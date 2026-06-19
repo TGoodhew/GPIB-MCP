@@ -1,0 +1,222 @@
+{
+  "model": "3335A",
+  "manufacturer": "HP",
+  "category": "Synthesizer / Level Generator",
+  "description": "HP 3335A Synthesizer/Level Generator (200 Hz to 80.999999999 MHz). HP-IB remote programming uses single-character function codes followed by digits and a single-character unit suffix, with no spaces (e.g. 'F12.34M' = 12.34 MHz, 'A40.01M' = -40.01 dBm, 'FI4K' = freq increment 4 kHz). Unit suffix codes are context dependent: M = MHz or -dBm, K = kHz or +dBm, H = Hz or degrees. The 3335A is a listen-only device; no talk/query or status readback is documented. Programming codes from Table 3-5 of the Operating Manual; special-attenuator codes from Table 3-6.",
+  "source": "3335A_OM.pdf",
+  "aliases": ["3335A", "HP3335A", "HP 3335A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "F",
+      "category": "Frequency",
+      "description": "Selects the frequency function and sets the output frequency. Enter the value then a unit suffix (M=MHz, K=kHz, H=Hz). Code 'F' = ASCII 'F' (decimal 70).",
+      "set": "F<value><unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["M", "K", "H"], "range": "200 Hz to 80.999999999 MHz (75 ohm); unit M=MHz, K=kHz, H=Hz" }
+      ],
+      "examples": ["F12.34M", "F12500K"]
+    },
+    {
+      "name": "amplitude",
+      "mnemonic": "A",
+      "category": "Amplitude",
+      "description": "Selects the amplitude function and sets the output level. Enter the value then a level unit suffix (K=+dBm, M=-dBm). Code 'A' = ASCII 'A' (decimal 65).",
+      "set": "A<value><unit>",
+      "parameters": [
+        { "name": "amplitude", "units": ["K", "M"], "range": "+11.25 dBm to -88.74 dBm (75 ohm); unit K=+dBm, M=-dBm" }
+      ],
+      "examples": ["A40.01M", "A3K"]
+    },
+    {
+      "name": "frequency_increment",
+      "mnemonic": "I",
+      "category": "Increment",
+      "description": "Programs the frequency increment (step size) used by INCR up/down. The 'I' instruction acts on the currently selected function; precede with 'F' to ensure a frequency increment (e.g. 'FI4K'). Code 'I' = ASCII 'I' (decimal 73).",
+      "set": "FI<value><unit>",
+      "parameters": [
+        { "name": "increment", "units": ["M", "K", "H"], "range": "frequency step; unit M=MHz, K=kHz, H=Hz" }
+      ],
+      "examples": ["FI4K", "FI500H"]
+    },
+    {
+      "name": "amplitude_increment",
+      "mnemonic": "I",
+      "category": "Increment",
+      "description": "Programs the amplitude increment (step size) used by INCR up/down. The 'I' instruction acts on the currently selected function; precede with 'A' to ensure an amplitude increment (e.g. 'AI2K'). Code 'I' = ASCII 'I' (decimal 73).",
+      "set": "AI<value><unit>",
+      "parameters": [
+        { "name": "increment", "units": ["K", "M"], "range": "amplitude step in dB; unit K=+dBm, M=-dBm" }
+      ],
+      "examples": ["AI2K", "AI0.5K"]
+    },
+    {
+      "name": "phase_increment",
+      "mnemonic": "P",
+      "category": "Increment",
+      "description": "Programs the phase increment in degrees (entered with the H = degrees unit suffix). Stepping with INCR up/down then advances the output phase relative to the reference. Code 'P' = ASCII 'P' (decimal 80). May also be reached via 'PI'.",
+      "set": "P<value>H",
+      "parameters": [
+        { "name": "phase_increment", "units": ["H"], "range": "phase step in degrees (H = deg)" }
+      ],
+      "examples": ["P45H", "P3H"]
+    },
+    {
+      "name": "increment_up",
+      "mnemonic": "U",
+      "category": "Increment",
+      "description": "Steps the active parameter (frequency, amplitude or phase) up by one programmed increment. Code 'U' = ASCII 'U' (decimal 85).",
+      "set": "U",
+      "examples": ["U", "UU"]
+    },
+    {
+      "name": "increment_down",
+      "mnemonic": "D",
+      "category": "Increment",
+      "description": "Steps the active parameter (frequency, amplitude or phase) down by one programmed increment. Code 'D' = ASCII 'D' (decimal 68).",
+      "set": "D",
+      "examples": ["D", "DD"]
+    },
+    {
+      "name": "sweep_width",
+      "mnemonic": "W",
+      "category": "Sweep",
+      "description": "Selects the sweep width (span) function and sets the sweep width, centered on the current frequency. Enter the value then a frequency unit suffix (M=MHz, K=kHz, H=Hz). Code 'W' = ASCII 'W' (decimal 87).",
+      "set": "W<value><unit>",
+      "parameters": [
+        { "name": "sweep_width", "units": ["M", "K", "H"], "range": "sweep span; unit M=MHz, K=kHz, H=Hz" }
+      ],
+      "examples": ["W1.5K", "W500K"]
+    },
+    {
+      "name": "goto_start_frequency",
+      "mnemonic": "G",
+      "category": "Sweep",
+      "description": "Goes to (displays and outputs) the sweep start frequency, half the sweep width below the center frequency. Code 'G' = ASCII 'G' (decimal 71).",
+      "set": "G",
+      "examples": ["G"]
+    },
+    {
+      "name": "start_single_sweep_10s",
+      "mnemonic": "X",
+      "category": "Sweep",
+      "description": "Initiates a single sweep of approximately 10 seconds (about 100 steps), covering the sweep width centered on the current frequency. Code 'X' = ASCII 'X' (decimal 88).",
+      "set": "X",
+      "examples": ["X"]
+    },
+    {
+      "name": "start_single_sweep_50s",
+      "mnemonic": "Y",
+      "category": "Sweep",
+      "description": "Initiates a single sweep of approximately 50 seconds (about 1000 steps). Code 'Y' = ASCII 'Y' (decimal 89).",
+      "set": "Y",
+      "examples": ["Y"]
+    },
+    {
+      "name": "start_auto_sweep",
+      "mnemonic": "Z",
+      "category": "Sweep",
+      "description": "Initiates a continuous (auto) sweep, repeatedly sweeping from the start frequency until stopped. Code 'Z' = ASCII 'Z' (decimal 90).",
+      "set": "Z",
+      "examples": ["Z"]
+    },
+    {
+      "name": "stop_sweep",
+      "mnemonic": "Q",
+      "category": "Sweep",
+      "description": "Stops sweep mode operation and returns to fixed (non-sweep) output. Code 'Q' = ASCII 'Q' (decimal 81).",
+      "set": "Q",
+      "examples": ["Q"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "S",
+      "category": "Registers",
+      "description": "Stores the current operating parameters (frequency, amplitude, freq incr, amptd incr, phase incr, sweep width) into a preset register. Follow 'S' with the register number 0 through 7. Code 'S' = ASCII 'S' (decimal 83).",
+      "set": "S<register>",
+      "parameters": [
+        { "name": "register", "range": "0-7" }
+      ],
+      "examples": ["S2", "S0"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "R",
+      "category": "Registers",
+      "description": "Recalls operating parameters from a preset register. Follow 'R' with the register number 0 through 7. Code 'R' = ASCII 'R' (decimal 82).",
+      "set": "R<register>",
+      "parameters": [
+        { "name": "register", "range": "0-7" }
+      ],
+      "examples": ["R2", "R3"]
+    },
+    {
+      "name": "display_last_entry",
+      "mnemonic": "L",
+      "category": "Display",
+      "description": "Displays the last data entry. Code 'L' = ASCII 'L' (decimal 76).",
+      "set": "L",
+      "examples": ["L"]
+    },
+    {
+      "name": "back_space",
+      "mnemonic": "B",
+      "category": "Data Entry",
+      "description": "Back space: deletes the last entered digit during data entry. Code 'B' = ASCII 'B' (decimal 66).",
+      "set": "B",
+      "examples": ["B"]
+    },
+    {
+      "name": "clear",
+      "mnemonic": "C",
+      "category": "Data Entry",
+      "description": "Clears the current data entry. Code 'C' = ASCII 'C' (decimal 67).",
+      "set": "C",
+      "examples": ["C"]
+    },
+    {
+      "name": "unit_mhz_minus_dbm",
+      "mnemonic": "M",
+      "category": "Units",
+      "description": "Unit/terminator suffix. Terminates a frequency entry as MHz, or an amplitude entry as -dBm. ASCII 'M' (decimal 77).",
+      "set": "M",
+      "examples": ["F12.34M", "A40.01M"]
+    },
+    {
+      "name": "unit_khz_plus_dbm",
+      "mnemonic": "K",
+      "category": "Units",
+      "description": "Unit/terminator suffix. Terminates a frequency entry as kHz, or an amplitude entry as +dBm. ASCII 'K' (decimal 75).",
+      "set": "K",
+      "examples": ["F12500K", "A3K"]
+    },
+    {
+      "name": "unit_hz_deg",
+      "mnemonic": "H",
+      "category": "Units",
+      "description": "Unit/terminator suffix. Terminates a frequency entry as Hz, or a phase entry as degrees. ASCII 'H' (decimal 72).",
+      "set": "H",
+      "examples": ["F500H", "P45H"]
+    },
+    {
+      "name": "negative_sign",
+      "mnemonic": "-",
+      "category": "Data Entry",
+      "description": "Minus sign used within a numeric data entry (e.g. negative amplitude values). ASCII '-' (decimal 45).",
+      "set": "-",
+      "examples": ["A-23.45 (followed by a level unit suffix)"]
+    },
+    {
+      "name": "special_attenuator_normal",
+      "mnemonic": "TC",
+      "category": "Attenuator",
+      "description": "Special attenuator program codes (Table 3-6). 'T' = ASCII 'T' (decimal 84) selects straight-through (all sections through). Codes T and 0 through 9 directly control the attenuator sections (AT0-AT7); 'C' returns the instrument to normal amplitude operation. See manual Table 3-6 for the section-by-section bit pattern of each code.",
+      "set": "T | <0-9> | C",
+      "parameters": [
+        { "name": "attenuator_code", "range": "T (straight through), 0-9 (direct attenuator control), C (return to normal amplitude operation)" }
+      ],
+      "examples": ["T", "C"]
+    }
+  ]
+}

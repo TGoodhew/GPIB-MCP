@@ -1,0 +1,763 @@
+{
+  "model": "8350B",
+  "manufacturer": "HP",
+  "category": "Sweep Oscillator",
+  "description": "HP 8350B Sweep Oscillator mainframe used with 835xx (83500-series) RF plug-ins. Legacy HP-IB (IEEE-488) instrument using a two-letter mnemonic program-code language (NOT SCPI). Program codes may be upper or lower case; the instrument ignores spaces, plus signs, and unexpected/invalid characters. Numeric entries are not executed until a units terminator (scale suffix) is supplied: frequency GZ/MZ/KZ/HZ (GHz/MHz/kHz/Hz), time SC/MS (seconds/msec), and power dBm/dB. Most parameters that carry a numeric value are read back with the Output Interrogated Parameter function: send 'OP' immediately followed by the function's prefix (e.g. 'OPFA' reads the start frequency); the reply is a 14-character ASCII value of the form +d.dddddE+dd terminated by CR/LF. Output Active Parameter (OA) returns whichever parameter is currently active. Power level, ALC mode and RF on/off control require an 83500-series plug-in and are device dependent on the plug-in installed; HP 86200-series plug-ins cannot be power-programmed via the 8350B. Source: HP 8350B Operating and Service Manual, Table 3-7 HP-IB Program Codes and the per-block Remote Function Procedure tables.",
+  "source": "8350B-OSM.pdf",
+  "aliases": ["8350B", "8350A", "HP8350B", "HP 8350B"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "OI",
+    "matchRegex": "8350",
+    "description": "Output Software Revision Number / Output Identity. Returns 'O8350B REV X,Y' (mainframe rev X, plug-in rev Y), e.g. 'O8350B REV 1,5', terminated by CR/LF. The 8350B has no SCPI '*IDN?' or '?'-style query; OI is the closest identity query."
+  },
+  "commands": [
+    {
+      "name": "instrument_preset",
+      "mnemonic": "IP",
+      "category": "System",
+      "description": "Instrument Preset. Returns the sweep oscillator to its known preset state (START/STOP mode over the plug-in range, markers off, etc.). SAVE registers are left unchanged.",
+      "set": "IP",
+      "examples": ["IP"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Frequency",
+      "description": "Start frequency of the START/STOP swept range. Follow the value with a frequency scale suffix. Range is determined by the installed plug-in. Start must be <= Stop.",
+      "set": "FA <value> <suffix>",
+      "query": "OPFA",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent (values up to +/-2% out of range are accepted)" }
+      ],
+      "examples": ["FA 2 GZ", "OUTPUT 719;\"OPFA\""]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Frequency",
+      "description": "Stop frequency of the START/STOP swept range. Follow the value with a frequency scale suffix. Range is plug-in dependent. Stop must be >= Start.",
+      "set": "FB <value> <suffix>",
+      "query": "OPFB",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["FB 8 GZ", "OUTPUT 719;\"OPFB\""]
+    },
+    {
+      "name": "cw_frequency",
+      "mnemonic": "CW",
+      "category": "Frequency",
+      "description": "Continuous-wave (CW) frequency. Selects CW mode and outputs a constant frequency. Resolution 0.00038% of band.",
+      "set": "CW <value> <suffix>",
+      "query": "OPCW",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["CW 5 GZ", "OUTPUT 719;\"OPCW\""]
+    },
+    {
+      "name": "swept_cw",
+      "mnemonic": "SHCW",
+      "category": "Frequency",
+      "description": "Swept CW mode ([SHIFT][CW]). Holds a CW frequency while the SWEEP OUT produces a 0 to 10 V ramp, giving a flat horizontal display trace.",
+      "set": "SHCW",
+      "examples": ["SHCW"]
+    },
+    {
+      "name": "center_frequency",
+      "mnemonic": "CF",
+      "category": "Frequency",
+      "description": "Center frequency of the CF/dF swept range. Output sweeps from CF-dF/2 to CF+dF/2.",
+      "set": "CF <value> <suffix>",
+      "query": "OPCF",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["CF 4 GZ", "OUTPUT 719;\"OPCF\""]
+    },
+    {
+      "name": "delta_frequency",
+      "mnemonic": "DF",
+      "category": "Frequency",
+      "description": "Delta (span) frequency of the CF/dF swept range (Delta-F frequency span).",
+      "set": "DF <value> <suffix>",
+      "query": "OPDF",
+      "parameters": [
+        { "name": "span", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["DF 500 MZ", "OUTPUT 719;\"OPDF\""]
+    },
+    {
+      "name": "coarse_cw_resolution",
+      "mnemonic": "SHCF",
+      "category": "Frequency",
+      "description": "Selects coarse CW control-knob resolution ([SHIFT][CF]), 0.0015% of band.",
+      "set": "SHCF",
+      "examples": ["SHCF"]
+    },
+    {
+      "name": "fine_cw_resolution",
+      "mnemonic": "SHDF",
+      "category": "Frequency",
+      "description": "Selects fine CW control-knob resolution ([SHIFT][dF]), 0.00038% of band.",
+      "set": "SHDF",
+      "examples": ["SHDF"]
+    },
+    {
+      "name": "frequency_vernier",
+      "mnemonic": "VR",
+      "category": "Frequency",
+      "description": "CW/center frequency vernier. Adjusts the effective center frequency by up to +/-0.05% of the band in use, resolution 0.00038% of band.",
+      "set": "VR <value> <suffix>",
+      "query": "OPVR",
+      "parameters": [
+        { "name": "vernier", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "+/-0.05% of band" }
+      ],
+      "examples": ["VR 0 MZ", "OUTPUT 719;\"OPVR\""]
+    },
+    {
+      "name": "frequency_offset",
+      "mnemonic": "SHVR",
+      "category": "Frequency",
+      "description": "Frequency (RF) offset ([SHIFT][VERNIER]). Shifts the CW/center frequency by any amount up to the full plug-in range. Resolution 0.00038% of band.",
+      "set": "SHVR <value> <suffix>",
+      "query": "OPSHVR",
+      "parameters": [
+        { "name": "offset", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Up to full plug-in range" }
+      ],
+      "examples": ["SHVR 10 MZ", "OUTPUT 719;\"OPSHVR\""]
+    },
+    {
+      "name": "frequency_display_multiplier",
+      "mnemonic": "SHFA",
+      "category": "Frequency",
+      "description": "Frequency display multiplier ([SHIFT][START]). Scales the displayed frequency value (display only; defaults to 1 after Instrument Preset).",
+      "set": "SHFA <value> <suffix>",
+      "query": "OPSHFA",
+      "examples": ["SHFA 2 GZ", "OUTPUT 719;\"OPSHFA\""]
+    },
+    {
+      "name": "frequency_display_offset",
+      "mnemonic": "SHFB",
+      "category": "Frequency",
+      "description": "Frequency display offset ([SHIFT][STOP]). Offsets the displayed frequency value (display only; defaults to 0 after Instrument Preset).",
+      "set": "SHFB <value> <suffix>",
+      "query": "OPSHFB",
+      "examples": ["SHFB 100 MZ", "OUTPUT 719;\"OPSHFB\""]
+    },
+    {
+      "name": "marker_1",
+      "mnemonic": "M1",
+      "category": "Markers",
+      "description": "Frequency marker 1: selects/positions marker 1 (makes it the active marker). Resolution 0.4% of selected sweep width. Use OPM1 to read its frequency.",
+      "set": "M1 <value> <suffix>",
+      "query": "OPM1",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["M1 3 GZ", "OUTPUT 719;\"OPM1\""]
+    },
+    {
+      "name": "marker_2",
+      "mnemonic": "M2",
+      "category": "Markers",
+      "description": "Frequency marker 2: selects/positions marker 2 (makes it the active marker).",
+      "set": "M2 <value> <suffix>",
+      "query": "OPM2",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["M2 5 GZ", "OUTPUT 719;\"OPM2\""]
+    },
+    {
+      "name": "marker_3",
+      "mnemonic": "M3",
+      "category": "Markers",
+      "description": "Frequency marker 3: selects/positions marker 3 (makes it the active marker).",
+      "set": "M3 <value> <suffix>",
+      "query": "OPM3",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["M3 6 GZ", "OUTPUT 719;\"OPM3\""]
+    },
+    {
+      "name": "marker_4",
+      "mnemonic": "M4",
+      "category": "Markers",
+      "description": "Frequency marker 4: selects/positions marker 4 (makes it the active marker).",
+      "set": "M4 <value> <suffix>",
+      "query": "OPM4",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["M4 7 GZ", "OUTPUT 719;\"OPM4\""]
+    },
+    {
+      "name": "marker_5",
+      "mnemonic": "M5",
+      "category": "Markers",
+      "description": "Frequency marker 5: selects/positions marker 5 (makes it the active marker).",
+      "set": "M5 <value> <suffix>",
+      "query": "OPM5",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["M5 8 GZ", "OUTPUT 719;\"OPM5\""]
+    },
+    {
+      "name": "marker_off",
+      "mnemonic": "MO",
+      "category": "Markers",
+      "description": "Turns off the active marker. Sent as a suffix after selecting a marker (M1..M5). The character after M may be the letter O or the digit 0.",
+      "set": "MO",
+      "examples": ["M1MO", "M3MO"]
+    },
+    {
+      "name": "all_markers_off",
+      "mnemonic": "SHMO",
+      "category": "Markers",
+      "description": "Turns off all frequency markers ([SHIFT][OFF]).",
+      "set": "SHMO",
+      "examples": ["SHMO"]
+    },
+    {
+      "name": "marker_delta",
+      "mnemonic": "SHM1",
+      "category": "Markers",
+      "description": "Marker delta ([SHIFT][M1]). Displays the frequency difference between the active marker and the previously active marker. Read the difference with OPSHM1.",
+      "set": "SHM1",
+      "query": "OPSHM1",
+      "examples": ["SHM1", "OUTPUT 719;\"OPSHM1\""]
+    },
+    {
+      "name": "marker_to_center_frequency",
+      "mnemonic": "MC",
+      "category": "Markers",
+      "description": "Marker to Center Frequency. Sets the center frequency to the active marker's frequency, keeping span where possible.",
+      "set": "MC",
+      "examples": ["MC"]
+    },
+    {
+      "name": "marker_sweep",
+      "mnemonic": "MP",
+      "category": "Markers",
+      "description": "Marker sweep on/off. MP1 reassigns markers 1 and 2 to Start and Stop frequencies (M1/M2 sweep on); MP0 turns marker sweep off. Trailing digit selects on (1) or off (0).",
+      "set": "MP<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["MP1", "MP0"]
+    },
+    {
+      "name": "permanent_marker_sweep",
+      "mnemonic": "SHMP",
+      "category": "Markers",
+      "description": "Permanent marker sweep ([SHIFT][MKR SWEEP]). Makes the values of markers 1 and 2 the permanent START/STOP frequency values. (Also documented as SHSP in Table 3-7.)",
+      "set": "SHMP",
+      "examples": ["SHMP"]
+    },
+    {
+      "name": "counter_interface_enable",
+      "mnemonic": "SHM2",
+      "category": "Markers",
+      "description": "Counter interface enable ([SHIFT][M2]). Enables swept-frequency counting end points (used with FA, FB, or M1..M5).",
+      "set": "SHM2",
+      "examples": ["SHM2"]
+    },
+    {
+      "name": "counter_interface_disable",
+      "mnemonic": "SHM3",
+      "category": "Markers",
+      "description": "Counter interface disable ([SHIFT][M3]). Disables swept counting.",
+      "set": "SHM3",
+      "examples": ["SHM3"]
+    },
+    {
+      "name": "power_level",
+      "mnemonic": "PL",
+      "category": "Power",
+      "description": "RF output power level (requires 83500-series plug-in; value/range device dependent on the plug-in). Follow the value with a dBm terminator. Read back with OPPL.",
+      "set": "PL <value> dBm",
+      "query": "OPPL",
+      "parameters": [
+        { "name": "power", "units": ["dBm"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["PL 0 dBm", "OUTPUT 719;\"OPPL\""]
+    },
+    {
+      "name": "power_sweep",
+      "mnemonic": "PS",
+      "category": "Power",
+      "description": "RF power sweep. PS<value> sets the power-sweep magnitude (read with OPPS); PSm form (PS1/PS0) turns power sweep on/off. Requires 83500-series plug-in.",
+      "set": "PS <value> dB",
+      "query": "OPPS",
+      "parameters": [
+        { "name": "sweep", "units": ["dB"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["PS 10 dB", "PS1", "OUTPUT 719;\"OPPS\""]
+    },
+    {
+      "name": "power_slope",
+      "mnemonic": "SL",
+      "category": "Power",
+      "description": "RF power slope. SL<value> sets the slope magnitude (read with OPSL); SLm form (SL1/SL0) turns slope on/off. Compensates power versus frequency. Requires 83500-series plug-in.",
+      "set": "SL <value> dB",
+      "query": "OPSL",
+      "parameters": [
+        { "name": "slope", "units": ["dB"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["SL 1 dB", "SL1", "OUTPUT 719;\"OPSL\""]
+    },
+    {
+      "name": "rf_power",
+      "mnemonic": "RF",
+      "category": "Power",
+      "description": "RF power output on/off. RF1 turns RF on, RF0 turns RF off. Requires 83500-series plug-in.",
+      "set": "RF<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["RF1", "RF0"]
+    },
+    {
+      "name": "internal_leveling",
+      "mnemonic": "A1",
+      "category": "ALC",
+      "description": "Selects internal ALC leveling mode (the power-on/preset default ALC mode).",
+      "set": "A1",
+      "examples": ["A1"]
+    },
+    {
+      "name": "external_crystal_leveling",
+      "mnemonic": "A2",
+      "category": "ALC",
+      "description": "Selects external crystal-detector ALC leveling mode.",
+      "set": "A2",
+      "examples": ["A2"]
+    },
+    {
+      "name": "external_power_meter_leveling",
+      "mnemonic": "A3",
+      "category": "ALC",
+      "description": "Selects external power-meter ALC leveling mode.",
+      "set": "A3",
+      "examples": ["A3"]
+    },
+    {
+      "name": "external_sweep",
+      "mnemonic": "SX",
+      "category": "Sweep",
+      "description": "External sweep mode. The plug-in oscillator is tuned by a 0 to 10 V ramp applied to the SWP INPUT BNC.",
+      "set": "SX",
+      "examples": ["SX"]
+    },
+    {
+      "name": "manual_sweep",
+      "mnemonic": "SM",
+      "category": "Sweep",
+      "description": "Manual sweep mode. Sets a single (manual) frequency point; follow the value with a frequency suffix. Read the present manual frequency with OPSM.",
+      "set": "SM <value> <suffix>",
+      "query": "OPSM",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["SM 4 GZ", "OUTPUT 719;\"OPSM\""]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "ST",
+      "category": "Sweep",
+      "description": "Sweep time for continuous (time) sweep. Follow the value with a time terminator (SC seconds or MS milliseconds). Minimum sweep time depends on plug-in and bandwidth. Read with OPST.",
+      "set": "ST <value> <suffix>",
+      "query": "OPST",
+      "parameters": [
+        { "name": "time", "units": ["SC", "MS"], "range": "0.01 to 100 seconds" }
+      ],
+      "examples": ["ST 10 SC", "ST 100 MS", "OUTPUT 719;\"OPST\""]
+    },
+    {
+      "name": "single_sweep",
+      "mnemonic": "SG",
+      "category": "Sweep",
+      "description": "Single sweep. Selects/triggers single-sweep mode; initial engagement aborts any sweep in progress (equivalent to trigger T4).",
+      "set": "SG",
+      "examples": ["SG"]
+    },
+    {
+      "name": "trigger_internal",
+      "mnemonic": "T1",
+      "category": "Sweep",
+      "description": "Internal sweep trigger (free run / auto). Sweep trigger controls apply only in TIME sweep mode.",
+      "set": "T1",
+      "examples": ["T1"]
+    },
+    {
+      "name": "trigger_line",
+      "mnemonic": "T2",
+      "category": "Sweep",
+      "description": "Line sweep trigger (triggered by the power-line frequency).",
+      "set": "T2",
+      "examples": ["T2"]
+    },
+    {
+      "name": "trigger_external",
+      "mnemonic": "T3",
+      "category": "Sweep",
+      "description": "External sweep trigger. A >2 V trigger (20 V max), wider than 0.5 us at <1 MHz rep rate, applied to the rear auxiliary connector pin 9.",
+      "set": "T3",
+      "examples": ["T3"]
+    },
+    {
+      "name": "trigger_single",
+      "mnemonic": "T4",
+      "category": "Sweep",
+      "description": "Single sweep trigger. Selects/triggers single sweep (same effect as SG / Take Sweep).",
+      "set": "T4",
+      "examples": ["T4"]
+    },
+    {
+      "name": "reset_sweep",
+      "mnemonic": "RS",
+      "category": "Sweep",
+      "description": "Reset sweep. Aborts the present single sweep and resets it so it can be triggered again. Valid only in single-sweep trigger mode.",
+      "set": "RS",
+      "examples": ["RS"]
+    },
+    {
+      "name": "take_sweep",
+      "mnemonic": "TS",
+      "category": "Sweep",
+      "description": "Take sweep. Triggers a single sweep. Valid only in single-sweep trigger mode.",
+      "set": "TS",
+      "examples": ["TS"]
+    },
+    {
+      "name": "frequency_step_size",
+      "mnemonic": "SF",
+      "category": "Step",
+      "description": "Frequency step size, used by the step up/down keys for START, STOP, CF, CW, MARKER and MANUAL SWEEP. Follow with a frequency suffix. Not displayed.",
+      "set": "SF <value> <suffix>",
+      "parameters": [
+        { "name": "step", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["SF 250 MZ"]
+    },
+    {
+      "name": "power_step_size",
+      "mnemonic": "SP",
+      "category": "Step",
+      "description": "Power step size, used by the step up/down keys when varying POWER LEVEL. Follow with a dBm/dB terminator. Plug-in dependent. Read with OPSP.",
+      "set": "SP <value> dBm",
+      "query": "OPSP",
+      "parameters": [
+        { "name": "step", "units": ["dBm", "dB"], "range": "Plug-in dependent" }
+      ],
+      "examples": ["SP 1 dBm", "OUTPUT 719;\"OPSP\""]
+    },
+    {
+      "name": "step_up",
+      "mnemonic": "UP",
+      "category": "Step",
+      "description": "Step up / increment the active function by the current step size.",
+      "set": "UP",
+      "examples": ["UP"]
+    },
+    {
+      "name": "step_down",
+      "mnemonic": "DN",
+      "category": "Step",
+      "description": "Step down / decrement the active function by the current step size. (Front panel code DN; the program-code table also lists 'ON' as the OCR rendering of this code.)",
+      "set": "DN",
+      "examples": ["DN"]
+    },
+    {
+      "name": "backspace",
+      "mnemonic": "BK",
+      "category": "Step",
+      "description": "Backspace. Removes the last entered digit before a units terminator is supplied.",
+      "set": "BK",
+      "examples": ["BK"]
+    },
+    {
+      "name": "default_step_size",
+      "mnemonic": "SHSS",
+      "category": "Step",
+      "description": "Reset step sizes to default values ([SHIFT][STEP SIZE]).",
+      "set": "SHSS",
+      "examples": ["SHSS"]
+    },
+    {
+      "name": "amplitude_marker",
+      "mnemonic": "AK",
+      "category": "Modulation",
+      "description": "Amplitude markers on/off. AK1 puts mainframe frequency markers into RF amplitude dips; AK0 returns them to Z-axis intensity dots.",
+      "set": "AK<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["AK1", "AK0"]
+    },
+    {
+      "name": "display_blanking",
+      "mnemonic": "DP",
+      "category": "Modulation",
+      "description": "Display (CRT) blanking on/off via Z-axis control during retrace. DP1 on, DP0 off.",
+      "set": "DP<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["DP1", "DP0"]
+    },
+    {
+      "name": "rf_blanking",
+      "mnemonic": "RP",
+      "category": "Modulation",
+      "description": "RF blanking on/off. Turns off RF power during the retrace sweep. RP1 on, RP0 off.",
+      "set": "RP<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["RP1", "RP0"]
+    },
+    {
+      "name": "square_wave_modulation",
+      "mnemonic": "MD",
+      "category": "Modulation",
+      "description": "Internal square-wave amplitude modulation on/off. MD1 on, MD0 off. Standard square-wave frequency 27.775 kHz (internally jumper-selectable to 1 kHz).",
+      "set": "MD<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["MD1", "MD0"]
+    },
+    {
+      "name": "save_register",
+      "mnemonic": "SV",
+      "category": "Storage",
+      "description": "Save current settings into a storage register (1 to 9). Fails with Error 30 if the save lock is engaged.",
+      "set": "SV<n>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["SV1", "SV9"]
+    },
+    {
+      "name": "recall_register",
+      "mnemonic": "RC",
+      "category": "Storage",
+      "description": "Recall settings from a storage register (1 to 9). Unused registers contain Instrument Preset settings.",
+      "set": "RC<n>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["RC1", "RC9"]
+    },
+    {
+      "name": "memory_lock",
+      "mnemonic": "SHSV",
+      "category": "Storage",
+      "description": "Save register lock / enable save protection ([SHIFT][SAVE]). Write-protects all registers.",
+      "set": "SHSV",
+      "examples": ["SHSV"]
+    },
+    {
+      "name": "memory_unlock",
+      "mnemonic": "SHRC",
+      "category": "Storage",
+      "description": "Save register unlock / disable save protection ([SHIFT][RECALL]).",
+      "set": "SHRC",
+      "examples": ["SHRC"]
+    },
+    {
+      "name": "alternate_sweep",
+      "mnemonic": "AU",
+      "category": "Storage",
+      "description": "Alternate sweep on. Alternates between the current state and a selected stored register (1 to 9) on successive sweeps.",
+      "set": "AU<n>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["AU2"]
+    },
+    {
+      "name": "alternate_sweep_off",
+      "mnemonic": "ALO",
+      "category": "Storage",
+      "description": "Alternate sweep off. (Table 3-7 also lists alternate sweep on/off as the ALmn form.)",
+      "set": "ALO",
+      "examples": ["ALO"]
+    },
+    {
+      "name": "cw_filter",
+      "mnemonic": "FI",
+      "category": "System",
+      "description": "CW filter in/out (83500-series plug-in). FI1 inserts the CW filter, FI0 removes it.",
+      "set": "FI<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = out, 1 = in" }
+      ],
+      "examples": ["FI1", "FI0"]
+    },
+    {
+      "name": "fm_sensitivity_20mhz",
+      "mnemonic": "F1",
+      "category": "Modulation",
+      "description": "External FM input sensitivity -20 MHz/volt (83500-series plug-in). Reset to the internal switch position at power-on / Instrument Preset.",
+      "set": "F1",
+      "examples": ["F1"]
+    },
+    {
+      "name": "fm_sensitivity_6mhz",
+      "mnemonic": "F2",
+      "category": "Modulation",
+      "description": "External FM input sensitivity -6 MHz/volt (83500-series plug-in). Reset to the internal switch position at power-on / Instrument Preset.",
+      "set": "F2",
+      "examples": ["F2"]
+    },
+    {
+      "name": "display_update",
+      "mnemonic": "DU",
+      "category": "System",
+      "description": "Display update on/off. DU1 (default) updates the numeric displays on each numeric programming; DU0 blanks the displays to speed up stepped CW programming.",
+      "set": "DU<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["DU1", "DU0"]
+    },
+    {
+      "name": "network_analyzer_trigger",
+      "mnemonic": "NT",
+      "category": "System",
+      "description": "Network analyzer trigger (HP 8410B/C). Generates an external trigger pulse so the 8410B/C re-phase-locks on the present RF signal; the only function valid while the input micro learn string is in effect.",
+      "set": "NT",
+      "examples": ["NT"]
+    },
+    {
+      "name": "output_interrogated_parameter",
+      "mnemonic": "OP",
+      "category": "Output",
+      "description": "Output Interrogated Parameter. Send 'OP' immediately followed by a function prefix to read that parameter's present numeric value as a 14-character ASCII string (+d.dddddE+dd, CR/LF). Valid prefixes: FA, CW, CF, DF, FB, M1, M2, M3, M4, M5, VR, SHVR, SHM1, SS, ST, SM, PL, PS, SL, SP, SHFA, SHFB.",
+      "query": "OP<prefix>",
+      "parameters": [
+        { "name": "prefix", "range": "FA, CW, CF, DF, FB, M1-M5, VR, SHVR, SHM1, SS, ST, SM, PL, PS, SL, SP, SHFA, SHFB" }
+      ],
+      "examples": ["OPFA", "OPCW", "OPST"]
+    },
+    {
+      "name": "output_active_parameter",
+      "mnemonic": "OA",
+      "category": "Output",
+      "description": "Output Active Parameter. Returns the numeric value of the currently active parameter (enabled for step/data-entry modification) as +d.dddddE+dd, CR/LF.",
+      "query": "OA",
+      "examples": ["OA"]
+    },
+    {
+      "name": "output_harmonic_number",
+      "mnemonic": "OH",
+      "category": "Output",
+      "description": "Output Harmonic Number. Returns the ratio of RF OUTPUT frequency to AUX OUTPUT frequency as 'dd' (CR/LF); zero in the heterodyne-band condition.",
+      "query": "OH",
+      "examples": ["OH"]
+    },
+    {
+      "name": "output_software_revision",
+      "mnemonic": "OI",
+      "category": "Output",
+      "description": "Output Software Revision Number (Output Identity). Returns 'O8350B REV X,Y' (mainframe rev X, plug-in rev Y), CR/LF terminated, e.g. 'O8350B REV 1,5'.",
+      "query": "OI",
+      "examples": ["OI"]
+    },
+    {
+      "name": "output_learn_string",
+      "mnemonic": "OL",
+      "category": "Output",
+      "description": "Output Learn String. Returns a 90-byte binary string fully describing the present instrument/plug-in state (excludes storage registers), terminated with EOI. Restore with IL.",
+      "query": "OL",
+      "examples": ["OL"]
+    },
+    {
+      "name": "input_learn_string",
+      "mnemonic": "IL",
+      "category": "Output",
+      "description": "Input Learn String. Send 'IL' followed by the 90-byte binary learn string previously read with OL to restore that instrument state.",
+      "set": "IL <90 bytes>",
+      "examples": ["IL"]
+    },
+    {
+      "name": "output_micro_learn_string",
+      "mnemonic": "OX",
+      "category": "Output",
+      "description": "Output Micro Learn String. Returns an 8-byte binary string describing the present CW frequency, vernier, sweep output voltage and power level, terminated with EOI. Requires CW mode with plug-in CW filter off.",
+      "query": "OX",
+      "examples": ["OX"]
+    },
+    {
+      "name": "input_micro_learn_string",
+      "mnemonic": "IX",
+      "category": "Output",
+      "description": "Input Micro Learn String. Send 'IX' followed by the 8-byte micro learn string for rapid CW programming. Exit this binary entry mode only with the MO code, then restore displays with CW, ST, PL.",
+      "set": "IX <8 bytes>",
+      "examples": ["IX"]
+    },
+    {
+      "name": "output_mode_string",
+      "mnemonic": "OM",
+      "category": "Output",
+      "description": "Output Mode String. Returns an 8-byte (unpacked) binary string listing all presently active functions (no numeric values), terminated with EOI.",
+      "query": "OM",
+      "examples": ["OM"]
+    },
+    {
+      "name": "output_status",
+      "mnemonic": "OS",
+      "category": "Status",
+      "description": "Output Status Bytes. Returns 3 sequential 8-bit status bytes (byte 1 = serial-poll status byte; bytes 2-3 = extended status), terminated with EOI. Cleared by serial poll, device clear, CS, or Instrument Preset.",
+      "query": "OS",
+      "examples": ["OS"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "CS",
+      "category": "Status",
+      "description": "Clear Status Bytes. Clears all three status bytes, including the extended status bytes.",
+      "set": "CS",
+      "examples": ["CS"]
+    },
+    {
+      "name": "request_status_byte_mask",
+      "mnemonic": "RM",
+      "category": "Status",
+      "description": "Request Status Byte Mask. Send 'RM' followed by one mask byte (decimal 0 to 255) selecting which status-byte (#1) conditions generate SRQ. Default at power-on is 0; not affected by Instrument Preset.",
+      "set": "RM <byte>",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255" }
+      ],
+      "examples": ["RM"]
+    },
+    {
+      "name": "request_extended_status_byte_mask",
+      "mnemonic": "RE",
+      "category": "Status",
+      "description": "Request Extended Status Byte Mask. Send 'RE' followed by one mask byte for the first extended status byte (#2). Default mask 255.",
+      "set": "RE <byte>",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255" }
+      ],
+      "examples": ["RE"]
+    },
+    {
+      "name": "request_second_extended_status_byte_mask",
+      "mnemonic": "R2",
+      "category": "Status",
+      "description": "Request Second Extended Status Byte Mask. Send 'R2' followed by one mask byte for the second extended status byte (#3). Default mask 255.",
+      "set": "R2 <byte>",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255" }
+      ],
+      "examples": ["R2"]
+    }
+  ]
+}

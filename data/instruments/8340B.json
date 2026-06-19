@@ -1,0 +1,134 @@
+{
+  "model": "8340B",
+  "manufacturer": "HP",
+  "category": "Synthesized Sweeper",
+  "description": "HP 8340B synthesized sweeper (10 MHz-26.5 GHz; the related HP 8341B covers 10 MHz-20.0 GHz). Legacy HP-IB (IEEE-488) instrument, NOT SCPI. It is programmed with a two/three-letter ASCII mnemonic command set; a setting command is the mnemonic followed by a numeric value and a units terminator (e.g. HZ, MZ, GZ, DM, DB, MS, SC, PCT) and front-panel keys map directly to HP-IB mnemonics. SHIFTed functions are sent as the corresponding base mnemonic prefixed with SH (e.g. front-panel SHIFT MANUAL = SHS3). INSTR PRESET is IP. NOTE: This definition is limited to mnemonics that could be verified in the available manual text. The full front-panel HP-IB code list (CW, FA, FB, CF, DF, PL, power sweep, sweep time/trigger, markers, modulation, status/output queries, etc.) resides in the 8340B/8341B Operating manual, which in this source set is a scanned image with no extractable text layer and could not be OCR'd; those additional commands are intentionally omitted rather than guessed. The mnemonics below are documented in the 8340B/8341B Getting Started & Quick Reference Guide (08340-90243).",
+  "source": "HP 8340B, 41B Operating.pdf",
+  "aliases": ["8340B", "8341B", "HP8340B"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "instrument_preset",
+      "mnemonic": "IP",
+      "category": "System",
+      "description": "INSTR PRESET. Returns the instrument to its preset (default) state. Documented as the HP-IB equivalent of the front-panel [INSTR PRESET] key; also exits the calibration-constant password access mode.",
+      "set": "IP",
+      "examples": ["IP"]
+    },
+    {
+      "name": "enter_password",
+      "mnemonic": "SHMZ/SHKZ",
+      "category": "System",
+      "description": "Enter the calibration-constant access password over HP-IB. Documented sequence: send SHMZ20HZ followed by SHKZ###HZ, where ### is the password value. This unlocks access to calibration constants until [INSTR PRESET] (IP) is sent. SHM and SHK are the shifted M (cal-constant number) and K (cal-constant value) entry mnemonics; Z is the entry separator and HZ terminates the numeric field.",
+      "set": "SHMZ20HZ SHKZ<password>HZ",
+      "parameters": [
+        { "name": "password" }
+      ],
+      "examples": ["SHMZ20HZ SHKZ123HZ"]
+    },
+    {
+      "name": "shift_manual",
+      "mnemonic": "SHS3",
+      "category": "Sweep",
+      "description": "SHIFT MANUAL. Shifted sweep function; on the front panel it is reached with [SHIFT] [MANUAL] and is used in fault/diagnostic handling. HP-IB mnemonic SHS3 (the SH prefix denotes the shifted form of the S3 sweep-mode mnemonic).",
+      "set": "SHS3",
+      "examples": ["SHS3"]
+    },
+    {
+      "name": "shift_free_run",
+      "mnemonic": "SHT1",
+      "category": "Trigger",
+      "description": "SHIFT FREE RUN. Activates the display self-test diagnostic function; front panel [SHIFT] [FREE RUN]. HP-IB mnemonic SHT1 (shifted form of the T1 trigger/free-run mnemonic).",
+      "set": "SHT1",
+      "examples": ["SHT1"]
+    },
+    {
+      "name": "shift_ext",
+      "mnemonic": "SHT3",
+      "category": "Trigger",
+      "description": "SHIFT EXT. Diagnostic function used when the UNLK (unlock) annunciator appears; front panel [SHIFT] [EXT]. HP-IB mnemonic SHT3 (shifted form of the T3 external-trigger mnemonic).",
+      "set": "SHT3",
+      "examples": ["SHT3"]
+    },
+    {
+      "name": "shift_m1",
+      "mnemonic": "SHM1",
+      "category": "Diagnostics",
+      "description": "SHIFT M1 diagnostic. Displays the expected M divisor, N divisor, M/N frequency, and 20/30 loop frequency. Front panel [SHIFT] [M1]; HP-IB mnemonic SHM1.",
+      "set": "SHM1",
+      "examples": ["SHM1"]
+    },
+    {
+      "name": "shift_m2",
+      "mnemonic": "SHM2",
+      "category": "Diagnostics",
+      "description": "SHIFT M2 diagnostic. Displays the expected band number and YIG oscillator (YO) frequency. Front panel [SHIFT] [M2]; HP-IB mnemonic SHM2.",
+      "set": "SHM2",
+      "examples": ["SHM2"]
+    },
+    {
+      "name": "shift_m3",
+      "mnemonic": "SHM3",
+      "category": "Diagnostics",
+      "description": "SHIFT M3 diagnostic. Displays the expected PLL2 VCO frequency and PLL3 upconverter frequency. Front panel [SHIFT] [M3]; HP-IB mnemonic SHM3.",
+      "set": "SHM3",
+      "examples": ["SHM3"]
+    },
+    {
+      "name": "shift_m4",
+      "mnemonic": "SHM4",
+      "category": "Diagnostics",
+      "description": "SHIFT M4 diagnostic. Activates 32 service diagnostic routines that test DACs and control circuits on the level control, SYTM driver, marker bandcross, and sweep generator assemblies, and displays power-on / instrument self-test results. Front panel [SHIFT] [M4]; HP-IB mnemonic SHM4.",
+      "set": "SHM4",
+      "examples": ["SHM4"]
+    },
+    {
+      "name": "shift_m5",
+      "mnemonic": "SHM5",
+      "category": "Diagnostics",
+      "description": "SHIFT M5. Turns off the active diagnostic routines (SHM1-SHM4) and restores the displays to their previous condition. Front panel [SHIFT] [M5]; HP-IB mnemonic SHM5.",
+      "set": "SHM5",
+      "examples": ["SHM5"]
+    },
+    {
+      "name": "shift_rf",
+      "mnemonic": "SHRF",
+      "category": "ALC",
+      "description": "SHIFT RF. Disables the ALC (automatic leveling control) to allow direct control of the linear modulator circuit; while engaged there is no limit on the minimum pulse repetition frequency. Front panel [SHIFT] [RF]; HP-IB mnemonic SHRF.",
+      "set": "SHRF",
+      "examples": ["SHRF"]
+    },
+    {
+      "name": "shift_meter",
+      "mnemonic": "SHA3",
+      "category": "ALC",
+      "description": "SHIFT METER. Bypasses the ALC to allow direct control of the linear modulator circuit; while in this mode there is no limit on the minimum pulse repetition frequency. Front panel [SHIFT] [METER]; HP-IB mnemonic SHA3.",
+      "set": "SHA3",
+      "examples": ["SHA3"]
+    },
+    {
+      "name": "shift_peak",
+      "mnemonic": "SHRP",
+      "category": "ALC",
+      "description": "SHIFT PEAK. Extended peaking routine that aligns all of the YTM tracking calibration constants (5 to 10 seconds), versus PEAK which aligns the output filter with a single CW frequency in a fraction of a second. Front panel [SHIFT] [PEAK]; HP-IB mnemonic SHRP.",
+      "set": "SHRP",
+      "examples": ["SHRP"]
+    },
+    {
+      "name": "shift_power_sweep",
+      "mnemonic": "SHPS",
+      "category": "Power",
+      "description": "SHIFT PWR SWEEP. Decouples the 90 dB step attenuator (ATN) from the automatic leveling control (ALC). Pressing [POWER LEVEL] recouples the attenuator and ALC loop. Front panel [SHIFT] [PWR SWEEP]; HP-IB mnemonic SHPS.",
+      "set": "SHPS",
+      "examples": ["SHPS"]
+    },
+    {
+      "name": "shift_slope",
+      "mnemonic": "SHSL",
+      "category": "Power",
+      "description": "SHIFT SLOPE. Allows front-panel control of the 90 dB step attenuator (ATN). Front panel [SHIFT] [SLOPE]; HP-IB mnemonic SHSL.",
+      "set": "SHSL",
+      "examples": ["SHSL"]
+    }
+  ]
+}

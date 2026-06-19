@@ -1,0 +1,1565 @@
+{
+  "model": "8714ES",
+  "manufacturer": "HP/Agilent",
+  "category": "Network Analyzer",
+  "description": "HP/Agilent 8714ES/8714ET (and related 8711/8712/8713/8714 B/C/ES/ET) RF network analyzer family. Measures transmission and reflection (S-parameters), power, and (with Option 100) fault location and structural return loss on RF devices such as amplifiers, filters, mixers and cables. Programmed with SCPI over HP-IB (GPIB / IEEE-488). Commands carry an optional [1|2] channel suffix; all commands have command and query forms unless noted as command-only or query-only. Frequency suffixes HZ/KHZ/MHZ/GHZ and time suffixes S/MS/US/NS/PS are accepted; binary parameters accept 1/0 as well as ON/OFF.",
+  "source": "8714 Programmers Guide.pdf",
+  "aliases": ["8714ES", "8714ET", "8712ES", "8712ET", "8714", "8711", "8712", "8713", "8714B", "8714C", "8711C", "8712C", "8713C", "8714ES/ET", "HP 8714", "Agilent 8714"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "871[24]E[ST]",
+    "description": "Standard IEEE 488.2 identification query. Returns the manufacturer, model, serial number and firmware revision of the analyzer. Use SYSTem:VERSion? to query the SCPI version."
+  },
+  "commands": [
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear the status byte, the standard event status register, the error queue and all event registers summarized in the status byte.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Set or query the Standard Event Status Enable Register. The argument is the sum of the decimal weights of the bits to enable.",
+      "set": "*ESE <num>",
+      "query": "*ESE?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255 (sum of bit weights)" }
+      ],
+      "examples": ["*ESE 60", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Read and clear the Standard Event Status Register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Return the analyzer's identification string (manufacturer, model, serial number, firmware revision).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "learn_query",
+      "mnemonic": "*LRN?",
+      "category": "Common",
+      "description": "Return a learn string (instrument state) that can later be sent back to restore the state.",
+      "query": "*LRN?",
+      "examples": ["*LRN?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Set the operation-complete bit in the Standard Event Status Register when all pending operations have finished. The query form returns 1 when operations are complete.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Return a string identifying the installed options.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "pass_control_back",
+      "mnemonic": "*PCB",
+      "category": "Common",
+      "description": "Set the HP-IB address to which active control is to be passed back.",
+      "set": "*PCB <num>",
+      "parameters": [
+        { "name": "address", "range": "0 to 30" }
+      ],
+      "examples": ["*PCB 21"]
+    },
+    {
+      "name": "power_on_status_clear",
+      "mnemonic": "*PSC",
+      "category": "Common",
+      "description": "Set or query the power-on status clear flag, which controls whether the enable registers are cleared at power-on.",
+      "set": "*PSC <num>",
+      "query": "*PSC?",
+      "parameters": [
+        { "name": "state", "range": "0 or 1" }
+      ],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Reset the analyzer to a known instrument state.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Set or query the Service Request Enable Register. The argument is the sum of the decimal weights of the bits to enable.",
+      "set": "*SRE <num>",
+      "query": "*SRE?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255 (sum of bit weights)" }
+      ],
+      "examples": ["*SRE 32", "*SRE?"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Read the status byte.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "abort",
+      "mnemonic": "ABORt",
+      "category": "Trigger",
+      "description": "Abort and reset the sweep in progress.",
+      "set": "ABORt",
+      "examples": ["ABOR"]
+    },
+    {
+      "name": "initiate_continuous",
+      "mnemonic": "INITiate:CONTinuous",
+      "category": "Trigger",
+      "description": "Set the trigger system to continuously sweep or to stop sweeping on the specified channel.",
+      "set": "INITiate[1|2]:CONTinuous <ON|OFF>",
+      "query": "INITiate[1|2]:CONTinuous?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["INIT:CONT ON", "INIT1:CONT OFF"]
+    },
+    {
+      "name": "initiate_immediate",
+      "mnemonic": "INITiate:IMMediate",
+      "category": "Trigger",
+      "description": "Initiate a new measurement sweep on the specified channel.",
+      "set": "INITiate[1|2][:IMMediate]",
+      "examples": ["INIT", "INIT1:IMM"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIGger:SEQuence:SOURce",
+      "category": "Trigger",
+      "description": "Set the source for the sweep trigger signal. Choose IMMediate or EXTernal (used in conjunction with SENSe:SWEep:TRIGger:SOURce).",
+      "set": "TRIGger[:SEQuence]:SOURce <char>",
+      "query": "TRIGger[:SEQuence]:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|EXTernal" }
+      ],
+      "examples": ["TRIG:SOUR IMM", "TRIG:SOUR EXT"]
+    },
+    {
+      "name": "calc_data_query",
+      "mnemonic": "CALCulate:DATA?",
+      "category": "Calculate",
+      "description": "Query the formatted data trace. Functionally equivalent to TRAC? CH<1|2>FDATA. Returns BLOCK or NR3 depending on the selected data format.",
+      "query": "CALCulate[1|2]:DATA?",
+      "examples": ["CALC1:DATA?"]
+    },
+    {
+      "name": "calc_format",
+      "mnemonic": "CALCulate:FORMat",
+      "category": "Calculate",
+      "description": "Select the display format for the measurement data. The query returns the short form of the active format mnemonic.",
+      "set": "CALCulate[1|2]:FORMat <char>",
+      "query": "CALCulate[1|2]:FORMat?",
+      "parameters": [
+        { "name": "format", "range": "MLOGarithmic|MLINear|SWR|PHASe|SMITh|POLar|GDELay|REAL|IMAGinary|MIMPedance" }
+      ],
+      "examples": ["CALC1:FORM MLOG", "CALC:FORM SWR", "CALC1:FORM?"]
+    },
+    {
+      "name": "calc_format_unit_mlin",
+      "mnemonic": "CALCulate:FORMat:UNIT:MLIN",
+      "category": "Calculate",
+      "description": "Select linear magnitude units for the Y-axis display.",
+      "set": "CALCulate[1|2]:FORMat:UNIT:MLIN <char>",
+      "query": "CALCulate[1|2]:FORMat:UNIT:MLIN?",
+      "parameters": [
+        { "name": "unit", "range": "W|MW|UW|V|MV|UV" }
+      ],
+      "examples": ["CALC1:FORM:UNIT:MLIN W"]
+    },
+    {
+      "name": "calc_format_unit_mlog",
+      "mnemonic": "CALCulate:FORMat:UNIT:MLOG",
+      "category": "Calculate",
+      "description": "Select log magnitude units for the Y-axis display.",
+      "set": "CALCulate[1|2]:FORMat:UNIT:MLOG <char>",
+      "query": "CALCulate[1|2]:FORMat:UNIT:MLOG?",
+      "parameters": [
+        { "name": "unit", "range": "DBW|DBM|DBUW|DBV|DBMV|DBUV" }
+      ],
+      "examples": ["CALC1:FORM:UNIT:MLOG DBM"]
+    },
+    {
+      "name": "calc_gdaperture_aperture",
+      "mnemonic": "CALCulate:GDAPerture:APERture",
+      "category": "Calculate",
+      "description": "Set the group delay aperture as a ratio of desired aperture to measured frequency span (HP 8712B/14B only).",
+      "set": "CALCulate[1|2]:GDAPerture:APERture <num>",
+      "query": "CALCulate[1|2]:GDAPerture:APERture?",
+      "parameters": [
+        { "name": "ratio" }
+      ],
+      "examples": ["CALC1:GDAP:APER 0.05"]
+    },
+    {
+      "name": "calc_gdaperture_span",
+      "mnemonic": "CALCulate:GDAPerture:SPAN",
+      "category": "Calculate",
+      "description": "Specify the group delay aperture in Hertz (HP 8712B/14B only).",
+      "set": "CALCulate[1|2]:GDAPerture:SPAN <num>",
+      "query": "CALCulate[1|2]:GDAPerture:SPAN?",
+      "parameters": [
+        { "name": "span", "units": ["Hz"] }
+      ],
+      "examples": ["CALC1:GDAP:SPAN 1E6"]
+    },
+    {
+      "name": "calc_limit_display",
+      "mnemonic": "CALCulate:LIMit:DISPlay",
+      "category": "Calculate",
+      "description": "Turn on/off display of limit lines.",
+      "set": "CALCulate[1|2]:LIMit:DISPlay <ON|OFF>",
+      "query": "CALCulate[1|2]:LIMit:DISPlay?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["CALC1:LIM:DISP ON"]
+    },
+    {
+      "name": "calc_limit_state",
+      "mnemonic": "CALCulate:LIMit:STATe",
+      "category": "Calculate",
+      "description": "Turn on/off the limit test.",
+      "set": "CALCulate[1|2]:LIMit:STATe <ON|OFF>",
+      "query": "CALCulate[1|2]:LIMit:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["CALC1:LIM:STAT ON"]
+    },
+    {
+      "name": "calc_limit_segment_amplitude_start",
+      "mnemonic": "CALCulate:LIMit:SEGMent:AMPLitude:STARt",
+      "category": "Calculate",
+      "description": "Set the Begin (start) limit amplitude for the specified limit segment.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:AMPLitude:STARt <num>",
+      "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:AMPLitude:STARt?",
+      "parameters": [
+        { "name": "amplitude" }
+      ],
+      "examples": ["CALC1:LIM:SEGM1:AMPL:STAR -3"]
+    },
+    {
+      "name": "calc_limit_segment_amplitude_stop",
+      "mnemonic": "CALCulate:LIMit:SEGMent:AMPLitude:STOP",
+      "category": "Calculate",
+      "description": "Set the End (stop) limit amplitude for the specified limit segment.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:AMPLitude:STOP <num>",
+      "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:AMPLitude:STOP?",
+      "parameters": [
+        { "name": "amplitude" }
+      ],
+      "examples": ["CALC1:LIM:SEGM1:AMPL:STOP -3"]
+    },
+    {
+      "name": "calc_limit_segment_aoff",
+      "mnemonic": "CALCulate:LIMit:SEGMent:AOFF",
+      "category": "Calculate",
+      "description": "Turn off all limit segments for a given channel; deletes all segments in the channel's limit table.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent:AOFF",
+      "examples": ["CALC1:LIM:SEGM:AOFF"]
+    },
+    {
+      "name": "calc_limit_segment_frequency_start",
+      "mnemonic": "CALCulate:LIMit:SEGMent:FREQuency:STARt",
+      "category": "Calculate",
+      "description": "Set the Begin (start) frequency for the specified limit segment.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STARt <num>",
+      "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STARt?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["CALC1:LIM:SEGM1:FREQ:STAR 1E6"]
+    },
+    {
+      "name": "calc_limit_segment_frequency_stop",
+      "mnemonic": "CALCulate:LIMit:SEGMent:FREQuency:STOP",
+      "category": "Calculate",
+      "description": "Set the End (stop) frequency for the specified limit segment.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STOP <num>",
+      "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STOP?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["CALC1:LIM:SEGM1:FREQ:STOP 1E9"]
+    },
+    {
+      "name": "calc_limit_segment_state",
+      "mnemonic": "CALCulate:LIMit:SEGMent:STATe",
+      "category": "Calculate",
+      "description": "Turn on/off the specified limit segment; adds or deletes the segment.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:STATe <ON|OFF>",
+      "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["CALC1:LIM:SEGM1:STAT ON"]
+    },
+    {
+      "name": "calc_limit_segment_type",
+      "mnemonic": "CALCulate:LIMit:SEGMent:TYPE",
+      "category": "Calculate",
+      "description": "Set the limit type for the specified segment. Choosing a type sets the segment's limit parameters to their default values.",
+      "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:TYPE <char>",
+      "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:TYPE?",
+      "parameters": [
+        { "name": "type", "range": "LMAX (Max Line)|LMIN (Min Line)|PMAX (Max Point)|PMIN (Min Point)" }
+      ],
+      "examples": ["CALC1:LIM:SEGM1:TYPE LMAX"]
+    },
+    {
+      "name": "calc_marker_aoff",
+      "mnemonic": "CALCulate:MARKer:AOFF",
+      "category": "Marker",
+      "description": "Turn off all markers for a given channel; also turns off marker functions and tracking.",
+      "set": "CALCulate[1|2]:MARKer:AOFF",
+      "examples": ["CALC1:MARK:AOFF"]
+    },
+    {
+      "name": "calc_marker_state",
+      "mnemonic": "CALCulate:MARKer:STATe",
+      "category": "Marker",
+      "description": "Turn on/off the specified marker (markers 1 to 8).",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8][:STATe] <ON|OFF>",
+      "query": "CALCulate[1|2]:MARKer[1|2|...8][:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["CALC1:MARK1:STAT ON", "CALC1:MARK1 ON"]
+    },
+    {
+      "name": "calc_marker_x",
+      "mnemonic": "CALCulate:MARKer:X",
+      "category": "Marker",
+      "description": "Set the specified marker frequency (or power if in power sweep).",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:X <num>",
+      "query": "CALCulate[1|2]:MARKer[1|2|...8]:X?",
+      "parameters": [
+        { "name": "x", "units": ["Hz"] }
+      ],
+      "examples": ["CALC1:MARK1:X 1E9"]
+    },
+    {
+      "name": "calc_marker_x_abs",
+      "mnemonic": "CALCulate:MARKer:X:ABS",
+      "category": "Marker",
+      "description": "Set a marker to an absolute value (such as frequency or amplitude); the value is not relative to a reference marker even if one is enabled.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:X:ABS <num>",
+      "query": "CALCulate[1|2]:MARKer[1|2|...8]:X:ABS?",
+      "parameters": [
+        { "name": "x" }
+      ],
+      "examples": ["CALC1:MARK1:X:ABS 1E9"]
+    },
+    {
+      "name": "calc_marker_y_query",
+      "mnemonic": "CALCulate:MARKer:Y?",
+      "category": "Marker",
+      "description": "Query the specified marker amplitude.",
+      "query": "CALCulate[1|2]:MARKer[1|2|...8]:Y?",
+      "examples": ["CALC1:MARK1:Y?"]
+    },
+    {
+      "name": "calc_marker_maximum",
+      "mnemonic": "CALCulate:MARKer:MAXimum",
+      "category": "Marker",
+      "description": "Set the specified marker to the maximum value on the trace.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:MAXimum",
+      "examples": ["CALC1:MARK1:MAX"]
+    },
+    {
+      "name": "calc_marker_minimum",
+      "mnemonic": "CALCulate:MARKer:MINimum",
+      "category": "Marker",
+      "description": "Set the specified marker to the minimum value on the trace.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:MINimum",
+      "examples": ["CALC1:MARK1:MIN"]
+    },
+    {
+      "name": "calc_marker_maximum_left",
+      "mnemonic": "CALCulate:MARKer:MAXimum:LEFT",
+      "category": "Marker",
+      "description": "Move the specified marker to the next local maximum to the left.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:MAXimum:LEFT",
+      "examples": ["CALC1:MARK1:MAX:LEFT"]
+    },
+    {
+      "name": "calc_marker_maximum_right",
+      "mnemonic": "CALCulate:MARKer:MAXimum:RIGHt",
+      "category": "Marker",
+      "description": "Move the specified marker to the next local maximum to the right.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:MAXimum:RIGHt",
+      "examples": ["CALC1:MARK1:MAX:RIGH"]
+    },
+    {
+      "name": "calc_marker_minimum_left",
+      "mnemonic": "CALCulate:MARKer:MINimum:LEFT",
+      "category": "Marker",
+      "description": "Move the specified marker to the next local minimum to the left.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:MINimum:LEFT",
+      "examples": ["CALC1:MARK1:MIN:LEFT"]
+    },
+    {
+      "name": "calc_marker_minimum_right",
+      "mnemonic": "CALCulate:MARKer:MINimum:RIGHt",
+      "category": "Marker",
+      "description": "Move the specified marker to the next local minimum to the right.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:MINimum:RIGHt",
+      "examples": ["CALC1:MARK1:MIN:RIGH"]
+    },
+    {
+      "name": "calc_marker_target",
+      "mnemonic": "CALCulate:MARKer:TARGet",
+      "category": "Marker",
+      "description": "Perform a marker search for a target value. The character argument is the search direction LEFT or RIGHt.",
+      "set": "CALCulate[1|2]:MARKer[1|2|...8]:TARGet <char>,<num>",
+      "parameters": [
+        { "name": "direction", "range": "LEFT|RIGHt" },
+        { "name": "target" }
+      ],
+      "examples": ["CALC1:MARK1:TARG RIGH,-3"]
+    },
+    {
+      "name": "calc_marker_function_select",
+      "mnemonic": "CALCulate:MARKer:FUNCtion:SELect",
+      "category": "Marker",
+      "description": "Select the active marker function.",
+      "set": "CALCulate[1|2]:MARKer:FUNCtion[:SELect] <char>",
+      "query": "CALCulate[1|2]:MARKer:FUNCtion[:SELect]?",
+      "parameters": [
+        { "name": "function", "range": "OFF|MAXimum|MINimum|TARGet|BWIDth|NOTCh|MPEak|MNOTch|STATistics|FLATness|FSTATistics" }
+      ],
+      "examples": ["CALC1:MARK:FUNC BWID"]
+    },
+    {
+      "name": "calc_marker_function_result_query",
+      "mnemonic": "CALCulate:MARKer:FUNCtion:RESult?",
+      "category": "Marker",
+      "description": "Query the results of the active marker function. Return depends on the active function (e.g. BWID returns bandwidth, center frequency, Q and loss; STAT returns frequency span, mean, standard deviation and peak-to-peak ripple).",
+      "query": "CALCulate[1|2]:MARKer:FUNCtion:RESult?",
+      "examples": ["CALC1:MARK:FUNC:RES?"]
+    },
+    {
+      "name": "calc_marker_function_tracking",
+      "mnemonic": "CALCulate:MARKer:FUNCtion:TRACking",
+      "category": "Marker",
+      "description": "Turn on/off marker function tracking.",
+      "set": "CALCulate[1|2]:MARKer:FUNCtion:TRACking <ON|OFF>",
+      "query": "CALCulate[1|2]:MARKer:FUNCtion:TRACking?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["CALC1:MARK:FUNC:TRAC ON"]
+    },
+    {
+      "name": "calc_marker_bwidth",
+      "mnemonic": "CALCulate:MARKer:BWIDth",
+      "category": "Marker",
+      "description": "Calculate the bandwidth of a bandpass filter. The argument is the target bandwidth (e.g. -3 for the 3 dB bandwidth).",
+      "set": "CALCulate[1|2]:MARKer:BWIDth <num>",
+      "query": "CALCulate[1|2]:MARKer:BWIDth?",
+      "parameters": [
+        { "name": "target", "units": ["dB"], "range": "e.g. -3 for 3 dB bandwidth" }
+      ],
+      "examples": ["CALC1:MARK:BWID -3"]
+    },
+    {
+      "name": "calc_marker_notch",
+      "mnemonic": "CALCulate:MARKer:NOTCh",
+      "category": "Marker",
+      "description": "Calculate the notch width of a notch filter. The argument is the target notch width (e.g. -6 for the 6 dB bandwidth).",
+      "set": "CALCulate[1|2]:MARKer:NOTCh <num>",
+      "query": "CALCulate[1|2]:MARKer:NOTCh?",
+      "parameters": [
+        { "name": "target", "units": ["dB"], "range": "e.g. -6" }
+      ],
+      "examples": ["CALC1:MARK:NOTC -6"]
+    },
+    {
+      "name": "calc_marker_mode",
+      "mnemonic": "CALCulate:MARKer:MODE",
+      "category": "Marker",
+      "description": "Turn on/off the delta marker state. Choose ABSolute or RELative.",
+      "set": "CALCulate[1|2]:MARKer:MODE <char>",
+      "query": "CALCulate[1|2]:MARKer:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "ABSolute|RELative" }
+      ],
+      "examples": ["CALC1:MARK:MODE REL"]
+    },
+    {
+      "name": "calc_marker_reference_x_query",
+      "mnemonic": "CALCulate:MARKer:REFerence:X?",
+      "category": "Marker",
+      "description": "Query the frequency of the reference marker.",
+      "query": "CALCulate[1|2]:MARKer:REFerence:X?",
+      "examples": ["CALC1:MARK:REF:X?"]
+    },
+    {
+      "name": "calc_marker_reference_y_query",
+      "mnemonic": "CALCulate:MARKer:REFerence:Y?",
+      "category": "Marker",
+      "description": "Query the amplitude of the reference marker.",
+      "query": "CALCulate[1|2]:MARKer:REFerence:Y?",
+      "examples": ["CALC1:MARK:REF:Y?"]
+    },
+    {
+      "name": "calc_marker_gdelay_query",
+      "mnemonic": "CALCulate:MARKer:GDELay?",
+      "category": "Marker",
+      "description": "Return the group delay value, in seconds, at the specified marker.",
+      "query": "CALCulate[1|2]:MARKer[1|2|...8]:GDELay?",
+      "examples": ["CALC1:MARK1:GDEL?"]
+    },
+    {
+      "name": "calc_math_expression",
+      "mnemonic": "CALCulate:MATH:EXPRession",
+      "category": "Calculate",
+      "description": "Select a trace math expression. Choose (IMPL) for 'data only' or (IMPL/CH<1|2>SMEM) for 'data/memory'.",
+      "set": "CALCulate[1|2]:MATH[:EXPRession] <expr>",
+      "query": "CALCulate[1|2]:MATH[:EXPRession]?",
+      "parameters": [
+        { "name": "expression", "range": "(IMPL) | (IMPL/CH<1|2>SMEM)" }
+      ],
+      "examples": ["CALC1:MATH (IMPL)", "CALC1:MATH (IMPL/CH1SMEM)"]
+    },
+    {
+      "name": "configure",
+      "mnemonic": "CONFigure",
+      "category": "Configure",
+      "description": "Configure the analyzer to measure a specific device type and parameter (the BEGIN function). Choose one of the supported configuration strings.",
+      "set": "CONFigure <string>",
+      "parameters": [
+        { "name": "config", "range": "'AMPLifier:TRANsmission'|'AMPLifier:REFLection'|'AMPLifier:POWer'|'FILTer:TRANsmission'|'FILTer:REFLection'|'BBANd:TRANsmission'|'BBANd:REFLection'|'MIXer:CLOSs'|'MIXer:GDEL'|'MIXer:REFLection'|'CABLe:TRANsmission'|'CABLe:REFLection'|'CABLe:FAULT'|'CABLe:SRL'" }
+      ],
+      "examples": ["CONF 'FILTer:TRANsmission'"]
+    },
+    {
+      "name": "sense_frequency_start",
+      "mnemonic": "SENSe:FREQuency:STARt",
+      "category": "Frequency",
+      "description": "Set the start frequency of the RF source.",
+      "set": "SENSe[1|2]:FREQuency:STARt <num>",
+      "query": "SENSe[1|2]:FREQuency:STARt?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+      ],
+      "examples": ["SENS1:FREQ:STAR 1MHZ", "SENS:FREQ:STAR 300E3"]
+    },
+    {
+      "name": "sense_frequency_stop",
+      "mnemonic": "SENSe:FREQuency:STOP",
+      "category": "Frequency",
+      "description": "Set the stop frequency of the RF source.",
+      "set": "SENSe[1|2]:FREQuency:STOP <num>",
+      "query": "SENSe[1|2]:FREQuency:STOP?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+      ],
+      "examples": ["SENS1:FREQ:STOP 1.3GHZ"]
+    },
+    {
+      "name": "sense_frequency_center",
+      "mnemonic": "SENSe:FREQuency:CENTer",
+      "category": "Frequency",
+      "description": "Set the center frequency of the RF source.",
+      "set": "SENSe[1|2]:FREQuency:CENTer <num>",
+      "query": "SENSe[1|2]:FREQuency:CENTer?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+      ],
+      "examples": ["SENS1:FREQ:CENT 900MHZ"]
+    },
+    {
+      "name": "sense_frequency_span",
+      "mnemonic": "SENSe:FREQuency:SPAN",
+      "category": "Frequency",
+      "description": "Set the frequency span of the RF source.",
+      "set": "SENSe[1|2]:FREQuency:SPAN <num>",
+      "query": "SENSe[1|2]:FREQuency:SPAN?",
+      "parameters": [
+        { "name": "span", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+      ],
+      "examples": ["SENS1:FREQ:SPAN 100MHZ"]
+    },
+    {
+      "name": "sense_frequency_span_maximum",
+      "mnemonic": "SENSe:FREQuency:SPAN:MAXimum",
+      "category": "Frequency",
+      "description": "Set the maximum frequency span of the RF source for bandpass fault location measurements (Option 100 only).",
+      "set": "SENSe[1|2]:FREQuency:SPAN:MAXimum <num>",
+      "query": "SENSe[1|2]:FREQuency:SPAN:MAXimum?",
+      "parameters": [
+        { "name": "span", "units": ["Hz"] }
+      ],
+      "examples": ["SENS1:FREQ:SPAN:MAX 50MHZ"]
+    },
+    {
+      "name": "sense_frequency_mode",
+      "mnemonic": "SENSe:FREQuency:MODE",
+      "category": "Frequency",
+      "description": "Set the fault location measurement to CENTer (bandpass) or LOWPass (Option 100 only).",
+      "set": "SENSe[1|2]:FREQuency:MODE <char>",
+      "query": "SENSe[1|2]:FREQuency:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "CENTer|LOWPass" }
+      ],
+      "examples": ["SENS1:FREQ:MODE CENT"]
+    },
+    {
+      "name": "sense_sweep_points",
+      "mnemonic": "SENSe:SWEep:POINts",
+      "category": "Sweep",
+      "description": "Set the number of data points for the measurement.",
+      "set": "SENSe[1|2]:SWEep:POINts <num>",
+      "query": "SENSe[1|2]:SWEep:POINts?",
+      "parameters": [
+        { "name": "points", "range": "3|5|11|21|51|101|201|401|801|1601" }
+      ],
+      "examples": ["SENS1:SWE:POIN 201"]
+    },
+    {
+      "name": "sense_sweep_time",
+      "mnemonic": "SENSe:SWEep:TIME",
+      "category": "Sweep",
+      "description": "Set the sweep time.",
+      "set": "SENSe[1|2]:SWEep:TIME <num>",
+      "query": "SENSe[1|2]:SWEep:TIME?",
+      "parameters": [
+        { "name": "time", "units": ["s", "MS", "US"] }
+      ],
+      "examples": ["SENS1:SWE:TIME 0.1"]
+    },
+    {
+      "name": "sense_sweep_time_auto",
+      "mnemonic": "SENSe:SWEep:TIME:AUTO",
+      "category": "Sweep",
+      "description": "Turn on/off the automatic sweep time function.",
+      "set": "SENSe[1|2]:SWEep:TIME:AUTO <ON|OFF|ONCE>",
+      "query": "SENSe[1|2]:SWEep:TIME:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|ONCE|1|0" }
+      ],
+      "examples": ["SENS1:SWE:TIME:AUTO ON"]
+    },
+    {
+      "name": "sense_sweep_trigger_source",
+      "mnemonic": "SENSe:SWEep:TRIGger:SOURce",
+      "category": "Sweep",
+      "description": "Set the trigger source for each point in a sweep. Choose IMMediate or EXTernal (used in conjunction with TRIGger:SEQuence:SOURce).",
+      "set": "SENSe:SWEep:TRIGger:SOURce <char>",
+      "query": "SENSe:SWEep:TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|EXTernal" }
+      ],
+      "examples": ["SENS:SWE:TRIG:SOUR IMM"]
+    },
+    {
+      "name": "sense_average_state",
+      "mnemonic": "SENSe:AVERage:STATe",
+      "category": "Average",
+      "description": "Turn on/off the trace averaging function.",
+      "set": "SENSe[1|2]:AVERage[:STATe] <ON|OFF>",
+      "query": "SENSe[1|2]:AVERage[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["SENS1:AVER ON"]
+    },
+    {
+      "name": "sense_average_count",
+      "mnemonic": "SENSe:AVERage:COUNt",
+      "category": "Average",
+      "description": "Specify a count or weighting factor for the averaged measurement data.",
+      "set": "SENSe[1|2]:AVERage:COUNt <num>",
+      "query": "SENSe[1|2]:AVERage:COUNt?",
+      "parameters": [
+        { "name": "count" }
+      ],
+      "examples": ["SENS1:AVER:COUN 16"]
+    },
+    {
+      "name": "sense_average_clear",
+      "mnemonic": "SENSe:AVERage:CLEar",
+      "category": "Average",
+      "description": "Restart the trace averaging function.",
+      "set": "SENSe[1|2]:AVERage:CLEar",
+      "examples": ["SENS1:AVER:CLE"]
+    },
+    {
+      "name": "sense_bwidth_resolution",
+      "mnemonic": "SENSe:BWIDth:RESolution",
+      "category": "Bandwidth",
+      "description": "Specify the bandwidth of the IF receiver to be used in the measurement.",
+      "set": "SENSe[1|2]:BWIDth[:RESolution] <num>",
+      "query": "SENSe[1|2]:BWIDth[:RESolution]?",
+      "parameters": [
+        { "name": "bandwidth", "units": ["Hz"], "range": "15 (fine)|250 (narrow)|1200 (medium narrow)|3700 (medium)|4000 (medium wide)|6500 (wide)" }
+      ],
+      "examples": ["SENS1:BWID 3700"]
+    },
+    {
+      "name": "sense_detector_function",
+      "mnemonic": "SENSe:DETector:FUNCtion",
+      "category": "Detector",
+      "description": "Specify which detection mode is used to make the measurement. Choose BBANd (broadband) or NBANd (narrowband).",
+      "set": "SENSe[1|2]:DETector[:FUNCtion] <char>",
+      "query": "SENSe[1|2]:DETector[:FUNCtion]?",
+      "parameters": [
+        { "name": "mode", "range": "BBANd|NBANd" }
+      ],
+      "examples": ["SENS1:DET NBAN"]
+    },
+    {
+      "name": "sense_couple",
+      "mnemonic": "SENSe:COUPle",
+      "category": "Sweep",
+      "description": "Turn on/off the alternate sweep mode. Choose ALL (coupled sweep) or NONE (alternate sweep).",
+      "set": "SENSe[1|2]:COUPle <char>",
+      "query": "SENSe[1|2]:COUPle?",
+      "parameters": [
+        { "name": "mode", "range": "ALL|NONE" }
+      ],
+      "examples": ["SENS1:COUP ALL"]
+    },
+    {
+      "name": "sense_state",
+      "mnemonic": "SENSe:STATe",
+      "category": "Sense",
+      "description": "Turn on/off the specified measurement channel.",
+      "set": "SENSe[1|2]:STATe <ON|OFF>",
+      "query": "SENSe[1|2]:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["SENS2:STAT ON"]
+    },
+    {
+      "name": "sense_roscillator_source",
+      "mnemonic": "SENSe:ROSCillator:SOURce",
+      "category": "Sense",
+      "description": "Specify the source of the reference oscillator. Choose INTernal or EXTernal.",
+      "set": "SENSe[1|2]:ROSCillator:SOURce <char>",
+      "query": "SENSe[1|2]:ROSCillator:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal" }
+      ],
+      "examples": ["SENS1:ROSC:SOUR INT"]
+    },
+    {
+      "name": "sense_function_query",
+      "mnemonic": "SENSe:FUNCtion?",
+      "category": "Sense",
+      "description": "Query the measurement function. Returns an 'XFR:POW...' or 'XFR:POW:RAT...' string.",
+      "query": "SENSe[1|2]:FUNCtion?",
+      "examples": ["SENS1:FUNC?"]
+    },
+    {
+      "name": "sense_function_power",
+      "mnemonic": "SENSe:FUNCtion:XFRequency:POWer",
+      "category": "Sense",
+      "description": "Specify that the receiver will measure the power into a specific detector on the specified measurement channel. Choose detector 0 (R), 1 (A), 2 (B), 11 (Ext X) or 12 (Ext Y).",
+      "set": "SENSe[1|2]:FUNCtion 'XFRequency:POWer <num>'",
+      "parameters": [
+        { "name": "detector", "range": "0 (R)|1 (A)|2 (B)|11 (Ext X)|12 (Ext Y)" }
+      ],
+      "examples": ["SENS1:FUNC 'XFR:POW 1'"]
+    },
+    {
+      "name": "sense_function_power_ratio",
+      "mnemonic": "SENSe:FUNCtion:XFRequency:POWer:RATio",
+      "category": "Sense",
+      "description": "Specify that the receiver will measure a ratio of the power into the specified measurement channel. Choose a ratio of two detectors (e.g. 1,0 for A/R; 2,0 for B/R).",
+      "set": "SENSe[1|2]:FUNCtion 'XFRequency:POWer:RATio <num>,<num>'",
+      "parameters": [
+        { "name": "numerator", "range": "1 (A)|2 (B)|11 (Ext X)|12 (Ext Y)" },
+        { "name": "denominator", "range": "0 (R)|11 (Ext X)|12 (Ext Y)" }
+      ],
+      "examples": ["SENS1:FUNC 'XFR:POW:RAT 1,0'"]
+    },
+    {
+      "name": "sense_correction_state",
+      "mnemonic": "SENSe:CORRection:STATe",
+      "category": "Calibration",
+      "description": "Turn on/off error correction (calibration) for the specified channel.",
+      "set": "SENSe[1|2]:CORRection[:STATe] <ON|OFF>",
+      "query": "SENSe[1|2]:CORRection[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["SENS1:CORR ON"]
+    },
+    {
+      "name": "sense_correction_annotation_query",
+      "mnemonic": "SENSe:CORRection:ANNotation?",
+      "category": "Calibration",
+      "description": "Return the current calibration annotation: 'C', 'C?', or empty string.",
+      "query": "SENSe[1|2]:CORRection:ANNotation?",
+      "examples": ["SENS1:CORR:ANN?"]
+    },
+    {
+      "name": "sense_correction_collect_method",
+      "mnemonic": "SENSe:CORRection:COLLect:METHod",
+      "category": "Calibration",
+      "description": "Select the type of calibration to perform.",
+      "set": "SENSe[1|2]:CORRection:COLLect:METHod <char>",
+      "parameters": [
+        { "name": "method", "range": "TRAN1 (Transmission response)|TRAN2 (Transmission response & isolation)|TRAN3 (Transmission enhanced response)|REFL3 (Reflection one port)|TEST (Test Set Calibration)|VERIFY (Calibration Check)" }
+      ],
+      "examples": ["SENS1:CORR:COLL:METH TRAN1"]
+    },
+    {
+      "name": "sense_correction_collect_acquire",
+      "mnemonic": "SENSe:CORRection:COLLect:ACQuire",
+      "category": "Calibration",
+      "description": "Measure a calibration standard.",
+      "set": "SENSe[1|2]:CORRection:COLLect[:ACQuire] <char>",
+      "parameters": [
+        { "name": "standard", "range": "STANdard1 (Open)|STANdard2 (Short)|STANdard3 (Load)|STANdard4 (Through cable)" }
+      ],
+      "examples": ["SENS1:CORR:COLL:ACQ STAN1"]
+    },
+    {
+      "name": "sense_correction_collect_ckit",
+      "mnemonic": "SENSe:CORRection:COLLect:CKIT:SELect",
+      "category": "Calibration",
+      "description": "Select the cal kit. Choose one of the supported cal-kit definition strings.",
+      "set": "SENSe[1|2]:CORRection:COLLect:CKIT[:SELect] <string>",
+      "parameters": [
+        { "name": "calkit", "range": "'COAX,7MM,TYPE-N,50,FEMALE'|'COAX,7MM,TYPE-N,50,MALE'|'COAX,3.5,APC-3.5,50,IMPLIED'|'USER,IMPLIED,IMPLIED,IMPLIED,IMPLIED'|'COAX,7MM,TYPE-F,75,IMPLIED'|'COAX,7MM,TYPE-N,75,FEMALE'|'COAX,7MM,TYPE-N,75,MALE'" }
+      ],
+      "examples": ["SENS1:CORR:COLL:CKIT 'COAX,7MM,TYPE-N,50,FEMALE'"]
+    },
+    {
+      "name": "sense_correction_collect_save",
+      "mnemonic": "SENSe:CORRection:COLLect:SAVE",
+      "category": "Calibration",
+      "description": "Complete and save the current calibration.",
+      "set": "SENSe[1|2]:CORRection:COLLect:SAVE",
+      "examples": ["SENS1:CORR:COLL:SAVE"]
+    },
+    {
+      "name": "sense_correction_collect_abort",
+      "mnemonic": "SENSe:CORRection:COLLect:ABORt",
+      "category": "Calibration",
+      "description": "Abort the calibration currently in progress.",
+      "set": "SENSe[1|2]:CORRection:COLLect:ABORt",
+      "examples": ["SENS1:CORR:COLL:ABOR"]
+    },
+    {
+      "name": "sense_correction_collect_istate",
+      "mnemonic": "SENSe:CORRection:COLLect:ISTate:AUTO",
+      "category": "Calibration",
+      "description": "Select the instrument state for calibration. Choose Full Band (ON) or User Defined (OFF).",
+      "set": "SENSe[1|2]:CORRection:COLLect:ISTate[:AUTO] <ON|OFF>",
+      "query": "SENSe[1|2]:CORRection:COLLect:ISTate[:AUTO]?",
+      "parameters": [
+        { "name": "state", "range": "ON (Full Band)|OFF (User Defined)|1|0" }
+      ],
+      "examples": ["SENS1:CORR:COLL:IST ON"]
+    },
+    {
+      "name": "sense_correction_cset_select",
+      "mnemonic": "SENSe:CORRection:CSET:SELect",
+      "category": "Calibration",
+      "description": "Set or query the calibration set. Setting DEFault restores the factory default calibration for the current measurement and channel; the query returns DEF (factory default), FULL (full band) or USER (user defined).",
+      "set": "SENSe[1|2]:CORRection:CSET[:SELect] DEFault",
+      "query": "SENSe[1|2]:CORRection:CSET[:SELect]?",
+      "parameters": [
+        { "name": "cset", "range": "DEFault (set); query returns DEF|FULL|USER" }
+      ],
+      "examples": ["SENS1:CORR:CSET DEF", "SENS1:CORR:CSET?"]
+    },
+    {
+      "name": "sense_correction_edelay_time",
+      "mnemonic": "SENSe:CORRection:EDELay:TIME",
+      "category": "Calibration",
+      "description": "Specify the electrical delay in seconds.",
+      "set": "SENSe[1|2]:CORRection:EDELay:TIME <num>",
+      "query": "SENSe[1|2]:CORRection:EDELay:TIME?",
+      "parameters": [
+        { "name": "delay", "units": ["s", "NS", "PS"] }
+      ],
+      "examples": ["SENS1:CORR:EDEL:TIME 1E-9"]
+    },
+    {
+      "name": "sense_correction_impedance_select",
+      "mnemonic": "SENSe:CORRection:IMPedance:INPut:MAGNitude:SELect",
+      "category": "Calibration",
+      "description": "Select the system impedance: ZO_50 selects 50 ohms, Z0_75 selects 75 ohms.",
+      "set": "SENSe[1|2]:CORRection:IMPedance:INPut:MAGNitude:SELect <char>",
+      "parameters": [
+        { "name": "impedance", "range": "ZO_50|Z0_75" }
+      ],
+      "examples": ["SENS1:CORR:IMP:INP:MAGN:SEL ZO_50"]
+    },
+    {
+      "name": "source_power_level",
+      "mnemonic": "SOURce:POWer:LEVel:AMPLitude",
+      "category": "Source",
+      "description": "Set the RF power output from the source.",
+      "set": "SOURce[1|2]:POWer[:LEVel][:IMMediate][:AMPLitude] <num>",
+      "query": "SOURce[1|2]:POWer[:LEVel][:IMMediate][:AMPLitude]?",
+      "parameters": [
+        { "name": "power", "units": ["dBm"] }
+      ],
+      "examples": ["SOUR1:POW 0", "SOUR:POW -10"]
+    },
+    {
+      "name": "source_power_preset",
+      "mnemonic": "SOURce:POWer:PRESet",
+      "category": "Source",
+      "description": "Set the power level that the analyzer returns to after an instrument preset.",
+      "set": "SOURce[1|2]:POWer:PRESet <num>",
+      "query": "SOURce[1|2]:POWer:PRESet?",
+      "parameters": [
+        { "name": "power", "units": ["dBm"] }
+      ],
+      "examples": ["SOUR1:POW:PRES 0"]
+    },
+    {
+      "name": "source_power_range",
+      "mnemonic": "SOURce:POWer:RANGe",
+      "category": "Source",
+      "description": "Specify the power sweep range (attenuator setting).",
+      "set": "SOURce[1|2]:POWer:RANGe <char>",
+      "query": "SOURce[1|2]:POWer:RANGe?",
+      "parameters": [
+        { "name": "range", "range": "ATTen0|ATTen10|ATTen20|ATTen30|ATTen40|ATTen50|ATTen60" }
+      ],
+      "examples": ["SOUR1:POW:RANG ATTen0"]
+    },
+    {
+      "name": "source_power_start",
+      "mnemonic": "SOURce:POWer:STARt",
+      "category": "Source",
+      "description": "Set the power sweep start power.",
+      "set": "SOURce[1|2]:POWer:STARt <num>",
+      "query": "SOURce[1|2]:POWer:STARt?",
+      "parameters": [
+        { "name": "power", "units": ["dBm"] }
+      ],
+      "examples": ["SOUR1:POW:STAR -20"]
+    },
+    {
+      "name": "source_power_stop",
+      "mnemonic": "SOURce:POWer:STOP",
+      "category": "Source",
+      "description": "Set the power sweep stop power.",
+      "set": "SOURce[1|2]:POWer:STOP <num>",
+      "query": "SOURce[1|2]:POWer:STOP?",
+      "parameters": [
+        { "name": "power", "units": ["dBm"] }
+      ],
+      "examples": ["SOUR1:POW:STOP 0"]
+    },
+    {
+      "name": "power_mode",
+      "mnemonic": "POWer:MODE",
+      "category": "Source",
+      "description": "Specify either frequency sweep (FIXed) or power sweep (SWEep) for the specified channel.",
+      "set": "POWer[1|2]:MODE <char>",
+      "query": "POWer[1|2]:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "FIXed|SWEep" }
+      ],
+      "examples": ["POW1:MODE FIX"]
+    },
+    {
+      "name": "output_state",
+      "mnemonic": "OUTPut:STATe",
+      "category": "Source",
+      "description": "Turn on/off RF power from the source.",
+      "set": "OUTPut[:STATe] <ON|OFF>",
+      "query": "OUTPut[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["OUTP ON", "OUTP OFF"]
+    },
+    {
+      "name": "format_data",
+      "mnemonic": "FORMat:DATA",
+      "category": "Format",
+      "description": "Specify the data format for use during data transfer.",
+      "set": "FORMat[:DATA] <char>[,<num>]",
+      "query": "FORMat[:DATA]?",
+      "parameters": [
+        { "name": "format", "range": "REAL,64|REAL,32|INTeger,16|ASCii" }
+      ],
+      "examples": ["FORM REAL,64", "FORM ASC"]
+    },
+    {
+      "name": "format_border",
+      "mnemonic": "FORMat:BORDer",
+      "category": "Format",
+      "description": "Specify the byte order used for HP-IB data transfer. Choose NORMal or SWAPped (for PC-compatible systems).",
+      "set": "FORMat:BORDer <char>",
+      "query": "FORMat:BORDer?",
+      "parameters": [
+        { "name": "order", "range": "NORMal|SWAPped" }
+      ],
+      "examples": ["FORM:BORD SWAP"]
+    },
+    {
+      "name": "trace_data_query",
+      "mnemonic": "TRACe:DATA?",
+      "category": "Trace",
+      "description": "Query trace data. Choose the array to read; the data is returned as BLOCK or NR3 depending on the selected format.",
+      "query": "TRACe[:DATA]? <char>",
+      "parameters": [
+        { "name": "array", "range": "CH<1|2>FDATA (formatted data)|CH<1|2>FMEM (formatted memory)|CH<1|2>SDATA (unformatted data)|CH<1|2>SMEM (unformatted memory)|CH<1|2><A|B|R>FWD (raw data)|CH<1|2>SCORR<1|2|3|4> (correction data)" }
+      ],
+      "examples": ["TRAC? CH1FDATA"]
+    },
+    {
+      "name": "trace_data_set",
+      "mnemonic": "TRACe:DATA",
+      "category": "Trace",
+      "description": "Input trace data into the specified array, or move data from one internal array to another. Data may be BLOCK or NR3 type.",
+      "set": "TRACe[:DATA] <char>,<data>",
+      "parameters": [
+        { "name": "array", "range": "see TRACe:DATA? array list" },
+        { "name": "data", "range": "BLOCK or NR3; or a source-array mnemonic to copy between arrays" }
+      ],
+      "examples": ["TRAC CH1SMEM,CH1SDATA"]
+    },
+    {
+      "name": "display_format",
+      "mnemonic": "DISPlay:FORMat",
+      "category": "Display",
+      "description": "Select the format (full or split screen) for displaying trace data. Choose SINGle (overlay) or ULOWer (split).",
+      "set": "DISPlay:FORMat <char>",
+      "query": "DISPlay:FORMat?",
+      "parameters": [
+        { "name": "format", "range": "SINGle|ULOWer" }
+      ],
+      "examples": ["DISP:FORM SING"]
+    },
+    {
+      "name": "display_format_expand",
+      "mnemonic": "DISPlay:FORMat:EXPAND",
+      "category": "Display",
+      "description": "Enable/disable expand measurement mode.",
+      "set": "DISPlay:FORMat:EXPAND <ON|OFF>",
+      "query": "DISPlay:FORMat:EXPAND?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["DISP:FORM:EXPAND ON"]
+    },
+    {
+      "name": "display_trace_y_scale_auto",
+      "mnemonic": "DISPlay:WINDow:TRACe:Y:SCALe:AUTO",
+      "category": "Display",
+      "description": "Scale the measurement data for a best-fit display.",
+      "set": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:AUTO ONCE",
+      "examples": ["DISP:WIND1:TRAC:Y:AUTO ONCE"]
+    },
+    {
+      "name": "display_trace_y_scale_pdivision",
+      "mnemonic": "DISPlay:WINDow:TRACe:Y:SCALe:PDIVision",
+      "category": "Display",
+      "description": "Specify the height (dB or units per division) of each vertical division of the specified measurement channel.",
+      "set": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:PDIVision <num>",
+      "query": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:PDIVision?",
+      "parameters": [
+        { "name": "scale_per_div", "units": ["dB"] }
+      ],
+      "examples": ["DISP:WIND1:TRAC:Y:PDIV 10"]
+    },
+    {
+      "name": "display_trace_y_scale_rlevel",
+      "mnemonic": "DISPlay:WINDow:TRACe:Y:SCALe:RLEVel",
+      "category": "Display",
+      "description": "Specify the value for the Y-axis reference position (reference level) for the specified measurement channel.",
+      "set": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:RLEVel <num>",
+      "query": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:RLEVel?",
+      "parameters": [
+        { "name": "reference_level", "units": ["dB"] }
+      ],
+      "examples": ["DISP:WIND1:TRAC:Y:RLEV 0"]
+    },
+    {
+      "name": "display_trace_y_scale_rposition",
+      "mnemonic": "DISPlay:WINDow:TRACe:Y:SCALe:RPOSition",
+      "category": "Display",
+      "description": "Specify the Y-axis reference position for the specified measurement channel.",
+      "set": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:RPOSition <num>",
+      "query": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:RPOSition?",
+      "parameters": [
+        { "name": "position" }
+      ],
+      "examples": ["DISP:WIND1:TRAC:Y:RPOS 5"]
+    },
+    {
+      "name": "display_trace_state",
+      "mnemonic": "DISPlay:WINDow:TRACe:STATe",
+      "category": "Display",
+      "description": "Turn on/off the display of trace and memory data from the specified measurement channel.",
+      "set": "DISPlay:WINDow[1|2]:TRACe[1|2][:STATe] <ON|OFF>",
+      "query": "DISPlay:WINDow[1|2]:TRACe[1|2][:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["DISP:WIND1:TRAC1:STAT ON"]
+    },
+    {
+      "name": "display_graticule_grid",
+      "mnemonic": "DISPlay:WINDow:TRACe:GRATicule:GRID",
+      "category": "Display",
+      "description": "Turn on/off display of the graticule grid.",
+      "set": "DISPlay:WINDow[1|2]:TRACe:GRATicule:GRID[:STATe] <ON|OFF>",
+      "query": "DISPlay:WINDow[1|2]:TRACe:GRATicule:GRID[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["DISP:WIND1:TRAC:GRAT:GRID ON"]
+    },
+    {
+      "name": "display_annotation_title_data",
+      "mnemonic": "DISPlay:ANNotation:TITLe:DATA",
+      "category": "Display",
+      "description": "Enter a string for the specified title line.",
+      "set": "DISPlay:ANNotation:TITLe[1|2]:DATA <string>",
+      "query": "DISPlay:ANNotation:TITLe[1|2]:DATA?",
+      "parameters": [
+        { "name": "title" }
+      ],
+      "examples": ["DISP:ANN:TITL1:DATA 'Filter Test'"]
+    },
+    {
+      "name": "display_annotation_title_state",
+      "mnemonic": "DISPlay:ANNotation:TITLe:STATe",
+      "category": "Display",
+      "description": "Turn on/off display of the title and clock.",
+      "set": "DISPlay:ANNotation:TITLe[:STATe] <ON|OFF>",
+      "query": "DISPlay:ANNotation:TITLe[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["DISP:ANN:TITL ON"]
+    },
+    {
+      "name": "display_annotation_message_data",
+      "mnemonic": "DISPlay:ANNotation:MESSage:DATA",
+      "category": "Display",
+      "description": "Display a user-defined message in the pop-up message window. An optional argument specifies the timeout (NONE|SHORt|MEDium|LONG).",
+      "set": "DISPlay:ANNotation:MESSage:DATA <string>",
+      "parameters": [
+        { "name": "message" },
+        { "name": "timeout", "range": "NONE|SHORt|MEDium|LONG" }
+      ],
+      "examples": ["DISP:ANN:MESS:DATA 'Connect DUT'"]
+    },
+    {
+      "name": "display_program_mode",
+      "mnemonic": "DISPlay:PROGram:MODE",
+      "category": "Display",
+      "description": "Select the portion of the analyzer's screen used as an HP Instrument BASIC display.",
+      "set": "DISPlay:PROGram[:MODE] <char>",
+      "query": "DISPlay:PROGram[:MODE]?",
+      "parameters": [
+        { "name": "mode", "range": "OFF|FULL|UPPer|LOWer" }
+      ],
+      "examples": ["DISP:PROG FULL"]
+    },
+    {
+      "name": "hcopy_immediate",
+      "mnemonic": "HCOPy:IMMediate",
+      "category": "Hardcopy",
+      "description": "Initiate a hardcopy output (print or plot).",
+      "set": "HCOPy[:IMMediate]",
+      "examples": ["HCOP"]
+    },
+    {
+      "name": "hcopy_abort",
+      "mnemonic": "HCOPy:ABORt",
+      "category": "Hardcopy",
+      "description": "Abort any hardcopy currently in progress.",
+      "set": "HCOPy:ABORt",
+      "examples": ["HCOP:ABOR"]
+    },
+    {
+      "name": "hcopy_device_port",
+      "mnemonic": "HCOPy:DEVice:PORT",
+      "category": "Hardcopy",
+      "description": "Select the communications port for hardcopy output.",
+      "set": "HCOPy:DEVice[1|2|3]:PORT <char>",
+      "query": "HCOPy:DEVice[1|2|3]:PORT?",
+      "parameters": [
+        { "name": "port", "range": "CENTronics|SERial|GPIB|MMEMory|LAN" }
+      ],
+      "examples": ["HCOP:DEV1:PORT GPIB"]
+    },
+    {
+      "name": "hcopy_device_language",
+      "mnemonic": "HCOPy:DEVice:LANGuage",
+      "category": "Hardcopy",
+      "description": "Select the language for hardcopy output.",
+      "set": "HCOPy:DEVice[1|2|3]:LANGuage <char>",
+      "query": "HCOPy:DEVice[1|2|3]:LANGuage?",
+      "parameters": [
+        { "name": "language", "range": "PCL|HPGL|EPSon|IBM|PCX|PCL5" }
+      ],
+      "examples": ["HCOP:DEV1:LANG PCL"]
+    },
+    {
+      "name": "hcopy_device_mode",
+      "mnemonic": "HCOPy:DEVice:MODE",
+      "category": "Hardcopy",
+      "description": "Select the graph and/or table(s) to appear on a hardcopy plot.",
+      "set": "HCOPy:DEVice[1|2|3]:MODE <char>",
+      "query": "HCOPy:DEVice[1|2|3]:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "GMARker|GRAPh|ISETtings|MARKer|TABLe" }
+      ],
+      "examples": ["HCOP:DEV1:MODE GRAP"]
+    },
+    {
+      "name": "mmemory_catalog_query",
+      "mnemonic": "MMEMory:CATalog?",
+      "category": "Memory",
+      "description": "List the names of the files in memory.",
+      "query": "MMEMory:CATalog? <string>",
+      "examples": ["MMEM:CAT?"]
+    },
+    {
+      "name": "mmemory_store_state",
+      "mnemonic": "MMEMory:STORe:STATe",
+      "category": "Memory",
+      "description": "Save an instrument state to mass storage. The string is the filename.",
+      "set": "MMEMory:STORe:STATe 1,<string>",
+      "parameters": [
+        { "name": "filename" }
+      ],
+      "examples": ["MMEM:STOR:STAT 1,'STATE1.STA'"]
+    },
+    {
+      "name": "mmemory_load_state",
+      "mnemonic": "MMEMory:LOAD:STATe",
+      "category": "Memory",
+      "description": "Recall an instrument state from mass storage. The string is the filename.",
+      "set": "MMEMory:LOAD:STATe 1,<string>",
+      "parameters": [
+        { "name": "filename" }
+      ],
+      "examples": ["MMEM:LOAD:STAT 1,'STATE1.STA'"]
+    },
+    {
+      "name": "mmemory_store_trace",
+      "mnemonic": "MMEMory:STORe:TRACe",
+      "category": "Memory",
+      "description": "Store an ASCII list of trace and frequency values to a file. The character argument is the formatted data trace CH<1|2>FDATA and the string is the filename.",
+      "set": "MMEMory:STORe:TRACe <char>,<string>",
+      "parameters": [
+        { "name": "array", "range": "CH<1|2>FDATA" },
+        { "name": "filename" }
+      ],
+      "examples": ["MMEM:STOR:TRAC CH1FDATA,'TRACE.PRN'"]
+    },
+    {
+      "name": "mmemory_copy",
+      "mnemonic": "MMEMory:COPY",
+      "category": "Memory",
+      "description": "Copy a file. string1 is the source file, string2 is the destination file.",
+      "set": "MMEMory:COPY <string1>,<string2>",
+      "parameters": [
+        { "name": "source" },
+        { "name": "destination" }
+      ],
+      "examples": ["MMEM:COPY 'A.STA','B.STA'"]
+    },
+    {
+      "name": "mmemory_delete",
+      "mnemonic": "MMEMory:DELete",
+      "category": "Memory",
+      "description": "Delete a file. The string is the filename.",
+      "set": "MMEMory:DELete <string>",
+      "parameters": [
+        { "name": "filename" }
+      ],
+      "examples": ["MMEM:DEL 'A.STA'"]
+    },
+    {
+      "name": "mmemory_initialize",
+      "mnemonic": "MMEMory:INITialize",
+      "category": "Memory",
+      "description": "Format a disk. The optional string is the mass storage device (MEM: internal memory, or INT: internal floppy disk), the char is the disk format (DOS), and the num is the interleave factor.",
+      "set": "MMEMory:INITialize [<string>[,<char>[,<num>]]]",
+      "parameters": [
+        { "name": "device", "range": "MEM:|INT:" },
+        { "name": "format", "range": "DOS" },
+        { "name": "interleave" }
+      ],
+      "examples": ["MMEM:INIT 'INT:'"]
+    },
+    {
+      "name": "mmemory_msis",
+      "mnemonic": "MMEMory:MSIS",
+      "category": "Memory",
+      "description": "Select a mass storage device. Choose MEM: (internal memory) or INT: (internal floppy disk drive).",
+      "set": "MMEMory:MSIS <string>",
+      "query": "MMEMory:MSIS?",
+      "parameters": [
+        { "name": "device", "range": "MEM:|INT:" }
+      ],
+      "examples": ["MMEM:MSIS 'INT:'"]
+    },
+    {
+      "name": "status_operation_condition_query",
+      "mnemonic": "STATus:OPERation:CONDition?",
+      "category": "Status",
+      "description": "Read the Operational Status condition register.",
+      "query": "STATus:OPERation:CONDition?",
+      "examples": ["STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_event_query",
+      "mnemonic": "STATus:OPERation:EVENt?",
+      "category": "Status",
+      "description": "Read and clear the Operational Status event register.",
+      "query": "STATus:OPERation[:EVENt]?",
+      "examples": ["STAT:OPER?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Set and query bits in the Operational Status enable register.",
+      "set": "STATus:OPERation:ENABle <num>",
+      "query": "STATus:OPERation:ENABle?",
+      "parameters": [
+        { "name": "mask", "range": "sum of decimal bit weights" }
+      ],
+      "examples": ["STAT:OPER:ENAB 16"]
+    },
+    {
+      "name": "status_operation_averaging_event_query",
+      "mnemonic": "STATus:OPERation:AVERaging:EVENt?",
+      "category": "Status",
+      "description": "Read and clear the Averaging status event register.",
+      "query": "STATus:OPERation:AVERaging[:EVENt]?",
+      "examples": ["STAT:OPER:AVER?"]
+    },
+    {
+      "name": "status_operation_measuring_event_query",
+      "mnemonic": "STATus:OPERation:MEASuring:EVENt?",
+      "category": "Status",
+      "description": "Read and clear the Measuring status event register.",
+      "query": "STATus:OPERation:MEASuring[:EVENt]?",
+      "examples": ["STAT:OPER:MEAS?"]
+    },
+    {
+      "name": "status_questionable_event_query",
+      "mnemonic": "STATus:QUEStionable:EVENt?",
+      "category": "Status",
+      "description": "Read and clear the Questionable Status event register.",
+      "query": "STATus:QUEStionable[:EVENt]?",
+      "examples": ["STAT:QUES?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STATus:QUEStionable:ENABle",
+      "category": "Status",
+      "description": "Set and query bits in the Questionable Status enable register.",
+      "set": "STATus:QUEStionable:ENABle <num>",
+      "query": "STATus:QUEStionable:ENABle?",
+      "parameters": [
+        { "name": "mask", "range": "sum of decimal bit weights" }
+      ],
+      "examples": ["STAT:QUES:ENAB 8"]
+    },
+    {
+      "name": "status_questionable_limit_event_query",
+      "mnemonic": "STATus:QUEStionable:LIMit:EVENt?",
+      "category": "Status",
+      "description": "Read and clear the Limit Fail event register.",
+      "query": "STATus:QUEStionable:LIMit[:EVENt]?",
+      "examples": ["STAT:QUES:LIM?"]
+    },
+    {
+      "name": "status_device_event_query",
+      "mnemonic": "STATus:DEVice:EVENt?",
+      "category": "Status",
+      "description": "Read and clear the Device Status event register.",
+      "query": "STATus:DEVice[:EVENt]?",
+      "examples": ["STAT:DEV?"]
+    },
+    {
+      "name": "status_device_enable",
+      "mnemonic": "STATus:DEVice:ENABle",
+      "category": "Status",
+      "description": "Set and query bits in the Device Status enable register.",
+      "set": "STATus:DEVice:ENABle <num>",
+      "query": "STATus:DEVice:ENABle?",
+      "parameters": [
+        { "name": "mask", "range": "sum of decimal bit weights" }
+      ],
+      "examples": ["STAT:DEV:ENAB 1"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STATus:PRESet",
+      "category": "Status",
+      "description": "Set bits in most enable and transition registers to their default state.",
+      "set": "STATus:PRESet",
+      "examples": ["STAT:PRES"]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": "SYSTem:PRESet",
+      "category": "System",
+      "description": "Perform a system preset; the same as the front-panel PRESET key.",
+      "set": "SYSTem:PRESet",
+      "examples": ["SYST:PRES"]
+    },
+    {
+      "name": "system_error_query",
+      "mnemonic": "SYSTem:ERRor?",
+      "category": "System",
+      "description": "Query the error queue; returns the error number and message.",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_version_query",
+      "mnemonic": "SYSTem:VERSion?",
+      "category": "System",
+      "description": "Query the SCPI version of the analyzer. Use *IDN? to query the firmware revision.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "system_date",
+      "mnemonic": "SYSTem:DATE",
+      "category": "System",
+      "description": "Set the year, month and day of the real-time clock.",
+      "set": "SYSTem:DATE <num1>,<num2>,<num3>",
+      "query": "SYSTem:DATE?",
+      "parameters": [
+        { "name": "year" },
+        { "name": "month" },
+        { "name": "day" }
+      ],
+      "examples": ["SYST:DATE 2026,6,19"]
+    },
+    {
+      "name": "system_time",
+      "mnemonic": "SYSTem:TIME",
+      "category": "System",
+      "description": "Set the hour, minute and second of the real-time clock.",
+      "set": "SYSTem:TIME <num1>,<num2>,<num3>",
+      "query": "SYSTem:TIME?",
+      "parameters": [
+        { "name": "hour" },
+        { "name": "minute" },
+        { "name": "second" }
+      ],
+      "examples": ["SYST:TIME 14,30,0"]
+    },
+    {
+      "name": "system_beeper_immediate",
+      "mnemonic": "SYSTem:BEEPer:IMMediate",
+      "category": "System",
+      "description": "Instruct the analyzer to beep. Optional arguments are frequency (Hz), duration (seconds) and volume (0 to 1).",
+      "set": "SYSTem:BEEPer[:IMMediate] [<freq>[,<dur>[,<vol>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] },
+        { "name": "duration", "units": ["s"] },
+        { "name": "volume", "range": "0 to 1" }
+      ],
+      "examples": ["SYST:BEEP", "SYST:BEEP 1000,0.2,0.5"]
+    },
+    {
+      "name": "system_communicate_gpib_address",
+      "mnemonic": "SYSTem:COMMunicate:GPIB:SELF:ADDRess",
+      "category": "System",
+      "description": "Set the analyzer's HP-IB address. A delay of 5 seconds is required before a command is sent to the new address.",
+      "set": "SYSTem:COMMunicate:GPIB[:SELF]:ADDRess <num>",
+      "query": "SYSTem:COMMunicate:GPIB[:SELF]:ADDRess?",
+      "parameters": [
+        { "name": "address", "range": "0 to 30" }
+      ],
+      "examples": ["SYST:COMM:GPIB:ADDR 16"]
+    },
+    {
+      "name": "system_communicate_gpib_echo",
+      "mnemonic": "SYSTem:COMMunicate:GPIB:ECHO",
+      "category": "System",
+      "description": "Turn on/off HP-IB mnemonic echo.",
+      "set": "SYSTem:COMMunicate:GPIB:ECHO <ON|OFF>",
+      "query": "SYSTem:COMMunicate:GPIB:ECHO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["SYST:COMM:GPIB:ECHO OFF"]
+    },
+    {
+      "name": "system_communicate_gpib_hcopy_address",
+      "mnemonic": "SYSTem:COMMunicate:GPIB:HCOPy:ADDRess",
+      "category": "System",
+      "description": "Set the address of an HP-IB printer or plotter for hardcopy output.",
+      "set": "SYSTem:COMMunicate:GPIB:HCOPy:ADDRess <num>",
+      "query": "SYSTem:COMMunicate:GPIB:HCOPy:ADDRess?",
+      "parameters": [
+        { "name": "address", "range": "0 to 30" }
+      ],
+      "examples": ["SYST:COMM:GPIB:HCOP:ADDR 5"]
+    },
+    {
+      "name": "system_set_lrn_query",
+      "mnemonic": "SYSTem:SET:LRN?",
+      "category": "System",
+      "description": "Query or set the instrument state as a learn string (BLOCK).",
+      "set": "SYSTem:SET <block>",
+      "query": "SYSTem:SET:LRN? [<USER>]",
+      "examples": ["SYST:SET:LRN?"]
+    },
+    {
+      "name": "system_set_lrnlong_query",
+      "mnemonic": "SYSTem:SET:LRNLong?",
+      "category": "System",
+      "description": "Query or set the instrument state, data, and calibration as a learn string (BLOCK); similar to save/recall.",
+      "query": "SYSTem:SET:LRNLong? [<USER>]",
+      "examples": ["SYST:SET:LRNL?"]
+    },
+    {
+      "name": "system_key",
+      "mnemonic": "SYSTem:KEY",
+      "category": "System",
+      "description": "Send key names that execute the same functions as front-panel keys.",
+      "set": "SYSTem:KEY <char>",
+      "examples": ["SYST:KEY 'PRESET'"]
+    }
+  ]
+}

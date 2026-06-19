@@ -1,0 +1,379 @@
+{
+  "model": "8116A",
+  "manufacturer": "HP",
+  "category": "Pulse / Function Generator",
+  "description": "HP 8116A Pulse/Function Generator (1 mHz to 50 MHz), fully HP-IB programmable. Uses HP's front-panel mnemonic program code set (e.g. FRQ frequency, AMP amplitude, OFS offset, DTY duty cycle, WID pulse width). Operating modes M1-M8, control modes CT0-CT4, waveform W0-W4, trigger slope T0-T2. Program codes are the same as front-panel mnemonics; lower-case may replace any/all capitals. Parameters with units must be terminated by their delimiter (e.g. 'BUR 17 #'). The 8116A does not necessarily process codes in the order sent: universal messages (mode, waveform, trigger) are processed before parameter data. Sweep functions (STA/STP/MRK/SWT, modes M5-M8) require Option 001. Output messages terminate with CR/LF or EOI. Note: in the source manual OCR, the frequency mnemonic FRQ is often rendered as 'FRO' (O/Q confusion); the documented mnemonic is FRQ.",
+  "source": "8116A-OSM-002.pdf",
+  "aliases": ["8116A", "HP8116A", "HP 8116A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "CST",
+    "description": "Learn String. When addressed to talk, returns an 89-character (161 for Opt. 001) ASCII string of the current mode/parameter settings, e.g. starting 'M1 ,CT0,T1 ,W1 ,H0,A0,L0,C0,D1 ,BUR...'. The 8116A has no IDN-style identity query; CST is the only learn/identify output."
+  },
+  "commands": [
+    {
+      "name": "operating_mode",
+      "mnemonic": "M",
+      "category": "Mode",
+      "description": "Selects the operating mode: M1=NORM, M2=TRIG, M3=GATE, M4=E.WID (external width), M5=I.SWP (internal sweep, Opt.001), M6=E.SWP (external sweep, Opt.001), M7=I.BUR (internal burst, Opt.001), M8=E.BUR (external burst, Opt.001).",
+      "set": "M<n>",
+      "parameters": [
+        { "name": "mode", "range": "1-8 (M5-M8 require Opt. 001)" }
+      ],
+      "examples": ["M1", "M2"]
+    },
+    {
+      "name": "control_mode",
+      "mnemonic": "CT",
+      "category": "Mode",
+      "description": "Selects the control (modulation) mode: CT0=off, CT1=FM, CT2=AM, CT3=PWM, CT4=VCO.",
+      "set": "CT<n>",
+      "parameters": [
+        { "name": "control_mode", "range": "0-4" }
+      ],
+      "examples": ["CT0", "CT1"]
+    },
+    {
+      "name": "trigger_slope",
+      "mnemonic": "T",
+      "category": "Trigger",
+      "description": "Selects the external trigger slope: T0=off, T1=positive slope, T2=negative slope.",
+      "set": "T<n>",
+      "parameters": [
+        { "name": "slope", "range": "0-2" }
+      ],
+      "examples": ["T1", "T2"]
+    },
+    {
+      "name": "haversine",
+      "mnemonic": "H",
+      "category": "Waveform",
+      "description": "Haversine (-90 degrees) selection: H0=off, H1=on.",
+      "set": "H<n>",
+      "parameters": [
+        { "name": "haversine", "range": "0-1" }
+      ],
+      "examples": ["H0", "H1"]
+    },
+    {
+      "name": "waveform",
+      "mnemonic": "W",
+      "category": "Waveform",
+      "description": "Selects the output waveform: W0=off (dc), W1=sine, W2=triangle, W3=square, W4=pulse.",
+      "set": "W<n>",
+      "parameters": [
+        { "name": "waveform", "range": "0-4" }
+      ],
+      "examples": ["W1", "W4"]
+    },
+    {
+      "name": "frequency",
+      "mnemonic": "FRQ",
+      "category": "Frequency",
+      "description": "Sets the output frequency. Interrogate the current setting with 'IFRQ' (talker returns e.g. 'FRQ 1.00 Hz'). Parameter string must be terminated with a unit delimiter.",
+      "set": "FRQ <value> <unit>",
+      "query": "IFRQ",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "1.00 mHz to 50.0 MHz (3 digit resolution); MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+      ],
+      "examples": ["FRQ 1 KHZ", "FRQ 50 MHZ", "IFRQ"]
+    },
+    {
+      "name": "duty_cycle",
+      "mnemonic": "DTY",
+      "category": "Parameter",
+      "description": "Sets the duty cycle (sine, triangle, square). Interrogate with 'IDTY'. Range 10%-90% for 1 mHz to 999 kHz; 20%-80% for 1 MHz to 9.99 MHz; must be 50% for frequencies >= 10 MHz.",
+      "set": "DTY <value> %",
+      "query": "IDTY",
+      "parameters": [
+        { "name": "duty_cycle", "units": ["%"], "range": "10 % to 90 % (1 mHz-999 kHz); 20 % to 80 % (1-9.99 MHz); 50 % only (>= 10 MHz)" }
+      ],
+      "examples": ["DTY 50 %", "IDTY"]
+    },
+    {
+      "name": "pulse_width",
+      "mnemonic": "WID",
+      "category": "Parameter",
+      "description": "Sets the pulse width (pulse mode / E.WID mode). Interrogate with 'IWID'.",
+      "set": "WID <value> <unit>",
+      "query": "IWID",
+      "parameters": [
+        { "name": "width", "units": ["NS", "US", "MS"], "range": "10.0 ns to 999 ms (3 digit resolution); NS=nanoseconds, US=microseconds, MS=milliseconds" }
+      ],
+      "examples": ["WID 100 NS", "WID 100 US", "IWID"]
+    },
+    {
+      "name": "amplitude",
+      "mnemonic": "AMP",
+      "category": "Amplitude",
+      "description": "Sets the output amplitude (peak-to-peak). Interrogate with 'IAMP'. AMP/OFS are active when HIL/LOL are not.",
+      "set": "AMP <value> <unit>",
+      "query": "IAMP",
+      "parameters": [
+        { "name": "amplitude", "units": ["MV", "V"], "range": "10.0 mVpp to 16.0 Vpp into 50 ohm (up to 32 Vpp into high impedance); MV=millivolts, V=volts" }
+      ],
+      "examples": ["AMP 1.00 V", "AMP 120 MV", "IAMP"]
+    },
+    {
+      "name": "offset",
+      "mnemonic": "OFS",
+      "category": "Amplitude",
+      "description": "Sets the DC offset. Interrogate with 'IOFS'.",
+      "set": "OFS <value> <unit>",
+      "query": "IOFS",
+      "parameters": [
+        { "name": "offset", "units": ["MV", "V"], "range": "0 to +/- 7.95 V (0 to +/- 795 mV on low level window); MV=millivolts, V=volts" }
+      ],
+      "examples": ["OFS 100 MV", "OFS 120 MV", "IOFS"]
+    },
+    {
+      "name": "high_level",
+      "mnemonic": "HIL",
+      "category": "Amplitude",
+      "description": "Sets the output high level. Interrogate with 'IHIL'. HIL/LOL are active when AMP/OFS are not. When changing both HIL and LOL, reprogram both in the same string to avoid an error condition.",
+      "set": "HIL <value> V",
+      "query": "IHIL",
+      "parameters": [
+        { "name": "high_level", "units": ["V"], "range": "V = volts" }
+      ],
+      "examples": ["HIL 3.5V", "HIL 4.00V", "IHIL"]
+    },
+    {
+      "name": "low_level",
+      "mnemonic": "LOL",
+      "category": "Amplitude",
+      "description": "Sets the output low level. Interrogate with 'ILOL'. When changing both HIL and LOL, reprogram both in the same string to avoid an error condition.",
+      "set": "LOL <value> V",
+      "query": "ILOL",
+      "parameters": [
+        { "name": "low_level", "units": ["V"], "range": "V = volts" }
+      ],
+      "examples": ["LOL 3.0V", "LOL -1.00V", "ILOL"]
+    },
+    {
+      "name": "burst_number",
+      "mnemonic": "BUR",
+      "category": "Burst",
+      "description": "Sets the burst number (number of cycles per burst, internal burst mode). Interrogate with 'IBUR'. Must be terminated with the '#' delimiter.",
+      "set": "BUR <value> #",
+      "query": "IBUR",
+      "parameters": [
+        { "name": "burst_number", "units": ["#"], "range": "1 to 1999 cycles" }
+      ],
+      "examples": ["BUR 7 #", "BUR 17 #", "IBUR"]
+    },
+    {
+      "name": "repetition_rate",
+      "mnemonic": "RPT",
+      "category": "Burst",
+      "description": "Sets the repetition rate (time between internal burst starts). Interrogate with 'IRPT'.",
+      "set": "RPT <value> <unit>",
+      "query": "IRPT",
+      "parameters": [
+        { "name": "repetition_rate", "units": ["NS", "US", "MS"], "range": "NS=nanoseconds, US=microseconds, MS=milliseconds" }
+      ],
+      "examples": ["RPT 100 MS", "IRPT"]
+    },
+    {
+      "name": "sweep_start_frequency",
+      "mnemonic": "STA",
+      "category": "Sweep",
+      "description": "Sets the sweep start frequency (Opt. 001). Interrogate with 'ISTA'.",
+      "set": "STA <value> <unit>",
+      "query": "ISTA",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+      ],
+      "examples": ["STA 1.00 KHZ", "ISTA"]
+    },
+    {
+      "name": "sweep_stop_frequency",
+      "mnemonic": "STP",
+      "category": "Sweep",
+      "description": "Sets the sweep stop frequency (Opt. 001). Interrogate with 'ISTP'.",
+      "set": "STP <value> <unit>",
+      "query": "ISTP",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+      ],
+      "examples": ["STP 100 KHZ", "ISTP"]
+    },
+    {
+      "name": "sweep_marker_frequency",
+      "mnemonic": "MRK",
+      "category": "Sweep",
+      "description": "Sets the sweep marker frequency (Opt. 001). Interrogate with 'IMRK'.",
+      "set": "MRK <value> <unit>",
+      "query": "IMRK",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+      ],
+      "examples": ["MRK 10.0 KHZ", "IMRK"]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "SWT",
+      "category": "Sweep",
+      "description": "Sets the sweep time (Opt. 001). Interrogate with 'ISWT'.",
+      "set": "SWT <value> <unit>",
+      "query": "ISWT",
+      "parameters": [
+        { "name": "time", "units": ["S", "MS"], "range": "S=seconds, MS=milliseconds" }
+      ],
+      "examples": ["SWT 50.0 MS", "ISWT"]
+    },
+    {
+      "name": "limit",
+      "mnemonic": "L",
+      "category": "Output",
+      "description": "Limit function: L0=off, L1=on.",
+      "set": "L<n>",
+      "parameters": [
+        { "name": "limit", "range": "0-1" }
+      ],
+      "examples": ["L0", "L1"]
+    },
+    {
+      "name": "complement",
+      "mnemonic": "C",
+      "category": "Output",
+      "description": "Complement output: C0=off (normal output), C1=on (complemented output).",
+      "set": "C<n>",
+      "parameters": [
+        { "name": "complement", "range": "0-1" }
+      ],
+      "examples": ["C0", "C1"]
+    },
+    {
+      "name": "disable",
+      "mnemonic": "D",
+      "category": "Output",
+      "description": "Output disable: D0=off (output enabled), D1=on (output disabled).",
+      "set": "D<n>",
+      "parameters": [
+        { "name": "disable", "range": "0-1" }
+      ],
+      "examples": ["D0", "D1"]
+    },
+    {
+      "name": "autovernier_mode",
+      "mnemonic": "A",
+      "category": "Autovernier",
+      "description": "Autovernier mode: A0=off, A1=on. The autovernier function MUST be enabled (A1) before any digit increment/decrement (MU/SU/LU/MD/SD/LD) can be executed.",
+      "set": "A<n>",
+      "parameters": [
+        { "name": "autovernier", "range": "0-1" }
+      ],
+      "examples": ["A0", "A1"]
+    },
+    {
+      "name": "autovernier_msd_up",
+      "mnemonic": "MU",
+      "category": "Autovernier",
+      "description": "Autovernier: increment most significant digit up. Requires A1 first.",
+      "set": "MU",
+      "examples": ["MU"]
+    },
+    {
+      "name": "autovernier_2nd_up",
+      "mnemonic": "SU",
+      "category": "Autovernier",
+      "description": "Autovernier: increment second significant digit up. Requires A1 first.",
+      "set": "SU",
+      "examples": ["SU"]
+    },
+    {
+      "name": "autovernier_lsd_up",
+      "mnemonic": "LU",
+      "category": "Autovernier",
+      "description": "Autovernier: increment least significant digit up. Requires A1 first.",
+      "set": "LU",
+      "examples": ["LU"]
+    },
+    {
+      "name": "autovernier_msd_down",
+      "mnemonic": "MD",
+      "category": "Autovernier",
+      "description": "Autovernier: decrement most significant digit down. Requires A1 first.",
+      "set": "MD",
+      "examples": ["MD"]
+    },
+    {
+      "name": "autovernier_2nd_down",
+      "mnemonic": "SD",
+      "category": "Autovernier",
+      "description": "Autovernier: decrement second significant digit down. Requires A1 first.",
+      "set": "SD",
+      "examples": ["SD"]
+    },
+    {
+      "name": "autovernier_lsd_down",
+      "mnemonic": "LD",
+      "category": "Autovernier",
+      "description": "Autovernier: decrement least significant digit down. Requires A1 first.",
+      "set": "LD",
+      "examples": ["LD"]
+    },
+    {
+      "name": "service_request_mask",
+      "mnemonic": "SR",
+      "category": "Status",
+      "description": "Service Request control for timing errors: SR1 suppresses the Service Request (SRQ) for a TIMING ERROR (status byte bit 1 still sets); SR0 re-activates the service request for timing errors. Stored ROM settings have SR set to 0.",
+      "set": "SR<n>",
+      "parameters": [
+        { "name": "sr", "range": "0-1" }
+      ],
+      "examples": ["SR1", "SR0"]
+    },
+    {
+      "name": "execute_self_test",
+      "mnemonic": "EST",
+      "category": "System",
+      "description": "Initiates the RAM/hardware self-test routine. On fault detection the 8116A sets bits 4 (System Failure) and 7 (Service Request) of its HP-IB status byte. Read result via serial poll.",
+      "set": "EST",
+      "examples": ["EST"]
+    },
+    {
+      "name": "learn_string",
+      "mnemonic": "CST",
+      "category": "Status",
+      "description": "Learn String (talker function). When addressed to talk after 'CST', returns an 89-character (161 for Opt. 001) ASCII string of all current mode/parameter settings. Order is fixed except HIL/LOL vs OFS/AMP depending on which is active. Used to save/identify the full instrument state.",
+      "set": "CST",
+      "query": "CST",
+      "examples": ["CST"]
+    },
+    {
+      "name": "interrogate_error",
+      "mnemonic": "IERR",
+      "category": "Status",
+      "description": "Interrogate error. After a Service Request, returns a more detailed description of the error (e.g. duty cycle or width error when TIMING ERROR is indicated in the status byte).",
+      "set": "IERR",
+      "query": "IERR",
+      "examples": ["IERR"]
+    },
+    {
+      "name": "device_clear",
+      "mnemonic": "DCL",
+      "category": "System",
+      "description": "HP-IB Universal Command Device Clear. Loads the standard parameter set stored in 8116A ROMs. After DCL the 8116A does not remain in remote mode. Issued via the bus (e.g. CLEAR 7), not as an ASCII string.",
+      "set": "DCL",
+      "examples": ["CLEAR 7"]
+    },
+    {
+      "name": "selected_device_clear",
+      "mnemonic": "SDC",
+      "category": "System",
+      "description": "HP-IB Selected Device Clear. Loads the standard parameter set stored in 8116A ROMs; the 8116A remains in remote mode. Issued via the bus (e.g. CLEAR 716).",
+      "set": "SDC",
+      "examples": ["CLEAR 716"]
+    },
+    {
+      "name": "group_execute_trigger",
+      "mnemonic": "GET",
+      "category": "Trigger",
+      "description": "HP-IB Group Execute Trigger. When the 8116A is in trigger, external sweep, or burst mode, this bus message initiates a single cycle, sweep, or burst respectively. Issued via the bus (e.g. TRIGGER 716).",
+      "set": "GET",
+      "examples": ["TRIGGER 716"]
+    }
+  ]
+}

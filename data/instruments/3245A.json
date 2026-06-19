@@ -1,0 +1,942 @@
+{
+  "model": "3245A",
+  "manufacturer": "HP",
+  "category": "Universal Source",
+  "description": "HP 3245A Universal Source: synthesized two-channel voltage/current source generating DC, defined AC waveforms (sine, ramp, square), and arbitrary waveforms, controlled over HP-IB using HP's native English-mnemonic command language. DC voltage range approx -10.25 V to +10.25 V, DC current -0.1 A to +0.1 A. AC voltage output 0.03125 Vpp to 20 Vpp (open circuit), current to 0.2 App. Waveform frequency 0 Hz to 1 MHz. Channel A is addressed as 0/CHANA, channel B as 100/CHANB. Command details are fully documented in the separate HP 3245A Command Reference Manual (03245-90002); this definition is drawn from the command summaries and alphabetical menu command list (Table 6-2) of the Operating & Programming Manual.",
+  "source": "3245A OPM.pdf",
+  "aliases": ["3245A", "HP3245A", "HP 3245A", "3245"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "ID?",
+    "matchRegex": "3245",
+    "description": "ID? returns the model number string 'HP3245'. IDN? returns four lines: manufacturer (HEWLETT PACKARD), model (3245), serial number (always 0), and firmware revision code (yyww)."
+  },
+  "commands": [
+    {
+      "name": "identify_model",
+      "mnemonic": "ID?",
+      "category": "Status",
+      "description": "Returns the HP 3245A model number string (HP3245).",
+      "query": "ID?",
+      "examples": ["ID?"]
+    },
+    {
+      "name": "identify_full",
+      "mnemonic": "IDN?",
+      "category": "Status",
+      "description": "Identity query. Returns four lines: manufacturer's name (HEWLETT PACKARD), model number (3245), serial number (always 0), and firmware revision code (yyww, where yy = year - 1960, ww = week).",
+      "query": "IDN?",
+      "examples": ["IDN?"]
+    },
+    {
+      "name": "channel_type_query",
+      "mnemonic": "CTYPE?",
+      "category": "Status",
+      "description": "Returns the channel type: '21' for an installed channel or '0' for a non-existent channel. CTYPE? 0 (channel A) always returns 21; CTYPE? 100 (channel B) returns 21 on a two-channel instrument or 0 on a single-channel instrument.",
+      "query": "CTYPE?",
+      "parameters": [ { "name": "channel", "range": "0/CHANA, 100/CHANB" } ],
+      "examples": ["CTYPE? 0", "CTYPE? 100"]
+    },
+    {
+      "name": "revision_query",
+      "mnemonic": "REV?",
+      "category": "Status",
+      "description": "Returns the firmware revision date code in the form 'yyww' (yy = year - 1960, ww = week number).",
+      "query": "REV?",
+      "examples": ["REV?"]
+    },
+    {
+      "name": "serial_number_query",
+      "mnemonic": "SER?",
+      "category": "Status",
+      "description": "Serial number query.",
+      "query": "SER?",
+      "examples": ["SER?"]
+    },
+    {
+      "name": "apply_dc_voltage",
+      "mnemonic": "APPLY DCV",
+      "category": "DC Output",
+      "description": "Outputs a DC voltage on the use channel.",
+      "set": "APPLY DCV <volts>",
+      "parameters": [ { "name": "volts", "units": "V", "range": "approx -10.25 to +10.25 V" } ],
+      "examples": ["APPLY DCV 1.5", "APPLY DCV 5"]
+    },
+    {
+      "name": "apply_dc_current",
+      "mnemonic": "APPLY DCI",
+      "category": "DC Output",
+      "description": "Outputs a DC current on the use channel.",
+      "set": "APPLY DCI <amps>",
+      "parameters": [ { "name": "amps", "units": "A", "range": "-0.1 to +0.1 A" } ],
+      "examples": ["APPLY DCI 0.05", "APPLY DCI -0.05"]
+    },
+    {
+      "name": "apply_triggered_dc_voltage",
+      "mnemonic": "APPLY DCMEMV",
+      "category": "DC Output",
+      "description": "Outputs successive triggered DC voltages from a defined memory array, one value output per trigger event (set by TRIGIN).",
+      "set": "APPLY DCMEMV <array>",
+      "examples": ["APPLY DCMEMV A"]
+    },
+    {
+      "name": "apply_triggered_dc_current",
+      "mnemonic": "APPLY DCMEMI",
+      "category": "DC Output",
+      "description": "Outputs successive triggered DC currents from a defined memory array, one value output per trigger event (set by TRIGIN).",
+      "set": "APPLY DCMEMI <array>",
+      "examples": ["APPLY DCMEMI A"]
+    },
+    {
+      "name": "apply_sine_voltage",
+      "mnemonic": "APPLY ACV",
+      "category": "AC Waveform",
+      "description": "Outputs a sine wave voltage (peak-to-peak) on the use channel.",
+      "set": "APPLY ACV <volts>",
+      "parameters": [ { "name": "volts", "units": "Vpp", "range": "0.03125 to 20 Vpp (open circuit)" } ],
+      "examples": ["APPLY ACV 5", "APPLY ACV 1"]
+    },
+    {
+      "name": "apply_sine_current",
+      "mnemonic": "APPLY ACI",
+      "category": "AC Waveform",
+      "description": "Outputs a sine wave current (peak-to-peak) on the use channel.",
+      "set": "APPLY ACI <amps>",
+      "parameters": [ { "name": "amps", "units": "App", "range": "0.00001 to 0.2 App" } ],
+      "examples": ["APPLY ACI 0.05"]
+    },
+    {
+      "name": "apply_ramp_voltage",
+      "mnemonic": "APPLY RPV",
+      "category": "AC Waveform",
+      "description": "Outputs a ramp wave voltage (peak-to-peak) on the use channel.",
+      "set": "APPLY RPV <volts>",
+      "parameters": [ { "name": "volts", "units": "Vpp", "range": "0.03125 to 20 Vpp" } ],
+      "examples": ["APPLY RPV 5"]
+    },
+    {
+      "name": "apply_ramp_current",
+      "mnemonic": "APPLY RPI",
+      "category": "AC Waveform",
+      "description": "Outputs a ramp wave current (peak-to-peak) on the use channel.",
+      "set": "APPLY RPI <amps>",
+      "parameters": [ { "name": "amps", "units": "App" } ],
+      "examples": ["APPLY RPI 0.05"]
+    },
+    {
+      "name": "apply_square_voltage",
+      "mnemonic": "APPLY SQV",
+      "category": "AC Waveform",
+      "description": "Outputs a square wave voltage (peak-to-peak) on the use channel.",
+      "set": "APPLY SQV <volts>",
+      "parameters": [ { "name": "volts", "units": "Vpp", "range": "0.03125 to 20 Vpp" } ],
+      "examples": ["APPLY SQV 5"]
+    },
+    {
+      "name": "apply_square_current",
+      "mnemonic": "APPLY SQI",
+      "category": "AC Waveform",
+      "description": "Outputs a square wave current (peak-to-peak) on the use channel.",
+      "set": "APPLY SQI <amps>",
+      "parameters": [ { "name": "amps", "units": "App" } ],
+      "examples": ["APPLY SQI 0.05"]
+    },
+    {
+      "name": "apply_arbitrary_voltage",
+      "mnemonic": "APPLY WFV",
+      "category": "Arbitrary Waveform",
+      "description": "Outputs an arbitrary (user-defined or precomputed) voltage waveform from an array.",
+      "set": "APPLY WFV <pp_amplitude> [,<array>]",
+      "parameters": [ { "name": "pp_amplitude", "units": "Vpp", "range": "0.03125 to 20 Vpp" } ],
+      "examples": ["APPLY WFV 5,A"]
+    },
+    {
+      "name": "apply_arbitrary_current",
+      "mnemonic": "APPLY WFI",
+      "category": "Arbitrary Waveform",
+      "description": "Outputs an arbitrary (user-defined or precomputed) current waveform from an array.",
+      "set": "APPLY WFI <pp_amplitude> [,<array>]",
+      "parameters": [ { "name": "pp_amplitude", "units": "App" } ],
+      "examples": ["APPLY WFI 0.05,A"]
+    },
+    {
+      "name": "apply_query",
+      "mnemonic": "APPLY?",
+      "category": "DC Output",
+      "description": "Queries the current output function of the use channel.",
+      "query": "APPLY?",
+      "examples": ["APPLY?"]
+    },
+    {
+      "name": "output_value_query",
+      "mnemonic": "OUTPUT?",
+      "category": "DC Output",
+      "description": "Returns the present output value (DC level or AC peak-to-peak amplitude) of the use channel.",
+      "query": "OUTPUT?",
+      "examples": ["OUTPUT?", "APPLY DCV 1.5;OUTPUT?"]
+    },
+    {
+      "name": "frequency",
+      "mnemonic": "FREQ",
+      "category": "Frequency",
+      "description": "Sets or queries the waveform frequency. For dual-frequency triggered mode two values may be given (FREQ f1,f2).",
+      "set": "FREQ <freq1> [,<freq2>]",
+      "query": "FREQ?",
+      "parameters": [ { "name": "freq1", "units": "Hz", "range": "0 to 1 MHz" } ],
+      "examples": ["FREQ 1000", "FREQ 5E3", "FREQ 50,500", "FREQ?"]
+    },
+    {
+      "name": "dc_offset",
+      "mnemonic": "DCOFF",
+      "category": "Amplitude",
+      "description": "Sets or queries the DC offset voltage applied to an AC/arbitrary waveform. Limited to about 50% of the selected range.",
+      "set": "DCOFF <volts>",
+      "query": "DCOFF?",
+      "parameters": [ { "name": "volts", "units": "V", "range": "+/- 50% of range" } ],
+      "examples": ["DCOFF 1", "DCOFF?"]
+    },
+    {
+      "name": "duty_cycle",
+      "mnemonic": "DUTY",
+      "category": "Waveform Parameter",
+      "description": "Sets or queries the duty cycle (percentage) of square/ramp waveforms.",
+      "set": "DUTY <percent>",
+      "query": "DUTY?",
+      "parameters": [ { "name": "percent", "units": "%", "range": "5 to 95" } ],
+      "examples": ["DUTY 30", "DUTY?"]
+    },
+    {
+      "name": "phase_angle",
+      "mnemonic": "PANG",
+      "category": "Waveform Parameter",
+      "description": "Sets or queries the phase angle of the waveform in degrees.",
+      "set": "PANG <degrees>",
+      "query": "PANG?",
+      "parameters": [ { "name": "degrees", "units": "degrees", "range": "0 to 360" } ],
+      "examples": ["PANG 180", "PANG 0", "PANG?"]
+    },
+    {
+      "name": "use_channel",
+      "mnemonic": "USE",
+      "category": "Channel",
+      "description": "Selects the use channel for subsequent commands. Channel A = 0 or CHANA, channel B = 100 or CHANB.",
+      "set": "USE <ch>",
+      "query": "USE?",
+      "parameters": [ { "name": "ch", "range": "0/CHANA, 100/CHANB" } ],
+      "examples": ["USE 0", "USE 100", "USE?"]
+    },
+    {
+      "name": "output_terminal",
+      "mnemonic": "TERM",
+      "category": "Output Terminal",
+      "description": "Selects or queries the output terminal (FRONT or REAR). Power-on is FRONT.",
+      "set": "TERM <mode>",
+      "query": "TERM?",
+      "parameters": [ { "name": "mode", "range": "FRONT, REAR" } ],
+      "examples": ["TERM FRONT", "TERM REAR", "TERM?"]
+    },
+    {
+      "name": "output_impedance",
+      "mnemonic": "IMP",
+      "category": "Output Terminal",
+      "description": "Sets or queries the output impedance (0 ohm or 50 ohm). Power-on is 0 ohm.",
+      "set": "IMP <mode>",
+      "query": "IMP?",
+      "parameters": [ { "name": "mode", "units": "ohm", "range": "0, 50" } ],
+      "examples": ["IMP 50", "IMP 0", "IMP?"]
+    },
+    {
+      "name": "output_range",
+      "mnemonic": "RANGE",
+      "category": "Output Terminal",
+      "description": "Sets or queries the fixed output range (max_output). Omitting the parameter selects autorange.",
+      "set": "RANGE [<max_output>]",
+      "query": "RANGE?",
+      "parameters": [ { "name": "max_output", "range": "function/range dependent" } ],
+      "examples": ["RANGE 0.01", "RANGE", "RANGE?"]
+    },
+    {
+      "name": "autorange",
+      "mnemonic": "ARANGE",
+      "category": "Output Terminal",
+      "description": "Enables or queries autorange mode. Power-on is autorange ON.",
+      "set": "ARANGE [<control>]",
+      "query": "ARANGE?",
+      "parameters": [ { "name": "control", "range": "ON, OFF" } ],
+      "examples": ["ARANGE ON", "ARANGE OFF", "ARANGE?"]
+    },
+    {
+      "name": "dc_resolution",
+      "mnemonic": "DCRES",
+      "category": "DC Output",
+      "description": "Sets or queries the DC resolution mode (high or low resolution). Power-on is high-resolution.",
+      "set": "DCRES <mode>",
+      "query": "DCRES?",
+      "parameters": [ { "name": "mode", "range": "HIGH, LOW" } ],
+      "examples": ["DCRES HIGH", "DCRES?"]
+    },
+    {
+      "name": "output_delay",
+      "mnemonic": "DELAY",
+      "category": "Output Terminal",
+      "description": "Sets or queries the output settling delay time. Power-on default 0.04 seconds.",
+      "set": "DELAY [<time>]",
+      "query": "DELAY?",
+      "parameters": [ { "name": "time", "units": "s", "range": "default 0.04 s" } ],
+      "examples": ["DELAY 0.1", "DELAY?"]
+    },
+    {
+      "name": "trigger_input_source",
+      "mnemonic": "TRIGIN",
+      "category": "Trigger",
+      "description": "Sets or queries the trigger input source/event that triggers an output or waveform. SGL is a software single trigger; HIGH/LOW set software trigger levels; EXT uses the external Trigger I/O port. Power-on is HIGH.",
+      "set": "TRIGIN <event>",
+      "query": "TRIGIN?",
+      "parameters": [ { "name": "event", "range": "HIGH, LOW, SGL, EXT, HOLD, TBn" } ],
+      "examples": ["TRIGIN SGL", "TRIGIN EXT", "TRIGIN HIGH", "TRIGIN?"]
+    },
+    {
+      "name": "trigger_mode",
+      "mnemonic": "TRIGMODE",
+      "category": "Trigger",
+      "description": "Sets or queries the waveform trigger mode. OFF = no triggering, ARMWF = armed/synchronized, GATED = gated, DUALFR = dual-frequency. Power-on is OFF (no effect on DCV/DCI).",
+      "set": "TRIGMODE <mode>",
+      "query": "TRIGMODE?",
+      "parameters": [ { "name": "mode", "range": "OFF, ARMWF, GATED, DUALFR" } ],
+      "examples": ["TRIGMODE ARMWF", "TRIGMODE DUALFR", "TRIGMODE?"]
+    },
+    {
+      "name": "trigger_output",
+      "mnemonic": "TRIGOUT",
+      "category": "Trigger",
+      "description": "Sets or queries the trigger output destination. EXT routes the channel trigger signal to the channel Trigger (I/O) port.",
+      "set": "TRIGOUT <dest>",
+      "query": "TRIGOUT?",
+      "parameters": [ { "name": "dest", "range": "EXT, OFF, TBn" } ],
+      "examples": ["TRIGOUT EXT", "TRIGOUT?"]
+    },
+    {
+      "name": "pulse_trigger_bus",
+      "mnemonic": "TRG",
+      "category": "Trigger",
+      "description": "Pulses the internal trigger bus.",
+      "set": "TRG",
+      "examples": ["TRG"]
+    },
+    {
+      "name": "drive_trigger_bus",
+      "mnemonic": "DRIVETBn",
+      "category": "Trigger",
+      "description": "Sets or queries the source driving trigger bus n. Power-on is Off.",
+      "set": "DRIVETBn <source>",
+      "query": "DRIVETBn?",
+      "parameters": [ { "name": "n", "range": "0, 1" } ],
+      "examples": ["DRIVETB0 ON", "DRIVETB1?"]
+    },
+    {
+      "name": "trigger_bus_query",
+      "mnemonic": "TBn?",
+      "category": "Trigger",
+      "description": "Reads the current logic level of trigger bus n.",
+      "query": "TBn?",
+      "parameters": [ { "name": "n", "range": "0, 1" } ],
+      "examples": ["TB0?", "TB1?"]
+    },
+    {
+      "name": "ref_frequency_input",
+      "mnemonic": "REFIN",
+      "category": "Frequency",
+      "description": "Sets or queries the reference frequency input source (INT or EXT). Power-on is INT.",
+      "set": "REFIN <source>",
+      "query": "REFIN?",
+      "parameters": [ { "name": "source", "range": "INT, EXT" } ],
+      "examples": ["REFIN EXT", "REFIN?"]
+    },
+    {
+      "name": "ref_frequency_output",
+      "mnemonic": "REFOUT",
+      "category": "Frequency",
+      "description": "Sets or queries the reference frequency output destination (INT or EXT). Power-on is EXT.",
+      "set": "REFOUT <dest>",
+      "query": "REFOUT?",
+      "parameters": [ { "name": "dest", "range": "INT, EXT" } ],
+      "examples": ["REFOUT EXT", "REFOUT?"]
+    },
+    {
+      "name": "synchronized_output_mode",
+      "mnemonic": "PHSYNC",
+      "category": "Frequency",
+      "description": "Generates synchronized (phase-locked) outputs across channels.",
+      "set": "PHSYNC",
+      "examples": ["PHSYNC"]
+    },
+    {
+      "name": "sync_out",
+      "mnemonic": "SYNCOUT",
+      "category": "Trigger",
+      "description": "Sets or queries the sync-out signal destination. Power-on is Off.",
+      "set": "SYNCOUT <dest>",
+      "query": "SYNCOUT?",
+      "parameters": [ { "name": "dest", "range": "OFF, WFV, EXT" } ],
+      "examples": ["SYNCOUT EXT", "SYNCOUT?"]
+    },
+    {
+      "name": "fast_amplitude_sweep",
+      "mnemonic": "FASTAMP",
+      "category": "Waveform Parameter",
+      "description": "Performs a fast amplitude/offset change (fast amplitude sweep) for high-speed level changes.",
+      "set": "FASTAMP <value>",
+      "examples": ["FASTAMP 1"]
+    },
+    {
+      "name": "fast_frequency_sweep",
+      "mnemonic": "FASTFREQ",
+      "category": "Frequency",
+      "description": "Performs a fast frequency sweep for high-speed frequency changes.",
+      "set": "FASTFREQ <value>",
+      "examples": ["FASTFREQ 1000"]
+    },
+    {
+      "name": "define_real_array",
+      "mnemonic": "REAL",
+      "category": "Memory",
+      "description": "Defines (declares) a REAL (floating-point) array in instrument memory.",
+      "set": "REAL <name>[<size>]",
+      "examples": ["REAL A[256]"]
+    },
+    {
+      "name": "dim_real_array",
+      "mnemonic": "DIM",
+      "category": "Memory",
+      "description": "Defines (dimensions) a REAL array in instrument memory.",
+      "set": "DIM <name>[<size>]",
+      "examples": ["DIM A[256]"]
+    },
+    {
+      "name": "define_integer_array",
+      "mnemonic": "INTEGER",
+      "category": "Memory",
+      "description": "Defines an INTEGER array (values rounded to -32768..+32767) in instrument memory.",
+      "set": "INTEGER <name>[<size>]",
+      "examples": ["INTEGER A[256]"]
+    },
+    {
+      "name": "fill_array",
+      "mnemonic": "FILL",
+      "category": "Memory",
+      "description": "Fills an array with a list of values.",
+      "set": "FILL <name>,<list>",
+      "examples": ["FILL A,1,2,3,4"]
+    },
+    {
+      "name": "fill_sine_array",
+      "mnemonic": "FILLAC",
+      "category": "Memory",
+      "description": "Fills an array with a precomputed sine waveform.",
+      "set": "FILLAC <name>",
+      "examples": ["FILLAC A"]
+    },
+    {
+      "name": "fill_ramp_array",
+      "mnemonic": "FILLRP",
+      "category": "Memory",
+      "description": "Fills an array with a precomputed ramp waveform.",
+      "set": "FILLRP <name>",
+      "examples": ["FILLRP A"]
+    },
+    {
+      "name": "fill_arbitrary_array",
+      "mnemonic": "FILLWF",
+      "category": "Memory",
+      "description": "Fills an array with an arbitrary (user-defined) waveform.",
+      "set": "FILLWF <name>",
+      "examples": ["FILLWF A"]
+    },
+    {
+      "name": "define_subroutine",
+      "mnemonic": "SUB",
+      "category": "Memory",
+      "description": "Begins definition of a named subroutine.",
+      "set": "SUB <name>",
+      "examples": ["SUB MYSUB"]
+    },
+    {
+      "name": "end_subroutine",
+      "mnemonic": "SUBEND",
+      "category": "Memory",
+      "description": "Ends a subroutine definition.",
+      "set": "SUBEND",
+      "examples": ["SUBEND"]
+    },
+    {
+      "name": "call_subroutine",
+      "mnemonic": "CALL",
+      "category": "Memory",
+      "description": "Calls (executes) a stored subroutine.",
+      "set": "CALL <name>",
+      "examples": ["CALL MYSUB"]
+    },
+    {
+      "name": "run_subroutine",
+      "mnemonic": "RUN",
+      "category": "Memory",
+      "description": "Runs a stored subroutine.",
+      "set": "RUN <name>",
+      "examples": ["RUN MYSUB"]
+    },
+    {
+      "name": "list_subroutine",
+      "mnemonic": "LIST",
+      "category": "Memory",
+      "description": "Lists the contents of a stored subroutine.",
+      "query": "LIST <name>",
+      "examples": ["LIST MYSUB"]
+    },
+    {
+      "name": "delete_subroutine",
+      "mnemonic": "DELSUB",
+      "category": "Memory",
+      "description": "Deletes a stored subroutine.",
+      "set": "DELSUB <name>",
+      "examples": ["DELSUB MYSUB"]
+    },
+    {
+      "name": "abort_subroutine",
+      "mnemonic": "ABORT",
+      "category": "Memory",
+      "description": "Aborts a running subroutine.",
+      "set": "ABORT",
+      "examples": ["ABORT"]
+    },
+    {
+      "name": "compress_subroutine",
+      "mnemonic": "COMPRESS",
+      "category": "Memory",
+      "description": "Compresses a stored subroutine to reclaim memory.",
+      "set": "COMPRESS <name>",
+      "examples": ["COMPRESS MYSUB"]
+    },
+    {
+      "name": "pause_subroutine",
+      "mnemonic": "PAUSE",
+      "category": "Memory",
+      "description": "Pauses a running subroutine.",
+      "set": "PAUSE",
+      "examples": ["PAUSE"]
+    },
+    {
+      "name": "pause_query",
+      "mnemonic": "PAUSED?",
+      "category": "Memory",
+      "description": "Returns whether a subroutine is currently paused.",
+      "query": "PAUSED?",
+      "examples": ["PAUSED?"]
+    },
+    {
+      "name": "continue_subroutine",
+      "mnemonic": "CONT",
+      "category": "Memory",
+      "description": "Continues a paused subroutine.",
+      "set": "CONT",
+      "examples": ["CONT"]
+    },
+    {
+      "name": "single_step_subroutine",
+      "mnemonic": "STEP",
+      "category": "Memory",
+      "description": "Single-steps a paused subroutine.",
+      "set": "STEP",
+      "examples": ["STEP"]
+    },
+    {
+      "name": "running_query",
+      "mnemonic": "RUNNING?",
+      "category": "Memory",
+      "description": "Returns whether a subroutine is currently running.",
+      "query": "RUNNING?",
+      "examples": ["RUNNING?"]
+    },
+    {
+      "name": "catalog",
+      "mnemonic": "CAT",
+      "category": "Memory",
+      "description": "Catalogs the subroutines, arrays, and variables stored in instrument memory.",
+      "query": "CAT",
+      "examples": ["CAT"]
+    },
+    {
+      "name": "memory_available_query",
+      "mnemonic": "MEMAVAIL?",
+      "category": "Memory",
+      "description": "Returns the amount of available instrument memory.",
+      "query": "MEMAVAIL?",
+      "examples": ["MEMAVAIL?"]
+    },
+    {
+      "name": "size_query",
+      "mnemonic": "SIZE?",
+      "category": "Memory",
+      "description": "Returns the size of a named array.",
+      "query": "SIZE? <name>",
+      "examples": ["SIZE? A"]
+    },
+    {
+      "name": "scratch",
+      "mnemonic": "SCRATCH",
+      "category": "Memory",
+      "description": "Deletes all stored subroutines, variables, and arrays from instrument memory.",
+      "set": "SCRATCH",
+      "examples": ["SCRATCH"]
+    },
+    {
+      "name": "store_state",
+      "mnemonic": "SSTATE",
+      "category": "State",
+      "description": "Stores the complete HP 3245A instrument state into a numbered register.",
+      "set": "SSTATE <n>",
+      "examples": ["SSTATE 1"]
+    },
+    {
+      "name": "store_channel_a_state",
+      "mnemonic": "SSTATEA",
+      "category": "State",
+      "description": "Stores the channel A state into a numbered register.",
+      "set": "SSTATEA <n>",
+      "examples": ["SSTATEA 1"]
+    },
+    {
+      "name": "store_channel_b_state",
+      "mnemonic": "SSTATEB",
+      "category": "State",
+      "description": "Stores the channel B state into a numbered register.",
+      "set": "SSTATEB <n>",
+      "examples": ["SSTATEB 1"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "RSTATE",
+      "category": "State",
+      "description": "Recalls a complete HP 3245A instrument state from a numbered register.",
+      "set": "RSTATE <n>",
+      "examples": ["RSTATE 1"]
+    },
+    {
+      "name": "recall_channel_a_state",
+      "mnemonic": "RSTATEA",
+      "category": "State",
+      "description": "Recalls the channel A state from a numbered register.",
+      "set": "RSTATEA <n>",
+      "examples": ["RSTATEA 1"]
+    },
+    {
+      "name": "recall_channel_b_state",
+      "mnemonic": "RSTATEB",
+      "category": "State",
+      "description": "Recalls the channel B state from a numbered register.",
+      "set": "RSTATEB <n>",
+      "examples": ["RSTATEB 1"]
+    },
+    {
+      "name": "send_state",
+      "mnemonic": "SET",
+      "category": "State",
+      "description": "Sends a complete HP 3245A learn-string state to the instrument.",
+      "set": "SET <state_data>",
+      "query": "SET?",
+      "examples": ["SET?"]
+    },
+    {
+      "name": "copy_channel_a_to_b",
+      "mnemonic": "STOREATOB",
+      "category": "State",
+      "description": "Copies the channel A state to channel B.",
+      "set": "STOREATOB",
+      "examples": ["STOREATOB"]
+    },
+    {
+      "name": "copy_channel_b_to_a",
+      "mnemonic": "STOREBTOA",
+      "category": "State",
+      "description": "Copies the channel B state to channel A.",
+      "set": "STOREBTOA",
+      "examples": ["STOREBTOA"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "RESET",
+      "category": "State",
+      "description": "Resets the HP 3245A (or a specified channel) to its known power-on state. RESET with no parameter resets the entire instrument. RST is an accepted synonym.",
+      "set": "RESET [<ch>]",
+      "parameters": [ { "name": "ch", "range": "0/CHANA, 100/CHANB" } ],
+      "examples": ["RESET", "RESET 0", "RST"]
+    },
+    {
+      "name": "channel_reset",
+      "mnemonic": "CRESET",
+      "category": "State",
+      "description": "Resets the use channel to its known state.",
+      "set": "CRESET",
+      "examples": ["CRESET"]
+    },
+    {
+      "name": "clear",
+      "mnemonic": "CLR",
+      "category": "State",
+      "description": "Places the HP 3245A in the same state as the HP-IB device clear (CLEAR) command. CLEAR is an accepted synonym.",
+      "set": "CLR",
+      "examples": ["CLR", "CLEAR"]
+    },
+    {
+      "name": "confidence_test",
+      "mnemonic": "TEST",
+      "category": "Calibration",
+      "description": "Performs a confidence self-test on the HP 3245A or a specified channel. Sets the output to 0 V on the tested channel and returns 'PASS' or 'FAIL'.",
+      "set": "TEST [<ch>]",
+      "parameters": [ { "name": "ch", "range": "0/CHANA, 100/CHANB" } ],
+      "examples": ["TEST", "TEST 0"]
+    },
+    {
+      "name": "device_self_test",
+      "mnemonic": "DTEST",
+      "category": "Calibration",
+      "description": "Performs the device self-test.",
+      "set": "DTEST",
+      "examples": ["DTEST"]
+    },
+    {
+      "name": "fixtured_self_test",
+      "mnemonic": "FTEST",
+      "category": "Calibration",
+      "description": "Performs the fixtured self-test.",
+      "set": "FTEST",
+      "examples": ["FTEST"]
+    },
+    {
+      "name": "channel_adjustment",
+      "mnemonic": "CAL",
+      "category": "Calibration",
+      "description": "Performs a channel adjustment (calibration) operation.",
+      "set": "CAL <value>",
+      "examples": ["CAL 0"]
+    },
+    {
+      "name": "calibration_security",
+      "mnemonic": "SECURE",
+      "category": "Calibration",
+      "description": "Sets or controls the calibration security (protection).",
+      "set": "SECURE <code>",
+      "examples": ["SECURE 0"]
+    },
+    {
+      "name": "cal_jumper_query",
+      "mnemonic": "CALEN?",
+      "category": "Calibration",
+      "description": "Reads the calibration enable jumper setting.",
+      "query": "CALEN?",
+      "examples": ["CALEN?"]
+    },
+    {
+      "name": "calibration_number_query",
+      "mnemonic": "CALNUM?",
+      "category": "Calibration",
+      "description": "Returns the calibration number (count of calibrations performed).",
+      "query": "CALNUM?",
+      "examples": ["CALNUM?"]
+    },
+    {
+      "name": "calibration_data_query",
+      "mnemonic": "CALSTR?",
+      "category": "Calibration",
+      "description": "Reads stored calibration data.",
+      "query": "CALSTR?",
+      "examples": ["CALSTR?"]
+    },
+    {
+      "name": "status_word_query",
+      "mnemonic": "STA?",
+      "category": "Status",
+      "description": "Returns the 16-bit status word. Bits are set when corresponding conditions occur.",
+      "query": "STA?",
+      "examples": ["STA?"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "STB?",
+      "category": "Status",
+      "description": "Returns the status byte.",
+      "query": "STB?",
+      "examples": ["STB?"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "RQS",
+      "category": "Status",
+      "description": "Sets or queries the service request (SRQ) enable mask. Bits set in the RQS mask allow corresponding status conditions to generate an SRQ.",
+      "set": "RQS <mask>",
+      "query": "RQS?",
+      "parameters": [ { "name": "mask", "range": "0 to 65535" } ],
+      "examples": ["RQS 8", "RQS?"]
+    },
+    {
+      "name": "programmed_service_request",
+      "mnemonic": "SRQ",
+      "category": "Status",
+      "description": "Generates a programmed (front panel) service request.",
+      "set": "SRQ",
+      "examples": ["SRQ"]
+    },
+    {
+      "name": "power_on_srq",
+      "mnemonic": "PONSRQ",
+      "category": "Status",
+      "description": "Enables or disables the power-on service request.",
+      "set": "PONSRQ <control>",
+      "parameters": [ { "name": "control", "range": "ON, OFF" } ],
+      "examples": ["PONSRQ ON"]
+    },
+    {
+      "name": "error_string_query",
+      "mnemonic": "ERRSTR?",
+      "category": "Status",
+      "description": "Returns the next error as an error number and descriptive string (e.g. 0,\"NO ERROR\").",
+      "query": "ERRSTR?",
+      "examples": ["ERRSTR?"]
+    },
+    {
+      "name": "monitor_conditions",
+      "mnemonic": "MON",
+      "category": "Status",
+      "description": "Sets the front panel monitor mode. MON HP-IB displays the latest command received over HP-IB.",
+      "set": "MON <mode>",
+      "parameters": [ { "name": "mode", "range": "HP-IB, etc." } ],
+      "examples": ["MON HP-IB"]
+    },
+    {
+      "name": "output_format",
+      "mnemonic": "OFORMAT",
+      "category": "I/O",
+      "description": "Selects the numeric output data format: ASCII (comma-separated, power-on default) or BINARY (16-bit integer / 64-bit IEEE-754).",
+      "set": "OFORMAT <format>",
+      "parameters": [ { "name": "format", "range": "ASCII, BINARY" } ],
+      "examples": ["OFORMAT ASCII", "OFORMAT BINARY"]
+    },
+    {
+      "name": "block_output_mode",
+      "mnemonic": "BLOCKOUT",
+      "category": "I/O",
+      "description": "Determines whether the IEEE-728 Block A header is sent before each binary output.",
+      "set": "BLOCKOUT <control>",
+      "parameters": [ { "name": "control", "range": "ON, OFF" } ],
+      "examples": ["BLOCKOUT ON", "BLOCKOUT OFF"]
+    },
+    {
+      "name": "input_buffer",
+      "mnemonic": "INBUF",
+      "category": "I/O",
+      "description": "Enables or disables input buffering. With INBUF ON commands are accepted into the buffer immediately; with INBUF OFF commands are accepted only when the instrument is not busy.",
+      "set": "INBUF <control>",
+      "parameters": [ { "name": "control", "range": "ON, OFF" } ],
+      "examples": ["INBUF ON", "INBUF OFF"]
+    },
+    {
+      "name": "output_buffer",
+      "mnemonic": "OUTBUF",
+      "category": "I/O",
+      "description": "Enables or controls output buffering.",
+      "set": "OUTBUF <control>",
+      "parameters": [ { "name": "control", "range": "ON, OFF" } ],
+      "examples": ["OUTBUF ON"]
+    },
+    {
+      "name": "clear_output_buffer",
+      "mnemonic": "CLROUT",
+      "category": "I/O",
+      "description": "Clears the output buffer.",
+      "set": "CLROUT",
+      "examples": ["CLROUT"]
+    },
+    {
+      "name": "ready_query",
+      "mnemonic": "READY?",
+      "category": "I/O",
+      "description": "Returns whether the instrument is ready to accept a new command (used with input buffering).",
+      "query": "READY?",
+      "examples": ["READY?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "WAIT",
+      "category": "I/O",
+      "description": "Pauses command execution for the specified time in seconds.",
+      "set": "WAIT <time>",
+      "parameters": [ { "name": "time", "units": "s" } ],
+      "examples": ["WAIT 2", "WAIT 3.5E-3"]
+    },
+    {
+      "name": "hpib_address",
+      "mnemonic": "ADDRESS",
+      "category": "I/O",
+      "description": "Sets or queries the HP-IB bus address. Factory default is 09.",
+      "set": "ADDRESS <addr>",
+      "query": "ADDRESS?",
+      "parameters": [ { "name": "addr", "range": "1 to 31" } ],
+      "examples": ["ADDRESS 9", "ADDRESS?"]
+    },
+    {
+      "name": "go_to_local",
+      "mnemonic": "LOCAL",
+      "category": "I/O",
+      "description": "Returns the instrument to local (front panel) control.",
+      "set": "LOCAL",
+      "examples": ["LOCAL"]
+    },
+    {
+      "name": "remote",
+      "mnemonic": "RMT",
+      "category": "I/O",
+      "description": "Places the instrument in remote control state.",
+      "set": "RMT",
+      "examples": ["RMT"]
+    },
+    {
+      "name": "set_time",
+      "mnemonic": "SETTIME",
+      "category": "Other",
+      "description": "Sets the internal real-time clock.",
+      "set": "SETTIME <time>",
+      "examples": ["SETTIME 12.0"]
+    },
+    {
+      "name": "read_time",
+      "mnemonic": "TIME",
+      "category": "Other",
+      "description": "Reads the internal real-time clock.",
+      "query": "TIME",
+      "examples": ["TIME"]
+    },
+    {
+      "name": "beep",
+      "mnemonic": "BEEP",
+      "category": "Other",
+      "description": "Sounds the instrument beeper.",
+      "set": "BEEP",
+      "examples": ["BEEP"]
+    },
+    {
+      "name": "help",
+      "mnemonic": "HELP",
+      "category": "Other",
+      "description": "Displays front panel command syntax help for an optional topic.",
+      "query": "HELP [<topic>]",
+      "examples": ["HELP", "HELP APPLY"]
+    },
+    {
+      "name": "demo",
+      "mnemonic": "DEMO",
+      "category": "Other",
+      "description": "Runs the built-in HP 3245A demonstration.",
+      "set": "DEMO",
+      "examples": ["DEMO"]
+    }
+  ]
+}
