@@ -1,0 +1,55 @@
+{
+  "model": "11713A",
+  "manufacturer": "HP",
+  "category": "Attenuator / Switch Driver",
+  "description": "HP/Agilent 11713A Attenuator/Switch Driver. A GPIB (HP-IB) compatible driver that controls up to two programmable step attenuators (ATTEN X and ATTEN Y) and two microwave coaxial switches (S9 and S0) via solid-state current sinks. The driver is listen-only: it accepts data-message program codes when in remote mode and addressed to listen, and has no talk capability (it cannot send data, respond to serial poll, or trigger). The programming string is composed of A (general ON / energize) and B (general OFF / de-energize) commands each followed by one or more channel digits 1-8 (attenuator sections; 1-4 = ATTEN X, 5-8 = ATTEN Y) and 9 or 0 (coaxial switches S9, S0). Alpha characters may be upper or lower case.",
+  "source": "11713A.pdf",
+  "aliases": ["11713A", "HP11713A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "channel_on",
+      "mnemonic": "A",
+      "category": "Switch",
+      "description": "General ON command. Drives the addressed channels to the energized state. For attenuator sections (digits 1-4 = ATTEN X pins, 5-8 = ATTEN Y pins) the 'A' digit forces the corresponding section relay; for switches (digit 9 = S9, 0 = S0) it sets the coaxial switch to its 'A' position. Multiple digits may follow a single A (e.g. A1234). A digit may not appear in both the A field and the B field of the same string.",
+      "set": "A<digits>",
+      "parameters": [
+        { "name": "digits", "range": "Any of 1-4 (ATTEN X sections), 5-8 (ATTEN Y sections), 9 (switch S9), 0 (switch S0); one or more, no digit repeated in the B field" }
+      ],
+      "examples": ["OUTPUT 728;\"A1234567890\"", "OUTPUT 728;\"A12B34\""]
+    },
+    {
+      "name": "channel_off",
+      "mnemonic": "B",
+      "category": "Switch",
+      "description": "General OFF command. Drives the addressed channels to the de-energized state. For attenuator sections (digits 1-4 = ATTEN X, 5-8 = ATTEN Y) the 'B' digit releases the corresponding section relay; for switches (digit 9 = S9, 0 = S0) it sets the coaxial switch to its 'B' position (+24 V applied). Multiple digits may follow a single B (e.g. B5678). A digit may not appear in both the A field and the B field of the same string.",
+      "set": "B<digits>",
+      "parameters": [
+        { "name": "digits", "range": "Any of 1-4 (ATTEN X sections), 5-8 (ATTEN Y sections), 9 (switch S9), 0 (switch S0); one or more, no digit repeated in the A field" }
+      ],
+      "examples": ["OUTPUT 728;\"B1234567890\"", "OUTPUT 728;\"A4B123\""]
+    },
+    {
+      "name": "set_attenuation",
+      "mnemonic": "A/B",
+      "category": "Attenuator",
+      "description": "Sets a programmable step attenuator to a desired attenuation level by combining A (ON) and B (OFF) commands across that attenuator's section digits. ATTEN X uses digits 1-4, ATTEN Y uses digits 5-8. Each section that must be inserted is listed after A, each that must be removed after B; a digit must not appear in both fields. The dB weighting of each section depends on the attenuator model (e.g. 4-section 1/2/4/4 dB, 10/20/40/40 dB, or 3-section 10/20/40 dB). For example, on a 0-110 dB attenuator A1B234 = 1 dB and A1234 = 11 dB on ATTEN X; A5678 = 110 dB on ATTEN Y.",
+      "set": "A<sections>B<sections>",
+      "parameters": [
+        { "name": "sections", "units": "section number", "range": "ATTEN X: digits 1-4; ATTEN Y: digits 5-8. Digit-to-dB weighting per attenuator model (see Table 6-3)." }
+      ],
+      "examples": ["OUTPUT 728;\"A1B234\"", "OUTPUT 728;\"A12B34A56B78\""]
+    },
+    {
+      "name": "set_switch",
+      "mnemonic": "A/B",
+      "category": "Switch",
+      "description": "Sets a coaxial (RF) switch position. Digit 9 controls switch S9 and digit 0 controls switch S0. 'A9' selects the S9 'A' position and 'B9' selects the S9 'B' position (which applies +24 V); likewise 'A0'/'B0' for S0. Used with HP 8761/8762/8763 etc. coaxial switches connected to the rear-panel banana jacks.",
+      "set": "A/B 9|0",
+      "parameters": [
+        { "name": "switch", "range": "9 = switch S9, 0 = switch S0; prefix A for the A position, B for the B position" }
+      ],
+      "examples": ["OUTPUT 728;\"A9\"", "OUTPUT 728;\"B0\""]
+    }
+  ]
+}

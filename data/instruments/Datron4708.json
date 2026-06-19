@@ -1,0 +1,231 @@
+{
+  "model": "4708",
+  "manufacturer": "Datron",
+  "category": "Multifunction Calibrator",
+  "description": "Datron 4708 Autocal Multifunction Standard - a high-precision multifunction calibrator providing DC Voltage (Option 10), AC Voltage (Option 20), and DC Current / AC Current / Resistance (Option 30). IEEE 488-1978 interface. Remote control uses position-dependent alphabetic device-dependent command codes (Table 5.4); a program string is terminated by the ASCII '=' character or by EOI asserted coincident with the line feed (LF) character. The instrument has no SCPI-style *IDN? identity query, but software part number / issue can be read with V3. Interface capability: SH1 AH1 T6 TE0 L4 LE0 SR1 RL2 PP0 DC1 DT0 C0 E1.",
+  "source": "Datron 4708 Operator Manual.pdf",
+  "aliases": ["4708", "Datron 4708", "Wavetek 4708"],
+  "termination": { "write": "=", "read": "\n" },
+  "commands": [
+    {
+      "name": "function",
+      "mnemonic": "F",
+      "category": "Function",
+      "description": "Selects the output function: F0=DC Voltage, F1=AC Voltage, F2=DC Current, F3=AC Current, F4=Resistance. Changing function (sent as a single command) forces OUTPUT OFF, which must then be re-enabled with O1.",
+      "set": "F<code>",
+      "parameters": [
+        { "name": "function", "range": "0=DCV, 1=ACV, 2=DCI, 3=ACI, 4=Resistance" }
+      ],
+      "examples": ["F0=", "F1="]
+    },
+    {
+      "name": "output_range",
+      "mnemonic": "R",
+      "category": "Range",
+      "description": "Selects the output range. R0=Autorange (output value set by M code, ranges automatically). R1-R9 select fixed ranges; the actual value depends on the selected function. V/A ranges R1=100uV/0.1uV up through R8=1000V/100mA; Resistance ranges R1=10ohm up through R9=100Mohm. In autorange (R0), commands A0/A1/A2 are invalid.",
+      "set": "R<code>",
+      "parameters": [
+        { "name": "range", "range": "0=Autorange; 1-9 = fixed range (function dependent: V/A R1..R8, Resistance R1..R9)" }
+      ],
+      "examples": ["R0=", "R5=", "R7="]
+    },
+    {
+      "name": "output_value",
+      "mnemonic": "M",
+      "category": "Output",
+      "description": "Sets the Main register (OUTPUT display) value explicitly, in numeric, scientific or engineering notation. Replaces the manual incremental adjustment. If resolution is too high the value is truncated and an SRQ/RQS status byte is generated. With OUTPUT already ON, an M command alone updates the register but high-voltage outputs do not ramp until a separate 'O1=' string is received.",
+      "set": "M<value>",
+      "parameters": [
+        { "name": "value", "units": ["V", "A", "ohm"], "range": "Function/range dependent; accepts numeric, scientific (E) or engineering notation, e.g. M-153, M+1.6212574, M1621257E-6, M.002563" }
+      ],
+      "examples": ["M-153=", "M1621257E-6="]
+    },
+    {
+      "name": "full_range_zero",
+      "mnemonic": "A",
+      "category": "Output",
+      "description": "Sets the output to a calibration extreme of the selected range. A0=Zero (not valid in Autorange), A1=+Full Range, A2=-Full Range. Invalid when R0 (Autorange) is set.",
+      "set": "A<code>",
+      "parameters": [
+        { "name": "value", "range": "0=Zero, 1=+Full Range, 2=-Full Range" }
+      ],
+      "examples": ["A0=", "A1="]
+    },
+    {
+      "name": "output",
+      "mnemonic": "O",
+      "category": "Output",
+      "description": "Switches the analog OUTPUT off or on. O0=Output disable (OFF), O1=Output enable to the value/frequency held in the Main and Auxiliary registers. For high-voltage ranges, sending O1 effects the low-to-high voltage changeover subject to the safety interlocks/delay.",
+      "set": "O<code>",
+      "parameters": [
+        { "name": "state", "range": "0=OFF, 1=ON" }
+      ],
+      "examples": ["O0=", "O1="]
+    },
+    {
+      "name": "frequency",
+      "mnemonic": "H",
+      "category": "Frequency",
+      "description": "Sets the Auxiliary register (frequency) value for AC functions, in numeric, scientific or engineering notation. Frequency autoranges to the correct range for the H value (no frequency range code needed). Resolved to three significant digits; excess significance is truncated and reported by SRQ status byte. The manual frequency Store memories cannot be set via the bus.",
+      "set": "H<value>",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "AC function dependent; three significant digits; numeric/scientific/engineering notation" }
+      ],
+      "examples": ["H1000=", "H1E3="]
+    },
+    {
+      "name": "spot_frequency",
+      "mnemonic": "T",
+      "category": "Frequency",
+      "description": "Selects an ultra-accurately calibrated spot frequency from non-volatile memory. T0=Cancel spot frequency (reverts to 1kHz), T1-T5 select stored spot frequencies SF1-SF5 for the current Function/Range. Spot frequency memory contents can only be changed during the Autocal routine. A new F (function) command cancels the spot selection.",
+      "set": "T<code>",
+      "parameters": [
+        { "name": "spot", "range": "0=Cancel, 1=SF1, 2=SF2, 3=SF3, 4=SF4, 5=SF5" }
+      ],
+      "examples": ["T1=", "T0="]
+    },
+    {
+      "name": "sense",
+      "mnemonic": "S",
+      "category": "Sense",
+      "description": "Selects local or remote (4-wire) sense. S0=Local Sense (2-wire; forced in current functions F2/F3 and on lower V ranges), S1=Remote Sense (4-wire; available only on F0/F1 ranges R5-R8, or in F4 Resistance on all ranges). Invalid commands (e.g. remote sense in 100mV range) are rejected.",
+      "set": "S<code>",
+      "parameters": [
+        { "name": "sense", "range": "0=Local (2-wire), 1=Remote (4-wire)" }
+      ],
+      "examples": ["S0=", "S1="]
+    },
+    {
+      "name": "guard",
+      "mnemonic": "G",
+      "category": "Sense",
+      "description": "Selects local or remote guard. G0=Local Guard, G1=Remote Guard.",
+      "set": "G<code>",
+      "parameters": [
+        { "name": "guard", "range": "0=Local, 1=Remote" }
+      ],
+      "examples": ["G0=", "G1="]
+    },
+    {
+      "name": "safety_delay",
+      "mnemonic": "D",
+      "category": "Output",
+      "description": "Controls the High Voltage Safety delay (3 seconds). D0=Safety delay active (default; enforced by any function or range change including autorange). D1=Safety delay overridden. WARNING: D1 sets up potentially dangerous high-voltage situations and should only be used when essential for high-speed operation.",
+      "set": "D<code>",
+      "parameters": [
+        { "name": "delay", "range": "0=Active, 1=Overridden" }
+      ],
+      "examples": ["D0=", "D1="]
+    },
+    {
+      "name": "recall_verify",
+      "mnemonic": "V",
+      "category": "Query",
+      "description": "Interrogates the 4708 to prepare a status/value output string (released when the 4708 is next addressed as a talker). V0=present Output value, V1=present Frequency setting, V2=functional status string (space R*F*O*G*S*W*Q*D*L*K terminator; lower-case 'r' if autoranged), V3=Software status (part number / issue, e.g. '890077-4'), V4-V8=recall stored frequencies F1-F5. Output formatted per K and L codes.",
+      "query": "V<code>",
+      "parameters": [
+        { "name": "item", "range": "0=Output value, 1=Frequency, 2=Functional status, 3=Software status (part no/issue), 4-8=Stored frequencies F1-F5" }
+      ],
+      "examples": ["V0=", "V2=", "V3="]
+    },
+    {
+      "name": "specification_tolerance",
+      "mnemonic": "P",
+      "category": "Query",
+      "description": "Calculates the per-unit Output Uncertainty (Spec mode) of the current state for the nominated calibration interval and prepares an output string (legend 'pu' = per unit). P0=24 hour, P1=90 day, P2=1 year. Formatted per K and L codes.",
+      "query": "P<code>",
+      "parameters": [
+        { "name": "interval", "range": "0=24 hour, 1=90 day, 2=1 year" }
+      ],
+      "examples": ["P0=", "P2="]
+    },
+    {
+      "name": "tolerance_limit",
+      "mnemonic": "U",
+      "category": "Query",
+      "description": "Calculates an absolute limit of uncertainty of the present output value for a nominated calibration interval and prepares an output string. U0=Low limit 24 hour, U1=Low limit 90 day, U2=Low limit 1 year, U3=High limit 24 hour, U4=High limit 90 day, U5=High limit 1 year. Formatted per K and L codes.",
+      "query": "U<code>",
+      "parameters": [
+        { "name": "limit", "range": "0=Low 24hr, 1=Low 90day, 2=Low 1yr, 3=High 24hr, 4=High 90day, 5=High 1yr" }
+      ],
+      "examples": ["U0=", "U5="]
+    },
+    {
+      "name": "diagnostic",
+      "mnemonic": "X",
+      "category": "Diagnostic",
+      "description": "Recalls the contents of non-volatile calibration memory locations (calibration constants stored at the most recent Autocalibration). X0=Zero Cal store, X1=Gain Cal store (DC; LF gain + HF in AC), X2=STD calibration gain factor, X3=Zero offset, X4=Gain error, X5=Linearity (not AC), X6=Reference Divider setting, X7=not used, X8=recall the user message stored via the I command. Refer to the Calibration and Servicing Handbook.",
+      "query": "X<code>",
+      "parameters": [
+        { "name": "store", "range": "0=Zero Cal, 1=Gain Cal, 2=STD gain factor, 3=Zero offset, 4=Gain error, 5=Linearity, 6=Reference divider, 8=User message" }
+      ],
+      "examples": ["X0=", "X8="]
+    },
+    {
+      "name": "service_request_mode",
+      "mnemonic": "Q",
+      "category": "Status",
+      "description": "Configures SRQ generation. Q0=SRQ on any of the specified states (default at power-up), Q1=SRQ on overload and any FAIL state only (not on Error states), Q2=No SRQs generated. The 4708 responds to serial poll with an RQS status byte (bit b7 = request bit; bit b8 = syntax/option error).",
+      "set": "Q<code>",
+      "parameters": [
+        { "name": "mode", "range": "0=SRQ on all specified states, 1=SRQ on overload/FAIL only, 2=No SRQs" }
+      ],
+      "examples": ["Q0=", "Q2="]
+    },
+    {
+      "name": "output_terminator",
+      "mnemonic": "K",
+      "category": "Format",
+      "description": "Sets the terminator characters appended to output strings. K0=Cr+Lf with EOI (no suppression), K1=Cr+Lf, K2=Cr with EOI, K3=Cr, K4=Lf with EOI, K5=Lf, K6=EOI with last character, K7=No terminator. Preserved across power-up and DCL/SDC.",
+      "set": "K<code>",
+      "parameters": [
+        { "name": "terminator", "range": "0=Cr/Lf/EOI, 1=Cr+Lf, 2=Cr+EOI, 3=Cr, 4=Lf+EOI, 5=Lf, 6=EOI only, 7=none" }
+      ],
+      "examples": ["K1=", "K6="]
+    },
+    {
+      "name": "value_notation",
+      "mnemonic": "L",
+      "category": "Format",
+      "description": "Sets the notation of output value strings. L0=Scientific with legends, L1=Scientific no legends, L2=Engineering with legends, L3=Engineering no legends. Legends (e.g. V, A, R, Hz, pu) are inserted after the exponent when L0 or L2 is selected. Preserved across power-up and DCL/SDC.",
+      "set": "L<code>",
+      "parameters": [
+        { "name": "notation", "range": "0=Scientific+legends, 1=Scientific, 2=Engineering+legends, 3=Engineering" }
+      ],
+      "examples": ["L0=", "L3="]
+    },
+    {
+      "name": "calibration_enable",
+      "mnemonic": "W",
+      "category": "Calibration",
+      "description": "Enables or disables remote Calibration mode. W0=Calibration disable, W1=Calibration enable (only if the rear-panel CALIBRATION ENABLE keyswitch is set to ENABLE). Required before remote calibration (C codes) or storing a user message (I code). The I command and W1 must not be sent in the same string.",
+      "set": "W<code>",
+      "parameters": [
+        { "name": "state", "range": "0=Disable, 1=Enable" }
+      ],
+      "examples": ["W1=", "W0="]
+    },
+    {
+      "name": "calibrate",
+      "mnemonic": "C",
+      "category": "Calibration",
+      "description": "Calibration triggers for automatic Autocal of the 4708 (require Calibration mode enabled via W1). C0=Calibration trigger (equivalent to CAL key), C1=as SET key, C2=as STD key, C3=as +0 key (in DC), C4=DC Coarse Linearity, C5=DC Linearity. Refer to Section 8 / Calibration and Servicing Handbook.",
+      "set": "C<code>",
+      "parameters": [
+        { "name": "step", "range": "0=CAL trigger, 1=SET, 2=STD, 3=+0 (DC), 4=DC Coarse Linearity, 5=DC Linearity" }
+      ],
+      "examples": ["C0=", "C1="]
+    },
+    {
+      "name": "user_message",
+      "mnemonic": "I",
+      "category": "Calibration",
+      "description": "Stores a user 'Aide Memoire' designator (up to 16 ASCII characters) in non-volatile memory to identify a specific calibrator. The 4708 must first be in CAL mode (keyswitch ENABLE plus W1). The subsequent 16-character string is stored and can be recalled with X8. The I command and W1 must not be sent in the same string.",
+      "set": "I<text>",
+      "parameters": [
+        { "name": "designator", "range": "Up to 16 ASCII characters" }
+      ],
+      "examples": ["I4708 LAB STD A="]
+    }
+  ]
+}

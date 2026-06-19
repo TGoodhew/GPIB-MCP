@@ -1,0 +1,197 @@
+{
+  "model": "4275A",
+  "manufacturer": "HP",
+  "category": "LCR Meter",
+  "description": "HP 4275A Multi-Frequency LCR Meter with Option 101 HP-IB Compatibility. Measures L, C, R, |Z|, |Y| as the primary (Display A) parameter and D, Q, ESR/G, X/B, L/C, theta as the secondary (Display B) parameter at ten spot test frequencies from 10 kHz to 10 MHz. Remote control uses HP's function-code (letter+number mnemonic) language sent as ASCII strings over HP-IB; the instrument is triggered with the 'E' code. Codes can be concatenated in one string (for example 'A2T3'). With Option 101 the unit can also operate as an addressable or talk-only device, and DC bias (Options 001/002) can be set remotely. Commands are documented in the Operation Manual Section III, Table 3-11 (Remote Program Codes), Table 3-12 (Data Output Codes), and paragraphs 3-66 to 3-95.",
+  "source": "4275A-OM.pdf",
+  "aliases": ["4275A", "HP4275A", "HP 4275A", "4275"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "display_a_function",
+      "mnemonic": "A",
+      "category": "Measurement Parameter",
+      "description": "Selects the primary measurement parameter shown on Display A. A1 = L (inductance), A2 = C (capacitance), A3 = R (resistance), A4 = |Z| (impedance magnitude). The valid Display A / Display B combinations are: L-D, L-Q, L-ESR/G; C-D, C-Q, C-ESR/G; R-X/B, R-L/C, R-X/B; |Z|-theta.",
+      "set": "A",
+      "parameters": [
+        { "name": "code", "range": "A1=L, A2=C, A3=R, A4=|Z|" }
+      ],
+      "examples": ["A2", "A4"]
+    },
+    {
+      "name": "display_b_function",
+      "mnemonic": "B",
+      "category": "Measurement Parameter",
+      "description": "Selects the secondary measurement parameter shown on Display B. B1 = D (dissipation factor), B2 = Q (quality factor), B3 = ESR/G. Combined codes select two-letter secondary parameters: 'B1,B3' = X/B, B2 = L/C, 'B1,B2,B3' = theta. The available secondary parameter depends on the Display A function selected.",
+      "set": "B",
+      "parameters": [
+        { "name": "code", "range": "B1=D, B2=Q, B3=ESR/G, B1,B3=X/B, B2=L/C, B1,B2,B3=theta" }
+      ],
+      "examples": ["B1", "B2"]
+    },
+    {
+      "name": "circuit_mode",
+      "mnemonic": "C",
+      "category": "Circuit Mode",
+      "description": "Selects the equivalent circuit mode used for the measurement. C1 = AUTO, C2 = series, C3 = parallel.",
+      "set": "C",
+      "parameters": [
+        { "name": "code", "range": "C1=AUTO, C2=series, C3=parallel" }
+      ],
+      "examples": ["C1", "C2"]
+    },
+    {
+      "name": "deviation_measurement",
+      "mnemonic": "D",
+      "category": "Deviation",
+      "description": "Selects deviation (delta) measurement mode relative to stored reference data. D0 = deviation OFF, D1 = absolute deviation (delta), D2 = percent deviation (delta%). D1 and D2 cannot be used if reference data has not been stored (see Store Reference Value, ST).",
+      "set": "D",
+      "parameters": [
+        { "name": "code", "range": "D0=OFF, D1=delta, D2=delta%" }
+      ],
+      "examples": ["D0", "D2"]
+    },
+    {
+      "name": "frequency_step",
+      "mnemonic": "F",
+      "category": "Test Frequency",
+      "description": "Selects the spot test frequency. F11=10 kHz, F12=20 kHz (30 kHz with Option 004), F13=40 kHz (50 kHz), F14=100 kHz, F15=200 kHz (300 kHz), F16=400 kHz (500 kHz), F17=1 MHz, F18=2 MHz (3 MHz), F19=4 MHz (5 MHz), F20=10 MHz. The frequencies in parentheses are used with Option 004. F21 and F22 are additional frequency steps.",
+      "set": "F",
+      "parameters": [
+        { "name": "code", "units": "Hz", "range": "F11=10kHz, F12=20(30)kHz, F13=40(50)kHz, F14=100kHz, F15=200(300)kHz, F16=400(500)kHz, F17=1MHz, F18=2(3)MHz, F19=4(5)MHz, F20=10MHz, F21, F22" }
+      ],
+      "examples": ["F14", "F17"]
+    },
+    {
+      "name": "high_resolution",
+      "mnemonic": "H",
+      "category": "Display",
+      "description": "Sets high-resolution display mode. H0 = OFF, H1 = ON.",
+      "set": "H",
+      "parameters": [
+        { "name": "code", "range": "H0=OFF, H1=ON" }
+      ],
+      "examples": ["H0", "H1"]
+    },
+    {
+      "name": "data_ready",
+      "mnemonic": "I",
+      "category": "Status",
+      "description": "Enables or disables the Data Ready service request. I0 = OFF, I1 = ON. When Data Ready is ON, an SRQ signal is generated (status byte bit 1) when measurement data is available.",
+      "set": "I",
+      "parameters": [
+        { "name": "code", "range": "I0=OFF, I1=ON" }
+      ],
+      "examples": ["I0", "I1"]
+    },
+    {
+      "name": "key_state_out",
+      "mnemonic": "K",
+      "category": "Data Output",
+      "description": "Requests output of the current key (setting) status. The instrument returns a string encoding Display A function, Display B function, circuit mode, delta measure, frequency step, high resolution, data ready, multiplier, LCRZ range, self test, and trigger settings. Note: the LCRZ Range is reported as R31 when set to AUTO, so set MANUAL range (R32) to read the true measuring range.",
+      "query": "K",
+      "examples": ["K"]
+    },
+    {
+      "name": "level_monitor",
+      "mnemonic": "L",
+      "category": "Data Output",
+      "description": "Requests output of the oscillator test signal level monitored at the unknown terminals. LV = monitor as voltage, LA = monitor as current. The returned data gives the level measurement status, measuring function, and value.",
+      "query": "L",
+      "parameters": [
+        { "name": "code", "range": "LV=voltage level, LA=current level" }
+      ],
+      "examples": ["LV", "LA"]
+    },
+    {
+      "name": "multiplier",
+      "mnemonic": "M",
+      "category": "Range",
+      "description": "Sets the display multiplier. M1 = x0.01, M2 = x0.1, M3 = x1.",
+      "set": "M",
+      "parameters": [
+        { "name": "code", "range": "M1=x0.01, M2=x0.1, M3=x1" }
+      ],
+      "examples": ["M2", "M3"]
+    },
+    {
+      "name": "lcrz_range",
+      "mnemonic": "R",
+      "category": "Range",
+      "description": "Sets the LCRZ measurement range. R31 = AUTO ranging, R32 = MANUAL ranging. R11 through R20 select fixed ranges; the actual L/C/R/Z value of each range depends on the Display A, Display B, and frequency settings (e.g. R11 = 1000 fF / 100 nH, up to R20 = 100 H). If a manually selected range cannot make the measurement, the instrument automatically resets to the nearest range capable of making it.",
+      "set": "R",
+      "parameters": [
+        { "name": "code", "range": "R31=AUTO, R32=MANUAL, R11..R20=fixed ranges" }
+      ],
+      "examples": ["R31", "R32"]
+    },
+    {
+      "name": "recall_reference_value",
+      "mnemonic": "RE",
+      "category": "Data Output",
+      "description": "Recalls and outputs the stored reference data. The data is output as the Display A function followed by its reference value. This code cannot be used if reference data has not been stored.",
+      "query": "RE",
+      "examples": ["RE"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "S",
+      "category": "Calibration",
+      "description": "Controls the instrument self test. S0 = OFF, S1 = ON. Completion of self test sets status byte bit 3; a faulty self test sets status byte bit 4.",
+      "set": "S",
+      "parameters": [
+        { "name": "code", "range": "S0=OFF, S1=ON" }
+      ],
+      "examples": ["S0", "S1"]
+    },
+    {
+      "name": "store_reference_value",
+      "mnemonic": "ST",
+      "category": "Deviation",
+      "description": "Stores the current measurement as the reference value, enabling deviation (delta) measurements and the Recall Reference (RE) output.",
+      "set": "ST",
+      "examples": ["ST"]
+    },
+    {
+      "name": "trigger_mode",
+      "mnemonic": "T",
+      "category": "Trigger",
+      "description": "Selects the trigger mode. T1 = INT (internal/continuous), T2 = EXT (external), T3 = HOLD/MANUAL.",
+      "set": "T",
+      "parameters": [
+        { "name": "code", "range": "T1=INT, T2=EXT, T3=HOLD/MANUAL" }
+      ],
+      "examples": ["T1", "T3"]
+    },
+    {
+      "name": "zero_offset",
+      "mnemonic": "Z",
+      "category": "Calibration",
+      "description": "Performs the offset (zero) compensation measurement. ZO = OPEN zero (residual admittance compensation), ZS = SHORT zero (residual impedance compensation). Completion of zero offset sets status byte bit 3.",
+      "set": "Z",
+      "parameters": [
+        { "name": "code", "range": "ZO=OPEN, ZS=SHORT" }
+      ],
+      "examples": ["ZO", "ZS"]
+    },
+    {
+      "name": "execute_trigger",
+      "mnemonic": "E",
+      "category": "Trigger",
+      "description": "Triggers the instrument to make a measurement from HP-IB and output data. Sent after the measurement-setup program codes.",
+      "set": "E",
+      "examples": ["E", "A2T3E"]
+    },
+    {
+      "name": "dc_bias",
+      "mnemonic": "BI",
+      "category": "DC Bias",
+      "description": "Sets the internal DC bias voltage (requires Option 001 or 002). Format is 'BI<mantissa>E<exponent>V' with 3 digits of mantissa and 2 digits of exponent. If polarity of the mantissa or exponent is not specified it defaults to plus (+).",
+      "set": "BI",
+      "parameters": [
+        { "name": "voltage", "units": "V", "range": "BI<3-digit mantissa>E<2-digit exponent>V" }
+      ],
+      "examples": ["BI100E-01V", "BI+200E+00V"]
+    }
+  ]
+}

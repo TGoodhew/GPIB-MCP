@@ -1,0 +1,766 @@
+{
+  "model": "3585A",
+  "manufacturer": "HP",
+  "category": "Spectrum Analyzer",
+  "description": "HP 3585A Spectrum Analyzer, 20 Hz to 40.1 MHz. Legacy HP-IB (IEEE-488) instrument programmed with a two-character ASCII mnemonic code set (NOT SCPI). Numeric entries (frequency, level, etc.) are not executed until a units/scale terminator (delimiter) is sent: frequency HZ/KZ/MZ (Hz/kHz/MHz), amplitude DM/DV (dBm/dBV) or DB (dB), level voltage V/MV/UV (volts/millivolts/microvolts), time SC (seconds). The codes UP and DN step the active function up/down by its step size. There is no '*IDN?' or '?'-style identity query; instrument state and identity-type information are obtained through the binary Dump (D1-D9) and Learn (LO/LI) modes. Output (dump) functions require a trigger (T4/T5/T6) except modes D8 and D9. After power-up or Instrument Preset the analyzer is in dump mode D1 with no trigger. Source: HP 3585A Operating Manual, Section III Part 2 (Remote Operation): Table 3-2-6 Summary of Programming Mnemonics/Delimiters/Times, Table 3-2-7 Programming Codes, Table 3-2-10 Summary of Programming Mnemonics, and the HP-IB Instruction Definitions (paragraphs 3-2-37 onward).",
+  "source": "3585A-OM.pdf",
+  "aliases": ["3585A", "3585B", "HP3585A", "HP 3585A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "instrument_preset",
+      "mnemonic": "PR",
+      "category": "System",
+      "description": "Instrument Preset. Returns the 3585A to its known preset state. Clears status word 2 and bits 4-6 of status word 1; turns off (but does not erase) annotation/script display lines. Dump mode reverts to D1 with no trigger.",
+      "set": "PR",
+      "examples": ["PR"]
+    },
+    {
+      "name": "center_frequency",
+      "mnemonic": "CF",
+      "category": "Frequency",
+      "description": "Center frequency. Up to 9 digits plus decimal, 0 to 40.1 MHz. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
+      "set": "CF <value> <suffix>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+      ],
+      "examples": ["CF 10 MZ", "CF 1.5MZ"]
+    },
+    {
+      "name": "frequency_span",
+      "mnemonic": "FS",
+      "category": "Frequency",
+      "description": "Frequency span (sweep width). Up to 9 digits plus decimal. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
+      "set": "FS <value> <suffix>",
+      "parameters": [
+        { "name": "span", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+      ],
+      "examples": ["FS 1 MZ", "FS 100 KZ"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Frequency",
+      "description": "Start frequency. Up to 9 digits plus decimal. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
+      "set": "FA <value> <suffix>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+      ],
+      "examples": ["FA 20 HZ", "FA 0 HZ"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Frequency",
+      "description": "Stop frequency. Up to 9 digits plus decimal. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
+      "set": "FB <value> <suffix>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+      ],
+      "examples": ["FB 40 MZ", "FB 40.1 MZ"]
+    },
+    {
+      "name": "center_frequency_step_size",
+      "mnemonic": "CS",
+      "category": "Frequency",
+      "description": "Center frequency step size. Sets the increment used by UP/DN when stepping the center frequency. Terminate with a frequency suffix (HZ/KZ/MZ).",
+      "set": "CS <value> <suffix>",
+      "parameters": [
+        { "name": "step", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+      ],
+      "examples": ["CS 1 MZ", "CS 100 KZ"]
+    },
+    {
+      "name": "full_sweep",
+      "mnemonic": "FL",
+      "category": "Frequency",
+      "description": "Full Sweep. Sets the analyzer to sweep the full 0 to 40.1 MHz frequency range.",
+      "set": "FL",
+      "examples": ["FL"]
+    },
+    {
+      "name": "reference_level",
+      "mnemonic": "RL",
+      "category": "Amplitude",
+      "description": "Reference level (log amplitude). Up to 3 digits plus decimal, from 10 dB above range to 100 dB below range. Terminate with DM (dBm) or DV (dBV), or use UP/DN to step. Up to two decimal places allowed.",
+      "set": "RL <value> <suffix>",
+      "parameters": [
+        { "name": "level", "units": ["DM", "DV"], "range": "10 dB above range to 100 dB below range" }
+      ],
+      "examples": ["RL 0 DM", "RL -10 DM"]
+    },
+    {
+      "name": "reference_level_volts",
+      "mnemonic": "RV",
+      "category": "Amplitude",
+      "description": "Reference level in volts (linear amplitude). Up to 3 digits plus decimal, from range x 3.14 to range x 1x10^5. Terminate with V (volts), MV (millivolts) or UV (microvolts), or use UP/DN to step.",
+      "set": "RV <value> <suffix>",
+      "parameters": [
+        { "name": "level", "units": ["V", "MV", "UV"], "range": "range x 3.14 to range x 1x10^5" }
+      ],
+      "examples": ["RV 1 V", "RV 100 MV"]
+    },
+    {
+      "name": "db_per_division",
+      "mnemonic": "DD",
+      "category": "Amplitude",
+      "description": "dB per division (vertical scale). Valid values are 1, 2, 5 or 10 dB/division. Terminate with DB, or use UP/DN to step.",
+      "set": "DD <value> DB",
+      "parameters": [
+        { "name": "scale", "units": ["DB"], "range": "1, 2, 5 or 10 dB/division" }
+      ],
+      "examples": ["DD 10 DB", "DD 1 DB"]
+    },
+    {
+      "name": "input_impedance_1mohm",
+      "mnemonic": "I1",
+      "category": "Input",
+      "description": "Select 1 M ohm input impedance.",
+      "set": "I1",
+      "examples": ["I1"]
+    },
+    {
+      "name": "input_impedance_50ohm",
+      "mnemonic": "I2",
+      "category": "Input",
+      "description": "Select 50 ohm input impedance.",
+      "set": "I2",
+      "examples": ["I2"]
+    },
+    {
+      "name": "input_impedance_75ohm",
+      "mnemonic": "I3",
+      "category": "Input",
+      "description": "Select 75 ohm input impedance.",
+      "set": "I3",
+      "examples": ["I3"]
+    },
+    {
+      "name": "auto_range",
+      "mnemonic": "AR",
+      "category": "Range",
+      "description": "Auto range on/off. AR1 turns auto range on, AR0 turns it off. Programming a specific range with RA automatically turns auto range off.",
+      "set": "AR<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["AR1", "AR0"]
+    },
+    {
+      "name": "range",
+      "mnemonic": "RA",
+      "category": "Range",
+      "description": "Input range. RA UP / RA DN steps the range. A specific range is selected with R01 through R12 (see range_select). Programming range automatically turns auto range off.",
+      "set": "RA <UP|DN>",
+      "parameters": [
+        { "name": "direction", "range": "UP or DN" }
+      ],
+      "examples": ["RA UP", "RA DN"]
+    },
+    {
+      "name": "range_select",
+      "mnemonic": "R",
+      "category": "Range",
+      "description": "Select a specific input range R01 through R12. In 50 ohm termination: R01=-25 dBm, R02=-20, R03=-15, R04=-10, R05=-5, R06=0, R07=+5, R08=+10, R09=+15, R10=+20, R11=+25, R12=+30 dBm. Programming range automatically turns auto range off.",
+      "set": "R<nn>",
+      "parameters": [
+        { "name": "range", "range": "01 through 12 (R01=-25 dBm ... R12=+30 dBm in 50 ohm)" }
+      ],
+      "examples": ["R06", "R12"]
+    },
+    {
+      "name": "ref_level_track",
+      "mnemonic": "AL",
+      "category": "Range",
+      "description": "Reference level tracking on/off. AL1 turns reference-level tracking on, AL0 turns it off.",
+      "set": "AL<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["AL1", "AL0"]
+    },
+    {
+      "name": "resolution_bandwidth",
+      "mnemonic": "RB",
+      "category": "Bandwidth",
+      "description": "Resolution bandwidth (RBW). Valid values 3, 10, 30 ... up to 30000 Hz (1-3-10 sequence). Terminate with HZ or KZ, or use UP/DN to step.",
+      "set": "RB <value> <suffix>",
+      "parameters": [
+        { "name": "bandwidth", "units": ["HZ", "KZ"], "range": "3 Hz to 30 kHz, 1-3-10 sequence" }
+      ],
+      "examples": ["RB 10 HZ", "RB 30 KZ"]
+    },
+    {
+      "name": "video_bandwidth",
+      "mnemonic": "VB",
+      "category": "Bandwidth",
+      "description": "Video bandwidth (VBW). Valid values 1, 3, 10 ... up to 30000 Hz. Terminate with HZ or KZ, or use UP/DN to step.",
+      "set": "VB <value> <suffix>",
+      "parameters": [
+        { "name": "bandwidth", "units": ["HZ", "KZ"], "range": "1 Hz to 30 kHz" }
+      ],
+      "examples": ["VB 1 HZ", "VB 30 KZ"]
+    },
+    {
+      "name": "bandwidth_coupled_to_span",
+      "mnemonic": "CP",
+      "category": "Bandwidth",
+      "description": "Couple bandwidth to span on/off. CP1 couples RBW/VBW/sweep time to span, CP0 uncouples.",
+      "set": "CP<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["CP1", "CP0"]
+    },
+    {
+      "name": "resolution_bandwidth_hold",
+      "mnemonic": "BH",
+      "category": "Bandwidth",
+      "description": "Resolution bandwidth hold on/off. BH1 holds the current RBW, BH0 releases the hold.",
+      "set": "BH<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["BH1", "BH0"]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "ST",
+      "category": "Sweep",
+      "description": "Sweep time. Range 0.2 to 999999 seconds, in 0.2 second steps. Terminate with SC (seconds), or use UP/DN to step.",
+      "set": "ST <value> SC",
+      "parameters": [
+        { "name": "time", "units": ["SC"], "range": "0.2 to 999999 seconds (0.2 s steps)" }
+      ],
+      "examples": ["ST 1 SC", "ST 0.2 SC"]
+    },
+    {
+      "name": "sweep_continuous",
+      "mnemonic": "S1",
+      "category": "Sweep",
+      "description": "Continuous sweep mode. Sets bit 7 of status word 1 (sweeping) until the sweep completes.",
+      "set": "S1",
+      "examples": ["S1"]
+    },
+    {
+      "name": "sweep_single",
+      "mnemonic": "S2",
+      "category": "Sweep",
+      "description": "Single sweep mode. Arms/starts a single sweep. Sets bit 7 of status word 1 (sweeping) until the sweep completes.",
+      "set": "S2",
+      "examples": ["S2"]
+    },
+    {
+      "name": "sweep_manual",
+      "mnemonic": "S3",
+      "category": "Sweep",
+      "description": "Manual sweep mode. Accepts any numeric entry from 0 to 40,100,000 that falls within the frequency span limits, terminated with a frequency suffix (HZ/KZ/MZ), or use UP/DN to step.",
+      "set": "S3 <value> <suffix>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz, within current span" }
+      ],
+      "examples": ["S3 10 MZ", "S3"]
+    },
+    {
+      "name": "trigger_free_run",
+      "mnemonic": "T1",
+      "category": "Trigger",
+      "description": "Free run sweep trigger.",
+      "set": "T1",
+      "examples": ["T1"]
+    },
+    {
+      "name": "trigger_line",
+      "mnemonic": "T2",
+      "category": "Trigger",
+      "description": "Line sweep trigger (triggered by the power-line frequency).",
+      "set": "T2",
+      "examples": ["T2"]
+    },
+    {
+      "name": "trigger_external",
+      "mnemonic": "T3",
+      "category": "Trigger",
+      "description": "External sweep trigger.",
+      "set": "T3",
+      "examples": ["T3"]
+    },
+    {
+      "name": "clear_trace_a",
+      "mnemonic": "CA",
+      "category": "Trace",
+      "description": "Clear trace A (the write/A trace).",
+      "set": "CA",
+      "examples": ["CA"]
+    },
+    {
+      "name": "store_a_into_b",
+      "mnemonic": "SA",
+      "category": "Trace",
+      "description": "Store A into B. Copies the A (write) trace into the B (store) trace.",
+      "set": "SA",
+      "examples": ["SA"]
+    },
+    {
+      "name": "view_trace_a",
+      "mnemonic": "TA",
+      "category": "Trace",
+      "description": "View trace A on/off. TA1 displays trace A, TA0 blanks it.",
+      "set": "TA<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["TA1", "TA0"]
+    },
+    {
+      "name": "view_trace_b",
+      "mnemonic": "TB",
+      "category": "Trace",
+      "description": "View trace B on/off. TB1 displays trace B, TB0 blanks it.",
+      "set": "TB<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["TB1", "TB0"]
+    },
+    {
+      "name": "max_hold",
+      "mnemonic": "MH",
+      "category": "Trace",
+      "description": "Max hold on/off. MH1 turns max hold on, MH0 turns it off.",
+      "set": "MH<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["MH1", "MH0"]
+    },
+    {
+      "name": "a_minus_b",
+      "mnemonic": "AB",
+      "category": "Trace",
+      "description": "A-B trace math on/off. AB1 displays A minus B, AB0 turns it off.",
+      "set": "AB<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["AB1", "AB0"]
+    },
+    {
+      "name": "marker",
+      "mnemonic": "C1",
+      "category": "Marker",
+      "description": "Marker on / select marker continuous-entry mode. With the marker active, IL/IR (knob increment left/right) move the marker. Use MK to position the marker to a specific trace point.",
+      "set": "C1",
+      "examples": ["C1"]
+    },
+    {
+      "name": "set_marker_location",
+      "mnemonic": "MK",
+      "category": "Marker",
+      "description": "Set marker to a specific trace position (1 to 1001) on the A or B trace; also turns on the Marker key. Valid MK1 thru MK1001. MK with no number = MK0 = MK1; MK1002-MK9999 = MK1001. Only the first four numeric digits are accepted; minus and decimal act as delimiters.",
+      "set": "MK<n>",
+      "parameters": [
+        { "name": "position", "range": "1 to 1001" }
+      ],
+      "examples": ["MK 500", "MK1001"]
+    },
+    {
+      "name": "marker_continuous_manual",
+      "mnemonic": "C2",
+      "category": "Marker",
+      "description": "Select Manual continuous-entry mode (knob IL/IR adjusts the manual sweep frequency).",
+      "set": "C2",
+      "examples": ["C2"]
+    },
+    {
+      "name": "marker_continuous_ref_level",
+      "mnemonic": "C3",
+      "category": "Marker",
+      "description": "Select Reference Level continuous-entry mode (knob IL/IR adjusts reference level).",
+      "set": "C3",
+      "examples": ["C3"]
+    },
+    {
+      "name": "marker_continuous_center_freq",
+      "mnemonic": "C4",
+      "category": "Marker",
+      "description": "Select Center Frequency continuous-entry mode (knob IL/IR adjusts center frequency).",
+      "set": "C4",
+      "examples": ["C4"]
+    },
+    {
+      "name": "marker_continuous_display_line",
+      "mnemonic": "C5",
+      "category": "Marker",
+      "description": "Select Display Line continuous-entry mode (knob IL/IR adjusts the display line level).",
+      "set": "C5",
+      "examples": ["C5"]
+    },
+    {
+      "name": "marker_continuous_off",
+      "mnemonic": "C6",
+      "category": "Marker",
+      "description": "Turn off continuous-entry / marker mode.",
+      "set": "C6",
+      "examples": ["C6"]
+    },
+    {
+      "name": "clear_display_line",
+      "mnemonic": "CL",
+      "category": "Marker",
+      "description": "Clear the display line.",
+      "set": "CL",
+      "examples": ["CL"]
+    },
+    {
+      "name": "counter",
+      "mnemonic": "CN",
+      "category": "Marker",
+      "description": "Marker frequency counter on/off. CN1 turns the counter on, CN0 turns it off.",
+      "set": "CN<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["CN1", "CN0"]
+    },
+    {
+      "name": "noise_level",
+      "mnemonic": "NL",
+      "category": "Marker",
+      "description": "Noise level marker on/off. NL1 turns the noise-level measurement on, NL0 turns it off.",
+      "set": "NL<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["NL1", "NL0"]
+    },
+    {
+      "name": "offset",
+      "mnemonic": "OF",
+      "category": "Marker",
+      "description": "Marker offset on/off. OF1 turns offset on, OF0 turns it off.",
+      "set": "OF<m>",
+      "parameters": [
+        { "name": "state", "range": "0 = off, 1 = on" }
+      ],
+      "examples": ["OF1", "OF0"]
+    },
+    {
+      "name": "enter_offset",
+      "mnemonic": "MO",
+      "category": "Marker",
+      "description": "Enter offset. Establishes the current marker position as the marker offset reference.",
+      "set": "MO",
+      "examples": ["MO"]
+    },
+    {
+      "name": "marker_to_center_frequency",
+      "mnemonic": "MC",
+      "category": "Marker",
+      "description": "Marker to Center Frequency. Sets center frequency to the current marker frequency.",
+      "set": "MC",
+      "examples": ["MC"]
+    },
+    {
+      "name": "marker_to_reference_level",
+      "mnemonic": "MR",
+      "category": "Marker",
+      "description": "Marker to Reference Level. Sets the reference level to the current marker amplitude.",
+      "set": "MR",
+      "examples": ["MR"]
+    },
+    {
+      "name": "offset_to_span",
+      "mnemonic": "OS",
+      "category": "Marker",
+      "description": "Offset to Span. Sets the frequency span to the marker offset value.",
+      "set": "OS",
+      "examples": ["OS"]
+    },
+    {
+      "name": "marker_offset_to_step",
+      "mnemonic": "MS",
+      "category": "Marker",
+      "description": "Marker/Offset to Step size. Sets the center-frequency step size from the marker offset.",
+      "set": "MS",
+      "examples": ["MS"]
+    },
+    {
+      "name": "knob_increment_left",
+      "mnemonic": "IL",
+      "category": "Entry",
+      "description": "Knob increment left (decrement). Decrements the active continuous-entry function (marker, manual sweep, ref level, center freq, or display line) by one knob step.",
+      "set": "IL",
+      "examples": ["IL"]
+    },
+    {
+      "name": "knob_increment_right",
+      "mnemonic": "IR",
+      "category": "Entry",
+      "description": "Knob increment right (increment). Increments the active continuous-entry function by one knob step.",
+      "set": "IR",
+      "examples": ["IR"]
+    },
+    {
+      "name": "step_up",
+      "mnemonic": "UP",
+      "category": "Entry",
+      "description": "Step up. Increments the active function by its step size. Used as a terminator in place of a units suffix (e.g. CF UP).",
+      "set": "UP",
+      "examples": ["CF UP", "RA UP"]
+    },
+    {
+      "name": "step_down",
+      "mnemonic": "DN",
+      "category": "Entry",
+      "description": "Step down. Decrements the active function by its step size. Used as a terminator in place of a units suffix (e.g. CF DN).",
+      "set": "DN",
+      "examples": ["CF DN", "RA DN"]
+    },
+    {
+      "name": "save_register",
+      "mnemonic": "SV",
+      "category": "Storage",
+      "description": "Save the current instrument state into a register (1 to 9). Output (dump) functions are not stored.",
+      "set": "SV<n>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["SV1", "SV9"]
+    },
+    {
+      "name": "recall_register",
+      "mnemonic": "RC",
+      "category": "Storage",
+      "description": "Recall an instrument state from a register. Valid register numbers are 1-5, 7-9, and 601-609.",
+      "set": "RC<n>",
+      "parameters": [
+        { "name": "register", "range": "1-5, 7-9, 601-609" }
+      ],
+      "examples": ["RC1", "RC601"]
+    },
+    {
+      "name": "dump_marker_amplitude",
+      "mnemonic": "D1",
+      "category": "Output",
+      "description": "Dump mode 1: output marker amplitude (default mode at power-up / Instrument Preset). Output format: marker amplitude, CR LF. Requires a trigger (T4/T5/T6).",
+      "query": "D1",
+      "examples": ["D1", "D1T4"]
+    },
+    {
+      "name": "dump_marker_freq_amplitude",
+      "mnemonic": "D2",
+      "category": "Output",
+      "description": "Dump mode 2: output marker frequency and amplitude. Output format: marker frequency, marker amplitude, CR LF. Requires a trigger (T4/T5/T6).",
+      "query": "D2",
+      "examples": ["D2", "D2T4"]
+    },
+    {
+      "name": "dump_trace_a",
+      "mnemonic": "D3",
+      "category": "Output",
+      "description": "Dump mode 3: output the 1001 amplitude readings of the A (write) trace, comma-separated, CR LF. Equivalent to reading each of the 1001 points in D1 mode with Noise Level off. Requires a trigger (T4/T5/T6).",
+      "query": "D3",
+      "examples": ["D3", "D3T4"]
+    },
+    {
+      "name": "dump_trace_b",
+      "mnemonic": "D4",
+      "category": "Output",
+      "description": "Dump mode 4: output the 1001 amplitude readings of the B (stored) trace, comma-separated, CR LF. Same as D3 but operates on the B trace. Requires a trigger (T4/T5/T6).",
+      "query": "D4",
+      "examples": ["D4", "D4T4"]
+    },
+    {
+      "name": "dump_calibration_registers",
+      "mnemonic": "D5",
+      "category": "Output",
+      "description": "Dump mode 5: output the calibration registers (offset frequency and offset amplitude correction factors for each of the 9 bandwidths, 9 pairs total, starting with the 3 Hz BW). Frequency in 0.1 Hz resolution, amplitude in dB to 0.01 dB. CR LF terminated. Requires a trigger.",
+      "query": "D5",
+      "examples": ["D5", "D5T4"]
+    },
+    {
+      "name": "dump_status",
+      "mnemonic": "D6",
+      "category": "Output",
+      "description": "Dump mode 6: output the status registers as two binary words. Word 1 status bits: b0 Up Range, b1 Down Range, b2 Input Tripped (unterminated), b3 Sweep Uncalibrated, b4 L.O. Unlocked, b5 An Error has been displayed, b6 Internal Calibration Error, b7 Instrument is Sweeping. Word 2 is the code of the last error message displayed (see error table). Bits 4-6 of word 1 and all of word 2 clear on Instrument Preset or device clear. Requires a trigger.",
+      "query": "D6",
+      "examples": ["D6", "D6T4"]
+    },
+    {
+      "name": "dump_alphanumerics",
+      "mnemonic": "D7",
+      "category": "Output",
+      "description": "Dump mode 7: output the CRT alphanumerics as displayed, in order: Reference Level, Top Right Frequency, dB per Division, Range, Marker Amplitude, Start/Center Frequency, Stop/Span Frequency, Resolution Bandwidth, Video Bandwidth, Sweep Time (each field CR LF terminated; unused characters sent as blanks). Requires a trigger.",
+      "query": "D7",
+      "examples": ["D7", "D7T4"]
+    },
+    {
+      "name": "dump_marker_amplitude_continuous",
+      "mnemonic": "D8",
+      "category": "Output",
+      "description": "Dump mode 8: same as D1 (marker amplitude) except the trigger is automatically reapplied after the output completes (continuous). Does not require a separate trigger.",
+      "query": "D8",
+      "examples": ["D8"]
+    },
+    {
+      "name": "dump_marker_freq_amplitude_continuous",
+      "mnemonic": "D9",
+      "category": "Output",
+      "description": "Dump mode 9: same as D2 (marker frequency and amplitude) except the trigger is automatically reapplied after the output completes (continuous). Does not require a separate trigger.",
+      "query": "D9",
+      "examples": ["D9"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "T4",
+      "category": "Output",
+      "description": "Immediate trigger. The output data specified by the active dump mode is transferred immediately to the output buffer (D3 and D4 excluded). If the marker is not displayed, the last marker reading is transferred. Each output (except D8/D9) must be preceded by a trigger.",
+      "set": "T4",
+      "examples": ["T4", "D2T4"]
+    },
+    {
+      "name": "trigger_delayed",
+      "mnemonic": "T5",
+      "category": "Output",
+      "description": "Delayed trigger. Behaves like T4 for dump modes D3-D7. For other modes, marker data is transferred when the sweep reaches the marker; SRQ is set when output is ready (serial-poll bit 1) and cleared after the first output word. T5 should be the last command of a command string. If the marker is not displayed, T5 behaves as T4.",
+      "set": "T5",
+      "examples": ["T5", "D2T5"]
+    },
+    {
+      "name": "trigger_delayed_no_srq",
+      "mnemonic": "T6",
+      "category": "Output",
+      "description": "Delayed trigger without SRQ. Functions the same as T5 except SRQ is not used to indicate the output-ready condition.",
+      "set": "T6",
+      "examples": ["T6", "D2T6"]
+    },
+    {
+      "name": "display_graphics",
+      "mnemonic": "DG",
+      "category": "Display",
+      "description": "Display Graphics. Returns the CRT to the normal graphic (trace) display; also turns the annotation line off and turns the script display off (graphics on).",
+      "set": "DG",
+      "examples": ["DG"]
+    },
+    {
+      "name": "display_annotation",
+      "mnemonic": "DA",
+      "category": "Display",
+      "description": "Display Annotation. Turns the 50-character annotation display line on (shown between the first and second horizontal graticule lines; displayed only when the A trace is on).",
+      "set": "DA",
+      "examples": ["DA"]
+    },
+    {
+      "name": "enter_annotation",
+      "mnemonic": "LA",
+      "category": "Display",
+      "description": "Enter annotation text. Following LA, send up to 50 ASCII characters (codes octal 40-137, terminated by a line feed) to fill the annotation line from the left. LA erases the present line first. Codes 44 ($), 100 (@), 136, 137 = blank; 134 = square root. Excess characters and out-of-range codes are ignored.",
+      "set": "LA <text>",
+      "parameters": [
+        { "name": "text", "range": "up to 50 ASCII chars, octal 40-137" }
+      ],
+      "examples": ["LA HARMONIC DISTORTION TEST", "DALA TITLE"]
+    },
+    {
+      "name": "display_script",
+      "mnemonic": "DS",
+      "category": "Display",
+      "description": "Display Script. Turns the script display on (six 50-character alphanumeric lines); the normal graphic display is turned off and only the six script lines are shown.",
+      "set": "DS",
+      "examples": ["DS"]
+    },
+    {
+      "name": "display_script_with_b_trace",
+      "mnemonic": "DC",
+      "category": "Display",
+      "description": "Display script combined with the B trace. Shows the six script lines simultaneously with the B trace. Can be used in place of DS to enter script directly onto the B trace.",
+      "set": "DC",
+      "examples": ["DC"]
+    },
+    {
+      "name": "erase_script",
+      "mnemonic": "ES",
+      "category": "Display",
+      "description": "Erase all six lines of script.",
+      "set": "ES",
+      "examples": ["ES"]
+    },
+    {
+      "name": "enter_script_line",
+      "mnemonic": "L",
+      "category": "Display",
+      "description": "Enter a script display line. L1 through L6 select the line; following the command send up to 50 ASCII characters (codes octal 40-137, terminated by a line feed) entered from the left. The L# command erases the present line first. Same character rules as annotation (44/100/136/137 = blank, 134 = square root).",
+      "set": "L<n> <text>",
+      "parameters": [
+        { "name": "line", "range": "1 to 6" },
+        { "name": "text", "range": "up to 50 ASCII chars, octal 40-137" }
+      ],
+      "examples": ["L1HELLO", "L2SPECTRUM ANALYZER"]
+    },
+    {
+      "name": "enable_key_entry",
+      "mnemonic": "EE",
+      "category": "Special Function",
+      "description": "Enable Entry. After this command, the 3585A outputs the binary code (Table 3-2-9) for any front-panel key pressed; normal keyboard operation is disabled. Used for key testing and operator decision entry.",
+      "set": "EE",
+      "examples": ["EE"]
+    },
+    {
+      "name": "enable_key_entry_with_srq",
+      "mnemonic": "EQ",
+      "category": "Special Function",
+      "description": "Enable Entry with SRQ. Same as EE except SRQ is also set when a key is pressed (serial-poll bit 2 set).",
+      "set": "EQ",
+      "examples": ["EQ"]
+    },
+    {
+      "name": "clear_enable_entry",
+      "mnemonic": "EC",
+      "category": "Special Function",
+      "description": "Enable Entry Clear. Disables the EE or EQ mode and resumes normal keyboard operation.",
+      "set": "EC",
+      "examples": ["EC"]
+    },
+    {
+      "name": "learn_mode_in",
+      "mnemonic": "LI",
+      "category": "Binary Data",
+      "description": "Learn mode in. Send LI followed by the 100-word binary learn string (previously read with LO) to restore that instrument state from HP-IB.",
+      "set": "LI <100 words>",
+      "examples": ["LI"]
+    },
+    {
+      "name": "learn_mode_out",
+      "mnemonic": "LO",
+      "category": "Binary Data",
+      "description": "Learn mode out. Outputs a 100-word binary string describing the present instrument state to HP-IB. Restore later with LI. Output functions are not included in the learn string.",
+      "query": "LO",
+      "examples": ["LO"]
+    },
+    {
+      "name": "b_trace_in_binary",
+      "mnemonic": "BI",
+      "category": "Binary Data",
+      "description": "B Trace in (binary) from HP-IB. Send BI followed by 2004 binary words to load the B (stored) trace.",
+      "set": "BI <2004 words>",
+      "examples": ["BI"]
+    },
+    {
+      "name": "b_trace_out_binary",
+      "mnemonic": "BO",
+      "category": "Binary Data",
+      "description": "B Trace out (binary) to HP-IB. Outputs the B (stored) trace as 2004 binary words.",
+      "query": "BO",
+      "examples": ["BO"]
+    },
+    {
+      "name": "a_trace_in_binary",
+      "mnemonic": "AI",
+      "category": "Binary Data",
+      "description": "A Trace in (binary) from HP-IB. Send AI followed by 2004 binary words to load the A (write) trace.",
+      "set": "AI <2004 words>",
+      "examples": ["AI"]
+    }
+  ]
+}
