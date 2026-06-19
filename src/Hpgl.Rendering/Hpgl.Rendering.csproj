@@ -1,0 +1,29 @@
+<!--
+  Hpgl.Rendering - HP-GL/2 vector-to-bitmap renderer (.NET Framework 4.7.2).
+
+  The HP-GL plotter-emulation capture-and-render technique that motivates this
+  library is derived from the HP7470A Plotter Emulator (7470.cpp) by John Miles,
+  KE5FX. Original C++ author: John Miles (KE5FX) - http://www.ke5fx.com/
+  This independent C# adaptation carries no warranty from KE5FX.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>Hpgl.Rendering</AssemblyName>
+    <RootNamespace>Hpgl.Rendering</RootNamespace>
+    <Product>Hpgl.Rendering</Product>
+    <Description>Standalone HP-GL/2 vector-to-bitmap renderer. Plot-emulation technique derived from KE5FX's 7470.cpp (http://www.ke5fx.com/).</Description>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Hpgl.Rendering.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -6,6 +6,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GpibMcp", "src\GpibMcp\Gpib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GpibMcp.Tests", "tests\GpibMcp.Tests\GpibMcp.Tests.csproj", "{C696A7CB-9D8C-4035-8CDF-7997115BB7A3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hpgl.Rendering", "src\Hpgl.Rendering\Hpgl.Rendering.csproj", "{D1E2F3A4-B5C6-47D8-9E0A-1B2C3D4E5F60}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hpgl.Rendering.Tests", "tests\Hpgl.Rendering.Tests\Hpgl.Rendering.Tests.csproj", "{E2F3A4B5-C6D7-48E9-0F1A-2B3C4D5E6F70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -20,6 +24,14 @@ Global
 		{C696A7CB-9D8C-4035-8CDF-7997115BB7A3}.Debug|x86.Build.0 = Debug|x86
 		{C696A7CB-9D8C-4035-8CDF-7997115BB7A3}.Release|x86.ActiveCfg = Release|x86
 		{C696A7CB-9D8C-4035-8CDF-7997115BB7A3}.Release|x86.Build.0 = Release|x86
+		{D1E2F3A4-B5C6-47D8-9E0A-1B2C3D4E5F60}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D1E2F3A4-B5C6-47D8-9E0A-1B2C3D4E5F60}.Debug|x86.Build.0 = Debug|Any CPU
+		{D1E2F3A4-B5C6-47D8-9E0A-1B2C3D4E5F60}.Release|x86.ActiveCfg = Release|Any CPU
+		{D1E2F3A4-B5C6-47D8-9E0A-1B2C3D4E5F60}.Release|x86.Build.0 = Release|Any CPU
+		{E2F3A4B5-C6D7-48E9-0F1A-2B3C4D5E6F70}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E2F3A4B5-C6D7-48E9-0F1A-2B3C4D5E6F70}.Debug|x86.Build.0 = Debug|Any CPU
+		{E2F3A4B5-C6D7-48E9-0F1A-2B3C4D5E6F70}.Release|x86.ActiveCfg = Release|Any CPU
+		{E2F3A4B5-C6D7-48E9-0F1A-2B3C4D5E6F70}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
