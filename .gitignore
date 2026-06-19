@@ -1,0 +1,16 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+
+# VS / Rider
+.vs/
+.idea/
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs
+*.log
