@@ -1,0 +1,1797 @@
+{
+  "model": "8591E",
+  "manufacturer": "HP/Agilent",
+  "category": "Spectrum Analyzer",
+  "description": "HP/Agilent 8591E spectrum analyzer, 9 kHz to 1.8 GHz. Part of the 8590 E-series; uses the 8590-series command language (mnemonic-based, not SCPI). Most numeric commands accept a value with a unit suffix and an optional AUTO/UP/DN argument, and most are queryable by appending '?'.",
+  "source": "8591e Programming Guide.pdf",
+  "aliases": ["8591E", "HP8591E", "HP 8591E", "8590 E-Series"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "ID?",
+    "matchRegex": "8591",
+    "description": "ID returns the spectrum analyzer model number (e.g. HP8591E) to the controller."
+  },
+  "commands": [
+    {
+      "name": "preset",
+      "mnemonic": "IP",
+      "category": "System",
+      "description": "Instrument preset. Returns the spectrum analyzer to a known state.",
+      "set": "IP",
+      "examples": ["IP"]
+    },
+    {
+      "name": "base_band_preset",
+      "mnemonic": "LF",
+      "category": "System",
+      "description": "Performs an instrument preset to the base band (band 0).",
+      "set": "LF",
+      "examples": ["LF"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "ID",
+      "category": "System",
+      "description": "Returns the spectrum analyzer model number to the controller (for example HP8591E).",
+      "query": "ID?",
+      "examples": ["ID?"]
+    },
+    {
+      "name": "revision",
+      "mnemonic": "REV",
+      "category": "System",
+      "description": "Returns the date code of the firmware revision number in YYMMDD format.",
+      "query": "REV?",
+      "examples": ["REV?"]
+    },
+    {
+      "name": "serial_number",
+      "mnemonic": "SER",
+      "category": "System",
+      "description": "Returns the serial number suffix of the spectrum analyzer.",
+      "query": "SER?",
+      "examples": ["SER?"]
+    },
+    {
+      "name": "have_option",
+      "mnemonic": "HAVE",
+      "category": "System",
+      "description": "Returns a 0 if a device or option is not installed, otherwise non-zero.",
+      "query": "HAVE",
+      "examples": ["HAVE"]
+    },
+    {
+      "name": "done",
+      "mnemonic": "DONE",
+      "category": "System",
+      "description": "Allows you to determine when the spectrum analyzer has started to execute all commands prior to and including DONE.",
+      "set": "DONE",
+      "query": "DONE?",
+      "examples": ["DONE?"]
+    },
+    {
+      "name": "abort",
+      "mnemonic": "ABORT",
+      "category": "System",
+      "description": "Stops the execution of all user-defined functions and readies the instrument for the next command received.",
+      "set": "ABORT",
+      "examples": ["ABORT"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "WAIT",
+      "category": "System",
+      "description": "Suspends all spectrum analyzer operation for the specified time duration.",
+      "set": "WAIT <number>",
+      "parameters": [ { "name": "time", "units": ["S", "MS"] } ],
+      "examples": ["WAIT 1S"]
+    },
+    {
+      "name": "memory_available",
+      "mnemonic": "MEM",
+      "category": "System",
+      "description": "Returns the amount of spectrum analyzer memory available.",
+      "query": "MEM?",
+      "examples": ["MEM?"]
+    },
+    {
+      "name": "power_up_time",
+      "mnemonic": "PWRUPTIME",
+      "category": "System",
+      "description": "Returns the number of milliseconds that have elapsed since the spectrum analyzer was turned on.",
+      "query": "PWRUPTIME?",
+      "examples": ["PWRUPTIME?"]
+    },
+    {
+      "name": "mode",
+      "mnemonic": "MODE",
+      "category": "System",
+      "description": "Returns 0 if the mode of operation is spectrum analysis; a non-zero value is returned if the operating mode (personality) is other than spectrum analysis.",
+      "query": "MODE?",
+      "examples": ["MODE?"]
+    },
+    {
+      "name": "release_hpib",
+      "mnemonic": "RELHPIB",
+      "category": "System",
+      "description": "Releases spectrum analyzer control of the HP-IB.",
+      "set": "RELHPIB",
+      "examples": ["RELHPIB"]
+    },
+
+    {
+      "name": "center_frequency",
+      "mnemonic": "CF",
+      "category": "Frequency",
+      "description": "Specifies the center frequency. Default unit is Hz.",
+      "set": "CF <number><unit>",
+      "query": "CF?",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "frequency range of the spectrum analyzer (to 1.8 GHz)" }
+      ],
+      "examples": ["CF 300MHZ", "CF?"]
+    },
+    {
+      "name": "frequency_span",
+      "mnemonic": "SP",
+      "category": "Frequency",
+      "description": "Changes the total displayed frequency range symmetrically about the center frequency. Default unit is Hz.",
+      "set": "SP <number><unit>",
+      "query": "SP?",
+      "parameters": [
+        { "name": "span", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0 Hz (zero span) to full span" }
+      ],
+      "examples": ["SP 20MHZ", "SP 0HZ", "SP?"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Frequency",
+      "description": "Specifies the start (left edge) frequency.",
+      "set": "FA <number><unit>",
+      "query": "FA?",
+      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "examples": ["FA 100MHZ", "FA?"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Frequency",
+      "description": "Specifies the stop (right edge) frequency.",
+      "set": "FB <number><unit>",
+      "query": "FB?",
+      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "examples": ["FB 500MHZ", "FB?"]
+    },
+    {
+      "name": "full_span",
+      "mnemonic": "FS",
+      "category": "Frequency",
+      "description": "Sets the frequency span of the spectrum analyzer to full span.",
+      "set": "FS",
+      "examples": ["FS"]
+    },
+    {
+      "name": "last_span",
+      "mnemonic": "LSPAN",
+      "category": "Frequency",
+      "description": "Changes the spectrum analyzer span to the previous span setting.",
+      "set": "LSPAN",
+      "examples": ["LSPAN"]
+    },
+    {
+      "name": "center_frequency_step",
+      "mnemonic": "SS",
+      "category": "Frequency",
+      "description": "Specifies the center-frequency step size used by the UP/DN step keys. Accepts AUTO to couple to span.",
+      "set": "SS <number><unit>",
+      "query": "SS?",
+      "parameters": [ { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "examples": ["SS 1MHZ", "SS AUTO", "SS?"]
+    },
+    {
+      "name": "frequency_offset",
+      "mnemonic": "FOFFSET",
+      "category": "Frequency",
+      "description": "Specifies the frequency offset for all absolute frequency readouts such as center frequency.",
+      "set": "FOFFSET <number><unit>",
+      "query": "FOFFSET?",
+      "parameters": [ { "name": "offset", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "examples": ["FOFFSET 10MHZ", "FOFFSET?"]
+    },
+    {
+      "name": "harmonic_number",
+      "mnemonic": "HN",
+      "category": "Frequency",
+      "description": "Returns the harmonic number of the current harmonic band in which the spectrum analyzer is tuning.",
+      "query": "HN?",
+      "examples": ["HN?"]
+    },
+    {
+      "name": "harmonic_number_lock",
+      "mnemonic": "HNLOCK",
+      "category": "Frequency",
+      "description": "Forces the spectrum analyzer to use only the selected harmonic band.",
+      "set": "HNLOCK <number>",
+      "query": "HNLOCK?",
+      "examples": ["HNLOCK 1", "HNLOCK?"]
+    },
+    {
+      "name": "harmonic_number_unlock",
+      "mnemonic": "HNUNLK",
+      "category": "Frequency",
+      "description": "Unlocks the harmonic band.",
+      "set": "HNUNLK",
+      "examples": ["HNUNLK"]
+    },
+    {
+      "name": "marker_frequency_output",
+      "mnemonic": "MF",
+      "category": "Frequency",
+      "description": "Returns the frequency (or time) of the on-screen active marker.",
+      "query": "MF?",
+      "examples": ["MF?"]
+    },
+
+    {
+      "name": "reference_level",
+      "mnemonic": "RL",
+      "category": "Amplitude",
+      "description": "Specifies the amplitude value of the reference level. Default unit is the current amplitude unit. Preset 0 dBm.",
+      "set": "RL <number><unit>",
+      "query": "RL?",
+      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "DB", "V", "MV", "UV", "W", "MW", "UW"], "range": "amplitude range of the spectrum analyzer" } ],
+      "examples": ["RL -10DBM", "RL?"]
+    },
+    {
+      "name": "reset_reference_level",
+      "mnemonic": "RESETRL",
+      "category": "Amplitude",
+      "description": "Resets the reference level to its instrument preset level.",
+      "set": "RESETRL",
+      "examples": ["RESETRL"]
+    },
+    {
+      "name": "reference_level_offset",
+      "mnemonic": "ROFFSET",
+      "category": "Amplitude",
+      "description": "Offsets all amplitude readouts without affecting the trace.",
+      "set": "ROFFSET <number>DB",
+      "query": "ROFFSET?",
+      "parameters": [ { "name": "offset", "units": ["DB"] } ],
+      "examples": ["ROFFSET 10DB", "ROFFSET?"]
+    },
+    {
+      "name": "reference_level_position",
+      "mnemonic": "RLPOS",
+      "category": "Amplitude",
+      "description": "Selects the position of the reference level (used in normalization).",
+      "set": "RLPOS <number>",
+      "query": "RLPOS?",
+      "examples": ["RLPOS 8", "RLPOS?"]
+    },
+    {
+      "name": "normalized_reference_level",
+      "mnemonic": "NRL",
+      "category": "Amplitude",
+      "description": "Sets the normalized reference level.",
+      "set": "NRL <number>",
+      "query": "NRL?",
+      "examples": ["NRL 0", "NRL?"]
+    },
+    {
+      "name": "attenuation",
+      "mnemonic": "AT",
+      "category": "Amplitude",
+      "description": "Specifies the RF input attenuation in 10 dB steps. Default unit dB. Accepts AUTO/UP/DN. Preset 10 dB.",
+      "set": "AT <number>DB",
+      "query": "AT?",
+      "parameters": [ { "name": "attenuation", "units": ["DB"], "range": "input attenuator range of the spectrum analyzer (0 to 70 dB)" } ],
+      "examples": ["AT 40DB", "AT AUTO", "AT?"]
+    },
+    {
+      "name": "amplitude_units",
+      "mnemonic": "AUNITS",
+      "category": "Amplitude",
+      "description": "Specifies the amplitude units for input, output, and display.",
+      "set": "AUNITS <unit>",
+      "query": "AUNITS?",
+      "parameters": [ { "name": "units", "range": "DBM | DBMV | DBUV | DB | V | MV | UV | W | MW | UW" } ],
+      "examples": ["AUNITS DBM", "AUNITS DBMV", "AUNITS?"]
+    },
+    {
+      "name": "log_scale",
+      "mnemonic": "LG",
+      "category": "Amplitude",
+      "description": "Specifies the vertical graticule divisions as logarithmic units (dB/division), without changing the reference level.",
+      "set": "LG <number>DB",
+      "query": "LG?",
+      "parameters": [ { "name": "scale", "units": ["DB"], "range": "dB per division" } ],
+      "examples": ["LG 10DB", "LG?"]
+    },
+    {
+      "name": "linear_scale",
+      "mnemonic": "LN",
+      "category": "Amplitude",
+      "description": "Specifies the vertical graticule divisions as linear units, without changing the reference level.",
+      "set": "LN",
+      "examples": ["LN"]
+    },
+    {
+      "name": "mixer_level",
+      "mnemonic": "ML",
+      "category": "Amplitude",
+      "description": "Specifies the maximum signal level applied to the input mixer for a signal equal to or below the reference level.",
+      "set": "ML <number>DB",
+      "query": "ML?",
+      "parameters": [ { "name": "level", "units": ["DB", "DBM"] } ],
+      "examples": ["ML -10DB", "ML?"]
+    },
+    {
+      "name": "input_impedance",
+      "mnemonic": "INZ",
+      "category": "Amplitude",
+      "description": "Specifies the value of input impedance expected at the active input port (50 or 75 ohm).",
+      "set": "INZ <number>",
+      "query": "INZ?",
+      "parameters": [ { "name": "impedance", "range": "50 or 75 (ohms)" } ],
+      "examples": ["INZ 50", "INZ?"]
+    },
+    {
+      "name": "coupling",
+      "mnemonic": "COUPLE",
+      "category": "Amplitude",
+      "description": "Selects direct-current (DC) coupling or alternating-current (AC) coupling.",
+      "set": "COUPLE <AC|DC>",
+      "query": "COUPLE?",
+      "examples": ["COUPLE DC", "COUPLE?"]
+    },
+    {
+      "name": "external_preamp_gain",
+      "mnemonic": "PREAMPG",
+      "category": "Amplitude",
+      "description": "Subtracts a positive or negative preamplifier gain value from the displayed signal.",
+      "set": "PREAMPG <number>DB",
+      "query": "PREAMPG?",
+      "parameters": [ { "name": "gain", "units": ["DB"] } ],
+      "examples": ["PREAMPG 20DB", "PREAMPG?"]
+    },
+    {
+      "name": "preselector_peak",
+      "mnemonic": "PP",
+      "category": "Amplitude",
+      "description": "Performs a preselector peak.",
+      "set": "PP",
+      "examples": ["PP"]
+    },
+
+    {
+      "name": "resolution_bandwidth",
+      "mnemonic": "RB",
+      "category": "Bandwidth",
+      "description": "Specifies the resolution bandwidth. Default unit Hz. Accepts AUTO to couple to span. Preset 3 MHz. Range 1 kHz to 3 MHz (30 Hz to 3 MHz with Option 130).",
+      "set": "RB <number><unit>",
+      "query": "RB?",
+      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"], "range": "1 kHz to 3 MHz (30 Hz to 3 MHz with Option 130)" } ],
+      "examples": ["RB 1KHZ", "RB AUTO", "RB?"]
+    },
+    {
+      "name": "video_bandwidth",
+      "mnemonic": "VB",
+      "category": "Bandwidth",
+      "description": "Specifies the video bandwidth. Accepts AUTO to couple to resolution bandwidth.",
+      "set": "VB <number><unit>",
+      "query": "VB?",
+      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "examples": ["VB 10KHZ", "VB AUTO", "VB?"]
+    },
+    {
+      "name": "video_bandwidth_ratio",
+      "mnemonic": "VBR",
+      "category": "Bandwidth",
+      "description": "Specifies the coupling ratio of video bandwidth to resolution bandwidth.",
+      "set": "VBR <number>",
+      "query": "VBR?",
+      "parameters": [ { "name": "ratio", "range": "VBW/RBW ratio (e.g. 0.3, 1, 3)" } ],
+      "examples": ["VBR 0.3", "VBR?"]
+    },
+    {
+      "name": "video_average",
+      "mnemonic": "VAVG",
+      "category": "Bandwidth",
+      "description": "Turns on or off video averaging, which averages trace points to smooth the displayed trace.",
+      "set": "VAVG <ON|OFF|number>",
+      "query": "VAVG?",
+      "parameters": [ { "name": "count", "range": "ON, OFF, or number of averages" } ],
+      "examples": ["VAVG 100", "VAVG OFF", "VAVG?"]
+    },
+    {
+      "name": "clear_average",
+      "mnemonic": "CLRAVG",
+      "category": "Bandwidth",
+      "description": "Restarts (clears) video averaging.",
+      "set": "CLRAVG",
+      "examples": ["CLRAVG"]
+    },
+
+    {
+      "name": "sweep_time",
+      "mnemonic": "ST",
+      "category": "Sweep",
+      "description": "Specifies the time in which the spectrum analyzer sweeps the displayed frequency range. Accepts AUTO to couple to span.",
+      "set": "ST <number><unit>",
+      "query": "ST?",
+      "parameters": [ { "name": "time", "units": ["S", "MS", "US"] } ],
+      "examples": ["ST 100MS", "ST AUTO", "ST?"]
+    },
+    {
+      "name": "take_sweep",
+      "mnemonic": "TS",
+      "category": "Sweep",
+      "description": "Starts and completes one full sweep before the next command is executed.",
+      "set": "TS",
+      "examples": ["TS"]
+    },
+    {
+      "name": "single_sweep",
+      "mnemonic": "SNGLS",
+      "category": "Sweep",
+      "description": "Selects single-sweep mode.",
+      "set": "SNGLS",
+      "examples": ["SNGLS"]
+    },
+    {
+      "name": "continuous_sweep",
+      "mnemonic": "CONTS",
+      "category": "Sweep",
+      "description": "Sets the spectrum analyzer to the continuous-sweep mode.",
+      "set": "CONTS",
+      "examples": ["CONTS"]
+    },
+    {
+      "name": "sweep_couple",
+      "mnemonic": "SWPCPL",
+      "category": "Sweep",
+      "description": "Selects a stimulus-response (SR) or spectrum-analyzer (SA) auto-coupled sweep time.",
+      "set": "SWPCPL <SR|SA>",
+      "query": "SWPCPL?",
+      "examples": ["SWPCPL SA", "SWPCPL?"]
+    },
+    {
+      "name": "auto_couple",
+      "mnemonic": "AUTO",
+      "category": "Sweep",
+      "description": "Couples the active functions automatically. Executing AUTO with no active function couples all functions.",
+      "set": "AUTO",
+      "examples": ["AUTO", "AT AUTO"]
+    },
+
+    {
+      "name": "trigger_mode",
+      "mnemonic": "TM",
+      "category": "Trigger",
+      "description": "Selects a trigger mode: free run, line, video, TV, or external.",
+      "set": "TM <FREE|LINE|VID|EXT|TV>",
+      "query": "TM?",
+      "parameters": [ { "name": "mode", "range": "FREE | LINE | VID | EXT | TV" } ],
+      "examples": ["TM FREE", "TM EXT", "TM?"]
+    },
+    {
+      "name": "on_end_of_sweep",
+      "mnemonic": "ONEOS",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands after the end of the sweep.",
+      "set": "ONEOS <commands>",
+      "examples": ["ONEOS TS;MKPK HI;"]
+    },
+    {
+      "name": "on_sweep",
+      "mnemonic": "ONSWP",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands at the beginning of the sweep.",
+      "set": "ONSWP <commands>",
+      "examples": ["ONSWP MKPK HI;"]
+    },
+    {
+      "name": "on_marker",
+      "mnemonic": "ONMKR",
+      "category": "Trigger",
+      "description": "Performs the list of analyzer commands when the sweep reaches the marker position.",
+      "set": "ONMKR <commands>",
+      "examples": ["ONMKR MKA?;"]
+    },
+    {
+      "name": "on_marker_update",
+      "mnemonic": "ONMKRU",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands whenever the value or units of the active marker change.",
+      "set": "ONMKRU <commands>",
+      "examples": ["ONMKRU MKA?;"]
+    },
+    {
+      "name": "on_service_request",
+      "mnemonic": "ONSRQ",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands whenever a service request occurs.",
+      "set": "ONSRQ <commands>",
+      "examples": ["ONSRQ STB?;"]
+    },
+    {
+      "name": "on_time",
+      "mnemonic": "ONTIME",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands at the specified time.",
+      "set": "ONTIME <number>,<commands>",
+      "examples": ["ONTIME 10,TS;"]
+    },
+    {
+      "name": "on_delay",
+      "mnemonic": "ONDELAY",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands after the time value has elapsed.",
+      "set": "ONDELAY <number>,<commands>",
+      "examples": ["ONDELAY 5,TS;"]
+    },
+    {
+      "name": "on_cycle",
+      "mnemonic": "ONCYCLE",
+      "category": "Trigger",
+      "description": "Executes the list of analyzer commands periodically.",
+      "set": "ONCYCLE <number>,<commands>",
+      "examples": ["ONCYCLE 60,TS;"]
+    },
+
+    {
+      "name": "detector",
+      "mnemonic": "DET",
+      "category": "Detector",
+      "description": "Selects the spectrum analyzer detection mode: positive-peak, sample, or negative. Preset DET POS.",
+      "set": "DET <POS|SMP|NEG>",
+      "query": "DET?",
+      "parameters": [ { "name": "mode", "range": "POS | SMP | NEG (NEG requires Option 101 or 301)" } ],
+      "examples": ["DET POS", "DET SMP", "DET?"]
+    },
+
+    {
+      "name": "clear_write",
+      "mnemonic": "CLRW",
+      "category": "Trace",
+      "description": "Clears the specified trace and enables trace data acquisition.",
+      "set": "CLRW <TRA|TRB|TRC>",
+      "examples": ["CLRW TRA", "CLRW TRB"]
+    },
+    {
+      "name": "view_trace",
+      "mnemonic": "VIEW",
+      "category": "Trace",
+      "description": "Displays trace A, B, or C and stops taking new data into the viewed trace.",
+      "set": "VIEW <TRA|TRB|TRC>",
+      "examples": ["VIEW TRA"]
+    },
+    {
+      "name": "blank_trace",
+      "mnemonic": "BLANK",
+      "category": "Trace",
+      "description": "Blanks trace A, B, or C and stops taking new data into the specified trace.",
+      "set": "BLANK <TRA|TRB|TRC>",
+      "examples": ["BLANK TRB"]
+    },
+    {
+      "name": "maximum_hold",
+      "mnemonic": "MXMH",
+      "category": "Trace",
+      "description": "Updates trace elements with the maximum level detected (max hold).",
+      "set": "MXMH <TRA|TRB|TRC>",
+      "examples": ["MXMH TRA"]
+    },
+    {
+      "name": "minimum_hold",
+      "mnemonic": "MINH",
+      "category": "Trace",
+      "description": "Updates trace C elements with the minimum level detected (min hold).",
+      "set": "MINH TRC",
+      "examples": ["MINH TRC"]
+    },
+    {
+      "name": "trace_display",
+      "mnemonic": "TRDSP",
+      "category": "Trace",
+      "description": "Turns on or off the display of trace A, B, or C without clearing the trace (measurements can still be taken).",
+      "set": "TRDSP <TRA|TRB|TRC>,<ON|OFF>",
+      "examples": ["TRDSP TRA,OFF"]
+    },
+    {
+      "name": "trace_preset",
+      "mnemonic": "TRPRST",
+      "category": "Trace",
+      "description": "Sets the trace operations to their preset values.",
+      "set": "TRPRST",
+      "examples": ["TRPRST"]
+    },
+    {
+      "name": "trace_status",
+      "mnemonic": "TRSTAT",
+      "category": "Trace",
+      "description": "Returns the status of traces A, B, and C: clear write, blank, view, minimum hold, or maximum hold.",
+      "query": "TRSTAT?",
+      "examples": ["TRSTAT?"]
+    },
+    {
+      "name": "trace_a_minus_b",
+      "mnemonic": "AMB",
+      "category": "Trace",
+      "description": "Subtracts trace B from trace A and sends the result to trace A during every sweep.",
+      "set": "AMB <ON|OFF>",
+      "examples": ["AMB ON", "AMB OFF"]
+    },
+    {
+      "name": "trace_a_minus_b_plus_dl",
+      "mnemonic": "AMBPL",
+      "category": "Trace",
+      "description": "Subtracts trace B from trace A, adds the display line value, and sends the result to trace A during every sweep.",
+      "set": "AMBPL <ON|OFF>",
+      "examples": ["AMBPL ON"]
+    },
+    {
+      "name": "trace_a_plus_b",
+      "mnemonic": "APB",
+      "category": "Trace",
+      "description": "Adds trace A to trace B and sends the result to trace A.",
+      "set": "APB",
+      "examples": ["APB"]
+    },
+    {
+      "name": "exchange_a_b",
+      "mnemonic": "AXB",
+      "category": "Trace",
+      "description": "Exchanges trace A and trace B.",
+      "set": "AXB",
+      "examples": ["AXB"]
+    },
+    {
+      "name": "trace_b_minus_dl",
+      "mnemonic": "BML",
+      "category": "Trace",
+      "description": "Subtracts the display line from trace B and places the result in trace B.",
+      "set": "BML",
+      "examples": ["BML"]
+    },
+    {
+      "name": "transfer_b_to_c",
+      "mnemonic": "BTC",
+      "category": "Trace",
+      "description": "Transfers trace B into trace C.",
+      "set": "BTC",
+      "examples": ["BTC"]
+    },
+    {
+      "name": "exchange_b_c",
+      "mnemonic": "BXC",
+      "category": "Trace",
+      "description": "Exchanges trace B and trace C.",
+      "set": "BXC",
+      "examples": ["BXC"]
+    },
+    {
+      "name": "trace_data_format",
+      "mnemonic": "TDF",
+      "category": "Trace",
+      "description": "Formats trace information for return to the controller.",
+      "set": "TDF <P|M|B|A|I>",
+      "query": "TDF?",
+      "parameters": [ { "name": "format", "range": "P (parameter/real), M (measurement units, ASCII), B (binary byte), A (binary word), I (image/instrument)" } ],
+      "examples": ["TDF P", "TDF B"]
+    },
+    {
+      "name": "transfer_trace_data",
+      "mnemonic": "TRA",
+      "category": "Trace",
+      "description": "Controls trace A data input or output (use TRA/TRB/TRC for traces A, B, C). Querying returns the trace amplitude values.",
+      "set": "TRA <data>",
+      "query": "TRA?",
+      "examples": ["TRA?"]
+    },
+    {
+      "name": "transfer_trace_a",
+      "mnemonic": "TA",
+      "category": "Trace",
+      "description": "Returns trace A amplitude values from the analyzer to the controller.",
+      "query": "TA",
+      "examples": ["TA"]
+    },
+    {
+      "name": "transfer_trace_b",
+      "mnemonic": "TB",
+      "category": "Trace",
+      "description": "Returns trace B amplitude values from the analyzer to the controller.",
+      "query": "TB",
+      "examples": ["TB"]
+    },
+    {
+      "name": "trace_registers_available",
+      "mnemonic": "TRCMEM",
+      "category": "Trace",
+      "description": "Returns a nonnegative integer indicating the total number of trace registers available for SAVET and RCLT.",
+      "query": "TRCMEM?",
+      "examples": ["TRCMEM?"]
+    },
+    {
+      "name": "define_trace",
+      "mnemonic": "TRDEF",
+      "category": "Trace",
+      "description": "Creates (declares) a user-defined trace.",
+      "set": "TRDEF <name>,<size>",
+      "examples": ["TRDEF MYTRACE,401"]
+    },
+    {
+      "name": "graph_trace",
+      "mnemonic": "TRGRPH",
+      "category": "Trace",
+      "description": "Displays a compressed trace on the analyzer display (graphs compressed trace).",
+      "set": "TRGRPH <source>",
+      "examples": ["TRGRPH TRA"]
+    },
+
+    {
+      "name": "marker_peak_search",
+      "mnemonic": "MKPK",
+      "category": "Marker",
+      "description": "Positions the active marker on a signal peak. MKPK HI finds the highest peak; NH next peak; NR next peak right; NL next peak left.",
+      "set": "MKPK <HI|NH|NR|NL>",
+      "parameters": [ { "name": "target", "range": "HI (highest), NH (next), NR (next right), NL (next left)" } ],
+      "examples": ["MKPK HI", "MKPK NH"]
+    },
+    {
+      "name": "marker_normal",
+      "mnemonic": "MKN",
+      "category": "Marker",
+      "description": "Activates and moves the marker to the specified frequency.",
+      "set": "MKN <number><unit>",
+      "query": "MKN?",
+      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "examples": ["MKN 300MHZ", "MKN?"]
+    },
+    {
+      "name": "marker_frequency",
+      "mnemonic": "MKF",
+      "category": "Marker",
+      "description": "Specifies the frequency value of the active marker.",
+      "set": "MKF <number><unit>",
+      "query": "MKF?",
+      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "examples": ["MKF?"]
+    },
+    {
+      "name": "marker_amplitude",
+      "mnemonic": "MKA",
+      "category": "Marker",
+      "description": "Specifies or returns the amplitude of the active marker.",
+      "set": "MKA <number><unit>",
+      "query": "MKA?",
+      "examples": ["MKA?"]
+    },
+    {
+      "name": "marker_position",
+      "mnemonic": "MKP",
+      "category": "Marker",
+      "description": "Places the active marker at the given x-coordinate (trace position).",
+      "set": "MKP <number>",
+      "query": "MKP?",
+      "examples": ["MKP 200", "MKP?"]
+    },
+    {
+      "name": "marker_delta",
+      "mnemonic": "MKD",
+      "category": "Marker",
+      "description": "Activates the delta marker.",
+      "set": "MKD <number><unit>",
+      "query": "MKD?",
+      "examples": ["MKD", "MKD?"]
+    },
+    {
+      "name": "marker_to_center_frequency",
+      "mnemonic": "MKCF",
+      "category": "Marker",
+      "description": "Sets the center frequency equal to the marker frequency and moves the marker to the center of the screen.",
+      "set": "MKCF",
+      "examples": ["MKCF"]
+    },
+    {
+      "name": "marker_to_reference_level",
+      "mnemonic": "MKRL",
+      "category": "Marker",
+      "description": "Sets the reference level to the amplitude value of the active marker.",
+      "set": "MKRL",
+      "examples": ["MKRL"]
+    },
+    {
+      "name": "marker_to_span",
+      "mnemonic": "MKSP",
+      "category": "Marker",
+      "description": "Sets the start and stop frequencies to the values of the delta markers.",
+      "set": "MKSP",
+      "examples": ["MKSP"]
+    },
+    {
+      "name": "marker_to_step_size",
+      "mnemonic": "MKSS",
+      "category": "Marker",
+      "description": "Sets the center-frequency step size to the marker frequency.",
+      "set": "MKSS",
+      "examples": ["MKSS"]
+    },
+    {
+      "name": "marker_minimum",
+      "mnemonic": "MKMIN",
+      "category": "Marker",
+      "description": "Moves the active marker to the minimum signal detected.",
+      "set": "MKMIN",
+      "examples": ["MKMIN"]
+    },
+    {
+      "name": "marker_off",
+      "mnemonic": "MKOFF",
+      "category": "Marker",
+      "description": "Turns off either the active marker or all the markers (MKOFF ALL).",
+      "set": "MKOFF",
+      "parameters": [ { "name": "scope", "range": "(none) active marker, or ALL" } ],
+      "examples": ["MKOFF", "MKOFF ALL"]
+    },
+    {
+      "name": "marker_noise",
+      "mnemonic": "MKNOISE",
+      "category": "Marker",
+      "description": "Displays the average noise level at the marker.",
+      "set": "MKNOISE <ON|OFF>",
+      "query": "MKNOISE?",
+      "examples": ["MKNOISE ON", "MKNOISE?"]
+    },
+    {
+      "name": "marker_track",
+      "mnemonic": "MKTRACK",
+      "category": "Marker",
+      "description": "Moves the signal with an active marker to the center of the display and keeps the signal peak at center screen.",
+      "set": "MKTRACK <ON|OFF>",
+      "query": "MKTRACK?",
+      "examples": ["MKTRACK ON", "MKTRACK?"]
+    },
+    {
+      "name": "marker_trace",
+      "mnemonic": "MKTRACE",
+      "category": "Marker",
+      "description": "Moves the active marker to a corresponding position in trace A, B, or C.",
+      "set": "MKTRACE <TRA|TRB|TRC>",
+      "examples": ["MKTRACE TRA"]
+    },
+    {
+      "name": "marker_type",
+      "mnemonic": "MKTYPE",
+      "category": "Marker",
+      "description": "Changes the type of the current active marker.",
+      "set": "MKTYPE <type>",
+      "query": "MKTYPE?",
+      "examples": ["MKTYPE AMP", "MKTYPE?"]
+    },
+    {
+      "name": "marker_readout",
+      "mnemonic": "MKREAD",
+      "category": "Marker",
+      "description": "Selects the type of active trace information displayed by the marker readout (frequency, time, inverse-time, or period).",
+      "set": "MKREAD <FRQ|TIME|INV|PER>",
+      "query": "MKREAD?",
+      "examples": ["MKREAD FRQ", "MKREAD?"]
+    },
+    {
+      "name": "marker_peak_excursion",
+      "mnemonic": "MKPX",
+      "category": "Marker",
+      "description": "Specifies the minimum signal excursion for the internal peak-identification routine.",
+      "set": "MKPX <number>DB",
+      "query": "MKPX?",
+      "parameters": [ { "name": "excursion", "units": ["DB"] } ],
+      "examples": ["MKPX 6DB", "MKPX?"]
+    },
+    {
+      "name": "marker_bandwidth",
+      "mnemonic": "MKBW",
+      "category": "Marker",
+      "description": "Returns the bandwidth at the specified power level relative to an on-screen marker or the signal peak.",
+      "set": "MKBW <number>DB",
+      "query": "MKBW?",
+      "parameters": [ { "name": "level", "units": ["DB"] } ],
+      "examples": ["MKBW -3DB", "MKBW?"]
+    },
+    {
+      "name": "marker_active",
+      "mnemonic": "MKACT",
+      "category": "Marker",
+      "description": "Specifies the active marker (SELECT 1 2 3 4).",
+      "set": "MKACT <number>",
+      "query": "MKACT?",
+      "examples": ["MKACT 1", "MKACT?"]
+    },
+    {
+      "name": "marker_as_active_function",
+      "mnemonic": "MKACTV",
+      "category": "Marker",
+      "description": "Makes the current active marker the active function.",
+      "set": "MKACTV <ON|OFF>",
+      "examples": ["MKACTV ON"]
+    },
+    {
+      "name": "marker_continue",
+      "mnemonic": "MKCONT",
+      "category": "Marker",
+      "description": "Resumes the sweep after execution of an MKSTOP command.",
+      "set": "MKCONT",
+      "examples": ["MKCONT"]
+    },
+    {
+      "name": "marker_stop",
+      "mnemonic": "MKSTOP",
+      "category": "Marker",
+      "description": "Stops the sweep at the active marker.",
+      "set": "MKSTOP",
+      "examples": ["MKSTOP"]
+    },
+    {
+      "name": "marker_pause",
+      "mnemonic": "MKPAUSE",
+      "category": "Marker",
+      "description": "Pauses the sweep at the active marker for the duration of the delay period.",
+      "set": "MKPAUSE <number>",
+      "query": "MKPAUSE?",
+      "examples": ["MKPAUSE 100MS", "MKPAUSE?"]
+    },
+    {
+      "name": "marker_counter",
+      "mnemonic": "MKFC",
+      "category": "Marker",
+      "description": "Turns on or off the marker frequency counter.",
+      "set": "MKFC <ON|OFF>",
+      "examples": ["MKFC ON", "MKFC OFF"]
+    },
+    {
+      "name": "marker_counter_resolution",
+      "mnemonic": "MKFCR",
+      "category": "Marker",
+      "description": "Sets the resolution of the marker frequency counter. Accepts AUTO.",
+      "set": "MKFCR <number><unit>",
+      "query": "MKFCR?",
+      "parameters": [ { "name": "resolution", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "examples": ["MKFCR 1KHZ", "MKFCR AUTO", "MKFCR?"]
+    },
+    {
+      "name": "marker_table",
+      "mnemonic": "MKTBL",
+      "category": "Marker",
+      "description": "Turns on or off the marker table.",
+      "set": "MKTBL <ON|OFF>",
+      "examples": ["MKTBL ON"]
+    },
+    {
+      "name": "marker_delta_dl_mode",
+      "mnemonic": "MKDLMODE",
+      "category": "Marker",
+      "description": "Selects whether marker amplitude values are shown relative to the reference level or relative to the display line.",
+      "set": "MKDLMODE <number>",
+      "examples": ["MKDLMODE 1"]
+    },
+    {
+      "name": "marker_zoom",
+      "mnemonic": "M4",
+      "category": "Marker",
+      "description": "Activates a single marker on the trace and enables the knob to change the marker position; the active function is then set to span.",
+      "set": "M4",
+      "examples": ["M4"]
+    },
+
+    {
+      "name": "display_line",
+      "mnemonic": "DL",
+      "category": "Display",
+      "description": "Defines the level of the display line in the active amplitude units and displays the display line on the screen. Accepts ON/OFF.",
+      "set": "DL <number><unit>",
+      "query": "DL?",
+      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "V"] } ],
+      "examples": ["DL -50DBM", "DL OFF", "DL?"]
+    },
+    {
+      "name": "threshold",
+      "mnemonic": "TH",
+      "category": "Display",
+      "description": "Clips signal responses below the threshold level. Accepts ON/OFF.",
+      "set": "TH <number><unit>",
+      "query": "TH?",
+      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "V"] } ],
+      "examples": ["TH -90DBM", "TH OFF", "TH?"]
+    },
+    {
+      "name": "graticule",
+      "mnemonic": "GRAT",
+      "category": "Display",
+      "description": "Turns on or off the graticule.",
+      "set": "GRAT <ON|OFF>",
+      "query": "GRAT?",
+      "examples": ["GRAT ON", "GRAT OFF"]
+    },
+    {
+      "name": "annotation",
+      "mnemonic": "ANNOT",
+      "category": "Display",
+      "description": "Turns on or off the screen annotation.",
+      "set": "ANNOT <ON|OFF>",
+      "query": "ANNOT?",
+      "examples": ["ANNOT OFF"]
+    },
+    {
+      "name": "title",
+      "mnemonic": "TITLE",
+      "category": "Display",
+      "description": "Activates the screen title mode (writes a title string on screen).",
+      "set": "TITLE <delimiter>text<delimiter>",
+      "examples": ["TITLE@MY TITLE@"]
+    },
+    {
+      "name": "menu",
+      "mnemonic": "MENU",
+      "category": "Display",
+      "description": "Displays the specified softkey menu on the spectrum analyzer screen.",
+      "set": "MENU <number>",
+      "examples": ["MENU 0", "MENU 1"]
+    },
+    {
+      "name": "clear_display",
+      "mnemonic": "CLRDSP",
+      "category": "Display",
+      "description": "Erases user-generated graphics and text.",
+      "set": "CLRDSP",
+      "examples": ["CLRDSP"]
+    },
+    {
+      "name": "hold_data_entry",
+      "mnemonic": "HD",
+      "category": "Display",
+      "description": "Disables data entry via the keypad, knob, or step keys and blanks the active function readout.",
+      "set": "HD",
+      "examples": ["HD"]
+    },
+    {
+      "name": "analog_plus",
+      "mnemonic": "ANLGPLUS",
+      "category": "Display",
+      "description": "Turns the Analog+ display mode on or off (Option 101 or 301).",
+      "set": "ANLGPLUS <ON|OFF>",
+      "examples": ["ANLGPLUS ON"]
+    },
+    {
+      "name": "crt_horizontal_position",
+      "mnemonic": "CRTHPOS",
+      "category": "Display",
+      "description": "Specifies the horizontal position of the text and graticule on the display.",
+      "set": "CRTHPOS <number>",
+      "query": "CRTHPOS?",
+      "examples": ["CRTHPOS 0", "CRTHPOS?"]
+    },
+    {
+      "name": "crt_vertical_position",
+      "mnemonic": "CRTVPOS",
+      "category": "Display",
+      "description": "Specifies the vertical position of the text and graticule on the display.",
+      "set": "CRTVPOS <number>",
+      "query": "CRTVPOS?",
+      "examples": ["CRTVPOS 0", "CRTVPOS?"]
+    },
+
+    {
+      "name": "calibrate",
+      "mnemonic": "CAL",
+      "category": "Calibration",
+      "description": "Initiates self-calibration routines.",
+      "set": "CAL <ALL|FETCH|STORE|...>",
+      "examples": ["CAL ALL"]
+    },
+    {
+      "name": "confidence_test",
+      "mnemonic": "CNF",
+      "category": "Calibration",
+      "description": "Performs the confidence test.",
+      "set": "CNF",
+      "examples": ["CNF"]
+    },
+    {
+      "name": "amplitude_correction",
+      "mnemonic": "AMPCOR",
+      "category": "Calibration",
+      "description": "Applies amplitude corrections at specified frequencies.",
+      "set": "AMPCOR <freq>,<amptd>,...",
+      "examples": ["AMPCOR 100MHZ,2DB"]
+    },
+    {
+      "name": "amplitude_correction_length",
+      "mnemonic": "AMPLEN",
+      "category": "Calibration",
+      "description": "Returns the number of frequency-amplitude correction factors that have been entered.",
+      "query": "AMPLEN?",
+      "examples": ["AMPLEN?"]
+    },
+    {
+      "name": "correction_factors_on",
+      "mnemonic": "CORREK",
+      "category": "Calibration",
+      "description": "Returns 1 if the correction factors are on, 0 if they are off.",
+      "set": "CORREK <ON|OFF>",
+      "query": "CORREK?",
+      "examples": ["CORREK ON", "CORREK?"]
+    },
+
+    {
+      "name": "status_byte_query",
+      "mnemonic": "STB",
+      "category": "Status",
+      "description": "Returns to the controller the decimal equivalent of the status byte.",
+      "query": "STB?",
+      "examples": ["STB?"]
+    },
+    {
+      "name": "clear_status_byte",
+      "mnemonic": "CLS",
+      "category": "Status",
+      "description": "Clears all status bits.",
+      "set": "CLS",
+      "examples": ["CLS"]
+    },
+    {
+      "name": "service_request_mask",
+      "mnemonic": "RQS",
+      "category": "Status",
+      "description": "Sets a bit mask for service requests.",
+      "set": "RQS <number>",
+      "query": "RQS?",
+      "examples": ["RQS 32", "RQS?"]
+    },
+    {
+      "name": "force_service_request",
+      "mnemonic": "SRQ",
+      "category": "Status",
+      "description": "Used by an external controller to simulate interrupts from the spectrum analyzer.",
+      "set": "SRQ <number>",
+      "examples": ["SRQ 2"]
+    },
+    {
+      "name": "command_error_query",
+      "mnemonic": "CMDERRQ",
+      "category": "Status",
+      "description": "Returns command error information.",
+      "query": "CMDERRQ?",
+      "examples": ["CMDERRQ?"]
+    },
+
+    {
+      "name": "output_active_function",
+      "mnemonic": "OA",
+      "category": "IO",
+      "description": "Returns the value of the active function.",
+      "query": "OA",
+      "examples": ["OA"]
+    },
+    {
+      "name": "output_parameter",
+      "mnemonic": "OP",
+      "category": "IO",
+      "description": "Returns the coordinates of the lower-left and upper-right corners of the display.",
+      "query": "OP",
+      "examples": ["OP"]
+    },
+    {
+      "name": "output_learn_string",
+      "mnemonic": "OL",
+      "category": "IO",
+      "description": "Transmits information to the controller describing the state of the spectrum analyzer when OL is executed.",
+      "query": "OL",
+      "examples": ["OL"]
+    },
+    {
+      "name": "user_state",
+      "mnemonic": "USTATE",
+      "category": "IO",
+      "description": "Transmits information that has been stored in the analyzer by the user.",
+      "query": "USTATE?",
+      "examples": ["USTATE?"]
+    },
+    {
+      "name": "enable_entry",
+      "mnemonic": "EE",
+      "category": "IO",
+      "description": "Sends the controller the values entered on the numeric keypad by the operator; enables front-panel number entry.",
+      "set": "EE",
+      "examples": ["EE"]
+    },
+    {
+      "name": "enable_knob",
+      "mnemonic": "EK",
+      "category": "IO",
+      "description": "Allows data entry with the front-panel knob when the spectrum analyzer is under remote control.",
+      "set": "EK",
+      "examples": ["EK"]
+    },
+    {
+      "name": "enter_parameter",
+      "mnemonic": "EP",
+      "category": "IO",
+      "description": "Sends values entered on the numeric keyboard to the present active function value.",
+      "set": "EP",
+      "examples": ["EP"]
+    },
+    {
+      "name": "enter_from_hpib",
+      "mnemonic": "ENTER",
+      "category": "IO",
+      "description": "Allows the spectrum analyzer to receive data from other devices on the HP-IB.",
+      "set": "ENTER <address>",
+      "examples": ["ENTER 5"]
+    },
+    {
+      "name": "output_to_port",
+      "mnemonic": "OUTPUT",
+      "category": "IO",
+      "description": "Allows the spectrum analyzer to send data to other devices on the HP-IB (or to the remote/parallel port).",
+      "set": "OUTPUT <address>,<data>",
+      "examples": ["OUTPUT 1,'TEXT'"]
+    },
+    {
+      "name": "up",
+      "mnemonic": "UP",
+      "category": "IO",
+      "description": "Increases the active function by the applicable step size.",
+      "set": "UP",
+      "examples": ["UP"]
+    },
+    {
+      "name": "down",
+      "mnemonic": "DN",
+      "category": "IO",
+      "description": "Reduces the active function by the applicable step size.",
+      "set": "DN",
+      "examples": ["DN"]
+    },
+
+    {
+      "name": "save_state",
+      "mnemonic": "SAVES",
+      "category": "SaveRecall",
+      "description": "Saves the currently displayed instrument state in one of the state registers in spectrum analyzer memory.",
+      "set": "SAVES <number>",
+      "examples": ["SAVES 1"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "RCLS",
+      "category": "SaveRecall",
+      "description": "Recalls spectrum analyzer state data from one of the state registers in spectrum analyzer memory.",
+      "set": "RCLS <number>",
+      "examples": ["RCLS 1"]
+    },
+    {
+      "name": "save_trace",
+      "mnemonic": "SAVET",
+      "category": "SaveRecall",
+      "description": "Saves the selected trace data and state information, amplitude correction factors, or limit-line tables in spectrum analyzer memory.",
+      "set": "SAVET <name>,<register>",
+      "examples": ["SAVET TRA,1"]
+    },
+    {
+      "name": "recall_trace",
+      "mnemonic": "RCLT",
+      "category": "SaveRecall",
+      "description": "Recalls previously saved trace data, amplitude factors, or limit-line data from the trace registers in spectrum analyzer memory.",
+      "set": "RCLT <name>,<register>",
+      "examples": ["RCLT TRA,1"]
+    },
+    {
+      "name": "protect_state",
+      "mnemonic": "PSTATE",
+      "category": "SaveRecall",
+      "description": "Protects all of the spectrum analyzer's user state and trace registers from being changed.",
+      "set": "PSTATE <ON|OFF>",
+      "examples": ["PSTATE ON"]
+    },
+    {
+      "name": "mass_storage_is",
+      "mnemonic": "MSI",
+      "category": "SaveRecall",
+      "description": "Specifies the current mass storage device as spectrum analyzer memory or a memory card.",
+      "set": "MSI <INTERNAL|CARD>",
+      "examples": ["MSI CARD"]
+    },
+    {
+      "name": "catalog",
+      "mnemonic": "CAT",
+      "category": "SaveRecall",
+      "description": "Returns the catalog information of spectrum analyzer memory or the memory card.",
+      "query": "CAT?",
+      "examples": ["CAT?"]
+    },
+    {
+      "name": "load",
+      "mnemonic": "LOAD",
+      "category": "SaveRecall",
+      "description": "Loads a file from the memory card.",
+      "set": "LOAD <filename>",
+      "examples": ["LOAD MYFILE"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "STOR",
+      "category": "SaveRecall",
+      "description": "Stores data on a RAM card.",
+      "set": "STOR <filename>",
+      "examples": ["STOR MYFILE"]
+    },
+    {
+      "name": "purge_file",
+      "mnemonic": "PURGE",
+      "category": "SaveRecall",
+      "description": "Deletes the specified file from the current mass storage device.",
+      "set": "PURGE <filename>",
+      "examples": ["PURGE MYFILE"]
+    },
+    {
+      "name": "prefix",
+      "mnemonic": "PREFX",
+      "category": "SaveRecall",
+      "description": "Specifies or changes the prefix used in save and recall operations.",
+      "set": "PREFX <delimiter>name<delimiter>",
+      "examples": ["PREFX@MEAS@"]
+    },
+    {
+      "name": "save_recall_number",
+      "mnemonic": "SAVRCLN",
+      "category": "SaveRecall",
+      "description": "Specifies the number to append to the prefix for a save or recall operation and initiates the transfer of data.",
+      "set": "SAVRCLN <number>",
+      "examples": ["SAVRCLN 1"]
+    },
+    {
+      "name": "power_on_state",
+      "mnemonic": "POWERON",
+      "category": "SaveRecall",
+      "description": "Selects the spectrum analyzer power-on state: IP (instrument preset) or LAST.",
+      "set": "POWERON <IP|LAST>",
+      "query": "POWERON?",
+      "examples": ["POWERON LAST", "POWERON?"]
+    },
+
+    {
+      "name": "plot",
+      "mnemonic": "PLOT",
+      "category": "Output",
+      "description": "Initiates output of the spectrum analyzer display to a plotter.",
+      "set": "PLOT <args>",
+      "examples": ["PLOT"]
+    },
+    {
+      "name": "print",
+      "mnemonic": "PRINT",
+      "category": "Output",
+      "description": "Prints screen data to a printer.",
+      "set": "PRINT",
+      "examples": ["PRINT"]
+    },
+    {
+      "name": "get_plot",
+      "mnemonic": "GETPLOT",
+      "category": "Output",
+      "description": "Initiates output of the spectrum analyzer display to a plotter (for use within a downloadable program).",
+      "set": "GETPLOT",
+      "examples": ["GETPLOT"]
+    },
+    {
+      "name": "get_print",
+      "mnemonic": "GETPRNT",
+      "category": "Output",
+      "description": "Initiates output of the spectrum analyzer display to a printer (for use within a downloadable program).",
+      "set": "GETPRNT",
+      "examples": ["GETPRNT"]
+    },
+    {
+      "name": "printer_address",
+      "mnemonic": "PRNTADRS",
+      "category": "Output",
+      "description": "Sets the HP-IB address of the printer.",
+      "set": "PRNTADRS <number>",
+      "query": "PRNTADRS?",
+      "examples": ["PRNTADRS 1", "PRNTADRS?"]
+    },
+
+    {
+      "name": "adjacent_channel_power",
+      "mnemonic": "ACP",
+      "category": "Measurement",
+      "description": "Performs the adjacent channel power measurement using channel spacing (ACPSP) and channel bandwidth (ACPBW).",
+      "set": "ACP",
+      "examples": ["ACP"]
+    },
+    {
+      "name": "acp_extended",
+      "mnemonic": "ACPE",
+      "category": "Measurement",
+      "description": "Performs the adjacent channel power extended measurement.",
+      "set": "ACPE",
+      "examples": ["ACPE"]
+    },
+    {
+      "name": "channel_power",
+      "mnemonic": "CHP",
+      "category": "Measurement",
+      "description": "Performs the channel power measurement over the specified channel bandwidth (ACPBW).",
+      "set": "CHP",
+      "examples": ["CHP"]
+    },
+    {
+      "name": "acp_channel_bandwidth",
+      "mnemonic": "ACPBW",
+      "category": "Measurement",
+      "description": "Specifies the channel bandwidth used for the ACP, ACPE, and CHP measurements.",
+      "set": "ACPBW <number><unit>",
+      "query": "ACPBW?",
+      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "examples": ["ACPBW 30KHZ", "ACPBW?"]
+    },
+    {
+      "name": "acp_channel_spacing",
+      "mnemonic": "ACPSP",
+      "category": "Measurement",
+      "description": "Specifies the frequency spacing between channels.",
+      "set": "ACPSP <number><unit>",
+      "query": "ACPSP?",
+      "parameters": [ { "name": "spacing", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "examples": ["ACPSP 30KHZ", "ACPSP?"]
+    },
+    {
+      "name": "acp_manual_auto",
+      "mnemonic": "ACPPAR",
+      "category": "Measurement",
+      "description": "Determines if the spectrum analyzer settings for ACP/ACPE/CHP/OBW measurements are set manually (0) or automatically (1).",
+      "set": "ACPPAR <0|1>",
+      "query": "ACPPAR?",
+      "examples": ["ACPPAR 1", "ACPPAR?"]
+    },
+    {
+      "name": "occupied_bandwidth",
+      "mnemonic": "OBW",
+      "category": "Measurement",
+      "description": "Performs the occupied bandwidth measurement using the value for occupied bandwidth percent (OBWPCT).",
+      "set": "OBW",
+      "examples": ["OBW"]
+    },
+    {
+      "name": "occupied_bandwidth_percent",
+      "mnemonic": "OBWPCT",
+      "category": "Measurement",
+      "description": "Specifies the percent of total power used in calculating the occupied bandwidth (OBW).",
+      "set": "OBWPCT <number>",
+      "query": "OBWPCT?",
+      "examples": ["OBWPCT 99", "OBWPCT?"]
+    },
+    {
+      "name": "percent_am",
+      "mnemonic": "PCTAM",
+      "category": "Measurement",
+      "description": "Turns on or off the percent AM measurement.",
+      "set": "PCTAM <ON|OFF>",
+      "examples": ["PCTAM ON"]
+    },
+    {
+      "name": "percent_am_response",
+      "mnemonic": "PCTAMR",
+      "category": "Measurement",
+      "description": "Returns the percent AM measured by the percent AM measurement (PCTAM).",
+      "query": "PCTAMR?",
+      "examples": ["PCTAMR?"]
+    },
+    {
+      "name": "third_order_intermod",
+      "mnemonic": "TOI",
+      "category": "Measurement",
+      "description": "Turns on (1) or off (0) the third-order intermodulation (TOI) measurement.",
+      "set": "TOI <0|1>",
+      "examples": ["MOV TOI,1", "MOV TOI,0"]
+    },
+    {
+      "name": "third_order_intermod_response",
+      "mnemonic": "TOIR",
+      "category": "Measurement",
+      "description": "Returns the highest third-order intermodulation product measured by the TOI measurement.",
+      "query": "TOIR?",
+      "examples": ["TOIR?"]
+    },
+    {
+      "name": "n_db_points",
+      "mnemonic": "NDBPNT",
+      "category": "Measurement",
+      "description": "Turns on or off the N dB points measurement.",
+      "set": "NDBPNT <ON|OFF>",
+      "examples": ["NDBPNT ON"]
+    },
+    {
+      "name": "n_db",
+      "mnemonic": "NDB",
+      "category": "Measurement",
+      "description": "Specifies the distance (in dB) from the signal peak for the N dB points measurement.",
+      "set": "NDB <number>DB",
+      "query": "NDB?",
+      "parameters": [ { "name": "distance", "units": ["DB"] } ],
+      "examples": ["NDB -3DB", "NDB?"]
+    },
+    {
+      "name": "n_db_points_bandwidth",
+      "mnemonic": "NDBPNTR",
+      "category": "Measurement",
+      "description": "Returns the bandwidth measured by the N dB points measurement.",
+      "query": "NDBPNTR?",
+      "examples": ["NDBPNTR?"]
+    },
+    {
+      "name": "power_bandwidth",
+      "mnemonic": "PWRBW",
+      "category": "Measurement",
+      "description": "Computes the bandwidth around the trace center that includes signals whose total power is a specified percentage of the total trace signal power.",
+      "set": "PWRBW <trace>,<percent>",
+      "query": "PWRBW?",
+      "examples": ["PWRBW TRA,99.0", "PWRBW?"]
+    },
+    {
+      "name": "measure_off",
+      "mnemonic": "MEASOFF",
+      "category": "Measurement",
+      "description": "Turns off the current measurement, erases the display, and then displays the MEAS/USER menu.",
+      "set": "MEASOFF",
+      "examples": ["MEASOFF"]
+    },
+    {
+      "name": "fft",
+      "mnemonic": "FFT",
+      "category": "Measurement",
+      "description": "Performs a discrete fast Fourier transform on the source trace array and stores the result in the destination array.",
+      "set": "FFT <dest>,<source>,<window>",
+      "examples": ["FFT TRA,TRA,TRB"]
+    },
+    {
+      "name": "peaks",
+      "mnemonic": "PEAKS",
+      "category": "Measurement",
+      "description": "Sorts signal peaks by frequency or amplitude, stores the results in the destination trace, and returns the number of peaks found.",
+      "set": "PEAKS <dest>,<source>,<sort>",
+      "examples": ["PEAKS TRB,TRA,AMP"]
+    },
+
+    {
+      "name": "demodulation",
+      "mnemonic": "DEMOD",
+      "category": "Auxiliary",
+      "description": "Turns the demodulator on or off and selects between AM, FM, or quasi-peak demodulation.",
+      "set": "DEMOD <ON|OFF|AM|FM>",
+      "examples": ["DEMOD ON", "DEMOD FM", "DEMOD OFF"]
+    },
+    {
+      "name": "fm_gain",
+      "mnemonic": "FMGAIN",
+      "category": "Auxiliary",
+      "description": "Sets the total FM frequency deviation for full screen demodulation.",
+      "set": "FMGAIN <number><unit>",
+      "query": "FMGAIN?",
+      "parameters": [ { "name": "deviation", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "examples": ["FMGAIN 100KHZ", "FMGAIN?"]
+    },
+    {
+      "name": "speaker",
+      "mnemonic": "SPEAKER",
+      "category": "Auxiliary",
+      "description": "Turns on or off the internal speaker.",
+      "set": "SPEAKER <ON|OFF>",
+      "examples": ["SPEAKER ON"]
+    },
+    {
+      "name": "squelch",
+      "mnemonic": "SQLCH",
+      "category": "Auxiliary",
+      "description": "Sets the squelch level.",
+      "set": "SQLCH <number><unit>",
+      "query": "SQLCH?",
+      "examples": ["SQLCH -60DBM", "SQLCH?"]
+    },
+    {
+      "name": "control_line_a",
+      "mnemonic": "CNTLA",
+      "category": "Auxiliary",
+      "description": "Sets the control line A of the auxiliary interface high or low.",
+      "set": "CNTLA <0|1>",
+      "examples": ["CNTLA 1"]
+    },
+    {
+      "name": "control_line_b",
+      "mnemonic": "CNTLB",
+      "category": "Auxiliary",
+      "description": "Sets the control line B of the auxiliary interface high or low.",
+      "set": "CNTLB <0|1>",
+      "examples": ["CNTLB 1"]
+    },
+    {
+      "name": "control_line_c",
+      "mnemonic": "CNTLC",
+      "category": "Auxiliary",
+      "description": "Sets the interface control line C of the auxiliary interface high or low.",
+      "set": "CNTLC <0|1>",
+      "examples": ["CNTLC 1"]
+    },
+    {
+      "name": "control_line_d",
+      "mnemonic": "CNTLD",
+      "category": "Auxiliary",
+      "description": "Sets the interface control line D of the auxiliary interface high or low.",
+      "set": "CNTLD <0|1>",
+      "examples": ["CNTLD 1"]
+    },
+    {
+      "name": "control_line_input",
+      "mnemonic": "CNTLI",
+      "category": "Auxiliary",
+      "description": "Returns a 1 when the interface control line I of the auxiliary interface is high, and 0 if the line is low.",
+      "query": "CNTLI?",
+      "examples": ["CNTLI?"]
+    },
+    {
+      "name": "source_power",
+      "mnemonic": "SRCPWR",
+      "category": "Auxiliary",
+      "description": "Selects the source power level (tracking generator).",
+      "set": "SRCPWR <ON|OFF|number>",
+      "query": "SRCPWR?",
+      "examples": ["SRCPWR -10DBM", "SRCPWR OFF", "SRCPWR?"]
+    },
+    {
+      "name": "source_tracking",
+      "mnemonic": "SRCTK",
+      "category": "Auxiliary",
+      "description": "Adjusts tracking of source output with spectrum-analyzer sweep.",
+      "set": "SRCTK <number>",
+      "query": "SRCTK?",
+      "examples": ["SRCTK?"]
+    },
+    {
+      "name": "source_tracking_peak",
+      "mnemonic": "SRCTKPK",
+      "category": "Auxiliary",
+      "description": "Adjusts tracking of source output with spectrum-analyzer sweep (auto peak).",
+      "set": "SRCTKPK",
+      "examples": ["SRCTKPK"]
+    },
+    {
+      "name": "source_power_offset",
+      "mnemonic": "SRCPOFS",
+      "category": "Auxiliary",
+      "description": "Offsets the source power level readout.",
+      "set": "SRCPOFS <number>DB",
+      "query": "SRCPOFS?",
+      "examples": ["SRCPOFS 0DB", "SRCPOFS?"]
+    },
+    {
+      "name": "source_power_step",
+      "mnemonic": "SRCPSTP",
+      "category": "Auxiliary",
+      "description": "Selects the source-power step size.",
+      "set": "SRCPSTP <number>DB",
+      "query": "SRCPSTP?",
+      "examples": ["SRCPSTP 1DB", "SRCPSTP?"]
+    },
+    {
+      "name": "source_power_sweep",
+      "mnemonic": "SRCPSWP",
+      "category": "Auxiliary",
+      "description": "Selects sweep range of the source output (power sweep).",
+      "set": "SRCPSWP <ON|OFF|number>",
+      "query": "SRCPSWP?",
+      "examples": ["SRCPSWP OFF", "SRCPSWP?"]
+    },
+    {
+      "name": "source_attenuator",
+      "mnemonic": "SRCAT",
+      "category": "Auxiliary",
+      "description": "Attenuates the source output level.",
+      "set": "SRCAT <number>DB",
+      "query": "SRCAT?",
+      "examples": ["SRCAT 0DB", "SRCAT?"]
+    },
+    {
+      "name": "source_leveling_control",
+      "mnemonic": "SRCALC",
+      "category": "Auxiliary",
+      "description": "Selects internal or external leveling for the tracking generator.",
+      "set": "SRCALC <INT|EXT>",
+      "examples": ["SRCALC INT"]
+    },
+    {
+      "name": "source_normalization",
+      "mnemonic": "SRCNORM",
+      "category": "Auxiliary",
+      "description": "Subtracts trace B from trace A, adds the display line, and sends the result to trace A (stimulus-response normalization).",
+      "set": "SRCNORM <ON|OFF>",
+      "examples": ["SRCNORM ON"]
+    },
+
+    {
+      "name": "limit_line_test",
+      "mnemonic": "LIMITEST",
+      "category": "LimitLine",
+      "description": "Compares trace A with the current limit-line data and enables limit-line testing.",
+      "set": "LIMITEST <ON|OFF>",
+      "query": "LIMITEST?",
+      "examples": ["LIMITEST ON", "LIMITEST?"]
+    },
+    {
+      "name": "limits_failed",
+      "mnemonic": "LIMIFAIL",
+      "category": "LimitLine",
+      "description": "Returns 0 if the last measurement sweep of trace A is equal to or within the limit-line bounds.",
+      "query": "LIMIFAIL?",
+      "examples": ["LIMIFAIL?"]
+    },
+    {
+      "name": "limit_line_display",
+      "mnemonic": "LIMIDISP",
+      "category": "LimitLine",
+      "description": "Controls when the limit line (or limit lines) are displayed.",
+      "set": "LIMIDISP <Y|N|AUTO>",
+      "examples": ["LIMIDISP Y"]
+    },
+    {
+      "name": "delete_limit_line",
+      "mnemonic": "LIMIDEL",
+      "category": "LimitLine",
+      "description": "Deletes all segments in the current limit-line table.",
+      "set": "LIMIDEL",
+      "examples": ["LIMIDEL"]
+    },
+    {
+      "name": "limit_line_segment_freq",
+      "mnemonic": "LIMISEG",
+      "category": "LimitLine",
+      "description": "Adds new segments to the current frequency limit line in either the upper or lower limit line.",
+      "set": "LIMISEG <freq>,<amptd>,<type>",
+      "examples": ["LIMISEG 100MHZ,-30DBM,FLAT"]
+    },
+    {
+      "name": "limit_line_segment_time",
+      "mnemonic": "LIMISEGT",
+      "category": "LimitLine",
+      "description": "Adds new segments to the current sweep-time limit line in either the upper or lower limit line.",
+      "set": "LIMISEGT <time>,<amptd>,<type>",
+      "examples": ["LIMISEGT 10MS,-30DBM,FLAT"]
+    },
+    {
+      "name": "limit_line_entry_mode",
+      "mnemonic": "LIMIMODE",
+      "category": "LimitLine",
+      "description": "Determines whether the limit-line entries are treated as upper, lower, upper-and-lower, or mid/delta amplitude values.",
+      "set": "LIMIMODE <mode>",
+      "examples": ["LIMIMODE UPPER"]
+    },
+    {
+      "name": "limit_line_relative",
+      "mnemonic": "LIMIREL",
+      "category": "LimitLine",
+      "description": "Specifies the current limit lines as fixed or relative.",
+      "set": "LIMIREL <FIX|REL>",
+      "examples": ["LIMIREL REL"]
+    },
+    {
+      "name": "limit_line_freq_time",
+      "mnemonic": "LIMIFT",
+      "category": "LimitLine",
+      "description": "Selects how the limit-line segments are placed on the display: according to frequency, or according to the sweep time setting.",
+      "set": "LIMIFT <FRQ|TIME>",
+      "examples": ["LIMIFT FRQ"]
+    }
+  ]
+}

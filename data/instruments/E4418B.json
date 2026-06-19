@@ -1,0 +1,1952 @@
+{
+  "model": "E4418B",
+  "manufacturer": "HP/Agilent",
+  "category": "RF Power Meter",
+  "description": "HP/Agilent E4418B EPM-series single-channel RF power meter, programmable via SCPI over GPIB (and RS-232/RS-422). The shared programming guide also covers the dual-channel E4419B; channel/window selection uses [1|2] suffixes. Supports Agilent E-Series and 8480-series sensors with sensor calibration-factor tables, averaging, limits, math, and recorder/TTL outputs.",
+  "source": "E4418B Programming.pdf",
+  "aliases": ["E4418B", "E4418A", "E4419B"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "E441[89]",
+    "description": "Returns manufacturer, model (e.g. E4418B or E4419B), serial number and firmware revision as a comma-separated string."
+  },
+  "commands": [
+    {
+      "name": "configure_power",
+      "mnemonic": "CONFigure[1|2][:SCALar][:POWer:AC]",
+      "category": "MEASurement",
+      "description": "Configures the meter for a single absolute power measurement on the selected channel/window without initiating it. Presets defaults appropriate to the measurement; results are retrieved later with READ? or FETCh?.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W (per UNIT:POWer)", "range": "DEF | MIN | MAX | sensor range" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["CONF:POW:AC 20DBM,2,(@1)", "CONF1?"]
+    },
+    {
+      "name": "configure_power_relative",
+      "mnemonic": "CONFigure[1|2][:SCALar][:POWer:AC]:RELative",
+      "category": "MEASurement",
+      "description": "Configures the meter for a relative power measurement (measured value referenced to the stored relative value) on the selected channel.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["CONF2:REL -50DBM,3,(@1)"]
+    },
+    {
+      "name": "configure_power_difference",
+      "mnemonic": "CONFigure[1|2][:SCALar][:POWer:AC]:DIFFerence",
+      "category": "MEASurement",
+      "description": "Configures the meter for a difference (channel A minus channel B) power measurement on the selected window.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["CONF:POW:AC:DIFF 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "configure_power_difference_relative",
+      "mnemonic": "CONFigure[1|2][:SCALar][:POWer:AC]:DIFFerence:RELative",
+      "category": "MEASurement",
+      "description": "Configures a relative difference measurement: the A-minus-B difference referenced to the stored relative value.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["CONF:POW:AC:DIFF:REL 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "configure_power_ratio",
+      "mnemonic": "CONFigure[1|2][:SCALar][:POWer:AC]:RATio",
+      "category": "MEASurement",
+      "description": "Configures the meter for a ratio (channel A / channel B) power measurement on the selected window.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "expected_value", "units": "dB or % (per UNIT:POWer:RATio)", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["CONF:POW:AC:RAT 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "configure_power_ratio_relative",
+      "mnemonic": "CONFigure[1|2][:SCALar][:POWer:AC]:RATio:RELative",
+      "category": "MEASurement",
+      "description": "Configures a relative ratio measurement: the A/B ratio referenced to the stored relative value.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "expected_value", "units": "dB or %", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["CONF:POW:AC:RAT:REL 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "fetch_power",
+      "mnemonic": "FETCh[1|2][:SCALar][:POWer:AC]?",
+      "category": "MEASurement",
+      "description": "Returns the most recent absolute power measurement result from the selected channel without re-triggering an acquisition.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["FETC1?", "FETC:POW:AC? 20DBM,2,(@1)"]
+    },
+    {
+      "name": "fetch_power_relative",
+      "mnemonic": "FETCh[1|2][:SCALar][:POWer:AC]:RELative?",
+      "category": "MEASurement",
+      "description": "Returns the most recent relative power measurement result from the selected channel.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["FETC:POW:AC:REL?"]
+    },
+    {
+      "name": "fetch_power_difference",
+      "mnemonic": "FETCh[1|2][:SCALar][:POWer:AC]:DIFFerence?",
+      "category": "MEASurement",
+      "description": "Returns the most recent difference (A minus B) power measurement result.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["FETC:POW:AC:DIFF? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "fetch_power_difference_relative",
+      "mnemonic": "FETCh[1|2][:SCALar][:POWer:AC]:DIFFerence:RELative?",
+      "category": "MEASurement",
+      "description": "Returns the most recent relative difference measurement result.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["FETC:POW:AC:DIFF:REL? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "fetch_power_ratio",
+      "mnemonic": "FETCh[1|2][:SCALar][:POWer:AC]:RATio?",
+      "category": "MEASurement",
+      "description": "Returns the most recent ratio (A / B) power measurement result.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["FETC:POW:AC:RAT? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "fetch_power_ratio_relative",
+      "mnemonic": "FETCh[1|2][:SCALar][:POWer:AC]:RATio:RELative?",
+      "category": "MEASurement",
+      "description": "Returns the most recent relative ratio measurement result.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["FETC:POW:AC:RAT:REL? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "read_power",
+      "mnemonic": "READ[1|2][:SCALar][:POWer:AC]?",
+      "category": "MEASurement",
+      "description": "Triggers a new absolute power acquisition on the selected channel and returns the result (equivalent to ABORt; INITiate; FETCh?).",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["READ1?", "READ:POW:AC? 20DBM,2,(@1)"]
+    },
+    {
+      "name": "read_power_relative",
+      "mnemonic": "READ[1|2][:SCALar][:POWer:AC]:RELative?",
+      "category": "MEASurement",
+      "description": "Triggers and returns a relative power measurement on the selected channel.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["READ:POW:AC:REL?"]
+    },
+    {
+      "name": "read_power_difference",
+      "mnemonic": "READ[1|2][:SCALar][:POWer:AC]:DIFFerence?",
+      "category": "MEASurement",
+      "description": "Triggers and returns a difference (A minus B) power measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["READ:POW:AC:DIFF? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "read_power_difference_relative",
+      "mnemonic": "READ[1|2][:SCALar][:POWer:AC]:DIFFerence:RELative?",
+      "category": "MEASurement",
+      "description": "Triggers and returns a relative difference measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["READ:POW:AC:DIFF:REL? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "read_power_ratio",
+      "mnemonic": "READ[1|2][:SCALar][:POWer:AC]:RATio?",
+      "category": "MEASurement",
+      "description": "Triggers and returns a ratio (A / B) power measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["READ:POW:AC:RAT? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "read_power_ratio_relative",
+      "mnemonic": "READ[1|2][:SCALar][:POWer:AC]:RATio:RELative?",
+      "category": "MEASurement",
+      "description": "Triggers and returns a relative ratio measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["READ:POW:AC:RAT:REL? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "measure_power",
+      "mnemonic": "MEASure[1|2][:SCALar][:POWer:AC]?",
+      "category": "MEASurement",
+      "description": "Configures, triggers and returns a single absolute power measurement in one operation (CONFigure + READ?).",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["MEAS1?", "MEAS2:POW:AC? -70DBM,1,(@1)"]
+    },
+    {
+      "name": "measure_power_relative",
+      "mnemonic": "MEASure[1|2][:SCALar][:POWer:AC]:RELative?",
+      "category": "MEASurement",
+      "description": "Configures, triggers and returns a single relative power measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+      ],
+      "examples": ["MEAS1:REL? -50DBM,2,(@2)"]
+    },
+    {
+      "name": "measure_power_difference",
+      "mnemonic": "MEASure[1|2][:SCALar][:POWer:AC]:DIFFerence?",
+      "category": "MEASurement",
+      "description": "Configures, triggers and returns a single difference (A minus B) measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["MEAS:POW:AC:DIFF? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "measure_power_difference_relative",
+      "mnemonic": "MEASure[1|2][:SCALar][:POWer:AC]:DIFFerence:RELative?",
+      "category": "MEASurement",
+      "description": "Configures, triggers and returns a single relative difference measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["MEAS:POW:AC:DIFF:REL? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "measure_power_ratio",
+      "mnemonic": "MEASure[1|2][:SCALar][:POWer:AC]:RATio?",
+      "category": "MEASurement",
+      "description": "Configures, triggers and returns a single ratio (A / B) measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["MEAS:POW:AC:RAT? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "measure_power_ratio_relative",
+      "mnemonic": "MEASure[1|2][:SCALar][:POWer:AC]:RATio:RELative?",
+      "category": "MEASurement",
+      "description": "Configures, triggers and returns a single relative ratio measurement.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+      ],
+      "examples": ["MEAS:POW:AC:RAT:REL? 20DBM,2,(@1),(@2)"]
+    },
+    {
+      "name": "calculate_gain_magnitude",
+      "mnemonic": "CALCulate[1|2]:GAIN[:MAGNitude]",
+      "category": "CALCulate",
+      "description": "Sets the display offset (gain/loss) value applied to the measured result for the selected window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dB", "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
+      ],
+      "examples": ["CALC1:GAIN 10", "CALC1:GAIN?"]
+    },
+    {
+      "name": "calculate_gain_state",
+      "mnemonic": "CALCulate[1|2]:GAIN:STATe",
+      "category": "CALCulate",
+      "description": "Enables or disables the display offset (gain) for the selected window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["CALC1:GAIN:STAT ON", "CALC1:GAIN:STAT?"]
+    },
+    {
+      "name": "calculate_limit_clear_auto",
+      "mnemonic": "CALCulate[1|2]:LIMit:CLEar:AUTO",
+      "category": "CALCulate",
+      "description": "Controls whether the limit fail count and fail flag are cleared automatically. ONCE clears them immediately for the next INITiate.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+      ],
+      "examples": ["CALC1:LIM:CLE:AUTO ONCE", "CALC1:LIM:CLE:AUTO?"]
+    },
+    {
+      "name": "calculate_limit_clear_immediate",
+      "mnemonic": "CALCulate[1|2]:LIMit:CLEar[:IMMediate]",
+      "category": "CALCulate",
+      "description": "Immediately clears the limit fail count and the fail flag for the selected window.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["CALC1:LIM:CLE"]
+    },
+    {
+      "name": "calculate_limit_fail",
+      "mnemonic": "CALCulate[1|2]:LIMit:FAIL?",
+      "category": "CALCulate",
+      "description": "Queries the limit fail flag for the selected window. Returns 1 if a limit failure has occurred since the count was last cleared, otherwise 0.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["CALC1:LIM:FAIL?"]
+    },
+    {
+      "name": "calculate_limit_fcount",
+      "mnemonic": "CALCulate[1|2]:LIMit:FCOunt?",
+      "category": "CALCulate",
+      "description": "Queries the number of limit-failure events (fail count) for the selected window.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["CALC1:LIM:FCO?"]
+    },
+    {
+      "name": "calculate_limit_lower",
+      "mnemonic": "CALCulate[1|2]:LIMit:LOWer[:DATA]",
+      "category": "CALCulate",
+      "description": "Sets the lower limit value used for limit checking on the selected window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W or dB/% per measurement", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["CALC1:LIM:LOW -10DBM", "CALC1:LIM:LOW?"]
+    },
+    {
+      "name": "calculate_limit_state",
+      "mnemonic": "CALCulate[1|2]:LIMit:STATe",
+      "category": "CALCulate",
+      "description": "Enables or disables limit checking for the selected window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["CALC1:LIM:STAT ON", "CALC1:LIM:STAT?"]
+    },
+    {
+      "name": "calculate_limit_upper",
+      "mnemonic": "CALCulate[1|2]:LIMit:UPPer[:DATA]",
+      "category": "CALCulate",
+      "description": "Sets the upper limit value used for limit checking on the selected window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W or dB/% per measurement", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["CALC1:LIM:UPP 2DBM", "CALC1:LIM:UPP?"]
+    },
+    {
+      "name": "calculate_math_expression",
+      "mnemonic": "CALCulate[1|2]:MATH[:EXPRession]",
+      "category": "CALCulate",
+      "description": "Sets the math expression that defines what the selected window measures (e.g. single channel, ratio or difference of sensor inputs).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "math expression string, e.g. \"(SENS1)\", \"(SENS1/SENS2)\", \"(SENS1-SENS2)\"" }
+      ],
+      "examples": ["CALC1:MATH \"(SENS1)\"", "CALC1:MATH?"]
+    },
+    {
+      "name": "calculate_math_expression_catalog",
+      "mnemonic": "CALCulate[1|2]:MATH[:EXPRession]:CATalog?",
+      "category": "CALCulate",
+      "description": "Returns a comma-separated list of the math expressions available for the selected window.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["CALC1:MATH:CAT?"]
+    },
+    {
+      "name": "calculate_relative_magnitude_auto",
+      "mnemonic": "CALCulate[1|2]:RELative[:MAGNitude]:AUTO",
+      "category": "CALCulate",
+      "description": "Sets the reference value for relative measurements. ONCE captures the current measured value as the relative reference.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+      ],
+      "examples": ["CALC1:REL:AUTO ONCE", "CALC1:REL:AUTO?"]
+    },
+    {
+      "name": "calculate_relative_state",
+      "mnemonic": "CALCulate[1|2]:RELative:STATe",
+      "category": "CALCulate",
+      "description": "Enables or disables relative-mode measurements for the selected window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["CALC1:REL:STAT ON", "CALC1:REL:STAT?"]
+    },
+    {
+      "name": "calibration_all",
+      "mnemonic": "CALibration[1|2][:ALL]",
+      "category": "CALibration",
+      "description": "Performs a complete calibration sequence (zero plus calibration) on the selected channel. The query form returns a pass/fail result.",
+      "set": true,
+      "query": true,
+      "parameters": [],
+      "examples": ["CAL1:ALL", "CAL1:ALL?"]
+    },
+    {
+      "name": "calibration_auto",
+      "mnemonic": "CALibration[1|2]:AUTO",
+      "category": "CALibration",
+      "description": "Controls automatic calibration. ONCE performs a calibration immediately on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+      ],
+      "examples": ["CAL1:AUTO ONCE", "CAL1:AUTO?"]
+    },
+    {
+      "name": "calibration_econtrol_state",
+      "mnemonic": "CALibration[1|2]:ECONtrol:STATe",
+      "category": "CALibration",
+      "description": "Enables or disables external power-reference (calibrator) control during calibration on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["CAL1:ECON:STAT ON", "CAL1:ECON:STAT?"]
+    },
+    {
+      "name": "calibration_rcalibration",
+      "mnemonic": "CALibration[1|2]:RCALibration",
+      "category": "CALibration",
+      "description": "Enables or disables the request-for-calibration-factor prompt for the reference calibration on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["CAL1:RCAL ON", "CAL1:RCAL?"]
+    },
+    {
+      "name": "calibration_rcfactor",
+      "mnemonic": "CALibration[1|2]:RCFactor",
+      "category": "CALibration",
+      "description": "Sets the reference calibration factor used during calibration on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "PCT (%)", "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
+      ],
+      "examples": ["CAL:RCF 98.7PCT", "CAL1:RCF?"]
+    },
+    {
+      "name": "calibration_zero_auto",
+      "mnemonic": "CALibration[1|2]:ZERO:AUTO",
+      "category": "CALibration",
+      "description": "Controls auto-zeroing of the selected channel. ONCE performs a zero immediately; the sensor input must have no applied power.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+      ],
+      "examples": ["CAL1:ZERO:AUTO ONCE", "CAL1:ZERO:AUTO?"]
+    },
+    {
+      "name": "display_contrast",
+      "mnemonic": "DISPlay:CONTrast",
+      "category": "DISPlay",
+      "description": "Sets the contrast level of the front-panel display.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "", "range": "0 to 1 | DEF | MIN | MAX" }
+      ],
+      "examples": ["DISP:CONT 0.5", "DISP:CONT?"]
+    },
+    {
+      "name": "display_enable",
+      "mnemonic": "DISPlay:ENABle",
+      "category": "DISPlay",
+      "description": "Enables or disables (blanks) the front-panel display. Disabling can increase measurement throughput.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["DISP:ENAB OFF", "DISP:ENAB?"]
+    },
+    {
+      "name": "display_window_format",
+      "mnemonic": "DISPlay[:WINDow[1|2]]:FORMat",
+      "category": "DISPlay",
+      "description": "Selects the display format for the window: a single numeric measurement or a dual numeric-plus-analog-meter layout.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "character_data", "units": "", "range": "DIGital | ANALog" }
+      ],
+      "examples": ["DISP:WIND1:FORM DIG", "DISP:WIND1:FORM?"]
+    },
+    {
+      "name": "display_window_meter_lower",
+      "mnemonic": "DISPlay[:WINDow[1|2]]:METer:LOWer",
+      "category": "DISPlay",
+      "description": "Sets the value represented by the lower (left) end of the analog meter scale for the window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["DISP:WIND1:MET:LOW -50DBM", "DISP:WIND1:MET:LOW?"]
+    },
+    {
+      "name": "display_window_meter_upper",
+      "mnemonic": "DISPlay[:WINDow[1|2]]:METer:UPPer",
+      "category": "DISPlay",
+      "description": "Sets the value represented by the upper (right) end of the analog meter scale for the window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["DISP:WIND1:MET:UPP 20DBM", "DISP:WIND1:MET:UPP?"]
+    },
+    {
+      "name": "display_window_resolution",
+      "mnemonic": "DISPlay[:WINDow[1|2]]:RESolution",
+      "category": "DISPlay",
+      "description": "Sets the displayed measurement resolution (number of significant digits) for the window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" }
+      ],
+      "examples": ["DISP:WIND1:RES 3", "DISP:WIND1:RES?"]
+    },
+    {
+      "name": "display_window_select",
+      "mnemonic": "DISPlay[:WINDow[1|2]]:SELect",
+      "category": "DISPlay",
+      "description": "Selects the specified window as the active (highlighted) window on the display.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["DISP:WIND1:SEL"]
+    },
+    {
+      "name": "display_window_state",
+      "mnemonic": "DISPlay[:WINDow[1|2]][:STATe]",
+      "category": "DISPlay",
+      "description": "Enables or disables (shows/hides) the specified display window.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["DISP:WIND1:STAT ON", "DISP:WIND1:STAT?"]
+    },
+    {
+      "name": "format_readings_border",
+      "mnemonic": "FORMat[:READings]:BORDer",
+      "category": "FORMat",
+      "description": "Sets the byte order for binary (REAL) reading transfers: normal or byte-swapped.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "order", "units": "", "range": "NORMal | SWAPped" }
+      ],
+      "examples": ["FORM:BORD NORM", "FORM:BORD?"]
+    },
+    {
+      "name": "format_readings_data",
+      "mnemonic": "FORMat[:READings][:DATA]",
+      "category": "FORMat",
+      "description": "Sets the data format used to return measurement readings: ASCII text or REAL (binary) data.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "type", "units": "", "range": "ASCii | REAL" }
+      ],
+      "examples": ["FORM ASCII", "FORM?"]
+    },
+    {
+      "name": "memory_catalog_all",
+      "mnemonic": "MEMory:CATalog[:ALL]?",
+      "category": "MEMory",
+      "description": "Returns a catalog of all memory items (instrument states and sensor cal/data tables), with the total bytes used and available.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:CAT:ALL?"]
+    },
+    {
+      "name": "memory_catalog_state",
+      "mnemonic": "MEMory:CATalog:STATe?",
+      "category": "MEMory",
+      "description": "Returns a catalog of the stored instrument-state memory items.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:CAT:STAT?"]
+    },
+    {
+      "name": "memory_catalog_table",
+      "mnemonic": "MEMory:CATalog:TABLe?",
+      "category": "MEMory",
+      "description": "Returns a catalog of the stored sensor calibration/data tables.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:CAT:TABL?"]
+    },
+    {
+      "name": "memory_clear_name",
+      "mnemonic": "MEMory:CLEar[:NAME]",
+      "category": "MEMory",
+      "description": "Clears (deletes the contents of) the named memory item, freeing its memory.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "string", "units": "", "range": "memory item name" }
+      ],
+      "examples": ["MEM:CLE \"SENSOR_A\""]
+    },
+    {
+      "name": "memory_clear_table",
+      "mnemonic": "MEMory:CLEar:TABLe",
+      "category": "MEMory",
+      "description": "Clears the contents of the currently selected sensor calibration/data table.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["MEM:CLE:TABL"]
+    },
+    {
+      "name": "memory_free_all",
+      "mnemonic": "MEMory:FREE[:ALL]?",
+      "category": "MEMory",
+      "description": "Returns the bytes of memory used and available for all memory items.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:FREE:ALL?"]
+    },
+    {
+      "name": "memory_free_state",
+      "mnemonic": "MEMory:FREE:STATe?",
+      "category": "MEMory",
+      "description": "Returns the bytes of memory used and available for instrument-state storage.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:FREE:STAT?"]
+    },
+    {
+      "name": "memory_free_table",
+      "mnemonic": "MEMory:FREE:TABLe?",
+      "category": "MEMory",
+      "description": "Returns the bytes of memory used and available for sensor calibration/data tables.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:FREE:TABL?"]
+    },
+    {
+      "name": "memory_nstates",
+      "mnemonic": "MEMory:NSTates?",
+      "category": "MEMory",
+      "description": "Returns the number of instrument-state memory registers available.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:NST?"]
+    },
+    {
+      "name": "memory_state_catalog",
+      "mnemonic": "MEMory:STATe:CATalog?",
+      "category": "MEMory",
+      "description": "Returns a list of the names assigned to the stored instrument-state registers.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:STAT:CAT?"]
+    },
+    {
+      "name": "memory_state_define",
+      "mnemonic": "MEMory:STATe:DEFine",
+      "category": "MEMory",
+      "description": "Associates a name with an instrument-state register number (or queries the register number for a name).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "state name" },
+        { "name": "numeric_value", "units": "", "range": "register number" }
+      ],
+      "examples": ["MEM:STAT:DEF \"SETUP1\",1", "MEM:STAT:DEF? \"SETUP1\""]
+    },
+    {
+      "name": "memory_table_frequency",
+      "mnemonic": "MEMory:TABLe:FREQuency",
+      "category": "MEMory",
+      "description": "Enters the frequency points into the currently selected sensor calibration table (as a comma-separated list).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value list", "units": "Hz (kHz/MHz/GHz suffixes)", "range": "1 kHz to 999.999 GHz per point" }
+      ],
+      "examples": ["MEM:TABL:FREQ 50MHZ,1GHZ,2GHZ", "MEM:TABL:FREQ?"]
+    },
+    {
+      "name": "memory_table_frequency_points",
+      "mnemonic": "MEMory:TABLe:FREQuency:POINts?",
+      "category": "MEMory",
+      "description": "Returns the number of frequency points in the currently selected sensor calibration table.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:TABL:FREQ:POIN?"]
+    },
+    {
+      "name": "memory_table_gain",
+      "mnemonic": "MEMory:TABLe:GAIN[:MAGNitude]",
+      "category": "MEMory",
+      "description": "Enters the calibration-factor (gain) values into the currently selected sensor calibration table, corresponding to the table's frequency points.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value list", "units": "PCT (%)", "range": "1.0 to 150.0 PCT per point" }
+      ],
+      "examples": ["MEM:TABL:GAIN 95.0,96.5,97.2", "MEM:TABL:GAIN?"]
+    },
+    {
+      "name": "memory_table_gain_points",
+      "mnemonic": "MEMory:TABLe:GAIN[:MAGNitude]:POINts?",
+      "category": "MEMory",
+      "description": "Returns the number of calibration-factor (gain) points in the currently selected sensor calibration table.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["MEM:TABL:GAIN:POIN?"]
+    },
+    {
+      "name": "memory_table_move",
+      "mnemonic": "MEMory:TABLe:MOVE",
+      "category": "MEMory",
+      "description": "Renames a sensor calibration/data table by moving its contents from an old name to a new name.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "old_name", "units": "", "range": "existing table name" },
+        { "name": "new_name", "units": "", "range": "new table name" }
+      ],
+      "examples": ["MEM:TABL:MOVE \"TABLE1\",\"TABLE2\""]
+    },
+    {
+      "name": "memory_table_select",
+      "mnemonic": "MEMory:TABLe:SELect",
+      "category": "MEMory",
+      "description": "Selects the sensor calibration/data table that subsequent MEMory:TABLe commands act upon.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "table name" }
+      ],
+      "examples": ["MEM:TABL:SEL \"HP8481A\"", "MEM:TABL:SEL?"]
+    },
+    {
+      "name": "output_recorder_limit_lower",
+      "mnemonic": "OUTPut:RECorder[1]|2:LIMit:LOWer",
+      "category": "OUTPut",
+      "description": "Sets the power value that corresponds to the minimum (0 V) output of the selected rear-panel recorder output.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["OUTP:REC1:LIM:LOW -50DBM", "OUTP:REC1:LIM:LOW?"]
+    },
+    {
+      "name": "output_recorder_limit_upper",
+      "mnemonic": "OUTPut:RECorder[1]|2:LIMit:UPPer",
+      "category": "OUTPut",
+      "description": "Sets the power value that corresponds to the maximum (full-scale) output of the selected rear-panel recorder output.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["OUTP:REC1:LIM:UPP 20DBM", "OUTP:REC1:LIM:UPP?"]
+    },
+    {
+      "name": "output_recorder_state",
+      "mnemonic": "OUTPut:RECorder[1]|2:STATe",
+      "category": "OUTPut",
+      "description": "Enables or disables the selected rear-panel recorder (analog) output.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["OUTP:REC1:STAT ON", "OUTP:REC1:STAT?"]
+    },
+    {
+      "name": "output_roscillator_state",
+      "mnemonic": "OUTPut:ROSCillator[:STATe]",
+      "category": "OUTPut",
+      "description": "Turns the 50 MHz 1 mW POWER REF calibrator output on or off.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["OUTP:ROSC ON", "OUTP:ROSC?"]
+    },
+    {
+      "name": "output_ttl_active",
+      "mnemonic": "OUTPut:TTL[1|2]:ACTive",
+      "category": "OUTPut",
+      "description": "Sets the active (asserted) logic level of the selected rear-panel TTL output.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "level", "units": "", "range": "HIGH | LOW" }
+      ],
+      "examples": ["OUTP:TTL1:ACT HIGH", "OUTP:TTL1:ACT?"]
+    },
+    {
+      "name": "output_ttl_feed",
+      "mnemonic": "OUTPut:TTL[1|2]:FEED",
+      "category": "OUTPut",
+      "description": "Selects the internal signal (e.g. a limit-fail summary) that drives the selected rear-panel TTL output.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "feed source string" }
+      ],
+      "examples": ["OUTP:TTL1:FEED \"CALC1:LIM\"", "OUTP:TTL1:FEED?"]
+    },
+    {
+      "name": "output_ttl_state",
+      "mnemonic": "OUTPut:TTL[1|2]:STATe",
+      "category": "OUTPut",
+      "description": "Enables or disables the selected rear-panel TTL output.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["OUTP:TTL1:STAT ON", "OUTP:TTL1:STAT?"]
+    },
+    {
+      "name": "sense_average_count",
+      "mnemonic": "[SENSe[1]]|SENSe2:AVERage:COUNt",
+      "category": "SENSe",
+      "description": "Sets the averaging filter length (number of readings averaged) for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "readings", "range": "1 to 1024 | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS1:AVER:COUN 16", "SENS1:AVER:COUN?"]
+    },
+    {
+      "name": "sense_average_count_auto",
+      "mnemonic": "[SENSe[1]]|SENSe2:AVERage:COUNt:AUTO",
+      "category": "SENSe",
+      "description": "Enables or disables automatic selection of the averaging filter length for the selected channel. ONCE sets it once based on the current signal.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+      ],
+      "examples": ["SENS1:AVER:COUN:AUTO ON", "SENS1:AVER:COUN:AUTO?"]
+    },
+    {
+      "name": "sense_average_sdetect",
+      "mnemonic": "[SENSe[1]]|SENSe2:AVERage:SDETect",
+      "category": "SENSe",
+      "description": "Enables or disables step detection, which shortens the averaging filter response when a large change in power is detected on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:AVER:SDET ON", "SENS1:AVER:SDET?"]
+    },
+    {
+      "name": "sense_average_state",
+      "mnemonic": "[SENSe[1]]|SENSe2:AVERage[:STATe]",
+      "category": "SENSe",
+      "description": "Enables or disables averaging (the filter) for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:AVER ON", "SENS1:AVER?"]
+    },
+    {
+      "name": "sense_correction_cset_select",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:CSET[1]|CSET2[:SELect]",
+      "category": "SENSe",
+      "description": "Selects the sensor calibration-factor table (CSET) to use for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "calibration table name" }
+      ],
+      "examples": ["SENS1:CORR:CSET:SEL \"HP8481A\"", "SENS1:CORR:CSET:SEL?"]
+    },
+    {
+      "name": "sense_correction_cset_state",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:CSET[1]|CSET2:STATe",
+      "category": "SENSe",
+      "description": "Enables or disables use of the selected sensor calibration-factor table (CSET) for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:CORR:CSET:STAT ON", "SENS1:CORR:CSET:STAT?"]
+    },
+    {
+      "name": "sense_correction_dcycle_input",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:DCYCle|GAIN3[:INPut][:MAGNitude]",
+      "category": "SENSe",
+      "description": "Sets the duty-cycle value used to correct pulsed-power (DCYCle/GAIN3) measurements on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "PCT (%)", "range": "0.001 to 99.999 PCT | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS1:CORR:DCYC 16PCT", "SENS1:CORR:DCYC?"]
+    },
+    {
+      "name": "sense_correction_dcycle_state",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:DCYCle|GAIN3:STATe",
+      "category": "SENSe",
+      "description": "Enables or disables duty-cycle (DCYCle/GAIN3) correction for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:CORR:DCYC:STAT ON", "SENS1:CORR:DCYC:STAT?"]
+    },
+    {
+      "name": "sense_correction_cfactor_gain_input",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:CFACtor|GAIN[1|2][:INPut][:MAGNitude]",
+      "category": "SENSe",
+      "description": "Sets the calibration-factor (GAIN1) or display-offset gain (GAIN2) input value for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "PCT (cal factor) or dB (gain)", "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS:CORR:CFAC 97.5PCT", "SENS1:CORR:GAIN2?"]
+    },
+    {
+      "name": "sense_correction_gain2_state",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:GAIN2:STATe",
+      "category": "SENSe",
+      "description": "Enables or disables the display-offset gain (GAIN2) correction for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:CORR:GAIN2:STAT ON", "SENS1:CORR:GAIN2:STAT?"]
+    },
+    {
+      "name": "sense_correction_fdoffset_input",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:FDOFfset|GAIN4[:INPut][:MAGNitude]?",
+      "category": "SENSe",
+      "description": "Queries the frequency-dependent offset (FDOFfset/GAIN4) value currently applied for the selected channel (read-only).",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SENS1:CORR:FDOF?"]
+    },
+    {
+      "name": "sense_correction_loss2_input",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:LOSS2[:INPut][:MAGNitude]",
+      "category": "SENSe",
+      "description": "Sets the external loss/offset (LOSS2) value for the selected channel, used to compensate for cable or attenuator loss.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dB", "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS1:CORR:LOSS2 10", "SENS1:CORR:LOSS2?"]
+    },
+    {
+      "name": "sense_correction_loss2_state",
+      "mnemonic": "[SENSe[1]]|SENSe2:CORRection:LOSS2:STATe",
+      "category": "SENSe",
+      "description": "Enables or disables the external loss/offset (LOSS2) correction for the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:CORR:LOSS2:STAT ON", "SENS1:CORR:LOSS2:STAT?"]
+    },
+    {
+      "name": "sense_frequency",
+      "mnemonic": "[SENSe[1]]|SENSe2:FREQuency[:CW|:FIXed]",
+      "category": "SENSe",
+      "description": "Sets the input signal frequency for the selected channel so the meter can apply the correct calibration factor (by interpolation from the sensor cal table or sensor EEPROM).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "Hz (kHz/MHz/GHz suffixes; default 50 MHz)", "range": "1 kHz to 999.999 GHz | DEF | MIN | MAX" }
+      ],
+      "examples": ["FREQ 500kHz", "SENS1:FREQ?"]
+    },
+    {
+      "name": "sense_limit_clear_auto",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:CLEar:AUTO",
+      "category": "SENSe",
+      "description": "Controls whether the channel limit fail count and flag clear automatically. ONCE clears them for the next INITiate.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+      ],
+      "examples": ["SENS1:LIM:CLE:AUTO ONCE", "SENS1:LIM:CLE:AUTO?"]
+    },
+    {
+      "name": "sense_limit_clear_immediate",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:CLEar[:IMMediate]",
+      "category": "SENSe",
+      "description": "Immediately clears the channel limit fail count and flag.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["SENS1:LIM:CLE"]
+    },
+    {
+      "name": "sense_limit_fail",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:FAIL?",
+      "category": "SENSe",
+      "description": "Queries the channel limit fail flag. Returns 1 if a limit failure has occurred since the count was cleared, otherwise 0.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SENS1:LIM:FAIL?"]
+    },
+    {
+      "name": "sense_limit_fcount",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:FCOunt?",
+      "category": "SENSe",
+      "description": "Queries the channel limit fail count (number of limit-failure events).",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SENS1:LIM:FCO?"]
+    },
+    {
+      "name": "sense_limit_lower",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:LOWer[:DATA]",
+      "category": "SENSe",
+      "description": "Sets the channel lower limit value used for limit checking.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS1:LIM:LOW -10DBM", "SENS1:LIM:LOW?"]
+    },
+    {
+      "name": "sense_limit_state",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:STATe",
+      "category": "SENSe",
+      "description": "Enables or disables channel limit checking.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:LIM:STAT ON", "SENS1:LIM:STAT?"]
+    },
+    {
+      "name": "sense_limit_upper",
+      "mnemonic": "[SENSe[1]]|SENSe2:LIMit:UPPer[:DATA]",
+      "category": "SENSe",
+      "description": "Sets the channel upper limit value used for limit checking.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS2:LIM:UPP:DATA -20DBM", "SENS1:LIM:UPP?"]
+    },
+    {
+      "name": "sense_power_ac_range",
+      "mnemonic": "[SENSe[1]]|SENSe2:POWer:AC:RANGe",
+      "category": "SENSe",
+      "description": "Sets the measurement range (lower or upper) for the selected channel. Used with E-Series and N8480 (excluding Option CFT) sensors; setting it disables autoranging.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "range index", "range": "0 (lower) | 1 (upper) | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS1:POW:AC:RANG 1", "SENS1:POW:AC:RANG?"]
+    },
+    {
+      "name": "sense_power_ac_range_auto",
+      "mnemonic": "[SENSe[1]]|SENSe2:POWer:AC:RANGe:AUTO",
+      "category": "SENSe",
+      "description": "Enables or disables autoranging for the selected channel (E-Series and N8480 non-CFT sensors). When ON, the meter selects the best measuring range automatically.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["SENS1:POW:AC:RANG:AUTO ON", "SENS1:POW:AC:RANG:AUTO?"]
+    },
+    {
+      "name": "sense_speed",
+      "mnemonic": "[SENSe[1]]|SENSe2:SPEed",
+      "category": "SENSe",
+      "description": "Sets the measurement speed (readings per second) for the selected channel. 20 and 40 readings/s allow full functionality; 200 readings/s (fast mode) restricts some features.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "readings/s", "range": "20 | 40 | 200 | DEF | MIN | MAX" }
+      ],
+      "examples": ["SENS1:SPE 200", "SENS1:SPE?"]
+    },
+    {
+      "name": "sense_v2p",
+      "mnemonic": "[SENSe[1]]|SENSe2:V2P",
+      "category": "SENSe",
+      "description": "Selects the voltage-to-power conversion (linearity correction) table type used for the connected sensor on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "type", "units": "", "range": "ATYPe | DTYPe" }
+      ],
+      "examples": ["SENS1:V2P ATYP", "SENS1:V2P?"]
+    },
+    {
+      "name": "status_operation_event",
+      "mnemonic": "STATus:OPERation",
+      "category": "STATus",
+      "description": "Accesses the Operation Status register set: CONDition?, EVENt? (default query), ENABle, PTRansition and NTRansition. Reports overall operation status.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER?", "STAT:OPER:ENAB 256"]
+    },
+    {
+      "name": "status_operation_calibrating",
+      "mnemonic": "STATus:OPERation:CALibrating[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Operation Calibrating summary register set (CONDition?, EVENt?, ENABle, PTRansition, NTRansition); indicates calibration in progress.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER:CAL?", "STAT:OPER:CAL:ENAB 3"]
+    },
+    {
+      "name": "status_operation_llfail",
+      "mnemonic": "STATus:OPERation:LLFail[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Operation Lower-Limit-Fail summary register set; indicates a lower limit failure.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER:LLF?", "STAT:OPER:LLF:ENAB 3"]
+    },
+    {
+      "name": "status_operation_measuring",
+      "mnemonic": "STATus:OPERation:MEASuring[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Operation Measuring summary register set; indicates a measurement is in progress.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER:MEAS?", "STAT:OPER:MEAS:ENAB 3"]
+    },
+    {
+      "name": "status_operation_sense",
+      "mnemonic": "STATus:OPERation:SENSe[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Operation Sense summary register set; indicates the meter is reading data from the sensor EEPROM.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER:SENS?", "STAT:OPER:SENS:ENAB 3"]
+    },
+    {
+      "name": "status_operation_trigger",
+      "mnemonic": "STATus:OPERation:TRIGger[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Operation Trigger summary register set; indicates the meter is waiting for or processing a trigger.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER:TRIG?", "STAT:OPER:TRIG:ENAB 3"]
+    },
+    {
+      "name": "status_operation_ulfail",
+      "mnemonic": "STATus:OPERation:ULFail[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Operation Upper-Limit-Fail summary register set; indicates an upper limit failure.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:OPER:ULF?", "STAT:OPER:ULF:ENAB 3"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STATus:PRESet",
+      "category": "STATus",
+      "description": "Presets the OPERation and QUEStionable status enable and transition registers to their default states.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["STAT:PRES"]
+    },
+    {
+      "name": "status_questionable",
+      "mnemonic": "STATus:QUEStionable",
+      "category": "STATus",
+      "description": "Accesses the Questionable Status register set (CONDition?, EVENt?, ENABle, PTRansition, NTRansition); reports questionable measurement conditions.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:QUES?", "STAT:QUES:ENAB 8"]
+    },
+    {
+      "name": "status_questionable_calibration",
+      "mnemonic": "STATus:QUEStionable:CALibration[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Questionable Calibration summary register set; indicates a calibration error condition.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:QUES:CAL?", "STAT:QUES:CAL:ENAB 3"]
+    },
+    {
+      "name": "status_questionable_power",
+      "mnemonic": "STATus:QUEStionable:POWer[:SUMMary]",
+      "category": "STATus",
+      "description": "Accesses the Questionable Power summary register set; indicates a questionable power measurement (e.g. over/under range).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+      ],
+      "examples": ["STAT:QUES:POW?", "STAT:QUES:POW:ENAB 3"]
+    },
+    {
+      "name": "system_communicate_gpib_address",
+      "mnemonic": "SYSTem:COMMunicate:GPIB[:SELF]:ADDRess",
+      "category": "SYSTem",
+      "description": "Sets the meter's GPIB (HP-IB) bus address.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "", "range": "0 to 30" }
+      ],
+      "examples": ["SYST:COMM:GPIB:ADDR 13", "SYST:COMM:GPIB:ADDR?"]
+    },
+    {
+      "name": "system_communicate_serial_control_dtr",
+      "mnemonic": "SYSTem:COMMunicate:SERial:CONTrol:DTR",
+      "category": "SYSTem",
+      "description": "Sets the behaviour of the RS-232 DTR control line.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "mode", "units": "", "range": "ON | OFF | IBFull" }
+      ],
+      "examples": ["SYST:COMM:SER:CONT:DTR IBF", "SYST:COMM:SER:CONT:DTR?"]
+    },
+    {
+      "name": "system_communicate_serial_control_rts",
+      "mnemonic": "SYSTem:COMMunicate:SERial:CONTrol:RTS",
+      "category": "SYSTem",
+      "description": "Sets the behaviour of the RS-232 RTS control line.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "mode", "units": "", "range": "ON | OFF | IBFull" }
+      ],
+      "examples": ["SYST:COMM:SER:CONT:RTS IBF", "SYST:COMM:SER:CONT:RTS?"]
+    },
+    {
+      "name": "system_communicate_serial_receive_baud",
+      "mnemonic": "SYSTem:COMMunicate:SERial[:RECeive]:BAUD",
+      "category": "SYSTem",
+      "description": "Sets the serial receive baud rate.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "baud", "range": "standard rates, e.g. 1200..115200" }
+      ],
+      "examples": ["SYST:COMM:SER:BAUD 9600", "SYST:COMM:SER:BAUD?"]
+    },
+    {
+      "name": "system_communicate_serial_receive_bits",
+      "mnemonic": "SYSTem:COMMunicate:SERial[:RECeive]:BITs",
+      "category": "SYSTem",
+      "description": "Sets the number of serial receive data bits.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "bits", "range": "7 | 8" }
+      ],
+      "examples": ["SYST:COMM:SER:BITS 8", "SYST:COMM:SER:BITS?"]
+    },
+    {
+      "name": "system_communicate_serial_receive_pace",
+      "mnemonic": "SYSTem:COMMunicate:SERial[:RECeive]:PACE",
+      "category": "SYSTem",
+      "description": "Sets the serial receive software flow control (handshaking).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "pace", "units": "", "range": "XON | NONE" }
+      ],
+      "examples": ["SYST:COMM:SER:PACE XON", "SYST:COMM:SER:PACE?"]
+    },
+    {
+      "name": "system_communicate_serial_receive_parity",
+      "mnemonic": "SYSTem:COMMunicate:SERial[:RECeive]:PARity[:TYPE]",
+      "category": "SYSTem",
+      "description": "Sets the serial receive parity type.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "parity", "units": "", "range": "EVEN | ODD | ZERO | ONE | NONE" }
+      ],
+      "examples": ["SYST:COMM:SER:PAR EVEN", "SYST:COMM:SER:PAR?"]
+    },
+    {
+      "name": "system_communicate_serial_receive_sbits",
+      "mnemonic": "SYSTem:COMMunicate:SERial[:RECeive]:SBITs",
+      "category": "SYSTem",
+      "description": "Sets the number of serial receive stop bits.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "bits", "range": "1 | 2" }
+      ],
+      "examples": ["SYST:COMM:SER:SBITS 1", "SYST:COMM:SER:SBITS?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_auto",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:AUTO?",
+      "category": "SYSTem",
+      "description": "Queries whether the serial transmit settings automatically follow the receive settings.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SYST:COMM:SER:TRAN:AUTO?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_baud",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:BAUD",
+      "category": "SYSTem",
+      "description": "Sets the serial transmit baud rate (when not auto-linked to receive).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "baud", "range": "standard rates" }
+      ],
+      "examples": ["SYST:COMM:SER:TRAN:BAUD 9600", "SYST:COMM:SER:TRAN:BAUD?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_bits",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:BITs",
+      "category": "SYSTem",
+      "description": "Sets the number of serial transmit data bits.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "bits", "range": "7 | 8" }
+      ],
+      "examples": ["SYST:COMM:SER:TRAN:BITS 8", "SYST:COMM:SER:TRAN:BITS?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_echo",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:ECHO",
+      "category": "SYSTem",
+      "description": "Enables or disables serial character echo.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "mode", "units": "", "range": "ON | OFF" }
+      ],
+      "examples": ["SYST:COMM:SER:TRAN:ECHO OFF", "SYST:COMM:SER:TRAN:ECHO?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_pace",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:PACE",
+      "category": "SYSTem",
+      "description": "Sets the serial transmit software flow control (handshaking).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "pace", "units": "", "range": "XON | NONE" }
+      ],
+      "examples": ["SYST:COMM:SER:TRAN:PACE XON", "SYST:COMM:SER:TRAN:PACE?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_parity",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:PARity[:TYPE]",
+      "category": "SYSTem",
+      "description": "Sets the serial transmit parity type.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "parity", "units": "", "range": "EVEN | ODD | ZERO | ONE | NONE" }
+      ],
+      "examples": ["SYST:COMM:SER:TRAN:PAR EVEN", "SYST:COMM:SER:TRAN:PAR?"]
+    },
+    {
+      "name": "system_communicate_serial_transmit_sbits",
+      "mnemonic": "SYSTem:COMMunicate:SERial:TRANsmit:SBITs",
+      "category": "SYSTem",
+      "description": "Sets the number of serial transmit stop bits.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "numeric_value", "units": "bits", "range": "1 | 2" }
+      ],
+      "examples": ["SYST:COMM:SER:TRAN:SBITS 1", "SYST:COMM:SER:TRAN:SBITS?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYSTem:ERRor?",
+      "category": "SYSTem",
+      "description": "Returns the next entry from the instrument's error/event queue as <code>,\"<message>\".",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_language",
+      "mnemonic": "SYSTem:LANGuage",
+      "category": "SYSTem",
+      "description": "Selects the remote programming language/command set used by the meter.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "character_data", "units": "", "range": "SCPI | (legacy compatibility language)" }
+      ],
+      "examples": ["SYST:LANG SCPI", "SYST:LANG?"]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": "SYSTem:LOCal",
+      "category": "SYSTem",
+      "description": "Returns the instrument to local (front-panel) control (RS-232/RS-422 use).",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["SYST:LOC"]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": "SYSTem:PRESet",
+      "category": "SYSTem",
+      "description": "Presets the instrument to a known measurement state (front-panel preset), without affecting GPIB address or stored states.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["SYST:PRES"]
+    },
+    {
+      "name": "system_remote",
+      "mnemonic": "SYSTem:REMote",
+      "category": "SYSTem",
+      "description": "Places the instrument in remote control mode and locks out the front panel (RS-232/RS-422 use).",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["SYST:REM"]
+    },
+    {
+      "name": "system_rinterface",
+      "mnemonic": "SYSTem:RINTerface",
+      "category": "SYSTem",
+      "description": "Selects the active remote interface used to control the meter.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "interface", "units": "", "range": "GPIB | RS232 | RS422" }
+      ],
+      "examples": ["SYST:RINT GPIB", "SYST:RINT?"]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": "SYSTem:RWLock",
+      "category": "SYSTem",
+      "description": "Places the instrument in remote-with-lockout state (front panel fully locked, RS-232/RS-422 use).",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["SYST:RWL"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYSTem:VERSion?",
+      "category": "SYSTem",
+      "description": "Returns the SCPI version to which the instrument complies (YYYY.V format).",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "abort",
+      "mnemonic": "ABORt[1|2]",
+      "category": "TRIGger",
+      "description": "Aborts any measurement in progress on the selected channel and returns the trigger system to idle.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["ABOR1"]
+    },
+    {
+      "name": "initiate_continuous",
+      "mnemonic": "INITiate[1|2]:CONTinuous",
+      "category": "TRIGger",
+      "description": "Sets the selected channel to continuous (free-run) measurement initiation when ON, or single-shot when OFF.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["INIT1:CONT ON", "INIT1:CONT?"]
+    },
+    {
+      "name": "initiate_immediate",
+      "mnemonic": "INITiate[1|2][:IMMediate]",
+      "category": "TRIGger",
+      "description": "Initiates a single measurement cycle on the selected channel (when not in continuous mode).",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["INIT1", "INIT:IMM"]
+    },
+    {
+      "name": "trigger_delay_auto",
+      "mnemonic": "TRIGger[1|2]:DELay:AUTO",
+      "category": "TRIGger",
+      "description": "Enables or disables automatic settling-time delay before a triggered measurement on the selected channel.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+      ],
+      "examples": ["TRIG1:DEL:AUTO ON", "TRIG1:DEL:AUTO?"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "TRIGger[1|2][:IMMediate]",
+      "category": "TRIGger",
+      "description": "Causes an immediate trigger event on the selected channel, regardless of the trigger source setting.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["TRIG1", "TRIG:IMM"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIGger[1|2]:SOURce",
+      "category": "TRIGger",
+      "description": "Selects the trigger source for the selected channel: software BUS (*TRG/GET), IMMediate (free run), or HOLD (no trigger).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "source", "units": "", "range": "BUS | IMMediate | HOLD" }
+      ],
+      "examples": ["TRIG1:SOUR IMM", "TRIG1:SOUR?"]
+    },
+    {
+      "name": "unit_power",
+      "mnemonic": "UNIT[1|2]:POWer",
+      "category": "UNIT",
+      "description": "Sets the measurement units for the selected window's absolute power readings. Also sets the default power suffix for relevant SENSe commands. Default is dBm.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "amplitude_unit", "units": "", "range": "W | DBM" }
+      ],
+      "examples": ["UNIT1:POW DBM", "UNIT2:POW?"]
+    },
+    {
+      "name": "unit_power_ratio",
+      "mnemonic": "UNIT[1|2]:POWer:RATio",
+      "category": "UNIT",
+      "description": "Sets the measurement units for the selected window's ratio readings. Default is dB.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "ratio_unit", "units": "", "range": "DB | PCT" }
+      ],
+      "examples": ["UNIT1:POW:RAT DB", "UNIT1:POW:RAT?"]
+    },
+    {
+      "name": "service_option",
+      "mnemonic": "SERVice:OPTion",
+      "category": "SERVice",
+      "description": "Sets or queries the instrument option configuration string (service use).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "option string" }
+      ],
+      "examples": ["SERV:OPT?"]
+    },
+    {
+      "name": "service_sensor_cdate",
+      "mnemonic": "SERVice:SENSor[1|2]:CDATE?",
+      "category": "SERVice",
+      "description": "Returns the calibration date stored in the connected sensor's EEPROM for the selected channel (E-Series sensors).",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SERV:SENS1:CDATE?"]
+    },
+    {
+      "name": "service_sensor_cplace",
+      "mnemonic": "SERVice:SENSor[1|2]:CPLace?",
+      "category": "SERVice",
+      "description": "Returns the calibration place stored in the connected sensor's EEPROM for the selected channel.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SERV:SENS1:CPL?"]
+    },
+    {
+      "name": "service_sensor_snumber",
+      "mnemonic": "SERVice:SENSor[1|2]:SNUMber?",
+      "category": "SERVice",
+      "description": "Returns the serial number stored in the connected sensor's EEPROM for the selected channel.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SERV:SENS1:SNUM?"]
+    },
+    {
+      "name": "service_sensor_type",
+      "mnemonic": "SERVice:SENSor[1|2]:TYPE?",
+      "category": "SERVice",
+      "description": "Returns the sensor type stored in the connected sensor's EEPROM for the selected channel.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["SERV:SENS1:TYPE?"]
+    },
+    {
+      "name": "service_snumber",
+      "mnemonic": "SERVice:SNUMber",
+      "category": "SERVice",
+      "description": "Sets or queries the instrument's serial number (service use).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "alpha_numeric", "units": "", "range": "serial number string" }
+      ],
+      "examples": ["SERV:SNUM?"]
+    },
+    {
+      "name": "service_version_processor",
+      "mnemonic": "SERVice:VERSion:PROCessor",
+      "category": "SERVice",
+      "description": "Returns (or sets, service use) the processor firmware version string.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "version string" }
+      ],
+      "examples": ["SERV:VERS:PROC?"]
+    },
+    {
+      "name": "service_version_system",
+      "mnemonic": "SERVice:VERSion:SYSTem",
+      "category": "SERVice",
+      "description": "Returns (or sets, service use) the system firmware version string.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "string", "units": "", "range": "version string" }
+      ],
+      "examples": ["SERV:VERS:SYST?"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears the Standard Event Status register, the error/event queue and other event registers.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "define_device_trigger",
+      "mnemonic": "*DDT",
+      "category": "Common",
+      "description": "Defines the command sequence executed when a Group Execute Trigger (GET) or *TRG is received.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "data", "units": "", "range": "arbitrary block program data or string program data" }
+      ],
+      "examples": ["*DDT #15INIT1", "*DDT?"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Sets the Standard Event Status Enable register mask.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "NRf", "units": "", "range": "0 to 255" }
+      ],
+      "examples": ["*ESE 60", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Reads and clears the Standard Event Status register (returns NR1 0 to 255).",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Returns the instrument identification string: manufacturer, model, serial number and firmware revision.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Sets the Operation Complete bit in the Standard Event Status register when all pending operations finish; the query (*OPC?) returns 1 when complete.",
+      "set": true,
+      "query": true,
+      "parameters": [],
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "option_identify",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Returns a comma-separated list of installed instrument options.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recalls a previously stored instrument state from the specified register.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "NRf", "units": "", "range": "register number (0 to NSTates-1)" }
+      ],
+      "examples": ["*RCL 1"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the instrument to its default measurement state.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["*RST"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Saves the current instrument state to the specified register.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "NRf", "units": "", "range": "register number (0 to NSTates-1)" }
+      ],
+      "examples": ["*SAV 1"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Sets the Service Request Enable register mask.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "NRf", "units": "", "range": "0 to 255" }
+      ],
+      "examples": ["*SRE 32", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Reads the Status Byte register (returns NR1 0 to 255) without clearing it.",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Triggers the instrument (equivalent to a Group Execute Trigger) when the trigger source is set to BUS.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Initiates the instrument self-test and returns the result (0 = pass, non-zero = failure).",
+      "set": false,
+      "query": true,
+      "parameters": [],
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Prevents the instrument from executing further commands until all pending overlapped operations complete.",
+      "set": true,
+      "query": false,
+      "parameters": [],
+      "examples": ["*WAI"]
+    }
+  ]
+}

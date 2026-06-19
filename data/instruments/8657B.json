@@ -1,0 +1,297 @@
+{
+  "model": "8657B",
+  "manufacturer": "HP",
+  "category": "Signal Generator",
+  "description": "HP 8657B synthesized signal generator (100 kHz to 2060 MHz). Legacy HP-IB (IEEE-488) instrument using two-letter function/units program codes, NOT SCPI. It is listen-only: the Signal Generator cannot talk, so it has no query forms and no identify query. Carrier parameters use a Function-Data-Units sequence (e.g. FR 123.4 MZ); modulation parameters use a Source-Function-Data-Units sequence. Program codes may be upper or lower case. Pulse modulation (PM/PF) and the RF DEAD (R5) feature are available on the 8657B only.",
+  "source": "8657B-OCM.pdf",
+  "aliases": ["8657B", "HP8657B", "8657A", "8656B"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "FR",
+      "category": "Frequency",
+      "description": "Carrier frequency function entry. Follow with a numeric value and a frequency unit code (HZ, KZ, or MZ). Up to 10 digits. Default after Clear: 100.00000 MHz.",
+      "set": "FR <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "100 kHz to 2060 MHz (10 kHz with uncalibrated output)" }
+      ],
+      "examples": ["FR 123.4 MZ", "FR 100 MZ"]
+    },
+    {
+      "name": "amplitude",
+      "mnemonic": "AP",
+      "category": "Amplitude",
+      "description": "Carrier output amplitude function entry. Follow with a numeric value (minus sign allowed) and an amplitude unit code. Default after Clear: -143.5 dBm.",
+      "set": "AP <value> <unit>",
+      "parameters": [
+        { "name": "amplitude", "units": ["DM", "DB", "DF", "EM", "VL", "MV", "UV"], "range": "+17 dBm to -143.5 dBm into 50 ohm (DM=dBm, DB=dB, DF=dBf, EM=EMF, VL=Volts, MV=mV, UV=uV)" }
+      ],
+      "examples": ["AP -10 DM", "AP 15.0 DB"]
+    },
+    {
+      "name": "amplitude_offset",
+      "mnemonic": "AO",
+      "category": "Amplitude",
+      "description": "Amplitude offset function entry.",
+      "set": "AO <value> <unit>",
+      "parameters": [
+        { "name": "offset", "units": ["DB"] }
+      ],
+      "examples": ["AO 0 DB"]
+    },
+    {
+      "name": "am_depth",
+      "mnemonic": "AM",
+      "category": "Modulation",
+      "description": "Amplitude modulation depth function entry. Used with a modulation source qualifier (S1/S2/S3/S4). Up to 3 digits. Units in percent (PC or %). Default after Clear: 0%.",
+      "set": "AM <value> <unit>",
+      "parameters": [
+        { "name": "depth", "units": ["PC", "%"], "range": "0 to 99 %" }
+      ],
+      "examples": ["S2 AM 30 PC", "AM 50 %"]
+    },
+    {
+      "name": "fm_deviation",
+      "mnemonic": "FM",
+      "category": "Modulation",
+      "description": "Frequency modulation peak deviation function entry. Used with a modulation source qualifier (S1/S2/S3/S4). Up to 3 digits. Default after Clear: 0.0 kHz.",
+      "set": "FM <value> <unit>",
+      "parameters": [
+        { "name": "deviation", "units": ["HZ", "KZ"], "range": "0 to 200 kHz (band dependent: 3-100 kHz at 0.1-1040 MHz, 6-200 kHz at 1040-2060 MHz)" }
+      ],
+      "examples": ["S3 FM 10 KZ", "FM 5 KZ"]
+    },
+    {
+      "name": "dc_fm",
+      "mnemonic": "S5",
+      "category": "Modulation",
+      "description": "DC FM function entry / modulation source qualifier.",
+      "set": "S5",
+      "examples": ["S5 FM 10 KZ"]
+    },
+    {
+      "name": "pulse_modulation",
+      "mnemonic": "PM",
+      "category": "Modulation",
+      "description": "Pulse modulation function entry (8657B only; available as an option). Two pulse modulation modes can be selected (see also PF for fast mode).",
+      "set": "PM",
+      "examples": ["PM"]
+    },
+    {
+      "name": "pulse_modulation_fast",
+      "mnemonic": "PF",
+      "category": "Modulation",
+      "description": "Pulse modulation, fast mode (8657B only).",
+      "set": "PF",
+      "examples": ["PF"]
+    },
+    {
+      "name": "modulation_source_external",
+      "mnemonic": "S1",
+      "category": "Modulation",
+      "description": "Selects the external modulation source (source qualifier).",
+      "set": "S1",
+      "examples": ["S1 AM 30 PC"]
+    },
+    {
+      "name": "modulation_source_int_400hz",
+      "mnemonic": "S2",
+      "category": "Modulation",
+      "description": "Selects the internal 400 Hz modulation source (source qualifier).",
+      "set": "S2",
+      "examples": ["S2 FM 10 KZ"]
+    },
+    {
+      "name": "modulation_source_int_1khz",
+      "mnemonic": "S3",
+      "category": "Modulation",
+      "description": "Selects the internal 1 kHz modulation source (source qualifier).",
+      "set": "S3",
+      "examples": ["S3 AM 30 PC"]
+    },
+    {
+      "name": "modulation_source_off",
+      "mnemonic": "S4",
+      "category": "Modulation",
+      "description": "Turns the modulation source ON / OFF qualifier (Table 3-5: Modulation Source Off; Table 3-4: Modulation Source ON).",
+      "set": "S4",
+      "examples": ["S4"]
+    },
+    {
+      "name": "rf_off",
+      "mnemonic": "R2",
+      "category": "RF Output",
+      "description": "RF OFF (function feature).",
+      "set": "R2",
+      "examples": ["R2"]
+    },
+    {
+      "name": "rf_on",
+      "mnemonic": "R3",
+      "category": "RF Output",
+      "description": "RF ON (function feature).",
+      "set": "R3",
+      "examples": ["R3"]
+    },
+    {
+      "name": "rf_dead",
+      "mnemonic": "R5",
+      "category": "RF Output",
+      "description": "RF DEAD: switches in all attenuator pads for reduced spurs (8657B only).",
+      "set": "R5",
+      "examples": ["R5"]
+    },
+    {
+      "name": "standby",
+      "mnemonic": "R0",
+      "category": "RF Output",
+      "description": "Places the Signal Generator in the STBY (standby) state.",
+      "set": "R0",
+      "examples": ["R0"]
+    },
+    {
+      "name": "on",
+      "mnemonic": "R1",
+      "category": "RF Output",
+      "description": "Places the Signal Generator in the ON state.",
+      "set": "R1",
+      "examples": ["R1"]
+    },
+    {
+      "name": "reverse_power_protection_reset",
+      "mnemonic": "RP",
+      "category": "RF Output",
+      "description": "Resets the reverse power protection circuitry after the source of reverse power has been removed.",
+      "set": "RP",
+      "examples": ["RP"]
+    },
+    {
+      "name": "hi_alc",
+      "mnemonic": "HI",
+      "category": "Amplitude",
+      "description": "HI ALC function feature (not available on the HP 8656B).",
+      "set": "HI",
+      "examples": ["HI"]
+    },
+    {
+      "name": "lo_alc",
+      "mnemonic": "LO",
+      "category": "Amplitude",
+      "description": "LO ALC function feature (not available on the HP 8656B).",
+      "set": "LO",
+      "examples": ["LO"]
+    },
+    {
+      "name": "increment_set",
+      "mnemonic": "IS",
+      "category": "Increment",
+      "description": "Increment Set (function qualifier). Sets the step size for the currently selected function; data length is the same as the selected function. Used with the selected function's units.",
+      "set": "IS <value> <unit>",
+      "parameters": [
+        { "name": "increment", "range": "same as for the selected function" }
+      ],
+      "examples": ["IS 10 MZ"]
+    },
+    {
+      "name": "step_up",
+      "mnemonic": "UP",
+      "category": "Increment",
+      "description": "Step Up: increments the active function by the increment-set value.",
+      "set": "UP",
+      "examples": ["UP", "UP UP UP"]
+    },
+    {
+      "name": "step_down",
+      "mnemonic": "DN",
+      "category": "Increment",
+      "description": "Step Down: decrements the active function by the increment-set value.",
+      "set": "DN",
+      "examples": ["DN"]
+    },
+    {
+      "name": "phase_increment",
+      "mnemonic": "PI",
+      "category": "Increment",
+      "description": "Phase Increment (function feature).",
+      "set": "PI",
+      "examples": ["PI"]
+    },
+    {
+      "name": "phase_decrement",
+      "mnemonic": "PD",
+      "category": "Increment",
+      "description": "Phase Decrement (function feature).",
+      "set": "PD",
+      "examples": ["PD"]
+    },
+    {
+      "name": "save",
+      "mnemonic": "ST",
+      "category": "Memory",
+      "description": "Save the current setup into a register (0-9).",
+      "set": "ST<n>",
+      "parameters": [
+        { "name": "register", "range": "0-9" }
+      ],
+      "examples": ["ST 0", "ST 9"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "Memory",
+      "description": "Recall a saved setup from a register (0-9).",
+      "set": "RC<n>",
+      "parameters": [
+        { "name": "register", "range": "0-9" }
+      ],
+      "examples": ["RC 0", "RC 9"]
+    },
+    {
+      "name": "save_extended",
+      "mnemonic": "SV",
+      "category": "Memory",
+      "description": "Save the current setup into an extended register (0-99).",
+      "set": "SV<n>",
+      "parameters": [
+        { "name": "register", "range": "0-99" }
+      ],
+      "examples": ["SV 0", "SV 99"]
+    },
+    {
+      "name": "recall_extended",
+      "mnemonic": "RL",
+      "category": "Memory",
+      "description": "Recall a saved setup from an extended register (0-99).",
+      "set": "RL<n>",
+      "parameters": [
+        { "name": "register", "range": "0-99" }
+      ],
+      "examples": ["RL 0", "RL 99"]
+    },
+    {
+      "name": "sequence",
+      "mnemonic": "SEQ",
+      "category": "Sequence",
+      "description": "Sequence feature: steps through saved setups. Default sequence counter after Clear: 0.",
+      "set": "SEQ",
+      "examples": ["SEQ"]
+    },
+    {
+      "name": "flexible_sequence",
+      "mnemonic": "GT",
+      "category": "Sequence",
+      "description": "Flexible Sequence (Go To) feature.",
+      "set": "GT",
+      "examples": ["GT"]
+    },
+    {
+      "name": "reverse_sequence",
+      "mnemonic": "RS",
+      "category": "Sequence",
+      "description": "Reverse Sequence feature: steps backward through the sequence.",
+      "set": "RS",
+      "examples": ["RS"]
+    }
+  ]
+}

@@ -1,0 +1,1094 @@
+{
+  "model": "3458A",
+  "manufacturer": "HP/Agilent",
+  "category": "Digital Multimeter",
+  "description": "HP/Agilent 3458A 8.5-digit Digital Multimeter. Uses its own native command language (not SCPI). Provides DC/AC voltage and current, 2-/4-wire resistance, frequency, period, direct- and sub-sampled digitizing, extensive real-time and post-process math, reading memory, subprograms, state storage, autocalibration and triggering control.",
+  "source": "3458A Multimeter User's Guide.pdf",
+  "aliases": ["3458A", "HP3458A", "Agilent 3458A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "ID?",
+    "matchRegex": "3458A",
+    "description": "Identity Query. The multimeter responds to the ID? command by sending the string 'HP 3458A'."
+  },
+  "commands": [
+    {
+      "name": "autocal",
+      "mnemonic": "ACAL",
+      "category": "Calibration",
+      "description": "Autocal. Performs an internal self-calibration routine (ALL, DCV, AC, or OHMS) without external standards. Constants are stored in continuous memory.",
+      "set": "ACAL <mode>[,<security_code>]",
+      "parameters": [
+        { "name": "mode", "range": "ALL | DCV | AC | OHMS" },
+        { "name": "security_code", "range": "integer (required when autocal secured)" }
+      ],
+      "examples": ["ACAL ALL,3458", "ACAL DCV"]
+    },
+    {
+      "name": "ac_bandwidth",
+      "mnemonic": "ACBAND",
+      "category": "Measurement Configuration",
+      "description": "AC bandwidth. Specifies the frequency content (lowest and highest expected frequency) of the input signal for AC or AC+DC measurements, allowing the fastest possible measurement.",
+      "set": "ACBAND [<low_frequency>][,<high_frequency>]",
+      "query": "ACBAND?",
+      "parameters": [
+        { "name": "low_frequency", "units": "Hz", "range": "power-on 20 Hz; default 20 Hz" },
+        { "name": "high_frequency", "units": "Hz", "range": "power-on 20 MHz; default 2 MHz" }
+      ],
+      "examples": ["ACBAND 500,1000", "ACBAND?"]
+    },
+    {
+      "name": "gpib_address",
+      "mnemonic": "ADDRESS",
+      "category": "System",
+      "description": "Sets the multimeter's GPIB address (front panel only). Stored in continuous memory. Address 31 selects Talk Only mode.",
+      "set": "ADDRESS <value>",
+      "query": "ADDRESS?",
+      "parameters": [
+        { "name": "value", "range": "0 to 31 (factory setting 22)" }
+      ],
+      "examples": ["ADDRESS 22"]
+    },
+    {
+      "name": "aperture",
+      "mnemonic": "APER",
+      "category": "Measurement Configuration",
+      "description": "Aperture. Specifies the A/D converter integration time in seconds, overriding any previously specified integration time or resolution.",
+      "set": "APER [<aperture>]",
+      "query": "APER?",
+      "parameters": [
+        { "name": "aperture", "units": "s", "range": "0 to 1 s in 100 ns increments; values <500 ns select 500 ns minimum; default 500 ns" }
+      ],
+      "examples": ["APER 10E-6", "APER?"]
+    },
+    {
+      "name": "autorange",
+      "mnemonic": "ARANGE",
+      "category": "Measurement Configuration",
+      "description": "Autorange. Enables or disables the autorange function. Does not operate for direct-/sub-sampled measurements, the TIMER sample event, or the SWEEP command.",
+      "set": "ARANGE [<control>]",
+      "query": "ARANGE?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1) | ONCE(2); power-on ON" }
+      ],
+      "examples": ["ARANGE OFF", "ARANGE ON"]
+    },
+    {
+      "name": "auxiliary_error_query",
+      "mnemonic": "AUXERR?",
+      "category": "Status",
+      "description": "Auxiliary Error Query. Returns the decimal-weighted sum of all set bits in the auxiliary (hardware) error register, then clears the register.",
+      "query": "AUXERR?",
+      "examples": ["AUXERR?"]
+    },
+    {
+      "name": "autozero",
+      "mnemonic": "AZERO",
+      "category": "Measurement Configuration",
+      "description": "Autozero. Enables or disables the autozero function for DC voltage, DC current, and resistance measurements. When ON a zero measurement is subtracted from every reading.",
+      "set": "AZERO [<control>]",
+      "query": "AZERO?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1) | ONCE(2); power-on ON" }
+      ],
+      "examples": ["AZERO OFF", "AZERO ON"]
+    },
+    {
+      "name": "beeper",
+      "mnemonic": "BEEP",
+      "category": "System",
+      "description": "Controls the multimeter's beeper. When enabled the beeper emits a 1 kHz beep if an error occurs.",
+      "set": "BEEP [<control>]",
+      "query": "BEEP?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1) | ONCE(2)" }
+      ],
+      "examples": ["BEEP OFF", "BEEP ON"]
+    },
+    {
+      "name": "calibrate",
+      "mnemonic": "CAL",
+      "category": "Calibration",
+      "description": "Calibration command. Refer to the 3458A Calibration Manual for details.",
+      "set": "CAL",
+      "examples": ["CAL"]
+    },
+    {
+      "name": "call_subprogram",
+      "mnemonic": "CALL",
+      "category": "Subprograms",
+      "description": "Call Subprogram. Executes a previously stored subprogram created with SUB.",
+      "set": "CALL [<name>]",
+      "parameters": [
+        { "name": "name", "range": "alpha/alphanumeric or integer 0-127, up to 10 characters" }
+      ],
+      "examples": ["CALL DCCUR2"]
+    },
+    {
+      "name": "calibration_number_query",
+      "mnemonic": "CALNUM?",
+      "category": "Calibration",
+      "description": "Calibration Number Query. Returns an integer indicating the number of times the multimeter has been calibrated.",
+      "query": "CALNUM?",
+      "examples": ["CALNUM?"]
+    },
+    {
+      "name": "calibration_string",
+      "mnemonic": "CALSTR",
+      "category": "Calibration",
+      "description": "Calibration String (remote only). Stores a string (up to 75 characters) in the multimeter's nonvolatile calibration RAM.",
+      "set": "CALSTR <string>[,<security_code>]",
+      "query": "CALSTR?",
+      "parameters": [
+        { "name": "string", "range": "quoted string up to 75 characters" },
+        { "name": "security_code", "range": "integer (required when cal RAM secured)" }
+      ],
+      "examples": ["CALSTR 'CALIBRATED 04/02/1987'", "CALSTR?"]
+    },
+    {
+      "name": "compress_subprogram",
+      "mnemonic": "COMPRESS",
+      "category": "Subprograms",
+      "description": "Compress Subprogram. Removes the ASCII text of a stored subprogram to save memory; the subprogram is then lost when power is removed.",
+      "set": "COMPRESS <name>",
+      "parameters": [
+        { "name": "name", "range": "subprogram name (up to 10 chars or integer 0-127)" }
+      ],
+      "examples": ["COMPRESS TEST12"]
+    },
+    {
+      "name": "continue",
+      "mnemonic": "CONT",
+      "category": "Subprograms",
+      "description": "Continue. Resumes execution of a subprogram suspended by a PAUSE command.",
+      "set": "CONT",
+      "examples": ["CONT"]
+    },
+    {
+      "name": "clear_status_byte",
+      "mnemonic": "CSB",
+      "category": "Status",
+      "description": "Clear Status Byte. Clears (sets to 0) all bits in the status register.",
+      "set": "CSB",
+      "examples": ["CSB"]
+    },
+    {
+      "name": "defeat",
+      "mnemonic": "DEFEAT",
+      "category": "Measurement Configuration",
+      "description": "Enables or disables the input protection algorithm and some syntax/error checking, allowing faster configuration changes. Use with caution (see manual).",
+      "set": "DEFEAT [<mode>]",
+      "query": "DEFEAT?",
+      "parameters": [
+        { "name": "mode", "range": "OFF(0)=protection enabled | ON(1)=protection disabled; power-on OFF" }
+      ],
+      "examples": ["DEFEAT ON", "DEFEAT OFF"]
+    },
+    {
+      "name": "define_key",
+      "mnemonic": "DEFKEY",
+      "category": "Display",
+      "description": "Define Key. Assigns one or more commands to a user-defined front panel function key (f0-f9). DEFKEY DEFAULT erases all assigned key strings.",
+      "set": "DEFKEY <number>,<string> | DEFKEY DEFAULT",
+      "parameters": [
+        { "name": "number", "range": "0-9 (or F0-F9)" },
+        { "name": "string", "range": "quoted command list up to 40 characters" }
+      ],
+      "examples": ["DEFKEY 0,'DCV 10'", "DEFKEY DEFAULT"]
+    },
+    {
+      "name": "delay",
+      "mnemonic": "DELAY",
+      "category": "Triggering",
+      "description": "Specifies a time interval inserted between the trigger event and the first sample event.",
+      "set": "DELAY [<time>]",
+      "query": "DELAY?",
+      "parameters": [
+        { "name": "time", "units": "s", "range": "1E-7 to 6000 s (10 ns increments for sampling, 100 ns otherwise); 0 selects minimum; -1 returns to automatic" }
+      ],
+      "examples": ["DELAY 5", "DELAY -1"]
+    },
+    {
+      "name": "delete_subprogram",
+      "mnemonic": "DELSUB",
+      "category": "Subprograms",
+      "description": "Delete Subprogram. Removes a single subprogram from memory.",
+      "set": "DELSUB <name>",
+      "parameters": [
+        { "name": "name", "range": "subprogram name (up to 10 chars or integer 0-127)" }
+      ],
+      "examples": ["DELSUB TEST12"]
+    },
+    {
+      "name": "diagnostic",
+      "mnemonic": "DIAGNOST",
+      "category": "System",
+      "description": "Service-related command. Refer to the 3458A Service Manual for details.",
+      "set": "DIAGNOST",
+      "examples": ["DIAGNOST"]
+    },
+    {
+      "name": "display",
+      "mnemonic": "DISP",
+      "category": "Display",
+      "description": "Display. Enables or disables the display, sends a message to the display, or clears it.",
+      "set": "DISP [<control>][,<message>]",
+      "query": "DISP?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1) | MSG(2) | CLR(3)" },
+        { "name": "message", "range": "text up to 75 characters" }
+      ],
+      "examples": ["DISP OFF,TIME-OUT", "DISP MSG,'TIME OUT'"]
+    },
+    {
+      "name": "direct_sampling",
+      "mnemonic": "DSAC, DSDC",
+      "category": "Measurement Function",
+      "description": "Direct-Sampling (digitizing). DSAC measures only the AC component; DSDC measures combined AC+DC. Uses the 2 ns track/hold and 12 MHz input path. No autorange; range set by max._input.",
+      "set": "DSAC [<max._input>][,<%_resolution>] | DSDC [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "V", "range": "selects range 10mV..1000V (0 to 1E3); default 10V" },
+        { "name": "%_resolution", "range": "ignored (allowed for syntax consistency)" }
+      ],
+      "examples": ["DSDC 10", "DSAC 1"]
+    },
+    {
+      "name": "error_mask",
+      "mnemonic": "EMASK",
+      "category": "Status",
+      "description": "Error Mask. Enables specified error conditions to set the error bit (bit 5) in the status register. Value is the decimal-weighted sum of enabled error conditions.",
+      "set": "EMASK [<value>]",
+      "query": "EMASK?",
+      "parameters": [
+        { "name": "value", "range": "0 to 32767 (weighted sum of error conditions); power-on 32767" }
+      ],
+      "examples": ["EMASK 4", "EMASK 0"]
+    },
+    {
+      "name": "eoi_control",
+      "mnemonic": "END",
+      "category": "GPIB",
+      "description": "Enables or disables the GPIB End Or Identify (EOI) function for readings.",
+      "set": "END [<control>]",
+      "query": "END?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1) | ALWAYS(2)" }
+      ],
+      "examples": ["END ALWAYS", "END OFF"]
+    },
+    {
+      "name": "error_query",
+      "mnemonic": "ERR?",
+      "category": "Status",
+      "description": "Error Query. Returns the decimal-weighted sum of all set bits in the error register, clears the register, and shuts off the ERR annunciator.",
+      "query": "ERR?",
+      "examples": ["ERR?"]
+    },
+    {
+      "name": "error_string_query",
+      "mnemonic": "ERRSTR?",
+      "category": "Status",
+      "description": "Error String Query. Reads and clears the least significant set bit in the error or auxiliary error register and returns an error number and explanatory message string.",
+      "query": "ERRSTR?",
+      "examples": ["ERRSTR?"]
+    },
+    {
+      "name": "external_output",
+      "mnemonic": "EXTOUT",
+      "category": "Triggering",
+      "description": "External Output. Specifies the event that generates a signal on the rear panel Ext Out connector and its polarity.",
+      "set": "EXTOUT [<event>][,<polarity>]",
+      "query": "EXTOUT?",
+      "parameters": [
+        { "name": "event", "range": "OFF(0) | ICOMP(1) | ONCE(2) | APER(3) | BCOMP(4) | SRQ(5) | RCOMP(6); power-on ICOMP" },
+        { "name": "polarity", "range": "NEG(0) | POS(1); power-on NEG" }
+      ],
+      "examples": ["EXTOUT APER", "EXTOUT ICOMP,NEG"]
+    },
+    {
+      "name": "fixed_impedance",
+      "mnemonic": "FIXEDZ",
+      "category": "Measurement Configuration",
+      "description": "Enables or disables fixed input resistance (10 MΩ on all ranges) for DC voltage measurements, preventing input-resistance changes from affecting readings.",
+      "set": "FIXEDZ [<control>]",
+      "query": "FIXEDZ?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1); power-on OFF" }
+      ],
+      "examples": ["FIXEDZ ON", "FIXEDZ OFF"]
+    },
+    {
+      "name": "frequency",
+      "mnemonic": "FREQ",
+      "category": "Measurement Function",
+      "description": "Frequency. Measures the frequency of the input signal. Input signal type is set with FSOURCE.",
+      "set": "FREQ [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "range": "fixed range value or AUTO; default AUTO" },
+        { "name": "%_resolution", "range": ".00001(7 digit,1s gate) | .0001 | .001 | .01 | .1(4 digit,100us gate); default .00001" }
+      ],
+      "examples": ["FREQ .01,.001", "FSOURCE ACI"]
+    },
+    {
+      "name": "frequency_source",
+      "mnemonic": "FSOURCE",
+      "category": "Measurement Configuration",
+      "description": "Frequency Source. Specifies the type of signal used as the input for frequency or period measurements.",
+      "set": "FSOURCE [<source>]",
+      "query": "FSOURCE?",
+      "parameters": [
+        { "name": "source", "range": "ACV(2) | ACDCV(3) | ACI(7) | ACDCI(8); power-on ACV" }
+      ],
+      "examples": ["FSOURCE ACDCI", "FSOURCE ACV"]
+    },
+    {
+      "name": "function",
+      "mnemonic": "FUNC",
+      "category": "Measurement Function",
+      "description": "Function. Selects the measurement type and optionally the range and resolution. The FUNC header is optional and may be omitted. Function names (DCV, ACV, OHM, etc.) can be sent directly.",
+      "set": "FUNC <function>[,<max._input>][,<%_resolution>]",
+      "query": "FUNC?",
+      "parameters": [
+        { "name": "function", "range": "DCV(1) | ACV(2) | ACDCV(3) | OHM(4) | OHMF(5) | DCI(6) | ACI(7) | ACDCI(8) | FREQ(9) | PER(10) | DSAC(11) | DSDC(12) | SSAC(13) | SSDC(14); power-on DCV" },
+        { "name": "max._input", "range": "absolute value of expected input to select a range, or AUTO; power-on AUTO" },
+        { "name": "%_resolution", "range": "percentage of max._input (or digits/gate for FREQ,PER)" }
+      ],
+      "examples": ["FUNC DCV,10,.001", "FUNC OHM,1E3,.001"]
+    },
+    {
+      "name": "dc_voltage",
+      "mnemonic": "DCV",
+      "category": "Measurement Function",
+      "description": "Selects DC voltage measurements (FUNC DCV). Ranges 100mV, 1V, 10V, 100V, 1000V.",
+      "set": "DCV [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "V", "range": "0 to 1E3 selects 100mV..1000V; -1 or AUTO for autorange" },
+        { "name": "%_resolution", "range": "percentage of max._input" }
+      ],
+      "examples": ["DCV 10", "DCV 6,.00167"]
+    },
+    {
+      "name": "ac_voltage",
+      "mnemonic": "ACV",
+      "category": "Measurement Function",
+      "description": "Selects AC voltage measurements (FUNC ACV). Conversion method set by SETACV. Ranges 10mV..1000V.",
+      "set": "ACV [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "V", "range": "0 to 1E3 selects 10mV..1000V; -1 or AUTO for autorange" },
+        { "name": "%_resolution", "range": "percentage of max._input" }
+      ],
+      "examples": ["ACV 10", "ACV"]
+    },
+    {
+      "name": "acdc_voltage",
+      "mnemonic": "ACDCV",
+      "category": "Measurement Function",
+      "description": "Selects AC+DC voltage measurements (FUNC ACDCV). Conversion method set by SETACV.",
+      "set": "ACDCV [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "V", "range": "0 to 1E3 selects 10mV..1000V; -1 or AUTO for autorange" }
+      ],
+      "examples": ["ACDCV 10", "ACDCV"]
+    },
+    {
+      "name": "ohms_2wire",
+      "mnemonic": "OHM",
+      "category": "Measurement Function",
+      "description": "Selects 2-wire ohms measurements (FUNC OHM). Ranges 10Ω..1GΩ.",
+      "set": "OHM [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "ohm", "range": "0 to 1.2E9 selects 10Ω..1GΩ; -1 or AUTO for autorange" },
+        { "name": "%_resolution", "range": "percentage of max._input" }
+      ],
+      "examples": ["OHM 1E3,.001", "OHM"]
+    },
+    {
+      "name": "ohms_4wire",
+      "mnemonic": "OHMF",
+      "category": "Measurement Function",
+      "description": "Selects 4-wire ohms measurements (FUNC OHMF). Ranges 10Ω..1GΩ.",
+      "set": "OHMF [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "ohm", "range": "0 to 1.2E9 selects 10Ω..1GΩ; -1 or AUTO for autorange" }
+      ],
+      "examples": ["OHMF 1E3", "OHMF"]
+    },
+    {
+      "name": "dc_current",
+      "mnemonic": "DCI",
+      "category": "Measurement Function",
+      "description": "Selects DC current measurements (FUNC DCI). Ranges 0.1uA..1A.",
+      "set": "DCI [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "A", "range": "0 to 1.2 selects .1uA..1A; -1 or AUTO for autorange" }
+      ],
+      "examples": ["DCI 1", "DCI"]
+    },
+    {
+      "name": "ac_current",
+      "mnemonic": "ACI",
+      "category": "Measurement Function",
+      "description": "Selects AC current measurements (FUNC ACI). Ranges 100uA..1A.",
+      "set": "ACI [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "A", "range": "0 to 1.2 selects 100uA..1A; -1 or AUTO for autorange" }
+      ],
+      "examples": ["ACI 1", "ACI"]
+    },
+    {
+      "name": "acdc_current",
+      "mnemonic": "ACDCI",
+      "category": "Measurement Function",
+      "description": "Selects AC+DC current measurements (FUNC ACDCI). Ranges 100uA..1A.",
+      "set": "ACDCI [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "A", "range": "0 to 1.2 selects 100uA..1A; -1 or AUTO for autorange" }
+      ],
+      "examples": ["ACDCI 1", "ACDCI"]
+    },
+    {
+      "name": "identity_query",
+      "mnemonic": "ID?",
+      "category": "System",
+      "description": "Identity Query. The multimeter responds by sending the string 'HP 3458A', allowing the GPIB controller to locate the multimeter by its address.",
+      "query": "ID?",
+      "examples": ["ID?"]
+    },
+    {
+      "name": "input_buffer",
+      "mnemonic": "INBUF",
+      "category": "GPIB",
+      "description": "Input Buffer. Enables or disables the input buffer. When enabled, commands are stored, releasing the bus immediately.",
+      "set": "INBUF [<control>]",
+      "query": "INBUF?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1); power-on OFF" }
+      ],
+      "examples": ["INBUF ON", "INBUF OFF"]
+    },
+    {
+      "name": "integer_scale_query",
+      "mnemonic": "ISCALE?",
+      "category": "Data Output",
+      "description": "Integer Scale Query. Returns the scale factor for readings output in SINT or DINT formats. Multiply integer readings by this factor to restore actual values.",
+      "query": "ISCALE?",
+      "examples": ["ISCALE?"]
+    },
+    {
+      "name": "level",
+      "mnemonic": "LEVEL",
+      "category": "Triggering",
+      "description": "Specifies the level triggering voltage (as a percentage of the present range) and the coupling (AC or DC) for level triggering.",
+      "set": "LEVEL [<percentage>][,<coupling>]",
+      "query": "LEVEL?",
+      "parameters": [
+        { "name": "percentage", "units": "%", "range": "-500% to +500% (5% steps, sampling) or -120% to 120% (1% steps, DCV); power-on 0%" },
+        { "name": "coupling", "range": "DC(1) | AC(2); power-on AC" }
+      ],
+      "examples": ["LEVEL 50,AC", "LEVEL 250,DC"]
+    },
+    {
+      "name": "level_filter",
+      "mnemonic": "LFILTER",
+      "category": "Triggering",
+      "description": "Level Filter. Enables or disables a single-pole low-pass filter (75 kHz 3-dB point) on the level-detection circuitry to prevent false triggers.",
+      "set": "LFILTER [<control>]",
+      "query": "LFILTER?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1); power-on OFF" }
+      ],
+      "examples": ["LFILTER ON", "LFILTER OFF"]
+    },
+    {
+      "name": "line_frequency_reference",
+      "mnemonic": "LFREQ",
+      "category": "Measurement Configuration",
+      "description": "Specifies the A/D converter's reference frequency, or with LINE measures the line frequency and sets the reference to the measured value.",
+      "set": "LFREQ [<frequency>] | LFREQ LINE",
+      "query": "LFREQ?",
+      "parameters": [
+        { "name": "frequency", "units": "Hz", "range": "45-65 Hz or 360-440 Hz (divided by 8); or LINE to measure" }
+      ],
+      "examples": ["LFREQ LINE", "LFREQ 60"]
+    },
+    {
+      "name": "line_frequency_query",
+      "mnemonic": "LINE?",
+      "category": "Measurement Configuration",
+      "description": "Line Frequency Query. Measures and returns the frequency of the AC power line.",
+      "query": "LINE?",
+      "examples": ["LINE?"]
+    },
+    {
+      "name": "lockout",
+      "mnemonic": "LOCK",
+      "category": "System",
+      "description": "Lockout. Enables or disables the multimeter's front panel keyboard (including the Local key).",
+      "set": "LOCK [<control>]",
+      "query": "LOCK?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0)=keyboard enabled | ON(1)=keyboard disabled; power-on OFF" }
+      ],
+      "examples": ["LOCK ON", "LOCK OFF"]
+    },
+    {
+      "name": "math",
+      "mnemonic": "MATH",
+      "category": "Math",
+      "description": "Enables or disables real-time math operations (up to two). operation_b is performed on the result of operation_a.",
+      "set": "MATH [<operation_a>][,<operation_b>]",
+      "query": "MATH?",
+      "parameters": [
+        { "name": "operation", "range": "OFF(0) | CONT(1) | CTHRM(3) | DB(4) | DBM(5) | FILTER(6) | FTHRM(8) | NULL(9) | PERC(10) | PFAIL(11) | RMS(12) | SCALE(13) | STAT(14) | CTHRM2K(16) | CTHRM10K(17) | FTHRM2K(18) | FTHRM10K(19) | CRTD85(20) | CRTD92(21) | FRTD85(22) | FRTD92(23); power-on OFF" }
+      ],
+      "examples": ["MATH NULL", "MATH OFF"]
+    },
+    {
+      "name": "memory_count_query",
+      "mnemonic": "MCOUNT?",
+      "category": "Memory",
+      "description": "Memory Count Query. Returns the total number of stored readings.",
+      "query": "MCOUNT?",
+      "examples": ["MCOUNT?"]
+    },
+    {
+      "name": "memory",
+      "mnemonic": "MEM",
+      "category": "Memory",
+      "description": "Memory. Enables or disables reading memory and designates the storage mode (LIFO/FIFO).",
+      "set": "MEM [<mode>]",
+      "query": "MEM?",
+      "parameters": [
+        { "name": "mode", "range": "OFF(0) | LIFO(1) | FIFO(2) | CONT(3); power-on OFF" }
+      ],
+      "examples": ["MEM FIFO", "MEM OFF"]
+    },
+    {
+      "name": "menu",
+      "mnemonic": "MENU",
+      "category": "Display",
+      "description": "Selects the SHORT or FULL list of commands in the front panel's alphabetic command menu.",
+      "set": "MENU [<mode>]",
+      "query": "MENU?",
+      "parameters": [
+        { "name": "mode", "range": "SHORT(0) | FULL(1)" }
+      ],
+      "examples": ["MENU SHORT", "MENU FULL"]
+    },
+    {
+      "name": "memory_format",
+      "mnemonic": "MFORMAT",
+      "category": "Memory",
+      "description": "Memory Format. Clears reading memory and designates the storage format for new readings.",
+      "set": "MFORMAT [<format>]",
+      "query": "MFORMAT?",
+      "parameters": [
+        { "name": "format", "range": "ASCII(1) | SINT(2) | DINT(3) | SREAL(4) | DREAL(5); power-on SREAL" }
+      ],
+      "examples": ["MFORMAT DINT", "MFORMAT SINT"]
+    },
+    {
+      "name": "memory_math",
+      "mnemonic": "MMATH",
+      "category": "Math",
+      "description": "Memory Math. Enables or disables post-process math operations performed as readings are removed/copied from reading memory.",
+      "set": "MMATH [<operation_a>][,<operation_b>]",
+      "query": "MMATH?",
+      "parameters": [
+        { "name": "operation", "range": "OFF(0) | CONT(1) | CTHRM(3) | DB(4) | DBM(5) | FILTER(6) | FTHRM(8) | NULL(9) | PERC(10) | PFAIL(11) | RMS(12) | SCALE(13) | STAT(14) | CTHRM2K(16) | CTHRM10K(17) | FTHRM2K(18) | FTHRM10K(19) | CRTD85(20) | CRTD92(21) | FRTD85(22) | FRTD92(23); power-on OFF" }
+      ],
+      "examples": ["MMATH NULL", "MMATH STAT"]
+    },
+    {
+      "name": "memory_size",
+      "mnemonic": "MSIZE",
+      "category": "Memory",
+      "description": "Memory Size. Accepted for language compatibility (performs no action). The MSIZE? query returns total reading memory and the largest unused block of subprogram/state memory.",
+      "set": "MSIZE [<reading_memory>][,<subprogram_memory>]",
+      "query": "MSIZE?",
+      "examples": ["MSIZE?"]
+    },
+    {
+      "name": "number_of_digits",
+      "mnemonic": "NDIG",
+      "category": "Display",
+      "description": "Number of Digits. Sets the maximum number of digits displayed (implied half digit). Does not affect A/D resolution or readings to memory/bus.",
+      "set": "NDIG [<value>]",
+      "query": "NDIG?",
+      "parameters": [
+        { "name": "value", "range": "3 to 8 (displays value-and-a-half digits); power-on 7" }
+      ],
+      "examples": ["NDIG 8", "NDIG 6"]
+    },
+    {
+      "name": "number_of_power_line_cycles",
+      "mnemonic": "NPLC",
+      "category": "Measurement Configuration",
+      "description": "Number of Power Line Cycles. Specifies the A/D converter's integration time in power line cycles, primarily to establish normal mode noise rejection.",
+      "set": "NPLC [<power_line_cycles>]",
+      "query": "NPLC?",
+      "parameters": [
+        { "name": "power_line_cycles", "range": "0-1 PLC (fine steps), 1-10 PLC (1 PLC steps), 10-1000 PLC (10 PLC steps); power-on 10; default 0" }
+      ],
+      "examples": ["NPLC 10", "NPLC 1000"]
+    },
+    {
+      "name": "number_of_readings",
+      "mnemonic": "NRDGS",
+      "category": "Triggering",
+      "description": "Number of Readings. Designates the number of readings taken per trigger and the sample event that initiates each reading.",
+      "set": "NRDGS [<count>][,<event>]",
+      "query": "NRDGS?",
+      "parameters": [
+        { "name": "count", "range": "1 to 16777215; power-on 1" },
+        { "name": "event", "range": "AUTO(1) | EXTSYN(2) | SYN(5) | TIMER(6) | LEVEL(7) | LINE(8); power-on AUTO" }
+      ],
+      "examples": ["NRDGS 5,SYN", "NRDGS 256,TIMER"]
+    },
+    {
+      "name": "offset_compensated_ohms",
+      "mnemonic": "OCOMP",
+      "category": "Measurement Configuration",
+      "description": "Enables or disables the offset compensated ohms function (10Ω to 100kΩ ranges) for 2-wire and 4-wire resistance measurements.",
+      "set": "OCOMP [<control>]",
+      "query": "OCOMP?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1); power-on OFF" }
+      ],
+      "examples": ["OCOMP ON", "OCOMP OFF"]
+    },
+    {
+      "name": "output_format",
+      "mnemonic": "OFORMAT",
+      "category": "Data Output",
+      "description": "Output Format. Designates the GPIB output format for readings sent to the controller.",
+      "set": "OFORMAT [<format>]",
+      "query": "OFORMAT?",
+      "parameters": [
+        { "name": "format", "range": "ASCII(1) | SINT(2) | DINT(3) | SREAL(4) | DREAL(5); power-on ASCII" }
+      ],
+      "examples": ["OFORMAT SREAL", "OFORMAT DINT"]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "OPT?",
+      "category": "System",
+      "description": "Option Query. Returns installed options: 0 = none, 1 = Extended Reading Memory Option.",
+      "query": "OPT?",
+      "examples": ["OPT?"]
+    },
+    {
+      "name": "pause",
+      "mnemonic": "PAUSE",
+      "category": "Subprograms",
+      "description": "Suspends subprogram execution. Resume with CONT or GPIB Group Execute Trigger. Allowed only within a subprogram.",
+      "set": "PAUSE",
+      "query": "PAUSE?",
+      "examples": ["PAUSE", "PAUSE?"]
+    },
+    {
+      "name": "period",
+      "mnemonic": "PER",
+      "category": "Measurement Function",
+      "description": "Period. Measures the period of the input signal. Input signal type is set with FSOURCE.",
+      "set": "PER [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "range": "fixed range value or AUTO; default AUTO" },
+        { "name": "%_resolution", "range": ".00001(7 digit,1s gate) | .0001 | .001 | .01 | .1(4 digit,100us gate); default .00001" }
+      ],
+      "examples": ["PER .01", "PER"]
+    },
+    {
+      "name": "preset",
+      "mnemonic": "PRESET",
+      "category": "System",
+      "description": "Configures the multimeter to one of three predefined states: NORM (remote operation), FAST (fast readings/transfer), or DIG (DCV digitizing).",
+      "set": "PRESET [<type>]",
+      "parameters": [
+        { "name": "type", "range": "FAST(0) | NORM(1) | DIG(2); default NORM" }
+      ],
+      "examples": ["PRESET NORM", "PRESET FAST"]
+    },
+    {
+      "name": "purge_state",
+      "mnemonic": "PURGE",
+      "category": "State Storage",
+      "description": "Purge State. Removes a single stored state from memory.",
+      "set": "PURGE <name>",
+      "parameters": [
+        { "name": "name", "range": "state name (up to 10 chars or integer 0-127)" }
+      ],
+      "examples": ["PURGE A2"]
+    },
+    {
+      "name": "query_format",
+      "mnemonic": "QFORMAT",
+      "category": "Data Output",
+      "description": "Query Format. Designates whether query responses contain numeric or alpha characters and whether command headers are returned.",
+      "set": "QFORMAT [<type>]",
+      "query": "QFORMAT?",
+      "parameters": [
+        { "name": "type", "range": "NUM(0) | NORM(1) | ALPHA; power-on NORM" }
+      ],
+      "examples": ["QFORMAT ALPHA", "QFORMAT NUM"]
+    },
+    {
+      "name": "range_abbrev",
+      "mnemonic": "R",
+      "category": "Measurement Configuration",
+      "description": "R is an abbreviation for the RANGE command.",
+      "set": "R [<max._input>][,<%_resolution>]",
+      "examples": ["R 10", "R 1E3,.001"]
+    },
+    {
+      "name": "range",
+      "mnemonic": "RANGE",
+      "category": "Measurement Configuration",
+      "description": "Selects a measurement range or the autorange mode for the present function.",
+      "set": "RANGE [<max._input>][,<%_resolution>]",
+      "query": "RANGE?",
+      "parameters": [
+        { "name": "max._input", "range": "absolute value of expected input to select a range, or AUTO (-1); power-on AUTO" },
+        { "name": "%_resolution", "range": "percentage of max._input (or digits for FREQ/PER)" }
+      ],
+      "examples": ["RANGE 10", "RANGE 800,.00125"]
+    },
+    {
+      "name": "ratio",
+      "mnemonic": "RATIO",
+      "category": "Measurement Configuration",
+      "description": "Measures a DC reference voltage on the Sense terminals and a signal voltage on the Input terminals, then computes the ratio (signal/reference).",
+      "set": "RATIO [<control>]",
+      "query": "RATIO?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1); power-on OFF" }
+      ],
+      "examples": ["RATIO ON", "RATIO OFF"]
+    },
+    {
+      "name": "resolution",
+      "mnemonic": "RES",
+      "category": "Measurement Configuration",
+      "description": "Resolution. Specifies reading resolution as a percentage of the present range (or digits/gate time for frequency and period).",
+      "set": "RES [<%_resolution>]",
+      "query": "RES?",
+      "parameters": [
+        { "name": "%_resolution", "range": "percentage of range = (actual resolution/range)*100; default determined by integration time" }
+      ],
+      "examples": ["RES .001", "RES?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "RESET",
+      "category": "System",
+      "description": "Sets the multimeter to the power-on state without cycling power. Aborts readings, clears error and status registers (except power-on SRQ), clears reading memory, and executes the default configuration commands.",
+      "set": "RESET",
+      "examples": ["RESET"]
+    },
+    {
+      "name": "revision_query",
+      "mnemonic": "REV?",
+      "category": "System",
+      "description": "Revision Query. Returns the master and slave processor firmware revision numbers separated by a comma.",
+      "query": "REV?",
+      "examples": ["REV?"]
+    },
+    {
+      "name": "recall_math",
+      "mnemonic": "RMATH",
+      "category": "Math",
+      "description": "Recall Math. Reads and returns the contents of a math register.",
+      "set": "RMATH [<register>]",
+      "parameters": [
+        { "name": "register", "range": "DEGREE(1) | LOWER(2) | MAX(3) | MEAN(4) | MIN(5) | NSAMP(6) | OFFSET(7) | PERC(8) | REF(9) | RES(10) | SCALE(11) | SDEV(12) | UPPER(13) | HIRES(14) | PFAILNUM(15); default DEGREE" }
+      ],
+      "examples": ["RMATH SDEV", "RMATH MEAN"]
+    },
+    {
+      "name": "recall_memory",
+      "mnemonic": "RMEM",
+      "category": "Memory",
+      "description": "Recall Memory. Reads and returns a reading or group of readings stored in reading memory, leaving them intact. Automatically turns reading memory off.",
+      "set": "RMEM [<first>][,<count>][,<record>]",
+      "parameters": [
+        { "name": "first", "range": "beginning reading number; default 1" },
+        { "name": "count", "range": "number of readings to recall; default 1" },
+        { "name": "record", "range": "record number; default 1" }
+      ],
+      "examples": ["RMEM 1,3,6", "RMEM 1,10"]
+    },
+    {
+      "name": "request_service",
+      "mnemonic": "RQS",
+      "category": "Status",
+      "description": "Request Service. Enables one or more status register conditions (decimal-weighted sum) to assert the GPIB SRQ line.",
+      "set": "RQS [<value>]",
+      "query": "RQS?",
+      "parameters": [
+        { "name": "value", "range": "0 to 255 (weighted sum of status conditions); power-on 0 or 8" }
+      ],
+      "examples": ["RQS 4", "RQS 0"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "RSTATE",
+      "category": "State Storage",
+      "description": "Recall State. Recalls a stored state from memory and configures the multimeter to that state. State 0 holds the power-down state.",
+      "set": "RSTATE [<name>]",
+      "parameters": [
+        { "name": "name", "range": "state name (up to 10 chars or integer 0-127); default 0" }
+      ],
+      "examples": ["RSTATE B2", "RSTATE 0"]
+    },
+    {
+      "name": "secure_cal",
+      "mnemonic": "SCAL",
+      "category": "Calibration",
+      "description": "Calibration command. Refer to the 3458A Calibration Manual for details.",
+      "set": "SCAL",
+      "examples": ["SCAL"]
+    },
+    {
+      "name": "scratch",
+      "mnemonic": "SCRATCH",
+      "category": "Subprograms",
+      "description": "Clears all subprograms and stored states from memory.",
+      "set": "SCRATCH",
+      "examples": ["SCRATCH"]
+    },
+    {
+      "name": "security_code",
+      "mnemonic": "SECURE",
+      "category": "Calibration",
+      "description": "Security Code. Enters a security code to prevent unauthorized calibration or autocalibration, and optionally secures autocal. Factory code is 3458.",
+      "set": "SECURE <old_code>,<new_code>[,<acal_secure>]",
+      "parameters": [
+        { "name": "old_code", "range": "previous security code (factory 3458)" },
+        { "name": "new_code", "range": "integer -2.1E9 to 2.1E9 (0 disables security)" },
+        { "name": "acal_secure", "range": "OFF(0) | ON(1)" }
+      ],
+      "examples": ["SECURE 3458,4448,ON", "SECURE 3458,0"]
+    },
+    {
+      "name": "set_acv",
+      "mnemonic": "SETACV",
+      "category": "Measurement Configuration",
+      "description": "Set ACV. Selects the RMS conversion technique (analog, random sampling, or synchronous sampling) for AC or AC+DC voltage measurements.",
+      "set": "SETACV [<type>]",
+      "query": "SETACV?",
+      "parameters": [
+        { "name": "type", "range": "ANA(1) | RNDM(2) | SYNC(3); power-on ANA" }
+      ],
+      "examples": ["SETACV SYNC", "SETACV ANA"]
+    },
+    {
+      "name": "slope",
+      "mnemonic": "SLOPE",
+      "category": "Triggering",
+      "description": "Specifies which slope (positive- or negative-going) of the signal is used by the level-detection circuitry. Used with the LEVEL command.",
+      "set": "SLOPE [<slope>]",
+      "query": "SLOPE?",
+      "parameters": [
+        { "name": "slope", "range": "NEG(0) | POS(1); power-on POS" }
+      ],
+      "examples": ["SLOPE POS", "SLOPE NEG"]
+    },
+    {
+      "name": "store_math",
+      "mnemonic": "SMATH",
+      "category": "Math",
+      "description": "Store Math. Places a number in a math register.",
+      "set": "SMATH [<register>][,<number>]",
+      "parameters": [
+        { "name": "register", "range": "DEGREE(1) | LOWER(2) | MAX(3) | MEAN(4) | MIN(5) | NSAMP(6) | OFFSET(7) | PERC(8) | REF(9) | RES(10) | SCALE(11) | UPPER(13) | HIRES(14) | PFAILNUM(15); default DEGREE" },
+        { "name": "number", "range": "value to place in register; default last reading" }
+      ],
+      "examples": ["SMATH OFFSET,3.05", "SMATH 11,1E-3"]
+    },
+    {
+      "name": "service_request",
+      "mnemonic": "SRQ",
+      "category": "Status",
+      "description": "Service Request. Sets bit 2 in the status register. If enabled (RQS 4), asserts the GPIB SRQ line.",
+      "set": "SRQ",
+      "examples": ["SRQ"]
+    },
+    {
+      "name": "sub_sampling",
+      "mnemonic": "SSAC, SSDC",
+      "category": "Measurement Function",
+      "description": "Sub-Sampling (digitizing of periodic signals). SSAC measures only the AC component; SSDC measures combined AC+DC. No autorange/autozero; range set by max._input. Interval and sample count set by SWEEP.",
+      "set": "SSAC [<max._input>][,<%_resolution>] | SSDC [<max._input>][,<%_resolution>]",
+      "parameters": [
+        { "name": "max._input", "units": "V", "range": "selects range 10mV..1000V (0 to 1E3); default 10V" },
+        { "name": "%_resolution", "range": "ignored (allowed for syntax consistency)" }
+      ],
+      "examples": ["SSDC 10", "SSAC 1"]
+    },
+    {
+      "name": "sub_sampling_parameters_query",
+      "mnemonic": "SSPARM?",
+      "category": "Measurement Configuration",
+      "description": "Sub-Sampling Parameters Query. Returns the parameters needed to reconstruct a sub-sampled waveform when samples are sent directly to the GPIB output buffer.",
+      "query": "SSPARM?",
+      "examples": ["SSPARM?"]
+    },
+    {
+      "name": "sync_source",
+      "mnemonic": "SSRC",
+      "category": "Triggering",
+      "description": "Sync Source. Synchronizes sub-sampling or synchronous ACV/ACDCV sampling to an external signal or to a voltage level on the input signal.",
+      "set": "SSRC [<source>][,<mode>]",
+      "query": "SSRC?",
+      "parameters": [
+        { "name": "source", "range": "EXT(2) | LEVEL(7); power-on LEVEL" },
+        { "name": "mode", "range": "AUTO(1) | HOLD(4); power-on AUTO (synchronous AC only)" }
+      ],
+      "examples": ["SSRC LEVEL", "SSRC EXT"]
+    },
+    {
+      "name": "store_state",
+      "mnemonic": "SSTATE",
+      "category": "State Storage",
+      "description": "Store State. Stores the multimeter's present state and assigns it a name. States are recalled with RSTATE.",
+      "set": "SSTATE <name>",
+      "parameters": [
+        { "name": "name", "range": "state name (up to 10 chars or integer 0-127); integer names get STATE prefix" }
+      ],
+      "examples": ["SSTATE B2", "SSTATE 8"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "STB?",
+      "category": "Status",
+      "description": "Status Byte Query. Returns the decimal-weighted sum of all set bits in the status register.",
+      "query": "STB?",
+      "examples": ["STB?"]
+    },
+    {
+      "name": "subprogram",
+      "mnemonic": "SUB",
+      "category": "Subprograms",
+      "description": "Subprogram. Stores a series of commands as a named subprogram. Terminated by SUBEND. A subprogram named 0 is the autostart subprogram.",
+      "set": "SUB <name>",
+      "parameters": [
+        { "name": "name", "range": "alpha/alphanumeric or integer 0-127, up to 10 characters" }
+      ],
+      "examples": ["SUB DCCUR2", "SUB EXTPACE"]
+    },
+    {
+      "name": "subprogram_end",
+      "mnemonic": "SUBEND",
+      "category": "Subprograms",
+      "description": "Subprogram End. Signals the end of a subprogram. When executed, sets bit 1 (if enabled) in the status register to signal completion.",
+      "set": "SUBEND",
+      "examples": ["SUBEND"]
+    },
+    {
+      "name": "sweep",
+      "mnemonic": "SWEEP",
+      "category": "Triggering",
+      "description": "Specifies the effective interval between samples and the total number of samples taken per trigger event (or per trigger arm event for sub-sampling). Replaces NRDGS n,TIMER and TIMER.",
+      "set": "SWEEP [<effective_interval>][,<#_samples>]",
+      "query": "SWEEP?",
+      "parameters": [
+        { "name": "effective_interval", "units": "s", "range": "10E-9 to 6000 s (sub-sampling) or 1/max-rate to 6000 s; power-on 100E-9, default 20us" },
+        { "name": "#_samples", "range": "1 to 1.67E7; power-on/default 1024" }
+      ],
+      "examples": ["SWEEP 30E-6,200", "SWEEP 5E-6,200"]
+    },
+    {
+      "name": "trig_abbrev",
+      "mnemonic": "T",
+      "category": "Triggering",
+      "description": "T is an abbreviation for the TRIG command.",
+      "set": "T [<event>]",
+      "examples": ["T AUTO", "T SGL"]
+    },
+    {
+      "name": "trigger_arm",
+      "mnemonic": "TARM",
+      "category": "Triggering",
+      "description": "Trigger Arm. Defines the event that enables (arms) the trigger event. Can also perform multiple measurement cycles via number_arms with the SGL event.",
+      "set": "TARM [<event>][,<number_arms>]",
+      "query": "TARM?",
+      "parameters": [
+        { "name": "event", "range": "AUTO(1) | EXT(2) | SGL(3) | HOLD(4) | SYN(5); power-on AUTO" },
+        { "name": "number_arms", "range": "0 to 2.1E9 (valid only with SGL); default 1" }
+      ],
+      "examples": ["TARM AUTO", "TARM SGL,5"]
+    },
+    {
+      "name": "trigger_buffer",
+      "mnemonic": "TBUFF",
+      "category": "Triggering",
+      "description": "Trigger Buffer. Enables or disables the external trigger buffer. ON corrects for TRIGGER TOO FAST errors with external triggers.",
+      "set": "TBUFF [<control>]",
+      "query": "TBUFF?",
+      "parameters": [
+        { "name": "control", "range": "OFF(0) | ON(1); power-on OFF" }
+      ],
+      "examples": ["TBUFF ON", "TBUFF OFF"]
+    },
+    {
+      "name": "temperature_query",
+      "mnemonic": "TEMP?",
+      "category": "System",
+      "description": "Temperature Query. Returns the multimeter's internal temperature in degrees Centigrade.",
+      "query": "TEMP?",
+      "examples": ["TEMP?"]
+    },
+    {
+      "name": "terminals",
+      "mnemonic": "TERM",
+      "category": "System",
+      "description": "Accepted for language compatibility (input terminals cannot be controlled from remote). The TERM? query returns which terminals (FRONT or REAR) are selected by the front panel switch.",
+      "set": "TERM [<source>]",
+      "query": "TERM?",
+      "parameters": [
+        { "name": "source", "range": "OPEN(0) | FRONT(1) | REAR(2)" }
+      ],
+      "examples": ["TERM FRONT", "TERM?"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "TEST",
+      "category": "System",
+      "description": "Causes the multimeter to perform a series of internal self-tests. Disconnect input signals before running. Errors set bits in the error/auxiliary error registers.",
+      "set": "TEST",
+      "examples": ["TEST"]
+    },
+    {
+      "name": "timer",
+      "mnemonic": "TIMER",
+      "category": "Triggering",
+      "description": "Defines the time interval for the TIMER sample event in the NRDGS command. The interval is inserted between readings.",
+      "set": "TIMER [<time>]",
+      "query": "TIMER?",
+      "parameters": [
+        { "name": "time", "units": "s", "range": "1/max-rate to 6000 s in 100 ns increments; power-on/default 1 s" }
+      ],
+      "examples": ["TIMER 200E-3", "TIMER 2"]
+    },
+    {
+      "name": "tone",
+      "mnemonic": "TONE",
+      "category": "System",
+      "description": "Causes the multimeter to beep once, then returns to the previous BEEP mode.",
+      "set": "TONE",
+      "examples": ["TONE"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "TRIG",
+      "category": "Triggering",
+      "description": "Specifies the trigger event. Operates with the trigger arm event (TARM) and sample event (NRDGS). Ignored for sub-sampling.",
+      "set": "TRIG [<event>]",
+      "query": "TRIG?",
+      "parameters": [
+        { "name": "event", "range": "AUTO(1) | EXT(2) | SGL(3) | HOLD(4) | SYN(5) | LEVEL(7) | LINE(8); power-on AUTO, default SGL" }
+      ],
+      "examples": ["TRIG SGL", "TRIG AUTO"]
+    }
+  ]
+}
