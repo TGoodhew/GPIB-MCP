@@ -4,6 +4,7 @@ using System.Text;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Newtonsoft.Json.Linq;
+using static GpibMcp.Tools.ToolArgs;
 
 namespace GpibMcp.Tools
 {
@@ -13,10 +14,17 @@ namespace GpibMcp.Tools
     /// </summary>
     public static class InstrumentTools
     {
-        /// <summary>Creates the registry of all tools the server exposes, bound to <paramref name="visa"/>.</summary>
-        public static ToolRegistry BuildRegistry(IInstrumentManager visa)
+        /// <summary>Convenience overload with an empty database and in-memory assignments (tests).</summary>
+        public static ToolRegistry BuildRegistry(IInstrumentManager visa) =>
+            BuildRegistry(visa, InstrumentDatabase.Empty(), AssignmentStore.InMemory());
+
+        /// <summary>Creates the registry of all tools the server exposes.</summary>
+        public static ToolRegistry BuildRegistry(IInstrumentManager visa, InstrumentDatabase db,
+                                                 AssignmentStore assignments)
         {
             if (visa == null) throw new ArgumentNullException(nameof(visa));
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            if (assignments == null) throw new ArgumentNullException(nameof(assignments));
             var registry = new ToolRegistry();
 
             // ---- VISA: discovery -------------------------------------------------
@@ -156,93 +164,10 @@ namespace GpibMcp.Tools
                     return Clean(Gpib488Helper.Query(board, primary, secondary, command));
                 }));
 
+            // ---- Instrument command database + assignments ----------------------
+            DatabaseTools.Register(registry, db, assignments, visa);
+
             return registry;
-        }
-
-        // ---------------------------------------------------------------------
-        // JSON Schema builders
-        // ---------------------------------------------------------------------
-
-        private static JObject Schema(params JProperty[] properties)
-        {
-            var props = new JObject();
-            var required = new JArray();
-            foreach (var p in properties)
-            {
-                props.Add(p);
-                var meta = (JObject)p.Value;
-                if (meta["__required"] != null && meta["__required"].Value<bool>())
-                {
-                    required.Add(p.Name);
-                    meta.Remove("__required");
-                }
-            }
-            var schema = new JObject
-            {
-                ["type"] = "object",
-                ["properties"] = props
-            };
-            if (required.Count > 0) schema["required"] = required;
-            return schema;
-        }
-
-        private static JProperty Prop(string name, string type, string description)
-        {
-            return new JProperty(name, new JObject { ["type"] = type, ["description"] = description });
-        }
-
-        private static JProperty Required(string name, string type, string description)
-        {
-            return new JProperty(name, new JObject
-            {
-                ["type"] = type,
-                ["description"] = description,
-                ["__required"] = true
-            });
-        }
-
-        // ---------------------------------------------------------------------
-        // Argument readers
-        // ---------------------------------------------------------------------
-
-        private static string Str(JObject args, string key, string fallback)
-        {
-            var token = args[key];
-            return token == null || token.Type == JTokenType.Null ? fallback : token.Value<string>();
-        }
-
-        private static string ReqStr(JObject args, string key)
-        {
-            string value = Str(args, key, null);
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentException("missing required argument '" + key + "'");
-            return value;
-        }
-
-        private static int Int(JObject args, string key, int fallback)
-        {
-            var token = args[key];
-            return token == null || token.Type == JTokenType.Null ? fallback : token.Value<int>();
-        }
-
-        private static int Int(JObject args, string key, int fallback, int min, int max, string label)
-        {
-            var token = args[key];
-            if (token == null || token.Type == JTokenType.Null)
-            {
-                if (fallback < min) throw new ArgumentException("missing required argument '" + label + "'");
-                return fallback;
-            }
-            int value = token.Value<int>();
-            if (value < min || value > max)
-                throw new ArgumentException(label + " must be between " + min + " and " + max);
-            return value;
-        }
-
-        /// <summary>Trims trailing CR/LF that instruments append to responses.</summary>
-        private static string Clean(string response)
-        {
-            return (response ?? string.Empty).TrimEnd('\r', '\n');
         }
 
         // ---------------------------------------------------------------------
@@ -255,7 +180,6 @@ namespace GpibMcp.Tools
         // ~15 devices, so a count at/above that limit is the tell-tale sign.
         // ---------------------------------------------------------------------
 
-        /// <summary>Maximum plausible device count on a real GPIB segment; above this we warn.</summary>
         private const int DefaultPhantomGpibThreshold = 15;
 
         private static int PhantomGpibThreshold()
@@ -282,11 +206,6 @@ namespace GpibMcp.Tools
             return count;
         }
 
-        /// <summary>
-        /// Guidance appended to discovery output when the GPIB bus looks phantom-full.
-        /// It is written for the assistant: it explains the situation and tells the model
-        /// to ask the user about a bus extender and which addresses are genuinely in use.
-        /// </summary>
         private static string BusExtenderAdvisory(int gpibCount)
         {
             var sb = new StringBuilder();

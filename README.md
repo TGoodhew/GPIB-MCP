@@ -35,6 +35,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [Tool reference](#tool-reference)
   - [Typical workflow](#typical-workflow)
   - [Discovery and bus extenders (HP 37204A)](#discovery-and-bus-extenders-hp-37204a)
+  - [Instrument command database](#instrument-command-database)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [Why x86?](#why-x86)
@@ -53,6 +54,8 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   multiple tool calls until you explicitly close it.
 - **Native NI-488.2 path** to address a GPIB instrument by board / primary / secondary
   without needing a VISA resource alias.
+- **User-extensible instrument command database** — tell Claude which model sits at an
+  address and it looks up the command reference, confirms identity, and drives it.
 - **Single, self-contained executable** — no external MCP SDK dependency; protocol
   handling is implemented directly so it runs cleanly on .NET Framework.
 
@@ -260,6 +263,13 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_list_open` | — | — | List sessions this server holds open |
 | `visa_close` | `resource` | — | Close a held-open session |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
+| `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
+| `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
+| `instrument_identify` | `resource` | — | Query identity and match against the database |
+| `assign_instrument` | `resource`, `model` | `confirm`, `verify` | Record that a model sits at a resource (persists on `confirm=true`) |
+| `list_assignments` | — | — | List recorded resource→model assignments |
+| `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
+| `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 
 Argument notes:
 
@@ -297,6 +307,47 @@ Non-GPIB resources (USB / TCPIP / serial) are unaffected.
 
 Tune or disable the threshold with the `GPIB_MCP_PHANTOM_GPIB_THRESHOLD` environment
 variable (set it very high to suppress the warning).
+
+### Instrument command database
+
+The server ships with a **user-extensible database of instrument command references**, so
+you can tell Claude *"an 8563E is at GPIB 18"* and it can look up what that instrument
+understands, confirm its identity, and drive it — instead of you supplying raw commands.
+
+Each model is one JSON file describing its identity query, command mnemonics, parameters,
+units, and examples (see [`data/instruments/`](data/instruments/)).
+
+**Ask what's known:**
+> *"Please tell me what GPIB instruments you know about."* → `instrument_list_models`
+
+**A worked example** — *"Get the current frequency of my 3325A and set the center
+frequency of my 8563E to that, with a span of 100 MHz":*
+
+1. `assign_instrument` (resource `GPIB0::7::INSTR`, model `3325A`) and
+   (`GPIB0::18::INSTR`, `8563E`) — Claude confirms with you, then persists on `confirm=true`.
+2. `instrument_reference` for each model → Claude learns `FR?` reads the 3325A frequency and
+   `CF`/`SP` set the 8563E center frequency and span.
+3. `visa_query GPIB0::7::INSTR "FR?"` → reads the frequency.
+4. `visa_write GPIB0::18::INSTR "CF <freq>;SP 100MHZ"` → sets it.
+
+#### Where it lives
+
+| Item | Location | Override |
+|------|----------|----------|
+| Bundled defaults | `<exe dir>\data\instruments\*.json` (ships with the build) | — |
+| User database | `%LOCALAPPDATA%\GpibMcp\instruments` | `GPIB_MCP_INSTRUMENT_DB` |
+| Assignments | `%LOCALAPPDATA%\GpibMcp\bindings.json` | `GPIB_MCP_BINDINGS` |
+
+On first run the bundled defaults are **copied into the user database** (never overwriting
+your edits), giving you an editable, prepopulated database. User definitions override
+bundled ones with the same model name.
+
+#### Extending it
+
+Drop a new `<model>.json` into the user database directory, or ask Claude to add one via
+`instrument_db_save` (it writes to the user directory and confirms before saving). Assignments
+and saves both follow a **confirm-before-write** flow: the first call reports what it *would*
+do, and only persists when called again with `confirm: true`.
 
 ### Manual test from a terminal
 
@@ -377,9 +428,16 @@ src/GpibMcp/
     VisaInstrumentManager.cs       NI-VISA session manager (primary path)
     Gpib488Helper.cs               NI-488.2 native GPIB helper
     CommandText.cs                 shared command-termination + log helpers
+    InstrumentDefinition.cs        instrument command-reference data model
+    InstrumentDatabase.cs          loads/indexes model definitions
+    AssignmentStore.cs             persistent resource->model assignments
+    InstrumentPaths.cs             DB/bindings paths + install-time prepopulation
   Tools/
-    InstrumentTools.cs             tool definitions + JSON Schemas
-tests/GpibMcp.Tests/               xUnit tests (protocol, tools, helpers, logging)
+    ToolArgs.cs                    shared JSON-Schema + argument helpers
+    InstrumentTools.cs             VISA / NI-488.2 tool definitions
+    DatabaseTools.cs               command-database + assignment tools
+data/instruments/*.json            bundled instrument command database
+tests/GpibMcp.Tests/               xUnit tests (protocol, tools, db, helpers, logging)
 ```
 
 ## Troubleshooting

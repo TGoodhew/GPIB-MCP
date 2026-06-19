@@ -24,6 +24,14 @@
     <InternalsVisibleTo Include="GpibMcp.Tests" />
   </ItemGroup>
 
+  <!-- Bundled instrument command database, deployed next to the exe so it is
+       available at install time and used to prepopulate the user database. -->
+  <ItemGroup>
+    <Content Include="..\..\data\instruments\*.json"
+             Link="data\instruments\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <!-- Lets `dotnet build` compile net472 without a full VS install. -->

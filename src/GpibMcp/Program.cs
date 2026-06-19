@@ -29,8 +29,13 @@ namespace GpibMcp
                 VisaInstrumentManager visa = null;
                 try
                 {
+                    string exeDir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+                    InstrumentPaths.EnsureUserDatabaseSeeded(exeDir);
+                    var db = InstrumentDatabase.Load(InstrumentPaths.DatabaseDirectories(exeDir));
+                    var assignments = AssignmentStore.FromFile(InstrumentPaths.BindingsPath());
+
                     visa = new VisaInstrumentManager();
-                    ToolRegistry registry = InstrumentTools.BuildRegistry(visa);
+                    ToolRegistry registry = InstrumentTools.BuildRegistry(visa, db, assignments);
                     var server = new McpServer(registry, stdin, stdout);
                     server.Run();
                     return 0;
