@@ -1,0 +1,1899 @@
+{
+  "model": "2015",
+  "manufacturer": "Keithley",
+  "category": "Multimeter / Audio Analyzer",
+  "description": "Keithley Model 2015/2015-P (and 2016) THD Multimeter: a 6.5-digit audio-analysis DMM that measures DC/AC voltage and current, 2- and 4-wire resistance, frequency, period, temperature, continuity and diodes, plus audio distortion functions (THD, THD+N, SINAD). The 2015-P adds an FFT analyzer with peak/marker and frequency-list functions and a built-in sine-wave source. Programmed using SCPI over GPIB (IEEE-488) or RS-232.",
+  "source": "kei2015-man.pdf",
+  "aliases": ["2015", "Keithley 2015", "Model 2015", "2015-P", "2015P", "2016"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "MODEL 201[56]|2015",
+    "description": "IEEE-488.2 identification query. Returns the instrument identification string including the model number, used to identify the Model 2015/2016 over the bus."
+  },
+  "commands": [
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Return the instrument to its *RST default conditions. Sets INIT:CONT OFF, TRIG:SOUR IMM, TRIG:COUNT 1 and continuous initiation disabled.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear Status. Clears the Standard Event, Operation Event, Measurement Event and Questionable Event registers and the Error Queue.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Identification query. Returns the manufacturer, model number, serial number and firmware revision.",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Program the Standard Event Status Enable Register. *ESE 0 clears the register.",
+      "set": "*ESE <NRf>",
+      "query": "*ESE?",
+      "parameters": [
+        { "name": "value", "range": "0 to 255 (bit mask)" }
+      ],
+      "examples": ["*ESE 0", "*ESE?"]
+    },
+    {
+      "name": "event_status_read",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Read and clear the Standard Event Status Register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Operation Complete. Sets the OPC bit in the Standard Event Status Register when all pending operations are finished.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "wait_to_continue",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Wait-to-Continue. Hold off the processing of subsequent commands until all previous operations are completed.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Bus trigger. Equivalent to a GPIB GET; triggers a measurement when the trigger source is set to BUS.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Program the Service Request Enable Register. *SRE 0 disables service requests.",
+      "set": "*SRE <NRf>",
+      "query": "*SRE?",
+      "parameters": [
+        { "name": "value", "range": "0 to 255 (bit mask)" }
+      ],
+      "examples": ["*SRE 128", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Read the Status Byte Register (the MSS bit appears in the *STB? response).",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "save_setup",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Save the present instrument setup in the specified memory location.",
+      "set": "*SAV <NRf>",
+      "parameters": [
+        { "name": "location", "range": "0 to 4 (setup memory)" }
+      ],
+      "examples": ["*SAV 0"]
+    },
+    {
+      "name": "recall_setup",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recall a previously saved instrument setup from the specified memory location.",
+      "set": "*RCL <NRf>",
+      "parameters": [
+        { "name": "location", "range": "0 to 4 (setup memory)" }
+      ],
+      "examples": ["*RCL 0"]
+    },
+    {
+      "name": "configure_function",
+      "mnemonic": "CONF:<function>",
+      "category": "Measurement",
+      "description": "Place the instrument in a one-shot measurement mode for the specified function. Selected-function controls default to *RST values, continuous initiation is disabled, trigger source is set to Immediate, count to one and delay to zero. Use READ? to trigger and acquire a reading.",
+      "set": "CONFigure:<function>",
+      "query": "CONFigure?",
+      "parameters": [
+        { "name": "function", "range": "CURRent:AC, CURRent[:DC], VOLTage:AC, VOLTage[:DC], RESistance, FRESistance, PERiod, FREQuency, TEMPerature, DIODe, CONTinuity, DISTortion" }
+      ],
+      "examples": ["CONF:VOLT:DC", "CONF:DIST", "CONF?"]
+    },
+    {
+      "name": "fetch",
+      "mnemonic": "FETC?",
+      "category": "Measurement",
+      "description": "Request the latest post-processed reading. Does not trigger a measurement and can repeatedly return the same reading. Returns error -230 (Data corrupt or stale) if no reading is available. Not permitted while in LIST/sweep output mode (returns +811).",
+      "query": "FETCh?",
+      "examples": ["FETC?"]
+    },
+    {
+      "name": "read",
+      "mnemonic": "READ?",
+      "category": "Measurement",
+      "description": "Perform an :ABORt, :INITiate and :FETCh? to trigger and acquire a reading (or a SAMPle:COUNt number of readings, stored in the buffer). Does not work when trigger source is BUS or EXTernal (error -214). Not permitted in LIST/sweep output mode.",
+      "query": "READ?",
+      "examples": ["READ?"]
+    },
+    {
+      "name": "measure_function",
+      "mnemonic": "MEAS:<function>?",
+      "category": "Measurement",
+      "description": "One-shot measurement. Combines :ABORt, :CONFigure:<function> and :READ? to reconfigure for the specified function (using *RST defaults), trigger a single reading and return the result.",
+      "query": "MEASure[:<function>]?",
+      "parameters": [
+        { "name": "function", "range": "CURRent:AC, CURRent[:DC], VOLTage:AC, VOLTage[:DC], RESistance, FRESistance, PERiod, FREQuency, TEMPerature, DIODe, CONTinuity, DISTortion" }
+      ],
+      "examples": ["MEAS:VOLT:DC?", "MEAS:DIST?"]
+    },
+    {
+      "name": "sense_function",
+      "mnemonic": "FUNC",
+      "category": "Sense",
+      "description": "Select the measurement function. The function name must be enclosed in quotes.",
+      "set": "[SENSe[1]]:FUNCtion <name>",
+      "query": "[SENSe[1]]:FUNCtion?",
+      "parameters": [
+        { "name": "name", "range": "'VOLTage:AC', 'VOLTage:DC', 'VOLTage[:DC]', 'CURRent:AC', 'CURRent:DC', 'RESistance', 'FRESistance', 'FREQuency', 'PERiod', 'TEMPerature', 'DIODe', 'CONTinuity', 'DISTortion'" }
+      ],
+      "examples": ["FUNC 'VOLTage:DC'", "FUNC 'DISTortion'", "FUNC?"]
+    },
+    {
+      "name": "sense_data",
+      "mnemonic": "DATA?",
+      "category": "Sense",
+      "description": "Return the last instrument reading.",
+      "query": "[SENSe[1]]:DATA?",
+      "examples": ["DATA?"]
+    },
+    {
+      "name": "sense_data_fresh",
+      "mnemonic": "DATA:FRES?",
+      "category": "Sense",
+      "description": "Return the latest reading after a trigger (similar to FETCh?), but guarantees it will not return the same reading twice. Waits for a reading in progress to complete. Does not trigger a reading.",
+      "query": "[SENSe[1]]:DATA:FRESh?",
+      "examples": ["DATA:FRES?"]
+    },
+    {
+      "name": "sense_data_latest",
+      "mnemonic": "DATA:LAT?",
+      "category": "Sense",
+      "description": "Return the last reading the instrument had, regardless of whether it was invalidated by changing ranges or functions. Can return old/meaningless data.",
+      "query": "[SENSe[1]]:DATA:LATest?",
+      "examples": ["DATA:LAT?"]
+    },
+    {
+      "name": "hold_window",
+      "mnemonic": "HOLD:WIND",
+      "category": "Sense",
+      "description": "Set the Hold window as a percentage.",
+      "set": "[SENSe[1]]:HOLD:WINDow <NRf>",
+      "query": "[SENSe[1]]:HOLD:WINDow?",
+      "parameters": [
+        { "name": "window", "units": ["%"], "range": "0.01 to 20 (default 1)" }
+      ],
+      "examples": ["HOLD:WIND 1"]
+    },
+    {
+      "name": "hold_count",
+      "mnemonic": "HOLD:COUN",
+      "category": "Sense",
+      "description": "Set the Hold count (number of readings within the window).",
+      "set": "[SENSe[1]]:HOLD:COUNt <NRf>",
+      "query": "[SENSe[1]]:HOLD:COUNt?",
+      "parameters": [
+        { "name": "count", "range": "2 to 100 (default 5)" }
+      ],
+      "examples": ["HOLD:COUN 5"]
+    },
+    {
+      "name": "hold_state",
+      "mnemonic": "HOLD:STAT",
+      "category": "Sense",
+      "description": "Enable or disable the Hold feature.",
+      "set": "[SENSe[1]]:HOLD:STATe <b>",
+      "query": "[SENSe[1]]:HOLD:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF or 1|0 (default OFF)" }
+      ],
+      "examples": ["HOLD:STAT ON"]
+    },
+    {
+      "name": "voltage_dc_range",
+      "mnemonic": "VOLT:DC:RANG",
+      "category": "Sense",
+      "description": "Select the DC voltage measurement range (upper).",
+      "set": "[SENSe[1]]:VOLTage:DC:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:VOLTage:DC:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "0 to 1010 (default 1000)" }
+      ],
+      "examples": ["VOLT:DC:RANG 10"]
+    },
+    {
+      "name": "voltage_dc_range_auto",
+      "mnemonic": "VOLT:DC:RANG:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable DC voltage autoranging.",
+      "set": "[SENSe[1]]:VOLTage:DC:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:VOLTage:DC:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["VOLT:DC:RANG:AUTO ON"]
+    },
+    {
+      "name": "voltage_dc_nplc",
+      "mnemonic": "VOLT:DC:NPLC",
+      "category": "Sense",
+      "description": "Set the DC voltage integration rate in power-line cycles.",
+      "set": "[SENSe[1]]:VOLTage:DC:NPLCycles <n>",
+      "query": "[SENSe[1]]:VOLTage:DC:NPLCycles?",
+      "parameters": [
+        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+      ],
+      "examples": ["VOLT:DC:NPLC 0.01"]
+    },
+    {
+      "name": "voltage_dc_digits",
+      "mnemonic": "VOLT:DC:DIG",
+      "category": "Sense",
+      "description": "Set the DC voltage measurement resolution in digits.",
+      "set": "[SENSe[1]]:VOLTage:DC:DIGits <n>",
+      "query": "[SENSe[1]]:VOLTage:DC:DIGits?",
+      "parameters": [
+        { "name": "digits", "range": "4 to 7 (default 7)" }
+      ],
+      "examples": ["VOLT:DC:DIG 6"]
+    },
+    {
+      "name": "voltage_dc_average_state",
+      "mnemonic": "VOLT:DC:AVER:STAT",
+      "category": "Sense",
+      "description": "Enable or disable the DC voltage digital averaging filter.",
+      "set": "[SENSe[1]]:VOLTage:DC:AVERage:STATe <b>",
+      "query": "[SENSe[1]]:VOLTage:DC:AVERage:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["VOLT:DC:AVER:STAT OFF"]
+    },
+    {
+      "name": "voltage_dc_average_count",
+      "mnemonic": "VOLT:DC:AVER:COUN",
+      "category": "Sense",
+      "description": "Set the DC voltage averaging filter count.",
+      "set": "[SENSe[1]]:VOLTage:DC:AVERage:COUNt <n>",
+      "query": "[SENSe[1]]:VOLTage:DC:AVERage:COUNt?",
+      "parameters": [
+        { "name": "count", "range": "1 to 100 (default 10)" }
+      ],
+      "examples": ["VOLT:DC:AVER:COUN 10"]
+    },
+    {
+      "name": "voltage_dc_average_tcontrol",
+      "mnemonic": "VOLT:DC:AVER:TCON",
+      "category": "Sense",
+      "description": "Select the DC voltage averaging filter type (moving or repeating). REPeat is the *RST default; MOVing is the :SYSTem:PRESet default.",
+      "set": "[SENSe[1]]:VOLTage:DC:AVERage:TCONtrol <name>",
+      "query": "[SENSe[1]]:VOLTage:DC:AVERage:TCONtrol?",
+      "parameters": [
+        { "name": "type", "range": "MOVing|REPeat" }
+      ],
+      "examples": ["VOLT:DC:AVER:TCON MOV"]
+    },
+    {
+      "name": "voltage_dc_reference",
+      "mnemonic": "VOLT:DC:REF",
+      "category": "Sense",
+      "description": "Specify the DC voltage relative reference value.",
+      "set": "[SENSe[1]]:VOLTage:DC:REFerence <n>",
+      "query": "[SENSe[1]]:VOLTage:DC:REFerence?",
+      "parameters": [
+        { "name": "reference", "units": ["V"], "range": "-1010 to +1010 (default 0)" }
+      ],
+      "examples": ["VOLT:DC:REF 0"]
+    },
+    {
+      "name": "voltage_dc_reference_state",
+      "mnemonic": "VOLT:DC:REF:STAT",
+      "category": "Sense",
+      "description": "Enable or disable the DC voltage relative reference.",
+      "set": "[SENSe[1]]:VOLTage:DC:REFerence:STATe <b>",
+      "query": "[SENSe[1]]:VOLTage:DC:REFerence:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["VOLT:DC:REF:STAT ON"]
+    },
+    {
+      "name": "voltage_dc_reference_acquire",
+      "mnemonic": "VOLT:DC:REF:ACQ",
+      "category": "Sense",
+      "description": "Use the present input signal as the DC voltage reference value.",
+      "set": "[SENSe[1]]:VOLTage:DC:REFerence:ACQuire",
+      "examples": ["VOLT:DC:REF:ACQ"]
+    },
+    {
+      "name": "voltage_ac_range",
+      "mnemonic": "VOLT:AC:RANG",
+      "category": "Sense",
+      "description": "Select the AC voltage measurement range (upper).",
+      "set": "[SENSe[1]]:VOLTage:AC:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:VOLTage:AC:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "0 to 757.5 (default 757.5)" }
+      ],
+      "examples": ["VOLT:AC:RANG 7.5"]
+    },
+    {
+      "name": "voltage_ac_range_auto",
+      "mnemonic": "VOLT:AC:RANG:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable AC voltage autoranging.",
+      "set": "[SENSe[1]]:VOLTage:AC:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:VOLTage:AC:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["VOLT:AC:RANG:AUTO ON"]
+    },
+    {
+      "name": "voltage_ac_nplc",
+      "mnemonic": "VOLT:AC:NPLC",
+      "category": "Sense",
+      "description": "Set the AC voltage integration rate in power-line cycles.",
+      "set": "[SENSe[1]]:VOLTage:AC:NPLCycles <n>",
+      "query": "[SENSe[1]]:VOLTage:AC:NPLCycles?",
+      "parameters": [
+        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+      ],
+      "examples": ["VOLT:AC:NPLC 1"]
+    },
+    {
+      "name": "voltage_ac_detector_bandwidth",
+      "mnemonic": "VOLT:AC:DET:BAND",
+      "category": "Sense",
+      "description": "Specify the AC voltage detector bandwidth.",
+      "set": "[SENSe[1]]:VOLTage:AC:DETector:BANDwidth <NRf>",
+      "query": "[SENSe[1]]:VOLTage:AC:DETector:BANDwidth?",
+      "parameters": [
+        { "name": "bandwidth", "units": ["Hz"], "range": "3 to 300e3 (default 30)" }
+      ],
+      "examples": ["VOLT:AC:DET:BAND 30"]
+    },
+    {
+      "name": "current_dc_range",
+      "mnemonic": "CURR:DC:RANG",
+      "category": "Sense",
+      "description": "Select the DC current measurement range (upper).",
+      "set": "[SENSe[1]]:CURRent:DC:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:CURRent:DC:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "0 to 3.1 (default 3)" }
+      ],
+      "examples": ["CURR:DC:RANG 3"]
+    },
+    {
+      "name": "current_dc_range_auto",
+      "mnemonic": "CURR:DC:RANG:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable DC current autoranging.",
+      "set": "[SENSe[1]]:CURRent:DC:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:CURRent:DC:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["CURR:DC:RANG:AUTO ON"]
+    },
+    {
+      "name": "current_dc_nplc",
+      "mnemonic": "CURR:DC:NPLC",
+      "category": "Sense",
+      "description": "Set the DC current integration rate in power-line cycles.",
+      "set": "[SENSe[1]]:CURRent:DC:NPLCycles <n>",
+      "query": "[SENSe[1]]:CURRent:DC:NPLCycles?",
+      "parameters": [
+        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+      ],
+      "examples": ["CURR:DC:NPLC 1"]
+    },
+    {
+      "name": "current_ac_range",
+      "mnemonic": "CURR:AC:RANG",
+      "category": "Sense",
+      "description": "Select the AC current measurement range (upper).",
+      "set": "[SENSe[1]]:CURRent:AC:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:CURRent:AC:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "0 to 3.1 (default 3)" }
+      ],
+      "examples": ["CURR:AC:RANG 3"]
+    },
+    {
+      "name": "current_ac_range_auto",
+      "mnemonic": "CURR:AC:RANG:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable AC current autoranging.",
+      "set": "[SENSe[1]]:CURRent:AC:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:CURRent:AC:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["CURR:AC:RANG:AUTO ON"]
+    },
+    {
+      "name": "resistance_range",
+      "mnemonic": "RES:RANG",
+      "category": "Sense",
+      "description": "Select the 2-wire resistance measurement range (upper).",
+      "set": "[SENSe[1]]:RESistance:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:RESistance:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["ohm"], "range": "0 to 120e6 (default 100e6)" }
+      ],
+      "examples": ["RES:RANG 1e3"]
+    },
+    {
+      "name": "resistance_range_auto",
+      "mnemonic": "RES:RANG:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable 2-wire resistance autoranging.",
+      "set": "[SENSe[1]]:RESistance:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:RESistance:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["RES:RANG:AUTO ON"]
+    },
+    {
+      "name": "resistance_nplc",
+      "mnemonic": "RES:NPLC",
+      "category": "Sense",
+      "description": "Set the 2-wire resistance integration rate in power-line cycles.",
+      "set": "[SENSe[1]]:RESistance:NPLCycles <n>",
+      "query": "[SENSe[1]]:RESistance:NPLCycles?",
+      "parameters": [
+        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+      ],
+      "examples": ["RES:NPLC 1"]
+    },
+    {
+      "name": "fresistance_range",
+      "mnemonic": "FRES:RANG",
+      "category": "Sense",
+      "description": "Select the 4-wire resistance measurement range (upper).",
+      "set": "[SENSe[1]]:FRESistance:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:FRESistance:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["ohm"], "range": "0 to 101e6 (default 100e6)" }
+      ],
+      "examples": ["FRES:RANG 1e3"]
+    },
+    {
+      "name": "fresistance_range_auto",
+      "mnemonic": "FRES:RANG:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable 4-wire resistance autoranging.",
+      "set": "[SENSe[1]]:FRESistance:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:FRESistance:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["FRES:RANG:AUTO ON"]
+    },
+    {
+      "name": "temperature_nplc",
+      "mnemonic": "TEMP:NPLC",
+      "category": "Sense",
+      "description": "Set the temperature integration rate in power-line cycles.",
+      "set": "[SENSe[1]]:TEMPerature:NPLCycles <n>",
+      "query": "[SENSe[1]]:TEMPerature:NPLCycles?",
+      "parameters": [
+        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+      ],
+      "examples": ["TEMP:NPLC 1"]
+    },
+    {
+      "name": "temperature_tcouple_type",
+      "mnemonic": "TEMP:TC:TYPE",
+      "category": "Sense",
+      "description": "Select the thermocouple type for temperature measurements.",
+      "set": "[SENSe[1]]:TEMPerature:TCouple:TYPE <name>",
+      "query": "[SENSe[1]]:TEMPerature:TCouple:TYPE?",
+      "parameters": [
+        { "name": "type", "range": "J|K|T (default J)" }
+      ],
+      "examples": ["TEMP:TC:TYPE K"]
+    },
+    {
+      "name": "temperature_rjunction_simulated",
+      "mnemonic": "TEMP:TC:RJUN:SIM",
+      "category": "Sense",
+      "description": "Specify the simulated reference-junction temperature in degrees C.",
+      "set": "[SENSe[1]]:TEMPerature:TCouple:RJUNction:SIMulated <n>",
+      "query": "[SENSe[1]]:TEMPerature:TCouple:RJUNction:SIMulated?",
+      "parameters": [
+        { "name": "temperature", "units": ["C"], "range": "0 to 50 (default 23)" }
+      ],
+      "examples": ["TEMP:TC:RJUN:SIM 23"]
+    },
+    {
+      "name": "frequency_aperture",
+      "mnemonic": "FREQ:APER",
+      "category": "Sense",
+      "description": "Set the gate/aperture time for frequency measurements.",
+      "set": "[SENSe[1]]:FREQuency:APERture <n>",
+      "query": "[SENSe[1]]:FREQuency:APERture?",
+      "parameters": [
+        { "name": "aperture", "units": ["s"], "range": "0.01 to 1.0 (default 1.0)" }
+      ],
+      "examples": ["FREQ:APER 1.0"]
+    },
+    {
+      "name": "frequency_threshold_voltage_range",
+      "mnemonic": "FREQ:THR:VOLT:RANG",
+      "category": "Sense",
+      "description": "Select the threshold voltage range for frequency measurements.",
+      "set": "[SENSe[1]]:FREQuency:THReshold:VOLTage:RANGe <n>",
+      "query": "[SENSe[1]]:FREQuency:THReshold:VOLTage:RANGe?",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "0 to 1010 (default 10)" }
+      ],
+      "examples": ["FREQ:THR:VOLT:RANG 10"]
+    },
+    {
+      "name": "period_aperture",
+      "mnemonic": "PER:APER",
+      "category": "Sense",
+      "description": "Set the gate/aperture time for period measurements.",
+      "set": "[SENSe[1]]:PERiod:APERture <n>",
+      "query": "[SENSe[1]]:PERiod:APERture?",
+      "parameters": [
+        { "name": "aperture", "units": ["s"], "range": "0.01 to 1.0 (default 1.0)" }
+      ],
+      "examples": ["PER:APER 1.0"]
+    },
+    {
+      "name": "period_threshold_voltage_range",
+      "mnemonic": "PER:THR:VOLT:RANG",
+      "category": "Sense",
+      "description": "Select the threshold voltage range for period measurements.",
+      "set": "[SENSe[1]]:PERiod:THReshold:VOLTage:RANGe <n>",
+      "query": "[SENSe[1]]:PERiod:THReshold:VOLTage:RANGe?",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "0 to 1010 (default 10)" }
+      ],
+      "examples": ["PER:THR:VOLT:RANG 10"]
+    },
+    {
+      "name": "diode_current_range",
+      "mnemonic": "DIOD:CURR:RANG",
+      "category": "Sense",
+      "description": "Select the test-current range for diode testing.",
+      "set": "[SENSe[1]]:DIODe:CURRent:RANGe[:UPPer] <NRf>",
+      "query": "[SENSe[1]]:DIODe:CURRent:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "0 to 1e-3 (default 1e-3)" }
+      ],
+      "examples": ["DIOD:CURR:RANG 1e-3"]
+    },
+    {
+      "name": "continuity_threshold",
+      "mnemonic": "CONT:THR",
+      "category": "Sense",
+      "description": "Set the threshold resistance for the continuity test.",
+      "set": "[SENSe[1]]:CONTinuity:THReshold <NRf>",
+      "query": "[SENSe[1]]:CONTinuity:THReshold?",
+      "parameters": [
+        { "name": "threshold", "units": ["ohm"], "range": "1 to 1000 (default 10)" }
+      ],
+      "examples": ["CONT:THR 10"]
+    },
+    {
+      "name": "distortion_type",
+      "mnemonic": "DIST:TYPE",
+      "category": "Distortion",
+      "description": "Select the distortion measurement type: total harmonic distortion (THD), THD plus noise (THDN) or signal-to-noise-and-distortion (SINAD).",
+      "set": "[SENSe[1]]:DISTortion:TYPE <name>",
+      "query": "[SENSe[1]]:DISTortion:TYPE?",
+      "parameters": [
+        { "name": "type", "range": "THD|THDN|SINAD" }
+      ],
+      "examples": ["DIST:TYPE THD", "DIST:TYPE SINAD"]
+    },
+    {
+      "name": "distortion_range",
+      "mnemonic": "DIST:RANG",
+      "category": "Distortion",
+      "description": "Select the distortion measurement input range (upper).",
+      "set": "[SENSe[1]]:DISTortion:RANGe[:UPPer] <n>",
+      "query": "[SENSe[1]]:DISTortion:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "0 to 757.5 (default 757.5)" }
+      ],
+      "examples": ["DIST:RANG 7.5"]
+    },
+    {
+      "name": "distortion_range_auto",
+      "mnemonic": "DIST:RANG:AUTO",
+      "category": "Distortion",
+      "description": "Enable or disable distortion autoranging.",
+      "set": "[SENSe[1]]:DISTortion:RANGe:AUTO <b>",
+      "query": "[SENSe[1]]:DISTortion:RANGe:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["DIST:RANG:AUTO ON"]
+    },
+    {
+      "name": "distortion_digits",
+      "mnemonic": "DIST:DIG",
+      "category": "Distortion",
+      "description": "Set the distortion measurement resolution in digits.",
+      "set": "[SENSe[1]]:DISTortion:DIGits <n>",
+      "query": "[SENSe[1]]:DISTortion:DIGits?",
+      "parameters": [
+        { "name": "digits", "range": "4 to 7 (default 6)" }
+      ],
+      "examples": ["DIST:DIG 6"]
+    },
+    {
+      "name": "distortion_average_state",
+      "mnemonic": "DIST:AVER:STAT",
+      "category": "Distortion",
+      "description": "Enable or disable the distortion averaging filter.",
+      "set": "[SENSe[1]]:DISTortion:AVERage:STATe <b>",
+      "query": "[SENSe[1]]:DISTortion:AVERage:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["DIST:AVER:STAT ON"]
+    },
+    {
+      "name": "distortion_average_count",
+      "mnemonic": "DIST:AVER:COUN",
+      "category": "Distortion",
+      "description": "Set the distortion averaging filter count.",
+      "set": "[SENSe[1]]:DISTortion:AVERage:COUNt <n>",
+      "query": "[SENSe[1]]:DISTortion:AVERage:COUNt?",
+      "parameters": [
+        { "name": "count", "range": "1 to 100 (default 10)" }
+      ],
+      "examples": ["DIST:AVER:COUN 10"]
+    },
+    {
+      "name": "distortion_average_tcontrol",
+      "mnemonic": "DIST:AVER:TCON",
+      "category": "Distortion",
+      "description": "Select the distortion averaging filter type (moving or repeating).",
+      "set": "[SENSe[1]]:DISTortion:AVERage:TCONtrol <name>",
+      "query": "[SENSe[1]]:DISTortion:AVERage:TCONtrol?",
+      "parameters": [
+        { "name": "type", "range": "MOVing|REPeat" }
+      ],
+      "examples": ["DIST:AVER:TCON MOV"]
+    },
+    {
+      "name": "distortion_frequency",
+      "mnemonic": "DIST:FREQ",
+      "category": "Distortion",
+      "description": "Set the fundamental frequency used for the distortion analysis.",
+      "set": "[SENSe[1]]:DISTortion:FREQuency[:SET] <NRf>",
+      "query": "[SENSe[1]]:DISTortion:FREQuency[:SET]?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "20 to 20000 (default 60)" }
+      ],
+      "examples": ["DIST:FREQ 1000", "DIST:FREQ 20"]
+    },
+    {
+      "name": "distortion_frequency_auto",
+      "mnemonic": "DIST:FREQ:AUTO",
+      "category": "Distortion",
+      "description": "Set auto frequency acquisition: ON acquires the fundamental frequency before each reading; OFF uses the last acquired or output frequency.",
+      "set": "[SENSe[1]]:DISTortion:FREQuency:AUTO <b>",
+      "query": "[SENSe[1]]:DISTortion:FREQuency:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["DIST:FREQ:AUTO ON"]
+    },
+    {
+      "name": "distortion_frequency_acquire",
+      "mnemonic": "DIST:FREQ:ACQ",
+      "category": "Distortion",
+      "description": "Measure the fundamental frequency once and use it for distortion analysis.",
+      "set": "[SENSe[1]]:DISTortion:FREQuency:ACQuire",
+      "examples": ["DIST:FREQ:ACQ"]
+    },
+    {
+      "name": "distortion_harmonic",
+      "mnemonic": "DIST:HARM",
+      "category": "Distortion",
+      "description": "Set the number of the highest harmonic included in the distortion calculation.",
+      "set": "[SENSe[1]]:DISTortion:HARMonic[:UPPer] <NRf>",
+      "query": "[SENSe[1]]:DISTortion:HARMonic[:UPPer]?",
+      "parameters": [
+        { "name": "harmonics", "range": "2 to 64 (default 2)" }
+      ],
+      "examples": ["DIST:HARM 9"]
+    },
+    {
+      "name": "distortion_harmonic_magnitude",
+      "mnemonic": "DIST:HARM:MAGN?",
+      "category": "Distortion",
+      "description": "Query the magnitudes of the measured harmonics over the specified start/end range.",
+      "query": "[SENSe[1]]:DISTortion:HARMonic:MAGNitude? <start#>,<end#>",
+      "parameters": [
+        { "name": "start", "range": "harmonic number" },
+        { "name": "end", "range": "harmonic number" }
+      ],
+      "examples": ["DIST:HARM:MAGN? 2,9"]
+    },
+    {
+      "name": "distortion_sfilter",
+      "mnemonic": "DIST:SFIL",
+      "category": "Distortion",
+      "description": "Select the shaping (weighting) filter applied to the distortion measurement.",
+      "set": "[SENSe[1]]:DISTortion:SFILter <name>",
+      "query": "[SENSe[1]]:DISTortion:SFILter?",
+      "parameters": [
+        { "name": "filter", "range": "NONE|C|CCITT|CCIRARM|A|CCIR (default NONE)" }
+      ],
+      "examples": ["DIST:SFIL A", "DIST:SFIL NONE"]
+    },
+    {
+      "name": "distortion_thd",
+      "mnemonic": "DIST:THD?",
+      "category": "Distortion",
+      "description": "Query the calculated THD reading for the last triggered measurement (number of harmonics depends on HARMonic setting).",
+      "query": "[SENSe[1]]:DISTortion:THD?",
+      "examples": ["DIST:THD?"]
+    },
+    {
+      "name": "distortion_thdn",
+      "mnemonic": "DIST:THDN?",
+      "category": "Distortion",
+      "description": "Query the calculated THD+noise reading for the last triggered measurement.",
+      "query": "[SENSe[1]]:DISTortion:THDN?",
+      "examples": ["DIST:THDN?"]
+    },
+    {
+      "name": "distortion_rms",
+      "mnemonic": "DIST:RMS?",
+      "category": "Distortion",
+      "description": "Query the calculated AC volts RMS value of the input waveform for the last measurement.",
+      "query": "[SENSe[1]]:DISTortion:RMS?",
+      "examples": ["DIST:RMS?"]
+    },
+    {
+      "name": "distortion_hco",
+      "mnemonic": "DIST:HCO",
+      "category": "Distortion",
+      "description": "Set the high cutoff frequency of the bandpass filter (must be above LCO).",
+      "set": "[SENSe[1]]:DISTortion:HCO <NRf>",
+      "query": "[SENSe[1]]:DISTortion:HCO?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "20 to 50000, above LCO (default 50000)" }
+      ],
+      "examples": ["DIST:HCO 50000"]
+    },
+    {
+      "name": "distortion_hco_state",
+      "mnemonic": "DIST:HCO:STAT",
+      "category": "Distortion",
+      "description": "Enable or disable the high cutoff filter.",
+      "set": "[SENSe[1]]:DISTortion:HCO:STATe <b>",
+      "query": "[SENSe[1]]:DISTortion:HCO:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF" }
+      ],
+      "examples": ["DIST:HCO:STAT ON"]
+    },
+    {
+      "name": "distortion_lco",
+      "mnemonic": "DIST:LCO",
+      "category": "Distortion",
+      "description": "Set the low cutoff frequency of the bandpass filter (must be below HCO).",
+      "set": "[SENSe[1]]:DISTortion:LCO <NRf>",
+      "query": "[SENSe[1]]:DISTortion:LCO?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "20 to 50000, below HCO (default 20)" }
+      ],
+      "examples": ["DIST:LCO 20"]
+    },
+    {
+      "name": "distortion_lco_state",
+      "mnemonic": "DIST:LCO:STAT",
+      "category": "Distortion",
+      "description": "Enable or disable the low cutoff filter.",
+      "set": "[SENSe[1]]:DISTortion:LCO:STATe <b>",
+      "query": "[SENSe[1]]:DISTortion:LCO:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF" }
+      ],
+      "examples": ["DIST:LCO:STAT ON"]
+    },
+    {
+      "name": "distortion_fft_bins",
+      "mnemonic": "DIST:FFT:BINS?",
+      "category": "Distortion",
+      "description": "Query the magnitude of the FFT bins over the specified start/end range (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:FFTransform:BINS? <start#>,<end#>",
+      "parameters": [
+        { "name": "start", "range": "1 to 1023" },
+        { "name": "end", "range": "1 to 1023" }
+      ],
+      "examples": ["DIST:FFT:BINS? 1,1023"]
+    },
+    {
+      "name": "distortion_peak_max",
+      "mnemonic": "DIST:PEAK:MAX?",
+      "category": "Distortion",
+      "description": "Request the maximum amplitude (in dBV) and its frequency, updating the current location marker to that frequency (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:MAX?",
+      "examples": ["DIST:PEAK:MAX?"]
+    },
+    {
+      "name": "distortion_peak_next",
+      "mnemonic": "DIST:PEAK:NEXT?",
+      "category": "Distortion",
+      "description": "Request the next lower maximum amplitude (dBV) and frequency, updating the current location marker (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:NEXT?",
+      "examples": ["DIST:PEAK:NEXT?"]
+    },
+    {
+      "name": "distortion_peak_left",
+      "mnemonic": "DIST:PEAK:LEFT?",
+      "category": "Distortion",
+      "description": "Request the next lower amplitude (dBV) at a frequency lower than the present, updating the current location marker (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:LEFT?",
+      "examples": ["DIST:PEAK:LEFT?"]
+    },
+    {
+      "name": "distortion_peak_right",
+      "mnemonic": "DIST:PEAK:RIGHT?",
+      "category": "Distortion",
+      "description": "Request the next lower amplitude (dBV) at a frequency higher than the present, updating the current location marker (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:RIGHT?",
+      "examples": ["DIST:PEAK:RIGHT?"]
+    },
+    {
+      "name": "distortion_peak_sref",
+      "mnemonic": "DIST:PEAK:SREF",
+      "category": "Distortion",
+      "description": "Set the reference marker to the current frequency location (Model 2015-P).",
+      "set": "[SENSe[1]]:DISTortion:PEAK:SREF",
+      "examples": ["DIST:PEAK:SREF"]
+    },
+    {
+      "name": "distortion_peak_srf",
+      "mnemonic": "DIST:PEAK:SRF",
+      "category": "Distortion",
+      "description": "Move the present location marker to the bin associated with the specified frequency (Model 2015-P).",
+      "set": "[SENSe[1]]:DISTortion:PEAK:SRF <freq>",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "20 to 50e3" }
+      ],
+      "examples": ["DIST:PEAK:SRF 600"]
+    },
+    {
+      "name": "distortion_peak_delta",
+      "mnemonic": "DIST:PEAK:DELTA?",
+      "category": "Distortion",
+      "description": "Request the frequency (Hz) and amplitude (dBV) difference between the reference marker and the present location (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:DELTA?",
+      "examples": ["DIST:PEAK:DELTA?"]
+    },
+    {
+      "name": "distortion_peak_loc",
+      "mnemonic": "DIST:PEAK:LOC?",
+      "category": "Distortion",
+      "description": "Request the frequency and amplitude (dBV) of the present location marker (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:LOC?",
+      "examples": ["DIST:PEAK:LOC?"]
+    },
+    {
+      "name": "distortion_peak_lower",
+      "mnemonic": "DIST:PEAK:LOWER",
+      "category": "Distortion",
+      "description": "Set the lower bound for the peak frequency search (Model 2015-P).",
+      "set": "[SENSe[1]]:DISTortion:PEAK:LOWER <freq>",
+      "query": "[SENSe[1]]:DISTortion:PEAK:LOWER?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "20 to 50e3 (default 20)" }
+      ],
+      "examples": ["DIST:PEAK:LOWER 20"]
+    },
+    {
+      "name": "distortion_peak_upper",
+      "mnemonic": "DIST:PEAK:UPPER",
+      "category": "Distortion",
+      "description": "Set the upper bound for the peak frequency search (Model 2015-P).",
+      "set": "[SENSe[1]]:DISTortion:PEAK:UPPER <freq>",
+      "query": "[SENSe[1]]:DISTortion:PEAK:UPPER?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "20 to 50e3 (default 20480)" }
+      ],
+      "examples": ["DIST:PEAK:UPPER 20480"]
+    },
+    {
+      "name": "distortion_peak_list",
+      "mnemonic": "DIST:PEAK:LIST",
+      "category": "Distortion",
+      "description": "Specify a list of frequencies (up to 50) to be analyzed (Model 2015-P).",
+      "set": "[SENSe[1]]:DISTortion:PEAK:LIST <freqlist>",
+      "query": "[SENSe[1]]:DISTortion:PEAK:LIST?",
+      "parameters": [
+        { "name": "freqlist", "units": ["Hz"], "range": "up to 50 frequencies" }
+      ],
+      "examples": ["DIST:PEAK:LIST 1e3,1.1e3,1.2e3"]
+    },
+    {
+      "name": "distortion_peak_list_data",
+      "mnemonic": "DIST:PEAK:LIST:DATA?",
+      "category": "Distortion",
+      "description": "Request the amplitudes for the frequencies in the peak list (Model 2015-P).",
+      "query": "[SENSe[1]]:DISTortion:PEAK:LIST:DATA?",
+      "examples": ["DIST:PEAK:LIST:DATA?"]
+    },
+    {
+      "name": "calc1_format",
+      "mnemonic": "CALC:FORM",
+      "category": "Calculate",
+      "description": "Select the CALC1 math format: NONE (no calculation), MXB (mx+b polynomial) or PERCent.",
+      "set": "CALCulate[1]:FORMat <name>",
+      "query": "CALCulate[1]:FORMat?",
+      "parameters": [
+        { "name": "format", "range": "NONE|MXB|PERCent (default PERCent)" }
+      ],
+      "examples": ["CALC:FORM MXB"]
+    },
+    {
+      "name": "calc1_kmath_mmfactor",
+      "mnemonic": "CALC:KMAT:MMF",
+      "category": "Calculate",
+      "description": "Set the 'm' factor for the mx+b calculation.",
+      "set": "CALCulate[1]:KMATh:MMFactor <NRf>",
+      "query": "CALCulate[1]:KMATh:MMFactor?",
+      "parameters": [
+        { "name": "m", "range": "-100e6 to 100e6 (default 1)" }
+      ],
+      "examples": ["CALC:KMAT:MMF 2"]
+    },
+    {
+      "name": "calc1_kmath_mbfactor",
+      "mnemonic": "CALC:KMAT:MBF",
+      "category": "Calculate",
+      "description": "Set the 'b' factor for the mx+b calculation.",
+      "set": "CALCulate[1]:KMATh:MBFactor <NRf>",
+      "query": "CALCulate[1]:KMATh:MBFactor?",
+      "parameters": [
+        { "name": "b", "range": "-100e6 to 100e6 (default 0)" }
+      ],
+      "examples": ["CALC:KMAT:MBF 0"]
+    },
+    {
+      "name": "calc1_kmath_munits",
+      "mnemonic": "CALC:KMAT:MUN",
+      "category": "Calculate",
+      "description": "Specify the units (three characters A-Z) for the mx+b reading.",
+      "set": "CALCulate[1]:KMATh:MUNits <name>",
+      "query": "CALCulate[1]:KMATh:MUNits?",
+      "parameters": [
+        { "name": "units", "range": "three characters 'A' through 'Z' (default MXB)" }
+      ],
+      "examples": ["CALC:KMAT:MUN 'OHM'"]
+    },
+    {
+      "name": "calc1_kmath_percent",
+      "mnemonic": "CALC:KMAT:PERC",
+      "category": "Calculate",
+      "description": "Set the target value for the PERCent calculation.",
+      "set": "CALCulate[1]:KMATh:PERCent <NRf>",
+      "query": "CALCulate[1]:KMATh:PERCent?",
+      "parameters": [
+        { "name": "target", "range": "-1e8 to +1e8 (default 1)" }
+      ],
+      "examples": ["CALC:KMAT:PERC 1"]
+    },
+    {
+      "name": "calc1_kmath_percent_acquire",
+      "mnemonic": "CALC:KMAT:PERC:ACQ",
+      "category": "Calculate",
+      "description": "Acquire the present input signal reading and use it as the PERCent target value.",
+      "set": "CALCulate[1]:KMATh:PERCent:ACQuire",
+      "examples": ["CALC:KMAT:PERC:ACQ"]
+    },
+    {
+      "name": "calc1_state",
+      "mnemonic": "CALC:STAT",
+      "category": "Calculate",
+      "description": "Enable or disable the CALC1 (kmath) calculation.",
+      "set": "CALCulate[1]:STATe <b>",
+      "query": "CALCulate[1]:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["CALC:STAT ON"]
+    },
+    {
+      "name": "calc1_data",
+      "mnemonic": "CALC:DATA?",
+      "category": "Calculate",
+      "description": "Read the result of the CALC1 calculation. If CALC1 is disabled or NONE, the raw reading is returned.",
+      "query": "CALCulate[1]:KMATh:DATA?",
+      "examples": ["CALC:DATA?"]
+    },
+    {
+      "name": "calc2_format",
+      "mnemonic": "CALC2:FORM",
+      "category": "Calculate",
+      "description": "Select the CALC2 statistics format applied to buffer readings.",
+      "set": "CALCulate2:FORMat <name>",
+      "query": "CALCulate2:FORMat?",
+      "parameters": [
+        { "name": "format", "range": "NONE|MEAN|SDEViation|MAXimum|MINimum (default NONE)" }
+      ],
+      "examples": ["CALC2:FORM MAX"]
+    },
+    {
+      "name": "calc2_state",
+      "mnemonic": "CALC2:STAT",
+      "category": "Calculate",
+      "description": "Enable or disable the CALC2 calculation.",
+      "set": "CALCulate2:STATe <b>",
+      "query": "CALCulate2:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["CALC2:STAT ON"]
+    },
+    {
+      "name": "calc2_immediate",
+      "mnemonic": "CALC2:IMM",
+      "category": "Calculate",
+      "description": "Recalculate the raw input data in the buffer using the selected CALC2 format. The query form performs the calculation and returns the result.",
+      "set": "CALCulate2:IMMediate",
+      "query": "CALCulate2:IMMediate?",
+      "examples": ["CALC2:IMM", "CALC2:IMM?"]
+    },
+    {
+      "name": "calc2_data",
+      "mnemonic": "CALC2:DATA?",
+      "category": "Calculate",
+      "description": "Read the CALC2 result. If CALC2 is disabled or NONE, the raw reading is returned.",
+      "query": "CALCulate2:DATA?",
+      "examples": ["CALC2:DATA?"]
+    },
+    {
+      "name": "calc3_limit_upper",
+      "mnemonic": "CALC3:LIM:UPP",
+      "category": "Calculate",
+      "description": "Set the upper limit value for the LIMIT1 limit test.",
+      "set": "CALCulate3:LIMit[1]:UPPer[:DATA] <n>",
+      "query": "CALCulate3:LIMit[1]:UPPer[:DATA]?",
+      "parameters": [
+        { "name": "limit", "range": "-100e6 to 100e6, or DEFault|MINimum|MAXimum (default 1)" }
+      ],
+      "examples": ["CALC3:LIM:UPP 1"]
+    },
+    {
+      "name": "calc3_limit_lower",
+      "mnemonic": "CALC3:LIM:LOW",
+      "category": "Calculate",
+      "description": "Set the lower limit value for the LIMIT1 limit test.",
+      "set": "CALCulate3:LIMit[1]:LOWer[:DATA] <n>",
+      "query": "CALCulate3:LIMit[1]:LOWer[:DATA]?",
+      "parameters": [
+        { "name": "limit", "range": "-100e6 to 100e6, or DEFault|MINimum|MAXimum (default -1)" }
+      ],
+      "examples": ["CALC3:LIM:LOW -1"]
+    },
+    {
+      "name": "calc3_limit_state",
+      "mnemonic": "CALC3:LIM:STAT",
+      "category": "Calculate",
+      "description": "Enable or disable the LIMIT1 limit test.",
+      "set": "CALCulate3:LIMit[1]:STATe <b>",
+      "query": "CALCulate3:LIMit[1]:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["CALC3:LIM:STAT ON"]
+    },
+    {
+      "name": "calc3_limit_fail",
+      "mnemonic": "CALC3:LIM:FAIL?",
+      "category": "Calculate",
+      "description": "Read the LIMIT1 test result (0 = pass, 1 = fail). Reading does not clear the fail indication.",
+      "query": "CALCulate3:LIMit[1]:FAIL?",
+      "examples": ["CALC3:LIM:FAIL?"]
+    },
+    {
+      "name": "calc3_limit_clear",
+      "mnemonic": "CALC3:LIM:CLE",
+      "category": "Calculate",
+      "description": "Clear the LIMIT1 failed-test indication.",
+      "set": "CALCulate3:LIMit[1]:CLEar[:IMMediate]",
+      "examples": ["CALC3:LIM:CLE"]
+    },
+    {
+      "name": "calc3_limit_clear_auto",
+      "mnemonic": "CALC3:LIM:CLE:AUTO",
+      "category": "Calculate",
+      "description": "Enable or disable auto-clear of the LIMIT1 fail indication when entering the idle state.",
+      "set": "CALCulate3:LIMit[1]:CLEar:AUTO <b>",
+      "query": "CALCulate3:LIMit[1]:CLEar:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["CALC3:LIM:CLE:AUTO ON"]
+    },
+    {
+      "name": "calc3_limit2_upper",
+      "mnemonic": "CALC3:LIM2:UPP",
+      "category": "Calculate",
+      "description": "Set the upper limit value for the LIMIT2 limit test.",
+      "set": "CALCulate3:LIMit2:UPPer[:DATA] <n>",
+      "query": "CALCulate3:LIMit2:UPPer[:DATA]?",
+      "parameters": [
+        { "name": "limit", "range": "-100e6 to 100e6 (default 2)" }
+      ],
+      "examples": ["CALC3:LIM2:UPP 2"]
+    },
+    {
+      "name": "calc3_limit2_lower",
+      "mnemonic": "CALC3:LIM2:LOW",
+      "category": "Calculate",
+      "description": "Set the lower limit value for the LIMIT2 limit test.",
+      "set": "CALCulate3:LIMit2:LOWer[:DATA] <n>",
+      "query": "CALCulate3:LIMit2:LOWer[:DATA]?",
+      "parameters": [
+        { "name": "limit", "range": "-100e6 to 100e6 (default -2)" }
+      ],
+      "examples": ["CALC3:LIM2:LOW -2"]
+    },
+    {
+      "name": "calc3_limit2_state",
+      "mnemonic": "CALC3:LIM2:STAT",
+      "category": "Calculate",
+      "description": "Enable or disable the LIMIT2 limit test.",
+      "set": "CALCulate3:LIMit2:STATe <b>",
+      "query": "CALCulate3:LIMit2:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["CALC3:LIM2:STAT ON"]
+    },
+    {
+      "name": "calc3_limit2_fail",
+      "mnemonic": "CALC3:LIM2:FAIL?",
+      "category": "Calculate",
+      "description": "Read the LIMIT2 test result.",
+      "query": "CALCulate3:LIMit2:FAIL?",
+      "examples": ["CALC3:LIM2:FAIL?"]
+    },
+    {
+      "name": "calc3_immediate",
+      "mnemonic": "CALC3:IMM",
+      "category": "Calculate",
+      "description": "Re-process the current input data to re-perform the limit tests with new test limits. Does not initiate a reading conversion.",
+      "set": "CALCulate3:IMMediate",
+      "examples": ["CALC3:IMM"]
+    },
+    {
+      "name": "display_text_data",
+      "mnemonic": "DISP:TEXT:DATA",
+      "category": "Display",
+      "description": "Define an ASCII text message (up to 12 characters) for the front-panel display. Characters must be quoted.",
+      "set": "DISPlay[:WINDow[1]]:TEXT:DATA <a>",
+      "query": "DISPlay[:WINDow[1]]:TEXT:DATA?",
+      "parameters": [
+        { "name": "message", "range": "up to 12 ASCII characters in quotes" }
+      ],
+      "examples": ["DISP:TEXT:DATA 'TEST MODE'"]
+    },
+    {
+      "name": "display_text_state",
+      "mnemonic": "DISP:TEXT:STAT",
+      "category": "Display",
+      "description": "Enable or disable the user text message display mode.",
+      "set": "DISPlay[:WINDow[1]]:TEXT:STATe <b>",
+      "query": "DISPlay[:WINDow[1]]:TEXT:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF" }
+      ],
+      "examples": ["DISP:TEXT:STAT ON"]
+    },
+    {
+      "name": "display_enable",
+      "mnemonic": "DISP:ENAB",
+      "category": "Display",
+      "description": "Enable or disable the front-panel display circuitry. Disabling increases measurement speed.",
+      "set": "DISPlay:ENABle <b>",
+      "query": "DISPlay:ENABle?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF" }
+      ],
+      "examples": ["DISP:ENAB OFF"]
+    },
+    {
+      "name": "format_data",
+      "mnemonic": "FORM:DATA",
+      "category": "Format",
+      "description": "Select the data format for transferred readings.",
+      "set": "FORMat[:DATA] <type>[,<length>]",
+      "query": "FORMat[:DATA]?",
+      "parameters": [
+        { "name": "type", "range": "ASCii|SREal|DREal (default ASCii)" }
+      ],
+      "examples": ["FORM:DATA ASCii", "FORM:DATA SRE"]
+    },
+    {
+      "name": "format_elements",
+      "mnemonic": "FORM:ELEM",
+      "category": "Format",
+      "description": "Specify the data elements returned with each reading.",
+      "set": "FORMat:ELEMents <item list>",
+      "query": "FORMat:ELEMents?",
+      "parameters": [
+        { "name": "elements", "range": "READing, CHANnel, UNITs (default READing)" }
+      ],
+      "examples": ["FORM:ELEM READ,UNIT"]
+    },
+    {
+      "name": "format_border",
+      "mnemonic": "FORM:BORD",
+      "category": "Format",
+      "description": "Select the binary byte order for SREal/DREal transfers.",
+      "set": "FORMat:BORDer <name>",
+      "query": "FORMat:BORDer?",
+      "parameters": [
+        { "name": "order", "range": "NORMal|SWAPped (default SWAPped)" }
+      ],
+      "examples": ["FORM:BORD NORM"]
+    },
+    {
+      "name": "unit_temperature",
+      "mnemonic": "UNIT:TEMP",
+      "category": "Unit",
+      "description": "Select the temperature measurement units.",
+      "set": "UNIT:TEMPerature <name>",
+      "query": "UNIT:TEMPerature?",
+      "parameters": [
+        { "name": "units", "range": "C|F|K (default C)" }
+      ],
+      "examples": ["UNIT:TEMP C"]
+    },
+    {
+      "name": "unit_voltage_ac",
+      "mnemonic": "UNIT:VOLT:AC",
+      "category": "Unit",
+      "description": "Select the AC voltage measurement units.",
+      "set": "UNIT:VOLTage:AC <name>",
+      "query": "UNIT:VOLTage:AC?",
+      "parameters": [
+        { "name": "units", "range": "V|DB|DBM (default V)" }
+      ],
+      "examples": ["UNIT:VOLT:AC DBM"]
+    },
+    {
+      "name": "unit_voltage_ac_db_reference",
+      "mnemonic": "UNIT:VOLT:AC:DB:REF",
+      "category": "Unit",
+      "description": "Specify the dB reference voltage for ACV dB units.",
+      "set": "UNIT:VOLTage:AC:DB:REFerence <n>",
+      "query": "UNIT:VOLTage:AC:DB:REFerence?",
+      "parameters": [
+        { "name": "reference", "units": ["V"], "range": "1e-7 to 1000 (default 1)" }
+      ],
+      "examples": ["UNIT:VOLT:AC:DB:REF 1"]
+    },
+    {
+      "name": "unit_voltage_ac_dbm_impedance",
+      "mnemonic": "UNIT:VOLT:AC:DBM:IMP",
+      "category": "Unit",
+      "description": "Specify the dBm reference impedance for ACV dBm units.",
+      "set": "UNIT:VOLTage:AC:DBM:IMPedance <n>",
+      "query": "UNIT:VOLTage:AC:DBM:IMPedance?",
+      "parameters": [
+        { "name": "impedance", "units": ["ohm"], "range": "1 to 9999 (default 75)" }
+      ],
+      "examples": ["UNIT:VOLT:AC:DBM:IMP 600"]
+    },
+    {
+      "name": "unit_voltage_dc",
+      "mnemonic": "UNIT:VOLT:DC",
+      "category": "Unit",
+      "description": "Select the DC voltage measurement units.",
+      "set": "UNIT:VOLTage[:DC] <name>",
+      "query": "UNIT:VOLTage[:DC]?",
+      "parameters": [
+        { "name": "units", "range": "V|DB|DBM (default V)" }
+      ],
+      "examples": ["UNIT:VOLT:DC V"]
+    },
+    {
+      "name": "unit_distortion",
+      "mnemonic": "UNIT:DIST",
+      "category": "Unit",
+      "description": "Set the distortion measurement units.",
+      "set": "UNIT:DISTortion <name>",
+      "query": "UNIT:DISTortion?",
+      "parameters": [
+        { "name": "units", "range": "PERCent|dB (default PERCent)" }
+      ],
+      "examples": ["UNIT:DIST PERC", "UNIT:DIST DB"]
+    },
+    {
+      "name": "output_state",
+      "mnemonic": "OUTP",
+      "category": "Output",
+      "description": "Enable or disable the sine-wave source output.",
+      "set": "OUTPut[:STATe] <b>",
+      "query": "OUTPut[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["OUTP ON"]
+    },
+    {
+      "name": "output_frequency",
+      "mnemonic": "OUTP:FREQ",
+      "category": "Output",
+      "description": "Set the sine-wave source output frequency.",
+      "set": "OUTPut:FREQuency <NRf>",
+      "query": "OUTPut:FREQuency?",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "10 to 20000 (default 60)" }
+      ],
+      "examples": ["OUTP:FREQ 1000"]
+    },
+    {
+      "name": "output_amplitude",
+      "mnemonic": "OUTP:AMPL",
+      "category": "Output",
+      "description": "Set the sine-wave source output amplitude.",
+      "set": "OUTPut:AMPLitude <NRf>",
+      "query": "OUTPut:AMPLitude?",
+      "parameters": [
+        { "name": "amplitude", "units": ["V"], "range": "0 to 4 for HIZ, 0 to 2 for others (default 0.5)" }
+      ],
+      "examples": ["OUTP:AMPL 0.25"]
+    },
+    {
+      "name": "output_impedance",
+      "mnemonic": "OUTP:IMP",
+      "category": "Output",
+      "description": "Set the sine-wave source output impedance.",
+      "set": "OUTPut:IMPedance <name>",
+      "query": "OUTPut:IMPedance?",
+      "parameters": [
+        { "name": "impedance", "range": "OHM50|OHM600|HIZ (default OHM50)" }
+      ],
+      "examples": ["OUTP:IMP OHM600"]
+    },
+    {
+      "name": "output_mode",
+      "mnemonic": "OUTP:MODE",
+      "category": "Output",
+      "description": "Set the source output mode (fixed output or list/sweep).",
+      "set": "OUTPut:MODE <name>",
+      "query": "OUTPut:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "FIXED|LIST (default FIXED)" }
+      ],
+      "examples": ["OUTP:MODE FIXED"]
+    },
+    {
+      "name": "output_list",
+      "mnemonic": "OUTP:LIST",
+      "category": "Output",
+      "description": "Set the source sweep list points as amplitude/frequency pairs (maximum 50, append up to 200).",
+      "set": "OUTPut:LIST <ampl#1,freq#1,...>",
+      "query": "OUTPut:LIST?",
+      "examples": ["OUTP:LIST 0.25,1000,0.25,1100"]
+    },
+    {
+      "name": "output_list_append",
+      "mnemonic": "OUTP:LIST:APP",
+      "category": "Output",
+      "description": "Append points (50 at a time) to the end of the sweep list.",
+      "set": "OUTPut:LIST:APPend",
+      "examples": ["OUTP:LIST:APP 0.25,1200"]
+    },
+    {
+      "name": "output_list_delay",
+      "mnemonic": "OUTP:LIST:DEL",
+      "category": "Output",
+      "description": "Set the source settling time for each sweep point.",
+      "set": "OUTPut:LIST:DELay <NRf>",
+      "query": "OUTPut:LIST:DELay?",
+      "parameters": [
+        { "name": "delay", "units": ["s"], "range": "seconds (default 0)" }
+      ],
+      "examples": ["OUTP:LIST:DEL 0.1"]
+    },
+    {
+      "name": "output_list_elements",
+      "mnemonic": "OUTP:LIST:ELEM",
+      "category": "Output",
+      "description": "Set the reading elements returned by the sweep :DATA? query.",
+      "set": "OUTPut:LIST:ELEMents <name>",
+      "query": "OUTPut:LIST:ELEMents?",
+      "parameters": [
+        { "name": "elements", "range": "DISTortion, AMPLitude (default DIST)" }
+      ],
+      "examples": ["OUTP:LIST:ELEM DIST"]
+    },
+    {
+      "name": "output_list_data",
+      "mnemonic": "OUTP:LIST:DATA?",
+      "category": "Output",
+      "description": "Query the results of the sweep (in the format set by ELEMents).",
+      "query": "OUTPut:LIST:DATA?",
+      "examples": ["OUTP:LIST:DATA?"]
+    },
+    {
+      "name": "output_list_points",
+      "mnemonic": "OUTP:LIST:POIN?",
+      "category": "Output",
+      "description": "Query the number of points in the sweep list.",
+      "query": "OUTPut:LIST:POINts?",
+      "examples": ["OUTP:LIST:POIN?"]
+    },
+    {
+      "name": "route_scan_external",
+      "mnemonic": "ROUT:SCAN:EXT",
+      "category": "Route",
+      "description": "Specify the external scan list (scanner card channels).",
+      "set": "ROUTe:SCAN:EXTernal <list>",
+      "query": "ROUTe:SCAN:EXTernal?",
+      "parameters": [
+        { "name": "list", "range": "2 to 800 channels (default 1-10)" }
+      ],
+      "examples": ["ROUT:SCAN:EXT (@1:10)"]
+    },
+    {
+      "name": "route_scan_lselect",
+      "mnemonic": "ROUT:SCAN:LSEL",
+      "category": "Route",
+      "description": "Select the scan operation (external scan or none).",
+      "set": "ROUTe:SCAN:LSELect <name>",
+      "query": "ROUTe:SCAN:LSELect?",
+      "parameters": [
+        { "name": "operation", "range": "EXTernal|NONE (default NONE)" }
+      ],
+      "examples": ["ROUT:SCAN:LSEL EXT"]
+    },
+    {
+      "name": "initiate",
+      "mnemonic": "INIT",
+      "category": "Trigger",
+      "description": "Initiate one trigger cycle, taking the instrument out of the idle state.",
+      "set": "INITiate[:IMMediate]",
+      "examples": ["INIT"]
+    },
+    {
+      "name": "initiate_continuous",
+      "mnemonic": "INIT:CONT",
+      "category": "Trigger",
+      "description": "Enable or disable continuous initiation. *RST disables; :SYSTem:PRESet enables.",
+      "set": "INITiate:CONTinuous <b>",
+      "query": "INITiate:CONTinuous?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF" }
+      ],
+      "examples": ["INIT:CONT OFF"]
+    },
+    {
+      "name": "abort",
+      "mnemonic": "ABOR",
+      "category": "Trigger",
+      "description": "Reset the trigger system, returning the instrument to the idle state (if continuous initiation is off).",
+      "set": "ABORt",
+      "examples": ["ABOR"]
+    },
+    {
+      "name": "trigger_count",
+      "mnemonic": "TRIG:COUN",
+      "category": "Trigger",
+      "description": "Set the number of measurements per trigger cycle. *RST default is 1; :SYSTem:PRESet sets INF.",
+      "set": "TRIGger[:SEQuence[1]]:COUNt <n>",
+      "query": "TRIGger[:SEQuence[1]]:COUNt?",
+      "parameters": [
+        { "name": "count", "range": "1 to 9999, or INF" }
+      ],
+      "examples": ["TRIG:COUN 1"]
+    },
+    {
+      "name": "trigger_delay",
+      "mnemonic": "TRIG:DEL",
+      "category": "Trigger",
+      "description": "Set the trigger delay.",
+      "set": "TRIGger[:SEQuence[1]]:DELay <n>",
+      "query": "TRIGger[:SEQuence[1]]:DELay?",
+      "parameters": [
+        { "name": "delay", "units": ["s"], "range": "0 to 999999.999 (default 0)" }
+      ],
+      "examples": ["TRIG:DEL 0"]
+    },
+    {
+      "name": "trigger_delay_auto",
+      "mnemonic": "TRIG:DEL:AUTO",
+      "category": "Trigger",
+      "description": "Enable or disable automatic trigger delay.",
+      "set": "TRIGger[:SEQuence[1]]:DELay:AUTO <b>",
+      "query": "TRIGger[:SEQuence[1]]:DELay:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": ["TRIG:DEL:AUTO OFF"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIG:SOUR",
+      "category": "Trigger",
+      "description": "Select the trigger control source.",
+      "set": "TRIGger[:SEQuence[1]]:SOURce <name>",
+      "query": "TRIGger[:SEQuence[1]]:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|TIMer|MANual|BUS|EXTernal (default IMMediate)" }
+      ],
+      "examples": ["TRIG:SOUR BUS", "TRIG:SOUR IMM"]
+    },
+    {
+      "name": "trigger_timer",
+      "mnemonic": "TRIG:TIM",
+      "category": "Trigger",
+      "description": "Set the timer interval between measurements when the trigger source is TIMer.",
+      "set": "TRIGger[:SEQuence[1]]:TIMer <n>",
+      "query": "TRIGger[:SEQuence[1]]:TIMer?",
+      "parameters": [
+        { "name": "interval", "units": ["s"], "range": "0.001 to 999999.999 (default 0.1)" }
+      ],
+      "examples": ["TRIG:TIM 0.1"]
+    },
+    {
+      "name": "trigger_signal",
+      "mnemonic": "TRIG:SIGN",
+      "category": "Trigger",
+      "description": "Bypass (loop around) the trigger control source for one trigger cycle.",
+      "set": "TRIGger[:SEQuence[1]]:SIGNal",
+      "examples": ["TRIG:SIGN"]
+    },
+    {
+      "name": "sample_count",
+      "mnemonic": "SAMP:COUN",
+      "category": "Trigger",
+      "description": "Specify the sample count (number of readings per INITiate/READ?).",
+      "set": "SAMPle:COUNt <NRf>",
+      "query": "SAMPle:COUNt?",
+      "parameters": [
+        { "name": "count", "range": "1 to 1024 (default 1)" }
+      ],
+      "examples": ["SAMP:COUN 10"]
+    },
+    {
+      "name": "trace_clear",
+      "mnemonic": "TRAC:CLE",
+      "category": "Trace",
+      "description": "Clear all readings from the buffer.",
+      "set": "TRACe:CLEar",
+      "examples": ["TRAC:CLE"]
+    },
+    {
+      "name": "trace_free",
+      "mnemonic": "TRAC:FREE?",
+      "category": "Trace",
+      "description": "Query the bytes available and bytes in use in the buffer.",
+      "query": "TRACe:FREE?",
+      "examples": ["TRAC:FREE?"]
+    },
+    {
+      "name": "trace_points",
+      "mnemonic": "TRAC:POIN",
+      "category": "Trace",
+      "description": "Specify the size of the reading buffer.",
+      "set": "TRACe:POINts <NRf>",
+      "query": "TRACe:POINts?",
+      "parameters": [
+        { "name": "points", "range": "2 to 1024" }
+      ],
+      "examples": ["TRAC:POIN 100"]
+    },
+    {
+      "name": "trace_feed",
+      "mnemonic": "TRAC:FEED",
+      "category": "Trace",
+      "description": "Select the source of readings stored in the buffer.",
+      "set": "TRACe:FEED <name>",
+      "query": "TRACe:FEED?",
+      "parameters": [
+        { "name": "source", "range": "SENSe[1]|CALCulate[1]|NONE" }
+      ],
+      "examples": ["TRAC:FEED SENS"]
+    },
+    {
+      "name": "trace_feed_control",
+      "mnemonic": "TRAC:FEED:CONT",
+      "category": "Trace",
+      "description": "Select the buffer control mode.",
+      "set": "TRACe:FEED:CONTrol <name>",
+      "query": "TRACe:FEED:CONTrol?",
+      "parameters": [
+        { "name": "mode", "range": "NEVer|NEXT" }
+      ],
+      "examples": ["TRAC:FEED:CONT NEXT"]
+    },
+    {
+      "name": "trace_data",
+      "mnemonic": "TRAC:DATA?",
+      "category": "Trace",
+      "description": "Read all readings in the buffer.",
+      "query": "TRACe:DATA?",
+      "examples": ["TRAC:DATA?"]
+    },
+    {
+      "name": "status_measurement_event",
+      "mnemonic": "STAT:MEAS?",
+      "category": "Status",
+      "description": "Read the Measurement Event Register.",
+      "query": "STATus:MEASurement[:EVENt]?",
+      "examples": ["STAT:MEAS?"]
+    },
+    {
+      "name": "status_measurement_enable",
+      "mnemonic": "STAT:MEAS:ENAB",
+      "category": "Status",
+      "description": "Program the Measurement Event Enable Register.",
+      "set": "STATus:MEASurement:ENABle <NRf>",
+      "query": "STATus:MEASurement:ENABle?",
+      "parameters": [
+        { "name": "value", "range": "0 to 65535 (bit mask)" }
+      ],
+      "examples": ["STAT:MEAS:ENAB 512"]
+    },
+    {
+      "name": "status_measurement_condition",
+      "mnemonic": "STAT:MEAS:COND?",
+      "category": "Status",
+      "description": "Read the Measurement Condition Register.",
+      "query": "STATus:MEASurement:CONDition?",
+      "examples": ["STAT:MEAS:COND?"]
+    },
+    {
+      "name": "status_operation_event",
+      "mnemonic": "STAT:OPER?",
+      "category": "Status",
+      "description": "Read the Operation Event Register.",
+      "query": "STATus:OPERation[:EVENt]?",
+      "examples": ["STAT:OPER?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STAT:OPER:ENAB",
+      "category": "Status",
+      "description": "Program the Operation Event Enable Register.",
+      "set": "STATus:OPERation:ENABle <NRf>",
+      "query": "STATus:OPERation:ENABle?",
+      "parameters": [
+        { "name": "value", "range": "0 to 65535 (bit mask)" }
+      ],
+      "examples": ["STAT:OPER:ENAB 1024"]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": "STAT:QUES?",
+      "category": "Status",
+      "description": "Read the Questionable Event Register.",
+      "query": "STATus:QUEStionable[:EVENt]?",
+      "examples": ["STAT:QUES?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STAT:QUES:ENAB",
+      "category": "Status",
+      "description": "Program the Questionable Event Enable Register.",
+      "set": "STATus:QUEStionable:ENABle <NRf>",
+      "query": "STATus:QUEStionable:ENABle?",
+      "parameters": [
+        { "name": "value", "range": "0 to 65535 (bit mask)" }
+      ],
+      "examples": ["STAT:QUES:ENAB 0"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STAT:PRES",
+      "category": "Status",
+      "description": "Return the status registers to their default (preset) states.",
+      "set": "STATus:PRESet",
+      "examples": ["STAT:PRES"]
+    },
+    {
+      "name": "status_queue_next",
+      "mnemonic": "STAT:QUE?",
+      "category": "Status",
+      "description": "Read the most recent error/status message from the Error Queue.",
+      "query": "STATus:QUEue[:NEXT]?",
+      "examples": ["STAT:QUE?"]
+    },
+    {
+      "name": "status_queue_clear",
+      "mnemonic": "STAT:QUE:CLE",
+      "category": "Status",
+      "description": "Clear all messages from the Error Queue.",
+      "set": "STATus:QUEue:CLEar",
+      "examples": ["STAT:QUE:CLE"]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": "SYST:PRES",
+      "category": "System",
+      "description": "Return the instrument to its :SYSTem:PRESet default conditions.",
+      "set": "SYSTem:PRESet",
+      "examples": ["SYST:PRES"]
+    },
+    {
+      "name": "system_posetup",
+      "mnemonic": "SYST:POS",
+      "category": "System",
+      "description": "Select the power-on setup configuration.",
+      "set": "SYSTem:POSetup <name>",
+      "query": "SYSTem:POSetup?",
+      "parameters": [
+        { "name": "setup", "range": "RST|PRESet|SAV0" }
+      ],
+      "examples": ["SYST:POS RST"]
+    },
+    {
+      "name": "system_frswitch",
+      "mnemonic": "SYST:FRSW?",
+      "category": "System",
+      "description": "Query the INPUTS front/rear switch position (0 = rear, 1 = front).",
+      "query": "SYSTem:FRSWitch?",
+      "examples": ["SYST:FRSW?"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYST:VERS?",
+      "category": "System",
+      "description": "Query the revision level of the SCPI standard implemented.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYST:ERR?",
+      "category": "System",
+      "description": "Query (read) the next message from the Error Queue.",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_clear",
+      "mnemonic": "SYST:CLE",
+      "category": "System",
+      "description": "Clear messages from the Error Queue.",
+      "set": "SYSTem:CLEar",
+      "examples": ["SYST:CLE"]
+    },
+    {
+      "name": "system_azero_state",
+      "mnemonic": "SYST:AZER:STAT",
+      "category": "System",
+      "description": "Enable or disable autozero.",
+      "set": "SYSTem:AZERo:STATe <b>",
+      "query": "SYSTem:AZERo:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["SYST:AZER:STAT ON"]
+    },
+    {
+      "name": "system_key",
+      "mnemonic": "SYST:KEY",
+      "category": "System",
+      "description": "Simulate a front-panel key press.",
+      "set": "SYSTem:KEY <NRf>",
+      "query": "SYSTem:KEY?",
+      "parameters": [
+        { "name": "key", "range": "1 to 31" }
+      ],
+      "examples": ["SYST:KEY 1"]
+    },
+    {
+      "name": "system_beeper_state",
+      "mnemonic": "SYST:BEEP:STAT",
+      "category": "System",
+      "description": "Enable or disable the beeper.",
+      "set": "SYSTem:BEEPer[:STATe] <b>",
+      "query": "SYSTem:BEEPer[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["SYST:BEEP:STAT ON"]
+    },
+    {
+      "name": "system_kclick",
+      "mnemonic": "SYST:KCL",
+      "category": "System",
+      "description": "Turn the front-panel key click on or off.",
+      "set": "SYSTem:KCLick <b>",
+      "query": "SYSTem:KCLick?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF (default ON)" }
+      ],
+      "examples": ["SYST:KCL ON"]
+    },
+    {
+      "name": "system_lfrequency",
+      "mnemonic": "SYST:LFR?",
+      "category": "System",
+      "description": "Query the detected power-line frequency.",
+      "query": "SYSTem:LFRequency?",
+      "examples": ["SYST:LFR?"]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": "SYST:LOC",
+      "category": "System",
+      "description": "Take the instrument out of remote and restore front-panel control (RS-232 only).",
+      "set": "SYSTem:LOCal",
+      "examples": ["SYST:LOC"]
+    },
+    {
+      "name": "system_remote",
+      "mnemonic": "SYST:REM",
+      "category": "System",
+      "description": "Place the instrument in remote (RS-232 only).",
+      "set": "SYSTem:REMote",
+      "examples": ["SYST:REM"]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": "SYST:RWL",
+      "category": "System",
+      "description": "Lock out the front-panel controls (RS-232 only).",
+      "set": "SYSTem:RWLock",
+      "examples": ["SYST:RWL"]
+    }
+  ]
+}

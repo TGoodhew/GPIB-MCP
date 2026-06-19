@@ -1,0 +1,324 @@
+{
+  "model": "E4406A",
+  "manufacturer": "Agilent",
+  "category": "Transmitter Tester / VSA",
+  "description": "Agilent E4406A VSA Series Transmitter Tester. SCPI over GPIB. The supplied User's Guide documents only a limited summary of SCPI commands (chiefly the Option B7C Baseband I/Q 'BbIQ Programming Commands' summary plus a few prose references); the complete command set lives in the separate Programmer's Guide and the per-personality measurement guides (GSM, EDGE, cdmaOne, cdma2000, W-CDMA, NADC/PDC, iDEN), which are not part of this source. This definition therefore contains only commands explicitly documented in E4406A_Manual.pdf.",
+  "source": "E4406A_Manual.pdf",
+  "aliases": ["E4406A", "VSA"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "E4406A",
+    "description": "Standard IEEE 488.2 identification query. Returns manufacturer, model (E4406A), serial number, and firmware revision."
+  },
+  "commands": [
+    {
+      "name": "select_instrument_mode",
+      "mnemonic": "INSTrument:SELect",
+      "category": "Instrument",
+      "description": "Selects the active instrument mode / measurement personality. The appropriate mode must be selected before the corresponding CONFigure/FETCh/READ/MEASure measurement commands can be used. Documented in prose only in the User's Guide (mode mnemonics are defined in the Programmer's Guide).",
+      "set": "INSTrument:SELect <mode>",
+      "query": "INSTrument:SELect?",
+      "parameters": [
+        { "name": "mode", "range": "instrument mode / measurement personality (e.g. BASIC and any installed personality such as GSM, EDGE, cdmaOne, cdma2000, W-CDMA, NADC/PDC, iDEN)" }
+      ],
+      "examples": ["INSTrument:SELect?"]
+    },
+    {
+      "name": "keyboard_lock",
+      "mnemonic": "SYSTem:KLOck",
+      "category": "System",
+      "description": "Remotely locks (or unlocks) the front-panel keyboard. When locked, the Klock annunciator appears in white text. Documented in prose in the User's Guide.",
+      "set": "SYSTem:KLOck <state>",
+      "query": "SYSTem:KLOck?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": ["SYSTem:KLOck ON", "SYSTem:KLOck OFF"]
+    },
+    {
+      "name": "spectrum_iq_marker_query",
+      "mnemonic": "CALCulate:SPECtrum:MARKer:IQ",
+      "category": "Calculate",
+      "description": "Baseband I/Q (Option B7C): reads out the current I and Q marker values for the Spectrum measurement.",
+      "query": "CALCulate:SPECtrum:MARKer:IQ [1]|2|3|4?",
+      "parameters": [
+        { "name": "marker", "range": "1|2|3|4 (default 1)" }
+      ],
+      "examples": ["CALCulate:SPECtrum:MARKer:IQ 1?"]
+    },
+    {
+      "name": "waveform_iq_marker_query",
+      "mnemonic": "CALCulate:WAVeform:MARKer:IQ",
+      "category": "Calculate",
+      "description": "Baseband I/Q (Option B7C): reads out the current I and Q marker values for the Waveform measurement.",
+      "query": "CALCulate:WAVeform:MARKer:IQ [1]|2|3|4?",
+      "parameters": [
+        { "name": "marker", "range": "1|2|3|4 (default 1)" }
+      ],
+      "examples": ["CALCulate:WAVeform:MARKer:IQ 1?"]
+    },
+    {
+      "name": "calibrate_iq_group",
+      "mnemonic": "CALibration:GIQ",
+      "category": "Calibration",
+      "description": "Baseband I/Q (Option B7C): performs the IQ group of alignments. The query form performs the alignment and returns 0 if the alignment is successful.",
+      "set": "CALibration:GIQ",
+      "query": "CALibration:GIQ?",
+      "examples": ["CALibration:GIQ", "CALibration:GIQ?"]
+    },
+    {
+      "name": "calibrate_iq_common_mode_null",
+      "mnemonic": "CALibration:IQ:CMR",
+      "category": "Calibration",
+      "description": "Baseband I/Q (Option B7C): forces a common mode response null on the I/Q inputs.",
+      "set": "CALibration:IQ:CMR",
+      "query": "CALibration:IQ:CMR?",
+      "examples": ["CALibration:IQ:CMR", "CALibration:IQ:CMR?"]
+    },
+    {
+      "name": "calibrate_iq_flatness",
+      "mnemonic": "CALibration:IQ:FLATness",
+      "category": "Calibration",
+      "description": "Baseband I/Q (Option B7C): activates a flatness calibration for all I/Q ranges and impedance settings.",
+      "set": "CALibration:IQ:FLATness",
+      "query": "CALibration:IQ:FLATness?",
+      "examples": ["CALibration:IQ:FLATness", "CALibration:IQ:FLATness?"]
+    },
+    {
+      "name": "calibrate_iq_offset",
+      "mnemonic": "CALibration:IQ:OFFSet",
+      "category": "Calibration",
+      "description": "Baseband I/Q (Option B7C): activates a calibration of the I/Q input offset DAC.",
+      "set": "CALibration:IQ:OFFSet",
+      "query": "CALibration:IQ:OFFSet?",
+      "examples": ["CALibration:IQ:OFFSet", "CALibration:IQ:OFFSet?"]
+    },
+    {
+      "name": "spectrum_y_scale_per_division",
+      "mnemonic": "DISPlay:SPECtrum:WINDow:TRACe:Y:SCALe:PDIVision",
+      "category": "Display",
+      "description": "Spectrum measurement: sets or queries the y-axis scale per division. Full form :DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision.",
+      "set": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision <power>",
+      "query": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision?",
+      "parameters": [
+        { "name": "power", "units": ["DB"], "range": "scale per division" }
+      ],
+      "examples": ["DISPlay:SPECtrum:WINDow:TRACe:Y:PDIVision 10DB", "DISPlay:SPECtrum:WINDow:TRACe:Y:PDIVision?"]
+    },
+    {
+      "name": "spectrum_y_reference_level",
+      "mnemonic": "DISPlay:SPECtrum:WINDow:TRACe:Y:SCALe:RLEVel",
+      "category": "Display",
+      "description": "Spectrum measurement: sets or queries the amplitude reference level for the y-axis. Full form :DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel.",
+      "set": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel <power>",
+      "query": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel?",
+      "parameters": [
+        { "name": "power", "units": ["DBM"], "range": "reference level" }
+      ],
+      "examples": ["DISPlay:SPECtrum:WINDow:TRACe:Y:RLEVel -10DBM", "DISPlay:SPECtrum:WINDow:TRACe:Y:RLEVel?"]
+    },
+    {
+      "name": "waveform_y_scale_per_division",
+      "mnemonic": "DISPlay:WAVeform:WINDow:TRACe:Y:SCALe:PDIVision",
+      "category": "Display",
+      "description": "Waveform measurement: sets or queries the y-axis scale per division. Full form :DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision.",
+      "set": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision <power>",
+      "query": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision?",
+      "parameters": [
+        { "name": "power", "units": ["DB"], "range": "scale per division" }
+      ],
+      "examples": ["DISPlay:WAVeform:WINDow:TRACe:Y:PDIVision 10DB", "DISPlay:WAVeform:WINDow:TRACe:Y:PDIVision?"]
+    },
+    {
+      "name": "waveform_y_reference_level",
+      "mnemonic": "DISPlay:WAVeform:WINDow:TRACe:Y:SCALe:RLEVel",
+      "category": "Display",
+      "description": "Waveform measurement: sets or queries the amplitude reference level for the y-axis. Full form :DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel.",
+      "set": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel <power>",
+      "query": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel?",
+      "parameters": [
+        { "name": "power", "units": ["DBM"], "range": "reference level" }
+      ],
+      "examples": ["DISPlay:WAVeform:WINDow:TRACe:Y:RLEVel -10DBM", "DISPlay:WAVeform:WINDow:TRACe:Y:RLEVel?"]
+    },
+    {
+      "name": "input_impedance_iq",
+      "mnemonic": "INPut:IMPedance:IQ",
+      "category": "Input",
+      "description": "Baseband I/Q (Option B7C): selects the characteristic input impedance when the input port is set to I or Q. The value also encodes unbalanced (U) or balanced (B) impedance mode.",
+      "set": "INPut:IMPedance:IQ U50|B600|U1M|B1M",
+      "query": "INPut:IMPedance:IQ?",
+      "parameters": [
+        { "name": "impedance", "range": "U50 (unbalanced 50 ohm)|B600 (balanced 600 ohm)|U1M (unbalanced 1 Mohm)|B1M (balanced 1 Mohm)" }
+      ],
+      "examples": ["INPut:IMPedance:IQ U50", "INPut:IMPedance:IQ?"]
+    },
+    {
+      "name": "input_impedance_reference",
+      "mnemonic": "INPut:IMPedance:REFerence",
+      "category": "Input",
+      "description": "Baseband I/Q (Option B7C): sets or queries the value of the input impedance reference when the input port is set to I or Q.",
+      "set": "INPut:IMPedance:REFerence <integer>",
+      "query": "INPut:IMPedance:REFerence?",
+      "parameters": [
+        { "name": "reference", "units": ["OHM"], "range": "integer impedance reference value" }
+      ],
+      "examples": ["INPut:IMPedance:REFerence 50", "INPut:IMPedance:REFerence?"]
+    },
+    {
+      "name": "input_iq_align",
+      "mnemonic": "INPut:IQ:ALIGn",
+      "category": "Input",
+      "description": "Baseband I/Q (Option B7C): activates or deactivates IQ alignment.",
+      "set": "INPut:IQ:ALIGn OFF|ON|0|1",
+      "query": "INPut:IQ:ALIGn?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON|0|1" }
+      ],
+      "examples": ["INPut:IQ:ALIGn ON", "INPut:IQ:ALIGn?"]
+    },
+    {
+      "name": "input_offset_i",
+      "mnemonic": "INPut:OFFSet:I",
+      "category": "Input",
+      "description": "Baseband I/Q (Option B7C): sets or queries the adjustment to compensate for I voltage bias on signals when the I input port is selected.",
+      "set": "INPut:OFFSet:I <level>",
+      "query": "INPut:OFFSet:I?",
+      "parameters": [
+        { "name": "level", "units": ["V"], "range": "DC offset voltage" }
+      ],
+      "examples": ["INPut:OFFSet:I 0.0V", "INPut:OFFSet:I?"]
+    },
+    {
+      "name": "input_offset_q",
+      "mnemonic": "INPut:OFFSet:Q",
+      "category": "Input",
+      "description": "Baseband I/Q (Option B7C): sets or queries the adjustment to compensate for Q voltage bias on signals when the Q input port is selected.",
+      "set": "INPut:OFFSet:Q <level>",
+      "query": "INPut:OFFSet:Q?",
+      "parameters": [
+        { "name": "level", "units": ["V"], "range": "DC offset voltage" }
+      ],
+      "examples": ["INPut:OFFSet:Q 0.0V", "INPut:OFFSet:Q?"]
+    },
+    {
+      "name": "configure_spectrum",
+      "mnemonic": "CONFigure:SPECtrum",
+      "category": "Measurement",
+      "description": "Configures the instrument for the Spectrum (frequency domain) measurement, which measures the amplitude of the input signal versus frequency using FFT techniques. Requires the appropriate mode selected via INSTrument:SELect.",
+      "set": "CONFigure:SPECtrum",
+      "examples": ["CONFigure:SPECtrum"]
+    },
+    {
+      "name": "fetch_spectrum",
+      "mnemonic": "FETCh:SPECtrum",
+      "category": "Measurement",
+      "description": "Returns the most recent Spectrum (frequency domain) measurement result without re-arming. Full form :FETCh:SPECtrum[n]?.",
+      "query": "FETCh:SPECtrum[n]?",
+      "parameters": [
+        { "name": "n", "range": "result subopcode selecting which data set to return" }
+      ],
+      "examples": ["FETCh:SPECtrum?"]
+    },
+    {
+      "name": "read_spectrum",
+      "mnemonic": "READ:SPECtrum",
+      "category": "Measurement",
+      "description": "Initiates a Spectrum (frequency domain) measurement and returns the result. Full form :READ:SPECtrum[n]?.",
+      "query": "READ:SPECtrum[n]?",
+      "parameters": [
+        { "name": "n", "range": "result subopcode selecting which data set to return" }
+      ],
+      "examples": ["READ:SPECtrum?"]
+    },
+    {
+      "name": "measure_spectrum",
+      "mnemonic": "MEASure:SPECtrum",
+      "category": "Measurement",
+      "description": "Configures, initiates, and returns the Spectrum (frequency domain) measurement result in one command. Full form :MEASure:SPECtrum[n]?.",
+      "query": "MEASure:SPECtrum[n]?",
+      "parameters": [
+        { "name": "n", "range": "result subopcode selecting which data set to return" }
+      ],
+      "examples": ["MEASure:SPECtrum?"]
+    },
+    {
+      "name": "configure_waveform",
+      "mnemonic": "CONFigure:WAVeform",
+      "category": "Measurement",
+      "description": "Configures the instrument for the Waveform (time domain) measurement, which measures power versus time (equivalent to zero-span operation). Requires the appropriate mode selected via INSTrument:SELect.",
+      "set": "CONFigure:WAVeform",
+      "examples": ["CONFigure:WAVeform"]
+    },
+    {
+      "name": "fetch_waveform",
+      "mnemonic": "FETCh:WAVeform",
+      "category": "Measurement",
+      "description": "Returns the most recent Waveform (time domain) measurement result without re-arming. Full form :FETCh:WAVeform[n]?.",
+      "query": "FETCh:WAVeform[n]?",
+      "parameters": [
+        { "name": "n", "range": "result subopcode selecting which data set to return" }
+      ],
+      "examples": ["FETCh:WAVeform?"]
+    },
+    {
+      "name": "read_waveform",
+      "mnemonic": "READ:WAVeform",
+      "category": "Measurement",
+      "description": "Initiates a Waveform (time domain) measurement and returns the result. Full form :READ:WAVeform[n]?.",
+      "query": "READ:WAVeform[n]?",
+      "parameters": [
+        { "name": "n", "range": "result subopcode selecting which data set to return" }
+      ],
+      "examples": ["READ:WAVeform?"]
+    },
+    {
+      "name": "measure_waveform",
+      "mnemonic": "MEASure:WAVeform",
+      "category": "Measurement",
+      "description": "Configures, initiates, and returns the Waveform (time domain) measurement result in one command. Full form :MEASure:WAVeform[n]?.",
+      "query": "MEASure:WAVeform[n]?",
+      "parameters": [
+        { "name": "n", "range": "result subopcode selecting which data set to return" }
+      ],
+      "examples": ["MEASure:WAVeform?"]
+    },
+    {
+      "name": "sense_feed",
+      "mnemonic": "SENSe:FEED",
+      "category": "Sense",
+      "description": "Selects the input signal source. Default is the front-panel RF INPUT port. For calibration/testing the input can be taken from the internal 321.4 MHz IF alignment signal or the internal 50 MHz amplitude reference. With Option B7C, the front-panel I and Q ports can be selected. Full form [:SENSe]:FEED.",
+      "set": "SENSe:FEED RF|IQ|IONLy|QONLy|AREFerence|IFALign",
+      "query": "SENSe:FEED?",
+      "parameters": [
+        { "name": "source", "range": "RF (front-panel RF INPUT)|IQ (combined I and Q ports, Option B7C)|IONLy (I port, Option B7C)|QONLy (Q port, Option B7C)|AREFerence (internal 50 MHz amplitude reference)|IFALign (internal 321.4 MHz IF alignment)" }
+      ],
+      "examples": ["SENSe:FEED RF", "SENSe:FEED?"]
+    },
+    {
+      "name": "sense_power_iq_range_upper",
+      "mnemonic": "SENSe:POWer:IQ:RANGe:UPPer",
+      "category": "Sense",
+      "description": "Baseband I/Q (Option B7C): selects the maximum total power expected from the unit under test at the test port when the I or Q port is selected. Full form [:SENSe]:POWer:IQ:RANGe[:UPPer].",
+      "set": "SENSe:POWer:IQ:RANGe[:UPPer] <power> [DBM]|DBMV|W",
+      "query": "SENSe:POWer:IQ:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "power", "units": ["DBM", "DBMV", "W"], "range": "maximum expected total power" }
+      ],
+      "examples": ["SENSe:POWer:IQ:RANGe:UPPer 0DBM", "SENSe:POWer:IQ:RANGe:UPPer?"]
+    },
+    {
+      "name": "sense_voltage_iq_range_upper",
+      "mnemonic": "SENSe:VOLTage:IQ:RANGe:UPPer",
+      "category": "Sense",
+      "description": "Baseband I/Q (Option B7C): selects the upper voltage range when the I or Q port is selected. This setting helps set the gain in the baseband IQ variable gain block to improve dynamic range. Full form [:SENSe]:VOLTage:IQ:RANGe[:UPPer].",
+      "set": "SENSe:VOLTage:IQ:RANGe[:UPPer] <level>",
+      "query": "SENSe:VOLTage:IQ:RANGe[:UPPer]?",
+      "parameters": [
+        { "name": "level", "units": ["V"], "range": "upper voltage range" }
+      ],
+      "examples": ["SENSe:VOLTage:IQ:RANGe:UPPer 1.0V", "SENSe:VOLTage:IQ:RANGe:UPPer?"]
+    }
+  ]
+}

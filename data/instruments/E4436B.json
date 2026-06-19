@@ -1,0 +1,412 @@
+{
+  "model": "E4436B",
+  "manufacturer": "Agilent",
+  "category": "Signal Generator",
+  "description": "Agilent E4436B ESG-DP digital signal generator (250 kHz to 3 GHz), part of the ESG-D/ESG-DP family. SCPI over GPIB. IMPORTANT: The only SCPI command reference available in the local manual library is the Options UN8/202 programming guide (E4436B UN8.pdf), which documents the digital/IQ modulation [:SOURce]:RADio subsystem plus a few common commands. The base-instrument analog subsystems (FREQuency, POWer, OUTPut, AM, FM, PM, SWEep/LIST, ROSCillator, UNIT, DISPlay, SYSTem, STATus) live in the separate ESG-D/DP SCPI Programming Guide, which is NOT present in the manual library; those commands are therefore NOT included here to avoid inventing undocumented syntax. The E4436B User.pdf is a front-panel/softkey operation reference and contains no SCPI command tables. Throughout the RADio subsystem the programming guide uses the placeholder <format> to mean any one of the supported digital formats: CUSTom, GSM, EDGE, PDC, PHS, DECT, TETRa, NADC.",
+  "source": "E4436B User.pdf",
+  "aliases": ["E4436B", "E4432B", "E4433B", "E4435B", "ESG-D", "ESG-DP"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "E443[0-9]B",
+    "description": "Standard IEEE 488.2 identification query. Returns manufacturer, model, serial number and firmware revision."
+  },
+  "commands": [
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the signal generator to a factory-defined instrument state. Documented throughout the UN8/202 programming guide as the reset preset.",
+      "set": "*RST",
+      "parameters": [],
+      "examples": ["*RST"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears the status byte, the data questionable event register, and the error queue.",
+      "set": "*CLS",
+      "parameters": [],
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Triggers the signal generator when the trigger source (e.g. a RADio format TRIGger[:SOURce]) is set to BUS.",
+      "set": "*TRG",
+      "parameters": [],
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "radio_format_state",
+      "mnemonic": "[:SOURce]:RADio:<format>[:STATe]",
+      "category": "Digital Modulation",
+      "description": "Enables or disables the selected digital modulation format (CUSTom, GSM, EDGE, PDC, PHS, DECT, TETRa or NADC). Turning a format on activates the corresponding IQ/digital modulation.",
+      "set": "[:SOURce]:RADio:<format>[:STATe] <bool>",
+      "query": "[:SOURce]:RADio:<format>[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":RADio:CUSTom:STATe ON", ":RADio:GSM ON"]
+    },
+    {
+      "name": "radio_format_secondary_state",
+      "mnemonic": "[:SOURce]:RADio:<format>:SECondary[:STATe]",
+      "category": "Digital Modulation",
+      "description": "Enables or disables the secondary (alternate) framing/configuration for the selected format.",
+      "set": "[:SOURce]:RADio:<format>:SECondary[:STATe] <bool>",
+      "query": "[:SOURce]:RADio:<format>:SECondary[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":RADio:GSM:SECondary:STATe ON"]
+    },
+    {
+      "name": "radio_modulation_type",
+      "mnemonic": "[:SOURce]:RADio:<format>:MODulation[:TYPE]",
+      "category": "Digital Modulation",
+      "description": "Selects the digital modulation type applied to the selected format. The full set of choices documented for CUSTom is shown in the range.",
+      "set": "[:SOURce]:RADio:<format>:MODulation[:TYPE] <type>",
+      "query": "[:SOURce]:RADio:<format>:MODulation[:TYPE]?",
+      "parameters": [
+        { "name": "type", "range": "BPSK|QPSK|IS95QPSK|GRAYQPSK|OQPSK|IS95OQPSK|P4DQPSK|PSK8|QAM4|QAM16|QAM32|QAM64|QAM256|FSK2|FSK4|FSK8|MSK|C4FM|UIQ|UFSK" }
+      ],
+      "examples": [":RADio:CUSTom:MODulation:TYPE QPSK", ":RADio:CUSTom:MODulation QAM16"]
+    },
+    {
+      "name": "radio_modulation_fsk_deviation",
+      "mnemonic": "[:SOURce]:RADio:<format>:MODulation:FSK[:DEViation]",
+      "category": "Digital Modulation",
+      "description": "Sets the frequency deviation used when the modulation type is an FSK format.",
+      "set": "[:SOURce]:RADio:<format>:MODulation:FSK[:DEViation] <value><unit>",
+      "query": "[:SOURce]:RADio:<format>:MODulation:FSK[:DEViation]?",
+      "parameters": [
+        { "name": "deviation", "units": ["Hz", "kHz", "MHz"] }
+      ],
+      "examples": [":RADio:CUSTom:MODulation:FSK:DEViation 5kHz"]
+    },
+    {
+      "name": "radio_modulation_msk_phase",
+      "mnemonic": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe]",
+      "category": "Digital Modulation",
+      "description": "Sets the phase deviation used when the modulation type is MSK.",
+      "set": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe] <value><unit>",
+      "query": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe]?",
+      "parameters": [
+        { "name": "phase", "units": ["deg", "rad"] }
+      ],
+      "examples": [":RADio:CUSTom:MODulation:MSK:PHASe 90deg"]
+    },
+    {
+      "name": "radio_modulation_user_iq",
+      "mnemonic": "[:SOURce]:RADio:<format>:MODulation:UIQ",
+      "category": "Digital Modulation",
+      "description": "Selects a user-defined I/Q modulation map from a named file.",
+      "set": "[:SOURce]:RADio:<format>:MODulation:UIQ \"<file name>\"",
+      "query": "[:SOURce]:RADio:<format>:MODulation:UIQ?",
+      "parameters": [
+        { "name": "file", "range": "\"<file name>\"" }
+      ],
+      "examples": [":RADio:CUSTom:MODulation:UIQ \"mymap\""]
+    },
+    {
+      "name": "radio_modulation_user_fsk",
+      "mnemonic": "[:SOURce]:RADio:<format>:MODulation:UFSK",
+      "category": "Digital Modulation",
+      "description": "Selects a user-defined FSK modulation map from a named file.",
+      "set": "[:SOURce]:RADio:<format>:MODulation:UFSK \"<file name>\"",
+      "query": "[:SOURce]:RADio:<format>:MODulation:UFSK?",
+      "parameters": [
+        { "name": "file", "range": "\"<file name>\"" }
+      ],
+      "examples": [":RADio:CUSTom:MODulation:UFSK \"myfsk\""]
+    },
+    {
+      "name": "radio_filter",
+      "mnemonic": "[:SOURce]:RADio:<format>:FILTer",
+      "category": "Digital Modulation",
+      "description": "Selects the baseband filter applied to the selected format, or a user filter from a named file.",
+      "set": "[:SOURce]:RADio:<format>:FILTer <filter>",
+      "query": "[:SOURce]:RADio:<format>:FILTer?",
+      "parameters": [
+        { "name": "filter", "range": "RNYQuist|NYQuist|GAUSsian|RECTangle|IS95|IS95_EQ|UGGaussian|EDGE|\"<file name>\"" }
+      ],
+      "examples": [":RADio:CUSTom:FILTer RNYQuist", ":RADio:CUSTom:FILTer GAUSsian"]
+    },
+    {
+      "name": "radio_filter_alpha",
+      "mnemonic": "[:SOURce]:RADio:<format>:ALPHa",
+      "category": "Digital Modulation",
+      "description": "Sets the filter alpha (roll-off factor) for Nyquist and root-Nyquist filters.",
+      "set": "[:SOURce]:RADio:<format>:ALPHa <value>",
+      "query": "[:SOURce]:RADio:<format>:ALPHa?",
+      "parameters": [
+        { "name": "alpha", "range": "0 to 1" }
+      ],
+      "examples": [":RADio:CUSTom:ALPHa 0.35"]
+    },
+    {
+      "name": "radio_filter_bbt",
+      "mnemonic": "[:SOURce]:RADio:<format>:BBT",
+      "category": "Digital Modulation",
+      "description": "Sets the bandwidth-bit-time (BbT) product for Gaussian filters.",
+      "set": "[:SOURce]:RADio:<format>:BBT <value>",
+      "query": "[:SOURce]:RADio:<format>:BBT?",
+      "parameters": [
+        { "name": "bbt", "range": "filter bandwidth-time product" }
+      ],
+      "examples": [":RADio:CUSTom:BBT 0.3"]
+    },
+    {
+      "name": "radio_symbol_rate",
+      "mnemonic": "[:SOURce]:RADio:<format>:SRATe",
+      "category": "Digital Modulation",
+      "description": "Sets the transmission symbol rate for the selected format.",
+      "set": "[:SOURce]:RADio:<format>:SRATe <value>",
+      "query": "[:SOURce]:RADio:<format>:SRATe?",
+      "parameters": [
+        { "name": "symbol_rate", "units": ["sps", "ksps", "Msps"] }
+      ],
+      "examples": [":RADio:CUSTom:SRATe 24.3ksps"]
+    },
+    {
+      "name": "radio_bit_rate",
+      "mnemonic": "[:SOURce]:RADio:<format>:BRATe",
+      "category": "Digital Modulation",
+      "description": "Sets the transmission bit rate for the selected format.",
+      "set": "[:SOURce]:RADio:<format>:BRATe <value>",
+      "query": "[:SOURce]:RADio:<format>:BRATe?",
+      "parameters": [
+        { "name": "bit_rate", "units": ["bps", "kbps", "Mbps"] }
+      ],
+      "examples": [":RADio:CUSTom:BRATe 270.833kbps"]
+    },
+    {
+      "name": "radio_data",
+      "mnemonic": "[:SOURce]:RADio:<format>:DATA",
+      "category": "Digital Modulation",
+      "description": "Selects the data pattern used to modulate the carrier: a PRBS (PNn), a fixed pattern (FIX4/Pn), or external data (EXT).",
+      "set": "[:SOURce]:RADio:<format>:DATA <pattern>",
+      "query": "[:SOURce]:RADio:<format>:DATA?",
+      "parameters": [
+        { "name": "pattern", "range": "PN9|PN11|PN15|PN20|PN23|FIX4|P4|P8|P16|P32|P64|EXT" }
+      ],
+      "examples": [":RADio:CUSTom:DATA PN9", ":RADio:CUSTom:DATA EXT"]
+    },
+    {
+      "name": "radio_data_differential_encode",
+      "mnemonic": "[:SOURce]:RADio:<format>:DENCode",
+      "category": "Digital Modulation",
+      "description": "Enables or disables differential encoding of the modulating data.",
+      "set": "[:SOURce]:RADio:<format>:DENCode <bool>",
+      "query": "[:SOURce]:RADio:<format>:DENCode?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":RADio:CUSTom:DENCode ON"]
+    },
+    {
+      "name": "radio_repeat",
+      "mnemonic": "[:SOURce]:RADio:<format>:REPeat",
+      "category": "Digital Modulation",
+      "description": "Selects single or continuous transmission of the data pattern.",
+      "set": "[:SOURce]:RADio:<format>:REPeat <mode>",
+      "query": "[:SOURce]:RADio:<format>:REPeat?",
+      "parameters": [
+        { "name": "mode", "range": "SINGle|CONTinuous" }
+      ],
+      "examples": [":RADio:CUSTom:REPeat CONTinuous"]
+    },
+    {
+      "name": "radio_baseband_clock",
+      "mnemonic": "[:SOURce]:RADio:<format>:BBCLock",
+      "category": "Digital Modulation",
+      "description": "Selects the baseband data clock source.",
+      "set": "[:SOURce]:RADio:<format>:BBCLock <source>",
+      "query": "[:SOURce]:RADio:<format>:BBCLock?",
+      "parameters": [
+        { "name": "source", "range": "INT|EXT" }
+      ],
+      "examples": [":RADio:CUSTom:BBCLock INT"]
+    },
+    {
+      "name": "radio_burst_shape_type",
+      "mnemonic": "[:SOURce]:RADio:<format>:BURSt:SHAPe[:TYPE]",
+      "category": "Digital Modulation",
+      "description": "Selects the burst rise/fall shape, either the built-in SINE shape or a user shape from a named file.",
+      "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe[:TYPE] <shape>",
+      "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe[:TYPE]?",
+      "parameters": [
+        { "name": "shape", "range": "SINE|\"<file name>\"" }
+      ],
+      "examples": [":RADio:CUSTom:BURSt:SHAPe:TYPE SINE"]
+    },
+    {
+      "name": "radio_burst_shape_rise_time",
+      "mnemonic": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:TIME",
+      "category": "Digital Modulation",
+      "description": "Sets the burst rise time.",
+      "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:TIME <value>",
+      "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:TIME?",
+      "parameters": [
+        { "name": "rise_time", "units": ["bits", "s"] }
+      ],
+      "examples": [":RADio:CUSTom:BURSt:SHAPe:RISE:TIME 1"]
+    },
+    {
+      "name": "radio_burst_shape_rise_delay",
+      "mnemonic": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:DELay",
+      "category": "Digital Modulation",
+      "description": "Sets the burst rise delay.",
+      "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:DELay <value>",
+      "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:DELay?",
+      "parameters": [
+        { "name": "rise_delay", "units": ["bits", "s"] }
+      ],
+      "examples": [":RADio:CUSTom:BURSt:SHAPe:RISE:DELay 0"]
+    },
+    {
+      "name": "radio_burst_shape_fall_time",
+      "mnemonic": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:TIME",
+      "category": "Digital Modulation",
+      "description": "Sets the burst fall time.",
+      "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:TIME <value>",
+      "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:TIME?",
+      "parameters": [
+        { "name": "fall_time", "units": ["bits", "s"] }
+      ],
+      "examples": [":RADio:CUSTom:BURSt:SHAPe:FALL:TIME 1"]
+    },
+    {
+      "name": "radio_burst_shape_fall_delay",
+      "mnemonic": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:DELay",
+      "category": "Digital Modulation",
+      "description": "Sets the burst fall delay.",
+      "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:DELay <value>",
+      "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:DELay?",
+      "parameters": [
+        { "name": "fall_delay", "units": ["bits", "s"] }
+      ],
+      "examples": [":RADio:CUSTom:BURSt:SHAPe:FALL:DELay 0"]
+    },
+    {
+      "name": "radio_trigger_source",
+      "mnemonic": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]",
+      "category": "Trigger",
+      "description": "Selects the trigger source that starts transmission for the selected format: front-panel key, external trigger, or GPIB bus (*TRG).",
+      "set": "[:SOURce]:RADio:<format>:TRIGger[:SOURce] <source>",
+      "query": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]?",
+      "parameters": [
+        { "name": "source", "range": "KEY|EXT|BUS" }
+      ],
+      "examples": [":RADio:CUSTom:TRIGger:SOURce BUS", ":RADio:CUSTom:TRIGger KEY"]
+    },
+    {
+      "name": "radio_secondary_trigger_source",
+      "mnemonic": "[:SOURce]:RADio:<format>:SECondary:TRIGger[:SOURce]",
+      "category": "Trigger",
+      "description": "Selects the trigger source for the secondary configuration of the selected format.",
+      "set": "[:SOURce]:RADio:<format>:SECondary:TRIGger[:SOURce] <source>",
+      "query": "[:SOURce]:RADio:<format>:SECondary:TRIGger[:SOURce]?",
+      "parameters": [
+        { "name": "source", "range": "KEY|EXT|BUS" }
+      ],
+      "examples": [":RADio:CUSTom:SECondary:TRIGger:SOURce EXT"]
+    },
+    {
+      "name": "radio_trigger_external_type",
+      "mnemonic": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal[:TYPE]",
+      "category": "Trigger",
+      "description": "Selects the behaviour of the external trigger: continuous gating, single shot, or reset.",
+      "set": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal[:TYPE] <type>",
+      "query": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal[:TYPE]?",
+      "parameters": [
+        { "name": "type", "range": "GATE|SINGle|RESet" }
+      ],
+      "examples": [":RADio:CUSTom:TRIGger:SOURce:EXTernal:TYPE SINGle"]
+    },
+    {
+      "name": "radio_trigger_external_delay",
+      "mnemonic": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay",
+      "category": "Trigger",
+      "description": "Sets the external trigger delay value.",
+      "set": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay <value>",
+      "query": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay?",
+      "parameters": [
+        { "name": "delay", "units": ["bits", "s"] }
+      ],
+      "examples": [":RADio:CUSTom:TRIGger:SOURce:EXTernal:DELay 10"]
+    },
+    {
+      "name": "radio_trigger_external_delay_state",
+      "mnemonic": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay:STATe",
+      "category": "Trigger",
+      "description": "Enables or disables the external trigger delay.",
+      "set": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay:STATe <bool>",
+      "query": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":RADio:CUSTom:TRIGger:SOURce:EXTernal:DELay:STATe ON"]
+    },
+    {
+      "name": "trigger_sequence_slope",
+      "mnemonic": ":TRIGger[:SEQuence]:SLOPe",
+      "category": "Trigger",
+      "description": "Selects the active edge (rising or falling) of the external trigger input.",
+      "set": ":TRIGger[:SEQuence]:SLOPe <slope>",
+      "query": ":TRIGger[:SEQuence]:SLOPe?",
+      "parameters": [
+        { "name": "slope", "range": "POSitive|NEGative" }
+      ],
+      "examples": [":TRIGger:SLOPe POSitive"]
+    },
+    {
+      "name": "radio_channel_optimization",
+      "mnemonic": "[:SOURce]:RADio:<format>:CHANnel",
+      "category": "Digital Modulation",
+      "description": "Optimizes the signal for either error vector magnitude (EVM) or adjacent channel power (ACP) performance.",
+      "set": "[:SOURce]:RADio:<format>:CHANnel <mode>",
+      "query": "[:SOURce]:RADio:<format>:CHANnel?",
+      "parameters": [
+        { "name": "mode", "range": "EVM|ACP" }
+      ],
+      "examples": [":RADio:CUSTom:CHANnel EVM"]
+    },
+    {
+      "name": "radio_polarity",
+      "mnemonic": "[:SOURce]:RADio:<format>:POLarity",
+      "category": "Digital Modulation",
+      "description": "Sets the polarity of the data/clock for the selected format.",
+      "set": "[:SOURce]:RADio:<format>:POLarity <polarity>",
+      "query": "[:SOURce]:RADio:<format>:POLarity?",
+      "parameters": [
+        { "name": "polarity", "range": "NORMal|INVerted" }
+      ],
+      "examples": [":RADio:CUSTom:POLarity NORMal"]
+    },
+    {
+      "name": "radio_format_band",
+      "mnemonic": "[:SOURce]:RADio:<format>:FCHannel:BAND",
+      "category": "Digital Modulation",
+      "description": "Selects the frequency channel band for cellular formats (EDGE/GSM band selection shown; DECT/PHS/TETRa use STANdard).",
+      "set": "[:SOURce]:RADio:<format>:FCHannel:BAND <band>",
+      "query": "[:SOURce]:RADio:<format>:FCHannel:BAND?",
+      "parameters": [
+        { "name": "band", "range": "BPGSm|MPGSm|BEGSm|MEGSm|BRGSm|MRGSm|BDCS|BPCS|STANdard" }
+      ],
+      "examples": [":RADio:GSM:FCHannel:BAND BEGSm", ":RADio:DECT:FCHannel:BAND STANdard"]
+    },
+    {
+      "name": "radio_format_default",
+      "mnemonic": "[:SOURce]:RADio:<format>:DEFault",
+      "category": "Digital Modulation",
+      "description": "Restores the selected format to its default framing/parameter values.",
+      "set": "[:SOURce]:RADio:<format>:DEFault",
+      "parameters": [],
+      "examples": [":RADio:DECT:DEFault"]
+    }
+  ]
+}

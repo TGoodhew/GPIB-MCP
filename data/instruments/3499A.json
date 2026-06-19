@@ -1,0 +1,785 @@
+{
+  "model": "3499A",
+  "manufacturer": "Agilent",
+  "category": "Switch / Control Unit",
+  "description": "Agilent 3499A/B/C Switch/Control System mainframe. High-density/high-speed switching and digital I/O for plug-in modules (MUX, GP relay, matrix, DIO, multifunction, RF/microwave/optical). Programmable via SCPI over GPIB, LAN, or RS-232. 3499A has slots 0-5, 3499B has slots 0-2, 3499C has slots 0-9 (slot 0 is the control board/built-in DIO). Operates in SCPI mode or HP 3488A emulation mode.",
+  "source": "3499A User & Programming.pdf",
+  "aliases": ["3499A", "3499B", "3499C"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "3499[ABC]",
+    "description": "Returns the instrument identification string containing the manufacturer, model number, serial number, and firmware revision."
+  },
+  "commands": [
+    {
+      "name": "close_channels",
+      "mnemonic": "[ROUTe:]CLOSe",
+      "category": "Switch",
+      "description": "Closes the switching channels specified in the channel list. Cannot be used to change bits on a digital I/O module. Channels may not close simultaneously; the order is not guaranteed.",
+      "set": "[ROUTe:]CLOSe <channel_list>",
+      "query": "[ROUTe:]CLOSe? <channel_list>",
+      "parameters": [
+        { "name": "channel_list", "range": "Form @snn (s=slot, nn=channel). Single (@snn), list (@snn,snn), range (@snn:snn), grouped ranges (@snn:snn,snn:snn), or any combination." }
+      ],
+      "examples": ["ROUT:CLOS (@101)", "CLOS? (@101,103:105)"]
+    },
+    {
+      "name": "close_state_query",
+      "mnemonic": "[ROUTe:]CLOSe:STATe?",
+      "category": "Switch",
+      "description": "Returns a comma-delineated list of all closed channel relays on all installed plug-in modules, each in the form snn (slot/channel). Reflects programmed state only.",
+      "query": "[ROUTe:]CLOSe:STATe?",
+      "examples": ["ROUT:CLOS:STAT?"]
+    },
+    {
+      "name": "open_channels",
+      "mnemonic": "[ROUTe:]OPEN",
+      "category": "Switch",
+      "description": "Opens the switching channels specified in the channel list, or ALL switching channels. The query returns 1 for open and 0 for closed for each channel in the list.",
+      "set": "[ROUTe:]OPEN <channel_list>|ALL",
+      "query": "[ROUTe:]OPEN? <channel_list>",
+      "parameters": [
+        { "name": "channel_list", "range": "Form @snn; single, list, range, grouped ranges, or combination; or the keyword ALL to open all channels." }
+      ],
+      "examples": ["ROUT:OPEN (@101:108)", "OPEN ALL"]
+    },
+    {
+      "name": "card_pair",
+      "mnemonic": "[ROUTe:]CPAir",
+      "category": "Switch",
+      "description": "Groups two cards of the same type so a command sent to one executes on both (lowest slot first). Useful for 4-wire scanning. Specify -1 as the second slot to cancel the pair. Query returns four comma-separated slot numbers (0,0,0,0 if none paired).",
+      "set": "[ROUTe:]CPAir <slot1>,<slot2>|-1",
+      "query": "[ROUTe:]CPAir?",
+      "parameters": [
+        { "name": "slot1", "range": "Valid slot 1-5 (3499A), 1-2 (3499B), 1-9 (3499C)" },
+        { "name": "slot2", "range": "Slot of identical module, or -1 to cancel pairing" }
+      ],
+      "examples": ["ROUT:CPA 1,3", "ROUT:CPA 1,-1", "ROUT:CPA?"]
+    },
+    {
+      "name": "function_mode",
+      "mnemonic": "[ROUTe:]FUNCtion",
+      "category": "Switch",
+      "description": "Configures the function mode of an N2260A or N2266A configurable MUX module: 80-ch 1-wire, 40-ch 2-wire, dual 20-ch 2-wire, or 20-ch 4-wire. Changing mode opens all channels on the module. Query returns WIRE1, WIRE2, BIWIRE2, or WIRE4.",
+      "set": "[ROUTe:]FUNCtion <slot>,<1|2|3|4|WIRE1|WIRE2|BIWIRE2|WIRE4>",
+      "query": "[ROUTe:]FUNCtion? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "Slot of N2260A/N2266A module" },
+        { "name": "mode", "range": "1|WIRE1 (80ch 1-wire), 2|WIRE2 (40ch 2-wire, default), 3|BIWIRE2 (dual 20ch 2-wire), 4|WIRE4 (20ch 4-wire)" }
+      ],
+      "examples": ["ROUT:FUNC 1,WIRE4", "ROUT:FUNC? 1"]
+    },
+    {
+      "name": "diag_speek",
+      "mnemonic": "DIAGnostic:SPEEK?",
+      "category": "Switch",
+      "description": "Reads an 8-bit data register on the 44475A Breadboard Module. Returns a decimal binary-weighted value of the DI lines. Register 4 is the DI register. Generates an error on newer N22xxx modules.",
+      "query": "DIAGnostic:SPEEK? <slot>,<register>",
+      "parameters": [
+        { "name": "slot", "range": "1-5 (3499A), 1-2 (3499B), 1-9 (3499C)" },
+        { "name": "register", "range": "4 (DI register on 44475A)" }
+      ],
+      "examples": ["DIAG:SPEEK? 1,4"]
+    },
+    {
+      "name": "diag_spoke",
+      "mnemonic": "DIAGnostic:SPOKE",
+      "category": "Switch",
+      "description": "Writes an 8-bit decimal value to a register on the 44475A Breadboard Module DO lines. Register 0 is the DO register. Generates an error on newer N22xxx modules.",
+      "set": "DIAGnostic:SPOKE <slot>,<register>,<data>",
+      "parameters": [
+        { "name": "slot", "range": "1-5 (3499A), 1-2 (3499B), 1-9 (3499C)" },
+        { "name": "register", "range": "0 (DO register on 44475A)" },
+        { "name": "data", "range": "0-255 (binary-weighted byte)" }
+      ],
+      "examples": ["DIAG:SPOKE 1,0,128"]
+    },
+    {
+      "name": "scan_list",
+      "mnemonic": "[ROUTe:]SCAN[:LIST]",
+      "category": "Scan",
+      "description": "Creates a scan list of switch channels, digital bits, and/or stored channel setups (up to 200 entries). DIO lines in the list must use handshake Mode #1 or #2. Query returns the channel sequence in list order.",
+      "set": "[ROUTe:]SCAN[:LIST] <scan_list>",
+      "query": "[ROUTe:]SCAN[:LIST]?",
+      "parameters": [
+        { "name": "scan_list", "range": "Form @snn; single, list, range, grouped ranges, or combination. May include stored setups. Up to 200 entries." }
+      ],
+      "examples": ["ROUT:SCAN (@101:108)", "ROUT:SCAN:LIST?"]
+    },
+    {
+      "name": "scan_clear",
+      "mnemonic": "[ROUTe:]SCAN CLEar",
+      "category": "Scan",
+      "description": "Clears all channels/bits/stored setups from the scan list. Does not affect scan configuration parameters.",
+      "set": "[ROUTe:]SCAN CLEar",
+      "examples": ["ROUT:SCAN CLE"]
+    },
+    {
+      "name": "scan_size_query",
+      "mnemonic": "[ROUTe:]SCAN:SIZE?",
+      "category": "Scan",
+      "description": "Returns the number of entries in the scan list as an integer between 0 and 200. A stored setup counts as one channel.",
+      "query": "[ROUTe:]SCAN:SIZE?",
+      "examples": ["ROUT:SCAN:SIZE?"]
+    },
+    {
+      "name": "arm_source",
+      "mnemonic": "ARM:SOURce",
+      "category": "Scan Configuration",
+      "description": "Specifies the event control source for the arm layer (sweep-to-sweep). Default after power-on/reset is IMMediate. Query returns the source string.",
+      "set": "ARM:SOURce <BUS|EXTernal|IMMediate|TIMer|MIX|HOLD>",
+      "query": "ARM:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "BUS, EXTernal, IMMediate (default), TIMer, MIX, HOLD" }
+      ],
+      "examples": ["ARM:SOUR IMM", "ARM:SOUR EXT", "ARM:SOUR?"]
+    },
+    {
+      "name": "arm_count",
+      "mnemonic": "ARM:COUNt",
+      "category": "Scan Configuration",
+      "description": "Sets the number of times the scan list is performed. MIN=1 sweep, MAX=99999 sweeps, INFinity continues until ABORt. Default after power-on/reset is 1 (MIN).",
+      "set": "ARM:COUNt <number>|MIN|MAX|INFinity",
+      "query": "ARM:COUNt? [MIN|MAX|INFinity]",
+      "parameters": [
+        { "name": "number", "range": "1 to 99999, or MIN (1), MAX (99999), INFinity (-1 returned)" }
+      ],
+      "examples": ["ARM:COUN 10", "ARM:COUN INF", "ARM:COUN?"]
+    },
+    {
+      "name": "arm_timer",
+      "mnemonic": "ARM:TIMer",
+      "category": "Scan Configuration",
+      "description": "Sets the sweep-to-sweep interval in the arm layer. Valid only when ARM:SOURce is TIMer. Default after power-on is 0 (MIN).",
+      "set": "ARM:TIMer <seconds>|MIN|MAX",
+      "query": "ARM:TIMer? [MIN|MAX]",
+      "parameters": [
+        { "name": "seconds", "units": "s", "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments" }
+      ],
+      "examples": ["ARM:TIM 5", "ARM:TIM?"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIGger:SOURce",
+      "category": "Scan Configuration",
+      "description": "Specifies the event control source for the trigger layer (channel-to-channel advance). Default after power-on/reset is IMMediate. Query returns the source string.",
+      "set": "TRIGger:SOURce <BUS|EXTernal|IMMediate|TIMer|MIX|HOLD>",
+      "query": "TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "BUS, EXTernal, IMMediate (default), TIMer, MIX, HOLD" }
+      ],
+      "examples": ["TRIG:SOUR TIM", "TRIG:SOUR EXT", "TRIG:SOUR?"]
+    },
+    {
+      "name": "trigger_timer",
+      "mnemonic": "TRIGger:TIMer",
+      "category": "Scan Configuration",
+      "description": "Sets the channel-to-channel interval in the trigger layer. Valid only when TRIGger:SOURce is TIMer. Default after power-on is 0 (MIN).",
+      "set": "TRIGger:TIMer <seconds>|MIN|MAX",
+      "query": "TRIGger:TIMer? [MIN|MAX]",
+      "parameters": [
+        { "name": "seconds", "units": "s", "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments" }
+      ],
+      "examples": ["TRIG:TIM 5", "TRIG:TIM?"]
+    },
+    {
+      "name": "channel_delay",
+      "mnemonic": "[ROUTe:][CHANnel:]DELay",
+      "category": "Scan Configuration",
+      "description": "Sets a delay between a scan-list channel closing and the next operation (and trigger-out pulse, if configured). Can be set per channel or for ALL channels. Default after power-on/reset is 0.",
+      "set": "[ROUTe:][CHANnel:]DELay <seconds>,<channel_list>|ALL",
+      "query": "[ROUTe:][CHANnel:]DELay? <channel_list>",
+      "parameters": [
+        { "name": "seconds", "units": "s", "range": "0 to 99999.999, 1 ms resolution" },
+        { "name": "channel_list", "range": "Form @snn; single, list, range, grouped, combination; or ALL" }
+      ],
+      "examples": ["ROUT:CHAN:DEL 2,(@101)", "ROUT:DEL? (@101)"]
+    },
+    {
+      "name": "config_ext_trigger_source",
+      "mnemonic": "CONFigure:EXTernal[:TRIGger]:SOURce",
+      "category": "Scan Configuration",
+      "description": "Selects the location (slot) of the external trigger input lines. Built-in trigger lines are on slot 0; a 44474A DIO module can supply EI/CC lines on its slot. Default after power-on/reset is 0.",
+      "set": "CONFigure:EXTernal[:TRIGger]:SOURce <slot>",
+      "query": "CONFigure:EXTernal[:TRIGger]:SOURce?",
+      "parameters": [
+        { "name": "slot", "range": "0 (built-in, default) or slot of installed 44474A" }
+      ],
+      "examples": ["CONF:EXT:TRIG:SOUR 0", "CONF:EXT:TRIG:SOUR?"]
+    },
+    {
+      "name": "config_ext_trigger_output",
+      "mnemonic": "CONFigure:EXTernal[:TRIGger][:OUTPut]",
+      "category": "Scan Configuration",
+      "description": "Enables/disables the external trigger-out pulse output after a channel closes during a scan. Default after power-on/reset is OFF. Query returns 0 (disabled) or 1 (enabled).",
+      "set": "CONFigure:EXTernal[:TRIGger][:OUTPut] <0|1|OFF|ON>",
+      "query": "CONFigure:EXTernal[:TRIGger][:OUTPut]?",
+      "parameters": [
+        { "name": "state", "range": "0|OFF (default), 1|ON" }
+      ],
+      "examples": ["CONF:EXT:TRIG:OUTP ON", "CONF:EXT:TRIG:OUTP?"]
+    },
+    {
+      "name": "initiate",
+      "mnemonic": "INITiate",
+      "category": "Scanning",
+      "description": "Takes the instrument out of the idle state and moves it to the arm layer. Must always be sent to start a scan regardless of arm/trigger sources.",
+      "set": "INITiate",
+      "examples": ["INIT"]
+    },
+    {
+      "name": "abort",
+      "mnemonic": "ABORt",
+      "category": "Scanning",
+      "description": "Stops a scan in progress regardless of trigger source. Does not affect scan configuration or scan list. The last-scanned channel remains closed; a scan cannot resume from where interrupted.",
+      "set": "ABORt",
+      "examples": ["ABOR"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "TRIGger[:IMMediate]",
+      "category": "Scanning",
+      "description": "Software trigger used as the trigger source in the arm or trigger layer when SOURce is set to HOLD.",
+      "set": "TRIGger[:IMMediate]",
+      "examples": ["TRIG", "TRIG:IMM"]
+    },
+    {
+      "name": "trigger_bus",
+      "mnemonic": "*TRG",
+      "category": "Scanning",
+      "description": "IEEE 488.2 common command used as the trigger source in the arm or trigger layer when SOURce is set to BUS.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "dig_mode",
+      "mnemonic": "SOURce:DIGital:MODE",
+      "category": "Digital Configuration",
+      "description": "Sets the digital I/O handshake mode (1-5) for a port. Mode 1 (static, default) and 2 (read what was written) support scan lists and card pairing; modes 3, 4, 5 do not. Only the first port on a module can use modes 3-5. Not valid for the built-in 4-bit DIO. Query returns 1-5.",
+      "set": "SOURce:DIGital:MODE <slot>,<mode>",
+      "query": "SOURce:DIGital:MODE? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "Slot of plug-in DIO/multifunction module" },
+        { "name": "mode", "range": "1 (static #1, default), 2 (static #2), 3 (read or write strobe), 4 (read and write strobe), 5 (full handshake)" }
+      ],
+      "examples": ["SOUR:DIG:MODE 4,1", "SOUR:DIG:MODE? 4"]
+    },
+    {
+      "name": "dig_control_polarity",
+      "mnemonic": "SOURce:DIGital:CONTrol:POLarity",
+      "category": "Digital Configuration",
+      "description": "Sets the polarity of the PCTL (peripheral control) handshake line for a slot. Not valid for the built-in 4-bit DIO (slot 0). Default after power-on/reset is POSitive. Query returns POS or NEG.",
+      "set": "SOURce:DIGital:CONTrol:POLarity <slot>,<0|1|POS|NEG>",
+      "query": "SOURce:DIGital:CONTrol:POLarity? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "1-5 (plug-in DIO module)" },
+        { "name": "polarity", "range": "0|POS (default), 1|NEG" }
+      ],
+      "examples": ["SOUR:DIG:CONT:POL 4,1", "SOUR:DIG:CONT:POL? 4"]
+    },
+    {
+      "name": "dig_flag_polarity",
+      "mnemonic": "SOURce:DIGital:FLAG:POLarity",
+      "category": "Digital Configuration",
+      "description": "Sets the polarity of the PFLG (peripheral flag) handshake line for a slot. Not valid for the built-in 4-bit DIO. Default after power-on/reset is POSitive. Query returns POS or NEG.",
+      "set": "SOURce:DIGital:FLAG:POLarity <slot>,<0|1|POS|NEG>",
+      "query": "SOURce:DIGital:FLAG:POLarity? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "1-5 (plug-in DIO module)" },
+        { "name": "polarity", "range": "0|POS (default), 1|NEG" }
+      ],
+      "examples": ["SOUR:DIG:FLAG:POL 4,0", "SOUR:DIG:FLAG:POL? 4"]
+    },
+    {
+      "name": "dig_io_polarity",
+      "mnemonic": "SOURce:DIGital:IO:POLarity",
+      "category": "Digital Configuration",
+      "description": "Sets the polarity of the I/O direction handshake line for a slot. Not valid for the built-in 4-bit DIO. Default after power-on/reset is POSitive. Query returns POS or NEG.",
+      "set": "SOURce:DIGital:IO:POLarity <slot>,<0|1|POS|NEG>",
+      "query": "SOURce:DIGital:IO:POLarity? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "1-5 (plug-in DIO module)" },
+        { "name": "polarity", "range": "0|POS (default), 1|NEG" }
+      ],
+      "examples": ["SOUR:DIG:IO:POL 4,1", "SOUR:DIG:IO:POL? 4"]
+    },
+    {
+      "name": "dig_data_polarity",
+      "mnemonic": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:POLarity",
+      "category": "Digital Configuration",
+      "description": "Sets the data-line polarity for a digital I/O port. Does not change the current data line state. Default after power-on/reset is POS. Query returns POS or NEG.",
+      "set": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:POLarity <port>,<0|1|POS|NEG>",
+      "query": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:POLarity? <port>",
+      "parameters": [
+        { "name": "port", "range": "Form snn (slot + first channel of port). 090 = built-in 4-bit port." },
+        { "name": "polarity", "range": "0|POS (default), 1|NEG" }
+      ],
+      "examples": ["SOUR:DIG:DATA:BYTE:POL 400,POS", "SOUR:DIG:DATA:POL? 400"]
+    },
+    {
+      "name": "dig_read_bit",
+      "mnemonic": "SENSe:DIGital:DATA:BIT?",
+      "category": "Digital Input",
+      "description": "Reads a single bit from the specified bit_port and returns 0 or 1. Built-in 4-bit DIO bits are 091-094.",
+      "query": "SENSe:DIGital:DATA:BIT? <bit_port>",
+      "parameters": [
+        { "name": "bit_port", "range": "Form snn (slot + bit). Built-in: 091-094. Plug-in: module dependent." }
+      ],
+      "examples": ["SENS:DIG:DATA:BIT? 406"]
+    },
+    {
+      "name": "dig_read_value",
+      "mnemonic": "SENSe:DIGital:DATA[:<BYTE|WORD|LWORD>][:VALue]?",
+      "category": "Digital Input",
+      "description": "Reads data from the specified port as a binary-weighted integer. BYTE=8 bits (0-255), WORD=16 bits (-32768..32767, 2's complement), LWORD=32 bits (2's complement). BYTE assumed if width omitted.",
+      "query": "SENSe:DIGital:DATA[:<BYTE|WORD|LWORD>][:VALue]? <port>",
+      "parameters": [
+        { "name": "port", "range": "Form snn (slot + first channel). 090 = built-in 4-bit port." },
+        { "name": "width", "range": "BYTE (default), WORD, LWORD" }
+      ],
+      "examples": ["SENS:DIG:DATA:BYTE:VAL? 400", "SENS:DIG:DATA:WORD:VAL? 400", "SENS:DIG:DATA:LWORD:VAL? 400"]
+    },
+    {
+      "name": "dig_read_block",
+      "mnemonic": "SENSe:DIGital:DATA[:<BYTE|WORD|LWORD>]:BLOCK?",
+      "category": "Digital Input",
+      "description": "Returns block data in the form <#digits><length><block> from the specified port. Block may contain 1 to 2048 bytes. Set port to 090 for the built-in 4-bit port. BYTE assumed if width omitted.",
+      "query": "SENSe:DIGital:DATA[:<BYTE|WORD|LWORD>]:BLOCK? <port>,<size>",
+      "parameters": [
+        { "name": "port", "range": "Form snn; 090 = built-in port" },
+        { "name": "size", "range": "Number of bytes to transfer (1-2048)" },
+        { "name": "width", "range": "BYTE (default), WORD, LWORD" }
+      ],
+      "examples": ["SENS:DIG:DATA:BYTE:BLOCK? 400,10"]
+    },
+    {
+      "name": "dig_read_trace",
+      "mnemonic": "SENSe:DIGital:DATA[:<BYTE|WORD|LWORD>]:TRACe",
+      "category": "Digital Memory",
+      "description": "Reads a block of data from a digital I/O port into a previously-defined system memory block. BYTE assumed if width omitted.",
+      "set": "SENSe:DIGital:DATA[:<BYTE|WORD|LWORD>]:TRACe <port>,<sys_mem_name>",
+      "parameters": [
+        { "name": "port", "range": "Form snn (slot + first channel)" },
+        { "name": "sys_mem_name", "range": "Name of a defined memory block (up to 12 chars)" },
+        { "name": "width", "range": "BYTE (default), WORD, LWORD" }
+      ],
+      "examples": ["SENS:DIG:DATA:BYTE:TRAC 400,MYBUF"]
+    },
+    {
+      "name": "dig_read_trace_data",
+      "mnemonic": "SENSe:DIGital:TRACE[:DATA]?",
+      "category": "Digital Memory",
+      "description": "Returns a block of data from the specified system memory location in the form <#digits><length><block> (block 1-2048 bytes).",
+      "query": "SENSe:DIGital:TRACE[:DATA]? <sys_mem_name>",
+      "parameters": [
+        { "name": "sys_mem_name", "range": "Name of a defined memory block" }
+      ],
+      "examples": ["SENS:DIG:TRACE? MYBUF"]
+    },
+    {
+      "name": "dig_write_bit",
+      "mnemonic": "SOURce:DIGital:DATA:BIT",
+      "category": "Digital Output",
+      "description": "Writes a 0 or 1 to the specified bit_port. Built-in 4-bit DIO bits are 091-094.",
+      "set": "SOURce:DIGital:DATA:BIT <bit_port>,<0|1>",
+      "parameters": [
+        { "name": "bit_port", "range": "Form snn (slot + bit). Built-in: 091-094." },
+        { "name": "value", "range": "0 or 1" }
+      ],
+      "examples": ["SOUR:DIG:DATA:BIT 409,1", "SOUR:DIG:DATA:BIT 409,0"]
+    },
+    {
+      "name": "dig_write_value",
+      "mnemonic": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>][:VALue]",
+      "category": "Digital Output",
+      "description": "Writes a decimal value (bit pattern) to the specified port. BYTE=8 bits (0-255; built-in 090 = 0-15), WORD=16 bits (2's complement), LWORD=32 bits (32-bit modules only). BYTE assumed if width omitted.",
+      "set": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>][:VALue] <port>,<data>",
+      "parameters": [
+        { "name": "port", "range": "Form snn; 090 = built-in 4-bit port (data 0-15)" },
+        { "name": "data", "range": "BYTE 0-255, WORD -32768..32767, LWORD -2^31..2^31-1" },
+        { "name": "width", "range": "BYTE (default), WORD, LWORD" }
+      ],
+      "examples": ["SOUR:DIG:DATA:BYTE 400,128", "SOUR:DIG:DATA:WORD 400,21845", "SOUR:DIG:DATA:LWORD 400,-2114"]
+    },
+    {
+      "name": "dig_write_block",
+      "mnemonic": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:BLOCK",
+      "category": "Digital Output",
+      "description": "Writes block data in the form <#digits><length><block> to the specified port (block 1-2048 bytes). Set port to 090 for the built-in 4-bit port. BYTE assumed if width omitted.",
+      "set": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:BLOCK <port>,<block_data>",
+      "parameters": [
+        { "name": "port", "range": "Form snn; 090 = built-in port" },
+        { "name": "block_data", "range": "IEEE block: <#digits><length><block>, 1-2048 bytes" },
+        { "name": "width", "range": "BYTE (default), WORD, LWORD" }
+      ],
+      "examples": ["SOUR:DIG:DATA:WORD:BLOCK 100,#210ABCDEFGHIJ"]
+    },
+    {
+      "name": "dig_write_trace",
+      "mnemonic": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:TRACe",
+      "category": "Digital Memory",
+      "description": "Writes a previously-stored memory block to the specified digital I/O port. The memory must have been defined with TRACe:DEFine and loaded with TRACe[:DATA].",
+      "set": "SOURce:DIGital:DATA[:<BYTE|WORD|LWORD>]:TRACe <port>,<sys_mem_name>",
+      "parameters": [
+        { "name": "port", "range": "Form snn (slot + first channel)" },
+        { "name": "sys_mem_name", "range": "Name of a defined and loaded memory block" },
+        { "name": "width", "range": "BYTE (default), WORD, LWORD" }
+      ],
+      "examples": ["SOUR:DIG:DATA:BYTE:TRAC 400,MYBUF"]
+    },
+    {
+      "name": "dig_trace_define",
+      "mnemonic": "SOURce:DIGital:TRACe:DEFine",
+      "category": "Digital Memory",
+      "description": "Defines a named system memory block for digital data. Two blocks may be defined; total size must not exceed 32768 bytes. Optional fill value initializes every byte. Query returns the block size in bytes.",
+      "set": "SOURce:DIGital:TRACe:DEFine <sys_mem_name>,<size>[,<fill>]",
+      "query": "SOURce:DIGital:TRACe:DEFine? <sys_mem_name>",
+      "parameters": [
+        { "name": "sys_mem_name", "range": "String up to 12 characters" },
+        { "name": "size", "range": "1 to 32768 bytes (total across blocks <= 32768)" },
+        { "name": "fill", "range": "0 to 255 (optional byte fill value)" }
+      ],
+      "examples": ["SOUR:DIG:TRAC:DEF MYBUF,256", "SOUR:DIG:TRAC:DEF? MYBUF"]
+    },
+    {
+      "name": "dig_trace_catalog",
+      "mnemonic": "SOURce:DIGital:TRACe:CATalog?",
+      "category": "Digital Memory",
+      "description": "Returns a string containing the name(s) of defined memory blocks, separated by a comma if two are defined. (Also documented as DEFine:CATalog? in the functional grouping.)",
+      "query": "SOURce:DIGital:TRACe:CATalog?",
+      "examples": ["SOUR:DIG:TRAC:CAT?"]
+    },
+    {
+      "name": "dig_trace_data",
+      "mnemonic": "SOURce:DIGital:TRACe[:DATA]",
+      "category": "Digital Memory",
+      "description": "Loads a previously-defined memory block with block data in the form <#digits><length><block> (block 1-2048 bytes).",
+      "set": "SOURce:DIGital:TRACe[:DATA] <sys_mem_name>,<block_data>",
+      "parameters": [
+        { "name": "sys_mem_name", "range": "Name of a previously-defined memory block" },
+        { "name": "block_data", "range": "IEEE block: <#digits><length><block>, 1-2048 bytes" }
+      ],
+      "examples": ["SOUR:DIG:TRAC MYBUF,#13ABC"]
+    },
+    {
+      "name": "dig_trace_delete",
+      "mnemonic": "SOURce:DIGital:TRACe:DELete[:NAME]",
+      "category": "Digital Memory",
+      "description": "Removes a single previously-defined memory block by name.",
+      "set": "SOURce:DIGital:TRACe:DELete[:NAME] <sys_mem_name>",
+      "parameters": [
+        { "name": "sys_mem_name", "range": "Name of a defined memory block" }
+      ],
+      "examples": ["SOUR:DIG:TRAC:DEL MYBUF"]
+    },
+    {
+      "name": "dig_trace_delete_all",
+      "mnemonic": "SOURce:DIGital:TRACe:DELete:ALL",
+      "category": "Digital Memory",
+      "description": "Removes all defined digital memory blocks.",
+      "set": "SOURce:DIGital:TRACe:DELete:ALL",
+      "examples": ["SOUR:DIG:TRAC:DEL:ALL"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "State Storage",
+      "description": "IEEE 488.2 common command. Saves the current instrument setup in the specified memory location. A saved location can be used as a channel in a scan list. Locations 01-10 (firmware 1.0/2.0/3.0) or 01-50 (firmware 4.0).",
+      "set": "*SAV <mem>",
+      "parameters": [
+        { "name": "mem", "range": "01-10 (FW 1.0-3.0) or 01-50 (FW 4.0)" }
+      ],
+      "examples": ["*SAV 1"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "State Storage",
+      "description": "IEEE 488.2 common command. Restores the instrument to a previously saved instrument state.",
+      "set": "*RCL <mem>",
+      "parameters": [
+        { "name": "mem", "range": "01-10 (FW 1.0-3.0) or 01-50 (FW 4.0)" }
+      ],
+      "examples": ["*RCL 1"]
+    },
+    {
+      "name": "state_delete",
+      "mnemonic": "SYSTem:STATe:DELete",
+      "category": "State Storage",
+      "description": "Deletes a single stored instrument state or all stored states.",
+      "set": "SYSTem:STATe:DELete <mem>|ALL",
+      "parameters": [
+        { "name": "mem", "range": "Memory location number, or ALL" }
+      ],
+      "examples": ["SYST:STAT:DEL 1", "SYST:STAT:DEL ALL"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Status",
+      "description": "Clears all event registers and the Status Byte register and the error queue. Does not affect enable registers.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Status",
+      "description": "Sets/queries the Standard Event Status Enable register (mask determining which event bits set the ESB bit 5 of the Status Byte). Query returns a decimal-weighted value.",
+      "set": "*ESE <value>",
+      "query": "*ESE?",
+      "parameters": [
+        { "name": "value", "range": "1 to 128" }
+      ],
+      "examples": ["*ESE 32", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Status",
+      "description": "Queries the Standard Event Register and returns its decimal-weighted value. Bits: 0=Power On, 2=Command Error, 3=Execution Error, 4=Device Error, 5=Query Error, 7=Operation Complete.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Status",
+      "description": "Sets/queries the Service Request Enable register (mask determining which Status Byte bits assert RQS, bit 6). Query returns a decimal-weighted value.",
+      "set": "*SRE <value>",
+      "query": "*SRE?",
+      "parameters": [
+        { "name": "value", "range": "1 to 128" }
+      ],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Status",
+      "description": "Reads the Status Byte register and returns a decimal-weighted summary of its bits. Bit 4 = MAV (data in output buffer), bit 7 = OPR summary.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "status_operation_condition",
+      "mnemonic": "STATus:OPERation:CONDition?",
+      "category": "Status",
+      "description": "Queries the Operation Status Condition register (real-time). Bit 0 = waiting in trigger layer, bit 1 = waiting in arm layer, bit 4 = scan started.",
+      "query": "STATus:OPERation:CONDition?",
+      "examples": ["STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_event",
+      "mnemonic": "STATus:OPERation[:EVENt]?",
+      "category": "Status",
+      "description": "Queries the Operation Status Event register, returning the binary-weighted sum of latched event bits. Reading clears the register.",
+      "query": "STATus:OPERation[:EVENt]?",
+      "examples": ["STAT:OPER:EVEN?", "STAT:OPER?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Sets/queries the Operation Status Enable register (mask determining which event bits set the OPR summary bit 7 of the Status Byte). Applicable bit values are 1 (trigger layer), 2 (arm layer), 16 (scan started). Query returns a decimal-weighted value.",
+      "set": "STATus:OPERation:ENABle <unmask>",
+      "query": "STATus:OPERation:ENABle?",
+      "parameters": [
+        { "name": "unmask", "range": "0 to 16348; only 1, 2, and 16 are meaningful" }
+      ],
+      "examples": ["STAT:OPER:ENAB 16", "STAT:OPER:ENAB?"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STATus:PRESet",
+      "category": "Status",
+      "description": "Clears (sets to 0) all Operation Status Enable register bits. Does not affect other register groups or the event register.",
+      "set": "STATus:PRESet",
+      "examples": ["STAT:PRES"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "System Information",
+      "description": "IEEE 488.2 common command. Returns the identification string: manufacturer, model number, serial number, and firmware revision.",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYSTem:ERRor?",
+      "category": "System Information",
+      "description": "Reads the error queue (FIFO, up to 10 entries). Returns error number and message, or just the number depending on environment. Empty queue returns +0,\"No error\". Overflow yields -350,\"Queue overflow\".",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYSTem:VERSion?",
+      "category": "System Information",
+      "description": "Returns a string indicating the SCPI version implemented on the mainframe control board, e.g. \"Version A.02.00\".",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "system_card_type",
+      "mnemonic": "SYSTem:CTYPe?",
+      "category": "System Information",
+      "description": "Returns a string with the module identification and serial number in the specified slot (e.g. \"40CH MUX N2260A, Serial #\"). Returns \"NO CARD 00000\" for an empty slot.",
+      "query": "SYSTem:CTYPe? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "0-5 (3499A), 0-2 (3499B), 0-9 (3499C)" }
+      ],
+      "examples": ["SYST:CTYP? 1"]
+    },
+    {
+      "name": "relay_cycles_query",
+      "mnemonic": "DIAGnostic[:RELay]:CYCLes?",
+      "category": "System Information",
+      "description": "Returns the relay cycle count for the specified channel(s), stored in non-volatile module memory. Returns -1 for channels/modules that cannot respond. Multiple channels return comma-separated integers in list order.",
+      "query": "DIAGnostic[:RELay]:CYCLes? <channel_list>",
+      "parameters": [
+        { "name": "channel_list", "range": "Form @snn; single, list, range, grouped, combination. May include tree relays s98/s99 on N2260A/N2266A." }
+      ],
+      "examples": ["DIAG:CYCL? (@101)", "DIAG:REL:CYCL? (@101:108)"]
+    },
+    {
+      "name": "relay_cycles_max",
+      "mnemonic": "DIAGnostic[:RELay]:CYCLes:MAX?",
+      "category": "System Information",
+      "description": "Returns the maximum relay cycle count among all relays on the module in the specified slot. Does not indicate which channel.",
+      "query": "DIAGnostic[:RELay]:CYCLes:MAX? <slot>",
+      "parameters": [
+        { "name": "slot", "range": "Slot of a supported switching module" }
+      ],
+      "examples": ["DIAG:REL:CYCL:MAX? 1"]
+    },
+    {
+      "name": "relay_cycles_clear",
+      "mnemonic": "DIAGnostic[:RELay]:CYCLes:CLEar",
+      "category": "System Information",
+      "description": "Resets the relay cycle counter of the specified channel(s) to zero. Use when replacing a relay.",
+      "set": "DIAGnostic[:RELay]:CYCLes:CLEar <channel_list>",
+      "parameters": [
+        { "name": "channel_list", "range": "Form @snn; single, list, range, grouped, combination" }
+      ],
+      "examples": ["DIAG:REL:CYCL:CLE (@101)"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "System-Level Control",
+      "description": "IEEE 488.2 common command. Sets the Operation Complete bit in the Standard Event Register when all prior commands finish executing. The *OPC? query returns +1 when commands have completed (useful for synchronizing without the status system).",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "ROUT:CLOS (@101);*OPC?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "System-Level Control",
+      "description": "Resets the instrument and returns parameters to default settings. Clears system memory, restores default digital configuration, and clears the error queue.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "System-Level Control",
+      "description": "Begins a self-test and returns a status code: +0 all passed, +1 ROM failed, +2 GPIB failed, +3 RS-232 failed, +4 front-panel failed. Takes several seconds and holds the bus until complete.",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "System-Level Control",
+      "description": "IEEE 488.2 common command. Prevents the instrument from executing further commands until all prior overlapped commands have completed.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+    {
+      "name": "card_power_on",
+      "mnemonic": "SYSTem:CPON",
+      "category": "System-Level Control",
+      "description": "Resets a specific module (or ALL modules) to its power-on state: opens all switching channels or sets all DIO ports to inputs. Does not affect card pairing or scan configuration, and does not reset the mainframe.",
+      "set": "SYSTem:CPON <slot>|ALL",
+      "parameters": [
+        { "name": "slot", "range": "Slot number, or ALL" }
+      ],
+      "examples": ["SYST:CPON 1", "SYST:CPON ALL"]
+    },
+    {
+      "name": "display_message",
+      "mnemonic": "DIAGnostic:DISPlay[:INFOrmation]",
+      "category": "Display",
+      "description": "Writes a message (up to 13 characters) to the front-panel display. Only upper-case is shown; trailing special characters (, . : ;) do not count toward the 13.",
+      "set": "DIAGnostic:DISPlay[:INFOrmation] <message>",
+      "parameters": [
+        { "name": "message", "range": "String up to 13 characters (A-Z, 0-9, symbols)" }
+      ],
+      "examples": ["DIAG:DISP:INFO \"HELLO\""]
+    },
+    {
+      "name": "display_state",
+      "mnemonic": "DIAGnostic:DISPlay:STATe",
+      "category": "Display",
+      "description": "Turns the front-panel display on or off. ADRS, RMT, and ERROR annunciators may still light when off. Default after power-on/reset is on. Query returns 0 (off) or 1 (on).",
+      "set": "DIAGnostic:DISPlay:STATe <0|1|OFF|ON>",
+      "query": "DIAGnostic:DISPlay:STATe?",
+      "parameters": [
+        { "name": "state", "range": "0|OFF, 1|ON (default on)" }
+      ],
+      "examples": ["DIAG:DISP:STAT ON", "DIAG:DISP:STAT?"]
+    },
+    {
+      "name": "monitor",
+      "mnemonic": "DIAGnostic:MONitor",
+      "category": "Display",
+      "description": "Enables monitor mode on the front-panel for a slot, channel, or port. Send -1 to disable. Only one slot/channel/port can be monitored at a time. Built-in DIO: monitor port 090 or bits 091-094. Tree relays s98/s99 cannot be monitored. Query returns the monitored item or -1.",
+      "set": "DIAGnostic:MONitor <slot>|<channel>|<port>|-1",
+      "query": "DIAGnostic:MONitor?",
+      "parameters": [
+        { "name": "target", "range": "Slot, channel (snn), or port; -1 to disable" }
+      ],
+      "examples": ["DIAG:MON 1", "DIAG:MON -1", "DIAG:MON?"]
+    },
+    {
+      "name": "system_mode",
+      "mnemonic": "SYSMODE",
+      "category": "System-Level Control",
+      "description": "Selects the instrument system mode: SCPI or HP 3488A emulation. Changing the mode resets the instrument (RS-232/GPIB settings preserved); allow at least 5 seconds before other operations. Query returns \"SCPI\" or \"HP3488A\".",
+      "set": "SYSMODE <0|1|SCPI|HP3488A>",
+      "query": "SYSMODE?",
+      "parameters": [
+        { "name": "mode", "range": "0|SCPI, 1|HP3488A" }
+      ],
+      "examples": ["SYSMODE SCPI", "SYSMODE?"]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": "SYSTem:LOCal",
+      "category": "RS-232",
+      "description": "Sets the instrument to local mode for RS-232 operation. All front-panel keys are fully functional.",
+      "set": "SYSTem:LOCal",
+      "examples": ["SYST:LOC"]
+    },
+    {
+      "name": "system_remote",
+      "mnemonic": "SYSTem:REMote",
+      "category": "RS-232",
+      "description": "Sets the instrument to remote mode for RS-232 operation. All front-panel keys except Local, View, Mon, Enter, the knob, and the arrow keys are disabled.",
+      "set": "SYSTem:REMote",
+      "examples": ["SYST:REM"]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": "SYSTem:RWLock",
+      "category": "RS-232",
+      "description": "Sets the instrument to remote mode with all front-panel keys disabled (remote with lockout). Same as SYSTem:REMote except all keys are locked.",
+      "set": "SYSTem:RWLock",
+      "examples": ["SYST:RWL"]
+    }
+  ]
+}

@@ -1,0 +1,1794 @@
+{
+  "model": "E4438C",
+  "manufacturer": "Agilent",
+  "category": "Vector Signal Generator",
+  "description": "Agilent E4438C ESG Vector Signal Generator (250 kHz to 6 GHz, frequency range option-dependent: Opt 501=1 GHz, 502=2 GHz, 503=3 GHz, 504=4 GHz, 506=6 GHz). SCPI-controlled over GPIB and LAN. Provides analog modulation (AM/FM/PhiM, pulse), I/Q modulation, an internal dual arbitrary waveform (ARB) baseband generator, real-time digital modulation (Custom/TDMA), and optional format personalities (GSM, EDGE, W-CDMA, cdma2000, DECT, PHS, PDC, TETRa, GPS, etc.). Supports CW, step/list frequency and power sweeps. This definition covers the core programmable control surface (frequency, power/amplitude, output, analog and digital modulation, ARB/real-time, list/sweep, reference oscillator, trigger, memory/mass-memory waveform handling, display, system, status, and common * commands); the thousands of per-personality leaf commands are not exhaustively enumerated.",
+  "source": "E4438C SCPI Command Reference.pdf",
+  "aliases": ["E4438C", "ESG", "ESG-C", "E4438C ESG"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "E4438C",
+    "description": "Returns manufacturer, model (E4438C), serial number, and firmware revision."
+  },
+  "commands": [
+    {
+      "name": "idn_query",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Returns the instrument identification string: manufacturer, model number, serial number, firmware revision.",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Returns the signal generator to a defined instrument state (factory-defined reset state).",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears the Status Byte register, the data questionable and standard event status event registers, and the error queue.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Sets bit 0 in the standard event status register when all pending operations complete. The query form returns 1 when all operations are complete.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "wait_to_continue",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Prohibits the instrument from executing any new commands until all pending overlapped commands have completed.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Sets (or queries) the standard event status enable register.",
+      "set": "*ESE <value>",
+      "query": "*ESE?",
+      "parameters": [{ "name": "mask", "range": "0 to 255" }],
+      "examples": ["*ESE 60", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Queries and clears the standard event status register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Sets (or queries) the value of the service request enable register.",
+      "set": "*SRE <value>",
+      "query": "*SRE?",
+      "parameters": [{ "name": "mask", "range": "0 to 255" }],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Queries the status byte register.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "identify_query_alt",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Returns a list of the options installed in the signal generator.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Restores the signal generator to a state previously stored in the specified register and sequence.",
+      "set": "*RCL <reg>,<seq>",
+      "parameters": [{ "name": "register", "range": "0 to 99" }, { "name": "sequence", "range": "0 to 9" }],
+      "examples": ["*RCL 1,0"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Saves the current instrument state to the specified memory register and sequence.",
+      "set": "*SAV <reg>,<seq>",
+      "parameters": [{ "name": "register", "range": "0 to 99" }, { "name": "sequence", "range": "0 to 9" }],
+      "examples": ["*SAV 1,0"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Triggers the device if BUS is the selected trigger source, otherwise it is ignored.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Initiates the internal self-test and returns the result (0 = pass).",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "recall_setup",
+      "mnemonic": "*PSC",
+      "category": "Common",
+      "description": "Sets (or queries) the power-on status clear flag, controlling automatic power-on clearing of the enable registers.",
+      "set": "*PSC <0|1>",
+      "query": "*PSC?",
+      "parameters": [{ "name": "state", "range": "0|1" }],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+
+    {
+      "name": "frequency_cw",
+      "mnemonic": "[:SOURce]:FREQuency[:CW]",
+      "category": "Frequency",
+      "description": "Sets the signal generator output frequency for CW frequency mode, or increments/decrements the current RF frequency by the step value.",
+      "set": ":FREQuency <val><unit>|UP|DOWN",
+      "query": ":FREQuency?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent: 501=1 GHz, 502=2 GHz, 503=3 GHz, 504=4 GHz, 506=6 GHz)" }],
+      "examples": [":FREQ 1 GHZ", ":FREQ:CW 2.4GHZ", ":FREQ UP"]
+    },
+    {
+      "name": "frequency_step_increment",
+      "mnemonic": "[:SOURce]:FREQuency[:CW]:STEP[:INCRement]",
+      "category": "Frequency",
+      "description": "Sets the step increment used by the FREQuency UP/DOWN command and the front-panel arrow keys.",
+      "set": ":FREQuency:STEP <val><unit>",
+      "query": ":FREQuency:STEP?",
+      "parameters": [{ "name": "increment", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "examples": [":FREQ:STEP 1 MHZ"]
+    },
+    {
+      "name": "frequency_fixed",
+      "mnemonic": "[:SOURce]:FREQuency:FIXed",
+      "category": "Frequency",
+      "description": "Sets the signal generator output frequency for the fixed (CW) frequency mode.",
+      "set": ":FREQuency:FIXed <val><unit>",
+      "query": ":FREQuency:FIXed?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent)" }],
+      "examples": [":FREQ:FIX 1 GHZ"]
+    },
+    {
+      "name": "frequency_mode",
+      "mnemonic": "[:SOURce]:FREQuency:MODE",
+      "category": "Frequency",
+      "description": "Sets the frequency mode of the signal generator: continuous wave (CW/FIXed) or list/step sweep (LIST).",
+      "set": ":FREQuency:MODE CW|FIXed|LIST",
+      "query": ":FREQuency:MODE?",
+      "parameters": [{ "name": "mode", "range": "CW | FIXed | LIST" }],
+      "examples": [":FREQ:MODE CW", ":FREQ:MODE LIST"]
+    },
+    {
+      "name": "frequency_start",
+      "mnemonic": "[:SOURce]:FREQuency:STARt",
+      "category": "Frequency",
+      "description": "Sets the first frequency point in a step sweep.",
+      "set": ":FREQuency:STARt <val><unit>",
+      "query": ":FREQuency:STARt?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent)" }],
+      "examples": [":FREQ:STAR 1 GHZ"]
+    },
+    {
+      "name": "frequency_stop",
+      "mnemonic": "[:SOURce]:FREQuency:STOP",
+      "category": "Frequency",
+      "description": "Sets the last frequency point in a step sweep.",
+      "set": ":FREQuency:STOP <val><unit>",
+      "query": ":FREQuency:STOP?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent)" }],
+      "examples": [":FREQ:STOP 2 GHZ"]
+    },
+    {
+      "name": "frequency_multiplier",
+      "mnemonic": "[:SOURce]:FREQuency:MULTiplier",
+      "category": "Frequency",
+      "description": "Sets the multiplier for the displayed frequency, used when an external multiplier follows the source.",
+      "set": ":FREQuency:MULTiplier <val>",
+      "query": ":FREQuency:MULTiplier?",
+      "parameters": [{ "name": "multiplier" }],
+      "examples": [":FREQ:MULT 2"]
+    },
+    {
+      "name": "frequency_offset",
+      "mnemonic": "[:SOURce]:FREQuency:OFFSet",
+      "category": "Frequency",
+      "description": "Sets a frequency offset value applied to the displayed frequency.",
+      "set": ":FREQuency:OFFSet <val><unit>",
+      "query": ":FREQuency:OFFSet?",
+      "parameters": [{ "name": "offset", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "examples": [":FREQ:OFFS 10 MHZ"]
+    },
+    {
+      "name": "frequency_offset_state",
+      "mnemonic": "[:SOURce]:FREQuency:OFFSet:STATe",
+      "category": "Frequency",
+      "description": "Enables or disables the frequency offset function.",
+      "set": ":FREQuency:OFFSet:STATe ON|OFF|1|0",
+      "query": ":FREQuency:OFFSet:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":FREQ:OFFS:STAT ON"]
+    },
+    {
+      "name": "frequency_reference",
+      "mnemonic": "[:SOURce]:FREQuency:REFerence",
+      "category": "Frequency",
+      "description": "Sets the frequency reference value; subsequent frequency settings are relative to this reference when reference mode is on.",
+      "set": ":FREQuency:REFerence <val><unit>",
+      "query": ":FREQuency:REFerence?",
+      "parameters": [{ "name": "reference", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "examples": [":FREQ:REF 1 GHZ"]
+    },
+    {
+      "name": "frequency_reference_state",
+      "mnemonic": "[:SOURce]:FREQuency:REFerence:STATe",
+      "category": "Frequency",
+      "description": "Enables or disables the frequency reference mode.",
+      "set": ":FREQuency:REFerence:STATe ON|OFF|1|0",
+      "query": ":FREQuency:REFerence:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":FREQ:REF:STAT ON"]
+    },
+    {
+      "name": "frequency_channels_band",
+      "mnemonic": "[:SOURce]:FREQuency:CHANnels:BAND",
+      "category": "Frequency",
+      "description": "Selects the frequency band used for channel-number-based frequency entry.",
+      "set": ":FREQuency:CHANnels:BAND <band>",
+      "query": ":FREQuency:CHANnels:BAND?",
+      "parameters": [{ "name": "band" }],
+      "examples": [":FREQ:CHAN:BAND GSM900"]
+    },
+    {
+      "name": "frequency_channels_number",
+      "mnemonic": "[:SOURce]:FREQuency:CHANnels:NUMBer",
+      "category": "Frequency",
+      "description": "Sets the channel number within the selected band when channel mode is on.",
+      "set": ":FREQuency:CHANnels:NUMBer <val>",
+      "query": ":FREQuency:CHANnels:NUMBer?",
+      "parameters": [{ "name": "channel" }],
+      "examples": [":FREQ:CHAN:NUMB 20"]
+    },
+    {
+      "name": "frequency_channels_state",
+      "mnemonic": "[:SOURce]:FREQuency:CHANnels[:STATe]",
+      "category": "Frequency",
+      "description": "Enables or disables channel-number-based frequency entry.",
+      "set": ":FREQuency:CHANnels:STATe ON|OFF|1|0",
+      "query": ":FREQuency:CHANnels:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":FREQ:CHAN:STAT ON"]
+    },
+    {
+      "name": "phase_adjust",
+      "mnemonic": "[:SOURce]:PHASe[:ADJust]",
+      "category": "Frequency",
+      "description": "Adjusts the phase of the output signal relative to the phase reference.",
+      "set": ":PHASe <val><unit>",
+      "query": ":PHASe?",
+      "parameters": [{ "name": "phase", "units": ["RAD", "DEG"] }],
+      "examples": [":PHAS 0.5 RAD"]
+    },
+    {
+      "name": "phase_reference",
+      "mnemonic": "[:SOURce]:PHASe:REFerence",
+      "category": "Frequency",
+      "description": "Sets the current output phase as a zero reference.",
+      "set": ":PHASe:REFerence",
+      "examples": [":PHAS:REF"]
+    },
+
+    {
+      "name": "power_amplitude",
+      "mnemonic": "[:SOURce]:POWer[:LEVel][:IMMediate][:AMPLitude]",
+      "category": "Amplitude",
+      "description": "Sets the RF output power level.",
+      "set": ":POWer <val><unit>",
+      "query": ":POWer?",
+      "parameters": [{ "name": "amplitude", "units": ["dBm", "dBuV", "uV", "mV", "V"], "range": "approx -136 to +17 dBm (option/frequency-dependent; Std up to +13 dBm, Opt UNB up to +17 dBm)" }],
+      "examples": [":POW -10 DBM", ":POW:LEV:IMM:AMPL 0 DBM"]
+    },
+    {
+      "name": "power_step_increment",
+      "mnemonic": "[:SOURce]:POWer[:LEVel][:IMMediate][:AMPLitude]:STEP[:INCRement]",
+      "category": "Amplitude",
+      "description": "Sets the incremental step value for the amplitude parameter, or increments/decrements the current output power.",
+      "set": ":POWer:STEP <val><unit>|UP|DOWN",
+      "query": ":POWer:STEP?",
+      "parameters": [{ "name": "increment", "units": ["dB"], "range": "0.02 to 100 dB" }],
+      "examples": [":POW:STEP 1 DB", ":POW UP"]
+    },
+    {
+      "name": "power_offset",
+      "mnemonic": "[:SOURce]:POWer[:LEVel][:IMMediate]:OFFSet",
+      "category": "Amplitude",
+      "description": "Sets a power offset value applied to the displayed/output amplitude.",
+      "set": ":POWer:OFFSet <val>DB",
+      "query": ":POWer:OFFSet?",
+      "parameters": [{ "name": "offset", "units": ["dB"] }],
+      "examples": [":POW:OFFS 10 DB"]
+    },
+    {
+      "name": "power_mode",
+      "mnemonic": "[:SOURce]:POWer:MODE",
+      "category": "Amplitude",
+      "description": "Sets the power mode: fixed amplitude (FIXed) or list/step sweep (LIST).",
+      "set": ":POWer:MODE FIXed|LIST",
+      "query": ":POWer:MODE?",
+      "parameters": [{ "name": "mode", "range": "FIXed | LIST" }],
+      "examples": [":POW:MODE FIX", ":POW:MODE LIST"]
+    },
+    {
+      "name": "power_start",
+      "mnemonic": "[:SOURce]:POWer:STARt",
+      "category": "Amplitude",
+      "description": "Sets the first amplitude point in a step sweep.",
+      "set": ":POWer:STARt <val><unit>",
+      "query": ":POWer:STARt?",
+      "parameters": [{ "name": "amplitude", "units": ["dBm"] }],
+      "examples": [":POW:STAR -20 DBM"]
+    },
+    {
+      "name": "power_stop",
+      "mnemonic": "[:SOURce]:POWer:STOP",
+      "category": "Amplitude",
+      "description": "Sets the last amplitude point in a step sweep.",
+      "set": ":POWer:STOP <val><unit>",
+      "query": ":POWer:STOP?",
+      "parameters": [{ "name": "amplitude", "units": ["dBm"] }],
+      "examples": [":POW:STOP 0 DBM"]
+    },
+    {
+      "name": "power_reference",
+      "mnemonic": "[:SOURce]:POWer:REFerence",
+      "category": "Amplitude",
+      "description": "Sets the power reference value; output power settings are relative to this reference when reference mode is on.",
+      "set": ":POWer:REFerence <val><unit>",
+      "query": ":POWer:REFerence?",
+      "parameters": [{ "name": "reference", "units": ["dBm"] }],
+      "examples": [":POW:REF -10 DBM"]
+    },
+    {
+      "name": "power_reference_state",
+      "mnemonic": "[:SOURce]:POWer:REFerence:STATe",
+      "category": "Amplitude",
+      "description": "Enables or disables the power reference mode.",
+      "set": ":POWer:REFerence:STATe ON|OFF|1|0",
+      "query": ":POWer:REFerence:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":POW:REF:STAT ON"]
+    },
+    {
+      "name": "power_attenuation",
+      "mnemonic": "[:SOURce]:POWer:ATTenuation",
+      "category": "Amplitude",
+      "description": "Sets the attenuator value (when attenuator auto is off).",
+      "set": ":POWer:ATTenuation <val>DB",
+      "query": ":POWer:ATTenuation?",
+      "parameters": [{ "name": "attenuation", "units": ["dB"] }],
+      "examples": [":POW:ATT 10 DB"]
+    },
+    {
+      "name": "power_attenuation_auto",
+      "mnemonic": "[:SOURce]:POWer:ATTenuation:AUTO",
+      "category": "Amplitude",
+      "description": "Enables or disables automatic attenuator switching (attenuator hold off/on).",
+      "set": ":POWer:ATTenuation:AUTO ON|OFF|1|0",
+      "query": ":POWer:ATTenuation:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":POW:ATT:AUTO ON"]
+    },
+    {
+      "name": "power_alc_state",
+      "mnemonic": "[:SOURce]:POWer:ALC[:STATe]",
+      "category": "Amplitude",
+      "description": "Enables or disables the automatic level control (ALC) loop.",
+      "set": ":POWer:ALC:STATe ON|OFF|1|0",
+      "query": ":POWer:ALC:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":POW:ALC:STAT ON"]
+    },
+    {
+      "name": "power_alc_bandwidth",
+      "mnemonic": "[:SOURce]:POWer:ALC:BANDwidth|BWIDth",
+      "category": "Amplitude",
+      "description": "Sets the ALC loop bandwidth.",
+      "set": ":POWer:ALC:BWIDth <val>",
+      "query": ":POWer:ALC:BWIDth?",
+      "parameters": [{ "name": "bandwidth" }],
+      "examples": [":POW:ALC:BWID 100HZ"]
+    },
+    {
+      "name": "power_alc_bandwidth_auto",
+      "mnemonic": "[:SOURce]:POWer:ALC:BANDwidth|BWIDth:AUTO",
+      "category": "Amplitude",
+      "description": "Enables or disables automatic selection of the ALC loop bandwidth.",
+      "set": ":POWer:ALC:BWIDth:AUTO ON|OFF|1|0",
+      "query": ":POWer:ALC:BWIDth:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":POW:ALC:BWID:AUTO ON"]
+    },
+    {
+      "name": "power_alc_level",
+      "mnemonic": "[:SOURce]:POWer:ALC:LEVel",
+      "category": "Amplitude",
+      "description": "Sets the ALC level for the modulator attenuator.",
+      "set": ":POWer:ALC:LEVel <val>DB",
+      "query": ":POWer:ALC:LEVel?",
+      "parameters": [{ "name": "level", "units": ["dB"] }],
+      "examples": [":POW:ALC:LEV 10 DB"]
+    },
+    {
+      "name": "power_alc_search",
+      "mnemonic": "[:SOURce]:POWer:ALC:SEARch",
+      "category": "Amplitude",
+      "description": "Enables or disables the internal power search calibration (used when ALC is off), or initiates a single search.",
+      "set": ":POWer:ALC:SEARch ON|OFF|ONCE",
+      "query": ":POWer:ALC:SEARch?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|ONCE" }],
+      "examples": [":POW:ALC:SEAR ONCE"]
+    },
+
+    {
+      "name": "output_state",
+      "mnemonic": ":OUTPut[:STATe]",
+      "category": "Output",
+      "description": "Enables or disables the RF output.",
+      "set": ":OUTPut:STATe ON|OFF|1|0",
+      "query": ":OUTPut:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":OUTP ON", ":OUTP:STAT OFF"]
+    },
+    {
+      "name": "output_modulation_state",
+      "mnemonic": ":OUTPut:MODulation[:STATe]",
+      "category": "Output",
+      "description": "Enables or disables all currently active modulation outputs (the front-panel Mod On/Off).",
+      "set": ":OUTPut:MODulation:STATe ON|OFF|1|0",
+      "query": ":OUTPut:MODulation:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":OUTP:MOD ON"]
+    },
+    {
+      "name": "output_blanking_state",
+      "mnemonic": ":OUTPut:BLANking:STATe",
+      "category": "Output",
+      "description": "Enables or disables RF output blanking during frequency changes/retrace.",
+      "set": ":OUTPut:BLANking:STATe ON|OFF|1|0",
+      "query": ":OUTPut:BLANking:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":OUTP:BLAN:STAT ON"]
+    },
+    {
+      "name": "output_blanking_auto",
+      "mnemonic": ":OUTPut:BLANking:AUTO",
+      "category": "Output",
+      "description": "Enables or disables automatic RF output blanking.",
+      "set": ":OUTPut:BLANking:AUTO ON|OFF|1|0",
+      "query": ":OUTPut:BLANking:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":OUTP:BLAN:AUTO ON"]
+    },
+
+    {
+      "name": "am_state",
+      "mnemonic": "[:SOURce]:AM[1]|2:STATe",
+      "category": "Analog Modulation",
+      "description": "Enables or disables amplitude modulation for the selected AM path (1 or 2).",
+      "set": ":AM:STATe ON|OFF|1|0",
+      "query": ":AM:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":AM:STAT ON", ":AM2:STAT OFF"]
+    },
+    {
+      "name": "am_depth",
+      "mnemonic": "[:SOURce]:AM[1]|2[:DEPTh][:LINear]",
+      "category": "Analog Modulation",
+      "description": "Sets the linear amplitude modulation depth (in percent) for the selected AM path.",
+      "set": ":AM <val>PCT",
+      "query": ":AM?",
+      "parameters": [{ "name": "depth", "units": ["%"], "range": "0 to 100 %" }],
+      "examples": [":AM 30PCT", ":AM2 50PCT"]
+    },
+    {
+      "name": "am_source",
+      "mnemonic": "[:SOURce]:AM[1]|2:SOURce",
+      "category": "Analog Modulation",
+      "description": "Selects the AM modulation source (internal generator or external input).",
+      "set": ":AM:SOURce INT[1]|INT2|EXT[1]|EXT2",
+      "query": ":AM:SOURce?",
+      "parameters": [{ "name": "source", "range": "INT1 | INT2 | EXT1 | EXT2" }],
+      "examples": [":AM:SOUR INT", ":AM:SOUR EXT1"]
+    },
+    {
+      "name": "am_internal_frequency",
+      "mnemonic": "[:SOURce]:AM[1]|2:INTernal[1]:FREQuency",
+      "category": "Analog Modulation",
+      "description": "Sets the internal modulation frequency for the AM source.",
+      "set": ":AM:INTernal:FREQuency <val><unit>",
+      "query": ":AM:INTernal:FREQuency?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":AM:INT:FREQ 1 KHZ"]
+    },
+    {
+      "name": "am_internal_function_shape",
+      "mnemonic": "[:SOURce]:AM[1]|2:INTernal[1]:FUNCtion:SHAPe",
+      "category": "Analog Modulation",
+      "description": "Selects the internal modulation waveform shape for the AM source.",
+      "set": ":AM:INTernal:FUNCtion:SHAPe SINE|TRIangle|SQUare|RAMP|NOISe|DUALsine|SWEPtsine",
+      "query": ":AM:INTernal:FUNCtion:SHAPe?",
+      "parameters": [{ "name": "shape", "range": "SINE | TRIangle | SQUare | RAMP | NOISe | DUALsine | SWEPtsine" }],
+      "examples": [":AM:INT:FUNC:SHAP SINE"]
+    },
+    {
+      "name": "am_external_coupling",
+      "mnemonic": "[:SOURce]:AM[1]|2:EXTernal[1]|2:COUPling",
+      "category": "Analog Modulation",
+      "description": "Selects AC or DC coupling for the external AM input.",
+      "set": ":AM:EXTernal:COUPling AC|DC",
+      "query": ":AM:EXTernal:COUPling?",
+      "parameters": [{ "name": "coupling", "range": "AC | DC" }],
+      "examples": [":AM:EXT:COUP DC"]
+    },
+    {
+      "name": "am_wideband_state",
+      "mnemonic": "[:SOURce]:AM:WIDeband:STATe",
+      "category": "Analog Modulation",
+      "description": "Enables or disables wideband AM.",
+      "set": ":AM:WIDeband:STATe ON|OFF|1|0",
+      "query": ":AM:WIDeband:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":AM:WID:STAT ON"]
+    },
+
+    {
+      "name": "fm_state",
+      "mnemonic": "[:SOURce]:FM[1]|2:STATe",
+      "category": "Analog Modulation",
+      "description": "Enables or disables frequency modulation for the selected FM path (1 or 2).",
+      "set": ":FM:STATe ON|OFF|1|0",
+      "query": ":FM:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":FM:STAT ON"]
+    },
+    {
+      "name": "fm_deviation",
+      "mnemonic": "[:SOURce]:FM[1]|2[:DEViation]",
+      "category": "Analog Modulation",
+      "description": "Sets the frequency modulation peak deviation for the selected FM path.",
+      "set": ":FM <val><unit>",
+      "query": ":FM?",
+      "parameters": [{ "name": "deviation", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":FM 10 KHZ", ":FM2 5KHZ"]
+    },
+    {
+      "name": "fm_source",
+      "mnemonic": "[:SOURce]:FM[1]|2:SOURce",
+      "category": "Analog Modulation",
+      "description": "Selects the FM modulation source (internal generator or external input).",
+      "set": ":FM:SOURce INT[1]|INT2|EXT[1]|EXT2",
+      "query": ":FM:SOURce?",
+      "parameters": [{ "name": "source", "range": "INT1 | INT2 | EXT1 | EXT2" }],
+      "examples": [":FM:SOUR INT"]
+    },
+    {
+      "name": "fm_internal_frequency",
+      "mnemonic": "[:SOURce]:FM[1]|2:INTernal[1]:FREQuency",
+      "category": "Analog Modulation",
+      "description": "Sets the internal modulation frequency for the FM source.",
+      "set": ":FM:INTernal:FREQuency <val><unit>",
+      "query": ":FM:INTernal:FREQuency?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":FM:INT:FREQ 1 KHZ"]
+    },
+    {
+      "name": "fm_internal_function_shape",
+      "mnemonic": "[:SOURce]:FM[1]|2:INTernal[1]:FUNCtion:SHAPe",
+      "category": "Analog Modulation",
+      "description": "Selects the internal modulation waveform shape for the FM source.",
+      "set": ":FM:INTernal:FUNCtion:SHAPe SINE|TRIangle|SQUare|RAMP|NOISe|DUALsine|SWEPtsine",
+      "query": ":FM:INTernal:FUNCtion:SHAPe?",
+      "parameters": [{ "name": "shape", "range": "SINE | TRIangle | SQUare | RAMP | NOISe | DUALsine | SWEPtsine" }],
+      "examples": [":FM:INT:FUNC:SHAP SINE"]
+    },
+    {
+      "name": "fm_external_coupling",
+      "mnemonic": "[:SOURce]:FM[1]|2:EXTernal[1]|2:COUPling",
+      "category": "Analog Modulation",
+      "description": "Selects AC or DC coupling for the external FM input.",
+      "set": ":FM:EXTernal:COUPling AC|DC",
+      "query": ":FM:EXTernal:COUPling?",
+      "parameters": [{ "name": "coupling", "range": "AC | DC" }],
+      "examples": [":FM:EXT:COUP DC"]
+    },
+
+    {
+      "name": "pm_state",
+      "mnemonic": "[:SOURce]:PM[1]|2:STATe",
+      "category": "Analog Modulation",
+      "description": "Enables or disables phase modulation for the selected PhiM path (1 or 2).",
+      "set": ":PM:STATe ON|OFF|1|0",
+      "query": ":PM:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":PM:STAT ON"]
+    },
+    {
+      "name": "pm_deviation",
+      "mnemonic": "[:SOURce]:PM[1]|2[:DEViation]",
+      "category": "Analog Modulation",
+      "description": "Sets the phase modulation peak deviation for the selected PhiM path.",
+      "set": ":PM <val><unit>",
+      "query": ":PM?",
+      "parameters": [{ "name": "deviation", "units": ["RAD", "DEG", "PIRAD"] }],
+      "examples": [":PM 1 RAD", ":PM2 90DEG"]
+    },
+    {
+      "name": "pm_source",
+      "mnemonic": "[:SOURce]:PM[1]|2:SOURce",
+      "category": "Analog Modulation",
+      "description": "Selects the PhiM modulation source (internal generator or external input).",
+      "set": ":PM:SOURce INT[1]|INT2|EXT[1]|EXT2",
+      "query": ":PM:SOURce?",
+      "parameters": [{ "name": "source", "range": "INT1 | INT2 | EXT1 | EXT2" }],
+      "examples": [":PM:SOUR INT"]
+    },
+    {
+      "name": "pm_internal_frequency",
+      "mnemonic": "[:SOURce]:PM[1]|2:INTernal[1]:FREQuency",
+      "category": "Analog Modulation",
+      "description": "Sets the internal modulation frequency for the PhiM source.",
+      "set": ":PM:INTernal:FREQuency <val><unit>",
+      "query": ":PM:INTernal:FREQuency?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":PM:INT:FREQ 1 KHZ"]
+    },
+    {
+      "name": "pm_internal_function_shape",
+      "mnemonic": "[:SOURce]:PM[1]|2:INTernal[1]:FUNCtion:SHAPe",
+      "category": "Analog Modulation",
+      "description": "Selects the internal modulation waveform shape for the PhiM source.",
+      "set": ":PM:INTernal:FUNCtion:SHAPe SINE|TRIangle|SQUare|RAMP|NOISe|DUALsine|SWEPtsine",
+      "query": ":PM:INTernal:FUNCtion:SHAPe?",
+      "parameters": [{ "name": "shape", "range": "SINE | TRIangle | SQUare | RAMP | NOISe | DUALsine | SWEPtsine" }],
+      "examples": [":PM:INT:FUNC:SHAP SINE"]
+    },
+    {
+      "name": "pm_bandwidth",
+      "mnemonic": "[:SOURce]:PM[1]|2:BANDwidth|BWIDth",
+      "category": "Analog Modulation",
+      "description": "Selects normal or high bandwidth mode for phase modulation.",
+      "set": ":PM:BWIDth NORMal|HIGH",
+      "query": ":PM:BWIDth?",
+      "parameters": [{ "name": "bandwidth", "range": "NORMal | HIGH" }],
+      "examples": [":PM:BWID HIGH"]
+    },
+
+    {
+      "name": "pulm_state",
+      "mnemonic": "[:SOURce]:PULM:STATe",
+      "category": "Pulse Modulation",
+      "description": "Enables or disables pulse modulation.",
+      "set": ":PULM:STATe ON|OFF|1|0",
+      "query": ":PULM:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":PULM:STAT ON"]
+    },
+    {
+      "name": "pulm_source",
+      "mnemonic": "[:SOURce]:PULM:SOURce",
+      "category": "Pulse Modulation",
+      "description": "Selects the pulse modulation source: internal square/pulse generator or external input.",
+      "set": ":PULM:SOURce INTernal|EXTernal|SCALar",
+      "query": ":PULM:SOURce?",
+      "parameters": [{ "name": "source", "range": "INTernal | EXTernal | SCALar" }],
+      "examples": [":PULM:SOUR INT"]
+    },
+    {
+      "name": "pulm_internal_frequency",
+      "mnemonic": "[:SOURce]:PULM:INTernal[1]:FREQuency",
+      "category": "Pulse Modulation",
+      "description": "Sets the internal pulse modulation rate (frequency).",
+      "set": ":PULM:INTernal:FREQuency <val><unit>",
+      "query": ":PULM:INTernal:FREQuency?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":PULM:INT:FREQ 1 KHZ"]
+    },
+    {
+      "name": "pulm_internal_period",
+      "mnemonic": "[:SOURce]:PULM:INTernal[1]:PERiod",
+      "category": "Pulse Modulation",
+      "description": "Sets the period of the internal pulse modulation generator.",
+      "set": ":PULM:INTernal:PERiod <val><unit>",
+      "query": ":PULM:INTernal:PERiod?",
+      "parameters": [{ "name": "period", "units": ["s", "ms", "us", "ns"] }],
+      "examples": [":PULM:INT:PER 1 MS"]
+    },
+    {
+      "name": "pulm_internal_pwidth",
+      "mnemonic": "[:SOURce]:PULM:INTernal[1]:PWIDth",
+      "category": "Pulse Modulation",
+      "description": "Sets the pulse width of the internal pulse modulation generator.",
+      "set": ":PULM:INTernal:PWIDth <val><unit>",
+      "query": ":PULM:INTernal:PWIDth?",
+      "parameters": [{ "name": "width", "units": ["s", "ms", "us", "ns"] }],
+      "examples": [":PULM:INT:PWID 1 US"]
+    },
+    {
+      "name": "pulm_internal_function_shape",
+      "mnemonic": "[:SOURce]:PULM:INTernal[1]:FUNCtion:SHAPe",
+      "category": "Pulse Modulation",
+      "description": "Selects the internal pulse generator waveform shape (square or pulse).",
+      "set": ":PULM:INTernal:FUNCtion:SHAPe SQUare|PULSe",
+      "query": ":PULM:INTernal:FUNCtion:SHAPe?",
+      "parameters": [{ "name": "shape", "range": "SQUare | PULSe" }],
+      "examples": [":PULM:INT:FUNC:SHAP PULS"]
+    },
+
+    {
+      "name": "lfoutput_state",
+      "mnemonic": "[:SOURce]:LFOutput:STATe",
+      "category": "LF Output",
+      "description": "Enables or disables the low-frequency (LF) output.",
+      "set": ":LFOutput:STATe ON|OFF|1|0",
+      "query": ":LFOutput:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":LFO:STAT ON"]
+    },
+    {
+      "name": "lfoutput_amplitude",
+      "mnemonic": "[:SOURce]:LFOutput:AMPLitude",
+      "category": "LF Output",
+      "description": "Sets the amplitude of the LF output signal.",
+      "set": ":LFOutput:AMPLitude <val>VP",
+      "query": ":LFOutput:AMPLitude?",
+      "parameters": [{ "name": "amplitude", "units": ["VP", "V"] }],
+      "examples": [":LFO:AMPL 1 VP"]
+    },
+    {
+      "name": "lfoutput_source",
+      "mnemonic": "[:SOURce]:LFOutput:SOURce",
+      "category": "LF Output",
+      "description": "Selects the source routed to the LF output (internal function generators or modulation monitor).",
+      "set": ":LFOutput:SOURce INT[1]|INT2|FUNCtion[1]|FUNCtion2",
+      "query": ":LFOutput:SOURce?",
+      "parameters": [{ "name": "source" }],
+      "examples": [":LFO:SOUR FUNC"]
+    },
+    {
+      "name": "lfoutput_function_frequency",
+      "mnemonic": "[:SOURce]:LFOutput:FUNCtion[1]:FREQuency",
+      "category": "LF Output",
+      "description": "Sets the frequency of the LF output internal function generator.",
+      "set": ":LFOutput:FUNCtion:FREQuency <val><unit>",
+      "query": ":LFOutput:FUNCtion:FREQuency?",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":LFO:FUNC:FREQ 1 KHZ"]
+    },
+    {
+      "name": "lfoutput_function_shape",
+      "mnemonic": "[:SOURce]:LFOutput:FUNCtion[1]:SHAPe",
+      "category": "LF Output",
+      "description": "Selects the waveform shape of the LF output internal function generator.",
+      "set": ":LFOutput:FUNCtion:SHAPe SINE|TRIangle|SQUare|RAMP|NOISe|DUALsine|SWEPtsine|PULSe",
+      "query": ":LFOutput:FUNCtion:SHAPe?",
+      "parameters": [{ "name": "shape" }],
+      "examples": [":LFO:FUNC:SHAP SINE"]
+    },
+
+    {
+      "name": "dm_state",
+      "mnemonic": "[:SOURce]:DM:STATe",
+      "category": "IQ Modulation",
+      "description": "Enables or disables external I/Q (vector) modulation.",
+      "set": ":DM:STATe ON|OFF|1|0",
+      "query": ":DM:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DM:STAT ON"]
+    },
+    {
+      "name": "dm_source",
+      "mnemonic": "[:SOURce]:DM:SOURce",
+      "category": "IQ Modulation",
+      "description": "Selects the I/Q modulation source (external input, internal baseband generator, etc.).",
+      "set": ":DM:SOURce EXTernal|INTernal|BBG1|EXT600|OFF|SUM",
+      "query": ":DM:SOURce?",
+      "parameters": [{ "name": "source", "range": "EXTernal | INTernal | BBG1 | EXT600 | OFF | SUM" }],
+      "examples": [":DM:SOUR BBG1"]
+    },
+    {
+      "name": "dm_iqadjustment_state",
+      "mnemonic": "[:SOURce]:DM:IQADjustment[:STATe]",
+      "category": "IQ Modulation",
+      "description": "Enables or disables I/Q adjustments (gain, offset, quadrature skew).",
+      "set": ":DM:IQADjustment:STATe ON|OFF|1|0",
+      "query": ":DM:IQADjustment:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DM:IQAD:STAT ON"]
+    },
+    {
+      "name": "dm_iqadjustment_gain",
+      "mnemonic": "[:SOURce]:DM:IQADjustment:GAIN",
+      "category": "IQ Modulation",
+      "description": "Sets the I/Q gain balance adjustment.",
+      "set": ":DM:IQADjustment:GAIN <val>DB",
+      "query": ":DM:IQADjustment:GAIN?",
+      "parameters": [{ "name": "gain", "units": ["dB"] }],
+      "examples": [":DM:IQAD:GAIN 0.1 DB"]
+    },
+    {
+      "name": "dm_iqadjustment_ioffset",
+      "mnemonic": "[:SOURce]:DM:IQADjustment:IOFFset",
+      "category": "IQ Modulation",
+      "description": "Sets the I-channel DC offset adjustment (percent of full scale).",
+      "set": ":DM:IQADjustment:IOFFset <val>",
+      "query": ":DM:IQADjustment:IOFFset?",
+      "parameters": [{ "name": "offset", "units": ["%"] }],
+      "examples": [":DM:IQAD:IOFF 1.0"]
+    },
+    {
+      "name": "dm_iqadjustment_qoffset",
+      "mnemonic": "[:SOURce]:DM:IQADjustment:QOFFset",
+      "category": "IQ Modulation",
+      "description": "Sets the Q-channel DC offset adjustment (percent of full scale).",
+      "set": ":DM:IQADjustment:QOFFset <val>",
+      "query": ":DM:IQADjustment:QOFFset?",
+      "parameters": [{ "name": "offset", "units": ["%"] }],
+      "examples": [":DM:IQAD:QOFF 1.0"]
+    },
+    {
+      "name": "dm_iqadjustment_qskew",
+      "mnemonic": "[:SOURce]:DM:IQADjustment:QSKew",
+      "category": "IQ Modulation",
+      "description": "Sets the I/Q quadrature angle (skew) adjustment.",
+      "set": ":DM:IQADjustment:QSKew <val>",
+      "query": ":DM:IQADjustment:QSKew?",
+      "parameters": [{ "name": "skew", "units": ["DEG"] }],
+      "examples": [":DM:IQAD:QSK 0.5"]
+    },
+    {
+      "name": "dm_polarity",
+      "mnemonic": "[:SOURce]:DM:POLarity[:ALL]",
+      "category": "IQ Modulation",
+      "description": "Sets the I/Q modulation polarity (normal or inverted).",
+      "set": ":DM:POLarity NORMal|INVert",
+      "query": ":DM:POLarity?",
+      "parameters": [{ "name": "polarity", "range": "NORMal | INVert" }],
+      "examples": [":DM:POL NORM"]
+    },
+
+    {
+      "name": "radio_arb_state",
+      "mnemonic": "[:SOURce]:RADio:ARB[:STATe]",
+      "category": "Digital Modulation - ARB",
+      "description": "Enables or disables the dual arbitrary waveform (ARB) baseband generator. Turning on ARB also enables I/Q modulation.",
+      "set": ":RADio:ARB:STATe ON|OFF|1|0",
+      "query": ":RADio:ARB:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:ARB:STAT ON"]
+    },
+    {
+      "name": "radio_arb_waveform",
+      "mnemonic": "[:SOURce]:RADio:ARB:WAVeform",
+      "category": "Digital Modulation - ARB",
+      "description": "Selects a waveform segment or sequence file from waveform memory (WFM1) or sequence (SEQ) for ARB playback.",
+      "set": ":RADio:ARB:WAVeform \"WFM1:<file>\"|\"SEQ:<file>\"",
+      "query": ":RADio:ARB:WAVeform?",
+      "parameters": [{ "name": "file" }],
+      "examples": [":RAD:ARB:WAV \"WFM1:my_wfm\"", ":RAD:ARB:WAV \"SEQ:my_seq\""]
+    },
+    {
+      "name": "radio_arb_clock_rate",
+      "mnemonic": "[:SOURce]:RADio:ARB:SCLock:RATE",
+      "category": "Digital Modulation - ARB",
+      "description": "Sets the ARB sample (waveform) clock rate.",
+      "set": ":RADio:ARB:SCLock:RATE <val><unit>",
+      "query": ":RADio:ARB:SCLock:RATE?",
+      "parameters": [{ "name": "rate", "units": ["Hz", "kHz", "MHz"] }],
+      "examples": [":RAD:ARB:SCL:RATE 40MHZ"]
+    },
+    {
+      "name": "radio_arb_scaling",
+      "mnemonic": "[:SOURce]:RADio:ARB:RSCaling",
+      "category": "Digital Modulation - ARB",
+      "description": "Sets the runtime scaling (in percent) applied to the ARB waveform to avoid DAC overflow.",
+      "set": ":RADio:ARB:RSCaling <val>",
+      "query": ":RADio:ARB:RSCaling?",
+      "parameters": [{ "name": "scaling", "units": ["%"], "range": "1 to 100 %" }],
+      "examples": [":RAD:ARB:RSC 70"]
+    },
+    {
+      "name": "radio_arb_trigger_source",
+      "mnemonic": "[:SOURce]:RADio:ARB:TRIGger[:SOURce]",
+      "category": "Digital Modulation - ARB",
+      "description": "Selects the ARB trigger source.",
+      "set": ":RADio:ARB:TRIGger:SOURce KEY|EXT|BUS",
+      "query": ":RADio:ARB:TRIGger:SOURce?",
+      "parameters": [{ "name": "source", "range": "KEY | EXT | BUS" }],
+      "examples": [":RAD:ARB:TRIG:SOUR EXT"]
+    },
+    {
+      "name": "radio_arb_trigger_type",
+      "mnemonic": "[:SOURce]:RADio:ARB:TRIGger:TYPE",
+      "category": "Digital Modulation - ARB",
+      "description": "Selects the ARB trigger type (continuous, single, gated, or segment advance).",
+      "set": ":RADio:ARB:TRIGger:TYPE CONTinuous|SINGle|GATE|SADVance",
+      "query": ":RADio:ARB:TRIGger:TYPE?",
+      "parameters": [{ "name": "type", "range": "CONTinuous | SINGle | GATE | SADVance" }],
+      "examples": [":RAD:ARB:TRIG:TYPE CONT"]
+    },
+    {
+      "name": "radio_arb_retrigger",
+      "mnemonic": "[:SOURce]:RADio:ARB:RETRigger",
+      "category": "Digital Modulation - ARB",
+      "description": "Sets the behavior when a trigger is received during waveform playback (on, off, or immediate).",
+      "set": ":RADio:ARB:RETRigger ON|OFF|IMMediate",
+      "query": ":RADio:ARB:RETRigger?",
+      "parameters": [{ "name": "mode", "range": "ON | OFF | IMMediate" }],
+      "examples": [":RAD:ARB:RETR ON"]
+    },
+    {
+      "name": "radio_arb_reference_source",
+      "mnemonic": "[:SOURce]:RADio:ARB:REFerence[:SOURce]",
+      "category": "Digital Modulation - ARB",
+      "description": "Selects the ARB sample-clock reference source (internal or external).",
+      "set": ":RADio:ARB:REFerence:SOURce INTernal|EXTernal",
+      "query": ":RADio:ARB:REFerence:SOURce?",
+      "parameters": [{ "name": "source", "range": "INTernal | EXTernal" }],
+      "examples": [":RAD:ARB:REF:SOUR INT"]
+    },
+    {
+      "name": "radio_arb_noise_state",
+      "mnemonic": "[:SOURce]:RADio:ARB:NOISe[:STATe]",
+      "category": "Digital Modulation - ARB",
+      "description": "Enables or disables additive white Gaussian noise (AWGN) on the ARB waveform.",
+      "set": ":RADio:ARB:NOISe:STATe ON|OFF|1|0",
+      "query": ":RADio:ARB:NOISe:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:ARB:NOIS:STAT ON"]
+    },
+    {
+      "name": "radio_arb_noise_cn",
+      "mnemonic": "[:SOURce]:RADio:ARB:NOISe:CN",
+      "category": "Digital Modulation - ARB",
+      "description": "Sets the carrier-to-noise ratio for the ARB noise function.",
+      "set": ":RADio:ARB:NOISe:CN <val>DB",
+      "query": ":RADio:ARB:NOISe:CN?",
+      "parameters": [{ "name": "cn", "units": ["dB"] }],
+      "examples": [":RAD:ARB:NOIS:CN 10 DB"]
+    },
+    {
+      "name": "radio_arb_generate_sine",
+      "mnemonic": "[:SOURce]:RADio:ARB:GENerate:SINE",
+      "category": "Digital Modulation - ARB",
+      "description": "Generates an I/Q sine (or sine cal) waveform into ARB waveform memory.",
+      "set": ":RADio:ARB:GENerate:SINE <file>[,<args>]",
+      "parameters": [{ "name": "file" }],
+      "examples": [":RAD:ARB:GEN:SINE \"sine_wfm\""]
+    },
+    {
+      "name": "radio_arb_filter_type",
+      "mnemonic": "[:SOURce]:RADio:ARB:FILTer:TYPE",
+      "category": "Digital Modulation - ARB",
+      "description": "Selects the baseband filter type applied by the ARB.",
+      "set": ":RADio:ARB:FILTer:TYPE RNYQuist|NYQuist|GAUSsian|RECTangle|IS95|...",
+      "query": ":RADio:ARB:FILTer:TYPE?",
+      "parameters": [{ "name": "type" }],
+      "examples": [":RAD:ARB:FILT:TYPE RNYQ"]
+    },
+    {
+      "name": "radio_arb_filter_alpha",
+      "mnemonic": "[:SOURce]:RADio:ARB:FILTer:ALPHa",
+      "category": "Digital Modulation - ARB",
+      "description": "Sets the filter alpha (roll-off) for Nyquist/root-Nyquist filters.",
+      "set": ":RADio:ARB:FILTer:ALPHa <val>",
+      "query": ":RADio:ARB:FILTer:ALPHa?",
+      "parameters": [{ "name": "alpha", "range": "0 to 1" }],
+      "examples": [":RAD:ARB:FILT:ALPH 0.35"]
+    },
+    {
+      "name": "radio_arb_sequence",
+      "mnemonic": "[:SOURce]:RADio:ARB:SEQuence",
+      "category": "Digital Modulation - ARB",
+      "description": "Defines a waveform sequence by listing waveform segments, repetitions, and markers.",
+      "set": ":RADio:ARB:SEQuence \"<seq>\",\"<wfm>\",<reps>,<markers>{,...}",
+      "query": ":RADio:ARB:SEQuence? \"<seq>\"",
+      "parameters": [{ "name": "sequence" }],
+      "examples": [":RAD:ARB:SEQ \"SEQ:my_seq\",\"WFM1:wfm1\",100,ALL"]
+    },
+
+    {
+      "name": "radio_custom_state",
+      "mnemonic": "[:SOURce]:RADio:CUSTom[:STATe]",
+      "category": "Digital Modulation - Real Time",
+      "description": "Enables or disables the real-time Custom (arbitrary single-carrier) digital modulation personality.",
+      "set": ":RADio:CUSTom:STATe ON|OFF|1|0",
+      "query": ":RADio:CUSTom:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:CUST:STAT ON"]
+    },
+    {
+      "name": "radio_gsm_state",
+      "mnemonic": "[:SOURce]:RADio:GSM[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the GSM digital modulation personality.",
+      "set": ":RADio:GSM:STATe ON|OFF|1|0",
+      "query": ":RADio:GSM:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:GSM:STAT ON"]
+    },
+    {
+      "name": "radio_edge_state",
+      "mnemonic": "[:SOURce]:RADio:EDGE[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the EDGE digital modulation personality.",
+      "set": ":RADio:EDGE:STATe ON|OFF|1|0",
+      "query": ":RADio:EDGE:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:EDGE:STAT ON"]
+    },
+    {
+      "name": "radio_dect_state",
+      "mnemonic": "[:SOURce]:RADio:DECT[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the DECT digital modulation personality.",
+      "set": ":RADio:DECT:STATe ON|OFF|1|0",
+      "query": ":RADio:DECT:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:DECT:STAT ON"]
+    },
+    {
+      "name": "radio_pdc_state",
+      "mnemonic": "[:SOURce]:RADio:PDC[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the PDC digital modulation personality.",
+      "set": ":RADio:PDC:STATe ON|OFF|1|0",
+      "query": ":RADio:PDC:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:PDC:STAT ON"]
+    },
+    {
+      "name": "radio_phs_state",
+      "mnemonic": "[:SOURce]:RADio:PHS[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the PHS digital modulation personality.",
+      "set": ":RADio:PHS:STATe ON|OFF|1|0",
+      "query": ":RADio:PHS:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:PHS:STAT ON"]
+    },
+    {
+      "name": "radio_tetra_state",
+      "mnemonic": "[:SOURce]:RADio:TETRa[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the TETRA digital modulation personality.",
+      "set": ":RADio:TETRa:STATe ON|OFF|1|0",
+      "query": ":RADio:TETRa:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:TETR:STAT ON"]
+    },
+    {
+      "name": "radio_gps_state",
+      "mnemonic": "[:SOURce]:RADio:GPS[:STATe]",
+      "category": "Digital Modulation - Format",
+      "description": "Enables or disables the GPS personality.",
+      "set": ":RADio:GPS:STATe ON|OFF|1|0",
+      "query": ":RADio:GPS:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":RAD:GPS:STAT ON"]
+    },
+
+    {
+      "name": "list_mode",
+      "mnemonic": "[:SOURce]:LIST:MODE",
+      "category": "List/Sweep",
+      "description": "Selects the list mode operation: stepping through a list (LIST) or manual point selection (MANual).",
+      "set": ":LIST:MODE LIST|MANual",
+      "query": ":LIST:MODE?",
+      "parameters": [{ "name": "mode", "range": "LIST | MANual" }],
+      "examples": [":LIST:MODE LIST"]
+    },
+    {
+      "name": "list_type",
+      "mnemonic": "[:SOURce]:LIST:TYPE",
+      "category": "List/Sweep",
+      "description": "Selects the sweep list type: list (LIST) or step (STEP).",
+      "set": ":LIST:TYPE LIST|STEP",
+      "query": ":LIST:TYPE?",
+      "parameters": [{ "name": "type", "range": "LIST | STEP" }],
+      "examples": [":LIST:TYPE STEP"]
+    },
+    {
+      "name": "list_frequency",
+      "mnemonic": "[:SOURce]:LIST:FREQuency",
+      "category": "List/Sweep",
+      "description": "Defines the list of frequency points for list-mode sweep.",
+      "set": ":LIST:FREQuency <val>{,<val>}",
+      "query": ":LIST:FREQuency?",
+      "parameters": [{ "name": "frequencies", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "examples": [":LIST:FREQ 1GHZ,1.5GHZ,2GHZ"]
+    },
+    {
+      "name": "list_frequency_points",
+      "mnemonic": "[:SOURce]:LIST:FREQuency:POINts",
+      "category": "List/Sweep",
+      "description": "Queries the number of frequency points in the list.",
+      "query": ":LIST:FREQuency:POINts?",
+      "examples": [":LIST:FREQ:POIN?"]
+    },
+    {
+      "name": "list_power",
+      "mnemonic": "[:SOURce]:LIST:POWer",
+      "category": "List/Sweep",
+      "description": "Defines the list of power (amplitude) points for list-mode sweep.",
+      "set": ":LIST:POWer <val>{,<val>}",
+      "query": ":LIST:POWer?",
+      "parameters": [{ "name": "powers", "units": ["dBm"] }],
+      "examples": [":LIST:POW -10DBM,-5DBM,0DBM"]
+    },
+    {
+      "name": "list_power_points",
+      "mnemonic": "[:SOURce]:LIST:POWer:POINts",
+      "category": "List/Sweep",
+      "description": "Queries the number of power points in the list.",
+      "query": ":LIST:POWer:POINts?",
+      "examples": [":LIST:POW:POIN?"]
+    },
+    {
+      "name": "list_dwell",
+      "mnemonic": "[:SOURce]:LIST:DWELl",
+      "category": "List/Sweep",
+      "description": "Defines the list of dwell times (seconds per point) for list-mode sweep.",
+      "set": ":LIST:DWELl <val>{,<val>}",
+      "query": ":LIST:DWELl?",
+      "parameters": [{ "name": "dwell", "units": ["s", "ms", "us"] }],
+      "examples": [":LIST:DWEL 0.1,0.1,0.1"]
+    },
+    {
+      "name": "list_dwell_points",
+      "mnemonic": "[:SOURce]:LIST:DWELl:POINts",
+      "category": "List/Sweep",
+      "description": "Queries the number of dwell-time points in the list.",
+      "query": ":LIST:DWELl:POINts?",
+      "examples": [":LIST:DWEL:POIN?"]
+    },
+    {
+      "name": "list_direction",
+      "mnemonic": "[:SOURce]:LIST:DIRection",
+      "category": "List/Sweep",
+      "description": "Sets the sweep direction (up or down) for list/step mode.",
+      "set": ":LIST:DIRection UP|DOWN",
+      "query": ":LIST:DIRection?",
+      "parameters": [{ "name": "direction", "range": "UP | DOWN" }],
+      "examples": [":LIST:DIR UP"]
+    },
+    {
+      "name": "list_manual",
+      "mnemonic": "[:SOURce]:LIST:MANual",
+      "category": "List/Sweep",
+      "description": "Selects the point in the list to output when LIST mode is MANual.",
+      "set": ":LIST:MANual <point>",
+      "query": ":LIST:MANual?",
+      "parameters": [{ "name": "point" }],
+      "examples": [":LIST:MAN 3"]
+    },
+    {
+      "name": "list_trigger_source",
+      "mnemonic": "[:SOURce]:LIST:TRIGger:SOURce",
+      "category": "List/Sweep",
+      "description": "Selects the point-to-point trigger source for list/step sweep.",
+      "set": ":LIST:TRIGger:SOURce BUS|IMMediate|EXTernal|KEY",
+      "query": ":LIST:TRIGger:SOURce?",
+      "parameters": [{ "name": "source", "range": "BUS | IMMediate | EXTernal | KEY" }],
+      "examples": [":LIST:TRIG:SOUR IMM"]
+    },
+    {
+      "name": "list_retrace",
+      "mnemonic": "[:SOURce]:LIST:RETRace",
+      "category": "List/Sweep",
+      "description": "Sets whether a single sweep retraces (returns to the first point) at completion.",
+      "set": ":LIST:RETRace ON|OFF|1|0",
+      "query": ":LIST:RETRace?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":LIST:RETR ON"]
+    },
+    {
+      "name": "list_type_list_initialize_fstep",
+      "mnemonic": "[:SOURce]:LIST:TYPE:LIST:INITialize:FSTep",
+      "category": "List/Sweep",
+      "description": "Replaces the loaded list data with the current step-sweep frequency, power, and dwell values.",
+      "set": ":LIST:TYPE:LIST:INITialize:FSTep",
+      "examples": [":LIST:TYPE:LIST:INIT:FST"]
+    },
+    {
+      "name": "list_type_list_initialize_preset",
+      "mnemonic": "[:SOURce]:LIST:TYPE:LIST:INITialize:PRESet",
+      "category": "List/Sweep",
+      "description": "Replaces the loaded list data with a single point at the current frequency, power, and dwell.",
+      "set": ":LIST:TYPE:LIST:INITialize:PRESet",
+      "examples": [":LIST:TYPE:LIST:INIT:PRES"]
+    },
+    {
+      "name": "sweep_dwell",
+      "mnemonic": "[:SOURce]:SWEep:DWELl",
+      "category": "List/Sweep",
+      "description": "Sets the dwell time for step sweep (time spent at each point).",
+      "set": ":SWEep:DWELl <val><unit>",
+      "query": ":SWEep:DWELl?",
+      "parameters": [{ "name": "dwell", "units": ["s", "ms", "us"] }],
+      "examples": [":SWE:DWEL 100 MS"]
+    },
+    {
+      "name": "sweep_points",
+      "mnemonic": "[:SOURce]:SWEep:POINts",
+      "category": "List/Sweep",
+      "description": "Sets the number of points in a step sweep.",
+      "set": ":SWEep:POINts <val>",
+      "query": ":SWEep:POINts?",
+      "parameters": [{ "name": "points", "range": "2 to 1601" }],
+      "examples": [":SWE:POIN 101"]
+    },
+
+    {
+      "name": "roscillator_source",
+      "mnemonic": "[:SOURce]:ROSCillator:SOURce",
+      "category": "Reference",
+      "description": "Queries (or under AUTO=OFF, indicates) the reference oscillator source in use (internal or external).",
+      "query": ":ROSCillator:SOURce?",
+      "parameters": [{ "name": "source", "range": "INT | EXT" }],
+      "examples": [":ROSC:SOUR?"]
+    },
+    {
+      "name": "roscillator_source_auto",
+      "mnemonic": "[:SOURce]:ROSCillator:SOURce:AUTO",
+      "category": "Reference",
+      "description": "Enables or disables automatic selection of the reference oscillator source (auto-detect external reference).",
+      "set": ":ROSCillator:SOURce:AUTO ON|OFF|1|0",
+      "query": ":ROSCillator:SOURce:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":ROSC:SOUR:AUTO ON"]
+    },
+
+    {
+      "name": "unit_power",
+      "mnemonic": ":UNIT:POWer",
+      "category": "Unit",
+      "description": "Sets the default amplitude units used for power entry and query.",
+      "set": ":UNIT:POWer DBM|DBUV|DBUVEMF|V|VEMF|DB",
+      "query": ":UNIT:POWer?",
+      "parameters": [{ "name": "unit", "range": "DBM | DBUV | DBUVEMF | V | VEMF | DB" }],
+      "examples": [":UNIT:POW DBM"]
+    },
+
+    {
+      "name": "trigger_immediate",
+      "mnemonic": ":TRIGger[:SEQuence][:IMMediate]",
+      "category": "Trigger",
+      "description": "Sets the trigger to immediate mode (free run) or generates an immediate trigger event for the sweep/list.",
+      "set": ":TRIGger:IMMediate",
+      "examples": [":TRIG", ":TRIG:IMM"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": ":TRIGger[:SEQuence]:SOURce",
+      "category": "Trigger",
+      "description": "Selects the sweep/list trigger source.",
+      "set": ":TRIGger:SOURce BUS|IMMediate|EXTernal|KEY",
+      "query": ":TRIGger:SOURce?",
+      "parameters": [{ "name": "source", "range": "BUS | IMMediate | EXTernal | KEY" }],
+      "examples": [":TRIG:SOUR IMM"]
+    },
+    {
+      "name": "trigger_slope",
+      "mnemonic": ":TRIGger[:SEQuence]:SLOPe",
+      "category": "Trigger",
+      "description": "Selects the active edge (positive or negative) of the external trigger input.",
+      "set": ":TRIGger:SLOPe POSitive|NEGative",
+      "query": ":TRIGger:SLOPe?",
+      "parameters": [{ "name": "slope", "range": "POSitive | NEGative" }],
+      "examples": [":TRIG:SLOP POS"]
+    },
+    {
+      "name": "trigger_type",
+      "mnemonic": ":TRIGger:TYPE",
+      "category": "Trigger",
+      "description": "Selects the sweep trigger type (e.g. point-to-point or single sweep).",
+      "set": ":TRIGger:TYPE <type>",
+      "query": ":TRIGger:TYPE?",
+      "parameters": [{ "name": "type" }],
+      "examples": [":TRIG:TYPE?"]
+    },
+    {
+      "name": "trigger_output_polarity",
+      "mnemonic": ":TRIGger:OUTPut:POLarity",
+      "category": "Trigger",
+      "description": "Selects the polarity (positive/negative) of the trigger output signal.",
+      "set": ":TRIGger:OUTPut:POLarity POSitive|NEGative",
+      "query": ":TRIGger:OUTPut:POLarity?",
+      "parameters": [{ "name": "polarity", "range": "POSitive | NEGative" }],
+      "examples": [":TRIG:OUTP:POL POS"]
+    },
+
+    {
+      "name": "correction_state",
+      "mnemonic": "[:SOURce]:CORRection[:STATe]",
+      "category": "Correction",
+      "description": "Enables or disables the user-flatness corrections.",
+      "set": ":CORRection:STATe ON|OFF|1|0",
+      "query": ":CORRection:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":CORR:STAT ON"]
+    },
+    {
+      "name": "correction_flatness_pair",
+      "mnemonic": "[:SOURce]:CORRection:FLATness:PAIR",
+      "category": "Correction",
+      "description": "Sets a frequency and amplitude correction pair in the user-flatness array (max 1601 points).",
+      "set": ":CORRection:FLATness:PAIR <freq>[<unit>],<corr>[<unit>]",
+      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"] }, { "name": "correction", "units": ["dB"] }],
+      "examples": [":CORR:FLAT:PAIR 1GHZ,1.5DB"]
+    },
+    {
+      "name": "correction_flatness_load",
+      "mnemonic": "[:SOURce]:CORRection:FLATness:LOAD",
+      "category": "Correction",
+      "description": "Loads a user-flatness correction file from the USERFLAT catalog.",
+      "set": ":CORRection:FLATness:LOAD \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":CORR:FLAT:LOAD \"myflat\""]
+    },
+    {
+      "name": "correction_flatness_store",
+      "mnemonic": "[:SOURce]:CORRection:FLATness:STORe",
+      "category": "Correction",
+      "description": "Stores the current user-flatness correction data to a named file.",
+      "set": ":CORRection:FLATness:STORe \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":CORR:FLAT:STOR \"myflat\""]
+    },
+    {
+      "name": "correction_flatness_preset",
+      "mnemonic": "[:SOURce]:CORRection:FLATness:PRESet",
+      "category": "Correction",
+      "description": "Presets the user-flatness correction to a single factory-defined point. Overwrites current data.",
+      "set": ":CORRection:FLATness:PRESet",
+      "examples": [":CORR:FLAT:PRES"]
+    },
+    {
+      "name": "correction_flatness_points",
+      "mnemonic": "[:SOURce]:CORRection:FLATness:POINts",
+      "category": "Correction",
+      "description": "Queries the number of points in the user-flatness correction file.",
+      "query": ":CORRection:FLATness:POINts?",
+      "examples": [":CORR:FLAT:POIN?"]
+    },
+
+    {
+      "name": "display_state",
+      "mnemonic": ":DISPlay[:WINDow][:STATe]",
+      "category": "Display",
+      "description": "Turns the front-panel display on or off.",
+      "set": ":DISPlay:STATe ON|OFF|1|0",
+      "query": ":DISPlay:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP ON"]
+    },
+    {
+      "name": "display_brightness",
+      "mnemonic": ":DISPlay:BRIGhtness",
+      "category": "Display",
+      "description": "Sets the display brightness.",
+      "set": ":DISPlay:BRIGhtness <val>",
+      "query": ":DISPlay:BRIGhtness?",
+      "parameters": [{ "name": "brightness" }],
+      "examples": [":DISP:BRIG 1"]
+    },
+    {
+      "name": "display_contrast",
+      "mnemonic": ":DISPlay:CONTrast",
+      "category": "Display",
+      "description": "Sets the display contrast.",
+      "set": ":DISPlay:CONTrast <val>",
+      "query": ":DISPlay:CONTrast?",
+      "parameters": [{ "name": "contrast" }],
+      "examples": [":DISP:CONT 0.5"]
+    },
+    {
+      "name": "display_inverse",
+      "mnemonic": ":DISPlay:INVerse",
+      "category": "Display",
+      "description": "Sets the display to inverse (reverse) video.",
+      "set": ":DISPlay:INVerse ON|OFF|1|0",
+      "query": ":DISPlay:INVerse?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:INV ON"]
+    },
+    {
+      "name": "display_remote",
+      "mnemonic": ":DISPlay:REMote",
+      "category": "Display",
+      "description": "Enables or disables the larger remote-display update mode.",
+      "set": ":DISPlay:REMote ON|OFF|1|0",
+      "query": ":DISPlay:REMote?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:REM ON"]
+    },
+    {
+      "name": "display_annotation_amplitude_unit",
+      "mnemonic": ":DISPlay:ANNotation:AMPLitude:UNIT",
+      "category": "Display",
+      "description": "Selects the amplitude annotation units shown on the display.",
+      "set": ":DISPlay:ANNotation:AMPLitude:UNIT DBM|DBUV|...",
+      "query": ":DISPlay:ANNotation:AMPLitude:UNIT?",
+      "parameters": [{ "name": "unit" }],
+      "examples": [":DISP:ANN:AMPL:UNIT DBM"]
+    },
+
+    {
+      "name": "memory_catalog_all",
+      "mnemonic": ":MEMory:CATalog[:ALL]",
+      "category": "Memory",
+      "description": "Outputs a catalog (list) of all files in internal memory, or of a specific file type.",
+      "query": ":MEMory:CATalog?",
+      "examples": [":MEM:CAT:ALL?", ":MEM:CAT:WFM?"]
+    },
+    {
+      "name": "memory_data",
+      "mnemonic": ":MEMory:DATA",
+      "category": "Memory",
+      "description": "Loads or queries binary data (e.g. waveform, FIR, list) into a named file in memory using IEEE 488.2 definite-length block format.",
+      "set": ":MEMory:DATA \"<file>\",#<block>",
+      "query": ":MEMory:DATA? \"<file>\"",
+      "parameters": [{ "name": "file" }, { "name": "data" }],
+      "examples": [":MEM:DATA \"WFM1:test\",#ABC"]
+    },
+    {
+      "name": "memory_data_iq",
+      "mnemonic": ":MEMory:DATA:IQ",
+      "category": "Memory",
+      "description": "Downloads I/Q waveform data into a named ARB waveform segment in memory.",
+      "set": ":MEMory:DATA:IQ \"<file>\",#<block>",
+      "parameters": [{ "name": "file" }, { "name": "data" }],
+      "examples": [":MEM:DATA:IQ \"WFM1:test\",#ABC"]
+    },
+    {
+      "name": "memory_delete_name",
+      "mnemonic": ":MEMory:DELete[:NAME]",
+      "category": "Memory",
+      "description": "Deletes a named file from internal memory.",
+      "set": ":MEMory:DELete \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":MEM:DEL \"WFM1:test\""]
+    },
+    {
+      "name": "memory_delete_all",
+      "mnemonic": ":MEMory:DELete:ALL",
+      "category": "Memory",
+      "description": "Deletes all files of a given type (or all files) from internal memory.",
+      "set": ":MEMory:DELete:ALL",
+      "examples": [":MEM:DEL:ALL"]
+    },
+    {
+      "name": "memory_copy_name",
+      "mnemonic": ":MEMory:COPY[:NAME]",
+      "category": "Memory",
+      "description": "Copies a file in internal memory to a new name.",
+      "set": ":MEMory:COPY \"<src>\",\"<dst>\"",
+      "parameters": [{ "name": "source" }, { "name": "destination" }],
+      "examples": [":MEM:COPY \"WFM1:a\",\"WFM1:b\""]
+    },
+    {
+      "name": "memory_free_all",
+      "mnemonic": ":MEMory:FREE[:ALL]",
+      "category": "Memory",
+      "description": "Queries the amount of free memory.",
+      "query": ":MEMory:FREE:ALL?",
+      "examples": [":MEM:FREE:ALL?"]
+    },
+    {
+      "name": "memory_load_list",
+      "mnemonic": ":MEMory:LOAD:LIST",
+      "category": "Memory",
+      "description": "Loads a sweep list from a named file in memory into the current list.",
+      "set": ":MEMory:LOAD:LIST \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":MEM:LOAD:LIST \"mylist\""]
+    },
+    {
+      "name": "memory_store_list",
+      "mnemonic": ":MEMory:STORe:LIST",
+      "category": "Memory",
+      "description": "Stores the current sweep list to a named file in memory.",
+      "set": ":MEMory:STORe:LIST \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":MEM:STOR:LIST \"mylist\""]
+    },
+
+    {
+      "name": "mmemory_catalog",
+      "mnemonic": ":MMEMory:CATalog",
+      "category": "Mass Memory",
+      "description": "Outputs a catalog (list) of files for a given mass-storage unit specifier (msus).",
+      "query": ":MMEMory:CATalog? \"<msus>\"",
+      "parameters": [{ "name": "msus" }],
+      "examples": [":MMEM:CAT? \"LIST:\""]
+    },
+    {
+      "name": "mmemory_data",
+      "mnemonic": ":MMEMory:DATA",
+      "category": "Mass Memory",
+      "description": "Loads or retrieves a file as an IEEE 488.2 definite-length block from mass memory.",
+      "set": ":MMEMory:DATA \"<file>\",#<block>",
+      "query": ":MMEMory:DATA? \"<file>\"",
+      "parameters": [{ "name": "file" }, { "name": "data" }],
+      "examples": [":MMEM:DATA \"/USER/BBG1/WAVEFORM/test\",#ABC"]
+    },
+    {
+      "name": "mmemory_copy",
+      "mnemonic": ":MMEMory:COPY",
+      "category": "Mass Memory",
+      "description": "Copies a file in mass memory to a new name.",
+      "set": ":MMEMory:COPY \"<src>\",\"<dst>\"",
+      "parameters": [{ "name": "source" }, { "name": "destination" }],
+      "examples": [":MMEM:COPY \"a\",\"b\""]
+    },
+    {
+      "name": "mmemory_delete_name",
+      "mnemonic": ":MMEMory:DELete[:NAME]",
+      "category": "Mass Memory",
+      "description": "Deletes a named file from mass memory (optionally specifying the msus).",
+      "set": ":MMEMory:DELete \"<file>\"[,\"<msus>\"]",
+      "parameters": [{ "name": "file" }],
+      "examples": [":MMEM:DEL \"LIST_1\",\"LIST:\""]
+    },
+    {
+      "name": "mmemory_move",
+      "mnemonic": ":MMEMory:MOVE",
+      "category": "Mass Memory",
+      "description": "Renames or moves a file in mass memory.",
+      "set": ":MMEMory:MOVE \"<src>\",\"<dst>\"",
+      "parameters": [{ "name": "source" }, { "name": "destination" }],
+      "examples": [":MMEM:MOVE \"a\",\"b\""]
+    },
+    {
+      "name": "mmemory_load_list",
+      "mnemonic": ":MMEMory:LOAD:LIST",
+      "category": "Mass Memory",
+      "description": "Loads a sweep list from a named file in mass memory.",
+      "set": ":MMEMory:LOAD:LIST \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":MMEM:LOAD:LIST \"mylist\""]
+    },
+    {
+      "name": "mmemory_store_list",
+      "mnemonic": ":MMEMory:STORe:LIST",
+      "category": "Mass Memory",
+      "description": "Stores the current sweep list to a named file in mass memory.",
+      "set": ":MMEMory:STORe:LIST \"<file>\"",
+      "parameters": [{ "name": "file" }],
+      "examples": [":MMEM:STOR:LIST \"mylist\""]
+    },
+
+    {
+      "name": "system_preset",
+      "mnemonic": ":SYSTem:PRESet[:USER]",
+      "category": "System",
+      "description": "Returns the signal generator to the user-defined or factory preset state (the front-panel Preset key).",
+      "set": ":SYSTem:PRESet",
+      "examples": [":SYST:PRES"]
+    },
+    {
+      "name": "system_preset_all",
+      "mnemonic": ":SYSTem:PRESet:ALL",
+      "category": "System",
+      "description": "Resets all states, including persistent states, to their factory defaults.",
+      "set": ":SYSTem:PRESet:ALL",
+      "examples": [":SYST:PRES:ALL"]
+    },
+    {
+      "name": "system_preset_type",
+      "mnemonic": ":SYSTem:PRESet:TYPE",
+      "category": "System",
+      "description": "Selects whether Preset returns the instrument to the NORMal (factory) or USER preset state.",
+      "set": ":SYSTem:PRESet:TYPE NORMal|USER",
+      "query": ":SYSTem:PRESet:TYPE?",
+      "parameters": [{ "name": "type", "range": "NORMal | USER" }],
+      "examples": [":SYST:PRES:TYPE NORM"]
+    },
+    {
+      "name": "system_preset_save",
+      "mnemonic": ":SYSTem:PRESet[:USER]:SAVE",
+      "category": "System",
+      "description": "Saves the current instrument state as the user preset state.",
+      "set": ":SYSTem:PRESet:SAVE",
+      "examples": [":SYST:PRES:SAVE"]
+    },
+    {
+      "name": "system_error_next",
+      "mnemonic": ":SYSTem:ERRor[:NEXT]",
+      "category": "System",
+      "description": "Reads and removes the oldest entry from the error queue, returning the error number and message.",
+      "query": ":SYSTem:ERRor?",
+      "examples": [":SYST:ERR?"]
+    },
+    {
+      "name": "system_idn",
+      "mnemonic": ":SYSTem:IDN",
+      "category": "System",
+      "description": "Sets or queries a user-definable identification string returned by *IDN?.",
+      "set": ":SYSTem:IDN \"<string>\"",
+      "query": ":SYSTem:IDN?",
+      "parameters": [{ "name": "string" }],
+      "examples": [":SYST:IDN?"]
+    },
+    {
+      "name": "system_opt",
+      "mnemonic": ":SYSTem:OPT",
+      "category": "System",
+      "description": "Sets or queries a user-definable option string returned by *OPT?.",
+      "set": ":SYSTem:OPT \"<string>\"",
+      "query": ":SYSTem:OPT?",
+      "parameters": [{ "name": "string" }],
+      "examples": [":SYST:OPT?"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": ":SYSTem:VERSion",
+      "category": "System",
+      "description": "Queries the SCPI version with which the instrument complies.",
+      "query": ":SYSTem:VERSion?",
+      "examples": [":SYST:VERS?"]
+    },
+    {
+      "name": "system_date",
+      "mnemonic": ":SYSTem:DATE",
+      "category": "System",
+      "description": "Sets or queries the instrument real-time clock date.",
+      "set": ":SYSTem:DATE <year>,<month>,<day>",
+      "query": ":SYSTem:DATE?",
+      "parameters": [{ "name": "year" }, { "name": "month" }, { "name": "day" }],
+      "examples": [":SYST:DATE 2026,6,19"]
+    },
+    {
+      "name": "system_time",
+      "mnemonic": ":SYSTem:TIME",
+      "category": "System",
+      "description": "Sets or queries the instrument real-time clock time.",
+      "set": ":SYSTem:TIME <hour>,<minute>,<second>",
+      "query": ":SYSTem:TIME?",
+      "parameters": [{ "name": "hour" }, { "name": "minute" }, { "name": "second" }],
+      "examples": [":SYST:TIME 13,30,0"]
+    },
+    {
+      "name": "system_language",
+      "mnemonic": ":SYSTem:LANGuage",
+      "category": "System",
+      "description": "Selects the remote command language/personality (e.g. SCPI or legacy compatibility modes).",
+      "set": ":SYSTem:LANGuage \"SCPI\"|\"COMP\"|\"NADC\"|\"PDC\"|\"PHS\"|\"8648\"",
+      "query": ":SYSTem:LANGuage?",
+      "parameters": [{ "name": "language", "range": "SCPI | COMP | NADC | PDC | PHS | 8648" }],
+      "examples": [":SYST:LANG \"SCPI\""]
+    },
+    {
+      "name": "system_communicate_gpib_address",
+      "mnemonic": ":SYSTem:COMMunicate:GPIB:ADDRess",
+      "category": "System",
+      "description": "Sets or queries the GPIB (HP-IB) address of the signal generator.",
+      "set": ":SYSTem:COMMunicate:GPIB:ADDRess <val>",
+      "query": ":SYSTem:COMMunicate:GPIB:ADDRess?",
+      "parameters": [{ "name": "address", "range": "0 to 30" }],
+      "examples": [":SYST:COMM:GPIB:ADDR 19"]
+    },
+    {
+      "name": "system_communicate_lan_ip",
+      "mnemonic": ":SYSTem:COMMunicate:LAN:IP",
+      "category": "System",
+      "description": "Sets or queries the LAN IP address.",
+      "set": ":SYSTem:COMMunicate:LAN:IP \"<addr>\"",
+      "query": ":SYSTem:COMMunicate:LAN:IP?",
+      "parameters": [{ "name": "ip" }],
+      "examples": [":SYST:COMM:LAN:IP \"192.168.0.10\""]
+    },
+    {
+      "name": "system_communicate_lan_hostname",
+      "mnemonic": ":SYSTem:COMMunicate:LAN:HOSTname",
+      "category": "System",
+      "description": "Sets or queries the LAN hostname.",
+      "set": ":SYSTem:COMMunicate:LAN:HOSTname \"<name>\"",
+      "query": ":SYSTem:COMMunicate:LAN:HOSTname?",
+      "parameters": [{ "name": "hostname" }],
+      "examples": [":SYST:COMM:LAN:HOST?"]
+    },
+    {
+      "name": "system_communicate_gtlocal",
+      "mnemonic": ":SYSTem:COMMunicate:GTLocal",
+      "category": "System",
+      "description": "Returns the signal generator to local (front-panel) control.",
+      "set": ":SYSTem:COMMunicate:GTLocal",
+      "examples": [":SYST:COMM:GTL"]
+    },
+
+    {
+      "name": "status_operation_event",
+      "mnemonic": ":STATus:OPERation[:EVENt]",
+      "category": "Status",
+      "description": "Queries (and clears) the standard operation status event register.",
+      "query": ":STATus:OPERation:EVENt?",
+      "examples": [":STAT:OPER:EVEN?"]
+    },
+    {
+      "name": "status_operation_condition",
+      "mnemonic": ":STATus:OPERation:CONDition",
+      "category": "Status",
+      "description": "Queries the standard operation status condition register.",
+      "query": ":STATus:OPERation:CONDition?",
+      "examples": [":STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": ":STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Sets or queries the standard operation status enable register.",
+      "set": ":STATus:OPERation:ENABle <val>",
+      "query": ":STATus:OPERation:ENABle?",
+      "parameters": [{ "name": "mask", "range": "0 to 32767" }],
+      "examples": [":STAT:OPER:ENAB 1024"]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": ":STATus:QUEStionable[:EVENt]",
+      "category": "Status",
+      "description": "Queries (and clears) the questionable status event register.",
+      "query": ":STATus:QUEStionable:EVENt?",
+      "examples": [":STAT:QUES:EVEN?"]
+    },
+    {
+      "name": "status_questionable_condition",
+      "mnemonic": ":STATus:QUEStionable:CONDition",
+      "category": "Status",
+      "description": "Queries the questionable status condition register.",
+      "query": ":STATus:QUEStionable:CONDition?",
+      "examples": [":STAT:QUES:COND?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": ":STATus:QUEStionable:ENABle",
+      "category": "Status",
+      "description": "Sets or queries the questionable status enable register.",
+      "set": ":STATus:QUEStionable:ENABle <val>",
+      "query": ":STATus:QUEStionable:ENABle?",
+      "parameters": [{ "name": "mask", "range": "0 to 32767" }],
+      "examples": [":STAT:QUES:ENAB 8"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": ":STATus:PRESet",
+      "category": "Status",
+      "description": "Presets the status register enable masks and transition filters to their default values.",
+      "set": ":STATus:PRESet",
+      "examples": [":STAT:PRES"]
+    }
+  ]
+}
