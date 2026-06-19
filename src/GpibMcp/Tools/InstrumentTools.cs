@@ -13,6 +13,7 @@ namespace GpibMcp.Tools
     /// </summary>
     public static class InstrumentTools
     {
+        /// <summary>Creates the registry of all tools the server exposes, bound to <paramref name="visa"/>.</summary>
         public static ToolRegistry BuildRegistry(VisaInstrumentManager visa)
         {
             if (visa == null) throw new ArgumentNullException(nameof(visa));
@@ -146,7 +147,7 @@ namespace GpibMcp.Tools
                 {
                     int board = Int(args, "board", 0);
                     byte primary = (byte)Int(args, "primary_address", -1, 0, 30, "primary_address");
-                    byte secondary = (byte)Int(args, "secondary_address", 0);
+                    byte secondary = (byte)Int(args, "secondary_address", Gpib488Helper.NoSecondaryAddress);
                     string command = ReqStr(args, "command");
                     return Clean(Gpib488Helper.Query(board, primary, secondary, command));
                 }));

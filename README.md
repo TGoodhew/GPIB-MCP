@@ -27,6 +27,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [1. Clone the repository](#1-clone-the-repository)
   - [2. Point the project at your NI assemblies](#2-point-the-project-at-your-ni-assemblies)
   - [3. Build](#3-build)
+  - [4. Verify the build](#4-verify-the-build)
 - [Configure an MCP client](#configure-an-mcp-client)
   - [Claude Desktop](#claude-desktop)
   - [Other MCP clients](#other-mcp-clients)
@@ -34,6 +35,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [Tool reference](#tool-reference)
   - [Typical workflow](#typical-workflow)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
+- [Logging](#logging)
 - [Why x86?](#why-x86)
 - [Project layout](#project-layout)
 - [Troubleshooting](#troubleshooting)
@@ -128,6 +130,50 @@ The resulting executable is:
 src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe
 ```
 
+### 4. Verify the build
+
+A clean build should report **0 warnings, 0 errors**. After building, confirm the
+server actually starts and speaks the protocol by driving it directly — no instruments
+or MCP client required.
+
+**a. Confirm the executable was produced:**
+
+```powershell
+Test-Path src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe   # -> True
+```
+
+**b. Run a protocol smoke test** (PowerShell). This sends `initialize` and `tools/list`
+and prints the server's responses; `2>$null` discards the stderr log so you see only the
+JSON-RPC traffic on stdout:
+
+```powershell
+$exe = "src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe"
+@(
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{}}}'
+  '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+) -join "`n" | & $exe 2>$null
+```
+
+Expected: two JSON lines — an `initialize` result advertising `serverInfo`, followed by
+a `tools/list` result listing the nine tools. If you get those, the build is good.
+
+**c. Exercise real hardware** (optional, requires connected instruments) — list resources
+and read an instrument's identity:
+
+```powershell
+$exe = "src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe"
+@(
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{}}}'
+  '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"visa_list_resources","arguments":{}}}'
+) -join "`n" | & $exe 2>$null
+```
+
+To see the server's internal trace while testing, raise the log level (see [Logging](#logging)):
+
+```powershell
+$env:GPIB_MCP_LOG_LEVEL = "Debug"   # then re-run; logs appear on stderr
+```
+
 ## Configure an MCP client
 
 ### Claude Desktop
@@ -207,6 +253,41 @@ $exe = "src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe"
 
 You should see an `initialize` result followed by a list of discovered resources.
 
+## Logging
+
+All diagnostics are written to **stderr** (stdout is reserved exclusively for MCP
+JSON-RPC traffic). Each line is timestamped (UTC) and tagged with a severity level:
+
+```
+2026-06-19T19:42:10.847Z [gpib-mcp] INFO: initialize from client 'audit-test' (protocol 2025-06-18)
+```
+
+Set the minimum level with the `GPIB_MCP_LOG_LEVEL` environment variable. Valid values,
+from least to most verbose: `Error`, `Warn`, `Info` (default), `Debug`.
+
+| Level | What it shows |
+|-------|---------------|
+| `Error` | Fatal/unhandled failures only |
+| `Warn` | + recoverable problems (failed tool calls, dispose errors) |
+| `Info` | + lifecycle (startup, client connect, sessions opened/closed) |
+| `Debug` | + every JSON-RPC frame in/out and every raw instrument read/write |
+
+`Debug` is the level to use when troubleshooting instrument communication — it logs the
+exact bytes sent to and received from each instrument (with control characters escaped).
+
+When configured in an MCP client, set it alongside the command, e.g. for Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "gpib": {
+      "command": "C:\\path\\to\\GPIB-MCP\\src\\GpibMcp\\bin\\x86\\Release\\net472\\GpibMcp.exe",
+      "env": { "GPIB_MCP_LOG_LEVEL": "Debug" }
+    }
+  }
+}
+```
+
 ## Why x86?
 
 NI's VISA.NET assemblies are commonly installed under a 32-bit
@@ -222,15 +303,19 @@ change the platform accordingly.
 GPIB-MCP.sln
 LICENSE
 README.md
+.editorconfig                      shared code-style settings
 src/GpibMcp/
   GpibMcp.csproj                   net472 / x86 project + NI references
   Program.cs                       entry point + stdio/UTF-8 setup
+  Diagnostics/
+    Log.cs                         leveled stderr logger (GPIB_MCP_LOG_LEVEL)
   Mcp/
     McpServer.cs                   JSON-RPC 2.0 dispatch (initialize / tools / ping)
     McpTool.cs                     tool + registry + error types
   Instruments/
     VisaInstrumentManager.cs       NI-VISA session manager (primary path)
     Gpib488Helper.cs               NI-488.2 native GPIB helper
+    CommandText.cs                 shared command-termination + log helpers
   Tools/
     InstrumentTools.cs             tool definitions + JSON Schemas
 ```

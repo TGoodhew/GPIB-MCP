@@ -1,4 +1,4 @@
-using System;
+using GpibMcp.Diagnostics;
 using NationalInstruments.NI4882;
 
 namespace GpibMcp.Instruments
@@ -23,8 +23,12 @@ namespace GpibMcp.Instruments
         {
             using (var device = new Device(board, primaryAddress, secondaryAddress))
             {
-                device.Write(EnsureTermination(command));
-                return device.ReadString();
+                string payload = CommandText.EnsureTerminated(command);
+                Log.Debug(Address(board, primaryAddress, secondaryAddress) + " <- " + CommandText.ForLog(payload));
+                device.Write(payload);
+                string response = device.ReadString();
+                Log.Debug(Address(board, primaryAddress, secondaryAddress) + " -> " + CommandText.ForLog(response));
+                return response;
             }
         }
 
@@ -33,14 +37,13 @@ namespace GpibMcp.Instruments
         {
             using (var device = new Device(board, primaryAddress, secondaryAddress))
             {
-                device.Write(EnsureTermination(command));
+                string payload = CommandText.EnsureTerminated(command);
+                Log.Debug(Address(board, primaryAddress, secondaryAddress) + " <- " + CommandText.ForLog(payload));
+                device.Write(payload);
             }
         }
 
-        private static string EnsureTermination(string command)
-        {
-            if (command == null) command = string.Empty;
-            return command.EndsWith("\n") ? command : command + "\n";
-        }
+        private static string Address(int board, byte primary, byte secondary) =>
+            "NI-488.2 GPIB" + board + "::" + primary + (secondary == NoSecondaryAddress ? "" : "::" + secondary);
     }
 }

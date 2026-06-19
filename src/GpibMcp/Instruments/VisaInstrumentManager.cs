@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ivi.Visa;
+using GpibMcp.Diagnostics;
 using NationalInstruments.Visa;
 
 namespace GpibMcp.Instruments
@@ -13,15 +13,23 @@ namespace GpibMcp.Instruments
     ///
     /// VISA covers every common bus - GPIB, USB-TMC, TCPIP/LXI, and serial - through the
     /// same message-based API, which is why it is the primary path for this server.
+    ///
+    /// All operations are guarded by a single lock, so I/O on the shared bus is serialized.
+    /// That is intentional: it is the safe default for a shared GPIB bus, and the server's
+    /// request loop is single-threaded in any case.
     /// </summary>
     public sealed class VisaInstrumentManager : IDisposable
     {
+        /// <summary>Default I/O timeout applied to sessions when the caller does not specify one.</summary>
+        public const int DefaultTimeoutMs = 5000;
+
+        /// <summary>VISA resource filter matching any INSTR resource on any bus.</summary>
+        public const string DefaultResourceFilter = "?*INSTR";
+
         private readonly ResourceManager _rm = new ResourceManager();
         private readonly Dictionary<string, MessageBasedSession> _sessions =
             new Dictionary<string, MessageBasedSession>(StringComparer.OrdinalIgnoreCase);
         private readonly object _gate = new object();
-
-        public const int DefaultTimeoutMs = 5000;
 
         /// <summary>
         /// Discovers connected VISA resources. The default filter matches any INSTR resource.
@@ -29,16 +37,21 @@ namespace GpibMcp.Instruments
         /// </summary>
         public IList<string> ListResources(string filter)
         {
-            if (string.IsNullOrWhiteSpace(filter)) filter = "?*INSTR";
+            if (string.IsNullOrWhiteSpace(filter)) filter = DefaultResourceFilter;
             lock (_gate)
             {
                 try
                 {
-                    return _rm.Find(filter).ToList();
+                    var found = _rm.Find(filter).ToList();
+                    Log.Debug("VISA Find('" + filter + "') -> " + found.Count + " resource(s)");
+                    return found;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // VISA throws VI_ERROR_RSRC_NFOUND when there are no matches.
+                    // VISA raises VI_ERROR_RSRC_NFOUND when nothing matches the filter; that is
+                    // an expected "no instruments" outcome rather than a fault, so we log it at
+                    // Debug and return an empty list.
+                    Log.Debug("VISA Find('" + filter + "') found no resources: " + ex.Message);
                     return new List<string>();
                 }
             }
@@ -48,7 +61,7 @@ namespace GpibMcp.Instruments
         public MessageBasedSession Open(string resource, int timeoutMs)
         {
             if (string.IsNullOrWhiteSpace(resource))
-                throw new ArgumentException("resource must be provided");
+                throw new ArgumentException("resource must be provided", nameof(resource));
             if (timeoutMs <= 0) timeoutMs = DefaultTimeoutMs;
 
             lock (_gate)
@@ -56,8 +69,10 @@ namespace GpibMcp.Instruments
                 MessageBasedSession session;
                 if (!_sessions.TryGetValue(resource, out session))
                 {
+                    Log.Debug("Opening VISA session: " + resource);
                     session = (MessageBasedSession)_rm.Open(resource);
                     _sessions[resource] = session;
+                    Log.Info("Opened instrument session: " + resource);
                 }
                 session.TimeoutMilliseconds = timeoutMs;
                 return session;
@@ -70,8 +85,12 @@ namespace GpibMcp.Instruments
             lock (_gate)
             {
                 var session = Open(resource, timeoutMs);
-                session.RawIO.Write(EnsureTermination(command));
-                return session.RawIO.ReadString();
+                string payload = CommandText.EnsureTerminated(command);
+                Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
+                session.RawIO.Write(payload);
+                string response = session.RawIO.ReadString();
+                Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
+                return response;
             }
         }
 
@@ -81,7 +100,9 @@ namespace GpibMcp.Instruments
             lock (_gate)
             {
                 var session = Open(resource, timeoutMs);
-                session.RawIO.Write(EnsureTermination(command));
+                string payload = CommandText.EnsureTerminated(command);
+                Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
+                session.RawIO.Write(payload);
             }
         }
 
@@ -91,7 +112,9 @@ namespace GpibMcp.Instruments
             lock (_gate)
             {
                 var session = Open(resource, timeoutMs);
-                return session.RawIO.ReadString();
+                string response = session.RawIO.ReadString();
+                Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
+                return response;
             }
         }
 
@@ -101,15 +124,21 @@ namespace GpibMcp.Instruments
             lock (_gate)
             {
                 var session = Open(resource, timeoutMs);
+                Log.Debug("VISA " + resource + " device clear");
                 session.Clear();
             }
         }
 
+        /// <summary>Returns the resource strings of all sessions currently held open.</summary>
         public IList<string> ListOpen()
         {
             lock (_gate) { return _sessions.Keys.ToList(); }
         }
 
+        /// <summary>
+        /// Closes and forgets a held-open session. Returns false if no session was open
+        /// for the resource.
+        /// </summary>
         public bool Close(string resource)
         {
             lock (_gate)
@@ -117,28 +146,40 @@ namespace GpibMcp.Instruments
                 MessageBasedSession session;
                 if (!_sessions.TryGetValue(resource, out session)) return false;
                 _sessions.Remove(resource);
-                try { session.Dispose(); } catch { /* best effort */ }
+                DisposeSession(resource, session);
+                Log.Info("Closed instrument session: " + resource);
                 return true;
             }
         }
 
-        /// <summary>Appends a newline terminator if the caller did not supply one.</summary>
-        private static string EnsureTermination(string command)
-        {
-            if (command == null) command = string.Empty;
-            return command.EndsWith("\n") ? command : command + "\n";
-        }
-
+        /// <summary>Closes every open session and the underlying VISA resource manager.</summary>
         public void Dispose()
         {
             lock (_gate)
             {
-                foreach (var session in _sessions.Values)
-                {
-                    try { session.Dispose(); } catch { /* best effort */ }
-                }
+                foreach (var entry in _sessions) DisposeSession(entry.Key, entry.Value);
                 _sessions.Clear();
-                try { _rm.Dispose(); } catch { /* best effort */ }
+
+                try
+                {
+                    _rm.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Error disposing VISA resource manager: " + ex.Message);
+                }
+            }
+        }
+
+        private static void DisposeSession(string resource, MessageBasedSession session)
+        {
+            try
+            {
+                session.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Error disposing session " + resource + ": " + ex.Message);
             }
         }
     }

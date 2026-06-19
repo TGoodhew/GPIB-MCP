@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using GpibMcp.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,7 +16,11 @@ namespace GpibMcp.Mcp
     {
         /// <summary>MCP revision this server implements (echoed back if the client requests it).</summary>
         public const string ProtocolVersion = "2025-06-18";
+
+        /// <summary>Server name reported to clients during initialize.</summary>
         public const string ServerName = "gpib-mcp";
+
+        /// <summary>Server version reported to clients during initialize.</summary>
         public const string ServerVersion = "0.1.0";
 
         private readonly ToolRegistry _tools;
@@ -37,6 +42,7 @@ namespace GpibMcp.Mcp
             while ((line = _input.ReadLine()) != null)
             {
                 if (line.Length == 0) continue;
+                Log.Debug("<- " + line);
                 JObject message;
                 try
                 {
@@ -44,12 +50,12 @@ namespace GpibMcp.Mcp
                 }
                 catch (Exception ex)
                 {
-                    Log("Ignoring unparseable line: " + ex.Message);
+                    Log.Warn("Ignoring unparseable line: " + ex.Message);
                     continue;
                 }
                 Dispatch(message);
             }
-            Log("stdin closed; shutting down.");
+            Log.Info("stdin closed; shutting down.");
         }
 
         private void Dispatch(JObject message)
@@ -76,11 +82,12 @@ namespace GpibMcp.Mcp
             }
             catch (McpError mcp)
             {
+                Log.Warn("Request '" + method + "' failed: " + mcp.Message);
                 SendError(id, mcp.Code, mcp.Message, mcp.ErrorData);
             }
             catch (Exception ex)
             {
-                Log("Unhandled error in " + method + ": " + ex);
+                Log.Error("Unhandled error in '" + method + "'", ex);
                 SendError(id, -32603, "Internal error: " + ex.Message, null);
             }
         }
@@ -111,13 +118,13 @@ namespace GpibMcp.Mcp
             switch (method)
             {
                 case "notifications/initialized":
-                    Log("Client initialized.");
+                    Log.Info("Client initialized.");
                     break;
                 case "notifications/cancelled":
                     // Single-threaded synchronous server: nothing to cancel.
                     break;
                 default:
-                    Log("Ignoring notification: " + method);
+                    Log.Debug("Ignoring notification: " + method);
                     break;
             }
         }
@@ -126,6 +133,11 @@ namespace GpibMcp.Mcp
         {
             // Echo the client's protocol version when present for best compatibility.
             string clientProtocol = prms != null ? (string)prms["protocolVersion"] : null;
+
+            var clientInfo = prms != null ? prms["clientInfo"] as JObject : null;
+            string clientName = clientInfo != null ? (string)clientInfo["name"] : "unknown";
+            Log.Info("initialize from client '" + clientName + "' (protocol " +
+                     (clientProtocol ?? "unspecified") + ")");
 
             return new JObject
             {
@@ -154,6 +166,7 @@ namespace GpibMcp.Mcp
             if (!_tools.TryGet(name, out tool))
                 throw McpError.InvalidParams("unknown tool: " + name);
 
+            Log.Debug("tools/call '" + name + "' args=" + arguments.ToString(Formatting.None));
             try
             {
                 string text = tool.Invoke(arguments);
@@ -163,7 +176,7 @@ namespace GpibMcp.Mcp
             {
                 // Tool execution failures are reported as a normal result with isError=true,
                 // per the MCP spec, so the model can see and react to the error text.
-                Log("Tool '" + name + "' failed: " + ex.Message);
+                Log.Warn("Tool '" + name + "' failed: " + ex.Message);
                 return ToolResult("Error: " + ex.Message, true);
             }
         }
@@ -206,6 +219,7 @@ namespace GpibMcp.Mcp
         private void Write(JObject payload)
         {
             string json = payload.ToString(Formatting.None);
+            Log.Debug("-> " + json);
             lock (_writeGate)
             {
                 _output.Write(json);
@@ -213,7 +227,5 @@ namespace GpibMcp.Mcp
                 _output.Flush();
             }
         }
-
-        private static void Log(string message) => Console.Error.WriteLine("[gpib-mcp] " + message);
     }
 }
