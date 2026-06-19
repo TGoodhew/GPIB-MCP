@@ -18,7 +18,7 @@ namespace GpibMcp.Instruments
     /// That is intentional: it is the safe default for a shared GPIB bus, and the server's
     /// request loop is single-threaded in any case.
     /// </summary>
-    public sealed class VisaInstrumentManager : IDisposable
+    public sealed class VisaInstrumentManager : IInstrumentManager, IDisposable
     {
         /// <summary>Default I/O timeout applied to sessions when the caller does not specify one.</summary>
         public const int DefaultTimeoutMs = 5000;

@@ -132,9 +132,20 @@ src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe
 
 ### 4. Verify the build
 
-A clean build should report **0 warnings, 0 errors**. After building, confirm the
-server actually starts and speaks the protocol by driving it directly — no instruments
-or MCP client required.
+A clean build should report **0 warnings, 0 errors**.
+
+**Run the unit tests** (no hardware required — they exercise the protocol layer,
+tool handlers, and helpers against an in-memory fake instrument manager):
+
+```bash
+dotnet test tests/GpibMcp.Tests/GpibMcp.Tests.csproj -c Release
+```
+
+All tests should pass. The suite runs in a 32-bit host (configured via
+`tests/GpibMcp.Tests/test.runsettings`) to match the x86 server assembly.
+
+Then confirm the server actually starts and speaks the protocol by driving it
+directly — again, no instruments or MCP client required.
 
 **a. Confirm the executable was produced:**
 
@@ -313,11 +324,13 @@ src/GpibMcp/
     McpServer.cs                   JSON-RPC 2.0 dispatch (initialize / tools / ping)
     McpTool.cs                     tool + registry + error types
   Instruments/
+    IInstrumentManager.cs          instrument-layer abstraction (enables testing)
     VisaInstrumentManager.cs       NI-VISA session manager (primary path)
     Gpib488Helper.cs               NI-488.2 native GPIB helper
     CommandText.cs                 shared command-termination + log helpers
   Tools/
     InstrumentTools.cs             tool definitions + JSON Schemas
+tests/GpibMcp.Tests/               xUnit tests (protocol, tools, helpers, logging)
 ```
 
 ## Troubleshooting

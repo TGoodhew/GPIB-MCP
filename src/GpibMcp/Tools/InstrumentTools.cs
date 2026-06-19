@@ -14,7 +14,7 @@ namespace GpibMcp.Tools
     public static class InstrumentTools
     {
         /// <summary>Creates the registry of all tools the server exposes, bound to <paramref name="visa"/>.</summary>
-        public static ToolRegistry BuildRegistry(VisaInstrumentManager visa)
+        public static ToolRegistry BuildRegistry(IInstrumentManager visa)
         {
             if (visa == null) throw new ArgumentNullException(nameof(visa));
             var registry = new ToolRegistry();
