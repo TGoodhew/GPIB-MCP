@@ -38,6 +38,48 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void ListResources_PhantomFullGpibBus_WarnsAboutExtender()
+        {
+            var fake = new FakeInstrumentManager();
+            // 31 GPIB addresses present is the HP 37204A signature (it ACKs every address).
+            for (int addr = 0; addr <= 30; addr++)
+                fake.ResourceList.Add("GPIB0::" + addr + "::INSTR");
+
+            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+
+            Assert.Contains("WARNING", text);
+            Assert.Contains("37204A", text);
+            Assert.Contains("which GPIB addresses are actually in use", text);
+        }
+
+        [Fact]
+        public void ListResources_FewGpibInstruments_NoExtenderWarning()
+        {
+            var fake = new FakeInstrumentManager();
+            fake.ResourceList.Add("GPIB0::9::INSTR");
+            fake.ResourceList.Add("GPIB0::18::INSTR");
+            fake.ResourceList.Add("GPIB0::22::INSTR");
+
+            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+
+            Assert.DoesNotContain("37204A", text);
+            Assert.Contains("GPIB0::9::INSTR", text);
+        }
+
+        [Fact]
+        public void ListResources_ManyNonGpibResources_NoExtenderWarning()
+        {
+            var fake = new FakeInstrumentManager();
+            // A large number of TCPIP resources must NOT trigger the GPIB-specific advisory.
+            for (int i = 0; i < 25; i++)
+                fake.ResourceList.Add("TCPIP0::10.0.0." + i + "::INSTR");
+
+            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+
+            Assert.DoesNotContain("37204A", text);
+        }
+
+        [Fact]
         public void Query_TrimsTrailingLineEndings()
         {
             var fake = new FakeInstrumentManager();

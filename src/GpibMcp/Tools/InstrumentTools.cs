@@ -34,6 +34,10 @@ namespace GpibMcp.Tools
                     var sb = new StringBuilder();
                     sb.AppendLine("Found " + resources.Count + " VISA resource(s):");
                     foreach (var r in resources) sb.AppendLine("  " + r);
+
+                    int gpibCount = CountGpibInstruments(resources);
+                    if (gpibCount >= PhantomGpibThreshold())
+                        sb.Append(Environment.NewLine + BusExtenderAdvisory(gpibCount));
                     return sb.ToString().TrimEnd();
                 }));
 
@@ -239,6 +243,65 @@ namespace GpibMcp.Tools
         private static string Clean(string response)
         {
             return (response ?? string.Empty).TrimEnd('\r', '\n');
+        }
+
+        // ---------------------------------------------------------------------
+        // Bus-extender (phantom address) detection
+        //
+        // Bus-level GPIB discovery reports an address as "present" whenever a
+        // listener acknowledges on the bus. HPIB bus extenders (e.g. HP 37204A)
+        // acknowledge EVERY address, so discovery returns a phantom-full bus and
+        // the result cannot be trusted. A physical GPIB segment supports at most
+        // ~15 devices, so a count at/above that limit is the tell-tale sign.
+        // ---------------------------------------------------------------------
+
+        /// <summary>Maximum plausible device count on a real GPIB segment; above this we warn.</summary>
+        private const int DefaultPhantomGpibThreshold = 15;
+
+        private static int PhantomGpibThreshold()
+        {
+            string raw = Environment.GetEnvironmentVariable("GPIB_MCP_PHANTOM_GPIB_THRESHOLD");
+            int parsed;
+            if (!string.IsNullOrWhiteSpace(raw) && int.TryParse(raw.Trim(), out parsed) && parsed > 0)
+                return parsed;
+            return DefaultPhantomGpibThreshold;
+        }
+
+        private static int CountGpibInstruments(IEnumerable<string> resources)
+        {
+            int count = 0;
+            foreach (var r in resources)
+            {
+                if (r == null) continue;
+                if (r.IndexOf("GPIB", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    r.IndexOf("INSTR", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Guidance appended to discovery output when the GPIB bus looks phantom-full.
+        /// It is written for the assistant: it explains the situation and tells the model
+        /// to ask the user about a bus extender and which addresses are genuinely in use.
+        /// </summary>
+        private static string BusExtenderAdvisory(int gpibCount)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("WARNING: " + gpibCount + " GPIB addresses report as present. A physical GPIB");
+            sb.AppendLine("segment supports at most ~15 devices, so this almost always means an HPIB bus");
+            sb.AppendLine("extender (e.g. HP 37204A) is on the bus. Such extenders acknowledge EVERY");
+            sb.AppendLine("address whether or not an instrument is connected, so the GPIB entries above");
+            sb.AppendLine("cannot be trusted - most are phantom addresses.");
+            sb.AppendLine();
+            sb.AppendLine("ASSISTANT: Before using any GPIB address, ask the user:");
+            sb.AppendLine("  1. Are you using an HP 37204A (or similar) HPIB bus extender?");
+            sb.AppendLine("  2. If so, which GPIB addresses are actually in use?");
+            sb.AppendLine("Then work only with the addresses the user confirms (run visa_identify on each");
+            sb.AppendLine("to verify). Non-GPIB resources (USB / TCPIP / serial) listed above are unaffected.");
+            return sb.ToString().TrimEnd();
         }
     }
 }

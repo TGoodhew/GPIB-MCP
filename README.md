@@ -34,6 +34,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
 - [Usage](#usage)
   - [Tool reference](#tool-reference)
   - [Typical workflow](#typical-workflow)
+  - [Discovery and bus extenders (HP 37204A)](#discovery-and-bus-extenders-hp-37204a)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [Why x86?](#why-x86)
@@ -278,6 +279,25 @@ Argument notes:
 
 Sessions are cached, so steps 2–3 reuse the same open connection automatically.
 
+### Discovery and bus extenders (HP 37204A)
+
+`visa_list_resources` performs **bus-level presence detection** — it does not query
+instruments. An address appears because a listener acknowledges on the bus, not because
+it answered `*IDN?`. (Use `visa_identify` to actually read an instrument's identity.)
+
+This matters with **HPIB bus extenders such as the HP 37204A**, which acknowledge *every*
+GPIB address whether or not an instrument is connected. Discovery then reports a
+"phantom-full" bus that cannot be trusted.
+
+The server detects this: when the number of GPIB resources reaches the phantom threshold
+(default **15**; a physical GPIB segment supports at most ~15 devices), `visa_list_resources`
+appends a warning instructing the assistant to ask you (1) whether a bus extender is in use
+and (2) which GPIB addresses are actually in use — then to verify each with `visa_identify`.
+Non-GPIB resources (USB / TCPIP / serial) are unaffected.
+
+Tune or disable the threshold with the `GPIB_MCP_PHANTOM_GPIB_THRESHOLD` environment
+variable (set it very high to suppress the warning).
+
 ### Manual test from a terminal
 
 You can drive the server directly without an MCP client by piping JSON-RPC frames
@@ -368,6 +388,7 @@ tests/GpibMcp.Tests/               xUnit tests (protocol, tools, helpers, loggin
 |---------|--------------------|
 | Build error: *metadata file `Ivi.Visa.dll` could not be found* | A `HintPath` in `GpibMcp.csproj` does not match your machine — update it (see [Install step 2](#2-point-the-project-at-your-ni-assemblies)). |
 | `visa_list_resources` returns nothing | No instruments powered/connected, or NI-VISA not installed. Confirm devices appear in **NI MAX** (Measurement & Automation Explorer). |
+| `visa_list_resources` lists *every* GPIB address | An HPIB bus extender (e.g. HP 37204A) is ACKing all addresses; the server flags this. See [Discovery and bus extenders](#discovery-and-bus-extenders-hp-37204a). |
 | `BadImageFormatException` at runtime | A bitness mismatch — ensure the build is `x86` and matches your installed NI runtime (see [Why x86?](#why-x86)). |
 | A query times out | Instrument needs a different terminator or longer timeout; raise `timeout_ms`, and check the instrument's programming manual for the expected line ending. |
 | Tools never appear in Claude Desktop | Check the `command` path in `claude_desktop_config.json` is absolute and backslash-escaped, then fully restart Claude Desktop. |
