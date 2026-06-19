@@ -1,0 +1,581 @@
+{
+  "model": "8508A",
+  "manufacturer": "HP",
+  "category": "Vector Voltmeter",
+  "description": "HP 8508A Vector Voltmeter with HP-IB interface. Measures channel A/B voltage and power, B/A magnitude ratio and B-A phase, transmission, group delay, SWR, reflection coefficient (rho), admittance (Y) and impedance (Z) from 100 kHz to 2 GHz. Uses an IEEE 488.2 mnemonic (SCPI-like) command set.",
+  "source": "8508A User Guide.pdf",
+  "aliases": ["8508A", "HP8508A"],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "*IDN?",
+    "response": "HEWLETT-PACKARD,8508A-050,0,REV 2944",
+    "matchRegex": "8508A"
+  },
+  "commands": [
+    {
+      "name": "averaging_count",
+      "mnemonic": "AVERage:COUNt",
+      "category": "Averaging",
+      "description": "Sets the averaging value. The number of internal readings averaged per result is 2 raised to the power of this count. Higher values reduce measurement variation at the cost of a lower rate. Changeable only via HP-IB.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "count",
+          "units": "exponent",
+          "range": "0 to 10 (default 5)"
+        }
+      ],
+      "examples": ["AVERage:COUNt 5", "AVER:COUN?"]
+    },
+    {
+      "name": "calibration",
+      "mnemonic": "*CAL?",
+      "category": "Calibration",
+      "description": "Performs an internal device calibration. Returns 0 for success, 1 if the calibration fails.",
+      "set": false,
+      "query": true,
+      "examples": ["*CAL?"]
+    },
+    {
+      "name": "capability",
+      "mnemonic": "CAPability?",
+      "category": "Status",
+      "description": "Returns the instrument's HP-IB capability string: SH1, AH1, T6, TE0, L4, LE0, SR1, RL1, PP0, DC1, DT1, C0, E2.",
+      "set": false,
+      "query": true,
+      "examples": ["CAPability?", "CAP?"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Status",
+      "description": "Clears the contents of the status register and associated status data structures. Used as part of a remote instrument preset.",
+      "set": true,
+      "query": false,
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "configure_measurement",
+      "mnemonic": "SENSe",
+      "category": "Measurement",
+      "description": "Configures the measurement(s) the Vector Voltmeter will make and return in response to a measurement query. Default is AVOLtage. Options for <meas> are the same as the Measure command.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "meas",
+          "range": "AVOLtage | BVOLtage | APOWer | BPOWer | BA | PHASe | TRANsmission | DELay | SWR | RHO | Y | Z | CORE (comma-separated list allowed)"
+        }
+      ],
+      "examples": ["SENSe TRANSMISSION", "SENSE AVOL,BVOL,PHASE"]
+    },
+    {
+      "name": "correction_data_a",
+      "mnemonic": "CORRection:DATA:A",
+      "category": "Correction",
+      "description": "Sends data to the Vector Voltmeter for use as the channel A normalization (reference) value. Defining reference data is available only from HP-IB.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "value",
+          "units": "fundamental units"
+        }
+      ],
+      "examples": ["CORRection:DATA:A 1.0", "CORR:DATA:A?"]
+    },
+    {
+      "name": "correction_data_b",
+      "mnemonic": "CORRection:DATA:B",
+      "category": "Correction",
+      "description": "Sends data to the Vector Voltmeter for use as the channel B normalization (reference) value.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "value",
+          "units": "fundamental units"
+        }
+      ],
+      "examples": ["CORRection:DATA:B 1.0", "CORR:DATA:B?"]
+    },
+    {
+      "name": "correction_data_phase",
+      "mnemonic": "CORRection:DATA:PHASe",
+      "category": "Correction",
+      "description": "Sends data to the Vector Voltmeter for use as the phase normalization (reference) value.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "value",
+          "units": "degrees"
+        }
+      ],
+      "examples": ["CORRection:DATA:PHASe 0", "CORR:DATA:PHAS?"]
+    },
+    {
+      "name": "correction_impedance",
+      "mnemonic": "CORRection:IMPedance",
+      "category": "Correction",
+      "description": "Sets the impedance normalization function. ON (1) normalizes impedance measurements; OFF (0) calculates impedance from the current Input Impedance value. Default OFF.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["CORRection:IMPedance ON", "CORR:IMP?"]
+    },
+    {
+      "name": "correction_termination",
+      "mnemonic": "CORRection:TERMination",
+      "category": "Correction",
+      "description": "Sets the termination standard used for reflection measurements. Default SHORT. Query returns the current setting as an ASCII string.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "termination",
+          "range": "SHORT | OPEN | Z0"
+        }
+      ],
+      "examples": ["CORRection:TERMination SHORT", "CORR:TERM?"]
+    },
+    {
+      "name": "correction_perform",
+      "mnemonic": "CORRection:PERForm",
+      "category": "Correction",
+      "description": "Sets the :A, :B and :PHASe references to be the current measurement values (saves current measurement as a reference).",
+      "set": true,
+      "query": false,
+      "examples": ["CORRection:PERForm"]
+    },
+    {
+      "name": "correction_state",
+      "mnemonic": "CORRection:STATe",
+      "category": "Correction",
+      "description": "Defines whether the correction (normalization) function is in use. ON (1) or OFF (0). Default OFF.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["CORRection:STATe ON", "CORR:STAT?"]
+    },
+    {
+      "name": "direct_analog_output",
+      "mnemonic": "DANalog",
+      "category": "Output",
+      "description": "Sets the Vector Voltmeter to operate as a simple converter. Frequency and amplitude ranges are locked and rear panel outputs represent the A or B voltage and the phase difference. No results are available over HP-IB in this mode. Default OFF.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["DANalog ON", "DAN?"]
+    },
+    {
+      "name": "display_state",
+      "mnemonic": "DISPlay:STATe",
+      "category": "Display",
+      "description": "Controls the front panel display. Turning the display off can improve measurement speed. Default ON.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["DISPlay:STATe OFF", "DISP:STAT?"]
+    },
+    {
+      "name": "fetch",
+      "mnemonic": "FETCh?",
+      "category": "Measurement",
+      "description": "Returns the result of the most recently started measurement as soon as it is available, using the current measurement configuration.",
+      "set": false,
+      "query": true,
+      "examples": ["FETCh?"]
+    },
+    {
+      "name": "fetch_continuous",
+      "mnemonic": "FETCh:CONTinuous?",
+      "category": "Measurement",
+      "description": "Causes results to be passed to HP-IB such that when one is read, the next is made available for reading as soon as it is calculated.",
+      "set": false,
+      "query": true,
+      "examples": ["FETCh:CONTinuous?", "FETC:CONT?"]
+    },
+    {
+      "name": "format",
+      "mnemonic": "FORMat",
+      "category": "Format",
+      "description": "Sets the units in which measurement results are returned. LINear: volts/watts/dimensionless ratio. LOGarithmic: dBuV/dBm/dB/Return Loss. POLar: ratio and phase angle. RECTangular/CARTesian: real and imaginary components. Default LINear POLar.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "format",
+          "range": "LINear | LOGarithmic | POLar | RECTangular | CARTesian"
+        }
+      ],
+      "examples": ["FORMAT LOG", "FORMat?"]
+    },
+    {
+      "name": "frequency_band",
+      "mnemonic": "FREQuency:BAND",
+      "category": "Frequency",
+      "description": "Selects the frequency band of the lock circuits explicitly and forces FREQ:BAND:AUTO OFF. Bands 1-15 cover 0.1 MHz to 2000 MHz; band 20 covers 0.02 to 0.02 MHz. Explicit selection minimizes lock time. Default is automatic.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "band",
+          "units": "band number",
+          "range": "1=0.1-0.2, 2=0.2-0.6, 3=0.6-1, 4=1-3, 5=3-5, 6=5-8, 7=8-15, 8=15-25, 9=25-50, 10=50-80, 11=80-150, 12=150-250, 13=250-500, 14=500-1000, 15=1000-2000 MHz; 20=0.02 MHz"
+        }
+      ],
+      "examples": ["FREQuency:BAND 11", "FREQ:BAND?"]
+    },
+    {
+      "name": "frequency_band_auto",
+      "mnemonic": "FREQuency:BAND:AUTO",
+      "category": "Frequency",
+      "description": "Selects automatic or explicit frequency band selection. Band 20 will not be auto-selected. When turned OFF the instrument remains in the current band. Default ON, forced OFF when FREQ:BAND is received.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["FREQuency:BAND:AUTO ON", "FREQ:BAND:AUTO?"]
+    },
+    {
+      "name": "identification",
+      "mnemonic": "*IDN?",
+      "category": "Status",
+      "description": "Returns a string describing the Vector Voltmeter and Input Module: Manufacturer, Model number (with input module option STD or 050), unused field, and firmware revision. E.g. HEWLETT-PACKARD,8508A-050,0,REV 2944.",
+      "set": false,
+      "query": true,
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "input_impedance",
+      "mnemonic": "INPut:IMPedance",
+      "category": "Input",
+      "description": "Sets the impedance of the measurement system, used in power and impedance measurements. Allowed values are 50 or 75 ohms.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "impedance",
+          "units": "ohms",
+          "range": "50 | 75"
+        }
+      ],
+      "examples": ["INPut:IMPedance 50", "INP:IMP?"]
+    },
+    {
+      "name": "input_pod",
+      "mnemonic": "INPut:POD?",
+      "category": "Input",
+      "description": "Returns the input module (pod) type: 50, 75, or none.",
+      "set": false,
+      "query": true,
+      "examples": ["INPut:POD?", "INP:POD?"]
+    },
+    {
+      "name": "measure",
+      "mnemonic": "MEASure?",
+      "category": "Measurement",
+      "description": "Configures and makes a measurement (or measurements) and returns the result(s). Default AVOLtage. Multiple measurements may be requested as a comma-separated list. Results also depend on CORRection:STATe.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        {
+          "name": "meas",
+          "range": "AVOLtage (Ch A voltage) | BVOLtage (Ch B voltage) | APOWer (Ch A power) | BPOWer (Ch B power) | BA (B/A magnitude ratio) | PHASe (B-A phase) | TRANsmission (B/A ratio and B-A phase) | DELay | SWR | RHO (reflection coefficient) | Y (admittance 1/Z) | Z (impedance) | CORE (AVOL,BVOL,PHASE)"
+        }
+      ],
+      "examples": ["MEASure? TRANSMISSION", "MEAS? AVOL,BVOL,PHASE"]
+    },
+    {
+      "name": "measure_timeout",
+      "mnemonic": "MEASure:TIMEout",
+      "category": "Measurement",
+      "description": "Allows a measurement to time out if the instrument has not locked to a signal. Default 30 seconds.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "timeout",
+          "units": "seconds",
+          "range": "0 to 30 (default 30)"
+        }
+      ],
+      "examples": ["MEASure:TIMEout 10", "MEAS:TIME?"]
+    },
+    {
+      "name": "measure_timeout_state",
+      "mnemonic": "MEASure:TIMEout:STATe",
+      "category": "Measurement",
+      "description": "Defines whether the measurement timeout function is in use. ON (1) or OFF (0).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["MEASure:TIMEout:STATe ON", "MEAS:TIME:STAT?"]
+    },
+    {
+      "name": "output_test_signal",
+      "mnemonic": "OUTPut",
+      "category": "Output",
+      "description": "Controls the front panel Test output signal. Default OFF.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": ["OUTPut ON", "OUTP?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Synchronization",
+      "description": "Causes the Operation Complete bit in the Standard Event Status Register to be set when all pending operations are complete. The query form returns 1 when all pending operations have completed.",
+      "set": true,
+      "query": true,
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "System",
+      "description": "Sets the Vector Voltmeter to a front panel state equivalent to pressing PRESET. Has no effect on status registers or results waiting to be read.",
+      "set": true,
+      "query": false,
+      "examples": ["*RST"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "System",
+      "description": "Initiates an instrument self test and returns a result. 0 indicates no errors; 1 indicates an error occurred.",
+      "set": false,
+      "query": true,
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Status",
+      "description": "Sets the service request enable conditions. Status Byte bits: 4 Message Available, 5 Standard Event Status Register summary, 7 Operation Status Register summary.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "0 to 255"
+        }
+      ],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "standard_event_enable",
+      "mnemonic": "*ESE",
+      "category": "Status",
+      "description": "Sets the Standard Event Status Register mask conditions. Query returns the currently selected conditions, range 0 through 255.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "0 to 255"
+        }
+      ],
+      "examples": ["*ESE 1", "*ESE?"]
+    },
+    {
+      "name": "standard_event_register",
+      "mnemonic": "*ESR?",
+      "category": "Status",
+      "description": "Returns and clears the current value of the Standard Event Status Register. Bits: 0 Operation Complete, 2 Query Error, 3 Device Error, 4 Execution Error, 5 Command Error.",
+      "set": false,
+      "query": true,
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Status",
+      "description": "Returns the current value of the Status Byte with Master Summary Status (MSS) as bit 6. Bits summarize each Status Reporting Structure and are cleared by clearing the related structure.",
+      "set": false,
+      "query": true,
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "status_operation_condition",
+      "mnemonic": "STATus:OPERation:CONDition?",
+      "category": "Status",
+      "description": "Returns the current value of the Operation Status Condition register. Bits: 0 Calibrating, 2 Ranging (unlocked), 3 Measuring, 4 Awaiting Trigger.",
+      "set": false,
+      "query": true,
+      "examples": ["STATus:OPERation:CONDition?", "STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_event",
+      "mnemonic": "STATus:OPERation:EVENt?",
+      "category": "Status",
+      "description": "Returns the current value of the Operation Status Event register (events latched by the transition filters).",
+      "set": false,
+      "query": true,
+      "examples": ["STATus:OPERation:EVENt?", "STAT:OPER:EVEN?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Selects which latched events (via the positive and negative transition filters) are reported in Status Byte summary bit 7. Query returns 0 through 255.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "0 to 255"
+        }
+      ],
+      "examples": ["STATus:OPERation:ENABle 8", "STAT:OPER:ENAB?"]
+    },
+    {
+      "name": "status_operation_ptransition",
+      "mnemonic": "STATus:OPERation:PTRansition",
+      "category": "Status",
+      "description": "Sets the positive transition filter for the Operation Status register. Query returns the current transition mask.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "Operation Status bit mask"
+        }
+      ],
+      "examples": ["STATus:OPERation:PTRansition 8", "STAT:OPER:PTR?"]
+    },
+    {
+      "name": "status_operation_ntransition",
+      "mnemonic": "STATus:OPERation:NTRansition",
+      "category": "Status",
+      "description": "Sets the negative transition filter for the Operation Status register. Query returns the current transition mask.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "Operation Status bit mask"
+        }
+      ],
+      "examples": ["STATus:OPERation:NTRansition 8", "STAT:OPER:NTR?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYSTem:ERRor?",
+      "category": "System",
+      "description": "Returns an error code describing any error that occurred, as either a numeric response or a descriptive string. By default a string is returned.",
+      "set": false,
+      "query": true,
+      "parameters": [
+        {
+          "name": "format",
+          "range": "NUMeric | STRing"
+        }
+      ],
+      "examples": ["SYSTem:ERRor?", "SYST:ERR? NUMERIC"]
+    },
+    {
+      "name": "system_key",
+      "mnemonic": "SYSTem:KEY",
+      "category": "System",
+      "description": "Programs front panel key functions to simulate key presses using keycodes 1-20 (1=A, 2=B, 3=REFL MEAS, 4=FORMAT, 5=POWER MEAS, 6=B/A MAG, 7=B-A PHASE, 8=REF SELECT, 9=REF, 10=SYSTEM IMPD, 11=METER SELECT, 12=LOG RANGE, 13=STEP UP, 14=STEP DOWN, 15=MAG RANGE, 16=HOLD VALUE, 17=DISPLAY, 18=SHIFT, 19=LCL, 20=PRESET). Query returns the code of the last key pressed.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "keycode",
+          "range": "1 to 20"
+        }
+      ],
+      "examples": ["SYSTem:KEY 20", "SYST:KEY?"]
+    },
+    {
+      "name": "system_format",
+      "mnemonic": "SYSTem:FORMat",
+      "category": "System",
+      "description": "Sets the HP-IB output format for measurement results. ASCii returns ASCII numeric data; FP64 returns 64-bit IEEE 488.2 floating point numbers.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "format",
+          "range": "ASCii | FP64"
+        }
+      ],
+      "examples": ["SYSTem:FORMat ASCII", "SYST:FORM?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Trigger",
+      "description": "Initiates a new measurement when TRIGger:SOURce is BUS. Performs the same function as the IEEE 488.1 Group Execute Trigger.",
+      "set": true,
+      "query": false,
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIGger:SOURce",
+      "category": "Trigger",
+      "description": "Selects the trigger mode. In FREErun the Vector Voltmeter measures as quickly as possible. With BUS it waits to receive a trigger (*TRG or GET) before initiating the next measurement.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        {
+          "name": "source",
+          "range": "BUS | FREErun"
+        }
+      ],
+      "examples": ["TRIGGER:SOURCE BUS", "TRIG:SOUR?"]
+    },
+    {
+      "name": "wait_to_continue",
+      "mnemonic": "*WAI",
+      "category": "Synchronization",
+      "description": "Causes the Vector Voltmeter to complete all current actions before accepting more commands. Used to synchronize the instrument with other equipment.",
+      "set": true,
+      "query": false,
+      "examples": ["*WAI"]
+    }
+  ]
+}

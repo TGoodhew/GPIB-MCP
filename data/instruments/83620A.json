@@ -1,0 +1,2147 @@
+{
+  "model": "83620A",
+  "manufacturer": "HP/Agilent",
+  "category": "Synthesized Sweeper",
+  "description": "HP 83620A Synthesized Sweeper (10 MHz to 20 GHz), part of the HP 8360 series. Programmable over HP-IB (GPIB/IEEE-488) using the SCPI language (the default; CIIL and 8340-Compatible languages are also selectable via SYSTem:LANGuage). Commands follow the SCPI tree shown in Table S-1 'HP 8360 SCPI COMMAND SUMMARY'. Most settings are accessed under the default SOURce subsystem, so the leading ':SOURce' is optional/implied (e.g. ':FREQuency:CW' == ':SOURce:FREQuency:CW'). Numeric values accept an optional units suffix (HZ/KHZ/MHZ/GHZ for frequency, S/MS/US for time, DB/DBM/PCT for level/depth) and most accept MAXimum, MINimum, and where noted UP/DOWN. Boolean parameters accept ON|OFF|1|0. Querying replaces the set value with '?'. After *RST the instrument returns to the predefined state listed under *RST in the command summary. *IDN? returns 'HEWLETT-PACKARD,model,serial number,DD MMM YY'. Command set is common to the 8360 family (83620A/B, 83640A/B, 83650A/B, etc.).",
+  "source": "83620A User.pdf",
+  "aliases": ["83620A", "83620B", "83640A", "8360"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "836[0-9]{2}",
+    "description": "Returns an identifying string in the format HEWLETT-PACKARD,model,serial number,DD MMM YY, where model, serial number, and firmware revision of the synthesizer queried are returned."
+  },
+  "commands": [
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Returns the instrument identification string: HEWLETT-PACKARD,model,serial number,DD MMM YY.",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the synthesizer to its predefined state (see the *RST list in the command summary). Sets INITiate:CONTinuous OFF.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears the Status Byte, the Data Questionable Event Register, the Standard Event Status Register, the Standard Operation Status Register, the error queue, the OPC pending flag, and any other registers summarized in the Status Byte.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Sets and queries the value of the Standard Event Status Enable Register.",
+      "set": "*ESE <num>",
+      "query": "*ESE?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255" }
+      ],
+      "examples": ["*ESE 32", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Queries the value of the Standard Event Status Register. This is a destructive read.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Operation complete command. The synthesizer generates the OPC message in the Standard Event Status Register when all pending operations (such as sweep or selftest) have finished.",
+      "set": "*OPC",
+      "examples": ["*OPC"]
+    },
+    {
+      "name": "operation_complete_query",
+      "mnemonic": "*OPC?",
+      "category": "Common",
+      "description": "Operation complete query. The synthesizer returns an ASCII '1' when all pending operations have finished.",
+      "query": "*OPC?",
+      "examples": ["*OPC?"]
+    },
+    {
+      "name": "options",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Returns a string identifying any device options installed.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "learn",
+      "mnemonic": "*LRN?",
+      "category": "Common",
+      "description": "Returns a long string of device-specific characters that, when sent back to the synthesizer, restores that instrument state.",
+      "query": "*LRN?",
+      "examples": ["*LRN?"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recalls the instrument state from the specified memory register.",
+      "set": "*RCL <num>",
+      "parameters": [
+        { "name": "register", "range": "0 to 8" }
+      ],
+      "examples": ["*RCL 1"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Stores the present instrument state in the specified memory register. An execution error occurs if you try to save state 0.",
+      "set": "*SAV <num>",
+      "parameters": [
+        { "name": "register", "range": "1 to 8" }
+      ],
+      "examples": ["*SAV 1"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Sets and queries the value of the Service Request Enable Register.",
+      "set": "*SRE <num>",
+      "query": "*SRE?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 255" }
+      ],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Queries the Status Byte. This is a non-destructive read.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Performs the same function as the Group Execute Trigger command defined by IEEE 488.1.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Performs a full selftest, without data logging or looping, and returns an error code: 0 passed, 1 failed, 2 not run yet, 3 aborted, 4 cannot execute the test, 5 cannot execute (test skipped), -1 unrecognized result.",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Causes the synthesizer to wait for the pending commands to be completed before executing any other commands. For example, 'TSW;*WAI' starts a sweep and waits until it completes before executing the next command.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+
+    {
+      "name": "abort",
+      "mnemonic": "ABORt",
+      "category": "Trigger",
+      "description": "Causes the sweep in progress to abort and reset. If INITiate:CONTinuous is ON it immediately restarts the sweep. The pending operation flag (driving *OPC, *WAI, *OPC?) undergoes a transition once the sweep is reset.",
+      "set": ":ABORt",
+      "examples": [":ABORt"]
+    },
+    {
+      "name": "trigger_sweep",
+      "mnemonic": "TSWeep",
+      "category": "Trigger",
+      "description": "Trigger sweep. Equivalent to ':ABORt;INITiate[:IMMediate]' - aborts the current sweep and immediately initiates a new one.",
+      "set": ":TSWeep",
+      "examples": [":TSWeep", ":TSW;*WAI"]
+    },
+
+    {
+      "name": "am_depth",
+      "mnemonic": "AM[:DEPTh]",
+      "category": "AM",
+      "description": "Sets and queries the percentage of AM when the SOURce is INTernal. If a value is given in dB it is converted to percent. After *RST the value is 50%.",
+      "set": ":AM[:DEPTh] <num>[PCT]|<num>DB|MAXimum|MINimum",
+      "query": ":AM[:DEPTh]? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "depth", "units": ["PCT", "DB"], "range": "0 to 40 dB (percent equivalent)" }
+      ],
+      "examples": [":AM 30PCT", ":AM:DEPTh? MAX"]
+    },
+    {
+      "name": "am_internal_frequency",
+      "mnemonic": "AM:INTernal:FREQuency",
+      "category": "AM",
+      "description": "Sets and queries the frequency (in Hz) of the internal AM source. After *RST the value is 1 kHz.",
+      "set": ":AM:INTernal:FREQuency <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":AM:INTernal:FREQuency? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument internal AM source range" }
+      ],
+      "examples": [":AM:INT:FREQ 1KHZ", ":AM:INT:FREQ?"]
+    },
+    {
+      "name": "am_internal_function",
+      "mnemonic": "AM:INTernal:FUNCtion",
+      "category": "AM",
+      "description": "Sets and queries the waveform of the internal AM source. After *RST the value is SINusoid.",
+      "set": ":AM:INTernal:FUNCtion SINusoid|SQUare|TRIangle|RAMP|NOISe",
+      "query": ":AM:INTernal:FUNCtion?",
+      "parameters": [
+        { "name": "waveform", "range": "SINusoid|SQUare|TRIangle|RAMP|NOISe" }
+      ],
+      "examples": [":AM:INT:FUNC SIN", ":AM:INT:FUNC?"]
+    },
+    {
+      "name": "am_source",
+      "mnemonic": "AM:SOURce",
+      "category": "AM",
+      "description": "Sets and queries the source of the AM modulating signal. After *RST the value is EXTernal.",
+      "set": ":AM:SOURce INTernal|EXTernal",
+      "query": ":AM:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal" }
+      ],
+      "examples": [":AM:SOUR INT", ":AM:SOUR?"]
+    },
+    {
+      "name": "am_mode",
+      "mnemonic": "AM:MODE",
+      "category": "AM",
+      "description": "Controls the AM depth limits of the synthesizer. NORMal is selected at *RST.",
+      "set": ":AM:MODE DEEP|NORMal",
+      "query": ":AM:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "DEEP|NORMal" }
+      ],
+      "examples": [":AM:MODE NORM", ":AM:MODE?"]
+    },
+    {
+      "name": "am_state",
+      "mnemonic": "AM:STATe",
+      "category": "AM",
+      "description": "Sets and queries the status of the AM modulation. After *RST the setting is OFF.",
+      "set": ":AM:STATe ON|OFF|1|0",
+      "query": ":AM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":AM:STAT ON", ":AM:STAT?"]
+    },
+    {
+      "name": "am_type",
+      "mnemonic": "AM:TYPE",
+      "category": "AM",
+      "description": "Sets and queries the type of AM modulation. After *RST the setting is LINear.",
+      "set": ":AM:TYPE LINear|EXPonential",
+      "query": ":AM:TYPE?",
+      "parameters": [
+        { "name": "type", "range": "LINear|EXPonential" }
+      ],
+      "examples": [":AM:TYPE LIN", ":AM:TYPE?"]
+    },
+    {
+      "name": "am_units",
+      "mnemonic": "UNIT:AM",
+      "category": "AM",
+      "description": "Sets and queries the default AM depth units. After *RST the value is PCT.",
+      "set": ":UNIT:AM DB|PCT",
+      "query": ":UNIT:AM?",
+      "parameters": [
+        { "name": "units", "range": "DB|PCT" }
+      ],
+      "examples": [":UNIT:AM PCT", ":UNIT:AM?"]
+    },
+
+    {
+      "name": "calibration_am_auto",
+      "mnemonic": "CALibration:AM:AUTO",
+      "category": "Calibration",
+      "description": "Sets and queries the automatic modulator calibration switch. If ON, each time a frequency or power is changed CALibration:AM[:EXECute] is attempted.",
+      "set": ":CALibration:AM:AUTO ON|OFF|1|0",
+      "query": ":CALibration:AM:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":CAL:AM:AUTO ON", ":CAL:AM:AUTO?"]
+    },
+    {
+      "name": "calibration_am_execute",
+      "mnemonic": "CALibration:AM[:EXECute]",
+      "category": "Calibration",
+      "description": "When AM is on and the synthesizer is in CW or manual mode, performs a modulator calibration (provided power sweep is not active).",
+      "set": ":CALibration:AM[:EXECute]",
+      "examples": [":CAL:AM"]
+    },
+    {
+      "name": "calibration_peaking_auto",
+      "mnemonic": "CALibration:PEAKing:AUTO",
+      "category": "Calibration",
+      "description": "Sets and queries the automatic RF peaking function. If ON, a peak is done at regular intervals automatically. After *RST the value is OFF.",
+      "set": ":CALibration:PEAKing:AUTO ON|OFF|1|0",
+      "query": ":CALibration:PEAKing:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":CAL:PEAK:AUTO OFF", ":CAL:PEAK:AUTO?"]
+    },
+    {
+      "name": "calibration_peaking_execute",
+      "mnemonic": "CALibration:PEAKing[:EXECute]",
+      "category": "Calibration",
+      "description": "Performs a single RF (YIG) peaking operation.",
+      "set": ":CALibration:PEAKing[:EXECute]",
+      "examples": [":CAL:PEAK"]
+    },
+    {
+      "name": "calibration_span_auto",
+      "mnemonic": "CALibration:SPAN:AUTO",
+      "category": "Calibration",
+      "description": "Sets and queries the automatic span calibration state. After *RST the value is OFF.",
+      "set": ":CALibration:SPAN:AUTO ON|OFF|1|0",
+      "query": ":CALibration:SPAN:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":CAL:SPAN:AUTO OFF", ":CAL:SPAN:AUTO?"]
+    },
+    {
+      "name": "calibration_span_execute",
+      "mnemonic": "CALibration:SPAN[:EXECute]",
+      "category": "Calibration",
+      "description": "Performs a span (frequency) calibration.",
+      "set": ":CALibration:SPAN[:EXECute]",
+      "examples": [":CAL:SPAN"]
+    },
+
+    {
+      "name": "correction_state",
+      "mnemonic": "CORRection[:STATe]",
+      "category": "Correction",
+      "description": "Sets and queries the user flatness/array correction state. After *RST the value is OFF.",
+      "set": ":CORRection[:STATe] ON|OFF|1|0",
+      "query": ":CORRection[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":CORR:STAT ON", ":CORR:STAT?"]
+    },
+    {
+      "name": "correction_flatness",
+      "mnemonic": "CORRection:FLATness",
+      "category": "Correction",
+      "description": "Sets and queries up to 801 frequency-correction pairs (frequency, correction in dB).",
+      "set": ":CORRection:FLATness <num>[freq suffix],<num>DB{,...}",
+      "query": ":CORRection:FLATness?",
+      "parameters": [
+        { "name": "pairs", "units": ["DB"], "range": "up to 801 {freq, dB} pairs" }
+      ],
+      "examples": [":CORR:FLAT 2GHZ,0.5DB", ":CORR:FLAT?"]
+    },
+    {
+      "name": "correction_flatness_points",
+      "mnemonic": "CORRection:FLATness:POINts?",
+      "category": "Correction",
+      "description": "Queries the number of frequency-correction pairs currently loaded.",
+      "query": ":CORRection:FLATness:POINts? [MAXimum|MINimum]",
+      "examples": [":CORR:FLAT:POIN?"]
+    },
+    {
+      "name": "correction_array",
+      "mnemonic": "CORRection:ARRay[0|1]",
+      "category": "Correction",
+      "description": "Sets and queries the correction array (up to 1601 points of correction in dB).",
+      "set": ":CORRection:ARRay[0|1] <num>[DB]{,...}",
+      "query": ":CORRection:ARRay[0|1]?",
+      "parameters": [
+        { "name": "values", "units": ["DB"], "range": "up to 1601 points" }
+      ],
+      "examples": [":CORR:ARR0?"]
+    },
+    {
+      "name": "correction_source",
+      "mnemonic": "CORRection:SOURce[0|1]",
+      "category": "Correction",
+      "description": "Sets and queries the correction source (ARRay or FLATness).",
+      "set": ":CORRection:SOURce[0|1] ARRay|FLATness",
+      "query": ":CORRection:SOURce[0|1]?",
+      "parameters": [
+        { "name": "source", "range": "ARRay|FLATness" }
+      ],
+      "examples": [":CORR:SOUR FLAT", ":CORR:SOUR?"]
+    },
+
+    {
+      "name": "frequency_cw",
+      "mnemonic": "FREQuency[:CW]",
+      "category": "Frequency",
+      "description": "Sets and queries the CW (fixed) output frequency. After *RST the value is (MAX+MIN)/2.",
+      "set": "[:SOURce]:FREQuency[:CW] <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:FREQuency[:CW]? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz (83620A specified range)" }
+      ],
+      "examples": [":FREQ:CW 10GHZ", ":FREQ:CW?"]
+    },
+    {
+      "name": "frequency_cw_auto",
+      "mnemonic": "FREQuency[:CW]:AUTO",
+      "category": "Frequency",
+      "description": "Sets and queries whether the CW frequency is coupled to (tracks) the center frequency. After *RST the value is OFF.",
+      "set": "[:SOURce]:FREQuency[:CW]:AUTO ON|OFF|1|0",
+      "query": "[:SOURce]:FREQuency[:CW]:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":FREQ:CW:AUTO ON", ":FREQ:CW:AUTO?"]
+    },
+    {
+      "name": "frequency_center",
+      "mnemonic": "FREQuency:CENTer",
+      "category": "Frequency",
+      "description": "Sets and queries the center frequency of the swept range. After *RST the value is (MAX+MIN)/2.",
+      "set": "[:SOURce]:FREQuency:CENTer <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:FREQuency:CENTer? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+      ],
+      "examples": [":FREQ:CENT 10GHZ", ":FREQ:CENT?"]
+    },
+    {
+      "name": "frequency_span",
+      "mnemonic": "FREQuency:SPAN",
+      "category": "Frequency",
+      "description": "Sets and queries the frequency span of the swept range.",
+      "set": "[:SOURce]:FREQuency:SPAN <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:FREQuency:SPAN? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "span", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0 to (MAX-MIN)" }
+      ],
+      "examples": [":FREQ:SPAN 2GHZ", ":FREQ:SPAN?"]
+    },
+    {
+      "name": "frequency_start",
+      "mnemonic": "FREQuency:STARt",
+      "category": "Frequency",
+      "description": "Sets and queries the start frequency of the swept range. After *RST the value is MINimum.",
+      "set": "[:SOURce]:FREQuency:STARt <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:FREQuency:STARt? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+      ],
+      "examples": [":FREQ:STAR 2GHZ", ":FREQ:STAR?"]
+    },
+    {
+      "name": "frequency_stop",
+      "mnemonic": "FREQuency:STOP",
+      "category": "Frequency",
+      "description": "Sets and queries the stop frequency of the swept range. After *RST the value is MAXimum.",
+      "set": "[:SOURce]:FREQuency:STOP <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:FREQuency:STOP? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+      ],
+      "examples": [":FREQ:STOP 18GHZ", ":FREQ:STOP?"]
+    },
+    {
+      "name": "frequency_mode",
+      "mnemonic": "FREQuency:MODE",
+      "category": "Frequency",
+      "description": "Sets and queries the frequency mode of the synthesizer. After *RST the value is CW.",
+      "set": "[:SOURce]:FREQuency:MODE CW|SWEep|LIST",
+      "query": "[:SOURce]:FREQuency:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "CW|SWEep|LIST" }
+      ],
+      "examples": [":FREQ:MODE SWE", ":FREQ:MODE?"]
+    },
+    {
+      "name": "frequency_manual",
+      "mnemonic": "FREQuency:MANual",
+      "category": "Frequency",
+      "description": "Sets and queries the manual frequency (the locked-on frequency in manual sweep mode), within the start/stop limits.",
+      "set": "[:SOURce]:FREQuency:MANual <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:FREQuency:MANual? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "between current start and stop limits" }
+      ],
+      "examples": [":FREQ:MAN 5GHZ", ":FREQ:MAN?"]
+    },
+    {
+      "name": "frequency_multiplier",
+      "mnemonic": "FREQuency:MULTiplier",
+      "category": "Frequency",
+      "description": "Sets and queries the frequency multiplier used to display/program frequency when an external multiplier is used. After *RST the value is 1.",
+      "set": "[:SOURce]:FREQuency:MULTiplier <num>|MAXimum|MINimum",
+      "query": "[:SOURce]:FREQuency:MULTiplier?",
+      "parameters": [
+        { "name": "multiplier", "range": "-36 to +36" }
+      ],
+      "examples": [":FREQ:MULT 2", ":FREQ:MULT?"]
+    },
+    {
+      "name": "frequency_multiplier_state",
+      "mnemonic": "FREQuency:MULTiplier:STATe",
+      "category": "Frequency",
+      "description": "Sets and queries whether the frequency multiplier is applied. After *RST the value is OFF.",
+      "set": "[:SOURce]:FREQuency:MULTiplier:STATe ON|OFF|1|0",
+      "query": "[:SOURce]:FREQuency:MULTiplier:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":FREQ:MULT:STAT ON", ":FREQ:MULT:STAT?"]
+    },
+    {
+      "name": "frequency_offset",
+      "mnemonic": "FREQuency:OFFSet",
+      "category": "Frequency",
+      "description": "Sets and queries a frequency offset added to the displayed/programmed frequency. After *RST the value is 0.",
+      "set": "[:SOURce]:FREQuency:OFFSet <num>[freq suffix]|MAXimum|MINimum",
+      "query": "[:SOURce]:FREQuency:OFFSet?",
+      "parameters": [
+        { "name": "offset", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "-99.999 to +99.999 GHz" }
+      ],
+      "examples": [":FREQ:OFFS 1GHZ", ":FREQ:OFFS?"]
+    },
+    {
+      "name": "frequency_offset_state",
+      "mnemonic": "FREQuency:OFFSet:STATe",
+      "category": "Frequency",
+      "description": "Sets and queries whether the frequency offset is applied. After *RST the value is OFF.",
+      "set": "[:SOURce]:FREQuency:OFFSet:STATe ON|OFF|1|0",
+      "query": "[:SOURce]:FREQuency:OFFSet:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":FREQ:OFFS:STAT ON", ":FREQ:OFFS:STAT?"]
+    },
+    {
+      "name": "frequency_step",
+      "mnemonic": "FREQuency:STEP[:INCRement]",
+      "category": "Frequency",
+      "description": "Sets and queries the frequency step (increment) size used with UP/DOWN. After *RST the step is calculated from the span.",
+      "set": "[:SOURce]:FREQuency:STEP[:INCRement] <num>[freq suffix]|MAXimum|MINimum",
+      "query": "[:SOURce]:FREQuency:STEP[:INCRement]?",
+      "parameters": [
+        { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "instrument frequency range" }
+      ],
+      "examples": [":FREQ:STEP 1MHZ", ":FREQ:STEP?"]
+    },
+    {
+      "name": "frequency_step_auto",
+      "mnemonic": "FREQuency:STEP:AUTO",
+      "category": "Frequency",
+      "description": "Sets and queries whether the frequency step size is automatically calculated from the span. After *RST the value is ON.",
+      "set": "[:SOURce]:FREQuency:STEP:AUTO ON|OFF|1|0",
+      "query": "[:SOURce]:FREQuency:STEP:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":FREQ:STEP:AUTO ON", ":FREQ:STEP:AUTO?"]
+    },
+
+    {
+      "name": "power_level",
+      "mnemonic": "POWer[:LEVel]",
+      "category": "Power",
+      "description": "Sets and queries the RF output power level. After *RST the value is 0 dBm.",
+      "set": "[:SOURce]:POWer[:LEVel] <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer[:LEVel]? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "power", "units": ["DBM"], "range": "specified power range of the instrument" }
+      ],
+      "examples": [":POW 0DBM", ":POW?"]
+    },
+    {
+      "name": "power_state",
+      "mnemonic": "POWer:STATe",
+      "category": "Power",
+      "description": "Turns the RF output on or off. After *RST the value is OFF.",
+      "set": "[:SOURce]:POWer:STATe ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:STAT ON", ":POW:STAT?"]
+    },
+    {
+      "name": "power_mode",
+      "mnemonic": "POWer:MODE",
+      "category": "Power",
+      "description": "Sets and queries the power mode (FIXed level or power SWEep). After *RST the value is FIXed.",
+      "set": "[:SOURce]:POWer:MODE FIXed|SWEep",
+      "query": "[:SOURce]:POWer:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "FIXed|SWEep" }
+      ],
+      "examples": [":POW:MODE FIX", ":POW:MODE?"]
+    },
+    {
+      "name": "power_center",
+      "mnemonic": "POWer:CENTer",
+      "category": "Power",
+      "description": "Sets and queries the power-sweep center level. After *RST the value is 0 dBm.",
+      "set": "[:SOURce]:POWer:CENTer <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:CENTer?",
+      "parameters": [
+        { "name": "power", "units": ["DBM"], "range": "specified power range" }
+      ],
+      "examples": [":POW:CENT 0DBM", ":POW:CENT?"]
+    },
+    {
+      "name": "power_span",
+      "mnemonic": "POWer:SPAN",
+      "category": "Power",
+      "description": "Sets and queries the power-sweep span. After *RST the value is 0 dB.",
+      "set": "[:SOURce]:POWer:SPAN <num>[DB]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:SPAN?",
+      "parameters": [
+        { "name": "span", "units": ["DB"], "range": "-45 to +45 dB" }
+      ],
+      "examples": [":POW:SPAN 10DB", ":POW:SPAN?"]
+    },
+    {
+      "name": "power_start",
+      "mnemonic": "POWer:STARt",
+      "category": "Power",
+      "description": "Sets and queries the power-sweep start value. After *RST the value is 0 dBm.",
+      "set": "[:SOURce]:POWer:STARt <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:STARt?",
+      "parameters": [
+        { "name": "power", "units": ["DBM"], "range": "specified power range" }
+      ],
+      "examples": [":POW:STAR -10DBM", ":POW:STAR?"]
+    },
+    {
+      "name": "power_stop",
+      "mnemonic": "POWer:STOP",
+      "category": "Power",
+      "description": "Sets and queries the power-sweep stop value. After *RST the value is 0 dBm.",
+      "set": "[:SOURce]:POWer:STOP <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:STOP?",
+      "parameters": [
+        { "name": "power", "units": ["DBM"], "range": "specified power range" }
+      ],
+      "examples": [":POW:STOP 0DBM", ":POW:STOP?"]
+    },
+    {
+      "name": "power_slope",
+      "mnemonic": "POWer:SLOPe",
+      "category": "Power",
+      "description": "Sets and queries the power slope (vs frequency) compensation. After *RST the value is 0.",
+      "set": "[:SOURce]:POWer:SLOPe <num>[DB/GHZ]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:SLOPe?",
+      "parameters": [
+        { "name": "slope", "units": ["DB/GHZ"], "range": "-2.5 to +2.5 dB/GHz" }
+      ],
+      "examples": [":POW:SLOP 1", ":POW:SLOP?"]
+    },
+    {
+      "name": "power_slope_state",
+      "mnemonic": "POWer:SLOPe:STATe",
+      "category": "Power",
+      "description": "Sets and queries whether the power slope compensation is applied. After *RST the value is OFF.",
+      "set": "[:SOURce]:POWer:SLOPe:STATe ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:SLOPe:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:SLOP:STAT ON", ":POW:SLOP:STAT?"]
+    },
+    {
+      "name": "power_offset",
+      "mnemonic": "POWer:OFFSet",
+      "category": "Power",
+      "description": "Sets and queries the power equation offset (added to the displayed/programmed power).",
+      "set": "[:SOURce]:POWer:OFFSet <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:OFFSet?",
+      "parameters": [
+        { "name": "offset", "units": ["DB", "DBM"], "range": "instrument power offset range" }
+      ],
+      "examples": [":POW:OFFS 0", ":POW:OFFS?"]
+    },
+    {
+      "name": "power_offset_state",
+      "mnemonic": "POWer:OFFSet:STATe",
+      "category": "Power",
+      "description": "Sets and queries whether the power offset is applied.",
+      "set": "[:SOURce]:POWer:OFFSet:STATe ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:OFFSet:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:OFFS:STAT ON", ":POW:OFFS:STAT?"]
+    },
+    {
+      "name": "power_attenuation",
+      "mnemonic": "POWer:ATTenuation",
+      "category": "Power",
+      "description": "Sets and queries the step attenuator setting (option-dependent).",
+      "set": "[:SOURce]:POWer:ATTenuation <num>[DB]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:ATTenuation?",
+      "parameters": [
+        { "name": "attenuation", "units": ["DB"], "range": "0 to 90 dB" }
+      ],
+      "examples": [":POW:ATT 10DB", ":POW:ATT?"]
+    },
+    {
+      "name": "power_attenuation_auto",
+      "mnemonic": "POWer:ATTenuation:AUTO",
+      "category": "Power",
+      "description": "Sets and queries whether the attenuator is coupled (automatically set with output level). After *RST the value is ON.",
+      "set": "[:SOURce]:POWer:ATTenuation:AUTO ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:ATTenuation:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:ATT:AUTO ON", ":POW:ATT:AUTO?"]
+    },
+    {
+      "name": "power_range",
+      "mnemonic": "POWer:RANGe",
+      "category": "Power",
+      "description": "Sets and queries the power meter range used for power leveling/calibration.",
+      "set": "[:SOURce]:POWer:RANGe <num>[DB]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:RANGe?",
+      "parameters": [
+        { "name": "range", "units": ["DB"], "range": "-30 to -90 dB" }
+      ],
+      "examples": [":POW:RANG -30", ":POW:RANG?"]
+    },
+    {
+      "name": "power_search",
+      "mnemonic": "POWer:SEARch",
+      "category": "Power",
+      "description": "Sets and queries the power search (external leveling source calibration) mode.",
+      "set": "[:SOURce]:POWer:SEARch ON|OFF|1|0|ONCE",
+      "query": "[:SOURce]:POWer:SEARch?",
+      "parameters": [
+        { "name": "mode", "range": "ON|OFF|1|0|ONCE" }
+      ],
+      "examples": [":POW:SEAR ONCE", ":POW:SEAR?"]
+    },
+    {
+      "name": "power_step",
+      "mnemonic": "POWer:STEP[:INCRement]",
+      "category": "Power",
+      "description": "Sets and queries the power step (increment) size used with UP/DOWN. After *RST the value is 10 dB.",
+      "set": "[:SOURce]:POWer:STEP[:INCRement] <num>[DB]|MAXimum|MINimum",
+      "query": "[:SOURce]:POWer:STEP[:INCRement]?",
+      "parameters": [
+        { "name": "step", "units": ["DB"], "range": "0.01 to 20 dB" }
+      ],
+      "examples": [":POW:STEP 1DB", ":POW:STEP?"]
+    },
+    {
+      "name": "power_step_auto",
+      "mnemonic": "POWer:STEP:AUTO",
+      "category": "Power",
+      "description": "Sets and queries whether the power step size is automatically determined. After *RST the value is ON.",
+      "set": "[:SOURce]:POWer:STEP:AUTO ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:STEP:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:STEP:AUTO ON", ":POW:STEP:AUTO?"]
+    },
+    {
+      "name": "power_alc_state",
+      "mnemonic": "POWer:ALC[:STATe]",
+      "category": "Power",
+      "description": "Sets and queries the Automatic Level Control (ALC) state.",
+      "set": "[:SOURce]:POWer:ALC[:STATe] ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:ALC[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:ALC:STAT ON", ":POW:ALC:STAT?"]
+    },
+    {
+      "name": "power_alc_source",
+      "mnemonic": "POWer:ALC:SOURce",
+      "category": "Power",
+      "description": "Sets and queries the ALC leveling point/source. After *RST the value is INTernal.",
+      "set": "[:SOURce]:POWer:ALC:SOURce INTernal|DIODe|PMETer|MMHead",
+      "query": "[:SOURce]:POWer:ALC:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|DIODe|PMETer|MMHead" }
+      ],
+      "examples": [":POW:ALC:SOUR INT", ":POW:ALC:SOUR?"]
+    },
+    {
+      "name": "power_alc_bandwidth",
+      "mnemonic": "POWer:ALC:BANDwidth",
+      "category": "Power",
+      "description": "Sets and queries the ALC loop bandwidth.",
+      "set": "[:SOURce]:POWer:ALC:BANDwidth <num>[freq suffix]|MAXimum|MINimum",
+      "query": "[:SOURce]:POWer:ALC:BANDwidth?",
+      "parameters": [
+        { "name": "bandwidth", "units": ["HZ", "KHZ"], "range": "instrument ALC bandwidth range" }
+      ],
+      "examples": [":POW:ALC:BAND MAX", ":POW:ALC:BAND?"]
+    },
+    {
+      "name": "power_alc_bandwidth_auto",
+      "mnemonic": "POWer:ALC:BANDwidth:AUTO",
+      "category": "Power",
+      "description": "Sets and queries automatic ALC bandwidth selection. After *RST the value is ON.",
+      "set": "[:SOURce]:POWer:ALC:BANDwidth:AUTO ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:ALC:BANDwidth:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:ALC:BAND:AUTO ON", ":POW:ALC:BAND:AUTO?"]
+    },
+    {
+      "name": "power_alc_cfactor",
+      "mnemonic": "POWer:ALC:CFACtor",
+      "category": "Power",
+      "description": "Sets and queries the coupling factor used with external detector leveling. After *RST the value is 16 dB.",
+      "set": "[:SOURce]:POWer:ALC:CFACtor <num>[DB]|MAXimum|MINimum|UP|DOWN",
+      "query": "[:SOURce]:POWer:ALC:CFACtor?",
+      "parameters": [
+        { "name": "factor", "units": ["DB"], "range": "0 to -90 dB" }
+      ],
+      "examples": [":POW:ALC:CFAC 16DB", ":POW:ALC:CFAC?"]
+    },
+    {
+      "name": "power_amplifier_state",
+      "mnemonic": "POWer:AMPLifier:STATE",
+      "category": "Power",
+      "description": "Sets and queries the state of the (optional) output power amplifier/booster.",
+      "set": "[:SOURce]:POWer:AMPLifier:STATE ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:AMPLifier:STATE?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:AMPL:STATE ON", ":POW:AMPL:STATE?"]
+    },
+    {
+      "name": "power_amplifier_state_auto",
+      "mnemonic": "POWer:AMPLifier:STATE:AUTO",
+      "category": "Power",
+      "description": "Sets and queries automatic control of the output amplifier. After *RST the value is ON.",
+      "set": "[:SOURce]:POWer:AMPLifier:STATE:AUTO ON|OFF|1|0",
+      "query": "[:SOURce]:POWer:AMPLifier:STATE:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":POW:AMPL:STATE:AUTO ON", ":POW:AMPL:STATE:AUTO?"]
+    },
+    {
+      "name": "power_units",
+      "mnemonic": "UNIT:POWer",
+      "category": "Power",
+      "description": "Sets and queries the default power units. After *RST the value is DBM.",
+      "set": ":UNIT:POWer DBM",
+      "query": ":UNIT:POWer?",
+      "parameters": [
+        { "name": "units", "range": "DBM" }
+      ],
+      "examples": [":UNIT:POW DBM", ":UNIT:POW?"]
+    },
+
+    {
+      "name": "fm_deviation",
+      "mnemonic": "FM[:DEViation]",
+      "category": "FM",
+      "description": "Sets and queries the peak FM deviation. After *RST the value is 1 MHz.",
+      "set": ":FM[:DEViation] <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":FM[:DEViation]? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "deviation", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument FM deviation range" }
+      ],
+      "examples": [":FM 1MHZ", ":FM?"]
+    },
+    {
+      "name": "fm_coupling",
+      "mnemonic": "FM:COUPling",
+      "category": "FM",
+      "description": "Sets and queries the FM input coupling. After *RST the value is AC.",
+      "set": ":FM:COUPling AC|DC",
+      "query": ":FM:COUPling?",
+      "parameters": [
+        { "name": "coupling", "range": "AC|DC" }
+      ],
+      "examples": [":FM:COUP AC", ":FM:COUP?"]
+    },
+    {
+      "name": "fm_filter_hpass",
+      "mnemonic": "FM:FILTer:HPASs",
+      "category": "FM",
+      "description": "Sets and queries the FM AC high-pass filter bandwidth. After *RST the value is MAXimum.",
+      "set": ":FM:FILTer:HPASs <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":FM:FILTer:HPASs?",
+      "parameters": [
+        { "name": "bandwidth", "units": ["HZ", "KHZ"], "range": "instrument FM AC bandwidth range" }
+      ],
+      "examples": [":FM:FILT:HPAS MAX", ":FM:FILT:HPAS?"]
+    },
+    {
+      "name": "fm_internal_frequency",
+      "mnemonic": "FM:INTernal:FREQuency",
+      "category": "FM",
+      "description": "Sets and queries the frequency of the internal FM source. After *RST the value is 1 MHz.",
+      "set": ":FM:INTernal:FREQuency <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":FM:INTernal:FREQuency?",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument internal FM source range" }
+      ],
+      "examples": [":FM:INT:FREQ 1MHZ", ":FM:INT:FREQ?"]
+    },
+    {
+      "name": "fm_internal_function",
+      "mnemonic": "FM:INTernal:FUNCtion",
+      "category": "FM",
+      "description": "Sets and queries the waveform of the internal FM source.",
+      "set": ":FM:INTernal:FUNCtion SINusoid|SQUare|TRIangle|RAMP|NOISe",
+      "query": ":FM:INTernal:FUNCtion?",
+      "parameters": [
+        { "name": "waveform", "range": "SINusoid|SQUare|TRIangle|RAMP|NOISe" }
+      ],
+      "examples": [":FM:INT:FUNC SIN", ":FM:INT:FUNC?"]
+    },
+    {
+      "name": "fm_sensitivity",
+      "mnemonic": "FM:SENSitivity",
+      "category": "FM",
+      "description": "Sets and queries the FM input sensitivity. After *RST the value is MAXimum.",
+      "set": ":FM:SENSitivity 100KHZ/V|1MHZ/V|10MHZ/V|MAXimum|MINimum",
+      "query": ":FM:SENSitivity?",
+      "parameters": [
+        { "name": "sensitivity", "range": "100KHZ/V|1MHZ/V|10MHZ/V" }
+      ],
+      "examples": [":FM:SENS 1MHZ/V", ":FM:SENS?"]
+    },
+    {
+      "name": "fm_source",
+      "mnemonic": "FM:SOURce",
+      "category": "FM",
+      "description": "Sets and queries the FM source. After *RST the value is EXTernal.",
+      "set": ":FM:SOURce INTernal|EXTernal",
+      "query": ":FM:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal" }
+      ],
+      "examples": [":FM:SOUR EXT", ":FM:SOUR?"]
+    },
+    {
+      "name": "fm_state",
+      "mnemonic": "FM:STATe",
+      "category": "FM",
+      "description": "Sets and queries the FM state. After *RST the value is OFF.",
+      "set": ":FM:STATe ON|OFF|1|0",
+      "query": ":FM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":FM:STAT ON", ":FM:STAT?"]
+    },
+
+    {
+      "name": "pulse_frequency",
+      "mnemonic": "PULSe:FREQuency",
+      "category": "Pulse",
+      "description": "Sets and queries the pulse generator frequency. After *RST the value is 500 kHz.",
+      "set": ":PULSe:FREQuency <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":PULSe:FREQuency?",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument pulse frequency range" }
+      ],
+      "examples": [":PULS:FREQ 500KHZ", ":PULS:FREQ?"]
+    },
+    {
+      "name": "pulse_period",
+      "mnemonic": "PULSe:PERiod",
+      "category": "Pulse",
+      "description": "Sets and queries the pulse period. After *RST the value is 2 us.",
+      "set": ":PULSe:PERiod <num>[time suffix]|MAXimum|MINimum",
+      "query": ":PULSe:PERiod?",
+      "parameters": [
+        { "name": "period", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse period range" }
+      ],
+      "examples": [":PULS:PER 2US", ":PULS:PER?"]
+    },
+    {
+      "name": "pulse_width",
+      "mnemonic": "PULSe:WIDTh",
+      "category": "Pulse",
+      "description": "Sets and queries the pulse width. After *RST the value is 1 us.",
+      "set": ":PULSe:WIDTh <num>[time suffix]|MAXimum|MINimum",
+      "query": ":PULSe:WIDTh?",
+      "parameters": [
+        { "name": "width", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse width range" }
+      ],
+      "examples": [":PULS:WIDT 1US", ":PULS:WIDT?"]
+    },
+
+    {
+      "name": "pulm_state",
+      "mnemonic": "PULM:STATe",
+      "category": "PulseModulation",
+      "description": "Sets and queries the pulse modulation state. After *RST the value is OFF.",
+      "set": ":PULM:STATe ON|OFF|1|0",
+      "query": ":PULM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":PULM:STAT ON", ":PULM:STAT?"]
+    },
+    {
+      "name": "pulm_source",
+      "mnemonic": "PULM:SOURce",
+      "category": "PulseModulation",
+      "description": "Sets and queries the pulse modulation source. After *RST the value is INTernal.",
+      "set": ":PULM:SOURce INTernal|EXTernal|SCALar",
+      "query": ":PULM:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal|SCALar" }
+      ],
+      "examples": [":PULM:SOUR INT", ":PULM:SOUR?"]
+    },
+    {
+      "name": "pulm_external_polarity",
+      "mnemonic": "PULM:EXTernal:POLarity",
+      "category": "PulseModulation",
+      "description": "Sets and queries the external pulse input polarity. After *RST the value is NORMal.",
+      "set": ":PULM:EXTernal:POLarity NORMal|INVerted",
+      "query": ":PULM:EXTernal:POLarity?",
+      "parameters": [
+        { "name": "polarity", "range": "NORMal|INVerted" }
+      ],
+      "examples": [":PULM:EXT:POL NORM", ":PULM:EXT:POL?"]
+    },
+    {
+      "name": "pulm_external_delay",
+      "mnemonic": "PULM:EXTernal:DELay",
+      "category": "PulseModulation",
+      "description": "Sets and queries the external pulse delay. After *RST the value is MINimum.",
+      "set": ":PULM:EXTernal:DELay <num>[time suffix]|MAXimum|MINimum",
+      "query": ":PULM:EXTernal:DELay?",
+      "parameters": [
+        { "name": "delay", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse delay range" }
+      ],
+      "examples": [":PULM:EXT:DEL MIN", ":PULM:EXT:DEL?"]
+    },
+    {
+      "name": "pulm_internal_frequency",
+      "mnemonic": "PULM:INTernal:FREQuency",
+      "category": "PulseModulation",
+      "description": "Sets and queries the internal pulse modulation frequency. After *RST the value is 500 kHz.",
+      "set": ":PULM:INTernal:FREQuency <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":PULM:INTernal:FREQuency?",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument internal pulse frequency range" }
+      ],
+      "examples": [":PULM:INT:FREQ 500KHZ", ":PULM:INT:FREQ?"]
+    },
+    {
+      "name": "pulm_internal_period",
+      "mnemonic": "PULM:INTernal:PERiod",
+      "category": "PulseModulation",
+      "description": "Sets and queries the internal pulse period. After *RST the value is 2 us.",
+      "set": ":PULM:INTernal:PERiod <num>[time suffix]|MAXimum|MINimum",
+      "query": ":PULM:INTernal:PERiod?",
+      "parameters": [
+        { "name": "period", "units": ["S", "MS", "US", "NS"], "range": "instrument internal pulse period range" }
+      ],
+      "examples": [":PULM:INT:PER 2US", ":PULM:INT:PER?"]
+    },
+    {
+      "name": "pulm_internal_width",
+      "mnemonic": "PULM:INTernal:WIDTh",
+      "category": "PulseModulation",
+      "description": "Sets and queries the internal pulse width. After *RST the value is 1 us.",
+      "set": ":PULM:INTernal:WIDTh <num>[time suffix]|MAXimum|MINimum",
+      "query": ":PULM:INTernal:WIDTh?",
+      "parameters": [
+        { "name": "width", "units": ["S", "MS", "US", "NS"], "range": "instrument internal pulse width range" }
+      ],
+      "examples": [":PULM:INT:WIDT 1US", ":PULM:INT:WIDT?"]
+    },
+    {
+      "name": "pulm_internal_gate",
+      "mnemonic": "PULM:INTernal:GATE",
+      "category": "PulseModulation",
+      "description": "Sets and queries the internal pulse gating state. After *RST the value is OFF.",
+      "set": ":PULM:INTernal:GATE ON|OFF|1|0",
+      "query": ":PULM:INTernal:GATE?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":PULM:INT:GATE ON", ":PULM:INT:GATE?"]
+    },
+    {
+      "name": "pulm_internal_trigger_source",
+      "mnemonic": "PULM:INTernal:TRIGger:SOURce",
+      "category": "PulseModulation",
+      "description": "Sets and queries the internal pulse trigger source. After *RST the value is INTernal.",
+      "set": ":PULM:INTernal:TRIGger:SOURce INTernal|EXTernal",
+      "query": ":PULM:INTernal:TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal" }
+      ],
+      "examples": [":PULM:INT:TRIG:SOUR INT", ":PULM:INT:TRIG:SOUR?"]
+    },
+    {
+      "name": "pulm_slew",
+      "mnemonic": "PULM:SLEW",
+      "category": "PulseModulation",
+      "description": "Sets and queries the pulse modulation rise time / slew. After *RST the value is MINimum.",
+      "set": ":PULM:SLEW <num>[time suffix]|MAXimum|MINimum",
+      "query": ":PULM:SLEW?",
+      "parameters": [
+        { "name": "slew", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse slew range" }
+      ],
+      "examples": [":PULM:SLEW MIN", ":PULM:SLEW?"]
+    },
+    {
+      "name": "pulm_slew_auto",
+      "mnemonic": "PULM:SLEW:AUTO",
+      "category": "PulseModulation",
+      "description": "Sets and queries automatic pulse modulation rise-time selection. After *RST the value is ON.",
+      "set": ":PULM:SLEW:AUTO ON|OFF|1|0",
+      "query": ":PULM:SLEW:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":PULM:SLEW:AUTO ON", ":PULM:SLEW:AUTO?"]
+    },
+
+    {
+      "name": "modulation_output_source",
+      "mnemonic": "MODulation:OUTPut:SOURce",
+      "category": "Modulation",
+      "description": "Sets and queries which internal modulation source (AM or FM) is routed to the modulation output.",
+      "set": ":MODulation:OUTPut:SOURce AM|FM",
+      "query": ":MODulation:OUTPut:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "AM|FM" }
+      ],
+      "examples": [":MOD:OUTP:SOUR AM", ":MOD:OUTP:SOUR?"]
+    },
+    {
+      "name": "modulation_output_state",
+      "mnemonic": "MODulation:OUTPut:STATe",
+      "category": "Modulation",
+      "description": "Sets and queries whether the internal modulation source is routed to the modulation output connector.",
+      "set": ":MODulation:OUTPut:STATe ON|OFF|1|0",
+      "query": ":MODulation:OUTPut:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":MOD:OUTP:STAT ON", ":MOD:OUTP:STAT?"]
+    },
+    {
+      "name": "modulation_state",
+      "mnemonic": "MODulation:STATe?",
+      "category": "Modulation",
+      "description": "Queries the overall modulation state (whether any modulation is active).",
+      "query": ":MODulation:STATe?",
+      "examples": [":MOD:STAT?"]
+    },
+
+    {
+      "name": "marker_state",
+      "mnemonic": "MARKer[n][:STATe]",
+      "category": "Marker",
+      "description": "Sets and queries the on/off state of marker n (n is 1 to 5, default 1). After *RST the value is OFF.",
+      "set": ":MARKer[n][:STATe] ON|OFF|1|0",
+      "query": ":MARKer[n][:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":MARK1:STAT ON", ":MARK1:STAT?"]
+    },
+    {
+      "name": "marker_frequency",
+      "mnemonic": "MARKer[n]:FREQuency",
+      "category": "Marker",
+      "description": "Sets and queries the frequency of marker n. After *RST the value matches FREQ:CENTer.",
+      "set": ":MARKer[n]:FREQuency <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":MARKer[n]:FREQuency?",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+      ],
+      "examples": [":MARK1:FREQ 10GHZ", ":MARK1:FREQ?"]
+    },
+    {
+      "name": "marker_mode",
+      "mnemonic": "MARKer[n]:MODE",
+      "category": "Marker",
+      "description": "Sets and queries the marker mode for marker n. After *RST the value is FREQuency.",
+      "set": ":MARKer[n]:MODE FREQuency|DELTa",
+      "query": ":MARKer[n]:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "FREQuency|DELTa" }
+      ],
+      "examples": [":MARK1:MODE FREQ", ":MARK1:MODE?"]
+    },
+    {
+      "name": "marker_reference",
+      "mnemonic": "MARKer[n]:REFerence",
+      "category": "Marker",
+      "description": "Sets and queries the reference marker used by marker n in delta mode.",
+      "set": ":MARKer[n]:REFerence <num>",
+      "query": ":MARKer[n]:REFerence?",
+      "parameters": [
+        { "name": "reference", "range": "1 to 5" }
+      ],
+      "examples": [":MARK2:REF 1", ":MARK2:REF?"]
+    },
+    {
+      "name": "marker_delta",
+      "mnemonic": "MARKer[n]:DELTa?",
+      "category": "Marker",
+      "description": "Queries the difference between two markers.",
+      "query": ":MARKer[n]:DELTa? <num>,<num>",
+      "parameters": [
+        { "name": "markers", "range": "1 to 5" }
+      ],
+      "examples": [":MARK1:DELT? 1,2"]
+    },
+    {
+      "name": "marker_amplitude_state",
+      "mnemonic": "MARKer[n]:AMPLitude[:STATe]",
+      "category": "Marker",
+      "description": "Sets and queries the amplitude-marker state for marker n. After *RST the value is OFF.",
+      "set": ":MARKer[n]:AMPLitude[:STATe] ON|OFF|1|0",
+      "query": ":MARKer[n]:AMPLitude[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":MARK1:AMPL:STAT ON", ":MARK1:AMPL:STAT?"]
+    },
+    {
+      "name": "marker_amplitude_value",
+      "mnemonic": "MARKer[n]:AMPLitude:VALue",
+      "category": "Marker",
+      "description": "Sets and queries the amplitude-marker depth for marker n. After *RST the value is 2 dBm.",
+      "set": ":MARKer[n]:AMPLitude:VALue <num>[DB]|MAXimum|MINimum",
+      "query": ":MARKer[n]:AMPLitude:VALue?",
+      "parameters": [
+        { "name": "depth", "units": ["DB"], "range": "+10 to -10 dB" }
+      ],
+      "examples": [":MARK1:AMPL:VAL 2", ":MARK1:AMPL:VAL?"]
+    },
+    {
+      "name": "marker_all_off",
+      "mnemonic": "MARKer:AOFF",
+      "category": "Marker",
+      "description": "Turns all markers off.",
+      "set": ":MARKer:AOFF",
+      "examples": [":MARK:AOFF"]
+    },
+
+    {
+      "name": "initiate_continuous",
+      "mnemonic": "INITiate:CONTinuous",
+      "category": "Trigger",
+      "description": "Sets and queries continuous sweep mode. After *RST the value is OFF.",
+      "set": ":INITiate:CONTinuous ON|OFF|1|0",
+      "query": ":INITiate:CONTinuous?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":INIT:CONT ON", ":INIT:CONT?"]
+    },
+    {
+      "name": "initiate_immediate",
+      "mnemonic": "INITiate[:IMMediate]",
+      "category": "Trigger",
+      "description": "Initiates (triggers) a sweep immediately.",
+      "set": ":INITiate[:IMMediate]",
+      "examples": [":INIT"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "TRIGger[:IMMediate]",
+      "category": "Trigger",
+      "description": "Generates an immediate trigger event.",
+      "set": ":TRIGger[:IMMediate]",
+      "examples": [":TRIG"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIGger:SOURce",
+      "category": "Trigger",
+      "description": "Sets and queries the trigger source.",
+      "set": ":TRIGger:SOURce IMMediate|BUS|EXTernal",
+      "query": ":TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|BUS|EXTernal" }
+      ],
+      "examples": [":TRIG:SOUR EXT", ":TRIG:SOUR?"]
+    },
+    {
+      "name": "trigger_output_delay",
+      "mnemonic": "TRIGger:ODELay",
+      "category": "Trigger",
+      "description": "Sets and queries the trigger output delay.",
+      "set": ":TRIGger:ODELay <num>[time suffix]",
+      "query": ":TRIGger:ODELay?",
+      "parameters": [
+        { "name": "delay", "units": ["S", "MS", "US"], "range": "0 to 3.2 s" }
+      ],
+      "examples": [":TRIG:ODEL 1MS", ":TRIG:ODEL?"]
+    },
+
+    {
+      "name": "sweep_time",
+      "mnemonic": "SWEep:TIME",
+      "category": "Sweep",
+      "description": "Sets and queries the sweep time. After *RST the value is MINimum.",
+      "set": ":SWEep:TIME <num>[time suffix]|MAXimum|MINimum",
+      "query": ":SWEep:TIME?",
+      "parameters": [
+        { "name": "time", "units": ["S", "MS"], "range": "133 ms to 200 s" }
+      ],
+      "examples": [":SWE:TIME 100MS", ":SWE:TIME?"]
+    },
+    {
+      "name": "sweep_time_auto",
+      "mnemonic": "SWEep:TIME:AUTO",
+      "category": "Sweep",
+      "description": "Sets and queries the automatic sweep time switch. After *RST the value is ON.",
+      "set": ":SWEep:TIME:AUTO ON|OFF|1|0",
+      "query": ":SWEep:TIME:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SWE:TIME:AUTO ON", ":SWE:TIME:AUTO?"]
+    },
+    {
+      "name": "sweep_time_llimit",
+      "mnemonic": "SWEep:TIME:LLIMit",
+      "category": "Sweep",
+      "description": "Sets and queries the fastest (lower-limit) sweep time used by auto sweep time. After *RST the value is 10 ms.",
+      "set": ":SWEep:TIME:LLIMit <num>[time suffix]|MAXimum|MINimum",
+      "query": ":SWEep:TIME:LLIMit?",
+      "parameters": [
+        { "name": "time", "units": ["S", "MS"], "range": "instrument sweep-time range" }
+      ],
+      "examples": [":SWE:TIME:LLIM 10MS", ":SWE:TIME:LLIM?"]
+    },
+    {
+      "name": "sweep_dwell",
+      "mnemonic": "SWEep:DWELl",
+      "category": "Sweep",
+      "description": "Sets and queries the per-point settling plus dwell time (stepped sweep). After *RST the value is 100 us.",
+      "set": ":SWEep:DWELl <num>[time suffix]|MAXimum|MINimum",
+      "query": ":SWEep:DWELl?",
+      "parameters": [
+        { "name": "time", "units": ["MS", "US"], "range": "0.1 to 3200 ms" }
+      ],
+      "examples": [":SWE:DWEL 1MS", ":SWE:DWEL?"]
+    },
+    {
+      "name": "sweep_dwell_auto",
+      "mnemonic": "SWEep:DWELl:AUTO",
+      "category": "Sweep",
+      "description": "Sets and queries automatic dwell-time calculation. After *RST the value is OFF.",
+      "set": ":SWEep:DWELl:AUTO ON|OFF|1|0",
+      "query": ":SWEep:DWELl:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SWE:DWEL:AUTO OFF", ":SWE:DWEL:AUTO?"]
+    },
+    {
+      "name": "sweep_points",
+      "mnemonic": "SWEep:POINts",
+      "category": "Sweep",
+      "description": "Sets and queries the number of points in a stepped sweep. After *RST the value is 11.",
+      "set": ":SWEep:POINts <num>|MAXimum|MINimum",
+      "query": ":SWEep:POINts?",
+      "parameters": [
+        { "name": "points", "range": "number of step points (MIN to MAX)" }
+      ],
+      "examples": [":SWE:POIN 101", ":SWE:POIN?"]
+    },
+    {
+      "name": "sweep_step",
+      "mnemonic": "SWEep:STEP",
+      "category": "Sweep",
+      "description": "Sets and queries the stepped-sweep step size (a function of the current span). After *RST the value is (StopMAX-StartMIN)/10.",
+      "set": ":SWEep:STEP <num>[freq suffix]|MAXimum|MINimum",
+      "query": ":SWEep:STEP?",
+      "parameters": [
+        { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "function of current span" }
+      ],
+      "examples": [":SWE:STEP 100MHZ", ":SWE:STEP?"]
+    },
+    {
+      "name": "sweep_generation",
+      "mnemonic": "SWEep:GENeration",
+      "category": "Sweep",
+      "description": "Sets and queries the sweep generation type. After *RST the value is ANALog.",
+      "set": ":SWEep:GENeration STEPped|ANALog",
+      "query": ":SWEep:GENeration?",
+      "parameters": [
+        { "name": "type", "range": "STEPped|ANALog" }
+      ],
+      "examples": [":SWE:GEN STEP", ":SWE:GEN?"]
+    },
+    {
+      "name": "sweep_mode",
+      "mnemonic": "SWEep:MODE",
+      "category": "Sweep",
+      "description": "Sets and queries the manual sweep mode switch. After *RST the value is AUTO.",
+      "set": ":SWEep:MODE AUTO|MANual",
+      "query": ":SWEep:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "AUTO|MANual" }
+      ],
+      "examples": [":SWE:MODE AUTO", ":SWE:MODE?"]
+    },
+    {
+      "name": "sweep_manual_point",
+      "mnemonic": "SWEep:MANual:POINt",
+      "category": "Sweep",
+      "description": "Sets and queries the step point number to lock on in manual stepped sweep. After *RST the value is 1.",
+      "set": ":SWEep:MANual:POINt <num>",
+      "query": ":SWEep:MANual:POINt?",
+      "parameters": [
+        { "name": "point", "range": "1 to the number of step points" }
+      ],
+      "examples": [":SWE:MAN:POIN 5", ":SWE:MAN:POIN?"]
+    },
+    {
+      "name": "sweep_manual_relative",
+      "mnemonic": "SWEep:MANual[:RELative]",
+      "category": "Sweep",
+      "description": "Sets and queries the manual sweep position as a fraction of the sweep. After *RST the value is 0.50.",
+      "set": ":SWEep:MANual[:RELative] <num>",
+      "query": ":SWEep:MANual[:RELative]?",
+      "parameters": [
+        { "name": "fraction", "range": "0 to 100% (0 to 1.0)" }
+      ],
+      "examples": [":SWE:MAN 0.5", ":SWE:MAN?"]
+    },
+    {
+      "name": "sweep_marker_state",
+      "mnemonic": "SWEep:MARKer:STATe",
+      "category": "Sweep",
+      "description": "Sets and queries whether markers define the swept range. After *RST the value is OFF.",
+      "set": ":SWEep:MARKer:STATe ON|OFF|1|0",
+      "query": ":SWEep:MARKer:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SWE:MARK:STAT ON", ":SWE:MARK:STAT?"]
+    },
+    {
+      "name": "sweep_marker_xfer",
+      "mnemonic": "SWEep:MARKer:XFER",
+      "category": "Sweep",
+      "description": "Transfers markers to the sweep range: marker 1 becomes start, marker 2 becomes stop.",
+      "set": ":SWEep:MARKer:XFER",
+      "examples": [":SWE:MARK:XFER"]
+    },
+    {
+      "name": "sweep_trigger_source",
+      "mnemonic": "SWEep:TRIGger:SOURce",
+      "category": "Sweep",
+      "description": "Sets and queries the stepped-sweep trigger source.",
+      "set": ":SWEep:TRIGger:SOURce IMMediate|BUS|EXTernal",
+      "query": ":SWEep:TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|BUS|EXTernal" }
+      ],
+      "examples": [":SWE:TRIG:SOUR EXT", ":SWE:TRIG:SOUR?"]
+    },
+    {
+      "name": "sweep_control_state",
+      "mnemonic": "SWEep:CONTrol:STATe",
+      "category": "Sweep",
+      "description": "Sets and queries the dual-source (master/slave) sweep control mode state.",
+      "set": ":SWEep:CONTrol:STATe ON|OFF|1|0",
+      "query": ":SWEep:CONTrol:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SWE:CONT:STAT ON", ":SWE:CONT:STAT?"]
+    },
+    {
+      "name": "sweep_control_type",
+      "mnemonic": "SWEep:CONTrol:TYPE",
+      "category": "Sweep",
+      "description": "Sets and queries the dual-source sweep control type (master or slave).",
+      "set": ":SWEep:CONTrol:TYPE MASTer|SLAVe",
+      "query": ":SWEep:CONTrol:TYPE?",
+      "parameters": [
+        { "name": "type", "range": "MASTer|SLAVe" }
+      ],
+      "examples": [":SWE:CONT:TYPE MAST", ":SWE:CONT:TYPE?"]
+    },
+
+    {
+      "name": "list_frequency",
+      "mnemonic": "LIST:FREQuency",
+      "category": "List",
+      "description": "Sets and queries the list of frequencies (up to 801 points) used in LIST frequency mode.",
+      "set": ":LIST:FREQuency <num>[freq suffix]{,...}|MAXimum|MINimum",
+      "query": ":LIST:FREQuency?",
+      "parameters": [
+        { "name": "frequencies", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "up to 801 points within specified freq range" }
+      ],
+      "examples": [":LIST:FREQ 1GHZ,2GHZ,3GHZ", ":LIST:FREQ?"]
+    },
+    {
+      "name": "list_frequency_points",
+      "mnemonic": "LIST:FREQuency:POINts",
+      "category": "List",
+      "description": "Sets and queries the number of frequency points in the list.",
+      "set": ":LIST:FREQuency:POINts <num>|MAXimum|MINimum",
+      "query": ":LIST:FREQuency:POINts? [MAXimum|MINimum]",
+      "parameters": [
+        { "name": "points", "range": "number of list frequency points" }
+      ],
+      "examples": [":LIST:FREQ:POIN?"]
+    },
+    {
+      "name": "list_dwell",
+      "mnemonic": "LIST:DWELl",
+      "category": "List",
+      "description": "Sets and queries the list dwell time(s) (up to 801 values). After *RST the value is 100 us (MINimum).",
+      "set": ":LIST:DWELl <num>[time suffix]{,...}|MAXimum|MINimum",
+      "query": ":LIST:DWELl?",
+      "parameters": [
+        { "name": "dwell", "units": ["MS", "US"], "range": "0.1 to 3200 ms, up to 801 values" }
+      ],
+      "examples": [":LIST:DWEL 1MS", ":LIST:DWEL?"]
+    },
+    {
+      "name": "list_dwell_points",
+      "mnemonic": "LIST:DWELl:POINts?",
+      "category": "List",
+      "description": "Queries the number of dwell-time points in the list.",
+      "query": ":LIST:DWELl:POINts?",
+      "examples": [":LIST:DWEL:POIN?"]
+    },
+    {
+      "name": "list_manual",
+      "mnemonic": "LIST:MANual",
+      "category": "List",
+      "description": "Sets and queries the list point number to lock on in manual list mode. After *RST the value is 1.",
+      "set": ":LIST:MANual <num>",
+      "query": ":LIST:MANual?",
+      "parameters": [
+        { "name": "point", "range": "1 to maximum number of defined points" }
+      ],
+      "examples": [":LIST:MAN 3", ":LIST:MAN?"]
+    },
+    {
+      "name": "list_mode",
+      "mnemonic": "LIST:MODE",
+      "category": "List",
+      "description": "Sets and queries the list sweep mode. After *RST the value is AUTO.",
+      "set": ":LIST:MODE AUTO|MANual",
+      "query": ":LIST:MODE?",
+      "parameters": [
+        { "name": "mode", "range": "AUTO|MANual" }
+      ],
+      "examples": [":LIST:MODE AUTO", ":LIST:MODE?"]
+    },
+    {
+      "name": "list_power_correction",
+      "mnemonic": "LIST[:POWer]:CORRection",
+      "category": "List",
+      "description": "Sets and queries per-point power correction levels for the list (up to 801 values). After *RST the value is 0.",
+      "set": ":LIST[:POWer]:CORRection <num>[DB]{,...}|MAXimum|MINimum",
+      "query": ":LIST[:POWer]:CORRection?",
+      "parameters": [
+        { "name": "correction", "units": ["DB"], "range": "+40 to -40 dB, up to 801 values" }
+      ],
+      "examples": [":LIST:CORR 0", ":LIST:CORR?"]
+    },
+    {
+      "name": "list_power_correction_points",
+      "mnemonic": "LIST[:POWer]:CORRection:POINts?",
+      "category": "List",
+      "description": "Queries the number of power-correction levels in the list.",
+      "query": ":LIST[:POWer]:CORRection:POINts? [MAXimum|MINimum]",
+      "examples": [":LIST:CORR:POIN?"]
+    },
+    {
+      "name": "list_trigger_source",
+      "mnemonic": "LIST:TRIGger:SOURce",
+      "category": "List",
+      "description": "Sets and queries the list trigger source. After *RST the value is IMMediate.",
+      "set": ":LIST:TRIGger:SOURce IMMediate|BUS|EXTernal",
+      "query": ":LIST:TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|BUS|EXTernal" }
+      ],
+      "examples": [":LIST:TRIG:SOUR IMM", ":LIST:TRIG:SOUR?"]
+    },
+
+    {
+      "name": "roscillator_source",
+      "mnemonic": "ROSCillator:SOURce",
+      "category": "Reference",
+      "description": "Sets and queries the reference oscillator source.",
+      "set": ":ROSCillator:SOURce INTernal|EXTernal|NONE",
+      "query": ":ROSCillator:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal|NONE" }
+      ],
+      "examples": [":ROSC:SOUR INT", ":ROSC:SOUR?"]
+    },
+    {
+      "name": "roscillator_source_auto",
+      "mnemonic": "ROSCillator:SOURce:AUTO",
+      "category": "Reference",
+      "description": "Sets and queries automatic selection of the reference oscillator source. After *RST the value is ON.",
+      "set": ":ROSCillator:SOURce:AUTO ON|OFF|1|0",
+      "query": ":ROSCillator:SOURce:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":ROSC:SOUR:AUTO ON", ":ROSC:SOUR:AUTO?"]
+    },
+
+    {
+      "name": "display_state",
+      "mnemonic": "DISPlay[:STATe]",
+      "category": "Display",
+      "description": "Turns the front-panel display on or off. After *RST the value is ON.",
+      "set": ":DISPlay[:STATe] ON|OFF|1|0",
+      "query": ":DISPlay[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":DISP:STAT ON", ":DISP:STAT?"]
+    },
+
+    {
+      "name": "status_operation_event",
+      "mnemonic": "STATus:OPERation[:EVENt]?",
+      "category": "Status",
+      "description": "Queries (and clears) the Operation Status Event register.",
+      "query": ":STATus:OPERation[:EVENt]?",
+      "examples": [":STAT:OPER?"]
+    },
+    {
+      "name": "status_operation_condition",
+      "mnemonic": "STATus:OPERation:CONDition?",
+      "category": "Status",
+      "description": "Queries the Operation Status Condition register.",
+      "query": ":STATus:OPERation:CONDition?",
+      "examples": [":STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Sets and queries the Operation Status Enable register.",
+      "set": ":STATus:OPERation:ENABle <num>",
+      "query": ":STATus:OPERation:ENABle?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 2047" }
+      ],
+      "examples": [":STAT:OPER:ENAB 0", ":STAT:OPER:ENAB?"]
+    },
+    {
+      "name": "status_operation_ntransition",
+      "mnemonic": "STATus:OPERation:NTRansition",
+      "category": "Status",
+      "description": "Sets and queries the Operation Status negative-transition filter.",
+      "set": ":STATus:OPERation:NTRansition <num>",
+      "query": ":STATus:OPERation:NTRansition?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 2047" }
+      ],
+      "examples": [":STAT:OPER:NTR 0", ":STAT:OPER:NTR?"]
+    },
+    {
+      "name": "status_operation_ptransition",
+      "mnemonic": "STATus:OPERation:PTRansition",
+      "category": "Status",
+      "description": "Sets and queries the Operation Status positive-transition filter.",
+      "set": ":STATus:OPERation:PTRansition <num>",
+      "query": ":STATus:OPERation:PTRansition?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 2047" }
+      ],
+      "examples": [":STAT:OPER:PTR 0", ":STAT:OPER:PTR?"]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": "STATus:QUEStionable[:EVENt]?",
+      "category": "Status",
+      "description": "Queries (and clears) the Questionable Status Event register.",
+      "query": ":STATus:QUEStionable[:EVENt]?",
+      "examples": [":STAT:QUES?"]
+    },
+    {
+      "name": "status_questionable_condition",
+      "mnemonic": "STATus:QUEStionable:CONDition?",
+      "category": "Status",
+      "description": "Queries the Questionable Status Condition register.",
+      "query": ":STATus:QUEStionable:CONDition?",
+      "examples": [":STAT:QUES:COND?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STATus:QUEStionable:ENABle",
+      "category": "Status",
+      "description": "Sets and queries the Questionable Status (SRQ) Enable register.",
+      "set": ":STATus:QUEStionable:ENABle <num>",
+      "query": ":STATus:QUEStionable:ENABle?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 2047" }
+      ],
+      "examples": [":STAT:QUES:ENAB 0", ":STAT:QUES:ENAB?"]
+    },
+    {
+      "name": "status_questionable_ntransition",
+      "mnemonic": "STATus:QUEStionable:NTRansition",
+      "category": "Status",
+      "description": "Sets and queries the Questionable Status negative-transition filter.",
+      "set": ":STATus:QUEStionable:NTRansition <num>",
+      "query": ":STATus:QUEStionable:NTRansition?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 2047" }
+      ],
+      "examples": [":STAT:QUES:NTR 0", ":STAT:QUES:NTR?"]
+    },
+    {
+      "name": "status_questionable_ptransition",
+      "mnemonic": "STATus:QUEStionable:PTRansition",
+      "category": "Status",
+      "description": "Sets and queries the Questionable Status positive-transition filter.",
+      "set": ":STATus:QUEStionable:PTRansition <num>",
+      "query": ":STATus:QUEStionable:PTRansition?",
+      "parameters": [
+        { "name": "mask", "range": "0 to 2047" }
+      ],
+      "examples": [":STAT:QUES:PTR 0", ":STAT:QUES:PTR?"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STATus:PRESet",
+      "category": "Status",
+      "description": "Presets the status reporting (enable/transition) registers to their default values.",
+      "set": ":STATus:PRESet",
+      "examples": [":STAT:PRES"]
+    },
+
+    {
+      "name": "system_version",
+      "mnemonic": "SYSTem:VERSion?",
+      "category": "System",
+      "description": "Queries the SCPI version implemented by the instrument.",
+      "query": ":SYSTem:VERSion?",
+      "examples": [":SYST:VERS?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYSTem:DUMP:ERRor?",
+      "category": "System",
+      "description": "Queries (dumps) the next entry from the instrument error queue.",
+      "query": ":SYSTem:DUMP:ERRor?",
+      "examples": [":SYST:DUMP:ERR?"]
+    },
+    {
+      "name": "system_printer_dump",
+      "mnemonic": "SYSTem:DUMP:PRINter?",
+      "category": "System",
+      "description": "Dumps the display/state to the configured printer.",
+      "query": ":SYSTem:DUMP:PRINter?",
+      "examples": [":SYST:DUMP:PRIN?"]
+    },
+    {
+      "name": "system_language",
+      "mnemonic": "SYSTem:LANGuage",
+      "category": "System",
+      "description": "Sets and queries the remote programming language.",
+      "set": ":SYSTem:LANGuage SCPI|CIIL|COMPatible",
+      "query": ":SYSTem:LANGuage?",
+      "parameters": [
+        { "name": "language", "range": "SCPI|CIIL|COMPatible" }
+      ],
+      "examples": [":SYST:LANG SCPI", ":SYST:LANG?"]
+    },
+    {
+      "name": "system_gpib_address",
+      "mnemonic": "SYSTem:COMMunicate:GPIB:ADDRess",
+      "category": "System",
+      "description": "Sets and queries the synthesizer HP-IB (GPIB) address. After *RST the value is 19.",
+      "set": ":SYSTem:COMMunicate:GPIB:ADDRess <num>",
+      "query": ":SYSTem:COMMunicate:GPIB:ADDRess?",
+      "parameters": [
+        { "name": "address", "range": "1 to 30" }
+      ],
+      "examples": [":SYST:COMM:GPIB:ADDR 19", ":SYST:COMM:GPIB:ADDR?"]
+    },
+    {
+      "name": "system_alternate",
+      "mnemonic": "SYSTem:ALTernate",
+      "category": "System",
+      "description": "Sets and queries the alternate (save/recall) register. After *RST the value is 1.",
+      "set": ":SYSTem:ALTernate <num>|MAXimum|MINimum",
+      "query": ":SYSTem:ALTernate?",
+      "parameters": [
+        { "name": "register", "range": "1 to 8" }
+      ],
+      "examples": [":SYST:ALT 1", ":SYST:ALT?"]
+    },
+    {
+      "name": "system_alternate_state",
+      "mnemonic": "SYSTem:ALTernate:STATe",
+      "category": "System",
+      "description": "Sets and queries the alternate-register (alternate state) on/off. After *RST the value is OFF.",
+      "set": ":SYSTem:ALTernate:STATe ON|OFF|1|0",
+      "query": ":SYSTem:ALTernate:STATe?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SYST:ALT:STAT ON", ":SYST:ALT:STAT?"]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": "SYSTem:PRESet[:EXEC]",
+      "category": "System",
+      "description": "Executes an instrument preset (factory or user, depending on SYSTem:PRESet:TYPE).",
+      "set": ":SYSTem:PRESet[:EXEC]",
+      "examples": [":SYST:PRES"]
+    },
+    {
+      "name": "system_preset_save",
+      "mnemonic": "SYSTem:PRESet:SAVE",
+      "category": "System",
+      "description": "Saves the current instrument state as the user preset state.",
+      "set": ":SYSTem:PRESet:SAVE",
+      "examples": [":SYST:PRES:SAVE"]
+    },
+    {
+      "name": "system_preset_type",
+      "mnemonic": "SYSTem:PRESet:TYPE",
+      "category": "System",
+      "description": "Sets and queries the preset mode (factory or user).",
+      "set": ":SYSTem:PRESet:TYPE FACTory|USER",
+      "query": ":SYSTem:PRESet:TYPE?",
+      "parameters": [
+        { "name": "type", "range": "FACTory|USER" }
+      ],
+      "examples": [":SYST:PRES:TYPE FACT", ":SYST:PRES:TYPE?"]
+    },
+    {
+      "name": "system_mmhead_select",
+      "mnemonic": "SYSTem:MMHead:SELect",
+      "category": "System",
+      "description": "Sets and queries which millimeter-wave head connection is selected.",
+      "set": ":SYSTem:MMHead:SELect FRONt|REAR|NONE",
+      "query": ":SYSTem:MMHead:SELect?",
+      "parameters": [
+        { "name": "select", "range": "FRONt|REAR|NONE" }
+      ],
+      "examples": [":SYST:MMH:SEL NONE", ":SYST:MMH:SEL?"]
+    },
+    {
+      "name": "system_mmhead_select_auto",
+      "mnemonic": "SYSTem:MMHead:SELect:AUTO",
+      "category": "System",
+      "description": "Sets and queries automatic millimeter-wave head selection. After *RST the value is ON.",
+      "set": ":SYSTem:MMHead:SELect:AUTO ON|OFF|0|1",
+      "query": ":SYSTem:MMHead:SELect:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SYST:MMH:SEL:AUTO ON", ":SYST:MMH:SEL:AUTO?"]
+    },
+    {
+      "name": "system_security_count",
+      "mnemonic": "SYSTem:SECurity:COUnt",
+      "category": "System",
+      "description": "Sets and queries the memory-clear (security) count. After *RST the value is 1.",
+      "set": ":SYSTem:SECurity:COUnt <num>|MAXimum|MINimum",
+      "query": ":SYSTem:SECurity:COUnt?",
+      "parameters": [
+        { "name": "count", "range": "0 to 32767" }
+      ],
+      "examples": [":SYST:SEC:COUN 1", ":SYST:SEC:COUN?"]
+    },
+    {
+      "name": "system_security_state",
+      "mnemonic": "SYSTem:SECurity[:STATe]",
+      "category": "System",
+      "description": "Sets and queries the security (memory protection) state.",
+      "set": ":SYSTem:SECurity[:STATe] ON|OFF|1|0",
+      "query": ":SYSTem:SECurity[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":SYST:SEC:STAT OFF", ":SYST:SEC:STAT?"]
+    },
+    {
+      "name": "system_key_assign",
+      "mnemonic": "SYSTem:KEY:ASSign",
+      "category": "System",
+      "description": "Assigns a key code to a user menu key.",
+      "set": ":SYSTem:KEY:ASSign <num>",
+      "parameters": [
+        { "name": "keycode", "range": "0 to 511 (key 1 to 14, excluding 5 and 10)" }
+      ],
+      "examples": [":SYST:KEY:ASS 0"]
+    },
+    {
+      "name": "system_key_clear",
+      "mnemonic": "SYSTem:KEY:CLEar",
+      "category": "System",
+      "description": "Clears one or all user menu keys.",
+      "set": ":SYSTem:KEY:CLEar <num>|ALL",
+      "parameters": [
+        { "name": "key", "range": "1 to 14 or ALL" }
+      ],
+      "examples": [":SYST:KEY:CLE ALL"]
+    },
+    {
+      "name": "system_key_disable",
+      "mnemonic": "SYSTem:KEY:DISable",
+      "category": "System",
+      "description": "Sets the save lock (disables the indicated front-panel function, e.g. SAVE).",
+      "set": ":SYSTem:KEY:DISable SAVE",
+      "parameters": [
+        { "name": "function", "range": "SAVE" }
+      ],
+      "examples": [":SYST:KEY:DIS SAVE"]
+    },
+    {
+      "name": "system_key_enable",
+      "mnemonic": "SYSTem:KEY:ENABle",
+      "category": "System",
+      "description": "Clears the save lock (enables the indicated front-panel function, e.g. SAVE). After *RST the value is SAVE.",
+      "set": ":SYSTem:KEY:ENABle SAVE",
+      "parameters": [
+        { "name": "function", "range": "SAVE" }
+      ],
+      "examples": [":SYST:KEY:ENAB SAVE"]
+    },
+
+    {
+      "name": "diagnostics_test_execute",
+      "mnemonic": "DIAGnostics:TEST[:EXECute]",
+      "category": "Diagnostics",
+      "description": "Executes the specified selftest number.",
+      "set": ":DIAGnostics:TEST[:EXECute] <num>",
+      "parameters": [
+        { "name": "test", "range": "0 to 288" }
+      ],
+      "examples": [":DIAG:TEST 0"]
+    },
+    {
+      "name": "diagnostics_test_name",
+      "mnemonic": "DIAGnostics:TEST:NAME?",
+      "category": "Diagnostics",
+      "description": "Queries the name of the specified selftest number.",
+      "query": ":DIAGnostics:TEST:NAME? <num>",
+      "parameters": [
+        { "name": "test", "range": "0 to 288" }
+      ],
+      "examples": [":DIAG:TEST:NAME? 0"]
+    },
+    {
+      "name": "diagnostics_test_points",
+      "mnemonic": "DIAGnostics:TEST:POINts?",
+      "category": "Diagnostics",
+      "description": "Queries the number of selftests available.",
+      "query": ":DIAGnostics:TEST:POINts?",
+      "examples": [":DIAG:TEST:POIN?"]
+    },
+    {
+      "name": "diagnostics_test_result",
+      "mnemonic": "DIAGnostics:TEST:RESult?",
+      "category": "Diagnostics",
+      "description": "Queries the condition (result) of the selftests.",
+      "query": ":DIAGnostics:TEST:RESult?",
+      "examples": [":DIAG:TEST:RES?"]
+    },
+    {
+      "name": "diagnostics_test_enable",
+      "mnemonic": "DIAGnostics:TEST:ENABle",
+      "category": "Diagnostics",
+      "description": "Enables the listed selftests. After *RST all tests are enabled (ALL).",
+      "set": ":DIAGnostics:TEST:ENABle <num>{,...}|ALL",
+      "parameters": [
+        { "name": "tests", "range": "test numbers or ALL" }
+      ],
+      "examples": [":DIAG:TEST:ENAB ALL"]
+    },
+    {
+      "name": "diagnostics_test_disable",
+      "mnemonic": "DIAGnostics:TEST:DISable",
+      "category": "Diagnostics",
+      "description": "Disables the listed selftests.",
+      "set": ":DIAGnostics:TEST:DISable <num>{,...}|ALL",
+      "parameters": [
+        { "name": "tests", "range": "test numbers or ALL" }
+      ],
+      "examples": [":DIAG:TEST:DIS ALL"]
+    },
+    {
+      "name": "diagnostics_test_loop",
+      "mnemonic": "DIAGnostics:TEST:LOOP",
+      "category": "Diagnostics",
+      "description": "Sets and queries selftest looping. After *RST the value is OFF.",
+      "set": ":DIAGnostics:TEST:LOOP ON|OFF|1|0",
+      "query": ":DIAGnostics:TEST:LOOP?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":DIAG:TEST:LOOP OFF", ":DIAG:TEST:LOOP?"]
+    },
+    {
+      "name": "diagnostics_test_log_state",
+      "mnemonic": "DIAGnostics:TEST:LOG[:STATe]",
+      "category": "Diagnostics",
+      "description": "Sets and queries selftest result logging. After *RST the value is OFF.",
+      "set": ":DIAGnostics:TEST:LOG[:STATe] ON|OFF|1|0",
+      "query": ":DIAGnostics:TEST:LOG[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "ON|OFF|1|0" }
+      ],
+      "examples": [":DIAG:TEST:LOG OFF", ":DIAG:TEST:LOG?"]
+    },
+    {
+      "name": "diagnostics_test_log_source",
+      "mnemonic": "DIAGnostics:TEST:LOG:SOURce",
+      "category": "Diagnostics",
+      "description": "Sets and queries when selftest results are logged. After *RST the value is FAIL.",
+      "set": ":DIAGnostics:TEST:LOG:SOURce ALL|FAIL",
+      "query": ":DIAGnostics:TEST:LOG:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "ALL|FAIL" }
+      ],
+      "examples": [":DIAG:TEST:LOG:SOUR FAIL", ":DIAG:TEST:LOG:SOUR?"]
+    },
+    {
+      "name": "diagnostics_test_data_value",
+      "mnemonic": "DIAGnostics:TEST:DATA:VALue?",
+      "category": "Diagnostics",
+      "description": "Queries the measured value for a selftest data point.",
+      "query": ":DIAGnostics:TEST:DATA:VALue?",
+      "examples": [":DIAG:TEST:DATA:VAL?"]
+    },
+    {
+      "name": "diagnostics_test_data_desc",
+      "mnemonic": "DIAGnostics:TEST:DATA:DESC?",
+      "category": "Diagnostics",
+      "description": "Queries the description for a selftest data point.",
+      "query": ":DIAGnostics:TEST:DATA:DESC?",
+      "examples": [":DIAG:TEST:DATA:DESC?"]
+    },
+    {
+      "name": "diagnostics_test_data_maximum",
+      "mnemonic": "DIAGnostics:TEST:DATA:MAXimum?",
+      "category": "Diagnostics",
+      "description": "Queries the maximum limit for a selftest data point.",
+      "query": ":DIAGnostics:TEST:DATA:MAXimum?",
+      "examples": [":DIAG:TEST:DATA:MAX?"]
+    },
+    {
+      "name": "diagnostics_test_data_minimum",
+      "mnemonic": "DIAGnostics:TEST:DATA:MINimum?",
+      "category": "Diagnostics",
+      "description": "Queries the minimum limit for a selftest data point.",
+      "query": ":DIAGnostics:TEST:DATA:MINimum?",
+      "examples": [":DIAG:TEST:DATA:MIN?"]
+    },
+    {
+      "name": "diagnostics_test_continue",
+      "mnemonic": "DIAGnostics:TEST:CONTinue",
+      "category": "Diagnostics",
+      "description": "Continues a paused selftest sequence.",
+      "set": ":DIAGnostics:TEST:CONTinue",
+      "examples": [":DIAG:TEST:CONT"]
+    },
+    {
+      "name": "diagnostics_abus_average",
+      "mnemonic": "DIAGnostics:ABUS:AVERage",
+      "category": "Diagnostics",
+      "description": "Sets and queries the number of ADC averages used by the analog bus measurements. After *RST the value is 1.",
+      "set": ":DIAGnostics:ABUS:AVERage <num>",
+      "query": ":DIAGnostics:ABUS:AVERage?",
+      "parameters": [
+        { "name": "averages", "range": "number of ADC averages" }
+      ],
+      "examples": [":DIAG:ABUS:AVER 1", ":DIAG:ABUS:AVER?"]
+    },
+    {
+      "name": "diagnostics_abus_status",
+      "mnemonic": "DIAGnostics:ABUS:STATus?",
+      "category": "Diagnostics",
+      "description": "Queries the analog-bus status.",
+      "query": ":DIAGnostics:ABUS:STATus?",
+      "examples": [":DIAG:ABUS:STAT?"]
+    },
+    {
+      "name": "diagnostics_output_faults",
+      "mnemonic": "DIAGnostics:OUTPut:FAULts?",
+      "category": "Diagnostics",
+      "description": "Queries the current instrument fault conditions.",
+      "query": ":DIAGnostics:OUTPut:FAULts?",
+      "examples": [":DIAG:OUTP:FAUL?"]
+    },
+    {
+      "name": "diagnostics_result",
+      "mnemonic": "DIAGnostics:RESult?",
+      "category": "Diagnostics",
+      "description": "Queries the diagnostic result.",
+      "query": ":DIAGnostics:RESult?",
+      "examples": [":DIAG:RES?"]
+    },
+    {
+      "name": "diagnostics_iorw",
+      "mnemonic": "DIAGnostics:IORW",
+      "category": "Diagnostics",
+      "description": "Performs a diagnostic I/O read/write to the specified device number and value.",
+      "set": ":DIAGnostics:IORW <num>,<num>",
+      "parameters": [
+        { "name": "device_value", "range": "I/O device number, value" }
+      ],
+      "examples": [":DIAG:IORW 0,0"]
+    },
+    {
+      "name": "diagnostics_instrument_pmeter_address",
+      "mnemonic": "DIAGnostics:INSTrument:PMETer:ADDRess",
+      "category": "Diagnostics",
+      "description": "Sets and queries the HP-IB address of the power meter used for calibration. After *RST/power-on the default is 13.",
+      "set": ":DIAGnostics:INSTrument:PMETer:ADDRess <num>",
+      "query": ":DIAGnostics:INSTrument:PMETer:ADDRess?",
+      "parameters": [
+        { "name": "address", "range": "1 to 31" }
+      ],
+      "examples": [":DIAG:INST:PMET:ADDR 13", ":DIAG:INST:PMET:ADDR?"]
+    },
+    {
+      "name": "diagnostics_instrument_printer_address",
+      "mnemonic": "DIAGnostics:INSTrument:PRINter:ADDRess",
+      "category": "Diagnostics",
+      "description": "Sets and queries the HP-IB address of the printer.",
+      "set": ":DIAGnostics:INSTrument:PRINter:ADDRess <num>",
+      "query": ":DIAGnostics:INSTrument:PRINter:ADDRess?",
+      "parameters": [
+        { "name": "address", "range": "1 to 31" }
+      ],
+      "examples": [":DIAG:INST:PRIN:ADDR 1", ":DIAG:INST:PRIN:ADDR?"]
+    }
+  ]
+}

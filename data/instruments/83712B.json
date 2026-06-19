@@ -1,0 +1,329 @@
+{
+  "model": "83712B",
+  "manufacturer": "HP/Agilent",
+  "category": "Synthesized CW Generator",
+  "description": "HP/Agilent 83712B Synthesized CW Generator. Part of the 8371x family of synthesized continuous-wave signal generators. The 83712A/12B cover 10 MHz (0.01 GHz) to 20 GHz; the 83711A/11B cover 1 GHz to 20 GHz. Standard frequency resolution is 1 kHz (1 Hz with Option 1E8). Controlled over GPIB (HP-IB) using SCPI; an HP 8673 compatible language mode is also selectable. This definition is drawn from the User's Guide, which documents the SCPI commands as 'Equivalent SCPI Command' entries for each front-panel key and special function plus the PRESET-conditions table; the full command reference lives in the separate Programming Guide (83711-90132). This instrument has no internal AM/FM/pulse modulation and no bus trigger capability (DT0, 'no trigger capability'), so no AM/FM/PULM/TRIGger/INITiate subsystems are documented here.",
+  "source": "83712B User.pdf",
+  "aliases": ["83712B", "83711B", "83712A", "83711A", "8371x"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "8371[0-9]",
+    "description": "Returns the synthesizer model number, serial number, and firmware revision number (the SCPI equivalent of the front-panel SHOW INFO function)."
+  },
+  "commands": [
+    {
+      "name": "set_frequency",
+      "mnemonic": "[SOURce[1]:]FREQuency[:CW|:FIXed]",
+      "category": "Frequency",
+      "description": "Sets the synthesizer output (CW) frequency. Valid range depends on model: 83712A/12B = 0.01 GHz to 20 GHz, 83711A/11B = 1.0 GHz to 20 GHz. Standard resolution is 1 kHz over 0.01-20 GHz (1 Hz with Option 1E8). Preset value is 3 GHz. If the Multiplier function is active, the displayed frequency is the frequency at the multiplier output.",
+      "set": "FREQ <freq>",
+      "query": "FREQ?",
+      "parameters": [
+        { "name": "freq", "units": "Hz", "range": "0.01 GHz to 20 GHz (83712A/12B); 1.0 GHz to 20 GHz (83711A/11B). Resolution 1 kHz (1 Hz with Option 1E8)." }
+      ],
+      "examples": ["FREQ 10GHZ", "FREQ 12.5E9"]
+    },
+    {
+      "name": "set_frequency_multiplier",
+      "mnemonic": "[SOURce[1]:]FREQuency:MULTiplier",
+      "category": "Frequency",
+      "description": "Sets the frequency multiplier value so that the displayed/entered frequency is the frequency at the output of an external multiplier rather than at the synthesizer output. Used when generating millimeter-wave signals. Preset value is 1.",
+      "set": "FREQ:MULT <multiplier>",
+      "query": "FREQ:MULT?",
+      "parameters": [
+        { "name": "multiplier", "range": "Multiplier factor (preset 1)" }
+      ],
+      "examples": ["FREQ:MULT 1", "FREQ:MULT 4"]
+    },
+    {
+      "name": "set_power_level",
+      "mnemonic": "[SOURce[1]:]POWer[:LEVel]",
+      "category": "Power",
+      "description": "Sets the synthesizer output power level at the RF OUTPUT connector. Standard configuration allows -15 dBm to +30 dBm; with Option 1E1 step attenuator the range is -120 dBm (-100 dBm on 83711A/12A) to +30 dBm. Internal vernier (ALC) range is -1 to +13 dBm. Preset value is 0 dBm.",
+      "set": "POW <level>",
+      "query": "POW?",
+      "parameters": [
+        { "name": "level", "units": "dBm", "range": "-15 dBm to +30 dBm standard; -120 dBm to +30 dBm with Option 1E1 (-100 dBm to +30 dBm on 83711A/12A)" }
+      ],
+      "examples": ["POW -10 DBM", "POW 0DBM"]
+    },
+    {
+      "name": "set_power_unit",
+      "mnemonic": "[SOURce[1]:]POWer:UNIT",
+      "category": "Power",
+      "description": "Selects the units used for power level entry and display. Preset value is DBM.",
+      "set": "POW:UNIT <unit>",
+      "query": "POW:UNIT?",
+      "parameters": [
+        { "name": "unit", "range": "DBM (and related power units; preset DBM)" }
+      ],
+      "examples": ["POW:UNIT DBM"]
+    },
+    {
+      "name": "set_alc_source",
+      "mnemonic": "[SOURce[1]:]POWer:ALC:SOURce",
+      "category": "Power",
+      "description": "Selects the automatic level control (ALC) source: INTernal leveling (internal ALC detector), DIODe (external diode detector leveling), or PMETer (external power meter leveling). Preset value is INT.",
+      "set": "POW:ALC:SOUR <source>",
+      "query": "POW:ALC:SOUR?",
+      "parameters": [
+        { "name": "source", "range": "INT | DIOD | PMET (preset INT)" }
+      ],
+      "examples": ["POW:ALC:SOUR INT", "POW:ALC:SOUR DIOD"]
+    },
+    {
+      "name": "set_alc_pmeter_level",
+      "mnemonic": "[SOURce[1]:]POWer:ALC:PMETer",
+      "category": "Power",
+      "description": "Sets the external power meter range hold value used during external power meter leveling. External power meter leveling is a multi-step process that also requires setting the ALC source to PMET. Preset value is 0 dBm.",
+      "set": "POW:ALC:PMET <pmeter>",
+      "query": "POW:ALC:PMET?",
+      "parameters": [
+        { "name": "pmeter", "units": "dBm", "range": "External meter reading: -15 dBm to +30 dBm standard; -100 dBm to +30 dBm with Option 1E1 (preset 0 dBm)" }
+      ],
+      "examples": ["POW:ALC:PMET 0DBM"]
+    },
+    {
+      "name": "set_attenuator_auto",
+      "mnemonic": "[SOURce[1]:]POWer:ATTenuation:AUTO",
+      "category": "Power",
+      "description": "Controls the step attenuator (attenuator hold) function. ON couples the attenuator automatically (attenuator hold off); OFF holds the attenuator at its current setting (attenuator hold on). The attenuator hold function does not activate in external diode or external power meter leveling modes. Preset value is ON.",
+      "set": "POW:ATT:AUTO <ON|OFF>",
+      "query": "POW:ATT:AUTO?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset ON)" }
+      ],
+      "examples": ["POW:ATT:AUTO ON", "POW:ATT:AUTO OFF"]
+    },
+    {
+      "name": "set_power_protection",
+      "mnemonic": "[SOURce[1]:]POWer:PROTection:STATe",
+      "category": "Power",
+      "description": "Controls the RF output power protection (reverse-power / overpower shutdown) state. Listed in the PRESET conditions table with preset value OFF.",
+      "set": "POW:PROT:STAT <ON|OFF>",
+      "query": "POW:PROT:STAT?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset OFF)" }
+      ],
+      "examples": ["POW:PROT:STAT OFF"]
+    },
+    {
+      "name": "set_output_state",
+      "mnemonic": "OUTPut[:STATe]",
+      "category": "Output",
+      "description": "Turns the signal at the RF OUTPUT connector on or off. When off, the level display shows OFF, the internal oscillators are turned off, and the internal RF power shutdown circuit is enabled. Preset value is ON.",
+      "set": "OUTP:STAT <ON|OFF>",
+      "query": "OUTP:STAT?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset ON)" }
+      ],
+      "examples": ["OUTP:STAT ON", "OUTP:STAT OFF"]
+    },
+    {
+      "name": "set_output_protection",
+      "mnemonic": "OUTPut:PROTection:STATe",
+      "category": "Output",
+      "description": "Controls the RF output protection state at the OUTPUT connector. Listed in the PRESET conditions table with preset value ON.",
+      "set": "OUTP:PROT:STAT <ON|OFF>",
+      "query": "OUTP:PROT:STAT?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset ON)" }
+      ],
+      "examples": ["OUTP:PROT:STAT ON"]
+    },
+    {
+      "name": "set_correction_state",
+      "mnemonic": "[SOURce[1]:]CORRection[:STATe]",
+      "category": "Correction",
+      "description": "Turns user-defined level (path-loss) corrections on or off. Used together with the level-correct (LVL CR) tables to compensate for external signal-path losses. Preset value is OFF.",
+      "set": "CORR:STAT <ON|OFF>",
+      "query": "CORR:STAT?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset OFF)" }
+      ],
+      "examples": ["CORR:STAT ON", "CORR:STAT OFF"]
+    },
+    {
+      "name": "select_correction_table",
+      "mnemonic": "[SOURce[1]:]CORRection:CSET[:SELect]",
+      "category": "Correction",
+      "description": "Selects the active level-correction table (frequency/loss data set). Tables are named FDAT<n> where n is the table number. Preset value is FDAT1.",
+      "set": "CORR:CSET:SEL <FDAT<n>>",
+      "query": "CORR:CSET:SEL?",
+      "parameters": [
+        { "name": "tableno", "range": "FDAT1 through FDAT4 (level-correction register; preset FDAT1)" }
+      ],
+      "examples": ["CORR:CSET:SEL FDAT1", "CORR:CSET:SEL FDAT2"]
+    },
+    {
+      "name": "set_correction_table_state",
+      "mnemonic": "[SOURce[1]:]CORRection:CSET[:STATe]",
+      "category": "Correction",
+      "description": "Turns the selected level-correction table (level corrections) on or off. Preset value is OFF.",
+      "set": "CORR:CSET:STAT <ON|OFF>",
+      "query": "CORR:CSET:STAT?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset OFF)" }
+      ],
+      "examples": ["CORR:CSET:STAT ON"]
+    },
+    {
+      "name": "set_display_state",
+      "mnemonic": "DISPlay[:WINDow][:STATe]",
+      "category": "Display",
+      "description": "Turns the front-panel fluorescent display and LED annunciators on or off (the CLEAR DISPLAY function). When off, DISPLAY BLANKED is shown; the display state is stored with the instrument state so sensitive settings are not revealed when a register is recalled. Preset value is ON (display restored).",
+      "set": "DISP:STAT <ON|OFF>",
+      "query": "DISP:STAT?",
+      "parameters": [
+        { "name": "state", "range": "ON | OFF (preset ON)" }
+      ],
+      "examples": ["DISP:STAT ON", "DISP:STAT OFF"]
+    },
+    {
+      "name": "select_memory_table",
+      "mnemonic": "MEMory:TABLe:SELect",
+      "category": "Memory",
+      "description": "Selects the active memory table (frequency/level data table). Listed in the PRESET conditions table with preset value FDAT1.",
+      "set": "MEM:TABL:SEL <FDAT<n>>",
+      "query": "MEM:TABL:SEL?",
+      "parameters": [
+        { "name": "tableno", "range": "FDAT1 ... (preset FDAT1)" }
+      ],
+      "examples": ["MEM:TABL:SEL FDAT1"]
+    },
+    {
+      "name": "initialize_memory",
+      "mnemonic": "MEMory:RAM:INITialize[:ALL]",
+      "category": "Memory",
+      "description": "Clears (erases) synthesizer RAM memory: all user settings return to the preset state, save/recall registers are erased, and level-correction tables are cleared (the ERASE MEMORY function). Factory calibration data in EEPROM is not affected.",
+      "set": "MEM:RAM:INIT",
+      "examples": ["MEM:RAM:INIT"]
+    },
+    {
+      "name": "set_gpib_address",
+      "mnemonic": "SYSTem:COMMunicate:GPIB:ADDRess",
+      "category": "System",
+      "description": "Sets the synthesizer's HP-IB (GPIB) address. Valid range is 00 to 30. Factory default is 19; not changed by PRESET. (Listed in the PRESET conditions table as default 192 for the RAM-default value.)",
+      "set": "SYST:COMM:GPIB:ADDR <address>",
+      "query": "SYST:COMM:GPIB:ADDR?",
+      "parameters": [
+        { "name": "address", "range": "0 to 30 (factory default 19)" }
+      ],
+      "examples": ["SYST:COMM:GPIB:ADDR 19"]
+    },
+    {
+      "name": "set_pmeter_address",
+      "mnemonic": "SYSTem:COMMunicate:PMETer:ADDRess",
+      "category": "System",
+      "description": "Sets the HP-IB address the synthesizer uses when communicating with an external power meter during the level-correct routine. Valid range is 00 to 30 (decimal). Factory default is 13; not changed by PRESET. This does not change the address at the power meter itself.",
+      "set": "SYST:COMM:PMET:ADDR <address>",
+      "query": "SYST:COMM:PMET:ADDR?",
+      "parameters": [
+        { "name": "address", "range": "0 to 30 (factory default 13)" }
+      ],
+      "examples": ["SYST:COMM:PMET:ADDR 13"]
+    },
+    {
+      "name": "set_language",
+      "mnemonic": "SYSTem:LANGuage",
+      "category": "System",
+      "description": "Selects the remote programming language: SCPI (Standard Commands for Programmable Instruments) or HP 8673 compatible language. Not changed by PRESET; defaults to SCPI when ERASE MEMORY is executed.",
+      "set": "SYST:LANG <\"SCPI\"|\"COMP=8673\">",
+      "query": "SYST:LANG?",
+      "parameters": [
+        { "name": "language", "range": "\"SCPI\" | \"COMP=8673\" (preset/default SCPI)" }
+      ],
+      "examples": ["SYST:LANG \"SCPI\"", "SYST:LANG \"COMP=8673\""]
+    },
+    {
+      "name": "press_key",
+      "mnemonic": "SYSTem:KEY",
+      "category": "System",
+      "description": "Emulates a front-panel key press by sending the key's numeric code (e.g. SYST:KEY 8 = LOCAL, SYST:KEY 54 = BACK SPACE, SYST:KEY 50 = SPCL OFF). Used to drive keys that have no direct SCPI equivalent. The key code must be one available on the synthesizer's front panel.",
+      "set": "SYST:KEY <keycode>",
+      "parameters": [
+        { "name": "keycode", "range": "Front-panel key code (e.g. 8 = LOCAL, 50 = SPCL OFF, 54 = BACK SPACE)" }
+      ],
+      "examples": ["SYST:KEY 8", "SYST:KEY 54"]
+    },
+    {
+      "name": "query_error",
+      "mnemonic": "SYSTem:ERRor?",
+      "category": "System",
+      "description": "Reads and removes the oldest entry from the error queue, returning the error number and a short description. Equivalent to reading errors via the front-panel MSG function. The error queue is cleared at preset.",
+      "query": "SYST:ERR?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "preset",
+      "mnemonic": "SYSTem:PRESet",
+      "category": "System",
+      "description": "Sets the synthesizer to a known preset state (equivalent to the front-panel PRESET key and to *RST). Sets FREQ:CW = 3 GHz, POW:LEVel = 0 dBm, OUTP:STAT = ON, POW:ALC:SOUR = INT, etc. Does not change the HP-IB address or remote language.",
+      "set": "SYST:PRES",
+      "examples": ["SYST:PRES"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Returns the synthesizer model number, serial number, and firmware revision number (SCPI equivalent of the SHOW INFO function).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Sets the synthesizer to its known preset state (equivalent to the front-panel PRESET key and to SYST:PRES).",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Saves the current instrument state to a save/recall register. All settings affected by PRESET are saved; level-correction tables are not saved. Register range is 0 through 9.",
+      "set": "*SAV <register>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9" }
+      ],
+      "examples": ["*SAV 1", "*SAV 0"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recalls a previously stored instrument state from a save/recall register. If the register was never written, recalling it sets the synthesizer to the preset state. Register range is 0 through 9.",
+      "set": "*RCL <register>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9" }
+      ],
+      "examples": ["*RCL 1", "*RCL 0"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Runs a functional verification (self test) on the synthesizer and returns the result (the SCPI equivalent of the SELF TEST special function).",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "query_options",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Returns which options are installed in the synthesizer (e.g. attenuator or ALC-source options). Referenced for checking option availability when a requested ALC source or feature is not present.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "learn_string",
+      "mnemonic": "*LRN?",
+      "category": "Common",
+      "description": "Returns the instrument 'learn string' (complete instrument state as block data) which can later be sent back via SYST:SET to restore the state. The *LRN? response is always a fixed length regardless of state, but can change with firmware version.",
+      "query": "*LRN?",
+      "examples": ["*LRN?"]
+    }
+  ]
+}

@@ -1,0 +1,505 @@
+{
+  "model": "6625A",
+  "manufacturer": "HP",
+  "category": "DC Power Supply",
+  "description": "HP/Agilent 6625A System DC Power Supply, a multiple-output (662xA series) precision linear supply with HP-IB (IEEE-488) control. Each output is individually programmed and metered for voltage, current, voltage/current range, overvoltage protection, and overcurrent protection. The 6625A has 4 outputs; commands address an output channel as the first parameter (1-4).",
+  "source": "6625A.pdf",
+  "aliases": ["6625A", "HP6625A", "6624A", "6623A", "6626A"],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "ID?",
+    "response": "Agilent 662XA",
+    "matchRegex": "662[0-9]"
+  },
+  "commands": [
+    {
+      "name": "set_voltage",
+      "mnemonic": "VSET",
+      "category": "Output Programming",
+      "description": "Set the output voltage of a channel. Value is always in volts. The supply rounds the setting to the nearest multiple of its resolution.",
+      "set": "VSET <ch>,<voltage>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "voltage", "units": "V", "range": "See Table 5-4 (depends on output range)" }
+      ],
+      "examples": ["VSET 1,5", "VSET 1,.45"]
+    },
+    {
+      "name": "query_voltage_setting",
+      "mnemonic": "VSET?",
+      "category": "Output Programming",
+      "description": "Query the programmed output voltage setting of a channel. Response is a real number (SZD.DDD).",
+      "query": "VSET? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["VSET? 1"]
+    },
+    {
+      "name": "set_current",
+      "mnemonic": "ISET",
+      "category": "Output Programming",
+      "description": "Set the output current limit of a channel. Value is always in amps. The supply rounds the setting to the nearest multiple of its resolution.",
+      "set": "ISET <ch>,<current>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "current", "units": "A", "range": "See Table 5-4 (depends on output range)" }
+      ],
+      "examples": ["ISET 1,0.015", "ISET 4,1.5"]
+    },
+    {
+      "name": "query_current_setting",
+      "mnemonic": "ISET?",
+      "category": "Output Programming",
+      "description": "Query the programmed output current setting of a channel. Response is a real number.",
+      "query": "ISET? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["ISET? 1"]
+    },
+    {
+      "name": "measure_voltage",
+      "mnemonic": "VOUT?",
+      "category": "Measurement",
+      "description": "Query the measured (actual) output voltage of a channel. Response is a real number (SZD.DDD).",
+      "query": "VOUT? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["VOUT? 1"]
+    },
+    {
+      "name": "measure_current",
+      "mnemonic": "IOUT?",
+      "category": "Measurement",
+      "description": "Query the measured (actual) output current of a channel. Response is a real number.",
+      "query": "IOUT? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["IOUT? 1"]
+    },
+    {
+      "name": "set_voltage_range",
+      "mnemonic": "VRSET",
+      "category": "Range Programming",
+      "description": "Set the full-scale voltage programming range of a channel. The supply automatically selects the lowest range that contains the specified value.",
+      "set": "VRSET <ch>,<voltage>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "voltage", "units": "V", "range": "See Table 5-4" }
+      ],
+      "examples": ["VRSET 1,7", "VRSET 1,50.5"]
+    },
+    {
+      "name": "query_voltage_range",
+      "mnemonic": "VRSET?",
+      "category": "Range Programming",
+      "description": "Query the full-scale voltage programming range of a channel. Response is a real number (ZD.DDD).",
+      "query": "VRSET? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["VRSET? 1"]
+    },
+    {
+      "name": "set_current_range",
+      "mnemonic": "IRSET",
+      "category": "Range Programming",
+      "description": "Set the full-scale current programming range of a channel. The supply automatically selects the lowest range that contains the specified value.",
+      "set": "IRSET <ch>,<current>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "current", "units": "A", "range": "See Table 5-4" }
+      ],
+      "examples": ["IRSET 1,.015", "IRSET 1,0.1"]
+    },
+    {
+      "name": "query_current_range",
+      "mnemonic": "IRSET?",
+      "category": "Range Programming",
+      "description": "Query the full-scale current programming range of a channel. Response is a real number.",
+      "query": "IRSET? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["IRSET? 1"]
+    },
+    {
+      "name": "step_voltage",
+      "mnemonic": "VSTEP",
+      "category": "Output Programming",
+      "description": "Increase or decrease a channel's output voltage by a step value. A value out of range causes a number range error.",
+      "set": "VSTEP <ch>,<x>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "step", "units": "V", "range": "See Table 5-4" }
+      ],
+      "examples": ["VSTEP 1,0.1"]
+    },
+    {
+      "name": "step_current",
+      "mnemonic": "ISTEP",
+      "category": "Output Programming",
+      "description": "Increase or decrease a channel's output current by a step value. A value out of range causes a number range error.",
+      "set": "ISTEP <ch>,<x>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "step", "units": "A", "range": "See Table 5-4" }
+      ],
+      "examples": ["ISTEP 1,0.01"]
+    },
+    {
+      "name": "set_output_state",
+      "mnemonic": "OUT",
+      "category": "Output Control",
+      "description": "Enable or disable an output channel. Does not disturb other programmed functions and does not reset protection circuits. 0 = OFF, 1 = ON.",
+      "set": "OUT <ch>,<0|1>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "state", "units": "", "range": "0 (OFF), 1 (ON)" }
+      ],
+      "examples": ["OUT 1,0", "OUT 1,1"]
+    },
+    {
+      "name": "query_output_state",
+      "mnemonic": "OUT?",
+      "category": "Output Control",
+      "description": "Query whether an output channel is on or off. Response is an integer (ZZD).",
+      "query": "OUT? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["OUT? 1"]
+    },
+    {
+      "name": "set_overvoltage",
+      "mnemonic": "OVSET",
+      "category": "Overvoltage Protection",
+      "description": "Set the overvoltage (OV) trip value of a channel in volts.",
+      "set": "OVSET <ch>,<voltage>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "voltage", "units": "V", "range": "See Table 5-4 (initial value 55 V; format SZZD.DD)" }
+      ],
+      "examples": ["OVSET 1,9.5"]
+    },
+    {
+      "name": "query_overvoltage",
+      "mnemonic": "OVSET?",
+      "category": "Overvoltage Protection",
+      "description": "Query the overvoltage trip value of a channel. Response is a real number (SZZD.DD).",
+      "query": "OVSET? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["OVSET? 1"]
+    },
+    {
+      "name": "reset_overvoltage",
+      "mnemonic": "OVRST",
+      "category": "Overvoltage Protection",
+      "description": "Reset the overvoltage circuit and re-enable the output after an OV trip. Remove the overvoltage condition first, or the supply will fire the OV again. Does not clear the fault register.",
+      "set": "OVRST <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["OVRST 1"]
+    },
+    {
+      "name": "enable_overcurrent",
+      "mnemonic": "OCP",
+      "category": "Overcurrent Protection",
+      "description": "Enable or disable overcurrent protection on a channel. When enabled and the output enters +CC mode, OCP downprograms the output voltage and disables the output. 0 = OFF, 1 = ON.",
+      "set": "OCP <ch>,<0|1>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "state", "units": "", "range": "0 (OFF), 1 (ON)" }
+      ],
+      "examples": ["OCP 1,1", "OCP 1,0"]
+    },
+    {
+      "name": "query_overcurrent",
+      "mnemonic": "OCP?",
+      "category": "Overcurrent Protection",
+      "description": "Query whether overcurrent protection is enabled on a channel. Response is 0 (off) or 1 (on).",
+      "query": "OCP? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["OCP? 1"]
+    },
+    {
+      "name": "reset_overcurrent",
+      "mnemonic": "OCRST",
+      "category": "Overcurrent Protection",
+      "description": "Reset the output channel after an overcurrent trip and re-enable it. First disable OCP or reduce output current below the programmed limit. Does not clear the fault register.",
+      "set": "OCRST <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["OCRST 1"]
+    },
+    {
+      "name": "query_status",
+      "mnemonic": "STS?",
+      "category": "Status",
+      "description": "Query the present status register of a channel. Response is an integer 0-255 decoded per Table 5-5 (CV, +CC, -CC, OV, OCP, UNR, coupled-parameter, etc.).",
+      "query": "STS? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["STS? 2"]
+    },
+    {
+      "name": "query_accumulated_status",
+      "mnemonic": "ASTS?",
+      "category": "Status",
+      "description": "Query the accumulated (astatus) status register of a channel, recording every status condition entered since last queried. Response is an integer 0-255 (Table 5-5). The register is reset to the present status value after being read.",
+      "query": "ASTS? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["ASTS? 2"]
+    },
+    {
+      "name": "query_fault",
+      "mnemonic": "FAULT?",
+      "category": "Status",
+      "description": "Query the fault register of a channel. A bit is set when the corresponding bit is set in both the status and mask registers. Response is an integer 0-255 (Table 5-5). The fault register is cleared after being read.",
+      "query": "FAULT? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["FAULT? 2"]
+    },
+    {
+      "name": "set_mask",
+      "mnemonic": "UNMASK",
+      "category": "Status",
+      "description": "Set (unmask) bits in a channel's mask register to specify which status conditions are enabled to set bits in the fault register. Value is a numeric code 0-255 per Table 5-5.",
+      "set": "UNMASK <ch>,<x>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "mask", "units": "", "range": "0-255" }
+      ],
+      "examples": ["UNMASK 2,255"]
+    },
+    {
+      "name": "query_mask",
+      "mnemonic": "UNMASK?",
+      "category": "Status",
+      "description": "Query the bits set in a channel's mask register. Response is an integer 0-255 (ZZD).",
+      "query": "UNMASK? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["UNMASK? 2"]
+    },
+    {
+      "name": "query_error",
+      "mnemonic": "ERR?",
+      "category": "Status",
+      "description": "Query the present programming or hardware error. An error code number is returned over the GP-IB (see Table 5-8). The error register is cleared after being read.",
+      "query": "ERR?",
+      "parameters": [],
+      "examples": ["ERR?"]
+    },
+    {
+      "name": "set_delay",
+      "mnemonic": "DLY",
+      "category": "Reprogramming Delay",
+      "description": "Set the reprogramming delay time of a channel, which delays the onset of CV/+CC/-CC/UNR fault detection after a setting change. Specified in seconds (0 to 32 s, in 4 ms steps). Power-on default is 20 ms.",
+      "set": "DLY <ch>,<seconds>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" },
+        { "name": "delay", "units": "s", "range": "0-32" }
+      ],
+      "examples": ["DLY 2,.08"]
+    },
+    {
+      "name": "query_delay",
+      "mnemonic": "DLY?",
+      "category": "Reprogramming Delay",
+      "description": "Query the reprogramming delay setting of a channel. Response format <sp>ZD.DDD seconds.",
+      "query": "DLY? <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["DLY? 2"]
+    },
+    {
+      "name": "set_display",
+      "mnemonic": "DSP",
+      "category": "Display",
+      "description": "Turn the front panel display on or off. Turning the display off shortens command processing time. 0 = OFF, 1 = ON.",
+      "set": "DSP <0|1>",
+      "parameters": [
+        { "name": "state", "units": "", "range": "0 (OFF), 1 (ON)" }
+      ],
+      "examples": ["DSP 0", "DSP 1"]
+    },
+    {
+      "name": "display_string",
+      "mnemonic": "DSP",
+      "category": "Display",
+      "description": "Display a quoted message string (max 12 characters) on the front panel.",
+      "set": "DSP \"<string>\"",
+      "parameters": [
+        { "name": "string", "units": "", "range": "up to 12 characters" }
+      ],
+      "examples": ["DSP \"OUTPUT 2 OK\""]
+    },
+    {
+      "name": "query_display",
+      "mnemonic": "DSP?",
+      "category": "Display",
+      "description": "Query whether the front panel display is on. Response is 1 (on) or 0 (off).",
+      "query": "DSP?",
+      "parameters": [],
+      "examples": ["DSP?"]
+    },
+    {
+      "name": "set_meter",
+      "mnemonic": "METER",
+      "category": "Display",
+      "description": "Select which output channel the front panel display meters.",
+      "set": "METER <ch>",
+      "parameters": [
+        { "name": "channel", "units": "", "range": "1-4" }
+      ],
+      "examples": ["METER 2"]
+    },
+    {
+      "name": "query_meter",
+      "mnemonic": "METER?",
+      "category": "Display",
+      "description": "Query which output channel the front panel display is currently metering.",
+      "query": "METER?",
+      "parameters": [],
+      "examples": ["METER?"]
+    },
+    {
+      "name": "store_state",
+      "mnemonic": "STO",
+      "category": "Storage and Recall",
+      "description": "Store the present operating state (VSET, VRSET, ISET, IRSET, OVSET, OCP, DLY) of all outputs into one of eleven non-volatile registers (0-10). At power-on the supply initializes all outputs from register 0.",
+      "set": "STO <register>",
+      "parameters": [
+        { "name": "register", "units": "", "range": "0-10" }
+      ],
+      "examples": ["STO 2"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "RCL",
+      "category": "Storage and Recall",
+      "description": "Recall the stored voltage, voltage range, current, current range and OV settings for all outputs from the specified register (0-10). Outputs are set sequentially (output 1, output 2, etc.).",
+      "set": "RCL <register>",
+      "parameters": [
+        { "name": "register", "units": "", "range": "0-10" }
+      ],
+      "examples": ["RCL 2"]
+    },
+    {
+      "name": "clear",
+      "mnemonic": "CLR",
+      "category": "System",
+      "description": "Return the power supply to its turn-on state. Clears the service request and the PON bit. May be sent as an addressed or unaddressed command.",
+      "set": "CLR",
+      "parameters": [],
+      "examples": ["CLR"]
+    },
+    {
+      "name": "set_srq",
+      "mnemonic": "SRQ",
+      "category": "Service Request",
+      "description": "Set the causes for generating a service request (SRQ): 0 = none/off, 1 = on faults, 2 = on errors, 3 = on faults and errors.",
+      "set": "SRQ <x>",
+      "parameters": [
+        { "name": "cause", "units": "", "range": "0, 1, 2, 3" }
+      ],
+      "examples": ["SRQ 0", "SRQ 3"]
+    },
+    {
+      "name": "query_srq",
+      "mnemonic": "SRQ?",
+      "category": "Service Request",
+      "description": "Query the present setting of the causes for issuing an SRQ. Response is 0, 1, 2, or 3.",
+      "query": "SRQ?",
+      "parameters": [],
+      "examples": ["SRQ?"]
+    },
+    {
+      "name": "set_power_on_srq",
+      "mnemonic": "PON",
+      "category": "Service Request",
+      "description": "Enable or disable the power-on service request. 1 causes the supply to generate an SRQ at power-on or after a temporary loss of power; 0 disables it. Setting is retained in non-volatile memory.",
+      "set": "PON <0|1>",
+      "parameters": [
+        { "name": "state", "units": "", "range": "0 (OFF), 1 (ON)" }
+      ],
+      "examples": ["PON 1", "PON 0"]
+    },
+    {
+      "name": "query_power_on_srq",
+      "mnemonic": "PON?",
+      "category": "Service Request",
+      "description": "Query whether the power-on SRQ is enabled. Response is 1 (on) or 0 (off).",
+      "query": "PON?",
+      "parameters": [],
+      "examples": ["PON?"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "ID?",
+      "category": "System",
+      "description": "Query the model number of the supply. Response is 'Agilent 662XA'.",
+      "query": "ID?",
+      "parameters": [],
+      "examples": ["ID?"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "TEST?",
+      "category": "System",
+      "description": "Cause the power supply to perform a self-test of its GP-IB interface. Response is 0 if the test passes.",
+      "query": "TEST?",
+      "parameters": [],
+      "examples": ["TEST?"]
+    },
+    {
+      "name": "query_rom",
+      "mnemonic": "ROM?",
+      "category": "System",
+      "description": "Query the revision date of the supply's primary ROM.",
+      "query": "ROM?",
+      "parameters": [],
+      "examples": ["ROM?"]
+    },
+    {
+      "name": "set_calibration_mode",
+      "mnemonic": "CMODE",
+      "category": "System",
+      "description": "Turn calibration mode on or off. 0 = OFF, 1 = ON. (Calibration commands require CMODE on; see Appendix A.)",
+      "set": "CMODE <0|1>",
+      "parameters": [
+        { "name": "state", "units": "", "range": "0 (OFF), 1 (ON)" }
+      ],
+      "examples": ["CMODE 1", "CMODE 0"]
+    },
+    {
+      "name": "query_calibration_mode",
+      "mnemonic": "CMODE?",
+      "category": "System",
+      "description": "Query whether calibration mode is on. Response is 1 (on) or 0 (off).",
+      "query": "CMODE?",
+      "parameters": [],
+      "examples": ["CMODE?"]
+    }
+  ]
+}
