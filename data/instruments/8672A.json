@@ -1,0 +1,104 @@
+{
+  "model": "8672A",
+  "manufacturer": "HP",
+  "category": "Signal Generator",
+  "description": "HP 8672A synthesized signal generator (2-18 GHz). Legacy HP-IB (IEEE-488) instrument, NOT SCPI. It is primarily listen-only: it cannot return measurement data and has NO identify query. When addressed to talk it sends only a single status byte (serial-poll response). Programming uses a fixed-order ASCII program string built from single-letter program codes followed by numeric arguments, in the sequence Frequency, Output Level (Range + Vernier), Modulation (AM + FM), then ALC. The full string is, e.g., P12596365Z0K9L7MON601. Each frequency digit has its own most-significant-digit code (P=10 GHz, Q=1 GHz, R=100 MHz, S=10 MHz, T=1 MHz, U=100 kHz, V=10 kHz, W=1 kHz); a frequency string starts with the code for the most-significant digit being programmed and ends with the Execute code Z plus a dummy argument. The instrument ignores spaces, commas, decimal points, CR and LF. Program codes in ASCII columns 4 and 5 are equivalent (e.g. Z and J behave identically). Codes/arguments for a function need not be on the same line, and functions may be programmed together or separately.",
+  "source": "8672A.pdf",
+  "aliases": ["8672A", "HP8672A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "P",
+      "category": "Frequency",
+      "description": "Program frequency. The string begins with the program code for the most-significant digit being programmed and is followed by the frequency digits, then the Execute code Z and a dummy argument. Digit codes: P=10 GHz, Q=1 GHz, R=100 MHz, S=10 MHz, T=1 MHz, U=100 kHz, V=10 kHz, W=1 kHz. Accepts any frequency in range to 8 significant digits; above 6.2 GHz the 1 kHz digit is rounded to the 2/3 kHz resolution. Frequency is stored in two blocks (10 GHz..10 MHz and 1 MHz..1 kHz); programming one block does not change the other except for rounding above 6.2 GHz.",
+      "set": "<digit-code><digits...>Z<dummy>",
+      "parameters": [
+        { "name": "frequency", "units": ["GHz", "MHz", "kHz"], "range": "2 to 18 GHz, 8 significant digits" }
+      ],
+      "examples": ["P12596365Z0", "P12345678Z1"]
+    },
+    {
+      "name": "frequency_execute",
+      "mnemonic": "Z",
+      "category": "Frequency",
+      "description": "Frequency Execute code. Terminates the frequency program string and causes the entered frequency digits to take effect. Followed by a single dummy argument (any digit).",
+      "set": "Z<dummy>",
+      "parameters": [
+        { "name": "dummy" }
+      ],
+      "examples": ["Z0", "Z1"]
+    },
+    {
+      "name": "output_level_range",
+      "mnemonic": "K",
+      "category": "Amplitude",
+      "description": "Program output level RANGE in 10 dB steps. Code K followed by an argument: 0=0 dBm, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, : (colon)=-100, ; (semicolon)=-110. The +10 dBm (over-range) position is set via the ALC code, not here.",
+      "set": "K<arg>",
+      "parameters": [
+        { "name": "range", "units": "dBm", "range": "0=0, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, :=-100, ;=-110" }
+      ],
+      "examples": ["K9", "K1"]
+    },
+    {
+      "name": "output_level_vernier",
+      "mnemonic": "L",
+      "category": "Amplitude",
+      "description": "Program output level VERNIER in 1 dB steps from +3 to -10 dB. Code L followed by an argument: ( =+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, : =-7, ; =-8, < =-9, = =-10 dB.",
+      "set": "L<arg>",
+      "parameters": [
+        { "name": "vernier", "units": "dB", "range": "+3 to -10 dB in 1 dB steps; (=+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, :=-7, ;=-8, <=-9, ==-10" }
+      ],
+      "examples": ["L7", "L3"]
+    },
+    {
+      "name": "am",
+      "mnemonic": "M",
+      "category": "Modulation",
+      "description": "Program amplitude modulation (AM). Code M followed by an argument: 0 or 1=OFF, 2=100%, 3=30%.",
+      "set": "M<arg>",
+      "parameters": [
+        { "name": "am", "range": "0 or 1=OFF, 2=100%, 3=30%" }
+      ],
+      "examples": ["M0", "M3"]
+    },
+    {
+      "name": "fm",
+      "mnemonic": "N",
+      "category": "Modulation",
+      "description": "Program frequency modulation (FM) deviation range. Code N followed by an argument: 6 or 7=OFF, 5=30 kHz, 4=100 kHz, 3=300 kHz, 2=1 MHz, 1=3 MHz, 0=10 MHz.",
+      "set": "N<arg>",
+      "parameters": [
+        { "name": "fm", "range": "6 or 7=OFF, 5=30 kHz, 4=100 kHz, 3=300 kHz, 2=1 MHz, 1=3 MHz, 0=10 MHz" }
+      ],
+      "examples": ["N6", "N0"]
+    },
+    {
+      "name": "alc",
+      "mnemonic": "O",
+      "category": "Output",
+      "description": "Program ALC. The code is O (the letter O) followed by a single argument representing the combined positions of the RF ON-OFF switch, the ALC selector switch, and the +10 dBm (over-range) RANGE position. Compute the argument by summing the weights of the desired switch positions: RF OFF=0 or ON=1; ALC INT=0, XTAL=4, MTR=12; RANGE 0 dBm=0 or +10 dBm=2. Use = (equal sign) for a weight of 13 and ? (question mark) for a weight of 17. In general an even argument leaves RF OFF and an odd argument turns RF ON. A Clear/Device Clear sets ALC to Internal and RF off.",
+      "set": "O<arg>",
+      "parameters": [
+        { "name": "alc", "range": "sum of weights: RF OFF=0/ON=1; ALC INT=0/XTAL=4/MTR=12; RANGE 0dBm=0/+10dBm=2; =(13), ?(17)" }
+      ],
+      "examples": ["O1", "O0"]
+    },
+    {
+      "name": "device_clear",
+      "mnemonic": "DCL/SDC",
+      "category": "System",
+      "description": "Clear message (HP-IB Device Clear / Selected Device Clear). Presets the Synthesizer to frequency 3 GHz, ALC Internal, RF power OFF, and modulation OFF. SDC is responded to when addressed to listen; DCL when not addressed. Device Clear does not affect addressing.",
+      "set": "DCL",
+      "examples": ["clr719"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "SPE",
+      "category": "Status",
+      "description": "Serial-poll status byte. The Synthesizer returns a single status byte when addressed to talk (in local or remote); it has no other talk output and no identify query. Bit weights: bit 8 (128)=CRYSTAL OVEN COLD, bit 7 (64)=RSV Request Service, bit 6 (32)=OUT OF RANGE (frequency), bit 5 (16)=RF OFF, bit 4 (8)=NOT PHASE LOCKED, bit 3 (4)=LEVEL UNCAL, bit 2 (2)=FM OVERMOD, bit 1 (1)=+10 dBm. RSV is set when not phase-locked with RF on, frequency out of range, level uncalibrated with RF on, or FM overmodulated with RF on.",
+      "query": "serial poll",
+      "examples": ["rds(719)"]
+    }
+  ]
+}

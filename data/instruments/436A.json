@@ -1,0 +1,158 @@
+{
+  "model": "436A",
+  "manufacturer": "HP",
+  "category": "RF Power Meter",
+  "description": "HP 436A Power Meter with HP-IB (Option 022). Legacy instrument using single-letter ASCII program codes to set range, measurement mode, cal factor enable/disable, and measurement rate (triggering). Has no *IDN? or SCPI support; does not respond to serial poll, parallel poll, GTL, or Group Execute Trigger. Remote trigger capability is part of the data message (measurement rate code). Reading the instrument returns a fixed 14-character output data string (status + range + mode + measured value + exponent + CR LF). The order of program codes matters: the code for measurement rate should be sent last.",
+  "source": "436A.pdf",
+  "aliases": ["436A", "HP436A", "HP 436A"],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "commands": [
+    {
+      "name": "rangeLeastSensitive",
+      "mnemonic": "5",
+      "category": "Range",
+      "description": "Select range 5 (least sensitive range).",
+      "set": "5",
+      "examples": ["5"]
+    },
+    {
+      "name": "range4",
+      "mnemonic": "4",
+      "category": "Range",
+      "description": "Select range 4.",
+      "set": "4",
+      "examples": ["4"]
+    },
+    {
+      "name": "range3",
+      "mnemonic": "3",
+      "category": "Range",
+      "description": "Select range 3.",
+      "set": "3",
+      "examples": ["3"]
+    },
+    {
+      "name": "range2",
+      "mnemonic": "2",
+      "category": "Range",
+      "description": "Select range 2.",
+      "set": "2",
+      "examples": ["2"]
+    },
+    {
+      "name": "rangeMostSensitive",
+      "mnemonic": "1",
+      "category": "Range",
+      "description": "Select range 1 (most sensitive range). Note: range 1 requires up to ~10 seconds to settle.",
+      "set": "1",
+      "examples": ["1"]
+    },
+    {
+      "name": "rangeAuto",
+      "mnemonic": "9",
+      "category": "Range",
+      "description": "Select autorange. The Power Meter automatically selects the appropriate range.",
+      "set": "9",
+      "examples": ["9", "9D+T"]
+    },
+    {
+      "name": "modeWatt",
+      "mnemonic": "A",
+      "category": "Mode",
+      "description": "Select Watt measurement mode.",
+      "set": "A",
+      "examples": ["A"]
+    },
+    {
+      "name": "modeDbRel",
+      "mnemonic": "B",
+      "category": "Mode",
+      "description": "Select dB (Rel) mode; reading is relative to a stored dB [Ref] reference.",
+      "set": "B",
+      "examples": ["B", "BT"]
+    },
+    {
+      "name": "modeDbRef",
+      "mnemonic": "C",
+      "category": "Mode",
+      "description": "Select dB [Ref] mode; stores the present RF input level as the reference for dB (Rel) measurements.",
+      "set": "C",
+      "examples": ["C", "CT"]
+    },
+    {
+      "name": "modeDbm",
+      "mnemonic": "D",
+      "category": "Mode",
+      "description": "Select dBm measurement mode.",
+      "set": "D",
+      "examples": ["D", "9D+T"]
+    },
+    {
+      "name": "sensorAutoZero",
+      "mnemonic": "Z",
+      "category": "Mode",
+      "description": "Sensor auto-zero. Remove RF power from the sensor (or at least 20 dB below the lowest range) before zeroing. Typically programmed with a trigger and read back; check status character for auto-zero loop completion.",
+      "set": "Z",
+      "examples": ["Z1T", "Z"]
+    },
+    {
+      "name": "calFactorDisable",
+      "mnemonic": "+",
+      "category": "CalFactor",
+      "description": "Disable cal factor; the Power Meter uses a cal factor of 100%.",
+      "set": "+",
+      "examples": ["+", "9D+T"]
+    },
+    {
+      "name": "calFactorEnable",
+      "mnemonic": "-",
+      "category": "CalFactor",
+      "description": "Enable cal factor; the Power Meter uses the cal factor set by the front-panel CAL FACTOR % switch (the switch value itself cannot be set remotely).",
+      "set": "-",
+      "examples": ["-"]
+    },
+    {
+      "name": "rateHold",
+      "mnemonic": "H",
+      "category": "Trigger",
+      "description": "Hold. Inhibits the Power Meter from taking measurements and from outputting data; sets a reference condition from which a measurement can be triggered synchronously.",
+      "set": "H",
+      "examples": ["H"]
+    },
+    {
+      "name": "triggerWithSettling",
+      "mnemonic": "T",
+      "category": "Trigger",
+      "description": "Trigger with settling time (Trigger with Delay). Makes one measurement after executing a settling-time delay subroutine, outputs data, then goes to Hold until the next trigger.",
+      "set": "T",
+      "examples": ["T", "BT"]
+    },
+    {
+      "name": "triggerImmediate",
+      "mnemonic": "I",
+      "category": "Trigger",
+      "description": "Trigger immediate. Makes one measurement and outputs data in the minimum possible time (no settling-time delay), then goes to Hold until the next trigger.",
+      "set": "I",
+      "examples": ["I", "9+DI"]
+    },
+    {
+      "name": "freeRunMaxRate",
+      "mnemonic": "R",
+      "category": "Trigger",
+      "description": "Free run at maximum rate. Continuously takes measurements and outputs data in the minimum possible time, with no settling-time delay before each measurement.",
+      "set": "R",
+      "examples": ["R"]
+    },
+    {
+      "name": "freeRunWithSettling",
+      "mnemonic": "V",
+      "category": "Trigger",
+      "description": "Free run with settling time. Continuously takes measurements, executing a settling-time delay subroutine prior to each measurement.",
+      "set": "V",
+      "examples": ["V", "9D+V"]
+    }
+  ]
+}

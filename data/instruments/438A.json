@@ -1,0 +1,540 @@
+{
+  "model": "438A",
+  "manufacturer": "HP",
+  "category": "RF Power Meter",
+  "description": "HP 438A dual-channel (sensor A and B) HP-IB power meter. Measures single-sensor power (A or B), ratio (A/B, B/A) and difference (A-B, B-A) in dBm, Watts, dB relative or percent relative. Uses an alphameric two-letter HP-IB command set. Commands marked as requiring numeric entry must be followed by the value and the EN (ENTER) program code. Identification returns 'HP438A,VERX.XX'.",
+  "source": "438A.pdf",
+  "aliases": ["438A", "HP438A"],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "?ID",
+    "response": "HP438A,VERX.XX",
+    "model": "HP438A",
+    "description": "Identification query. When addressed to talk after ?ID, the meter returns the string 'HP438A,VERX.XX' (CR/LF, EOI), where VERX.XX is the firmware version."
+  },
+  "commands": [
+    {
+      "name": "Sensor A measurement",
+      "mnemonic": "AP",
+      "category": "measurement mode",
+      "description": "Select channel A as the single-sensor active measurement (Sensor A power).",
+      "set": true,
+      "query": false,
+      "examples": ["AP"]
+    },
+    {
+      "name": "Sensor B measurement",
+      "mnemonic": "BP",
+      "category": "measurement mode",
+      "description": "Select channel B as the single-sensor active measurement (Sensor B power).",
+      "set": true,
+      "query": false,
+      "examples": ["BP"]
+    },
+    {
+      "name": "A/B ratio measurement",
+      "mnemonic": "AR",
+      "category": "measurement mode",
+      "description": "Display the ratio of Sensor A to Sensor B (A/B) in dB or percent.",
+      "set": true,
+      "query": false,
+      "examples": ["AR"]
+    },
+    {
+      "name": "B/A ratio measurement",
+      "mnemonic": "BR",
+      "category": "measurement mode",
+      "description": "Display the ratio of Sensor B to Sensor A (B/A) in dB or percent.",
+      "set": true,
+      "query": false,
+      "examples": ["BR"]
+    },
+    {
+      "name": "Sensor A minus Sensor B",
+      "mnemonic": "AD",
+      "category": "measurement mode",
+      "description": "Display the difference measurement A-B in dBm or Watts.",
+      "set": true,
+      "query": false,
+      "examples": ["AD"]
+    },
+    {
+      "name": "Sensor B minus Sensor A",
+      "mnemonic": "BD",
+      "category": "measurement mode",
+      "description": "Display the difference measurement B-A in dBm or Watts.",
+      "set": true,
+      "query": false,
+      "examples": ["BD"]
+    },
+    {
+      "name": "Set A (active entry channel A)",
+      "mnemonic": "AE",
+      "category": "channel select",
+      "description": "Select channel A as the active entry channel so that subsequent per-sensor parameters (cal factor, offset, range, filter, limits) apply to sensor A. Front panel SET A.",
+      "set": true,
+      "query": false,
+      "examples": ["AE", "AEKB99EN"]
+    },
+    {
+      "name": "Set B (active entry channel B)",
+      "mnemonic": "BE",
+      "category": "channel select",
+      "description": "Select channel B as the active entry channel so that subsequent per-sensor parameters (cal factor, offset, range, filter, limits) apply to sensor B. Front panel SET B.",
+      "set": true,
+      "query": false,
+      "examples": ["BE", "BEKB99EN"]
+    },
+    {
+      "name": "Cal Factor",
+      "mnemonic": "KB",
+      "category": "calibration",
+      "description": "Enter the calibration factor (in percent) for the sensor on the active entry channel; compensates for sensor mismatch and effective efficiency versus frequency. Followed by value and EN. Pressing CAL FACTOR then ENTER with no data sets 100%.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "calFactor",
+          "units": "percent",
+          "range": "1.0 to 150.0"
+        }
+      ],
+      "examples": ["KB99EN", "AEKB98.5EN"]
+    },
+    {
+      "name": "Cal Adj (reference calibration factor)",
+      "mnemonic": "CL",
+      "category": "calibration",
+      "description": "Calibrate the meter and sensor to a reference. Enter the reference calibration factor (sensor cal factor at 50 MHz) in percent, followed by EN, to start the calibration cycle. A negative value calibrates to an external reference; a positive value calibrates to the internal 1.00 mW reference oscillator.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "refCalFactor",
+          "units": "percent",
+          "range": "50.0 to 120.0 (negative value selects external reference)"
+        }
+      ],
+      "examples": ["CL98.5EN", "AEZECL96EN"]
+    },
+    {
+      "name": "Zero",
+      "mnemonic": "ZE",
+      "category": "calibration",
+      "description": "Initiate the zeroing routine for the active entry channel (no RF power applied). Each sensor must be zeroed separately.",
+      "set": true,
+      "query": false,
+      "examples": ["ZE", "AEZE"]
+    },
+    {
+      "name": "Auto Range",
+      "mnemonic": "RA",
+      "category": "range",
+      "description": "Set the active entry channel to automatic ranging. PRESET default for both sensors.",
+      "set": true,
+      "query": false,
+      "examples": ["RA", "AERA"]
+    },
+    {
+      "name": "Manual Range",
+      "mnemonic": "RM",
+      "category": "range",
+      "description": "Set a manual range (1-5) for the active entry channel. Range 1 is most sensitive, range 5 least. Each range is 10 dB. Followed by range number and EN. RM then EN with no number selects range hold.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "range",
+          "units": "range number",
+          "range": "1 to 5"
+        }
+      ],
+      "examples": ["RM3EN", "AERM3EN"]
+    },
+    {
+      "name": "Range Hold",
+      "mnemonic": "RH",
+      "category": "range",
+      "description": "Hold the current range while switching from auto to manual range mode (retains the auto range setting).",
+      "set": true,
+      "query": false,
+      "examples": ["RH"]
+    },
+    {
+      "name": "Auto Filter",
+      "mnemonic": "FA",
+      "category": "filter",
+      "description": "Set the active entry channel to automatic digital filter (averaging) length selection. PRESET default for both sensors.",
+      "set": true,
+      "query": false,
+      "examples": ["FA", "AEFA"]
+    },
+    {
+      "name": "Manual Filter",
+      "mnemonic": "FM",
+      "category": "filter",
+      "description": "Manually set the digital filter (averaging) length for the active entry channel. Enter a filter number 0-9; the filter length is 2 raised to that number (1 to 512 readings). Followed by number and EN. FM then EN with no number selects hold filter.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "filterNumber",
+          "units": "exponent of 2 (length = 2^n, 1 to 512)",
+          "range": "0 to 9"
+        }
+      ],
+      "examples": ["FM7EN", "AEFM4EN"]
+    },
+    {
+      "name": "Filter Hold",
+      "mnemonic": "FH",
+      "category": "filter",
+      "description": "Hold the current filter length while switching from auto to manual filter mode (retains the auto filter setting).",
+      "set": true,
+      "query": false,
+      "examples": ["FH"]
+    },
+    {
+      "name": "Offset",
+      "mnemonic": "OS",
+      "category": "offset",
+      "description": "Enter a dB offset for the active entry channel; the meter converts to and adds the equivalent value to the measurement. Signed value followed by EN. Out-of-range entries generate Error 51 (OS Error).",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "offset",
+          "units": "dB",
+          "range": "-99.99 to +99.99 (0.01 dB increments)"
+        }
+      ],
+      "examples": ["OS10.5EN", "BEOS-20EN"]
+    },
+    {
+      "name": "Display Offset",
+      "mnemonic": "DO",
+      "category": "offset",
+      "description": "DSP - OFS: display the current offset value. Valid only when sent immediately after the OFFSET (OS) program code.",
+      "set": true,
+      "query": false,
+      "examples": ["BPOSDOEN"]
+    },
+    {
+      "name": "Low Limit",
+      "mnemonic": "LL",
+      "category": "limits",
+      "description": "Set the low limit for the active entry channel limits-checking function. Signed value (sxxx.xxx) in dBm followed by EN.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "lowLimit",
+          "units": "dBm",
+          "range": "signed value sxxx.xxx"
+        }
+      ],
+      "examples": ["LL10EN", "AELL10EN"]
+    },
+    {
+      "name": "High Limit",
+      "mnemonic": "LH",
+      "category": "limits",
+      "description": "Set the high limit for the active entry channel limits-checking function. Signed value (sxxx.xxx) in dBm followed by EN.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "highLimit",
+          "units": "dBm",
+          "range": "signed value sxxx.xxx"
+        }
+      ],
+      "examples": ["LH20EN", "AELL10ENLH20EN"]
+    },
+    {
+      "name": "Enable Limits Checking",
+      "mnemonic": "LM1",
+      "category": "limits",
+      "description": "Enable the limits-checking function using the current high and low limit values. PRESET disables limits checking.",
+      "set": true,
+      "query": false,
+      "examples": ["LM1", "AELL10ENLH20ENLM1"]
+    },
+    {
+      "name": "Disable Limits Checking",
+      "mnemonic": "LM0",
+      "category": "limits",
+      "description": "Disable the limits-checking function.",
+      "set": true,
+      "query": false,
+      "examples": ["LM0"]
+    },
+    {
+      "name": "Log Units (dB/dBm)",
+      "mnemonic": "LG",
+      "category": "units",
+      "description": "Select logarithmic display units: dBm for single-sensor/difference, dB for ratio/relative.",
+      "set": true,
+      "query": false,
+      "examples": ["LG"]
+    },
+    {
+      "name": "Linear Units (Watts/%)",
+      "mnemonic": "LN",
+      "category": "units",
+      "description": "Select linear display units: Watts for single-sensor/difference, percent for ratio/relative.",
+      "set": true,
+      "query": false,
+      "examples": ["LN"]
+    },
+    {
+      "name": "Enter REL mode",
+      "mnemonic": "RL1",
+      "category": "relative",
+      "description": "Enter relative measurement mode. The first reading taken becomes the reference; subsequent measurements are displayed relative to it.",
+      "set": true,
+      "query": false,
+      "examples": ["RL1"]
+    },
+    {
+      "name": "Exit REL mode",
+      "mnemonic": "RL0",
+      "category": "relative",
+      "description": "Exit relative measurement mode.",
+      "set": true,
+      "query": false,
+      "examples": ["RL0"]
+    },
+    {
+      "name": "Reference Oscillator On",
+      "mnemonic": "OC1",
+      "category": "calibration",
+      "description": "Turn the internal 1.00 mW (0 dBm) 50 MHz power reference oscillator on.",
+      "set": true,
+      "query": false,
+      "examples": ["OC1"]
+    },
+    {
+      "name": "Reference Oscillator Off",
+      "mnemonic": "OC0",
+      "category": "calibration",
+      "description": "Turn the internal power reference oscillator off. PRESET default is off.",
+      "set": true,
+      "query": false,
+      "examples": ["OC0"]
+    },
+    {
+      "name": "Enter",
+      "mnemonic": "EN",
+      "category": "entry",
+      "description": "Terminate a numeric entry. Required after the value for any program code that takes numeric data (CL, KB, OS, RM, FM, LL, LH, ST, RC).",
+      "set": true,
+      "query": false,
+      "examples": ["KB99EN", "RM3EN"]
+    },
+    {
+      "name": "Store",
+      "mnemonic": "ST",
+      "category": "memory",
+      "description": "Store the current instrument configuration into a register (1-19). Followed by register number and EN.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "register",
+          "units": "register number",
+          "range": "1 to 19"
+        }
+      ],
+      "examples": ["ST5EN"]
+    },
+    {
+      "name": "Recall",
+      "mnemonic": "RC",
+      "category": "memory",
+      "description": "Recall an instrument configuration from a register (0-19). Register 0 holds the previous configuration (RECALL 0 recovers from an entry error and is executed at power-up). Followed by register number and EN.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "register",
+          "units": "register number",
+          "range": "0 to 19"
+        }
+      ],
+      "examples": ["RC2EN", "RC0EN"]
+    },
+    {
+      "name": "Preset",
+      "mnemonic": "PR",
+      "category": "system",
+      "description": "Preset the Power Meter to its default state (auto range/filter both sensors, cal factor 100%, offset/limits 0, REL off, reference oscillator off, units Watts, free-run trigger). The Clear message (DCL/SDC) produces the same result.",
+      "set": true,
+      "query": false,
+      "examples": ["PR"]
+    },
+    {
+      "name": "Display All",
+      "mnemonic": "DA",
+      "category": "display",
+      "description": "Display all segments (front panel display test).",
+      "set": true,
+      "query": false,
+      "examples": ["DA"]
+    },
+    {
+      "name": "Display Disable",
+      "mnemonic": "DD",
+      "category": "display",
+      "description": "Disable (blank) the front panel display.",
+      "set": true,
+      "query": false,
+      "examples": ["DD"]
+    },
+    {
+      "name": "Display Enable",
+      "mnemonic": "DE",
+      "category": "display",
+      "description": "Enable (restore) the front panel display.",
+      "set": true,
+      "query": false,
+      "examples": ["DE"]
+    },
+    {
+      "name": "Trigger Hold",
+      "mnemonic": "TR0",
+      "category": "trigger",
+      "description": "Trigger hold: stop taking measurements (hold the current measurement).",
+      "set": true,
+      "query": false,
+      "examples": ["TR0"]
+    },
+    {
+      "name": "Trigger Immediate",
+      "mnemonic": "TR1",
+      "category": "trigger",
+      "description": "Trigger immediate: take one measurement immediately (without waiting for the meter to settle) and output the result.",
+      "set": true,
+      "query": false,
+      "examples": ["TR1"]
+    },
+    {
+      "name": "Trigger with Delay",
+      "mnemonic": "TR2",
+      "category": "trigger",
+      "description": "Trigger with delay: take one settled measurement (wait for the meter to settle) and output the result.",
+      "set": true,
+      "query": false,
+      "examples": ["TR2"]
+    },
+    {
+      "name": "Trigger Free Run",
+      "mnemonic": "TR3",
+      "category": "trigger",
+      "description": "Free-run trigger: continuously take measurements. PRESET/power-up default trigger mode.",
+      "set": true,
+      "query": false,
+      "examples": ["TR3"]
+    },
+    {
+      "name": "GET response: Trigger Hold/Ignore",
+      "mnemonic": "GT0",
+      "category": "trigger",
+      "description": "Set the Group Execute Trigger (GET) bus command to be ignored.",
+      "set": true,
+      "query": false,
+      "examples": ["GT0"]
+    },
+    {
+      "name": "GET response: Trigger Immediate",
+      "mnemonic": "GT1",
+      "category": "trigger",
+      "description": "Set the meter to respond to the Group Execute Trigger (GET) bus command with Trigger Immediate (TR1).",
+      "set": true,
+      "query": false,
+      "examples": ["GT1"]
+    },
+    {
+      "name": "GET response: Trigger with Delay",
+      "mnemonic": "GT2",
+      "category": "trigger",
+      "description": "Set the meter to respond to the Group Execute Trigger (GET) bus command with Trigger with Delay (TR2). PRESET/turn-on default.",
+      "set": true,
+      "query": false,
+      "examples": ["GT2"]
+    },
+    {
+      "name": "Status Message",
+      "mnemonic": "SM",
+      "category": "status",
+      "description": "Request the Status Message. After SM and when addressed to talk, the meter sends a string of 23 ASCII characters (followed by CR, LF, EOI) describing its current state. Updated only after a measurement.",
+      "set": false,
+      "query": true,
+      "examples": ["SM"]
+    },
+    {
+      "name": "Clear Status Byte",
+      "mnemonic": "CS",
+      "category": "status",
+      "description": "Clear the status byte (status bits remain set until the status byte is cleared).",
+      "set": true,
+      "query": false,
+      "examples": ["CS"]
+    },
+    {
+      "name": "Service Request Mask",
+      "mnemonic": "@1",
+      "category": "status",
+      "description": "Prefix for the Service Request Mask. Followed by an 8-bit byte (Data message) whose value is the sum of the weights of the status-byte condition bits (1-5) to be enabled for SRQ: Data Ready (1), Cal/Zero Complete (2), Entry Error (4), Measurement Error (8), Over/Under Limit (16).",
+      "set": true,
+      "query": false,
+      "parameters": [
+        {
+          "name": "maskByte",
+          "units": "8-bit value (sum of enabled bit weights)",
+          "range": "0 to 255"
+        }
+      ],
+      "examples": ["@1,4"]
+    },
+    {
+      "name": "Service Request Mask Value",
+      "mnemonic": "RV",
+      "category": "status",
+      "description": "Request the Service Request Mask Value. After RV and when addressed to talk, the meter returns 1 byte (EOI) giving the current mask value.",
+      "set": false,
+      "query": true,
+      "examples": ["RV"]
+    },
+    {
+      "name": "Learn Mode #1",
+      "mnemonic": "LP1",
+      "category": "memory",
+      "description": "Learn Mode #1: when addressed to talk after LP1, the meter outputs an ASCII string describing its current configuration (see Learn Mode #1 output format).",
+      "set": false,
+      "query": true,
+      "examples": ["LP1"]
+    },
+    {
+      "name": "Learn Mode #2",
+      "mnemonic": "LP2",
+      "category": "memory",
+      "description": "Learn Mode #2: when addressed to talk after LP2, the meter outputs the 2 ASCII characters '@2' followed by 28 8-bit binary bytes (the last byte sent with EOI) describing its configuration. Requires a controller able to transfer binary data; the data can be returned to the meter to restore the configuration.",
+      "set": false,
+      "query": true,
+      "examples": ["LP2"]
+    },
+    {
+      "name": "Identification",
+      "mnemonic": "?ID",
+      "category": "system",
+      "description": "Identification query. When addressed to talk after ?ID, the meter returns 'HP438A,VERX.XX' (CR/LF, EOI), giving the model number and firmware version.",
+      "set": false,
+      "query": true,
+      "examples": ["?ID"]
+    }
+  ]
+}

@@ -1,0 +1,663 @@
+{
+  "model": "8673B",
+  "manufacturer": "HP",
+  "category": "Signal Generator",
+  "description": "HP 8673B synthesized signal generator (microwave, 2.0 to 26.0 GHz; 1.95 to 26.5 GHz overrange). Legacy HP-IB (IEEE-488) instrument, NOT SCPI, and has NO identify query. All functions except the LINE switch are HP-IB programmable. Program codes are typically 2-character mnemonics, each normally equivalent to a front-panel keystroke. A Data (program) message is built as [Program Code][Numeric Value][Units Terminator][EOS], or [Program Code][Numeric Value][EOS], or [Program Code][EOS]. End-of-String (EOS) may be Line Feed (LF), semicolon, or bus END (EOI). Units terminators scale the numeric value: frequency in GZ (GHz), MZ (MHz), KZ (kHz) or HZ (Hz); dwell time in MS (milliseconds); power in DB or DM (dBm). Alpha characters may be upper, lower or mixed case; spaces, unnecessary signs, leading zeros and CR are ignored. Default Immediate Execution mode (set by @3); Deferred Execution mode set by @2. Value-selectable parameters may be read back by appending OA (Output Active) to the program code and addressing the instrument to talk. Interface function codes: SH1, AH1, T5, TE0, L3, LE0, SR1.",
+  "source": "8673B User.pdf",
+  "aliases": ["8673B", "HP8673B"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "FR",
+      "category": "Frequency",
+      "description": "Set CW frequency (preferred code FR; CF or CW also accepted). CW also turns off any active sweep mode. Followed by numeric value and units terminator (GZ/MZ/KZ/HZ). Range 2.0 to 26.0 GHz. Read back the set CW frequency with FROA (returned in Hz); read the current RF output frequency with OK.",
+      "set": "FR<value><units>",
+      "query": "FROA",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz (1.95 to 26.5 GHz overrange)" }
+      ],
+      "examples": ["FR16.232334GZ", "FR16232.334MZ"]
+    },
+    {
+      "name": "frequency_increment",
+      "mnemonic": "FI",
+      "category": "Frequency",
+      "description": "Set the frequency increment (step) used by UP/DN tuning (preferred code FI; FN or Fl also accepted). Followed by numeric value and units terminator.",
+      "set": "FI<value><units>",
+      "parameters": [
+        { "name": "increment", "units": ["GZ", "MZ", "KZ", "HZ"] }
+      ],
+      "examples": ["FI1.5MZ", "FI1500KZ"]
+    },
+    {
+      "name": "increment_up",
+      "mnemonic": "UP",
+      "category": "Frequency",
+      "description": "Increment CW (or center) frequency by the frequency increment; in MANUAL sweep mode increments by the step size. One step per code received; send multiple codes to step multiple times.",
+      "set": "UP",
+      "examples": ["UP", "UPUPUP"]
+    },
+    {
+      "name": "increment_down",
+      "mnemonic": "DN",
+      "category": "Frequency",
+      "description": "Decrement CW (or center) frequency by the frequency increment; in MANUAL sweep mode decrements by the step size. One step per code received; send multiple codes to step multiple times.",
+      "set": "DN",
+      "examples": ["DN", "DNDNDNDN"]
+    },
+    {
+      "name": "tune_knob_off",
+      "mnemonic": "N0",
+      "category": "Frequency",
+      "description": "Disable the front-panel TUNE knob (N0 or NO).",
+      "set": "N0",
+      "examples": ["N0"]
+    },
+    {
+      "name": "tune_knob_on",
+      "mnemonic": "N1",
+      "category": "Frequency",
+      "description": "Enable the front-panel TUNE knob (active in local mode only).",
+      "set": "N1",
+      "examples": ["N1"]
+    },
+    {
+      "name": "offset_frequency",
+      "mnemonic": "FT",
+      "category": "Frequency",
+      "description": "Set frequency offset for downconverter/harmonic-mixing applications (preferred code FT; FO also accepted). Positive offset needs no sign. Entering an offset of zero deactivates offset mode. The offset is not multiplied by the display multiplier.",
+      "set": "FT<value><units>",
+      "parameters": [
+        { "name": "offset", "units": ["GZ", "MZ", "KZ", "HZ"] }
+      ],
+      "examples": ["FT63.238MZ", "FT-63238KZ"]
+    },
+    {
+      "name": "display_multiplier",
+      "mnemonic": "MU",
+      "category": "Frequency",
+      "description": "Set the display frequency multiplier (MU or MY) followed by the multiplier number and the XF terminator. All frequencies (except offset) are multiplied by this value for display.",
+      "set": "MU<value>XF",
+      "parameters": [
+        { "name": "multiplier", "units": "XF", "range": "1 to 99" }
+      ],
+      "examples": ["MY2XF", "MU2XF"]
+    },
+    {
+      "name": "rf_output_level",
+      "mnemonic": "LE",
+      "category": "Amplitude",
+      "description": "Set RF output level directly (preferred code LE; AP or PL also accepted). Followed by numeric value and power units terminator DB or DM (dBm). Settable range approximately -100 to +13 dBm. Read back with LEOA.",
+      "set": "LE<value>DM",
+      "query": "LEOA",
+      "parameters": [
+        { "name": "level", "units": ["DB", "DM"], "range": "approx -100 to +13 dBm" }
+      ],
+      "examples": ["LE-56DM", "LE-6DM"]
+    },
+    {
+      "name": "output_level_range",
+      "mnemonic": "RA",
+      "category": "Amplitude",
+      "description": "Set output level RANGE (step attenuator), in 10 dB steps from +10 to -90 dB. The 0 to -90 dB ranges directly control a 90 dB step attenuator. Used with the VERNIER to set output level separately from the direct LE code.",
+      "set": "RA<value>DB",
+      "parameters": [
+        { "name": "range", "units": ["DB", "DM"], "range": "+10 to -90 dB in 10 dB steps" }
+      ],
+      "examples": ["RA-50DB", "RA-50DBVE-6DM"]
+    },
+    {
+      "name": "output_level_vernier",
+      "mnemonic": "VE",
+      "category": "Amplitude",
+      "description": "Set the VERNIER (ALC) level setting. Continuously variable -10 to +3 dBm (ALC controls -10 to +13 dBm); remote DAC resolution is 0.1 dB. Used together with RANGE (RA) to set output level.",
+      "set": "VE<value>DM",
+      "parameters": [
+        { "name": "vernier", "units": ["DB", "DM"], "range": "-10 to +3 dBm continuously variable" }
+      ],
+      "examples": ["VE-6DM", "RA-50DBVE-6DM"]
+    },
+    {
+      "name": "range_down",
+      "mnemonic": "RD",
+      "category": "Amplitude",
+      "description": "Decrease RANGE (output level) by 10 dB.",
+      "set": "RD",
+      "examples": ["RD"]
+    },
+    {
+      "name": "range_up",
+      "mnemonic": "RU",
+      "category": "Amplitude",
+      "description": "Increase RANGE (output level) by 10 dB.",
+      "set": "RU",
+      "examples": ["RU"]
+    },
+    {
+      "name": "rf_output_off",
+      "mnemonic": "RF0",
+      "category": "RF Output",
+      "description": "Turn the RF output off (RF0 or RO).",
+      "set": "RF0",
+      "examples": ["RF0", "RO"]
+    },
+    {
+      "name": "rf_output_on",
+      "mnemonic": "RF1",
+      "category": "RF Output",
+      "description": "Turn the RF output on (RF1 or R1). Turning on the RF output starts an Auto Peak operation; monitor the SOURCE SETTLED status bit for completion.",
+      "set": "RF1",
+      "examples": ["RF1", "R1"]
+    },
+    {
+      "name": "am_off",
+      "mnemonic": "A1",
+      "category": "Modulation",
+      "description": "Turn amplitude modulation off (A0/AO or A1).",
+      "set": "A1",
+      "examples": ["A1", "A0"]
+    },
+    {
+      "name": "am_30_percent",
+      "mnemonic": "A2",
+      "category": "Modulation",
+      "description": "Select the 30% AM-per-volt depth range. Actual AM depth is set by the amplitude of the external modulation source at the AM IN connector.",
+      "set": "A2",
+      "examples": ["A2"]
+    },
+    {
+      "name": "am_100_percent",
+      "mnemonic": "A3",
+      "category": "Modulation",
+      "description": "Select the 100% AM-per-volt depth range. Actual AM depth is set by the amplitude of the external modulation source at the AM IN connector.",
+      "set": "A3",
+      "examples": ["A3"]
+    },
+    {
+      "name": "fm_off",
+      "mnemonic": "D1",
+      "category": "Modulation",
+      "description": "Turn frequency modulation off (D0/DO or D1).",
+      "set": "D1",
+      "examples": ["D1", "D0"]
+    },
+    {
+      "name": "fm_deviation",
+      "mnemonic": "D2",
+      "category": "Modulation",
+      "description": "Select the FM peak-deviation range. D2=0.03 MHz, D3=0.1 MHz, D4=0.3 MHz, D5=1 MHz, D6=3 MHz, D7=10 MHz. Actual deviation is set by the amplitude of the external modulating signal at the FM IN connector.",
+      "set": "D<n>",
+      "parameters": [
+        { "name": "range", "units": "MHz", "range": "D2=0.03, D3=0.1, D4=0.3, D5=1, D6=3, D7=10 MHz" }
+      ],
+      "examples": ["D3", "D7"]
+    },
+    {
+      "name": "pulse_off",
+      "mnemonic": "P1",
+      "category": "Modulation",
+      "description": "Turn pulse modulation off (P0/PO or P1).",
+      "set": "P1",
+      "examples": ["P1", "P0"]
+    },
+    {
+      "name": "pulse_normal",
+      "mnemonic": "P2",
+      "category": "Modulation",
+      "description": "Select pulse normal mode. Pulse modulation is TTL-level compatible at the PULSE IN connector.",
+      "set": "P2",
+      "examples": ["P2"]
+    },
+    {
+      "name": "pulse_complement",
+      "mnemonic": "P3",
+      "category": "Modulation",
+      "description": "Select pulse complement mode.",
+      "set": "P3",
+      "examples": ["P3"]
+    },
+    {
+      "name": "sweep_off",
+      "mnemonic": "W1",
+      "category": "Sweep",
+      "description": "Turn sweep mode off (W0/WO or W1).",
+      "set": "W1",
+      "examples": ["W1", "W0"]
+    },
+    {
+      "name": "auto_sweep",
+      "mnemonic": "W2",
+      "category": "Sweep",
+      "description": "Select automatic (repetitive) sweep mode. Steps the RF output from start frequency to stop frequency and repeats.",
+      "set": "W2",
+      "examples": ["W2"]
+    },
+    {
+      "name": "manual_sweep",
+      "mnemonic": "W3",
+      "category": "Sweep",
+      "description": "Select manual sweep mode (W3; SM also documented). Limits the tuning range between start and stop frequency; use IF / UP / DN to step.",
+      "set": "W3",
+      "examples": ["W3"]
+    },
+    {
+      "name": "single_sweep_arm_execute",
+      "mnemonic": "W4",
+      "category": "Sweep",
+      "description": "Single sweep: arm, or execute if already armed.",
+      "set": "W4",
+      "examples": ["W4"]
+    },
+    {
+      "name": "single_sweep_arm_only",
+      "mnemonic": "W5",
+      "category": "Sweep",
+      "description": "Single sweep: arm only (does not execute immediately). Follow with W4 to execute.",
+      "set": "W5",
+      "examples": ["W5"]
+    },
+    {
+      "name": "single_sweep_arm_and_begin",
+      "mnemonic": "W6",
+      "category": "Sweep",
+      "description": "Single sweep: arm and begin (perform one sweep immediately).",
+      "set": "W6",
+      "examples": ["W6"]
+    },
+    {
+      "name": "master_sweep",
+      "mnemonic": "W7",
+      "category": "Sweep",
+      "description": "Select master sweep mode (master/slave sweep configuration).",
+      "set": "W7",
+      "examples": ["W7"]
+    },
+    {
+      "name": "slave_sweep",
+      "mnemonic": "W8",
+      "category": "Sweep",
+      "description": "Select slave sweep mode (master/slave sweep configuration).",
+      "set": "W8",
+      "examples": ["W8"]
+    },
+    {
+      "name": "reset_sweep",
+      "mnemonic": "RS",
+      "category": "Sweep",
+      "description": "Reset the sweep.",
+      "set": "RS",
+      "examples": ["RS"]
+    },
+    {
+      "name": "center_frequency",
+      "mnemonic": "CF",
+      "category": "Sweep",
+      "description": "Set the sweep center frequency (preferred code CF; FR also accepted). Followed by numeric value and units terminator. Read back with CFOA (returned in Hz).",
+      "set": "CF<value><units>",
+      "query": "CFOA",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+      ],
+      "examples": ["CF16.232334GZ", "CF16232.334MZ"]
+    },
+    {
+      "name": "delta_frequency",
+      "mnemonic": "DF",
+      "category": "Sweep",
+      "description": "Set the sweep delta frequency (span). Followed by numeric value and units terminator. Read back with DFOA (returned in Hz). Setting delta frequency does not change the CW frequency when sweep is off.",
+      "set": "DF<value><units>",
+      "query": "DFOA",
+      "parameters": [
+        { "name": "span", "units": ["GZ", "MZ", "KZ", "HZ"] }
+      ],
+      "examples": ["DF4.5GZ", "DF4500MZ"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Sweep",
+      "description": "Set the sweep start frequency. Followed by numeric value and units terminator.",
+      "set": "FA<value><units>",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+      ],
+      "examples": ["FA16.232334GZ", "FA16232.334MZ"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Sweep",
+      "description": "Set the sweep stop frequency. Followed by numeric value and units terminator. Setting stop lower than start produces a negative (down) sweep span.",
+      "set": "FB<value><units>",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+      ],
+      "examples": ["FB16.232334GZ", "FB16232.334MZ"]
+    },
+    {
+      "name": "sweep_steps_and_size",
+      "mnemonic": "SP",
+      "category": "Sweep",
+      "description": "Set the number of sweep steps or the sweep step size, both using code SP (SS interchangeable). With the SS units terminator the value is the number of sweep steps (1 to 9999). With a frequency units terminator (GZ/MZ/KZ/HZ) the value is the sweep step size. Read back step size and number of steps with SPOA, which returns: SP <step size> HZ, SP <number of steps> SS.",
+      "set": "SP<value><units>",
+      "query": "SPOA",
+      "parameters": [
+        { "name": "value", "units": ["SS", "GZ", "MZ", "KZ", "HZ"], "range": "number of steps 1 to 9999, or step size in frequency units" }
+      ],
+      "examples": ["SP350SS", "SP455KZ"]
+    },
+    {
+      "name": "dwell_time",
+      "mnemonic": "DW",
+      "category": "Sweep",
+      "description": "Set the sweep dwell time per step. Followed by numeric value and the MS units terminator. Read back with DWOA.",
+      "set": "DW<value>MS",
+      "query": "DWOA",
+      "parameters": [
+        { "name": "dwell", "units": "MS", "range": "1 to 255 ms per step" }
+      ],
+      "examples": ["DW20MS"]
+    },
+    {
+      "name": "increment_frequency_sweep",
+      "mnemonic": "IF",
+      "category": "Sweep",
+      "description": "Increment frequency in MANUAL sweep mode only (see manual sweep).",
+      "set": "IF",
+      "examples": ["IF"]
+    },
+    {
+      "name": "markers_off",
+      "mnemonic": "M0",
+      "category": "Sweep",
+      "description": "Turn all sweep markers off (M0/MO or X0/XO).",
+      "set": "M0",
+      "examples": ["M0", "X0"]
+    },
+    {
+      "name": "marker_activate",
+      "mnemonic": "M1",
+      "category": "Sweep",
+      "description": "Activate sweep marker 1-5 (M1-M5, or X1-X5). When followed by a frequency value and units terminator, sets that marker's frequency.",
+      "set": "M<n>",
+      "parameters": [
+        { "name": "marker", "range": "1 to 5 (M1-M5 / X1-X5)" }
+      ],
+      "examples": ["M1", "M3"]
+    },
+    {
+      "name": "marker_frequency",
+      "mnemonic": "M3",
+      "category": "Sweep",
+      "description": "Set a sweep marker frequency: marker identifier (M1-M5 or X1-X5) followed by the frequency value and units terminator (GZ/MZ/KZ/HZ).",
+      "set": "M<n><value><units>",
+      "parameters": [
+        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+      ],
+      "examples": ["M312.34GZ", "M312340MZ"]
+    },
+    {
+      "name": "step",
+      "mnemonic": "SF",
+      "category": "Sweep",
+      "description": "STEP function code (SF; SP also documented for STEP). Used in step/sweep operations.",
+      "set": "SF",
+      "examples": ["SF"]
+    },
+    {
+      "name": "auto_peak_off",
+      "mnemonic": "K0",
+      "category": "Control",
+      "description": "Turn AUTO PEAK off.",
+      "set": "K0",
+      "examples": ["K0"]
+    },
+    {
+      "name": "auto_peak_on",
+      "mnemonic": "K1",
+      "category": "Control",
+      "description": "Turn AUTO PEAK on. K2 enables AUTO PEAK without the extra settling time.",
+      "set": "K1",
+      "examples": ["K1", "K2"]
+    },
+    {
+      "name": "meter_level",
+      "mnemonic": "T1",
+      "category": "Control",
+      "description": "Set the front-panel meter to LVL (output level) mode.",
+      "set": "T1",
+      "examples": ["T1"]
+    },
+    {
+      "name": "meter_am",
+      "mnemonic": "T2",
+      "category": "Control",
+      "description": "Set the front-panel meter to AM (depth) mode.",
+      "set": "T2",
+      "examples": ["T2"]
+    },
+    {
+      "name": "meter_fm",
+      "mnemonic": "T3",
+      "category": "Control",
+      "description": "Set the front-panel meter to FM (deviation) mode.",
+      "set": "T3",
+      "examples": ["T3"]
+    },
+    {
+      "name": "instrument_preset",
+      "mnemonic": "IP",
+      "category": "System",
+      "description": "Preset the instrument to its register-0 (default) state (IP, or RC0 / RCO). RCBS selects the alternate preset (firmware 2552A, 2634A and above).",
+      "set": "IP",
+      "examples": ["IP", "RC0"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "ST",
+      "category": "System",
+      "description": "Store the current instrument state into a storage register. Followed by the register number (1-9).",
+      "set": "ST<n>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["ST1"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "System",
+      "description": "Recall an instrument state from a storage register (RC or RL). Followed by the register number (1-9); RC0 presets the instrument.",
+      "set": "RC<n>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9 (0 = preset)" }
+      ],
+      "examples": ["RC1", "RL1"]
+    },
+    {
+      "name": "freq_display_off",
+      "mnemonic": "Y0",
+      "category": "System",
+      "description": "Turn the FREQUENCY display off.",
+      "set": "Y0",
+      "examples": ["Y0"]
+    },
+    {
+      "name": "freq_display_on",
+      "mnemonic": "Y1",
+      "category": "System",
+      "description": "Turn the FREQUENCY display on.",
+      "set": "Y1",
+      "examples": ["Y1"]
+    },
+    {
+      "name": "message",
+      "mnemonic": "MG",
+      "category": "Status",
+      "description": "Read the MESSAGE (error/malfunction code). After sending MG and addressing the instrument to talk, it returns a two-digit ASCII code followed by LF and EOI. Reading the message clears it to 00 (No Error).",
+      "set": "MG",
+      "query": "MG",
+      "examples": ["MG"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "CS",
+      "category": "Status",
+      "description": "Clear the status byte and extended status byte.",
+      "set": "CS",
+      "examples": ["CS", "CSK1"]
+    },
+    {
+      "name": "output_status",
+      "mnemonic": "OS",
+      "category": "Status",
+      "description": "Output the status byte and extended status byte (2 binary bytes with EOI) when addressed to talk.",
+      "set": "OS",
+      "query": "OS",
+      "examples": ["OS"]
+    },
+    {
+      "name": "output_request_mask",
+      "mnemonic": "OR",
+      "category": "Status",
+      "description": "Output the Request (RQS) mask in binary (1 byte with EOI) when addressed to talk.",
+      "set": "OR",
+      "query": "OR",
+      "examples": ["OR"]
+    },
+    {
+      "name": "set_request_mask",
+      "mnemonic": "RM",
+      "category": "Status",
+      "description": "Set the service-request (RQS) mask, in binary (prefix RM, or @1).",
+      "set": "RM<mask>",
+      "parameters": [
+        { "name": "mask" }
+      ],
+      "examples": ["RM"]
+    },
+    {
+      "name": "configure_trigger",
+      "mnemonic": "CT",
+      "category": "Trigger",
+      "description": "Configure the instrument's response to a Trigger message. CT is followed by one valid program code; that code is executed when a Trigger (bus GET or TR) message is received. Example: CTW6 performs a single sweep on trigger.",
+      "set": "CT<programcode>",
+      "parameters": [
+        { "name": "programcode" }
+      ],
+      "examples": ["CTW6", "CTDN"]
+    },
+    {
+      "name": "execute_trigger",
+      "mnemonic": "TR",
+      "category": "Trigger",
+      "description": "Execute the pre-configured trigger response (Data-message equivalent of the bus Group Execute Trigger). Acts only if a response was set via Configure Trigger (CT).",
+      "set": "TR",
+      "examples": ["TR"]
+    },
+    {
+      "name": "output_active_parameter",
+      "mnemonic": "OA",
+      "category": "Query",
+      "description": "Output Active Parameter suffix. Append OA to a value-selectable program code (e.g. CFOA, FROA, FAOA, FBOA, FSOA, M1OA-M5OA, DWOA, LEOA, VEOA, RAOA) then address to talk to read its current value as [Program Code][Numeric Value][Units Terminator][LF and EOI]. SPOA returns step size and number of steps.",
+      "query": "<code>OA",
+      "examples": ["CFOA", "LEOA"]
+    },
+    {
+      "name": "output_lock_frequency",
+      "mnemonic": "OK",
+      "category": "Query",
+      "description": "Output the current RF output (locked) frequency. After sending OK and addressing to talk, returns FR <value> Hz [LF and EOI]. Should not be used while sweeping.",
+      "set": "OK",
+      "query": "OK",
+      "examples": ["OK"]
+    },
+    {
+      "name": "output_couple",
+      "mnemonic": "OC",
+      "category": "Query",
+      "description": "Output Couple. When addressed to talk after OC, returns the current numeric values for [START], [Center Frequency], [DWELL] (start and center in Hz, dwell in ms) followed by LF and EOI.",
+      "set": "OC",
+      "query": "OC",
+      "examples": ["OC"]
+    },
+    {
+      "name": "front_panel_learn_mode",
+      "mnemonic": "L1",
+      "category": "System",
+      "description": "Front Panel Learn Mode (L1; OL also documented). When addressed to talk, the instrument sends @A followed by a 94-byte binary front-panel configuration string (96 bytes total) with EOI. The same binary string can be sent back (after @A) to restore the state.",
+      "set": "L1",
+      "query": "L1",
+      "examples": ["L1"]
+    },
+    {
+      "name": "special_function_learn_mode",
+      "mnemonic": "L2",
+      "category": "System",
+      "description": "Special Function Learn Mode (service). When addressed to talk, the instrument sends @9 followed by a 26-byte binary string with EOI. See Service documentation.",
+      "set": "L2",
+      "query": "L2",
+      "examples": ["L2"]
+    },
+    {
+      "name": "test_interface",
+      "mnemonic": "TI",
+      "category": "System",
+      "description": "Test Interface (service). Followed by 1 byte; when addressed to talk the instrument echoes the byte just received (1 byte with EOI).",
+      "set": "TI<byte>",
+      "parameters": [
+        { "name": "byte" }
+      ],
+      "examples": ["TI"]
+    },
+    {
+      "name": "service_function",
+      "mnemonic": "SV",
+      "category": "System",
+      "description": "Service Function code (SV). Service/diagnostic use.",
+      "set": "SV",
+      "examples": ["SV"]
+    },
+    {
+      "name": "immediate_execution_mode",
+      "mnemonic": "@3",
+      "category": "System",
+      "description": "Select Immediate Execution mode (default at turn-on). Each ASCII character is processed before the next is accepted; the instrument produces its own EOS after each character.",
+      "set": "@3",
+      "examples": ["@3"]
+    },
+    {
+      "name": "deferred_execution_mode",
+      "mnemonic": "@2",
+      "category": "System",
+      "description": "Select Deferred Execution mode. The instrument accepts strings up to 96 characters and executes upon receiving an EOS (LF, semicolon, bus END, or @). Faster transfers for fast controllers.",
+      "set": "@2",
+      "examples": ["@2"]
+    },
+    {
+      "name": "slave_up",
+      "mnemonic": "SU",
+      "category": "Sweep",
+      "description": "Slave Up (master/slave sweep coordination).",
+      "set": "SU",
+      "examples": ["SU"]
+    },
+    {
+      "name": "slave_down",
+      "mnemonic": "SD",
+      "category": "Sweep",
+      "description": "Slave Down (master/slave sweep coordination).",
+      "set": "SD",
+      "examples": ["SD"]
+    },
+    {
+      "name": "backspace",
+      "mnemonic": "BS",
+      "category": "System",
+      "description": "Backspace during numeric entry (firmware 2552A, 2634A and above).",
+      "set": "BS",
+      "examples": ["BS"]
+    }
+  ]
+}

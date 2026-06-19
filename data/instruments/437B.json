@@ -1,0 +1,711 @@
+{
+  "model": "437B",
+  "manufacturer": "HP",
+  "category": "RF Power Meter",
+  "description": "HP 437B programmable single-channel average-power meter, controlled over HP-IB (IEEE-488.1) using the alphanumeric 437B command code. Each command is a two- (or three-) letter ASCII mnemonic; commands that take a numeric value are terminated with EN (ENTER), the % sign, or PCT. Supports 10 user sensor cal-factor tables, frequency-based cal factor selection, dBm/Watt/relative display, offset, duty cycle, limits, manual/auto range and filter, zero/cal, remote triggering and a status-byte/SRQ model. Many codes are HP 438A compatible. The default HP-IB address is 13.",
+  "source": "437B-UM.pdf",
+  "aliases": ["437B", "HP437B"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "437B",
+    "description": "Identification query. After receiving program code *IDN? (or ID) and when addressed to talk, the meter returns the string 'HEWLETT-PACKARD, 437B,, X.X' where 437B is the model number and X.X is the firmware version."
+  },
+  "commands": [
+    {
+      "name": "identify",
+      "mnemonic": "ID",
+      "category": "System",
+      "description": "HP-IB identification query. Returns the string 'HEWLETT-PACKARD, 437B,, X.X' (model number and firmware version). *IDN? is the equivalent IEEE-488.2 style query.",
+      "set": false,
+      "query": true,
+      "examples": ["ID", "*IDN?"]
+    },
+    {
+      "name": "calibrate",
+      "mnemonic": "CL",
+      "category": "Calibration",
+      "description": "Calibrate the power meter and sensor to the 1 mW reference. Send CL followed by the sensor REF CAL FACTOR (percent) terminated by EN, % or PCT. The 50 MHz reference oscillator is enabled automatically for the duration of the routine. Allowable REF CAL FACTOR range is 50.0 to 120.0%.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "ref_cal_factor", "units": "%", "range": "50.0 to 120.0" }
+      ],
+      "examples": ["CL98.5EN", "CL98.5%"]
+    },
+    {
+      "name": "zero",
+      "mnemonic": "ZE",
+      "category": "Calibration",
+      "description": "Zero the power meter's internal circuitry on all five ranges for a zero indication with no power applied to the sensor. No power must be applied while zeroing (typically 5-20 seconds).",
+      "set": true,
+      "query": false,
+      "examples": ["ZE"]
+    },
+    {
+      "name": "cal_factor",
+      "mnemonic": "KB",
+      "category": "Calibration",
+      "description": "Enter the sensor calibration factor (in percent) used for actual measurements. Send KB followed by the cal factor value and a terminator (%, PCT or EN). Valid entries 1.0 to 150.0%; remote data is rounded to the required resolution.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "cal_factor", "units": "%", "range": "1.0 to 150.0" }
+      ],
+      "examples": ["KB99.9%", "KB95.0EN"]
+    },
+    {
+      "name": "frequency",
+      "mnemonic": "FR",
+      "category": "Measurement",
+      "description": "Enter the input signal frequency, which causes the meter to select a sensor-specific calibration factor from the selected sensor data table (interpolating if needed). Send FR followed by the value and a frequency-units code GZ, MZ, KZ or HZ. Allowable range 0.0001 to 999.9999 GHz with 100 kHz resolution. PRESET sets FREQ to 50 MHz.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "frequency", "units": "GHz/MHz/kHz/Hz (GZ|MZ|KZ|HZ)", "range": "0.0001 to 999.9999 GHz" }
+      ],
+      "examples": ["FR300MZ", "FR1.0GZ"]
+    },
+    {
+      "name": "units_hz",
+      "mnemonic": "HZ",
+      "category": "Measurement",
+      "description": "Hertz frequency-units terminator used after a numeric frequency value (e.g. with FR).",
+      "set": true,
+      "query": false,
+      "examples": ["FR50000000HZ"]
+    },
+    {
+      "name": "units_khz",
+      "mnemonic": "KZ",
+      "category": "Measurement",
+      "description": "Kilohertz frequency-units terminator used after a numeric frequency value (e.g. with FR).",
+      "set": true,
+      "query": false,
+      "examples": ["FR50000KZ"]
+    },
+    {
+      "name": "units_mhz",
+      "mnemonic": "MZ",
+      "category": "Measurement",
+      "description": "Megahertz frequency-units terminator used after a numeric frequency value (e.g. with FR).",
+      "set": true,
+      "query": false,
+      "examples": ["FR300MZ"]
+    },
+    {
+      "name": "units_ghz",
+      "mnemonic": "GZ",
+      "category": "Measurement",
+      "description": "Gigahertz frequency-units terminator used after a numeric frequency value (e.g. with FR).",
+      "set": true,
+      "query": false,
+      "examples": ["FR1.0GZ"]
+    },
+    {
+      "name": "log_display",
+      "mnemonic": "LG",
+      "category": "Measurement",
+      "description": "Select logarithmic (dBm) display/measurement units. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["LG"]
+    },
+    {
+      "name": "linear_display",
+      "mnemonic": "LN",
+      "category": "Measurement",
+      "description": "Select linear (Watts) display/measurement units. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["LN"]
+    },
+    {
+      "name": "resolution",
+      "mnemonic": "RE",
+      "category": "Measurement",
+      "description": "Set display resolution. Send RE followed by the resolution number (1-3) and EN. RES1 = 0.1 dB / 1% full scale, RES2 = 0.01 dB / 0.1% FS, RES3 = 0.001 dB / 0.01% FS. PRESET sets RES2. Setting resolution also enables auto filter.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "resolution", "units": "", "range": "1 to 3" }
+      ],
+      "examples": ["RE2EN", "RE3EN"]
+    },
+    {
+      "name": "rel_disable",
+      "mnemonic": "RL0",
+      "category": "Measurement",
+      "description": "Disable relative (REL) mode. Relative mode compares measurements in dB or % to a stored reference value.",
+      "set": true,
+      "query": false,
+      "examples": ["RL0"]
+    },
+    {
+      "name": "rel_enable_current",
+      "mnemonic": "RL1",
+      "category": "Measurement",
+      "description": "Enter REL mode using the CURRENT displayed reading as the new reference value.",
+      "set": true,
+      "query": false,
+      "examples": ["RL1"]
+    },
+    {
+      "name": "rel_enable_previous",
+      "mnemonic": "RL2",
+      "category": "Measurement",
+      "description": "Enter REL mode using the LAST/PREVIOUS entered reference power level (from a prior REL mode) as the reference value.",
+      "set": true,
+      "query": false,
+      "examples": ["RL2"]
+    },
+    {
+      "name": "offset_value",
+      "mnemonic": "OS",
+      "category": "Measurement",
+      "description": "Enter an offset value (in dB) to compensate for external gain or loss; added to the measured power. Send OS followed by the value and EN. Allowable range -99.99 to +99.99 dB in 0.01 dB steps. PRESET sets offset to 0 dB and disables it.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "offset", "units": "dB", "range": "-99.99 to +99.99" }
+      ],
+      "examples": ["OS10EN", "OS3.0EN"]
+    },
+    {
+      "name": "offset_on",
+      "mnemonic": "OF1",
+      "category": "Measurement",
+      "description": "Enable the offset function (using the last entered offset value).",
+      "set": true,
+      "query": false,
+      "examples": ["OF1"]
+    },
+    {
+      "name": "offset_off",
+      "mnemonic": "OF0",
+      "category": "Measurement",
+      "description": "Disable the offset function.",
+      "set": true,
+      "query": false,
+      "examples": ["OF0"]
+    },
+    {
+      "name": "duty_cycle_value",
+      "mnemonic": "DY",
+      "category": "Measurement",
+      "description": "Enter the duty cycle of a pulsed input signal so the meter displays pulse power (average power divided by duty cycle). Send DY followed by the value and a terminator (EN, % or PCT). Allowable range 0.001 to 99.999%. PRESET sets duty cycle to 1.000% and off.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "duty_cycle", "units": "%", "range": "0.001 to 99.999" }
+      ],
+      "examples": ["DY98.5EN", "DY50%"]
+    },
+    {
+      "name": "duty_cycle_on",
+      "mnemonic": "DC1",
+      "category": "Measurement",
+      "description": "Turn the duty cycle (pulse power) function on, using the last entered duty cycle value.",
+      "set": true,
+      "query": false,
+      "examples": ["DC1"]
+    },
+    {
+      "name": "duty_cycle_off",
+      "mnemonic": "DC0",
+      "category": "Measurement",
+      "description": "Turn the duty cycle function off.",
+      "set": true,
+      "query": false,
+      "examples": ["DC0"]
+    },
+    {
+      "name": "percent_terminator",
+      "mnemonic": "PCT",
+      "category": "Measurement",
+      "description": "Percent terminator. Can be used in place of EN to terminate a DUTY CYCLE, CAL FAC or REF CF numeric entry (equivalent to the % sign).",
+      "set": true,
+      "query": false,
+      "examples": ["KB99.9PCT", "DY98.5PCT"]
+    },
+    {
+      "name": "enter",
+      "mnemonic": "EN",
+      "category": "Measurement",
+      "description": "ENTER. Terminates a string of numeric data in a Data message, completing the preceding function (e.g. FR, OS, RE, RM, SE, ST, RC, LH, LL, DY). If sent immediately after a function code with no numeric data, the previously entered/default value is used.",
+      "set": true,
+      "query": false,
+      "examples": ["OS3.0EN", "FR1.0GZEN"]
+    },
+    {
+      "name": "exit",
+      "mnemonic": "EX",
+      "category": "Measurement",
+      "description": "EXIT. Discontinues access to a selected function and exits SPECIAL mode, returning the meter to standard measurement. Required to terminate sensor table edit mode (ET); not otherwise needed for HP-IB functions.",
+      "set": true,
+      "query": false,
+      "examples": ["EX"]
+    },
+    {
+      "name": "auto_range",
+      "mnemonic": "RA",
+      "category": "Range",
+      "description": "Enable automatic ranging (AUTO RNG). The meter selects the correct range (1-5) for the current measurement. PRESET sets AUTO RNG. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["RA"]
+    },
+    {
+      "name": "set_range",
+      "mnemonic": "RM",
+      "category": "Range",
+      "description": "Manually select a measurement range (and enter range-hold mode). Send RM followed by the range number (0-5) and EN; range 0 selects auto range. Ranges 1 (most sensitive) to 5 (least sensitive) are 10 dB each.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "range", "units": "", "range": "0 to 5 (0 = auto)" }
+      ],
+      "examples": ["RM3EN", "RM0EN"]
+    },
+    {
+      "name": "range_hold",
+      "mnemonic": "RH",
+      "category": "Range",
+      "description": "Range hold. Holds the current range so the meter does not change ranges (e.g. while outputting to the rear-panel recorder output). HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["RH"]
+    },
+    {
+      "name": "filter_auto",
+      "mnemonic": "FA",
+      "category": "Filter",
+      "description": "Select automatic filtering. The meter automatically sets the number of readings averaged (1-512 in binary progression) based on range and resolution. PRESET sets auto filter. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["FA"]
+    },
+    {
+      "name": "filter_manual",
+      "mnemonic": "FM",
+      "category": "Filter",
+      "description": "Select manual filtering and set the number of readings averaged. Send FM followed by the filter length (up to 512) and EN. The value is rounded to the nearest binary progression value (1,2,4,...,512).",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "filter_length", "units": "readings", "range": "1 to 512 (binary progression)" }
+      ],
+      "examples": ["FM128EN", "FM32EN"]
+    },
+    {
+      "name": "filter_hold",
+      "mnemonic": "FH",
+      "category": "Filter",
+      "description": "Filter hold. Switches from auto filter mode to manual filter mode while retaining the current auto filter value (no filter number is entered). HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["FH"]
+    },
+    {
+      "name": "limits_on",
+      "mnemonic": "LM1",
+      "category": "Limits",
+      "description": "Enable the limits checking function (using the last entered high and low limit values). An out-of-limit condition sets bit 4 of the Status Byte and displays OVER/UNDER LIMIT. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["LM1"]
+    },
+    {
+      "name": "limits_off",
+      "mnemonic": "LM0",
+      "category": "Limits",
+      "description": "Disable the limits checking function. PRESET disables limits checking. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["LM0"]
+    },
+    {
+      "name": "high_limit",
+      "mnemonic": "LH",
+      "category": "Limits",
+      "description": "Enter the high limit value. Send LH followed by the limit value (dBm) and EN. Allowable range +299.999 to -299.999 dBm. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "high_limit", "units": "dBm", "range": "-299.999 to +299.999" }
+      ],
+      "examples": ["LH30.00EN"]
+    },
+    {
+      "name": "low_limit",
+      "mnemonic": "LL",
+      "category": "Limits",
+      "description": "Enter the low limit value. Send LL followed by the limit value (dBm) and EN. Allowable range +299.999 to -299.999 dBm. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "low_limit", "units": "dBm", "range": "-299.999 to +299.999" }
+      ],
+      "examples": ["LL-90.00EN"]
+    },
+    {
+      "name": "trigger_hold",
+      "mnemonic": "TR0",
+      "category": "Trigger",
+      "description": "Trigger hold. Places the meter in standby mode: it keeps measuring but the display and HP-IB are not updated until a trigger (TR1/TR2 or the bus Trigger message) is received. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["TR0"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "TR1",
+      "category": "Trigger",
+      "description": "Trigger immediate. Takes one measurement (without clearing the digital filter), updates the display and HP-IB, then reverts to standby mode. Trigger codes should appear at the end of a program string. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["TR1"]
+    },
+    {
+      "name": "trigger_with_delay",
+      "mnemonic": "TR2",
+      "category": "Trigger",
+      "description": "Trigger with delay. Like TR1 but inserts a settling-time delay before measuring to allow internal amplifiers/filters to settle, then reverts to standby mode. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["TR2"]
+    },
+    {
+      "name": "trigger_free_run",
+      "mnemonic": "TR3",
+      "category": "Trigger",
+      "description": "Free run. Continuously makes measurements and updates the display/HP-IB as fast as possible. This is the default (PRESET/local) mode. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["TR3"]
+    },
+    {
+      "name": "get_ignore",
+      "mnemonic": "GT0",
+      "category": "Trigger",
+      "description": "Ignore Group Execute Trigger (GET) bus command. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["GT0"]
+    },
+    {
+      "name": "get_immediate",
+      "mnemonic": "GT1",
+      "category": "Trigger",
+      "description": "Respond to a GET bus command with Trigger Immediate. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["GT1"]
+    },
+    {
+      "name": "get_delay",
+      "mnemonic": "GT2",
+      "category": "Trigger",
+      "description": "Respond to a GET bus command with Trigger with Delay. This is the turn-on default GET response. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["GT2"]
+    },
+    {
+      "name": "select_sensor",
+      "mnemonic": "SE",
+      "category": "Sensor",
+      "description": "Select the sensor data table (0-9) corresponding to the power sensor in use, so FREQ accesses the proper cal-factor table. Send SE followed by the table number (0-9) and EN.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "table", "units": "", "range": "0 to 9" }
+      ],
+      "examples": ["SE5EN", "SE0EN"]
+    },
+    {
+      "name": "sensor_id",
+      "mnemonic": "SN",
+      "category": "Sensor",
+      "description": "Set a sensor data table's ID label. Send SN followed immediately by the table number (0-9) and the ID label (up to 7 characters of 0-9, A-Z or underscore).",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "table", "units": "", "range": "0 to 9" },
+        { "name": "id_label", "units": "", "range": "up to 7 chars: 0-9, A-Z, underscore" }
+      ],
+      "examples": ["SN21234567", "SN1SN_4567"]
+    },
+    {
+      "name": "clear_sensor_table",
+      "mnemonic": "CT",
+      "category": "Sensor",
+      "description": "Clear a sensor data table prior to entering new values. Send CT followed immediately by the table number (CT0-CT9). Cleared tables 2-9 cannot be recovered.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "table", "units": "", "range": "0 to 9" }
+      ],
+      "examples": ["CT3", "CT0"]
+    },
+    {
+      "name": "ref_cal_factor_table",
+      "mnemonic": "RF",
+      "category": "Sensor",
+      "description": "Enter the REF CAL FACTOR for a sensor data table. Send RF followed immediately by the table number (0-9), the REF CAL FACTOR, and % or EN. (RF0-RF9 select the table.)",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "table", "units": "", "range": "0 to 9" },
+        { "name": "ref_cal_factor", "units": "%", "range": "sensor REF CF" }
+      ],
+      "examples": ["RF398.5%", "RF0100EN"]
+    },
+    {
+      "name": "edit_sensor_table",
+      "mnemonic": "ET",
+      "category": "Sensor",
+      "description": "Edit a sensor data table. Send ET followed immediately by the table number (0-9, ET0-ET9), then frequency/cal-factor data pairs each terminated by EN; frequency uses HZ/KZ/MZ/GZ units and cal factor uses %. Terminate the edit session with EX (EXIT).",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "table", "units": "", "range": "0 to 9" }
+      ],
+      "examples": ["ET3 1.00MZ 98.5% EN", "ET3"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "ST",
+      "category": "Memory",
+      "description": "Store the current instrument configuration in a register. Send ST followed by the register number (1-10) and EN. PRESET does not affect registers. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "register", "units": "", "range": "1 to 10" }
+      ],
+      "examples": ["ST2EN"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "Memory",
+      "description": "Recall a stored instrument configuration. Send RC followed by the register number (0-10) and EN. Register 0 always holds the previous configuration (RECALL 0 recovers from an entry error or accidental PRESET). HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "register", "units": "", "range": "0 to 10" }
+      ],
+      "examples": ["RC2EN", "RC0EN"]
+    },
+    {
+      "name": "preset",
+      "mnemonic": "PR",
+      "category": "System",
+      "description": "Preset the power meter to a known state (FREQ 50 MHz, RESOLN 0.01 dB, duty cycle off, REL off, OFFSET off, PWR REF off, AUTO range, dBm units, limits -90/+90 dBm off, free run trigger, GT2, display enable). Does not affect sensor cal tables or storage registers. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["PR"]
+    },
+    {
+      "name": "ref_osc_on",
+      "mnemonic": "OC1",
+      "category": "System",
+      "description": "Enable the 50 MHz, 1 mW power reference oscillator (PWR REF) at the front-panel POWER REF output. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["OC1"]
+    },
+    {
+      "name": "ref_osc_off",
+      "mnemonic": "OC0",
+      "category": "System",
+      "description": "Disable the 50 MHz reference oscillator. PRESET disables it. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["OC0"]
+    },
+    {
+      "name": "special",
+      "mnemonic": "SP",
+      "category": "System",
+      "description": "Enable SPECIAL mode for access to Special Status, Sensor Data, Limits, Filter Averaging, HP-IB Address, Self Test and Init. Send SP followed by the desired function, any parameters, and EN. (Most SPECIAL operations also have their own HP-IB codes.)",
+      "set": true,
+      "query": false,
+      "examples": ["SP"]
+    },
+    {
+      "name": "display_enable",
+      "mnemonic": "DE",
+      "category": "Display",
+      "description": "Display enable. Restores normal front-panel display (same as local operation). Default at turn-on and after PRESET. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["DE"]
+    },
+    {
+      "name": "display_disable",
+      "mnemonic": "DD",
+      "category": "Display",
+      "description": "Display disable. Blanks the front-panel display; readings over the bus remain valid. Cleared by another display function or PRESET. (Effective for firmware V1.5 and above.) HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["DD"]
+    },
+    {
+      "name": "display_all",
+      "mnemonic": "DA",
+      "category": "Display",
+      "description": "Display all. Turns on all front-panel display segments to verify the display. Cleared by another display function or PRESET. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["DA"]
+    },
+    {
+      "name": "display_user_message",
+      "mnemonic": "DU",
+      "category": "Display",
+      "description": "Display a user message on the alphanumeric display. Up to 12 characters of numbers (0-9), letters (A-Z) or blanks.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "message", "units": "", "range": "up to 12 chars: 0-9, A-Z, space" }
+      ],
+      "examples": ["DU CONNECT DUT"]
+    },
+    {
+      "name": "output_display",
+      "mnemonic": "OD",
+      "category": "Display",
+      "description": "Output display text. When addressed to talk, the meter outputs the current display contents as text (used, for example, when reading back sensor data table entries).",
+      "set": false,
+      "query": true,
+      "examples": ["OD"]
+    },
+    {
+      "name": "learn_mode",
+      "mnemonic": "LP",
+      "category": "System",
+      "description": "Learn Mode. Sends the complete instrument configuration to the controller as a binary string. After receiving LP2 and when addressed to talk, the meter outputs the ASCII characters '@2' followed by 58 8-bit binary bytes (last byte with EOI). The same binary data can be sent back (prefixed by @2) to restore the configuration.",
+      "set": true,
+      "query": true,
+      "examples": ["LP2"]
+    },
+    {
+      "name": "status_message",
+      "mnemonic": "SM",
+      "category": "Status",
+      "description": "Status Message. After receiving SM and when addressed to talk, the meter sends a 26-ASCII-character string (terminated by CR LF with EOI) describing its current state (measurement/entry errors, operating mode, range, filter, units, statuses). Updated only after a measurement. HP 438A compatible.",
+      "set": false,
+      "query": true,
+      "examples": ["SM"]
+    },
+    {
+      "name": "clear_status_byte",
+      "mnemonic": "CS",
+      "category": "Status",
+      "description": "Clear the Status Byte and any pending Require Service message. HP 438A compatible.",
+      "set": true,
+      "query": false,
+      "examples": ["CS"]
+    },
+    {
+      "name": "set_srq_mask",
+      "mnemonic": "@1",
+      "category": "Status",
+      "description": "Set the Service Request (SRQ) Mask. Send @1 followed by an ASCII value 0-255 (sum of bit weights) selecting which conditions (Data Ready=1, Cal/Zero Complete=2, Entry Error=4, Measurement Error=8, Over/Under Limit=16, Event Status Register=32) may set the RQS bit. *SRE is the equivalent command. At turn-on the mask is cleared.",
+      "set": true,
+      "query": false,
+      "parameters": [
+        { "name": "mask", "units": "", "range": "0 to 255" }
+      ],
+      "examples": ["@116", "*SRE 16"]
+    },
+    {
+      "name": "set_srq_mask_star",
+      "mnemonic": "*SRE",
+      "category": "Status",
+      "description": "Set the Service Request Mask. Send *SRE followed by an ASCII value 0-255. Equivalent to @1. *SRE? queries the current mask value (0-255).",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "mask", "units": "", "range": "0 to 255" }
+      ],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "read_srq_mask",
+      "mnemonic": "RV",
+      "category": "Status",
+      "description": "Read Service Request Mask Value. After receiving RV and when addressed to talk, the meter outputs an ASCII value 0-255 (1 byte, EOI) describing the present mask state. *SRE? is the equivalent query. HP 438A compatible.",
+      "set": false,
+      "query": true,
+      "examples": ["RV", "*SRE?"]
+    },
+    {
+      "name": "read_status_byte",
+      "mnemonic": "*STB?",
+      "category": "Status",
+      "description": "Status Byte query. Returns an ASCII value 0-127 (sum of weighted set bits) without clearing the Status Byte. Bits: Data Ready=1, Cal/Zero Complete=2, Entry Error=4, Measurement Error=8, Over/Under Limit=16, Event Status Register=32, RQS=64.",
+      "set": false,
+      "query": true,
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "clear_status_registers",
+      "mnemonic": "*CLS",
+      "category": "Status",
+      "description": "Clear all status registers (Status Byte and any pending Require Service message). The leading '*' must be included.",
+      "set": true,
+      "query": false,
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_query",
+      "mnemonic": "*ESR?",
+      "category": "Status",
+      "description": "Event Status Register query. Returns an ASCII value 0-255 describing the present register state. Bits include Power On, Command Error, Execution Error and Device Dependent Error. The leading '*' must be included.",
+      "set": false,
+      "query": true,
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Status",
+      "description": "Set the Event Status Register Enable mask. Selects which Event Status Register bits set bit 5 of the Status Byte. *ESE? queries the mask. The leading '*' must be included.",
+      "set": true,
+      "query": true,
+      "parameters": [
+        { "name": "mask", "units": "", "range": "0 to 255" }
+      ],
+      "examples": ["*ESE 32", "*ESE?"]
+    },
+    {
+      "name": "device_error_query",
+      "mnemonic": "ERR?",
+      "category": "Status",
+      "description": "Device error query. Returns the current device error information. HP 438A compatible.",
+      "set": false,
+      "query": true,
+      "examples": ["ERR?"]
+    },
+    {
+      "name": "soft_reset",
+      "mnemonic": "*RST",
+      "category": "System",
+      "description": "Soft reset of the power meter. The leading '*' must be included.",
+      "set": true,
+      "query": false,
+      "examples": ["*RST"]
+    },
+    {
+      "name": "self_test_query",
+      "mnemonic": "*TST?",
+      "category": "System",
+      "description": "Self test query. Initiates the self test and returns the result. The leading '*' must be included.",
+      "set": false,
+      "query": true,
+      "examples": ["*TST?"]
+    }
+  ]
+}

@@ -1,0 +1,629 @@
+{
+  "model": "8663A",
+  "manufacturer": "HP",
+  "category": "Signal Generator",
+  "description": "HP 8663A synthesized signal generator (100 kHz to 2560 MHz, high performance). Legacy HP-IB (IEEE-488) instrument using two-letter function/units program codes, NOT SCPI. Program codes correspond to front-panel keystrokes; value-selectable parameters use a Function-Data-Units sequence (e.g. FR 250 MZ). Program codes may be upper or lower case; spaces and other non-recognized characters are ignored. The Generator recognizes only the ASCII characters LF ! + - . 0-9 a-z A-Z @. Multiple program codes may be concatenated into one Data string, optionally separated by ; (e.g. FR 1,200,000 HZ;AP -30DM). Two execution modes are selectable: Immediate (@3, power-up default; one End-of-String per character) and Deferred (@2; up to 82 characters executed on an EOS = LF, ! or bus END message). The Generator can talk only to return the RQS mask value, the Status key message, learn-mode strings and the IEEE-488 Status Byte; there is no identify (IDN-style) query.",
+  "source": "8663A_OC.pdf",
+  "aliases": ["8663A", "HP8663A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "FR",
+      "category": "Frequency",
+      "description": "Carrier (RF output) frequency function entry. Follow with a numeric value and a frequency unit code (HZ, KZ, MZ or GZ). Range 100 kHz to 2560 MHz (settable down to 1 kHz, unspecified). Resolution 0.1 Hz below 640 MHz, 0.2 Hz to 1280 MHz, 0.4 Hz above. Also serves as the center frequency for Span sweep. Default after System Clear: 100.0 MHz.",
+      "set": "FR <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "100 kHz to 2560 MHz" }
+      ],
+      "examples": ["FR 250 MZ", "FR 1,200,000 HZ"]
+    },
+    {
+      "name": "amplitude",
+      "mnemonic": "AP",
+      "category": "Amplitude",
+      "description": "RF output amplitude function entry. Follow with a numeric value (leading sign allowed under HP-IB only, e.g. +13 DM) and an amplitude unit code; otherwise the sign must be carried in the unit code (+D or -D). Range +16 to -129.9 dBm (999 mV to 0.072 uV), 0.1 dB resolution.",
+      "set": "AP <value> <unit>",
+      "parameters": [
+        { "name": "amplitude", "units": ["DM", "DB", "+D", "-D", "MV", "UV"], "range": "+16 to -129.9 dBm (DM=dBm w/sign on data, +D=+dBm, -D=-dBm, DB=dB, MV=mV, UV=uV)" }
+      ],
+      "examples": ["AP 12.7 -D", "AP -12.7 DM"]
+    },
+    {
+      "name": "amplitude_off",
+      "mnemonic": "A0",
+      "category": "Amplitude",
+      "description": "Turn the RF output amplitude off (net output less than -150 dBm). AMPLITUDE readout displays '---'. Equivalent to selecting AMPLITUDE then FCTN OFF.",
+      "set": "A0",
+      "examples": ["A0"]
+    },
+    {
+      "name": "am_depth",
+      "mnemonic": "AM",
+      "category": "Modulation",
+      "description": "Amplitude modulation depth function entry. Follow with a numeric value and the percent unit code (PC). Depth 0 to 95 %, 0.1 % resolution. Select the modulation source with M1/M2/M3/M4 and the rate with MOD FREQ (MF). To turn AM off select AM then FCTN OFF (FO).",
+      "set": "AM <value> PC",
+      "parameters": [
+        { "name": "depth", "units": ["PC"], "range": "0 to 95 %" }
+      ],
+      "examples": ["AM 45 PC"]
+    },
+    {
+      "name": "fm_deviation",
+      "mnemonic": "FM",
+      "category": "Modulation",
+      "description": "Frequency modulation peak deviation function entry. Follow with a numeric value and the kHz unit code (KZ is the only valid unit). Maximum peak deviation depends on carrier band (e.g. up to 100 kHz below 120 MHz, up to 400 kHz from 1280 MHz). Select source with M1/M2/M3/M4 and rate with MOD FREQ (MF). Default after System Clear: 20.0 kHz. Turn FM off with AM/FM/PM then FCTN OFF (FO).",
+      "set": "FM <value> KZ",
+      "parameters": [
+        { "name": "deviation", "units": ["KZ"], "range": "carrier-band dependent (e.g. <=100 kHz below 120 MHz, <=400 kHz above 1280 MHz)" }
+      ],
+      "examples": ["FM 25 KZ"]
+    },
+    {
+      "name": "phase_modulation_deviation",
+      "mnemonic": "PM",
+      "category": "Modulation",
+      "description": "Phase modulation (front-panel label phi-M) peak deviation function entry. Follow with a numeric value and the deg unit code (DG is the only valid unit). Maximum peak deviation depends on carrier band (e.g. 100 deg below 120 MHz, up to 400 deg from 1280 MHz), 1-4 deg resolution. Select source with M1/M2/M3/M4 and rate with MOD FREQ (MF). Default after System Clear: 20 deg. Phase modulation requires Option 002.",
+      "set": "PM <value> DG",
+      "parameters": [
+        { "name": "deviation", "units": ["DG"], "range": "carrier-band dependent (100 to 400 degrees peak)" }
+      ],
+      "examples": ["PM 25 DG"]
+    },
+    {
+      "name": "bpsk",
+      "mnemonic": "BP",
+      "category": "Modulation",
+      "description": "Select BPSK (binary phase-shift keying) modulation.",
+      "set": "BP",
+      "examples": ["BP"]
+    },
+    {
+      "name": "pulse_modulation",
+      "mnemonic": "PL",
+      "category": "Modulation",
+      "description": "Select pulse modulation (available for RF frequencies below 50 MHz, unspecified).",
+      "set": "PL",
+      "examples": ["PL"]
+    },
+    {
+      "name": "modulation_frequency",
+      "mnemonic": "MF",
+      "category": "Modulation",
+      "description": "Internal/external modulation rate (MOD FREQ) function entry. Follow with a numeric value and a unit code (HZ or KZ). Variable rate 10 Hz to 99.9 kHz; resolution varies with rate. Default after System Clear: 1 kHz.",
+      "set": "MF <value> <unit>",
+      "parameters": [
+        { "name": "rate", "units": ["HZ", "KZ"], "range": "10 Hz to 99.9 kHz" }
+      ],
+      "examples": ["MF 4 KZ", "MF 10 KZ"]
+    },
+    {
+      "name": "modulation_off",
+      "mnemonic": "MO",
+      "category": "Modulation",
+      "description": "Turn off all modulation circuitry (equivalent to Blue Key, MOD OFF).",
+      "set": "MO",
+      "examples": ["MO"]
+    },
+    {
+      "name": "mod_source_int_400",
+      "mnemonic": "M1",
+      "category": "Modulation",
+      "description": "Select internal 400 Hz fixed modulation source (INT 400).",
+      "set": "M1",
+      "examples": ["M1"]
+    },
+    {
+      "name": "mod_source_int_1k",
+      "mnemonic": "M2",
+      "category": "Modulation",
+      "description": "Select internal 1 kHz fixed modulation source (INT 1k).",
+      "set": "M2",
+      "examples": ["M2"]
+    },
+    {
+      "name": "mod_source_ext_ac",
+      "mnemonic": "M3",
+      "category": "Modulation",
+      "description": "Select external ac-coupled modulation source (EXT AC).",
+      "set": "M3",
+      "examples": ["M3"]
+    },
+    {
+      "name": "mod_source_ext_dc",
+      "mnemonic": "M4",
+      "category": "Modulation",
+      "description": "Select external dc-coupled modulation source (EXT DC).",
+      "set": "M4",
+      "examples": ["M4"]
+    },
+    {
+      "name": "fctn_off",
+      "mnemonic": "FO",
+      "category": "Modulation",
+      "description": "Turn off the last-selected front-panel function (FCTN OFF). For modulation, selecting the modulation type (AM/FM/PM) then FO turns that modulation off.",
+      "set": "FO",
+      "examples": ["FO"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Sweep",
+      "description": "RF sweep Start frequency function entry (START FREQ). Follow with a numeric value and a unit code. Sweep width 100 kHz to 2560 MHz.",
+      "set": "FA <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "100 kHz to 2560 MHz" }
+      ],
+      "examples": ["FA 600 MZ", "FA 200 KZ"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Sweep",
+      "description": "RF sweep Stop frequency function entry (STOP FREQ). Follow with a numeric value and a unit code. Sweep width 100 kHz to 2560 MHz.",
+      "set": "FB <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "100 kHz to 2560 MHz" }
+      ],
+      "examples": ["FB 800 MZ", "FB 300 MZ"]
+    },
+    {
+      "name": "span_frequency",
+      "mnemonic": "FS",
+      "category": "Sweep",
+      "description": "RF sweep Span frequency function entry (SPAN FREQ); total peak-to-peak deviation about the center frequency set with FR. Follow with a numeric value and a unit code. Span width 0.2 Hz to 2560 MHz (depends on center frequency).",
+      "set": "FS <value> <unit>",
+      "parameters": [
+        { "name": "span", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "0.2 Hz to 2560 MHz" }
+      ],
+      "examples": ["FS 100 MZ"]
+    },
+    {
+      "name": "set_step_size",
+      "mnemonic": "N3",
+      "category": "Sweep",
+      "description": "Set a constant sweep step size of your choice (SET SIZE). Follow with a numeric value and a unit code. Resolution 0.1 Hz below 640 MHz, 0.2 Hz to 1280 MHz, 0.4 Hz above.",
+      "set": "N3 <value> <unit>",
+      "parameters": [
+        { "name": "step_size", "units": ["HZ", "KZ", "MZ", "GZ"] }
+      ],
+      "examples": ["N3 100 KZ"]
+    },
+    {
+      "name": "steps_lin_100",
+      "mnemonic": "N1",
+      "category": "Sweep",
+      "description": "Set linear sweep to 100 steps (step size = sweepwidth/100).",
+      "set": "N1",
+      "examples": ["N1"]
+    },
+    {
+      "name": "steps_lin_1000",
+      "mnemonic": "N2",
+      "category": "Sweep",
+      "description": "Set linear sweep to 1000 steps (step size = sweepwidth/1000).",
+      "set": "N2",
+      "examples": ["N2"]
+    },
+    {
+      "name": "steps_log_10pct",
+      "mnemonic": "N4",
+      "category": "Sweep",
+      "description": "Set logarithmic sweep with 10% steps (initial step = 10% of start frequency; subsequent steps increase 10%).",
+      "set": "N4",
+      "examples": ["N4"]
+    },
+    {
+      "name": "steps_log_1pct",
+      "mnemonic": "N5",
+      "category": "Sweep",
+      "description": "Set logarithmic sweep with 1% steps (initial step = 1% of start frequency; subsequent steps increase 1%).",
+      "set": "N5",
+      "examples": ["N5"]
+    },
+    {
+      "name": "sweep_off",
+      "mnemonic": "W1",
+      "category": "Sweep",
+      "description": "Turn sweep off (MODE OFF).",
+      "set": "W1",
+      "examples": ["W1"]
+    },
+    {
+      "name": "sweep_auto",
+      "mnemonic": "W2",
+      "category": "Sweep",
+      "description": "Select Auto (continuous) sweep mode.",
+      "set": "W2",
+      "examples": ["W2"]
+    },
+    {
+      "name": "sweep_manual",
+      "mnemonic": "W3",
+      "category": "Sweep",
+      "description": "Select Manual sweep mode (controlled by the knob).",
+      "set": "W3",
+      "examples": ["W3"]
+    },
+    {
+      "name": "sweep_single",
+      "mnemonic": "W4",
+      "category": "Sweep",
+      "description": "Select Single sweep mode.",
+      "set": "W4",
+      "examples": ["W4"]
+    },
+    {
+      "name": "sweep_time_per_step_05ms",
+      "mnemonic": "T1",
+      "category": "Sweep",
+      "description": "Set sweep time per step to 0.5 ms (nominal).",
+      "set": "T1",
+      "examples": ["T1"]
+    },
+    {
+      "name": "sweep_time_per_step_1ms",
+      "mnemonic": "T2",
+      "category": "Sweep",
+      "description": "Set sweep time per step to 1 ms.",
+      "set": "T2",
+      "examples": ["T2"]
+    },
+    {
+      "name": "sweep_time_per_step_2ms",
+      "mnemonic": "T3",
+      "category": "Sweep",
+      "description": "Set sweep time per step to 2 ms.",
+      "set": "T3",
+      "examples": ["T3"]
+    },
+    {
+      "name": "sweep_time_per_step_10ms",
+      "mnemonic": "T4",
+      "category": "Sweep",
+      "description": "Set sweep time per step to 10 ms.",
+      "set": "T4",
+      "examples": ["T4"]
+    },
+    {
+      "name": "sweep_time_per_step_100ms",
+      "mnemonic": "T5",
+      "category": "Sweep",
+      "description": "Set sweep time per step to 100 ms.",
+      "set": "T5",
+      "examples": ["T5"]
+    },
+    {
+      "name": "marker_1",
+      "mnemonic": "X1",
+      "category": "Sweep",
+      "description": "Marker 1. As a frequency entry follow with a value and unit; as an increment/copy target use the X1 code alone.",
+      "set": "X1 <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+      ],
+      "examples": ["X1 500 MZ", "X1"]
+    },
+    {
+      "name": "marker_2",
+      "mnemonic": "X2",
+      "category": "Sweep",
+      "description": "Marker 2 (frequency entry or selection).",
+      "set": "X2 <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+      ],
+      "examples": ["X2"]
+    },
+    {
+      "name": "marker_3",
+      "mnemonic": "X3",
+      "category": "Sweep",
+      "description": "Marker 3 (frequency entry or selection).",
+      "set": "X3 <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+      ],
+      "examples": ["X3"]
+    },
+    {
+      "name": "marker_4",
+      "mnemonic": "X4",
+      "category": "Sweep",
+      "description": "Marker 4 (frequency entry or selection).",
+      "set": "X4 <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+      ],
+      "examples": ["X4"]
+    },
+    {
+      "name": "marker_5",
+      "mnemonic": "X5",
+      "category": "Sweep",
+      "description": "Marker 5 (frequency entry or selection).",
+      "set": "X5 <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+      ],
+      "examples": ["X5"]
+    },
+    {
+      "name": "marker_off",
+      "mnemonic": "X6",
+      "category": "Sweep",
+      "description": "Turn the selected marker off (MARKER OFF).",
+      "set": "X6",
+      "examples": ["X6"]
+    },
+    {
+      "name": "markers_all_off",
+      "mnemonic": "X7",
+      "category": "Sweep",
+      "description": "Turn all markers off (ALL OFF). Equivalent to Blue Key then MARKER OFF (BL X6).",
+      "set": "X7",
+      "examples": ["X7"]
+    },
+    {
+      "name": "rss_off",
+      "mnemonic": "Y0",
+      "category": "Sweep",
+      "description": "Disable HP-IB Remote Stepped Sweep and reset the frequency readout (Remote Stepped Sweep Off).",
+      "set": "Y0",
+      "examples": ["Y0"]
+    },
+    {
+      "name": "rss_with_display",
+      "mnemonic": "Y1",
+      "category": "Sweep",
+      "description": "Enable Remote Stepped Sweep with display update. Controller sends one program code per step.",
+      "set": "Y1",
+      "examples": ["Y1"]
+    },
+    {
+      "name": "rss_without_display",
+      "mnemonic": "Y2",
+      "category": "Sweep",
+      "description": "Enable Remote Stepped Sweep without display update (frequency stepped, readout not updated).",
+      "set": "Y2",
+      "examples": ["Y2"]
+    },
+    {
+      "name": "rss_execute",
+      "mnemonic": "Y3",
+      "category": "Sweep",
+      "description": "Execute one step of the Remote Stepped Sweep (RSS Execute). Sent once per sweep step after Y1 or Y2.",
+      "set": "Y3",
+      "examples": ["Y3"]
+    },
+    {
+      "name": "increment_up",
+      "mnemonic": "UP",
+      "category": "Increment",
+      "description": "Increase the last-selected parameter value by its increment (INCREMENT up arrow). Precede with the parameter's function code to choose which parameter is stepped.",
+      "set": "UP",
+      "examples": ["UP", "FR UP"]
+    },
+    {
+      "name": "increment_down",
+      "mnemonic": "DN",
+      "category": "Increment",
+      "description": "Decrease the last-selected parameter value by its increment (INCREMENT down arrow). Precede with the parameter's function code.",
+      "set": "DN",
+      "examples": ["DN", "AP DN"]
+    },
+    {
+      "name": "increment_set",
+      "mnemonic": "IS",
+      "category": "Increment",
+      "description": "Set the increment step size of a parameter (INCR SET): select a function code, then IS, then Data and Units. Subsequent UP/DN steps use this size.",
+      "set": "<function> IS <value> <unit>",
+      "examples": ["AP IS 10 DB", "FR IS 1 MZ"]
+    },
+    {
+      "name": "resolution_x10",
+      "mnemonic": "R1",
+      "category": "Knob",
+      "description": "Enable the knob / set knob resolution times 10 (Resolution X10, ON).",
+      "set": "R1",
+      "examples": ["R1"]
+    },
+    {
+      "name": "resolution_div10",
+      "mnemonic": "R2",
+      "category": "Knob",
+      "description": "Enable the knob / set knob resolution divided by 10 (Resolution 1/10, ON).",
+      "set": "R2",
+      "examples": ["R2", "R1 R2 R2"]
+    },
+    {
+      "name": "knob_off",
+      "mnemonic": "R3",
+      "category": "Knob",
+      "description": "Turn the knob off (Knob Off).",
+      "set": "R3",
+      "examples": ["R3"]
+    },
+    {
+      "name": "knob_hold",
+      "mnemonic": "R4",
+      "category": "Knob",
+      "description": "Hold knob control on the current function while keyboard control shifts to another (Knob Hold).",
+      "set": "R4",
+      "examples": ["R4"]
+    },
+    {
+      "name": "knob_increment",
+      "mnemonic": "R5",
+      "category": "Knob",
+      "description": "Select the knob increment mode (Knob Increment).",
+      "set": "R5",
+      "examples": ["R5"]
+    },
+    {
+      "name": "knob_cw",
+      "mnemonic": "RU",
+      "category": "Knob",
+      "description": "Knob clockwise / up one step (Knob CW). Must be sent ten times to execute one step, except in Manual Sweep mode or when Special 94/95 is enabled (then one code = one step). Does not require the knob to be enabled first.",
+      "set": "RU",
+      "examples": ["RU"]
+    },
+    {
+      "name": "knob_ccw",
+      "mnemonic": "RD",
+      "category": "Knob",
+      "description": "Knob counter-clockwise / down one step (Knob CCW). Must be sent ten times to execute one step, except in Manual Sweep mode or when Special 94/95 is enabled (then one code = one step).",
+      "set": "RD",
+      "examples": ["RD"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "ST",
+      "category": "Registers",
+      "description": "Store the full front-panel configuration into a storage register (1-9). Press STORE then a register number.",
+      "set": "ST <register>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["ST 2"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "Registers",
+      "description": "Recall a front-panel configuration from a storage register (1-9). Press RECALL then a register number.",
+      "set": "RC <register>",
+      "parameters": [
+        { "name": "register", "range": "1 to 9" }
+      ],
+      "examples": ["RC 2"]
+    },
+    {
+      "name": "sequence",
+      "mnemonic": "SQ",
+      "category": "Registers",
+      "description": "Recall register contents one register per SEQ keystroke, in the predetermined recall order set with SS.",
+      "set": "SQ",
+      "examples": ["SQ"]
+    },
+    {
+      "name": "set_sequence",
+      "mnemonic": "SS",
+      "category": "Registers",
+      "description": "Set the register recall order (SET SEQ): SS followed by the register numbers in the desired recall order, then ST (STORE). Maximum ten digits; register numbers may repeat. Equivalent to BL ST.",
+      "set": "SS <digits> ST",
+      "examples": ["SS 12725 ST"]
+    },
+    {
+      "name": "auto_sequence",
+      "mnemonic": "AS",
+      "category": "Registers",
+      "description": "Initiate continuous (auto) recall of registers in the predetermined sequence (AUTO SEQ). Equivalent to BL SQ. Stop by selecting any key except STATUS.",
+      "set": "AS",
+      "examples": ["AS"]
+    },
+    {
+      "name": "blue_key",
+      "mnemonic": "BL",
+      "category": "System",
+      "description": "Blue (shift) key. Precedes a second key code to invoke the blue-labeled function (e.g. BL ST = SET SEQ, BL SQ = AUTO SEQ, BL X6 = ALL OFF, BL AP = SPECIAL). Also returns the Generator to local mode (if local lockout is not in effect).",
+      "set": "BL <code>",
+      "examples": ["BL AP 21", "BL X1 FA"]
+    },
+    {
+      "name": "backspace",
+      "mnemonic": "BS",
+      "category": "System",
+      "description": "Backspace (delete last entered digit during data entry).",
+      "set": "BS",
+      "examples": ["BS"]
+    },
+    {
+      "name": "special_function",
+      "mnemonic": "SP",
+      "category": "Special",
+      "description": "Invoke a Special Function: SP followed by the special-function number. Equivalent to Blue Key then SPECIAL (BL AP). Documented special functions include: 00 System Clear; 2.0/2.1 power-up system-clear disable/enable; 10/11/12 Frequency Offset off/positive/negative; 20/21 ALC bandwidth normal/reduced; 30/31 Amplitude Reference off/on; 30/32 Microvolt Reference off/on; 41 Modulation Sweep; 70/71 external phiM input impedance; 81 Amplitude conversion V->dBm; 82 display HP-IB address; 85/86 Amplitude Correction off/on; 87 Amplitude Correction in sweep mode; 88 Auto-Sequence indicator; 91 Frequency Hopping; 92/94/95 Knob increments/revolution; 93 Manual Level-Control.",
+      "set": "SP <number>",
+      "parameters": [
+        { "name": "special_number" }
+      ],
+      "examples": ["SP 21", "SP 82", "SP 91", "BL AP 85"]
+    },
+    {
+      "name": "configure_trigger",
+      "mnemonic": "CT",
+      "category": "Trigger",
+      "description": "Configure Trigger: CT followed by the program code of the operation to be performed on a subsequent trigger. The trigger is then fired with TR (or bus GET).",
+      "set": "CT <code>",
+      "examples": ["CT UP"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "TR",
+      "category": "Trigger",
+      "description": "Trigger: execute the operation previously assigned with Configure Trigger (CT). Responds equally to the bus GET command.",
+      "set": "TR",
+      "examples": ["TR"]
+    },
+    {
+      "name": "write_rqs_mask",
+      "mnemonic": "@1",
+      "category": "Status",
+      "description": "Write (set) the Request Service (RQS) mask: @1 followed by a data message giving the mask value. Controls which conditions assert SRQ.",
+      "set": "@1 <value>",
+      "examples": ["@1 32"]
+    },
+    {
+      "name": "read_rqs_mask",
+      "mnemonic": "RM",
+      "category": "Status",
+      "description": "Read the Request Service (RQS) mask value. Send RM, then address the Generator to talk to receive the mask value.",
+      "set": "RM",
+      "query": "RM",
+      "examples": ["RM"]
+    },
+    {
+      "name": "read_status_message",
+      "mnemonic": "MS",
+      "category": "Status",
+      "description": "Read the STATUS key message. Send MS, then address the Generator to talk to receive the status information.",
+      "set": "MS",
+      "query": "MS",
+      "examples": ["MS"]
+    },
+    {
+      "name": "front_panel_learn",
+      "mnemonic": "L1",
+      "category": "Learn",
+      "description": "Initiate Front-Panel Learn mode: send L1, then address the Generator to talk; it returns the front-panel configuration learn string. Re-sending the string later restores that configuration.",
+      "set": "L1",
+      "query": "L1",
+      "examples": ["L1"]
+    },
+    {
+      "name": "fast_learn",
+      "mnemonic": "L2",
+      "category": "Learn",
+      "description": "Initiate 'Fast' Learn mode: send L2, then address the Generator to talk; it returns the complete instrument configuration learn string. Re-sending the string later restores that configuration.",
+      "set": "L2",
+      "query": "L2",
+      "examples": ["L2"]
+    },
+    {
+      "name": "deferred_execution_mode",
+      "mnemonic": "@2",
+      "category": "System",
+      "description": "Select Deferred execution mode: the Generator buffers up to 82 characters and executes the string on receipt of an EOS message (LF, ! or bus END).",
+      "set": "@2",
+      "examples": ["@2"]
+    },
+    {
+      "name": "immediate_execution_mode",
+      "mnemonic": "@3",
+      "category": "System",
+      "description": "Select Immediate execution mode (power-up default): the Generator processes each character as it is received.",
+      "set": "@3",
+      "examples": ["@3"]
+    }
+  ]
+}
