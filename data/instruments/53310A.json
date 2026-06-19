@@ -1,0 +1,1627 @@
+{
+  "model": "53310A",
+  "manufacturer": "HP/Agilent",
+  "category": "Modulation Domain Analyzer",
+  "description": "HP/Agilent 53310A Modulation Domain Analyzer. Measures frequency, time-interval and phase vs time and builds histograms. Programmed via SCPI 1990.0 over HP-IB (GPIB). Two input channels (A=1, B=2) plus optional C channel.",
+  "source": "53310A-PM.pdf",
+  "aliases": ["53310A", "HP53310A", "Agilent 53310A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": { "command": "*IDN?", "matchRegex": "53310A", "description": "Standard SCPI identification query." },
+  "commands": [
+    {
+      "name": "calibration_query",
+      "mnemonic": "*CAL?",
+      "category": "Common",
+      "description": "Performs an internal interpolator self-calibration and returns a value indicating success.",
+      "query": "*CAL?",
+      "examples": ["*CAL?"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears the status data structures (event registers and error queue).",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Sets or queries the Standard Event Status Enable Register.",
+      "set": "*ESE <NRf>",
+      "query": "*ESE?",
+      "parameters": [{ "name": "mask", "range": "0-255" }],
+      "examples": ["*ESE 16", "*ESE?"]
+    },
+    {
+      "name": "event_status_register_query",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Queries the Standard Event Status Register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "identification_query",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Queries the analyzer identification (manufacturer, model, serial, firmware).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Sets the operation complete bit in the Standard Event Status Register when all pending operations finish.",
+      "set": "*OPC",
+      "examples": ["*OPC"]
+    },
+    {
+      "name": "operation_complete_query",
+      "mnemonic": "*OPC?",
+      "category": "Common",
+      "description": "Places an ASCII '1' in the Output Queue when all pending operations are completed.",
+      "query": "*OPC?",
+      "examples": ["*OPC?"]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Identifies the options installed in the analyzer.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Restores analyzer state from a copy stored in local non-volatile memory.",
+      "set": "*RCL <NRf>",
+      "parameters": [{ "name": "register", "range": "0-9" }],
+      "examples": ["*RCL 1"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the analyzer to a known state.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "save",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Stores the current state of the analyzer in local non-volatile memory.",
+      "set": "*SAV <NRf>",
+      "parameters": [{ "name": "register", "range": "1-9" }],
+      "examples": ["*SAV 1"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Sets or queries the Service Request Enable Register.",
+      "set": "*SRE <NRf>",
+      "query": "*SRE?",
+      "parameters": [{ "name": "mask", "range": "0-255" }],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Queries the Status Byte and Master Summary Status bit.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Device-specific analog of IEEE 488.1 GET. Initiates a single measurement.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test_query",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Executes an internal self-test and reports the results.",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Makes the analyzer wait until all pending operations are complete before executing following commands.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+
+    {
+      "name": "abort",
+      "mnemonic": ":ABORt",
+      "category": "ABORt",
+      "description": "Aborts the measurement in progress. Event; no query.",
+      "set": ":ABORt",
+      "examples": [":ABOR"]
+    },
+
+    {
+      "name": "configure_histogram_frequency",
+      "mnemonic": ":CONFigure:HISTogram[:VOLTage]:FREQuency[1|2|3]",
+      "category": "CONFigure",
+      "description": "Configures the analyzer for a frequency Fast Histogram measurement. Channel suffix 1=A, 2=B, 3=C.",
+      "set": ":CONFigure:HISTogram:VOLTage:FREQuency[1|2|3]",
+      "examples": [":CONF:HIST:FREQ2"]
+    },
+    {
+      "name": "configure_histogram_tinterval",
+      "mnemonic": ":CONFigure:HISTogram[:VOLTage]:TINTerval",
+      "category": "CONFigure",
+      "description": "Configures the analyzer for a time-interval Fast Histogram measurement.",
+      "set": ":CONFigure:HISTogram:VOLTage:TINTerval",
+      "examples": [":CONF:HIST:TINT"]
+    },
+    {
+      "name": "configure_xtime_frequency",
+      "mnemonic": ":CONFigure:XTIMe[:VOLTage]:FREQuency[1|2|3]",
+      "category": "CONFigure",
+      "description": "Configures the analyzer for a frequency vs Time measurement. Channel suffix 1=A, 2=B, 3=C.",
+      "set": ":CONFigure:XTIMe:VOLTage:FREQuency[1|2|3]",
+      "examples": [":CONF:XTIM:FREQ2"]
+    },
+    {
+      "name": "configure_xtime_tinterval",
+      "mnemonic": ":CONFigure:XTIMe[:VOLTage]:TINTerval",
+      "category": "CONFigure",
+      "description": "Configures the analyzer for a time-interval vs Time measurement.",
+      "set": ":CONFigure:XTIMe:VOLTage:TINTerval",
+      "examples": [":CONF:XTIM:TINT"]
+    },
+    {
+      "name": "configure_query",
+      "mnemonic": ":CONFigure?",
+      "category": "CONFigure",
+      "description": "Returns the function configured by the last :CONFigure or :MEASure command.",
+      "query": ":CONFigure?",
+      "examples": [":CONF?"]
+    },
+
+    {
+      "name": "fetch_scalar_result",
+      "mnemonic": ":FETCh[:SCALar][:VOLTage]:{FREQuency|TINTerval}:<analysis>?",
+      "category": "FETCh",
+      "description": "Fetches a single ASCII scalar analysis result (IMEan, IMRate, MAXimum, MEAN, MINimum, MRATe, PROBability, PTPeak, SDEViation) for the configured frequency or time-interval function. IMRate/MRATe require vs Time.",
+      "query": ":FETCh:SCALar:VOLTage:{FREQuency|TINTerval}:<analysis>?",
+      "examples": [":FETC:VOLT:FREQ:MEAN?", ":FETC:SCAL:VOLT:TINT:MAX?"]
+    },
+    {
+      "name": "fetch_histogram",
+      "mnemonic": ":FETCh:HISTogram[:VOLTage]:{FREQuency|TINTerval}?",
+      "category": "FETCh",
+      "description": "Fetches Histogram data (from vs Time or Fast Histogram depending on :CONFigure). Format determined by :FORMat.",
+      "query": ":FETCh:HISTogram:VOLTage:{FREQuency|TINTerval}?",
+      "examples": [":FETC:HIST:VOLT:FREQ?"]
+    },
+    {
+      "name": "fetch_xtime",
+      "mnemonic": ":FETCh:XTIMe[:VOLTage]:{FREQuency|TINTerval}?",
+      "category": "FETCh",
+      "description": "Fetches vs Time measurement data. Format determined by :FORMat.",
+      "query": ":FETCh:XTIMe:VOLTage:{FREQuency|TINTerval}?",
+      "examples": [":FETC:XTIM:VOLT:FREQ?"]
+    },
+    {
+      "name": "fetch_query",
+      "mnemonic": ":FETCh?",
+      "category": "FETCh",
+      "description": "Retrieves the last function fetched, read, configured, or measured.",
+      "query": ":FETCh?",
+      "examples": [":FETC?"]
+    },
+
+    {
+      "name": "measure_histogram_frequency",
+      "mnemonic": ":MEASure:HISTogram[:VOLTage]:FREQuency[1|2|3]?",
+      "category": "MEASure",
+      "description": "Stops measuring, configures and makes a single frequency Fast Histogram measurement, placing data in the Output Queue. Channel 1=A, 2=B, 3=C.",
+      "query": ":MEASure:HISTogram:VOLTage:FREQuency[1|2|3]?",
+      "examples": [":MEAS:HIST:FREQ?"]
+    },
+    {
+      "name": "measure_histogram_tinterval",
+      "mnemonic": ":MEASure:HISTogram[:VOLTage]:TINTerval?",
+      "category": "MEASure",
+      "description": "Makes a single time-interval Fast Histogram measurement and returns the data.",
+      "query": ":MEASure:HISTogram:VOLTage:TINTerval?",
+      "examples": [":MEAS:HIST:TINT?"]
+    },
+    {
+      "name": "measure_xtime_frequency",
+      "mnemonic": ":MEASure:XTIMe[:VOLTage]:FREQuency[1|2|3]?",
+      "category": "MEASure",
+      "description": "Makes a single frequency vs Time measurement and returns the data. Channel 1=A, 2=B, 3=C.",
+      "query": ":MEASure:XTIMe:VOLTage:FREQuency[1|2|3]?",
+      "examples": [":MEAS:XTIM:FREQ?"]
+    },
+    {
+      "name": "measure_xtime_tinterval",
+      "mnemonic": ":MEASure:XTIMe[:VOLTage]:TINTerval?",
+      "category": "MEASure",
+      "description": "Makes a single time-interval vs Time measurement and returns the data.",
+      "query": ":MEASure:XTIMe:VOLTage:TINTerval?",
+      "examples": [":MEAS:XTIM:TINT?"]
+    },
+
+    {
+      "name": "read_scalar_result",
+      "mnemonic": ":READ[:SCALar][:VOLTage]:{FREQuency|TINTerval}:<analysis>?",
+      "category": "READ",
+      "description": "Stops measuring, makes a single measurement and returns a scalar analysis result (IMEan, IMRate, MAXimum, MEAN, MINimum, MRATe, PROBability, PTPeak, SDEViation).",
+      "query": ":READ:SCALar:VOLTage:{FREQuency|TINTerval}:<analysis>?",
+      "examples": [":READ:VOLT:FREQ:MEAN?"]
+    },
+    {
+      "name": "read_histogram",
+      "mnemonic": ":READ:HISTogram[:VOLTage]:{FREQuency|TINTerval}?",
+      "category": "READ",
+      "description": "Makes a single measurement and returns Histogram data. Format determined by :FORMat.",
+      "query": ":READ:HISTogram:VOLTage:{FREQuency|TINTerval}?",
+      "examples": [":READ:HIST:VOLT:FREQ?"]
+    },
+    {
+      "name": "read_xtime",
+      "mnemonic": ":READ:XTIMe[:VOLTage]:{FREQuency|TINTerval}?",
+      "category": "READ",
+      "description": "Makes a single measurement and returns vs Time data. Format determined by :FORMat.",
+      "query": ":READ:XTIMe:VOLTage:{FREQuency|TINTerval}?",
+      "examples": [":READ:XTIM:FREQ?"]
+    },
+    {
+      "name": "read_query",
+      "mnemonic": ":READ?",
+      "category": "READ",
+      "description": "Retrieves the last function fetched, read, configured, or measured.",
+      "query": ":READ?",
+      "examples": [":READ?"]
+    },
+
+    {
+      "name": "calc_analysis_all_off",
+      "mnemonic": ":CALCulate:ANALysis:AOFF",
+      "category": "CALCulate",
+      "description": "Disables all analysis functions. Event; no query.",
+      "set": ":CALCulate:ANALysis:AOFF",
+      "examples": [":CALC:ANAL:AOFF"]
+    },
+    {
+      "name": "calc_analysis_delimit",
+      "mnemonic": ":CALCulate:ANALysis:DELimit[1|2]",
+      "category": "CALCulate",
+      "description": "Selects the analysis range: ALL data or between MARKers. Suffix 1=vs Time, 2=Histogram. *RST=ALL.",
+      "set": ":CALCulate:ANALysis:DELimit[1|2] <ALL|MARKers>",
+      "query": ":CALCulate:ANALysis:DELimit[1|2]?",
+      "parameters": [{ "name": "delimit", "range": "ALL|MARKers" }],
+      "examples": [":CALC:ANAL:DEL ALL"]
+    },
+    {
+      "name": "calc_analysis_function_state",
+      "mnemonic": ":CALCulate:ANALysis:<function>[:STATe]",
+      "category": "CALCulate",
+      "description": "Enables/disables an analysis function. Functions: IMEan, IMRate, MAXimum, MEAN, MINimum, MRATe, PROBability, PTPeak, SDEViation. Maximum 4 enabled at a time. *RST=OFF.",
+      "set": ":CALCulate:ANALysis:<function>:STATe <ON|OFF|1|0>",
+      "query": ":CALCulate:ANALysis:<function>:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":CALC:ANAL:IME ON", ":CALC:ANAL:MEAN ON"]
+    },
+    {
+      "name": "calc_analysis_function_result",
+      "mnemonic": ":CALCulate:ANALysis:<function>:RESult?",
+      "category": "CALCulate",
+      "description": "Queries the result of an analysis function. The function's STATe must be ON.",
+      "query": ":CALCulate:ANALysis:<function>:RESult?",
+      "examples": [":CALC:ANAL:IME:RES?"]
+    },
+    {
+      "name": "calc_data_query",
+      "mnemonic": ":CALCulate:DATA?",
+      "category": "CALCulate",
+      "description": "Returns the Histogram from vs Time when CALC:HIST is ON and sensing vs Time. Query only.",
+      "query": ":CALCulate:DATA?",
+      "examples": [":CALC:DATA?"]
+    },
+    {
+      "name": "calc_dimension_encode_novalue",
+      "mnemonic": ":CALCulate:DIMension[1|2]:ENCode:NOValue?",
+      "category": "CALCulate",
+      "description": "Queries the NOValue encoding for the dimension. 1=Y-axis, 2=X-axis. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:ENCode:NOValue?",
+      "examples": [":CALC:DIM:ENC:NOV?"]
+    },
+    {
+      "name": "calc_dimension_format_query",
+      "mnemonic": ":CALCulate:DIMension[1|2]:FORMat?",
+      "category": "CALCulate",
+      "description": "Queries the data format of the dimension. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:FORMat?",
+      "examples": [":CALC:DIM:FORM?"]
+    },
+    {
+      "name": "calc_dimension_label_query",
+      "mnemonic": ":CALCulate:DIMension[1|2]:LABel?",
+      "category": "CALCulate",
+      "description": "Queries the label of the dimension. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:LABel?",
+      "examples": [":CALC:DIM:LAB?"]
+    },
+    {
+      "name": "calc_dimension_offset_query",
+      "mnemonic": ":CALCulate:DIMension[1|2]:OFFSet?",
+      "category": "CALCulate",
+      "description": "Queries the offset of the dimension. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:OFFSet?",
+      "examples": [":CALC:DIM:OFFS?"]
+    },
+    {
+      "name": "calc_dimension_scale_query",
+      "mnemonic": ":CALCulate:DIMension[1|2]:SCALe?",
+      "category": "CALCulate",
+      "description": "Queries the scale of the dimension. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:SCALe?",
+      "examples": [":CALC:DIM:SCAL?"]
+    },
+    {
+      "name": "calc_dimension_size_query",
+      "mnemonic": ":CALCulate:DIMension[1|2]:SIZE?",
+      "category": "CALCulate",
+      "description": "Queries the number of points in the dimension. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:SIZE?",
+      "examples": [":CALC:DIM:SIZE?"]
+    },
+    {
+      "name": "calc_dimension_type_query",
+      "mnemonic": ":CALCulate:DIMension[1|2]:TYPE?",
+      "category": "CALCulate",
+      "description": "Queries the type of the dimension. Query only.",
+      "query": ":CALCulate:DIMension[1|2]:TYPE?",
+      "examples": [":CALC:DIM:TYPE?"]
+    },
+    {
+      "name": "calc_histogram_state",
+      "mnemonic": ":CALCulate:HISTogram[:STATe]",
+      "category": "CALCulate",
+      "description": "ON displays Histogram from vs Time; OFF displays vs Time. Applies when sensing vs Time. *RST=OFF.",
+      "set": ":CALCulate:HISTogram:STATe <ON|OFF|1|0>",
+      "query": ":CALCulate:HISTogram:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":CALC:HIST ON"]
+    },
+    {
+      "name": "calc_histogram_accumulate",
+      "mnemonic": ":CALCulate:HISTogram:ACCumulate",
+      "category": "CALCulate",
+      "description": "ON accumulates histogram data whether STATe is ON or OFF. Coupled to :SENSe:HISTogram:ACCumulate. *RST=OFF.",
+      "set": ":CALCulate:HISTogram:ACCumulate <ON|OFF|1|0>",
+      "query": ":CALCulate:HISTogram:ACCumulate?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":CALC:HIST:ACC ON"]
+    },
+    {
+      "name": "calc_histogram_samples_above_query",
+      "mnemonic": ":CALCulate:HISTogram:SAMPles:ABOVe?",
+      "category": "CALCulate",
+      "description": "Returns the number of samples at or above RANGe:UPPer. Query only.",
+      "query": ":CALCulate:HISTogram:SAMPles:ABOVe?",
+      "examples": [":CALC:HIST:SAMP:ABOV?"]
+    },
+    {
+      "name": "calc_histogram_samples_below_query",
+      "mnemonic": ":CALCulate:HISTogram:SAMPles:BELow?",
+      "category": "CALCulate",
+      "description": "Returns the number of samples at or below RANGe:LOWer. Query only.",
+      "query": ":CALCulate:HISTogram:SAMPles:BELow?",
+      "examples": [":CALC:HIST:SAMP:BEL?"]
+    },
+    {
+      "name": "calc_histogram_samples_in_query",
+      "mnemonic": ":CALCulate:HISTogram:SAMPles:IN?",
+      "category": "CALCulate",
+      "description": "Returns the number of samples in the histogram. Query only.",
+      "query": ":CALCulate:HISTogram:SAMPles:IN?",
+      "examples": [":CALC:HIST:SAMP:IN?"]
+    },
+    {
+      "name": "calc_immediate",
+      "mnemonic": ":CALCulate:IMMediate",
+      "category": "CALCulate",
+      "description": "Recalculates without reacquiring data. Event; no query.",
+      "set": ":CALCulate:IMMediate",
+      "examples": [":CALC:IMM"]
+    },
+    {
+      "name": "calc_path_query",
+      "mnemonic": ":CALCulate:PATH?",
+      "category": "CALCulate",
+      "description": "Returns the calculation path; couples to SENSe:FUNCtion. Query only.",
+      "query": ":CALCulate:PATH?",
+      "examples": [":CALC:PATH?"]
+    },
+
+    {
+      "name": "clear",
+      "mnemonic": ":CLEar",
+      "category": "CLEar",
+      "description": "Clears displayed data and invalidates the data available. Event; no query.",
+      "set": ":CLEar",
+      "examples": [":CLE"]
+    },
+
+    {
+      "name": "diag_cal_input_gain_auto",
+      "mnemonic": ":DIAGnostic:CALibration:INPut[1|2]:GAIN:AUTO",
+      "category": "DIAGnostic",
+      "description": "ONCE calibrates input gain for channel (1=A, 2=B). *RST=OFF.",
+      "set": ":DIAGnostic:CALibration:INPut[1|2]:GAIN:AUTO <ONCE|OFF>",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":DIAG:CAL:INP1:GAIN:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_input_offset_auto",
+      "mnemonic": ":DIAGnostic:CALibration:INPut[1|2]:OFFSet:AUTO",
+      "category": "DIAGnostic",
+      "description": "ONCE calibrates input offset for channel (1=A, 2=B). *RST=OFF.",
+      "set": ":DIAGnostic:CALibration:INPut[1|2]:OFFSet:AUTO <ONCE|OFF>",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":DIAG:CAL:INP1:OFFS:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_interp_auto",
+      "mnemonic": ":DIAGnostic:CALibration:INTerp:AUTO",
+      "category": "DIAGnostic",
+      "description": "ONCE calibrates the interpolators. *RST=OFF.",
+      "set": ":DIAGnostic:CALibration:INTerp:AUTO <ONCE|OFF>",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":DIAG:CAL:INT:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_status_query",
+      "mnemonic": ":DIAGnostic:CALibration:STATus?",
+      "category": "DIAGnostic",
+      "description": "Returns 0 for calibration completed successfully, 1 for calibration failed. Query only.",
+      "query": ":DIAGnostic:CALibration:STATus?",
+      "examples": [":DIAG:CAL:STAT?"]
+    },
+
+    {
+      "name": "display_trace_connect",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:CONNect",
+      "category": "DISPlay",
+      "description": "ON connects measured samples on the display. *RST=ON.",
+      "set": ":DISPlay:WINDow:TRACe:CONNect <ON|OFF|1|0>",
+      "query": ":DISPlay:WINDow:TRACe:CONNect?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:TRAC:CONN ON"]
+    },
+    {
+      "name": "display_trace_graticule_axis",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:GRATicule:AXIS[:STATe]",
+      "category": "DISPlay",
+      "description": "Axis graticule (vs Time only). ON couples FRAMe ON and GRID OFF. *RST=ON.",
+      "set": ":DISPlay:WINDow:TRACe:GRATicule:AXIS:STATe <ON|OFF|1|0>",
+      "query": ":DISPlay:WINDow:TRACe:GRATicule:AXIS:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:TRAC:GRAT:AXIS ON"]
+    },
+    {
+      "name": "display_trace_graticule_frame",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:GRATicule:FRAMe[:STATe]",
+      "category": "DISPlay",
+      "description": "Frame graticule. ON couples AXIS OFF and GRID OFF. *RST=ON.",
+      "set": ":DISPlay:WINDow:TRACe:GRATicule:FRAMe:STATe <ON|OFF|1|0>",
+      "query": ":DISPlay:WINDow:TRACe:GRATicule:FRAMe:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:TRAC:GRAT:FRAM ON"]
+    },
+    {
+      "name": "display_trace_graticule_grid",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:GRATicule:GRID[:STATe]",
+      "category": "DISPlay",
+      "description": "Grid graticule. ON couples AXIS ON and FRAMe ON. *RST=OFF.",
+      "set": ":DISPlay:WINDow:TRACe:GRATicule:GRID:STATe <ON|OFF|1|0>",
+      "query": ":DISPlay:WINDow:TRACe:GRATicule:GRID:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:TRAC:GRAT:GRID ON"]
+    },
+    {
+      "name": "display_trace_persistence",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:PERSistence",
+      "category": "DISPlay",
+      "description": "Display persistence. Applies when :SENSe:SWEep:TIME:REPetitive is OFF. *RST=SINGle.",
+      "set": ":DISPlay:WINDow:TRACe:PERSistence <SINGle|INFinite>",
+      "query": ":DISPlay:WINDow:TRACe:PERSistence?",
+      "parameters": [{ "name": "mode", "range": "SINGle|INFinite" }],
+      "examples": [":DISP:TRAC:PERS INF"]
+    },
+    {
+      "name": "display_trace_probability_scale_auto",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:PROBability[:SCALe]:AUTO",
+      "category": "DISPlay",
+      "description": "ON scales the Histogram Y-axis display based on data instead of MIN and MAX. *RST=ON.",
+      "set": ":DISPlay:WINDow:TRACe:PROBability:SCALe:AUTO <ON|OFF|1|0>",
+      "query": ":DISPlay:WINDow:TRACe:PROBability:SCALe:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":DISP:TRAC:PROB:AUTO ON"]
+    },
+    {
+      "name": "display_trace_probability_scale_maximum",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:PROBability[:SCALe]:MAXimum",
+      "category": "DISPlay",
+      "description": "Sets the maximum of the Histogram probability (Y-axis) scale. *RST=100.",
+      "set": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MAXimum <numeric>[PCT]",
+      "query": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MAXimum?",
+      "parameters": [{ "name": "value", "units": "PCT" }],
+      "examples": [":DISP:TRAC:PROB:MAX 20"]
+    },
+    {
+      "name": "display_trace_probability_scale_minimum",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:PROBability[:SCALe]:MINimum",
+      "category": "DISPlay",
+      "description": "Sets the minimum of the Histogram probability (Y-axis) scale. *RST=0.",
+      "set": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MINimum <numeric>[PCT]",
+      "query": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MINimum?",
+      "parameters": [{ "name": "value", "units": "PCT" }],
+      "examples": [":DISP:TRAC:PROB:MIN 1"]
+    },
+    {
+      "name": "display_trace_probability_spacing",
+      "mnemonic": ":DISPlay[:WINDow]:TRACe:PROBability:SPACing",
+      "category": "DISPlay",
+      "description": "Sets the type of spacing used on the Histogram Y-axis display. *RST=LINear.",
+      "set": ":DISPlay:WINDow:TRACe:PROBability:SPACing <LINear|LOGarithmic>",
+      "query": ":DISPlay:WINDow:TRACe:PROBability:SPACing?",
+      "parameters": [{ "name": "spacing", "range": "LINear|LOGarithmic" }],
+      "examples": [":DISP:TRAC:PROB:SPAC LOG"]
+    },
+    {
+      "name": "display_menu",
+      "mnemonic": ":DISPlay:MENU[:NAME]",
+      "category": "DISPlay",
+      "description": "Displays the selected front-panel menu. Event; no query.",
+      "set": ":DISPlay:MENU:NAME <STATus|FUNCtion|VERTical|TIMebase|TRIGger|DISPlay|HIStogram|MARKers|SAMPling|UTility>",
+      "parameters": [{ "name": "menu", "range": "STATus|FUNCtion|VERTical|TIMebase|TRIGger|DISPlay|HIStogram|MARKers|SAMPling|UTility" }],
+      "examples": [":DISP:MENU FUNC"]
+    },
+
+    {
+      "name": "format_data",
+      "mnemonic": ":FORMat[:DATA]",
+      "category": "FORMat",
+      "description": "Sets the data format for queries returning vs Time or Histogram data. BLOCk is 16-bit integers for vs Time and 64-bit reals for Histogram. *RST=ASCii.",
+      "set": ":FORMat:DATA <ASCii|BLOCk>",
+      "query": ":FORMat:DATA?",
+      "parameters": [{ "name": "format", "range": "ASCii|BLOCk" }],
+      "examples": [":FORM BLOC"]
+    },
+
+    {
+      "name": "initiate_immediate",
+      "mnemonic": ":INITiate[:IMMediate]",
+      "category": "INITiate",
+      "description": "Initiates a single measurement. Event; no query.",
+      "set": ":INITiate:IMMediate",
+      "examples": [":INIT"]
+    },
+    {
+      "name": "initiate_continuous",
+      "mnemonic": ":INITiate:CONTinuous",
+      "category": "INITiate",
+      "description": "Enables/disables repetitive measurements. *RST=OFF.",
+      "set": ":INITiate:CONTinuous <ON|OFF|1|0>",
+      "query": ":INITiate:CONTinuous?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":INIT:CONT ON"]
+    },
+
+    {
+      "name": "input_coupling",
+      "mnemonic": ":INPut[1|2]:COUPling",
+      "category": "INPut",
+      "description": "Sets the input coupling for channel (1=A, 2=B). *RST=DC.",
+      "set": ":INPut[1|2]:COUPling <AC|DC>",
+      "query": ":INPut[1|2]:COUPling?",
+      "parameters": [{ "name": "coupling", "range": "AC|DC" }],
+      "examples": [":INP:COUP AC"]
+    },
+    {
+      "name": "input_impedance",
+      "mnemonic": ":INPut[1|2]:IMPedance",
+      "category": "INPut",
+      "description": "Sets the input impedance for channel (1=A, 2=B). Enter 50 OHM or 1 MOHM. *RST=1 MOHM.",
+      "set": ":INPut[1|2]:IMPedance <numeric>[OHM]",
+      "query": ":INPut[1|2]:IMPedance?",
+      "parameters": [{ "name": "impedance", "units": "OHM", "range": "50 or 1E6" }],
+      "examples": [":INP:IMP 50"]
+    },
+
+    {
+      "name": "marker_frequency_state",
+      "mnemonic": ":MARKer:FREQuency[:STATe]",
+      "category": "MARKer",
+      "description": "Enables/disables frequency markers. *RST=OFF.",
+      "set": ":MARKer:FREQuency:STATe <ON|OFF|1|0>",
+      "query": ":MARKer:FREQuency:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":MARK:FREQ ON"]
+    },
+    {
+      "name": "marker_frequency_position",
+      "mnemonic": ":MARKer:FREQuency:POSition[1|2]",
+      "category": "MARKer",
+      "description": "Sets the position of frequency marker 1 or 2. *RST: POS1=85 MHZ, POS2=115 MHZ.",
+      "set": ":MARKer:FREQuency:POSition[1|2] <numeric>[HZ]",
+      "query": ":MARKer:FREQuency:POSition[1|2]?",
+      "parameters": [{ "name": "position", "units": "HZ" }],
+      "examples": [":MARK:FREQ:POS1 100 MHZ"]
+    },
+    {
+      "name": "marker_frequency_position_auto",
+      "mnemonic": ":MARKer:FREQuency:POSition[1|2]:AUTO",
+      "category": "MARKer",
+      "description": "AUTO ON makes frequency and TI markers track the last analysis function enabled. *RST=ON.",
+      "set": ":MARKer:FREQuency:POSition[1|2]:AUTO <ON|OFF|1|0>",
+      "query": ":MARKer:FREQuency:POSition[1|2]:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":MARK:FREQ:POS1:AUTO ON"]
+    },
+    {
+      "name": "marker_probability_state",
+      "mnemonic": ":MARKer:PROBability[:STATe]",
+      "category": "MARKer",
+      "description": "Enables/disables Histogram probability markers (Histogram Y-axis). *RST=OFF.",
+      "set": ":MARKer:PROBability:STATe <ON|OFF|1|0>",
+      "query": ":MARKer:PROBability:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":MARK:PROB ON"]
+    },
+    {
+      "name": "marker_probability_position_query",
+      "mnemonic": ":MARKer:PROBability:POSition[1|2]?",
+      "category": "MARKer",
+      "description": "Queries the probability marker position (a function of the frequency or TI marker position). Query only.",
+      "query": ":MARKer:PROBability:POSition[1|2]?",
+      "examples": [":MARK:PROB:POS1?"]
+    },
+    {
+      "name": "marker_time_state",
+      "mnemonic": ":MARKer:TIME[:STATe]",
+      "category": "MARKer",
+      "description": "Enables/disables Time markers (vs Time X-axis). *RST=OFF.",
+      "set": ":MARKer:TIME:STATe <ON|OFF|1|0>",
+      "query": ":MARKer:TIME:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":MARK:TIME ON"]
+    },
+    {
+      "name": "marker_time_position",
+      "mnemonic": ":MARKer:TIME:POSition[1|2]",
+      "category": "MARKer",
+      "description": "Sets the position of Time marker 1 or 2. *RST: POS1=-0.4E-3, POS2=+0.4E-3.",
+      "set": ":MARKer:TIME:POSition[1|2] <numeric>[S]",
+      "query": ":MARKer:TIME:POSition[1|2]?",
+      "parameters": [{ "name": "position", "units": "S" }],
+      "examples": [":MARK:TIME:POS1 -0.4E-3"]
+    },
+    {
+      "name": "marker_tinterval_state",
+      "mnemonic": ":MARKer:TINTerval[:STATe]",
+      "category": "MARKer",
+      "description": "Enables/disables time interval markers. *RST=OFF.",
+      "set": ":MARKer:TINTerval:STATe <ON|OFF|1|0>",
+      "query": ":MARKer:TINTerval:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":MARK:TINT ON"]
+    },
+    {
+      "name": "marker_tinterval_position",
+      "mnemonic": ":MARKer:TINTerval:POSition[1|2]",
+      "category": "MARKer",
+      "description": "Sets the position of TI marker 1 or 2. *RST: POS1=0.7E-3, POS2=1.3E-3.",
+      "set": ":MARKer:TINTerval:POSition[1|2] <numeric>[S]",
+      "query": ":MARKer:TINTerval:POSition[1|2]?",
+      "parameters": [{ "name": "position", "units": "S" }],
+      "examples": [":MARK:TINT:POS1 0.7E-3"]
+    },
+    {
+      "name": "marker_tinterval_position_auto",
+      "mnemonic": ":MARKer:TINTerval:POSition[1|2]:AUTO",
+      "category": "MARKer",
+      "description": "AUTO ON makes TI and frequency markers track the last analysis function enabled. *RST=ON.",
+      "set": ":MARKer:TINTerval:POSition[1|2]:AUTO <ON|OFF|1|0>",
+      "query": ":MARKer:TINTerval:POSition[1|2]:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":MARK:TINT:POS1:AUTO ON"]
+    },
+
+    {
+      "name": "sense_data_query",
+      "mnemonic": "[:SENSe]:DATA?",
+      "category": "SENSe",
+      "description": "Returns vs Time or Fast Histogram data (uses :FORMat). Query only.",
+      "query": ":DATA?",
+      "examples": [":DATA?"]
+    },
+    {
+      "name": "sense_dimension_encode_novalue",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:ENCode:NOValue?",
+      "category": "SENSe",
+      "description": "Queries the NOValue encoding for the dimension. Query only.",
+      "query": ":DIMension[1|2]:ENCode:NOValue?",
+      "examples": [":DIM:ENC:NOV?"]
+    },
+    {
+      "name": "sense_dimension_format_query",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:FORMat?",
+      "category": "SENSe",
+      "description": "Queries the data format of the dimension. Query only.",
+      "query": ":DIMension[1|2]:FORMat?",
+      "examples": [":DIM:FORM?"]
+    },
+    {
+      "name": "sense_dimension_label_query",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:LABel?",
+      "category": "SENSe",
+      "description": "Queries the label of the dimension. Query only.",
+      "query": ":DIMension[1|2]:LABel?",
+      "examples": [":DIM:LAB?"]
+    },
+    {
+      "name": "sense_dimension_offset_query",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:OFFSet?",
+      "category": "SENSe",
+      "description": "Queries the offset of the dimension. Query only.",
+      "query": ":DIMension[1|2]:OFFSet?",
+      "examples": [":DIM:OFFS?"]
+    },
+    {
+      "name": "sense_dimension_scale_query",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:SCALe?",
+      "category": "SENSe",
+      "description": "Queries the scale of the dimension. Query only.",
+      "query": ":DIMension[1|2]:SCALe?",
+      "examples": [":DIM:SCAL?"]
+    },
+    {
+      "name": "sense_dimension_size_query",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:SIZE?",
+      "category": "SENSe",
+      "description": "Queries the number of points in the dimension. Query only.",
+      "query": ":DIMension[1|2]:SIZE?",
+      "examples": [":DIM:SIZE?"]
+    },
+    {
+      "name": "sense_dimension_type_query",
+      "mnemonic": "[:SENSe]:DIMension[1|2]:TYPE?",
+      "category": "SENSe",
+      "description": "Queries the type of the dimension. Query only.",
+      "query": ":DIMension[1|2]:TYPE?",
+      "examples": [":DIM:TYPE?"]
+    },
+    {
+      "name": "sense_event_hysteresis_relative",
+      "mnemonic": "[:SENSe]:EVENt[1|2]:HYSTeresis:RELative",
+      "category": "SENSe",
+      "description": "Sets the input event hysteresis as 0-100% for channel (1=A, 2=B). *RST=0.",
+      "set": ":EVENt[1|2]:HYSTeresis:RELative <numeric>[PCT]",
+      "query": ":EVENt[1|2]:HYSTeresis:RELative?",
+      "parameters": [{ "name": "hysteresis", "units": "PCT", "range": "0-100" }],
+      "examples": [":EVEN2:HYST:REL 30"]
+    },
+    {
+      "name": "sense_event_level",
+      "mnemonic": "[:SENSe]:EVENt[1|2]:LEVel",
+      "category": "SENSe",
+      "description": "Sets the input event (trigger) level voltage for channel (1=A, 2=B). *RST=0 V.",
+      "set": ":EVENt[1|2]:LEVel <numeric>[V]",
+      "query": ":EVENt[1|2]:LEVel?",
+      "parameters": [{ "name": "level", "units": "V" }],
+      "examples": [":EVEN2:LEV 5"]
+    },
+    {
+      "name": "sense_event_level_auto",
+      "mnemonic": "[:SENSe]:EVENt[1|2]:LEVel:AUTO",
+      "category": "SENSe",
+      "description": "ONCE finds the 50% voltage threshold of the input signal. Event; with query. *RST=OFF.",
+      "set": ":EVENt[1|2]:LEVel:AUTO <ONCE|OFF>",
+      "query": ":EVENt[1|2]:LEVel:AUTO?",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":EVEN2:LEV:AUTO ONCE"]
+    },
+    {
+      "name": "sense_frequency_arm_cfinterval",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:CFINterval[1|2|3]",
+      "category": "SENSe",
+      "description": "Sampling interval at center frequency for ARM:SOURce AUTO. 1=A, 2=B, 3=C. *RST=5E-5.",
+      "set": ":FREQuency:ARM:CFINterval[1|2|3] <numeric>[S]",
+      "query": ":FREQuency:ARM:CFINterval[1|2|3]?",
+      "parameters": [{ "name": "interval", "units": "S" }],
+      "examples": [":FREQ:ARM:CFIN 4.762E-6"]
+    },
+    {
+      "name": "sense_frequency_arm_cfinterval_auto",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:CFINterval[1|2|3]:AUTO",
+      "category": "SENSe",
+      "description": "ON couples the interval to SWEep:TIME:SPAN. *RST=ON.",
+      "set": ":FREQuency:ARM:CFINterval[1|2|3]:AUTO <ON|OFF|1|0>",
+      "query": ":FREQuency:ARM:CFINterval[1|2|3]:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":FREQ:ARM:CFIN:AUTO ON"]
+    },
+    {
+      "name": "sense_frequency_arm_ecount_query",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:ECOunt[1|2]?",
+      "category": "SENSe",
+      "description": "Returns the actual arm event count. 1=A, 2=B. Query only.",
+      "query": ":FREQuency:ARM:ECOunt[1|2]?",
+      "examples": [":FREQ:ARM:ECO?"]
+    },
+    {
+      "name": "sense_frequency_arm_ecount_multiplier",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:ECOunt[1|2]:MULTiplier",
+      "category": "SENSe",
+      "description": "Arm event count multiplier; applies when SOURce LINK and frequency A or B selected. 1=A, 2=B. *RST: ECO1=2, ECO2=1.",
+      "set": ":FREQuency:ARM:ECOunt[1|2]:MULTiplier <numeric>",
+      "query": ":FREQuency:ARM:ECOunt[1|2]:MULTiplier?",
+      "parameters": [{ "name": "multiplier" }],
+      "examples": [":FREQ:ARM:ECO:MULT 4"]
+    },
+    {
+      "name": "sense_frequency_arm_level",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:LEVel",
+      "category": "SENSe",
+      "description": "External arm level; applies when SOURce EXTernal, or SOURce LINK and frequency C selected. *RST=1.5 V.",
+      "set": ":FREQuency:ARM:LEVel <numeric>[V]",
+      "query": ":FREQuency:ARM:LEVel?",
+      "parameters": [{ "name": "level", "units": "V" }],
+      "examples": [":FREQ:ARM:LEV 0"]
+    },
+    {
+      "name": "sense_frequency_arm_link_query",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:LINK?",
+      "category": "SENSe",
+      "description": "Returns INT1, INT2, or EXT for frequency A, B, or C respectively. Query only.",
+      "query": ":FREQuency:ARM:LINK?",
+      "examples": [":FREQ:ARM:LINK?"]
+    },
+    {
+      "name": "sense_frequency_arm_slope",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:SLOPe",
+      "category": "SENSe",
+      "description": "External arm slope; applies when SOURce EXTernal, or SOURce LINK and frequency C selected. *RST=POS.",
+      "set": ":FREQuency:ARM:SLOPe <POSitive|NEGative>",
+      "query": ":FREQuency:ARM:SLOPe?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":FREQ:ARM:SLOP POS"]
+    },
+    {
+      "name": "sense_frequency_arm_source",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:SOURce",
+      "category": "SENSe",
+      "description": "Selects frequency arm source. LINK samples on edge of A or B, or external (frequency C). *RST=AUTO.",
+      "set": ":FREQuency:ARM:SOURce <AUTO|EXTernal|LINK|TIMer>",
+      "query": ":FREQuency:ARM:SOURce?",
+      "parameters": [{ "name": "source", "range": "AUTO|EXTernal|LINK|TIMer" }],
+      "examples": [":FREQ:ARM:SOUR EXT"]
+    },
+    {
+      "name": "sense_frequency_arm_timer",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:TIMer",
+      "category": "SENSe",
+      "description": "Time sampling interval (when SOURce TIMer). *RST=50.0E-6.",
+      "set": ":FREQuency:ARM:TIMer <numeric>[S]",
+      "query": ":FREQuency:ARM:TIMer?",
+      "parameters": [{ "name": "interval", "units": "S" }],
+      "examples": [":FREQ:ARM:TIM 5E-3"]
+    },
+    {
+      "name": "sense_frequency_arm_timer_status_query",
+      "mnemonic": "[:SENSe]:FREQuency:ARM:TIMer:STATus?",
+      "category": "SENSe",
+      "description": "Returns 0 (use selected time sampling) or 1 (selected time sampling below approximate minimum sampling interval). Query only.",
+      "query": ":FREQuency:ARM:TIMer:STATus?",
+      "examples": [":FREQ:ARM:TIM:STAT?"]
+    },
+    {
+      "name": "sense_frequency_range_upper",
+      "mnemonic": "[:SENSe]:FREQuency:RANGe[1|2|3][:UPPer]",
+      "category": "SENSe",
+      "description": "Sets the upper frequency range. 1=A, 2=B, 3=C. *RST: A=125 MHZ, B=70 MHZ, C=1.375 GHZ.",
+      "set": ":FREQuency:RANGe[1|2|3]:UPPer <numeric>[HZ]",
+      "query": ":FREQuency:RANGe[1|2|3]:UPPer?",
+      "parameters": [{ "name": "frequency", "units": "HZ" }],
+      "examples": [":FREQ:RANG 10 MHZ"]
+    },
+    {
+      "name": "sense_frequency_range_auto",
+      "mnemonic": "[:SENSe]:FREQuency:RANGe[1|2|3]:AUTO",
+      "category": "SENSe",
+      "description": "ONCE autoscales UPPer and LOWer for the input signal. Event with query. *RST=OFF.",
+      "set": ":FREQuency:RANGe[1|2|3]:AUTO <ONCE|OFF>",
+      "query": ":FREQuency:RANGe[1|2|3]:AUTO?",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":FREQ:RANG2:AUTO ONCE"]
+    },
+    {
+      "name": "sense_frequency_range_center_auto",
+      "mnemonic": "[:SENSe]:FREQuency:RANGe[1|2|3]:CENTer:AUTO",
+      "category": "SENSe",
+      "description": "ONCE autoscales UPPer and LOWer retaining their difference. Event with query. *RST=OFF.",
+      "set": ":FREQuency:RANGe[1|2|3]:CENTer:AUTO <ONCE|OFF>",
+      "query": ":FREQuency:RANGe[1|2|3]:CENTer:AUTO?",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":FREQ:RANG:CENT:AUTO ONCE"]
+    },
+    {
+      "name": "sense_frequency_range_lower",
+      "mnemonic": "[:SENSe]:FREQuency:RANGe[1|2|3]:LOWer",
+      "category": "SENSe",
+      "description": "Sets the lower frequency range. 1=A, 2=B, 3=C. *RST: A=75 MHZ, B=30 MHZ, C=625 MHZ.",
+      "set": ":FREQuency:RANGe[1|2|3]:LOWer <numeric>[HZ]",
+      "query": ":FREQuency:RANGe[1|2|3]:LOWer?",
+      "parameters": [{ "name": "frequency", "units": "HZ" }],
+      "examples": [":FREQ:RANG:LOW 5 MHZ"]
+    },
+    {
+      "name": "sense_function",
+      "mnemonic": "[:SENSe]:FUNCtion",
+      "category": "SENSe",
+      "description": "Selects the sensor function. Choices (short form, in quotes): FREQ[1|2|3], FREQ[1|2|3]:HIST, TINT, TINT:HIST. HIST=Fast Histogram. 1=A, 2=B, 3=C. *RST=FREQ.",
+      "set": ":FUNCtion <\"FREQ[1|2|3]\"|\"FREQ[1|2|3]:HIST\"|\"TINT\"|\"TINT:HIST\">",
+      "query": ":FUNCtion?",
+      "parameters": [{ "name": "function", "range": "FREQ|FREQ:HIST|TINT|TINT:HIST" }],
+      "examples": [":FUNC \"TINT:HIST\"", ":FUNC \"FREQ1\""]
+    },
+    {
+      "name": "sense_histogram_accumulate",
+      "mnemonic": "[:SENSe]:HISTogram:ACCumulate",
+      "category": "SENSe",
+      "description": "Fast Histogram accumulate. Coupled to :CALCulate:HISTogram:ACCumulate. *RST=OFF.",
+      "set": ":HISTogram:ACCumulate <ON|OFF|1|0>",
+      "query": ":HISTogram:ACCumulate?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":HIST:ACC ON"]
+    },
+    {
+      "name": "sense_histogram_arm_level",
+      "mnemonic": "[:SENSe]:HISTogram:ARM:LEVel",
+      "category": "SENSe",
+      "description": "External arm level for Fast Histogram (SOURce EXTernal required). *RST=1.5 V.",
+      "set": ":HISTogram:ARM:LEVel <numeric>[V]",
+      "query": ":HISTogram:ARM:LEVel?",
+      "parameters": [{ "name": "level", "units": "V" }],
+      "examples": [":HIST:ARM:LEV 1.5"]
+    },
+    {
+      "name": "sense_histogram_arm_slope",
+      "mnemonic": "[:SENSe]:HISTogram:ARM:SLOPe",
+      "category": "SENSe",
+      "description": "External arm slope for Fast Histogram (SOURce EXTernal required). *RST=POS.",
+      "set": ":HISTogram:ARM:SLOPe <POSitive|NEGative>",
+      "query": ":HISTogram:ARM:SLOPe?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":HIST:ARM:SLOP POS"]
+    },
+    {
+      "name": "sense_histogram_arm_source",
+      "mnemonic": "[:SENSe]:HISTogram:ARM:SOURce",
+      "category": "SENSe",
+      "description": "Event that starts Fast Histogram acquisition. IMMediate is as fast as possible. *RST=IMMediate.",
+      "set": ":HISTogram:ARM:SOURce <IMMediate|EXTernal>",
+      "query": ":HISTogram:ARM:SOURce?",
+      "parameters": [{ "name": "source", "range": "IMMediate|EXTernal" }],
+      "examples": [":HIST:ARM:SOUR IMM"]
+    },
+    {
+      "name": "sense_histogram_samples_above_query",
+      "mnemonic": "[:SENSe]:HISTogram:SAMPles:ABOVe?",
+      "category": "SENSe",
+      "description": "Returns the number of Fast Histogram samples above RANGe:UPPer. Query only.",
+      "query": ":HISTogram:SAMPles:ABOVe?",
+      "examples": [":HIST:SAMP:ABOV?"]
+    },
+    {
+      "name": "sense_histogram_samples_below_query",
+      "mnemonic": "[:SENSe]:HISTogram:SAMPles:BELow?",
+      "category": "SENSe",
+      "description": "Returns the number of Fast Histogram samples below RANGe:LOWer. Query only.",
+      "query": ":HISTogram:SAMPles:BELow?",
+      "examples": [":HIST:SAMP:BEL?"]
+    },
+    {
+      "name": "sense_histogram_samples_in_query",
+      "mnemonic": "[:SENSe]:HISTogram:SAMPles:IN?",
+      "category": "SENSe",
+      "description": "Returns the number of samples in the Fast Histogram. Query only.",
+      "query": ":HISTogram:SAMPles:IN?",
+      "examples": [":HIST:SAMP:IN?"]
+    },
+    {
+      "name": "sense_histogram_trigger_count",
+      "mnemonic": "[:SENSe]:HISTogram:TRIGger:COUNt",
+      "category": "SENSe",
+      "description": "Number of frequency or TI measurements required for a Fast Histogram update. *RST=1000.",
+      "set": ":HISTogram:TRIGger:COUNt <numeric>",
+      "query": ":HISTogram:TRIGger:COUNt?",
+      "parameters": [{ "name": "count" }],
+      "examples": [":HIST:TRIG:COUN 1000"]
+    },
+    {
+      "name": "sense_roscillator_source_query",
+      "mnemonic": "[:SENSe]:ROSCillator:SOURce?",
+      "category": "SENSe",
+      "description": "Returns the reference oscillator source (INT, EXT, or ERR); auto-detected. Query only.",
+      "query": ":ROSCillator:SOURce?",
+      "examples": [":ROSC:SOUR?"]
+    },
+    {
+      "name": "sense_sweep_time_delay",
+      "mnemonic": "[:SENSe]:SWEep:TIME:DELay",
+      "category": "SENSe",
+      "description": "Main timebase delay. *RST=0.",
+      "set": ":SWEep:TIME:DELay <numeric>[S]",
+      "query": ":SWEep:TIME:DELay?",
+      "parameters": [{ "name": "delay", "units": "S" }],
+      "examples": [":SWE:TIME:DEL 5E-3"]
+    },
+    {
+      "name": "sense_sweep_time_delay_link",
+      "mnemonic": "[:SENSe]:SWEep:TIME:DELay:LINK",
+      "category": "SENSe",
+      "description": "Delay reference. Coupled to SWEep:TIME:PANorama:DELay:LINK. *RST=CENTer.",
+      "set": ":SWEep:TIME:DELay:LINK <CENTer|STARt|STOP>",
+      "query": ":SWEep:TIME:DELay:LINK?",
+      "parameters": [{ "name": "reference", "range": "CENTer|STARt|STOP" }],
+      "examples": [":SWE:TIME:DEL:LINK CENT"]
+    },
+    {
+      "name": "sense_sweep_time_panorama_state",
+      "mnemonic": "[:SENSe]:SWEep:TIME:PANorama[:STATe]",
+      "category": "SENSe",
+      "description": "Enables/disables Panorama measurements. *RST=OFF.",
+      "set": ":SWEep:TIME:PANorama:STATe <ON|OFF|1|0>",
+      "query": ":SWEep:TIME:PANorama:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":SWE:TIME:PAN ON"]
+    },
+    {
+      "name": "sense_sweep_time_panorama_delay",
+      "mnemonic": "[:SENSe]:SWEep:TIME:PANorama:DELay",
+      "category": "SENSe",
+      "description": "Panorama timebase delay. *RST=0.",
+      "set": ":SWEep:TIME:PANorama:DELay <numeric>[S]",
+      "query": ":SWEep:TIME:PANorama:DELay?",
+      "parameters": [{ "name": "delay", "units": "S" }],
+      "examples": [":SWE:TIME:PAN:DEL 2E-3"]
+    },
+    {
+      "name": "sense_sweep_time_panorama_delay_link",
+      "mnemonic": "[:SENSe]:SWEep:TIME:PANorama:DELay:LINK",
+      "category": "SENSe",
+      "description": "Panorama delay reference. Coupled to SWEep:TIME:DELay:LINK. *RST=CENTer.",
+      "set": ":SWEep:TIME:PANorama:DELay:LINK <CENTer|STARt|STOP>",
+      "query": ":SWEep:TIME:PANorama:DELay:LINK?",
+      "parameters": [{ "name": "reference", "range": "CENTer|STARt|STOP" }],
+      "examples": [":SWE:TIME:PAN:DEL:LINK STAR"]
+    },
+    {
+      "name": "sense_sweep_time_panorama_span",
+      "mnemonic": "[:SENSe]:SWEep:TIME:PANorama:SPAN",
+      "category": "SENSe",
+      "description": "Panorama timebase span. *RST=1E-3.",
+      "set": ":SWEep:TIME:PANorama:SPAN <numeric>[S]",
+      "query": ":SWEep:TIME:PANorama:SPAN?",
+      "parameters": [{ "name": "span", "units": "S" }],
+      "examples": [":SWE:TIME:PAN:SPAN 1E-3"]
+    },
+    {
+      "name": "sense_sweep_time_repetitive_state",
+      "mnemonic": "[:SENSe]:SWEep:TIME:REPetitive[:STATe]",
+      "category": "SENSe",
+      "description": "ON=Repetitive, OFF=Real time. *RST=OFF.",
+      "set": ":SWEep:TIME:REPetitive:STATe <ON|OFF|1|0>",
+      "query": ":SWEep:TIME:REPetitive:STATe?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":SWE:TIME:REP:STAT ON"]
+    },
+    {
+      "name": "sense_sweep_time_repetitive_average",
+      "mnemonic": "[:SENSe]:SWEep:TIME:REPetitive:AVERage",
+      "category": "SENSe",
+      "description": "Repetitive averaging; applies when SWEep:TIME:REPetitive ON. *RST=OFF.",
+      "set": ":SWEep:TIME:REPetitive:AVERage <ON|OFF|1|0>",
+      "query": ":SWEep:TIME:REPetitive:AVERage?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":SWE:TIME:REP:AVER ON"]
+    },
+    {
+      "name": "sense_sweep_time_span",
+      "mnemonic": "[:SENSe]:SWEep:TIME:SPAN",
+      "category": "SENSe",
+      "description": "Main timebase span. *RST=1E-3.",
+      "set": ":SWEep:TIME:SPAN <numeric>[S]",
+      "query": ":SWEep:TIME:SPAN?",
+      "parameters": [{ "name": "span", "units": "S" }],
+      "examples": [":SWE:TIME:SPAN 2E-1"]
+    },
+    {
+      "name": "sense_tinterval_arm_atimer_query",
+      "mnemonic": "[:SENSe]:TINTerval:ARM:ATIMer?",
+      "category": "SENSe",
+      "description": "Returns the sample time for ARM:SOURce AUTO in vs Time or Histogram from vs Time. Query only.",
+      "query": ":TINTerval:ARM:ATIMer?",
+      "examples": [":TINT:ARM:ATIM?"]
+    },
+    {
+      "name": "sense_tinterval_arm_ecount",
+      "mnemonic": "[:SENSe]:TINTerval:ARM:ECOunt",
+      "category": "SENSe",
+      "description": "Arm event count (SOURce INTernal[1|2] required). *RST=1.",
+      "set": ":TINTerval:ARM:ECOunt <numeric>",
+      "query": ":TINTerval:ARM:ECOunt?",
+      "parameters": [{ "name": "count" }],
+      "examples": [":TINT:ARM:ECO 2"]
+    },
+    {
+      "name": "sense_tinterval_arm_level",
+      "mnemonic": "[:SENSe]:TINTerval:ARM:LEVel",
+      "category": "SENSe",
+      "description": "External arm level (SOURce EXTernal required). *RST=1.5 V.",
+      "set": ":TINTerval:ARM:LEVel <numeric>[V]",
+      "query": ":TINTerval:ARM:LEVel?",
+      "parameters": [{ "name": "level", "units": "V" }],
+      "examples": [":TINT:ARM:LEV 0"]
+    },
+    {
+      "name": "sense_tinterval_arm_slope",
+      "mnemonic": "[:SENSe]:TINTerval:ARM:SLOPe[1|2|3]",
+      "category": "SENSe",
+      "description": "TI arm slope. 1=A, 2=B, 3=EXT when SOURce INTernal[1|2] or EXTernal respectively. *RST=POS.",
+      "set": ":TINTerval:ARM:SLOPe[1|2|3] <POSitive|NEGative>",
+      "query": ":TINTerval:ARM:SLOPe[1|2|3]?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":TINT:ARM:SLOP POS"]
+    },
+    {
+      "name": "sense_tinterval_arm_source",
+      "mnemonic": "[:SENSe]:TINTerval:ARM:SOURce",
+      "category": "SENSe",
+      "description": "TI arm source. AUTO couples time sampling to main timebase for vs Time or Histogram from vs Time. *RST=AUTO.",
+      "set": ":TINTerval:ARM:SOURce <AUTO|INTernal[1|2]|EXTernal|TIMer>",
+      "query": ":TINTerval:ARM:SOURce?",
+      "parameters": [{ "name": "source", "range": "AUTO|INTernal[1|2]|EXTernal|TIMer" }],
+      "examples": [":TINT:ARM:SOUR EXT"]
+    },
+    {
+      "name": "sense_tinterval_arm_timer",
+      "mnemonic": "[:SENSe]:TINTerval:ARM:TIMer",
+      "category": "SENSe",
+      "description": "Time sampling interval (when SOURce TIMer). *RST=10E-6.",
+      "set": ":TINTerval:ARM:TIMer <numeric>[S]",
+      "query": ":TINTerval:ARM:TIMer?",
+      "parameters": [{ "name": "interval", "units": "S" }],
+      "examples": [":TINT:ARM:TIM 500 MS"]
+    },
+    {
+      "name": "sense_tinterval_range_upper",
+      "mnemonic": "[:SENSe]:TINTerval:RANGe[:UPPer]",
+      "category": "SENSe",
+      "description": "Sets the upper time-interval range. *RST=1.4E-3.",
+      "set": ":TINTerval:RANGe:UPPer <numeric>[S]",
+      "query": ":TINTerval:RANGe:UPPer?",
+      "parameters": [{ "name": "interval", "units": "S" }],
+      "examples": [":TINT:RANG 3E-3"]
+    },
+    {
+      "name": "sense_tinterval_range_auto",
+      "mnemonic": "[:SENSe]:TINTerval:RANGe:AUTO",
+      "category": "SENSe",
+      "description": "ONCE autoscales UPPer and LOWer for the input signal. Event with query. *RST=OFF.",
+      "set": ":TINTerval:RANGe:AUTO <ONCE|OFF>",
+      "query": ":TINTerval:RANGe:AUTO?",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":TINT:RANG:AUTO ONCE"]
+    },
+    {
+      "name": "sense_tinterval_range_center_auto",
+      "mnemonic": "[:SENSe]:TINTerval:RANGe:CENTer:AUTO",
+      "category": "SENSe",
+      "description": "ONCE autoscales UPPer and LOWer retaining their difference. Event with query. *RST=OFF.",
+      "set": ":TINTerval:RANGe:CENTer:AUTO <ONCE|OFF>",
+      "query": ":TINTerval:RANGe:CENTer:AUTO?",
+      "parameters": [{ "name": "state", "range": "ONCE|OFF" }],
+      "examples": [":TINT:RANG:CENT:AUTO ONCE"]
+    },
+    {
+      "name": "sense_tinterval_range_lower",
+      "mnemonic": "[:SENSe]:TINTerval:RANGe:LOWer",
+      "category": "SENSe",
+      "description": "Sets the lower time-interval range. *RST=600E-9.",
+      "set": ":TINTerval:RANGe:LOWer <numeric>[S]",
+      "query": ":TINTerval:RANGe:LOWer?",
+      "parameters": [{ "name": "interval", "units": "S" }],
+      "examples": [":TINT:RANG:LOW 600E-9"]
+    },
+    {
+      "name": "sense_tinterval_route",
+      "mnemonic": "[:SENSe]:TINTerval:ROUTe",
+      "category": "SENSe",
+      "description": "Time-interval input routing. *RST=SEParate.",
+      "set": ":TINTerval:ROUTe <COMMon|SEParate>",
+      "query": ":TINTerval:ROUTe?",
+      "parameters": [{ "name": "route", "range": "COMMon|SEParate" }],
+      "examples": [":TINT:ROUT COMM"]
+    },
+    {
+      "name": "sense_tinterval_slope",
+      "mnemonic": "[:SENSe]:TINTerval:SLOPe[1|2]",
+      "category": "SENSe",
+      "description": "TI measurement slope. 1=A (TI start edge), 2=B (TI stop edge). *RST=POS.",
+      "set": ":TINTerval:SLOPe[1|2] <POSitive|NEGative>",
+      "query": ":TINTerval:SLOPe[1|2]?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":TINT:SLOP1 POS"]
+    },
+    {
+      "name": "sense_tinterval_type",
+      "mnemonic": "[:SENSe]:TINTerval:TYPE",
+      "category": "SENSe",
+      "description": "Time-interval type. PLUS = +TI; PMINus = +/- TI. *RST=PLUS.",
+      "set": ":TINTerval:TYPE <PLUS|PMINus>",
+      "query": ":TINTerval:TYPE?",
+      "parameters": [{ "name": "type", "range": "PLUS|PMINus" }],
+      "examples": [":TINT:TYPE PLUS"]
+    },
+
+    {
+      "name": "status_operation_event_query",
+      "mnemonic": ":STATus:OPERation[:EVENt]?",
+      "category": "STATus",
+      "description": "Queries the Operation Status Event register. Query only.",
+      "query": ":STATus:OPERation:EVENt?",
+      "examples": [":STAT:OPER?"]
+    },
+    {
+      "name": "status_operation_condition_query",
+      "mnemonic": ":STATus:OPERation:CONDition?",
+      "category": "STATus",
+      "description": "Queries the Operation Status Condition register. Query only.",
+      "query": ":STATus:OPERation:CONDition?",
+      "examples": [":STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": ":STATus:OPERation:ENABle",
+      "category": "STATus",
+      "description": "Sets or queries the Operation Status Enable register.",
+      "set": ":STATus:OPERation:ENABle <NRf>",
+      "query": ":STATus:OPERation:ENABle?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:OPER:ENAB 1"]
+    },
+    {
+      "name": "status_operation_ntransition",
+      "mnemonic": ":STATus:OPERation:NTRansition",
+      "category": "STATus",
+      "description": "Sets or queries the Operation Status negative transition filter.",
+      "set": ":STATus:OPERation:NTRansition <NRf>",
+      "query": ":STATus:OPERation:NTRansition?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:OPER:NTR 0"]
+    },
+    {
+      "name": "status_operation_ptransition",
+      "mnemonic": ":STATus:OPERation:PTRansition",
+      "category": "STATus",
+      "description": "Sets or queries the Operation Status positive transition filter.",
+      "set": ":STATus:OPERation:PTRansition <NRf>",
+      "query": ":STATus:OPERation:PTRansition?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:OPER:PTR 1"]
+    },
+    {
+      "name": "status_questionable_event_query",
+      "mnemonic": ":STATus:QUEStionable[:EVENt]?",
+      "category": "STATus",
+      "description": "Queries the Questionable Status Event register. Query only.",
+      "query": ":STATus:QUEStionable:EVENt?",
+      "examples": [":STAT:QUES?"]
+    },
+    {
+      "name": "status_questionable_condition_query",
+      "mnemonic": ":STATus:QUEStionable:CONDition?",
+      "category": "STATus",
+      "description": "Queries the Questionable Status Condition register. Query only.",
+      "query": ":STATus:QUEStionable:CONDition?",
+      "examples": [":STAT:QUES:COND?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": ":STATus:QUEStionable:ENABle",
+      "category": "STATus",
+      "description": "Sets or queries the Questionable Status Enable register.",
+      "set": ":STATus:QUEStionable:ENABle <NRf>",
+      "query": ":STATus:QUEStionable:ENABle?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:QUES:ENAB 1"]
+    },
+    {
+      "name": "status_questionable_ntransition",
+      "mnemonic": ":STATus:QUEStionable:NTRansition",
+      "category": "STATus",
+      "description": "Sets or queries the Questionable Status negative transition filter.",
+      "set": ":STATus:QUEStionable:NTRansition <NRf>",
+      "query": ":STATus:QUEStionable:NTRansition?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:QUES:NTR 0"]
+    },
+    {
+      "name": "status_questionable_ptransition",
+      "mnemonic": ":STATus:QUEStionable:PTRansition",
+      "category": "STATus",
+      "description": "Sets or queries the Questionable Status positive transition filter.",
+      "set": ":STATus:QUEStionable:PTRansition <NRf>",
+      "query": ":STATus:QUEStionable:PTRansition?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:QUES:PTR 1"]
+    },
+    {
+      "name": "status_questionable_frequency_event_query",
+      "mnemonic": ":STATus:QUEStionable:FREQuency[:EVENt]?",
+      "category": "STATus",
+      "description": "Queries the Questionable Frequency Status Event register. Query only.",
+      "query": ":STATus:QUEStionable:FREQuency:EVENt?",
+      "examples": [":STAT:QUES:FREQ?"]
+    },
+    {
+      "name": "status_questionable_frequency_condition_query",
+      "mnemonic": ":STATus:QUEStionable:FREQuency:CONDition?",
+      "category": "STATus",
+      "description": "Queries the Questionable Frequency Status Condition register. Query only.",
+      "query": ":STATus:QUEStionable:FREQuency:CONDition?",
+      "examples": [":STAT:QUES:FREQ:COND?"]
+    },
+    {
+      "name": "status_questionable_frequency_enable",
+      "mnemonic": ":STATus:QUEStionable:FREQuency:ENABle",
+      "category": "STATus",
+      "description": "Sets or queries the Questionable Frequency Status Enable register.",
+      "set": ":STATus:QUEStionable:FREQuency:ENABle <NRf>",
+      "query": ":STATus:QUEStionable:FREQuency:ENABle?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:QUES:FREQ:ENAB 1"]
+    },
+    {
+      "name": "status_questionable_frequency_ntransition",
+      "mnemonic": ":STATus:QUEStionable:FREQuency:NTRansition",
+      "category": "STATus",
+      "description": "Sets or queries the Questionable Frequency Status negative transition filter.",
+      "set": ":STATus:QUEStionable:FREQuency:NTRansition <NRf>",
+      "query": ":STATus:QUEStionable:FREQuency:NTRansition?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:QUES:FREQ:NTR 0"]
+    },
+    {
+      "name": "status_questionable_frequency_ptransition",
+      "mnemonic": ":STATus:QUEStionable:FREQuency:PTRansition",
+      "category": "STATus",
+      "description": "Sets or queries the Questionable Frequency Status positive transition filter.",
+      "set": ":STATus:QUEStionable:FREQuency:PTRansition <NRf>",
+      "query": ":STATus:QUEStionable:FREQuency:PTRansition?",
+      "parameters": [{ "name": "mask" }],
+      "examples": [":STAT:QUES:FREQ:PTR 1"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": ":STATus:PRESet",
+      "category": "STATus",
+      "description": "Presets the :STATus enable and transition registers. Event; no query.",
+      "set": ":STATus:PRESet",
+      "examples": [":STAT:PRES"]
+    },
+
+    {
+      "name": "system_clicker",
+      "mnemonic": ":SYSTem:CLICker",
+      "category": "SYSTem",
+      "description": "Enables/disables the audible front-panel key click. *RST=ON.",
+      "set": ":SYSTem:CLICker <ON|OFF|1|0>",
+      "query": ":SYSTem:CLICker?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":SYST:CLIC ON"]
+    },
+    {
+      "name": "system_error_query",
+      "mnemonic": ":SYSTem:ERRor?",
+      "category": "SYSTem",
+      "description": "Responds with the first (oldest) error in the error queue. Query only.",
+      "query": ":SYSTem:ERRor?",
+      "examples": [":SYST:ERR?"]
+    },
+    {
+      "name": "system_key",
+      "mnemonic": ":SYSTem:KEY",
+      "category": "SYSTem",
+      "description": "Simulates a front-panel key press.",
+      "set": ":SYSTem:KEY <numeric>",
+      "query": ":SYSTem:KEY?",
+      "parameters": [{ "name": "key_code" }],
+      "examples": [":SYST:KEY 1"]
+    },
+    {
+      "name": "system_key_log_query",
+      "mnemonic": ":SYSTem:KEY:LOG?",
+      "category": "SYSTem",
+      "description": "Returns the contents of the key queue and empties the queue. Query only.",
+      "query": ":SYSTem:KEY:LOG?",
+      "examples": [":SYST:KEY:LOG?"]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": ":SYSTem:PRESet",
+      "category": "SYSTem",
+      "description": "Sets the analyzer to the same state as the front-panel Preset key. Event; no query.",
+      "set": ":SYSTem:PRESet",
+      "examples": [":SYST:PRES"]
+    },
+    {
+      "name": "system_print_query",
+      "mnemonic": ":SYSTem:PRINt?",
+      "category": "SYSTem",
+      "description": "Puts PCL-formatted display image data in the Output Queue. Query only.",
+      "query": ":SYSTem:PRINt?",
+      "examples": [":SYST:PRIN?"]
+    },
+    {
+      "name": "system_ssaver",
+      "mnemonic": ":SYSTem:SSAVer",
+      "category": "SYSTem",
+      "description": "Enables or disables the screen saver capability. *RST=OFF.",
+      "set": ":SYSTem:SSAVer <ON|OFF|1|0>",
+      "query": ":SYSTem:SSAVer?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":SYST:SSAV ON"]
+    },
+    {
+      "name": "system_version_query",
+      "mnemonic": ":SYSTem:VERSion?",
+      "category": "SYSTem",
+      "description": "Returns the SCPI version (1990.0). Query only.",
+      "query": ":SYSTem:VERSion?",
+      "examples": [":SYST:VERS?"]
+    },
+
+    {
+      "name": "trigger_auto",
+      "mnemonic": ":TRIGger:AUTO",
+      "category": "TRIGger",
+      "description": "ON auto-triggers if necessary; OFF waits indefinitely for a trigger. *RST=ON.",
+      "set": ":TRIGger:AUTO <ON|OFF|1|0>",
+      "query": ":TRIGger:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":TRIG:AUTO ON"]
+    },
+    {
+      "name": "trigger_frequency_level",
+      "mnemonic": ":TRIGger:FREQuency:LEVel[1|2|3]",
+      "category": "TRIGger",
+      "description": "Frequency-trigger value. 1=frequency A, 2=frequency B, 3=frequency C. Applies when SOURce LINK and measuring frequency. *RST: A=100 MHZ, B=50 MHZ, C=1 GHZ.",
+      "set": ":TRIGger:FREQuency:LEVel[1|2|3] <numeric>[HZ]",
+      "query": ":TRIGger:FREQuency:LEVel[1|2|3]?",
+      "parameters": [{ "name": "frequency", "units": "HZ" }],
+      "examples": [":TRIG:FREQ:LEV 5 MHZ"]
+    },
+    {
+      "name": "trigger_frequency_level_auto",
+      "mnemonic": ":TRIGger:FREQuency:LEVel[1|2|3]:AUTO",
+      "category": "TRIGger",
+      "description": "ON couples the level to the center of FREQ:RANGe. *RST=ON.",
+      "set": ":TRIGger:FREQuency:LEVel[1|2|3]:AUTO <ON|OFF|1|0>",
+      "query": ":TRIGger:FREQuency:LEVel[1|2|3]:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":TRIG:FREQ:LEV:AUTO ON"]
+    },
+    {
+      "name": "trigger_frequency_slope",
+      "mnemonic": ":TRIGger:FREQuency:SLOPe",
+      "category": "TRIGger",
+      "description": "Triggers on rising (POS) or falling (NEG) edge of frequency vs Time. *RST=POS.",
+      "set": ":TRIGger:FREQuency:SLOPe <POSitive|NEGative>",
+      "query": ":TRIGger:FREQuency:SLOPe?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":TRIG:FREQ:SLOP POS"]
+    },
+    {
+      "name": "trigger_hfreject",
+      "mnemonic": ":TRIGger:HFReject",
+      "category": "TRIGger",
+      "description": "High Frequency Reject. *RST=OFF.",
+      "set": ":TRIGger:HFReject <ON|OFF|1|0>",
+      "query": ":TRIGger:HFReject?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":TRIG:HFR OFF"]
+    },
+    {
+      "name": "trigger_level",
+      "mnemonic": ":TRIGger:LEVel",
+      "category": "TRIGger",
+      "description": "External-trigger level (SOURce EXTernal). *RST=1.5 V.",
+      "set": ":TRIGger:LEVel <numeric>[V]",
+      "query": ":TRIGger:LEVel?",
+      "parameters": [{ "name": "level", "units": "V" }],
+      "examples": [":TRIG:LEV 1.5"]
+    },
+    {
+      "name": "trigger_link_query",
+      "mnemonic": ":TRIGger:LINK?",
+      "category": "TRIGger",
+      "description": "Returns the string from :SENSe:FUNCtion. Query only.",
+      "query": ":TRIGger:LINK?",
+      "examples": [":TRIG:LINK?"]
+    },
+    {
+      "name": "trigger_slope",
+      "mnemonic": ":TRIGger:SLOPe",
+      "category": "TRIGger",
+      "description": "External-trigger slope (SOURce EXTernal). *RST=POS.",
+      "set": ":TRIGger:SLOPe <POSitive|NEGative>",
+      "query": ":TRIGger:SLOPe?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":TRIG:SLOP POS"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": ":TRIGger:SOURce",
+      "category": "TRIGger",
+      "description": "Trigger source. LINK = frequency or TI value triggering. *RST=LINK.",
+      "set": ":TRIGger:SOURce <EXTernal|LINK>",
+      "query": ":TRIGger:SOURce?",
+      "parameters": [{ "name": "source", "range": "EXTernal|LINK" }],
+      "examples": [":TRIG:SOUR LINK"]
+    },
+    {
+      "name": "trigger_tinterval_level",
+      "mnemonic": ":TRIGger:TINTerval:LEVel",
+      "category": "TRIGger",
+      "description": "Time-interval-trigger value. Applies when SOURce LINK and measuring TI. *RST=1E-3.",
+      "set": ":TRIGger:TINTerval:LEVel <numeric>[S]",
+      "query": ":TRIGger:TINTerval:LEVel?",
+      "parameters": [{ "name": "interval", "units": "S" }],
+      "examples": [":TRIG:TINT:LEV 1E-3"]
+    },
+    {
+      "name": "trigger_tinterval_level_auto",
+      "mnemonic": ":TRIGger:TINTerval:LEVel:AUTO",
+      "category": "TRIGger",
+      "description": "ON couples the level to the center of TINT:RANGe. *RST=ON.",
+      "set": ":TRIGger:TINTerval:LEVel:AUTO <ON|OFF|1|0>",
+      "query": ":TRIGger:TINTerval:LEVel:AUTO?",
+      "parameters": [{ "name": "state", "range": "ON|OFF|1|0" }],
+      "examples": [":TRIG:TINT:LEV:AUTO ON"]
+    },
+    {
+      "name": "trigger_tinterval_slope",
+      "mnemonic": ":TRIGger:TINTerval:SLOPe",
+      "category": "TRIGger",
+      "description": "Triggers on rising (POS) or falling (NEG) edge of TI vs Time. *RST=POS.",
+      "set": ":TRIGger:TINTerval:SLOPe <POSitive|NEGative>",
+      "query": ":TRIGger:TINTerval:SLOPe?",
+      "parameters": [{ "name": "slope", "range": "POSitive|NEGative" }],
+      "examples": [":TRIG:TINT:SLOP POS"]
+    }
+  ]
+}

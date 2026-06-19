@@ -1,0 +1,907 @@
+{
+  "model": "8901B",
+  "manufacturer": "HP",
+  "category": "Modulation Analyzer",
+  "description": "HP 8901B Modulation Analyzer (RF frequency, AM/FM/PM modulation, audio, and RF power; 150 kHz to 1300 MHz). Legacy HP-IB (IEEE-488) instrument that uses two-character alphameric program codes (e.g. M1 = AM, M5 = FREQ), NOT SCPI. Codes are either two alpha characters or an alpha character plus a number (e.g. M3, S5, 27.3SP). Lower-case alpha characters are treated as upper case; commas and spaces between codes are ignored. Special functions are entered as the special-function number followed by the suffix SP (e.g. 7.4SP). Three syntax forms exist: a two-character code/suffix alone, a number plus suffix (e.g. 100 MZ), or a prefix special function plus number plus suffix (e.g. 27.3SP 100 MZ). Numeric data is a signed mantissa of up to eight digits with one decimal point and an optional one/two digit signed exponent. Measurement results are read back as an implicit-point exponential constant in fundamental units (Hz, watts, radians, dB, %) terminated by CR LF. Factory HP-IB address is decimal 14.",
+  "source": "8901B User.pdf",
+  "aliases": ["8901B", "HP8901B", "8901A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "ID",
+    "description": "HP-IB Identify. Distinguishes an HP 8901B from an HP 8902A. Sent as a query: the code ID is followed by reading the instrument, which outputs a numeric value identifying the instrument type.",
+    "query": "ID"
+  },
+  "commands": [
+    {
+      "name": "measure_am",
+      "mnemonic": "M1",
+      "category": "Measurement",
+      "description": "Select AM (amplitude modulation depth) measurement mode. Uses the receiver section. Read the result back from the bus after triggering.",
+      "set": "M1",
+      "query": "M1 (then read)",
+      "examples": ["M1", "M1 100 MZ"]
+    },
+    {
+      "name": "measure_fm",
+      "mnemonic": "M2",
+      "category": "Measurement",
+      "description": "Select FM (frequency modulation peak deviation) measurement mode. Uses the receiver section.",
+      "set": "M2",
+      "query": "M2 (then read)",
+      "examples": ["M2", "M2 100 MZ"]
+    },
+    {
+      "name": "measure_pm",
+      "mnemonic": "M3",
+      "category": "Measurement",
+      "description": "Select PM (phase modulation, also shown as PhiM) measurement mode. Uses the receiver section. Result is in radians.",
+      "set": "M3",
+      "query": "M3 (then read)",
+      "examples": ["M3"]
+    },
+    {
+      "name": "measure_rf_power",
+      "mnemonic": "M4",
+      "category": "Measurement",
+      "description": "Select RF Power measurement mode using an external power sensor on the SENSOR connector.",
+      "set": "M4",
+      "query": "M4 (then read)",
+      "examples": ["M4"]
+    },
+    {
+      "name": "measure_frequency",
+      "mnemonic": "M5",
+      "category": "Measurement",
+      "description": "Select RF (input) Frequency counter measurement mode. Uses the receiver section.",
+      "set": "M5",
+      "query": "M5 (then read)",
+      "examples": ["M5"]
+    },
+    {
+      "name": "measure_audio_freq",
+      "mnemonic": "S1",
+      "category": "Measurement",
+      "description": "Select Audio Frequency measurement mode. Use A1 first to measure the internally demodulated signal, or A2/AUDIO INPUT to measure an external audio signal.",
+      "set": "S1",
+      "query": "S1 (then read)",
+      "examples": ["S1", "A1 S1"]
+    },
+    {
+      "name": "measure_audio_distortion",
+      "mnemonic": "S2",
+      "category": "Measurement",
+      "description": "Select Audio Distortion measurement mode. Use with D5 (1 kHz DISTN) or D6 (400 Hz DISTN) to set the distortion test frequency.",
+      "set": "S2",
+      "query": "S2 (then read)",
+      "examples": ["S2 D5", "S2 D6"]
+    },
+    {
+      "name": "measure_if_level",
+      "mnemonic": "S3",
+      "category": "Measurement",
+      "description": "Select IF Level measurement mode. Uses the receiver section.",
+      "set": "S3",
+      "query": "S3 (then read)",
+      "examples": ["S3"]
+    },
+    {
+      "name": "measure_tuned_rf_level",
+      "mnemonic": "S4",
+      "category": "Measurement",
+      "description": "Select Tuned RF Level measurement mode (uses the IF peak detector).",
+      "set": "S4",
+      "query": "S4 (then read)",
+      "examples": ["S4"]
+    },
+    {
+      "name": "measure_freq_error",
+      "mnemonic": "S5",
+      "category": "Measurement",
+      "description": "Select RF Frequency Error measurement mode.",
+      "set": "S5",
+      "query": "S5 (then read)",
+      "examples": ["S5"]
+    },
+    {
+      "name": "detector_peak_plus",
+      "mnemonic": "D1",
+      "category": "Detector",
+      "description": "Select the Peak+ (positive peak) audio/modulation detector.",
+      "set": "D1",
+      "examples": ["M2 D1"]
+    },
+    {
+      "name": "detector_peak_minus",
+      "mnemonic": "D2",
+      "category": "Detector",
+      "description": "Select the Peak- (negative peak) audio/modulation detector.",
+      "set": "D2",
+      "examples": ["M2 D2"]
+    },
+    {
+      "name": "detector_peak_hold",
+      "mnemonic": "D3",
+      "category": "Detector",
+      "description": "Select the Peak Hold detector.",
+      "set": "D3",
+      "examples": ["D3"]
+    },
+    {
+      "name": "detector_average",
+      "mnemonic": "D4",
+      "category": "Detector",
+      "description": "Select the Average detector (RMS calibrated).",
+      "set": "D4",
+      "examples": ["D4"]
+    },
+    {
+      "name": "distortion_1khz",
+      "mnemonic": "D5",
+      "category": "Detector",
+      "description": "Select 1 kHz DISTN: make audio distortion/SINAD measurements on a 1 kHz audio signal.",
+      "set": "D5",
+      "examples": ["S2 D5"]
+    },
+    {
+      "name": "distortion_400hz",
+      "mnemonic": "D6",
+      "category": "Detector",
+      "description": "Select 400 Hz DISTN: make audio distortion/SINAD measurements on a 400 Hz audio signal.",
+      "set": "D6",
+      "examples": ["S2 D6"]
+    },
+    {
+      "name": "detector_rms",
+      "mnemonic": "D8",
+      "category": "Detector",
+      "description": "Select the RMS detector.",
+      "set": "D8",
+      "examples": ["D8"]
+    },
+    {
+      "name": "detector_peak_half",
+      "mnemonic": "D9",
+      "category": "Detector",
+      "description": "Select the Peak+-/2 detector (half the peak-to-peak value).",
+      "set": "D9",
+      "examples": ["D9"]
+    },
+    {
+      "name": "display_log",
+      "mnemonic": "LG",
+      "category": "Display",
+      "description": "Display the measurement result in logarithmic units (dB). Used with R1 for dB Ratio.",
+      "set": "LG",
+      "examples": ["LG", "LG R1"]
+    },
+    {
+      "name": "display_lin",
+      "mnemonic": "LN",
+      "category": "Display",
+      "description": "Display the measurement result in linear units. Used with R1 for percent Ratio.",
+      "set": "LN",
+      "examples": ["LN", "LN R1"]
+    },
+    {
+      "name": "ext_atten_off",
+      "mnemonic": "N0",
+      "category": "Level",
+      "description": "Turn dB EXT ATTEN (external attenuation/gain offset) off.",
+      "set": "N0",
+      "examples": ["N0"]
+    },
+    {
+      "name": "ext_atten_on",
+      "mnemonic": "N1",
+      "category": "Level",
+      "description": "Turn dB EXT ATTEN on, offsetting level measurements by an external attenuation or gain value. Precede with a numeric value to enter the offset (e.g. nn N1).",
+      "set": "N1",
+      "parameters": [
+        { "name": "attenuation", "units": ["dB"] }
+      ],
+      "examples": ["N1", "10 N1"]
+    },
+    {
+      "name": "ratio_off",
+      "mnemonic": "R0",
+      "category": "Ratio",
+      "description": "Turn RATIO off.",
+      "set": "R0",
+      "examples": ["R0"]
+    },
+    {
+      "name": "ratio_on",
+      "mnemonic": "R1",
+      "category": "Ratio",
+      "description": "Turn RATIO on: compare the current measurement to a stored reference. Precede with a numeric value to enter the ratio reference (e.g. nnn R1). Use LN for percent ratio or LG for dB ratio.",
+      "set": "R1",
+      "parameters": [
+        { "name": "reference", "range": "default 100" }
+      ],
+      "examples": ["R1", "LG R1"]
+    },
+    {
+      "name": "previous_ratio",
+      "mnemonic": "R2",
+      "category": "Ratio",
+      "description": "PREVIOUS RATIO: compare to the previously established ratio reference.",
+      "set": "R2",
+      "examples": ["R2"]
+    },
+    {
+      "name": "hp_filter_off",
+      "mnemonic": "H0",
+      "category": "Filter",
+      "description": "Turn all HP (High-Pass) filters off.",
+      "set": "H0",
+      "examples": ["H0"]
+    },
+    {
+      "name": "hp_filter_50hz",
+      "mnemonic": "H1",
+      "category": "Filter",
+      "description": "Turn the 50 Hz high-pass filter on.",
+      "set": "H1",
+      "examples": ["H1"]
+    },
+    {
+      "name": "hp_filter_300hz",
+      "mnemonic": "H2",
+      "category": "Filter",
+      "description": "Turn the 300 Hz high-pass filter on.",
+      "set": "H2",
+      "examples": ["H2"]
+    },
+    {
+      "name": "lp_filter_off",
+      "mnemonic": "L0",
+      "category": "Filter",
+      "description": "Turn all LP (Low-Pass) filters off.",
+      "set": "L0",
+      "examples": ["L0"]
+    },
+    {
+      "name": "lp_filter_3khz",
+      "mnemonic": "L1",
+      "category": "Filter",
+      "description": "Turn the 3 kHz low-pass filter on.",
+      "set": "L1",
+      "examples": ["L1"]
+    },
+    {
+      "name": "lp_filter_15khz",
+      "mnemonic": "L2",
+      "category": "Filter",
+      "description": "Turn the 15 kHz low-pass filter on.",
+      "set": "L2",
+      "examples": ["L2"]
+    },
+    {
+      "name": "lp_filter_20khz",
+      "mnemonic": "L3",
+      "category": "Filter",
+      "description": "Turn the >20 kHz low-pass filter on.",
+      "set": "L3",
+      "examples": ["L3"]
+    },
+    {
+      "name": "deemphasis_off",
+      "mnemonic": "P0",
+      "category": "Filter",
+      "description": "Pre-display off and FM De-emphasis off.",
+      "set": "P0",
+      "examples": ["P0"]
+    },
+    {
+      "name": "deemphasis_on",
+      "mnemonic": "P1",
+      "category": "Filter",
+      "description": "Pre-display on and FM De-emphasis on (measure FM deviation after de-emphasis).",
+      "set": "P1",
+      "examples": ["P1"]
+    },
+    {
+      "name": "deemphasis_25us",
+      "mnemonic": "P2",
+      "category": "Filter",
+      "description": "Select the 25 microsecond FM de-emphasis network.",
+      "set": "P2",
+      "examples": ["P2"]
+    },
+    {
+      "name": "deemphasis_50us",
+      "mnemonic": "P3",
+      "category": "Filter",
+      "description": "Select the 50 microsecond FM de-emphasis network.",
+      "set": "P3",
+      "examples": ["P3"]
+    },
+    {
+      "name": "deemphasis_75us",
+      "mnemonic": "P4",
+      "category": "Filter",
+      "description": "Select the 75 microsecond FM de-emphasis network.",
+      "set": "P4",
+      "examples": ["P4"]
+    },
+    {
+      "name": "deemphasis_750us",
+      "mnemonic": "P5",
+      "category": "Filter",
+      "description": "Select the 750 microsecond FM de-emphasis network.",
+      "set": "P5",
+      "examples": ["P5"]
+    },
+    {
+      "name": "calibrate_off",
+      "mnemonic": "C0",
+      "category": "Calibration",
+      "description": "CALIBRATE off.",
+      "set": "C0",
+      "examples": ["C0"]
+    },
+    {
+      "name": "calibrate_on",
+      "mnemonic": "C1",
+      "category": "Calibration",
+      "description": "CALIBRATE on: initiate AM, FM, or RF Power calibration.",
+      "set": "C1",
+      "examples": ["C1"]
+    },
+    {
+      "name": "cal_factor",
+      "mnemonic": "CF",
+      "category": "Calibration",
+      "description": "Percent CAL FACTOR. With no preceding value, reads back the current calibration factor for the selected measurement. With a preceding numeric value, enters a calibration factor (in percent).",
+      "set": "<value> CF",
+      "query": "CF",
+      "parameters": [
+        { "name": "factor", "units": ["%"] }
+      ],
+      "examples": ["CF", "98 CF"]
+    },
+    {
+      "name": "zero",
+      "mnemonic": "ZR",
+      "category": "Calibration",
+      "description": "ZERO: cancel any dc offset present in the power sensor (RF Power measurement).",
+      "set": "ZR",
+      "examples": ["ZR"]
+    },
+    {
+      "name": "save_cal",
+      "mnemonic": "SC",
+      "category": "Calibration",
+      "description": "SAVE CAL: save the resulting calibration factor for RF Power, AM, or FM.",
+      "set": "SC",
+      "examples": ["M1 C1 SC"]
+    },
+    {
+      "name": "auto_tuning",
+      "mnemonic": "AT",
+      "category": "Tuning",
+      "description": "AUTO TUNING: enable automatic tuning to the input signal. Combine with K0 (lock mode) or K1 (track mode).",
+      "set": "AT",
+      "examples": ["AT", "AT K0"]
+    },
+    {
+      "name": "input_frequency_mhz",
+      "mnemonic": "MZ",
+      "category": "Tuning",
+      "description": "MHz: complete keyboard entry of an input (manual tuning) frequency in MHz. Used alone (MZ) it centers the IF; preceded by a value it tunes to that frequency.",
+      "set": "<value> MZ",
+      "parameters": [
+        { "name": "frequency", "units": ["MHz"], "range": "0.150 to 1300 MHz" }
+      ],
+      "examples": ["100 MZ", "MZ"]
+    },
+    {
+      "name": "input_frequency_hz",
+      "mnemonic": "HZ",
+      "category": "Tuning",
+      "description": "Hz: complete keyboard entry of an input (manual tuning) frequency in Hz.",
+      "set": "<value> HZ",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["1000000 HZ"]
+    },
+    {
+      "name": "increment_up_hz",
+      "mnemonic": "HU",
+      "category": "Tuning",
+      "description": "Increment up by the Hz increment step size (up arrow Hz).",
+      "set": "HU",
+      "examples": ["HU"]
+    },
+    {
+      "name": "increment_down_hz",
+      "mnemonic": "HD",
+      "category": "Tuning",
+      "description": "Increment down by the Hz increment step size (down arrow Hz).",
+      "set": "HD",
+      "examples": ["HD"]
+    },
+    {
+      "name": "increment_up_khz",
+      "mnemonic": "KU",
+      "category": "Tuning",
+      "description": "Increment up by the kHz increment step size (up arrow kHz). Precede with a value to set the kHz step size.",
+      "set": "KU",
+      "examples": ["KU", "1 KU"]
+    },
+    {
+      "name": "increment_down_khz",
+      "mnemonic": "KD",
+      "category": "Tuning",
+      "description": "Increment down by the kHz increment step size (down arrow kHz).",
+      "set": "KD",
+      "examples": ["KD"]
+    },
+    {
+      "name": "track_mode_off",
+      "mnemonic": "K0",
+      "category": "Tuning",
+      "description": "TRACK Mode off (low-noise lock mode).",
+      "set": "K0",
+      "examples": ["K0"]
+    },
+    {
+      "name": "track_mode_on",
+      "mnemonic": "K1",
+      "category": "Tuning",
+      "description": "TRACK Mode on: track drifting input signals from 10 MHz to 1300 MHz.",
+      "set": "K1",
+      "examples": ["K1"]
+    },
+    {
+      "name": "display_freq",
+      "mnemonic": "FR",
+      "category": "Display",
+      "description": "DISPLAY FREQ: display (read back) the RF frequency the instrument last tuned to.",
+      "set": "FR",
+      "query": "FR (then read)",
+      "examples": ["FR"]
+    },
+    {
+      "name": "display_increment",
+      "mnemonic": "FN",
+      "category": "Display",
+      "description": "DISPLAY INCREMENT: display (read back) the frequency increment step size.",
+      "set": "FN",
+      "query": "FN (then read)",
+      "examples": ["FN"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "TR",
+      "category": "Memory",
+      "description": "STORE: store the current measurement state (up to eight states, 0-7). Precede with a register number.",
+      "set": "<n> TR",
+      "parameters": [
+        { "name": "register", "range": "0-7" }
+      ],
+      "examples": ["1 TR"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "Memory",
+      "description": "RECALL: recall a stored measurement state (0-7). Precede with a register number.",
+      "set": "<n> RC",
+      "parameters": [
+        { "name": "register", "range": "0-7" }
+      ],
+      "examples": ["1 RC"]
+    },
+    {
+      "name": "special_function",
+      "mnemonic": "SP",
+      "category": "Special Function",
+      "description": "SPECIAL FUNCTION suffix. A special function code is formed by the special-function number (prefix.suffix) followed by SP. With no preceding number, SP reads back which operator-selected special functions (1-10) are set.",
+      "set": "<number>SP",
+      "query": "SP (then read)",
+      "parameters": [
+        { "name": "function", "range": "1 to 99 (1-10 instrument circuitry, 11-37 measurement modes, 40-99 service)" }
+      ],
+      "examples": ["7.4SP", "27.3SP 100 MZ"]
+    },
+    {
+      "name": "special_special",
+      "mnemonic": "SS",
+      "category": "Special Function",
+      "description": "SPECIAL, SPECIAL: reads back the instrument-selected (currently in-use) special function settings (1-10).",
+      "set": "SS",
+      "query": "SS (then read)",
+      "examples": ["SS"]
+    },
+    {
+      "name": "units_mv",
+      "mnemonic": "MV",
+      "category": "Units",
+      "description": "Select millivolt (mV) units for level measurements.",
+      "set": "MV",
+      "examples": ["MV"]
+    },
+    {
+      "name": "units_uv",
+      "mnemonic": "UV",
+      "category": "Units",
+      "description": "Select microvolt (uV) units for level measurements.",
+      "set": "UV",
+      "examples": ["UV"]
+    },
+    {
+      "name": "units_volts",
+      "mnemonic": "VL",
+      "category": "Units",
+      "description": "Select Volt (V) units for level measurements.",
+      "set": "VL",
+      "examples": ["VL"]
+    },
+    {
+      "name": "units_watts",
+      "mnemonic": "WT",
+      "category": "Units",
+      "description": "Select Watt (W) units for level measurements.",
+      "set": "WT",
+      "examples": ["WT"]
+    },
+    {
+      "name": "modulation_output",
+      "mnemonic": "A0",
+      "category": "Audio",
+      "description": "Select MODULATION OUTPUT: process the internally demodulated signal (audio input off).",
+      "set": "A0",
+      "examples": ["A0"]
+    },
+    {
+      "name": "audio_input",
+      "mnemonic": "A1",
+      "category": "Audio",
+      "description": "Select AUDIO INPUT: process an external audio signal applied to the MODULATION OUTPUT/AUDIO INPUT connector. (Table 3-13 also shows A2 used to select external audio measurements.)",
+      "set": "A1",
+      "examples": ["A1 S1"]
+    },
+    {
+      "name": "automatic_operation",
+      "mnemonic": "AU",
+      "category": "Control",
+      "description": "AUTOMATIC OPERATION: automatically tune and autorange to make the selected measurement. Should appear at the beginning of a programming string. Resets special functions.",
+      "set": "AU",
+      "examples": ["AU", "AU M5"]
+    },
+    {
+      "name": "auto_ranging",
+      "mnemonic": "G0",
+      "category": "Control",
+      "description": "Auto-Ranging on (RANGE HOLD off).",
+      "set": "G0",
+      "examples": ["G0"]
+    },
+    {
+      "name": "range_hold",
+      "mnemonic": "G1",
+      "category": "Control",
+      "description": "RANGE HOLD: freeze the current ranges in use.",
+      "set": "G1",
+      "examples": ["G1"]
+    },
+    {
+      "name": "enable_errors",
+      "mnemonic": "B0",
+      "category": "Control",
+      "description": "ENABLE ERRORS: re-enable Error 01 through Error 04.",
+      "set": "B0",
+      "examples": ["B0"]
+    },
+    {
+      "name": "disable_errors",
+      "mnemonic": "B1",
+      "category": "Control",
+      "description": "DISABLE ERRORS: disable Error 01 through Error 04.",
+      "set": "B1",
+      "examples": ["B1"]
+    },
+    {
+      "name": "clear",
+      "mnemonic": "CL",
+      "category": "Control",
+      "description": "CLEAR (key). Clears the current entry; for a volatile measurement mode, returns the instrument to the last selected non-volatile measurement mode. Also acts as a measurement trigger in Trigger Hold mode.",
+      "set": "CL",
+      "examples": ["CL"]
+    },
+    {
+      "name": "instrument_preset",
+      "mnemonic": "IP",
+      "category": "Control",
+      "description": "INSTR PRESET: configure the instrument to its power-up condition (same effect as the DCL device clear message). Sets Free-run trigger (T0).",
+      "set": "IP",
+      "examples": ["IP"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "ID",
+      "category": "Status",
+      "description": "HP-IB Identify. Distinguishes an HP 8901B from an HP 8902A. Read the instrument after sending ID to obtain the identifying value.",
+      "set": "ID",
+      "query": "ID (then read)",
+      "examples": ["ID"]
+    },
+    {
+      "name": "trigger_off",
+      "mnemonic": "T0",
+      "category": "Trigger",
+      "description": "Trigger Off / Free-Run: measurements are taken continuously and updated as rapidly as settings can change. Default after DCL, entering remote, or IP.",
+      "set": "T0",
+      "examples": ["T0"]
+    },
+    {
+      "name": "trigger_hold",
+      "mnemonic": "T1",
+      "category": "Trigger",
+      "description": "Trigger Hold: inhibit output to the display and bus until a trigger (T2, T3, GET, or CLEAR) is received.",
+      "set": "T1",
+      "examples": ["T1"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "T2",
+      "category": "Trigger",
+      "description": "Trigger Immediate: make one measurement and display the result without a settling time delay, then enter Trigger Hold.",
+      "set": "T2",
+      "examples": ["T2"]
+    },
+    {
+      "name": "trigger_with_settling",
+      "mnemonic": "T3",
+      "category": "Trigger",
+      "description": "Trigger With Settling: make a settled measurement (equivalent to the bus command GET), then enter Trigger Hold.",
+      "set": "T3",
+      "examples": ["T3"]
+    },
+    {
+      "name": "hex_a",
+      "mnemonic": "X0",
+      "category": "Special Function",
+      "description": "Hexadecimal digit A (used when entering hexadecimal values for certain special functions).",
+      "set": "X0",
+      "examples": ["X0"]
+    },
+    {
+      "name": "hex_b",
+      "mnemonic": "X1",
+      "category": "Special Function",
+      "description": "Hexadecimal digit B.",
+      "set": "X1",
+      "examples": ["X1"]
+    },
+    {
+      "name": "hex_c",
+      "mnemonic": "X2",
+      "category": "Special Function",
+      "description": "Hexadecimal digit C.",
+      "set": "X2",
+      "examples": ["X2"]
+    },
+    {
+      "name": "hex_d",
+      "mnemonic": "X3",
+      "category": "Special Function",
+      "description": "Hexadecimal digit D.",
+      "set": "X3",
+      "examples": ["X3"]
+    },
+    {
+      "name": "hex_e",
+      "mnemonic": "X4",
+      "category": "Special Function",
+      "description": "Hexadecimal digit E.",
+      "set": "X4",
+      "examples": ["X4"]
+    },
+    {
+      "name": "hex_f",
+      "mnemonic": "X5",
+      "category": "Special Function",
+      "description": "Hexadecimal digit F.",
+      "set": "X5",
+      "examples": ["X5"]
+    },
+    {
+      "name": "sf_fm_calibrator",
+      "mnemonic": "12.0SP",
+      "category": "Special Function",
+      "description": "FM Calibration Actual: enable the internal FM calibrator. 12.1SP = FM Residual Calibration, 12.2SP = FM Peak Calibration.",
+      "set": "12.0SP",
+      "examples": ["12.0SP"]
+    },
+    {
+      "name": "sf_am_calibrator",
+      "mnemonic": "13.0SP",
+      "category": "Special Function",
+      "description": "AM Calibration Actual: enable the internal AM calibrator. 13.1SP = AM Residual Calibration, 13.2SP = AM Peak Residual Calibration.",
+      "set": "13.0SP",
+      "examples": ["13.0SP"]
+    },
+    {
+      "name": "sf_read_lower_limit",
+      "mnemonic": "14.5SP",
+      "category": "Special Function",
+      "description": "Read the lower limit value. Related limit special functions: 14.6SP read upper limit, 14.7SP read lower limit measurement code, 14.8SP read upper limit measurement code, 14.0SP disable limits, 14.1SP/14.2SP enter limit.",
+      "set": "14.5SP",
+      "query": "14.5SP (then read)",
+      "examples": ["14.5SP"]
+    },
+    {
+      "name": "sf_timebase_oven",
+      "mnemonic": "15.0SP",
+      "category": "Special Function",
+      "description": "Timebase Oven Hot/Cold check. Returns 0 if the Option 002 reference oven is adequately warm (or not installed); Error 12 if cold.",
+      "set": "15.0SP",
+      "query": "15.0SP (then read)",
+      "examples": ["15.0SP"]
+    },
+    {
+      "name": "sf_timebase_source",
+      "mnemonic": "15.1SP",
+      "category": "Special Function",
+      "description": "Timebase Internal/External. Returns 1 if an external time base is in use, 0 if the internal time base is in use.",
+      "set": "15.1SP",
+      "query": "15.1SP (then read)",
+      "examples": ["15.1SP"]
+    },
+    {
+      "name": "sf_read_am_cal_factor",
+      "mnemonic": "16.2SP",
+      "category": "Special Function",
+      "description": "Read the AM Calibration Factor. 16.0SP disable, 16.1SP re-enable.",
+      "set": "16.2SP",
+      "query": "16.2SP (then read)",
+      "examples": ["16.2SP"]
+    },
+    {
+      "name": "sf_read_fm_cal_factor",
+      "mnemonic": "17.2SP",
+      "category": "Special Function",
+      "description": "Read the FM Calibration Factors. 17.0SP disable, 17.1SP re-enable.",
+      "set": "17.2SP",
+      "query": "17.2SP (then read)",
+      "examples": ["17.2SP"]
+    },
+    {
+      "name": "sf_squelched_tone_receiver",
+      "mnemonic": "18.0SP",
+      "category": "Special Function",
+      "description": "Squelched Tone Receiver mode (Other Modulation Capability). Shown as 18.XSP in the manual.",
+      "set": "18.0SP",
+      "examples": ["18.0SP"]
+    },
+    {
+      "name": "sf_read_hpib_address",
+      "mnemonic": "21.0SP",
+      "category": "Special Function",
+      "description": "Read the HP-IB address (Reading Internal User Information). Shown as 21.XSP in the manual.",
+      "set": "21.0SP",
+      "query": "21.0SP (then read)",
+      "examples": ["21.0SP"]
+    },
+    {
+      "name": "sf_srq_mask",
+      "mnemonic": "22.0SP",
+      "category": "Special Function",
+      "description": "SRQ Mask (Special Function 22): sets which Status Byte conditions generate a Service Request. 22.0SP is the default/cleared mask state set by a Clear message. 22.64SP displays (reads back) the SRQ Mask. A numeric weight may precede 22 to set the mask.",
+      "set": "<weight>22.0SP",
+      "query": "22.64SP (then read)",
+      "examples": ["22.0SP", "22.64SP"]
+    },
+    {
+      "name": "sf_read_ext_atten",
+      "mnemonic": "25.2SP",
+      "category": "Special Function",
+      "description": "Read the dB External Attenuation value. 25.0SP disable, enter value with nn N1.",
+      "set": "25.2SP",
+      "query": "25.2SP (then read)",
+      "examples": ["25.2SP"]
+    },
+    {
+      "name": "sf_frequency_offset",
+      "mnemonic": "27.3SP",
+      "category": "Special Function",
+      "description": "Frequency Offset Mode: enter and enable an external LO frequency. 27.0SP disable, 27.1SP enable, 27.2SP display external LO frequency. Enter value as 27.3SP nn MZ.",
+      "set": "27.3SP <value> MZ",
+      "query": "27.2SP (then read)",
+      "parameters": [
+        { "name": "lo_frequency", "units": ["MHz"] }
+      ],
+      "examples": ["27.3SP 100 MZ", "27.2SP"]
+    },
+    {
+      "name": "sf_sinad",
+      "mnemonic": "29.0SP",
+      "category": "Special Function",
+      "description": "Audio SINAD measurement (at 1 kHz or 400 Hz). Use A2 to select an external audio signal. Shown as 29.XSP in the manual.",
+      "set": "29.0SP",
+      "query": "29.0SP A2 (then read)",
+      "examples": ["29.0SP A2 D5"]
+    },
+    {
+      "name": "sf_audio_rms_level",
+      "mnemonic": "30.0SP",
+      "category": "Special Function",
+      "description": "External Audio RMS Level measurement (rms voltage of an external audio signal at the AUDIO INPUT port). Shown as 30.XSP in the manual; select voltage units with UV, MV, or VL.",
+      "set": "30.0SP",
+      "query": "30.0SP (then read)",
+      "examples": ["30.0SP MV"]
+    },
+    {
+      "name": "sf_lo_frequency",
+      "mnemonic": "33.0SP",
+      "category": "Special Function",
+      "description": "LO Frequency measurement. Shown as 33.XSP in the manual.",
+      "set": "33.0SP",
+      "query": "33.0SP (then read)",
+      "examples": ["33.0SP"]
+    },
+    {
+      "name": "sf_if_frequency",
+      "mnemonic": "34.0SP",
+      "category": "Special Function",
+      "description": "IF Frequency measurement. Shown as 34.XSP in the manual.",
+      "set": "34.0SP",
+      "query": "34.0SP (then read)",
+      "examples": ["34.0SP"]
+    },
+    {
+      "name": "sf_peak_rf_level",
+      "mnemonic": "35.0SP",
+      "category": "Special Function",
+      "description": "Peak RF Level measurement (RF Peak detector). Shown as 35.XSP in the manual.",
+      "set": "35.0SP",
+      "query": "35.0SP (then read)",
+      "examples": ["35.0SP"]
+    },
+    {
+      "name": "sf_rf_power_cal_factor_status",
+      "mnemonic": "37.2SP",
+      "category": "Special Function",
+      "description": "RF Power Calibration Factor status. 37.0SP automatic, 37.1SP manual, 37.4SP RF Power calibration factor table size, 37.3-37.6/37.9SP edit calibration factor tables. Enter automatic CF as 37.3SP nn CF.",
+      "set": "37.2SP",
+      "query": "37.2SP (then read)",
+      "examples": ["37.2SP", "37.3SP 98 CF"]
+    },
+    {
+      "name": "sf_software_date_code",
+      "mnemonic": "42.0SP",
+      "category": "Special Function",
+      "description": "Read the firmware Software Date Code. Shown as 42.XSP in the manual.",
+      "set": "42.0SP",
+      "query": "42.0SP (then read)",
+      "examples": ["42.0SP"]
+    },
+    {
+      "name": "sf_resolution_10hz",
+      "mnemonic": "7.1SP",
+      "category": "Special Function",
+      "description": "Select 10 Hz frequency counter resolution.",
+      "set": "7.1SP",
+      "examples": ["7.1SP"]
+    },
+    {
+      "name": "sf_resolution_1khz",
+      "mnemonic": "7.3SP",
+      "category": "Special Function",
+      "description": "Select 1000 Hz frequency counter resolution.",
+      "set": "7.3SP",
+      "examples": ["7.3SP"]
+    },
+    {
+      "name": "sf_resolution_1hz",
+      "mnemonic": "7.4SP",
+      "category": "Special Function",
+      "description": "Select 1 Hz frequency counter resolution (not available on all instruments; returns Error 23 if unequipped).",
+      "set": "7.4SP",
+      "examples": ["7.4SP"]
+    }
+  ]
+}

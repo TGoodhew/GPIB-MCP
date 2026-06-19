@@ -1,0 +1,1014 @@
+{
+  "model": "8970B",
+  "manufacturer": "HP",
+  "category": "Noise Figure Meter",
+  "description": "HP 8970B Noise Figure Meter (10-1600 MHz, extendable to 26.5 GHz with an 8971B/8972A test set and a system LO). Legacy HP-IB (IEEE-488) instrument using a two-letter alphameric program-code language, NOT SCPI. Almost every function is reachable two ways: a dedicated HP-IB code (e.g. FR, CA, W1) or a Special Function entered as a code number followed by SP (e.g. 1.0SP, 13.2SP). Numeric data is entered Function-Data-Units (e.g. FR100MZ); units codes are HZ and MZ for frequency, DB for dB, etc. The ENTER code is EN. Letters may be upper or lower case; characters other than 0-9, '.', '-' and the two valid code letters are ignored. The instrument talks and listens by default: each time it is addressed to talk it returns the current measurement as a fixed 12-byte real constant +/-DDDDDE+/-NN<CR><LF> (sign, five mantissa digits with the decimal point assumed right of the 5th digit, 'E', signed exponent), in fundamental units (Hz, dB, K). Output content is selected by H0/H1/H2 (43.0/43.1/43.2). Errors are output in the same 12-byte format as +90DDDE+06 where DD is the error code; +90000E+06 means data-not-ready. CALIBRATE (CA) and AUTO/SINGLE sweep (W1/W2) do NOT toggle over the bus - use W0 to turn sweep/calibrate off remotely. A Device Clear (DCL/SDC) or PRESET (PR) returns the instrument to Mode 1.0 defaults. There is no instrument-ID query (no *IDN); SD only shows the software date on the front-panel display.",
+  "source": "8970B-OM.pdf",
+  "aliases": ["8970B", "HP8970B", "8970"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "FR",
+      "category": "Frequency",
+      "description": "FREQUENCY key. Sets the fixed tuned frequency. Enter value in MHz (HP-IB inputs are rounded to the nearest MHz). Range 10-1600 MHz in Mode 1.0/1.5/1.9 (2047 MHz opt 020), 10-26500 MHz with test set, 10-99999 MHz in Modes 1.1-1.3/1.6-1.8. Terminate with MZ (MHz) or HZ (Hz); all values are taken as the unit shown. Default 30 MHz (Mode 1.0).",
+      "set": "FR <value> MZ",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 to 1600 MHz (up to 26500/99999 MHz depending on mode/test set)" }
+      ],
+      "examples": ["FR100MZ", "FR30MZ"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Frequency",
+      "description": "START FREQ key (Special Function not used). Sets the sweep start frequency. Default 10 MHz.",
+      "set": "FA <value> MZ",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 MHz to upper measurement-mode limit" }
+      ],
+      "examples": ["FA100MZ", "FA3000MZ"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Frequency",
+      "description": "STOP FREQ key. Sets the sweep stop frequency.",
+      "set": "FB <value> MZ",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 MHz to upper measurement-mode limit" }
+      ],
+      "examples": ["FB400MZ", "FB4000MZ"]
+    },
+    {
+      "name": "step_size",
+      "mnemonic": "SS",
+      "category": "Frequency",
+      "description": "STEP SIZE key. Sets the frequency step (increment) between measurement points in a sweep.",
+      "set": "SS <value> MZ",
+      "parameters": [
+        { "name": "step", "units": ["MZ", "HZ"], "range": "1 MHz to span" }
+      ],
+      "examples": ["SS50MZ", "SS200MZ"]
+    },
+    {
+      "name": "frequency_increment",
+      "mnemonic": "FN",
+      "category": "Frequency",
+      "description": "FREQ INCR key. Sets the fixed-frequency tuning increment used by the UP/DN step keys. Enter integer MHz (decimals are rounded to nearest MHz).",
+      "set": "FN <value> MZ",
+      "parameters": [
+        { "name": "increment", "units": ["MZ", "HZ"], "range": "integer MHz" }
+      ],
+      "examples": ["FN50MZ", "FN1MZ"]
+    },
+    {
+      "name": "step_frequency_up",
+      "mnemonic": "UP",
+      "category": "Frequency",
+      "description": "Steps the fixed tuned frequency up by the current frequency increment (set with FN).",
+      "set": "UP",
+      "parameters": [],
+      "examples": ["UP"]
+    },
+    {
+      "name": "step_frequency_down",
+      "mnemonic": "DN",
+      "category": "Frequency",
+      "description": "Steps the fixed tuned frequency down by the current frequency increment (set with FN).",
+      "set": "DN",
+      "parameters": [],
+      "examples": ["DN"]
+    },
+    {
+      "name": "enter",
+      "mnemonic": "EN",
+      "category": "Data Entry",
+      "description": "ENTER key. Completes a numeric data entry (equivalent of pressing ENTER). Used to terminate values where a units code is not supplied, and to separate frequency/ENR pairs during ENR table entry.",
+      "set": "EN",
+      "parameters": [],
+      "examples": ["TC296.5EN", "15.2EN"]
+    },
+    {
+      "name": "auto_sweep",
+      "mnemonic": "W1",
+      "category": "Sweep",
+      "description": "AUTO key. Starts a repetitive (auto) sweep from start to stop frequency. Does NOT toggle over the bus - use W0 to stop. To guarantee the sweep starts at the start frequency, send FA then W1.",
+      "set": "W1",
+      "parameters": [],
+      "examples": ["W1", "FA100MZFB400MZSS50MZW1"]
+    },
+    {
+      "name": "single_sweep",
+      "mnemonic": "W2",
+      "category": "Sweep",
+      "description": "SINGLE key. Performs one single sweep from start to stop frequency. Does NOT toggle over the bus.",
+      "set": "W2",
+      "parameters": [],
+      "examples": ["W2", "FA100MZFB400MZSS50MZW2"]
+    },
+    {
+      "name": "sweep_off",
+      "mnemonic": "W0",
+      "category": "Sweep",
+      "description": "Turns sweep and calibrate off. Must be used to turn AUTO/SINGLE sweep or CALIBRATE off over the HP-IB, since those functions do not toggle remotely.",
+      "set": "W0",
+      "parameters": [],
+      "examples": ["W0"]
+    },
+    {
+      "name": "measurement_mode",
+      "mnemonic": "E0",
+      "category": "Measurement Mode",
+      "description": "Selects the measurement mode (Special Function 1.0-1.9). E0=1.0 (10-1600 MHz direct), E1=1.1 (fixed IF, variable-freq system LO), E2=1.2 (variable IF, fixed-freq system LO, SSB), E3=1.3 (fixed IF, variable-freq sys LO, mixer is DUT), E4=1.4 (variable IF, fixed-freq sys LO, mixer is DUT), E5=1.5 (10-26500 MHz w/ test set), E6=1.6 (fixed IF, variable user-controlled LO), E7=1.7 (variable IF, fixed user LO, SSB), E8=1.8 (fixed IF, variable user LO, mixer is DUT), E9=1.9 (variable IF, fixed user LO, mixer is DUT). Mode 1.0 is the PRESET default.",
+      "set": "E<0-9>",
+      "parameters": [
+        { "name": "mode", "range": "E0=Mode1.0 ... E9=Mode1.9" }
+      ],
+      "examples": ["E0", "E5"]
+    },
+    {
+      "name": "measurement_noise_figure_uncorrected",
+      "mnemonic": "M1",
+      "category": "Measurement",
+      "description": "NOISE FIGURE (UNCORRECTED) measurement. Measures uncorrected noise figure (no second-stage/cal correction).",
+      "set": "M1",
+      "parameters": [],
+      "examples": ["M1"]
+    },
+    {
+      "name": "measurement_noise_figure_and_gain",
+      "mnemonic": "M2",
+      "category": "Measurement",
+      "description": "NOISE FIGURE AND GAIN (CORRECTED) measurement. Measures corrected noise figure and gain using the calibration data.",
+      "set": "M2",
+      "parameters": [],
+      "examples": ["M2"]
+    },
+    {
+      "name": "calibrate",
+      "mnemonic": "CA",
+      "category": "Calibration",
+      "description": "CALIBRATE key. Performs the second-stage (system) calibration over the swept range. Does NOT toggle over the bus - use W0 to abort/turn off.",
+      "set": "CA",
+      "parameters": [],
+      "examples": ["CA"]
+    },
+    {
+      "name": "cold_calibration_manual",
+      "mnemonic": "CC",
+      "category": "Calibration",
+      "description": "Cold Calibration for a manual measurement (Special Function 14.3) - noise source OFF.",
+      "set": "CC",
+      "parameters": [],
+      "examples": ["CC"]
+    },
+    {
+      "name": "hot_calibration_manual",
+      "mnemonic": "CH",
+      "category": "Calibration",
+      "description": "Hot Calibration for a manual measurement (Special Function 14.4) - noise source ON.",
+      "set": "CH",
+      "parameters": [],
+      "examples": ["CH"]
+    },
+    {
+      "name": "cold_measurement_manual",
+      "mnemonic": "MC",
+      "category": "Measurement",
+      "description": "Cold Manual Measurement (Special Function 14.1) - noise source OFF.",
+      "set": "MC",
+      "parameters": [],
+      "examples": ["MC"]
+    },
+    {
+      "name": "hot_measurement_manual",
+      "mnemonic": "MH",
+      "category": "Measurement",
+      "description": "Hot Manual Measurement (Special Function 14.2) - noise source ON.",
+      "set": "MH",
+      "parameters": [],
+      "examples": ["MH"]
+    },
+    {
+      "name": "display_current_measurement",
+      "mnemonic": "P0",
+      "category": "Measurement",
+      "description": "Normal Display (Special Function 15.0) - returns from displaying manual-measurement results to the current measurement.",
+      "set": "P0",
+      "parameters": [],
+      "examples": ["P0"]
+    },
+    {
+      "name": "display_manual_measurement_results",
+      "mnemonic": "P1",
+      "category": "Measurement",
+      "description": "Display Manual Measurement Results (Special Function 15.1).",
+      "set": "P1",
+      "parameters": [],
+      "examples": ["P1"]
+    },
+    {
+      "name": "sideband_offset",
+      "mnemonic": "B0",
+      "category": "Sideband",
+      "description": "Sideband Frequency Offset (Special Function 2.0-2.3). B0=2.0 Double Sideband (no offset), B1=2.1 Lower Single Sideband (Fsignal<FLO), B2=2.2 Upper Single Sideband (Fsignal>FLO), B3=2.3 Signal Up Conversion (F_IF=Fsignal+FLO).",
+      "set": "B<0-3>",
+      "parameters": [
+        { "name": "sideband", "range": "B0=DSB, B1=LSB, B2=USB, B3=up-conversion" }
+      ],
+      "examples": ["B0", "B1"]
+    },
+    {
+      "name": "if_frequency",
+      "mnemonic": "IF",
+      "category": "Frequency",
+      "description": "Enter IF frequency (Special Function 3.0) for Modes 1.1, 1.3, 1.6 and 1.8.",
+      "set": "IF <value> MZ",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ"] }
+      ],
+      "examples": ["IF70MZ", "IF4000MZ"]
+    },
+    {
+      "name": "lo_frequency",
+      "mnemonic": "LF",
+      "category": "Frequency",
+      "description": "Enter LO frequency (Special Function 3.1) for Modes 1.2, 1.4, 1.7 and 1.9.",
+      "set": "LF <value> MZ",
+      "parameters": [
+        { "name": "frequency", "units": ["MZ", "HZ"] }
+      ],
+      "examples": ["LF5000MZ"]
+    },
+    {
+      "name": "display_user_lo_frequency",
+      "mnemonic": "UL",
+      "category": "Frequency",
+      "description": "Displays the User-Controlled LO frequency (Special Function 3.2) in Modes 1.6 through 1.9.",
+      "set": "UL",
+      "parameters": [],
+      "examples": ["UL"]
+    },
+    {
+      "name": "use_enr_table",
+      "mnemonic": "S0",
+      "category": "ENR",
+      "description": "Use ENR Table (Special Function 5.0). Selects the stored frequency-dependent ENR table for measurements/calibration.",
+      "set": "S0",
+      "parameters": [],
+      "examples": ["S0"]
+    },
+    {
+      "name": "use_spot_enr",
+      "mnemonic": "S1",
+      "category": "ENR",
+      "description": "Use Spot ENR (Special Function 5.1). Uses a single spot ENR value rather than the table.",
+      "set": "S1",
+      "parameters": [],
+      "examples": ["S1"]
+    },
+    {
+      "name": "display_current_enr",
+      "mnemonic": "SE",
+      "category": "ENR",
+      "description": "Display Current ENR in dB (Special Function 5.2).",
+      "set": "SE",
+      "parameters": [],
+      "examples": ["SE"]
+    },
+    {
+      "name": "enter_spot_enr",
+      "mnemonic": "NE",
+      "category": "ENR",
+      "description": "Enter and Use Spot ENR (Special Function 5.3). Follow with the spot ENR value in dB and EN. Default 15.2 dB.",
+      "set": "NE <value> EN",
+      "parameters": [
+        { "name": "enr", "units": ["dB"], "range": "default 15.20 dB" }
+      ],
+      "examples": ["NE15.2EN"]
+    },
+    {
+      "name": "enter_enr_table",
+      "mnemonic": "NR",
+      "category": "ENR",
+      "description": "ENR key / Enter ENR Table. Enters ENR table edit mode, then accepts up to 35 frequency(MHz)/ENR(dB) pairs each separated by EN, and is terminated by sending FR to end the entry. The table improves measurement accuracy across frequency.",
+      "set": "NR <freq>EN<enr>EN ... FR",
+      "parameters": [
+        { "name": "frequency", "units": ["MHz"] },
+        { "name": "enr", "units": ["dB"] }
+      ],
+      "examples": ["NR10EN15.15EN100EN15.40EN1000EN15.20EN FR", "NR"]
+    },
+    {
+      "name": "enter_tcold",
+      "mnemonic": "TC",
+      "category": "ENR",
+      "description": "Enter Tcold (Special Function 6.0). Sets the noise-source cold temperature. Default 296.5 K.",
+      "set": "TC <value> EN",
+      "parameters": [
+        { "name": "tcold", "units": ["K"], "range": "default 296.5 K" }
+      ],
+      "examples": ["TC296.5EN"]
+    },
+    {
+      "name": "enter_thot",
+      "mnemonic": "TH",
+      "category": "ENR",
+      "description": "Enter and Use Thot (Special Function 5.4). Sets the noise-source hot temperature.",
+      "set": "TH <value> EN",
+      "parameters": [
+        { "name": "thot", "units": ["K"] }
+      ],
+      "examples": ["TH9892.8EN"]
+    },
+    {
+      "name": "enter_noise_source_id",
+      "mnemonic": "SN",
+      "category": "ENR",
+      "description": "Enter Noise Source Identifier (Special Function 5.5). Enters the noise-source serial/ID number.",
+      "set": "SN <id> EN",
+      "parameters": [
+        { "name": "id" }
+      ],
+      "examples": ["SN12345EN"]
+    },
+    {
+      "name": "noise_source_catalog",
+      "mnemonic": "NS",
+      "category": "ENR",
+      "description": "Noise Source Catalog (Special Function 5.6).",
+      "set": "NS",
+      "parameters": [],
+      "examples": ["NS"]
+    },
+    {
+      "name": "enr_table_for_calibration",
+      "mnemonic": "EC",
+      "category": "ENR",
+      "description": "Selects the ENR table number used for Calibration (Special Function 5.7). Default table 0.",
+      "set": "EC <table> EN",
+      "parameters": [
+        { "name": "table", "range": "0 to 4" }
+      ],
+      "examples": ["EC0EN"]
+    },
+    {
+      "name": "enr_table_for_measurement",
+      "mnemonic": "EM",
+      "category": "ENR",
+      "description": "Selects the ENR table number used for Measurement (Special Function 5.8). Default table 0.",
+      "set": "EM <table> EN",
+      "parameters": [
+        { "name": "table", "range": "0 to 4" }
+      ],
+      "examples": ["EM0EN"]
+    },
+    {
+      "name": "default_enr",
+      "mnemonic": "ND",
+      "category": "ENR",
+      "description": "Sets all ENR values to 15.20 dB and the noise-source ID number to 00000 (Special Function 95.6).",
+      "set": "ND",
+      "parameters": [],
+      "examples": ["ND"]
+    },
+    {
+      "name": "noise_figure_units",
+      "mnemonic": "N0",
+      "category": "Display",
+      "description": "Noise Figure Display Units (Special Function 10.0-10.4). N0=FdB, N1=F (ratio), N2=YdB, N3=Y (ratio), N4=Te in K.",
+      "set": "N<0-4>",
+      "parameters": [
+        { "name": "units", "range": "N0=FdB, N1=F, N2=YdB, N3=Y, N4=TeK" }
+      ],
+      "examples": ["N0", "N4"]
+    },
+    {
+      "name": "noise_source_temperature_units",
+      "mnemonic": "D0",
+      "category": "Display",
+      "description": "Selects Noise Source Temperature units for data input (Special Function 11.0-11.2). D0=K, D1=degrees C, D2=degrees F.",
+      "set": "D<0-2>",
+      "parameters": [
+        { "name": "units", "range": "D0=K, D1=C, D2=F" }
+      ],
+      "examples": ["D0"]
+    },
+    {
+      "name": "display_resolution",
+      "mnemonic": "X0",
+      "category": "Display",
+      "description": "Display Resolution (Special Function 12.0-12.2). X0=Maximum resolution, X1=Less resolution on noise figure, X2=Less resolution on gain.",
+      "set": "X<0-2>",
+      "parameters": [
+        { "name": "resolution", "range": "X0=max, X1=less NF, X2=less gain" }
+      ],
+      "examples": ["X0"]
+    },
+    {
+      "name": "smoothing_type",
+      "mnemonic": "V0",
+      "category": "Averaging",
+      "description": "Smoothing (averaging) type (Special Function 13.0-13.1). V0=Exponential smoothing, V1=Arithmetic smoothing.",
+      "set": "V<0-1>",
+      "parameters": [
+        { "name": "type", "range": "V0=exponential, V1=arithmetic" }
+      ],
+      "examples": ["V0", "V1"]
+    },
+    {
+      "name": "smoothing_factor",
+      "mnemonic": "AF",
+      "category": "Averaging",
+      "description": "Enter Smoothing Factor (Special Function 13.2). Sets the averaging factor (number of measurements averaged). Equivalent fixed codes F0-F9 set factor 1,2,4,8,16,32,64,128,256,512.",
+      "set": "AF <value> EN",
+      "parameters": [
+        { "name": "factor", "range": "1 to 512 (powers of 2)" }
+      ],
+      "examples": ["AF16EN", "F4"]
+    },
+    {
+      "name": "smoothing_factor_fixed",
+      "mnemonic": "F0",
+      "category": "Averaging",
+      "description": "Direct smoothing-factor codes. F0=1, F1=2, F2=4, F3=8, F4=16, F5=32, F6=64, F7=128, F8=256, F9=512.",
+      "set": "F<0-9>",
+      "parameters": [
+        { "name": "factor", "range": "F0=1 ... F9=512" }
+      ],
+      "examples": ["F0", "F9"]
+    },
+    {
+      "name": "increase_smoothing",
+      "mnemonic": "IN",
+      "category": "Averaging",
+      "description": "INCREASE key. Increases the smoothing (averaging) factor by one step.",
+      "set": "IN",
+      "parameters": [],
+      "examples": ["IN"]
+    },
+    {
+      "name": "decrease_smoothing",
+      "mnemonic": "DE",
+      "category": "Averaging",
+      "description": "DECREASE key. Decreases the smoothing (averaging) factor by one step.",
+      "set": "DE",
+      "parameters": [],
+      "examples": ["DE"]
+    },
+    {
+      "name": "display_control",
+      "mnemonic": "DF",
+      "category": "Display",
+      "description": "Display Control (Special Function 16.0-16.3). DF=show measurement frequency in left display, DI=show input frequency (to NFM in Modes 1.0-1.4 or to test set in Modes 1.5-1.9), BF=blank left display, BA=blank all displays.",
+      "set": "DF | DI | BF | BA",
+      "parameters": [
+        { "name": "selection", "range": "DF=freq, DI=input, BF=blank left, BA=blank all" }
+      ],
+      "examples": ["DF", "BA"]
+    },
+    {
+      "name": "hpib_data_output",
+      "mnemonic": "H0",
+      "category": "Output",
+      "description": "HP-IB Data Output Selection (Special Function 43.0-43.2). H0=NOISE FIGURE only output; H1=Frequency(left display), INSERTION GAIN and NOISE FIGURE output; H2=during calibration output Frequency, calibration data (GmKBm) and second-stage temperature. Each output value is the fixed 12-byte +/-DDDDDE+/-NN CR/LF format; EOI is set with each LF.",
+      "set": "H<0-2>",
+      "parameters": [
+        { "name": "selection", "range": "H0=NF only, H1=Freq+Gain+NF, H2=cal data" }
+      ],
+      "examples": ["H0", "H1"]
+    },
+    {
+      "name": "loss_compensation",
+      "mnemonic": "L0",
+      "category": "Loss Compensation",
+      "description": "Loss Compensation (Special Function 34.0-34.4). L0=Off, L1=On, LA=Enter loss before DUT in dB, LB=Enter loss after DUT in dB, LT=Enter temperature of losses. Enter LA/LB/LT values terminated with EN.",
+      "set": "L0 | L1 | LA <dB> EN | LB <dB> EN | LT <temp> EN",
+      "parameters": [
+        { "name": "value", "units": ["dB", "K"], "range": "loss in dB or temperature" }
+      ],
+      "examples": ["L1", "LA1.5EN", "L0"]
+    },
+    {
+      "name": "trigger_selection",
+      "mnemonic": "T0",
+      "category": "Trigger",
+      "description": "Trigger Selection (Special Function 30.0-30.2). T0=Free Run, T1=Hold, T2=Execute (single trigger; also triggered by the GET bus command).",
+      "set": "T<0-2>",
+      "parameters": [
+        { "name": "mode", "range": "T0=free run, T1=hold, T2=execute" }
+      ],
+      "examples": ["T0", "T2"]
+    },
+    {
+      "name": "rf_attenuation",
+      "mnemonic": "R0",
+      "category": "Attenuation",
+      "description": "RF Attenuation Selection (Special Function 60.0-60.6). R0=Auto, R1=+20 dB, R2=+10 dB, R3=0 dB, R4=-10 dB, R5=-20 dB, R6=-30 dB.",
+      "set": "R<0-6>",
+      "parameters": [
+        { "name": "attenuation", "range": "R0=Auto, R1=+20, R2=+10, R3=0, R4=-10, R5=-20, R6=-30 dB" }
+      ],
+      "examples": ["R0", "R3"]
+    },
+    {
+      "name": "display_rf_attenuator",
+      "mnemonic": "SR",
+      "category": "Attenuation",
+      "description": "Display RF Attenuator setting (Special Function 61.0).",
+      "set": "SR",
+      "parameters": [],
+      "examples": ["SR"]
+    },
+    {
+      "name": "rf_attenuator_hold",
+      "mnemonic": "RH",
+      "category": "Attenuation",
+      "description": "RF Attenuator Hold (Special Function 62.0). Holds the RF attenuators in the configuration that exists when activated.",
+      "set": "RH",
+      "parameters": [],
+      "examples": ["RH"]
+    },
+    {
+      "name": "if_attenuation",
+      "mnemonic": "I0",
+      "category": "Attenuation",
+      "description": "IF Attenuation Selection (Special Function 70.0-70.8). I0=Auto, I1=0 dB, I2=5 dB, I3=10 dB, I4=15 dB, I5=20 dB, I6=25 dB, I7=30 dB, I8=35 dB.",
+      "set": "I<0-8>",
+      "parameters": [
+        { "name": "attenuation", "range": "I0=Auto, I1=0 ... I8=35 dB (5 dB steps)" }
+      ],
+      "examples": ["I0", "I3"]
+    },
+    {
+      "name": "display_if_attenuator",
+      "mnemonic": "SI",
+      "category": "Attenuation",
+      "description": "Display IF Attenuator setting (Special Function 71.0).",
+      "set": "SI",
+      "parameters": [],
+      "examples": ["SI"]
+    },
+    {
+      "name": "if_attenuator_hold",
+      "mnemonic": "IH",
+      "category": "Attenuation",
+      "description": "IF Attenuator Hold (Special Function 72.0). Holds the IF attenuators in the configuration that exists when activated.",
+      "set": "IH",
+      "parameters": [],
+      "examples": ["IH"]
+    },
+    {
+      "name": "input_gain_calibration",
+      "mnemonic": "C0",
+      "category": "Calibration",
+      "description": "Input Gain Calibration range (Special Function 32.0-32.3). C0=+20/+10/0 dB, C1=+10/0/-10 dB, C2=0/-10/-20 dB, C3=-10/-20/-30 dB.",
+      "set": "C<0-3>",
+      "parameters": [
+        { "name": "range", "range": "C0..C3 select the 3-step gain-cal range" }
+      ],
+      "examples": ["C0"]
+    },
+    {
+      "name": "frequency_calibration",
+      "mnemonic": "Y0",
+      "category": "Calibration",
+      "description": "Frequency Calibration (Special Function 31.0-31.2). Y0=Automatic, Y1=Disable frequency cal, Y2=Perform one frequency cal.",
+      "set": "Y<0-2>",
+      "parameters": [
+        { "name": "mode", "range": "Y0=auto, Y1=disable, Y2=perform once" }
+      ],
+      "examples": ["Y0", "Y2"]
+    },
+    {
+      "name": "interpolated_measurements",
+      "mnemonic": "DG",
+      "category": "Measurement",
+      "description": "Interpolated Measurements (Special Function 39.0-39.1). DG=Disable interpolated measurements in Modes 1.5-1.9, EG=Enable interpolated measurements in Modes 1.5-1.9.",
+      "set": "DG | EG",
+      "parameters": [
+        { "name": "state", "range": "DG=disable, EG=enable" }
+      ],
+      "examples": ["EG", "DG"]
+    },
+    {
+      "name": "power_measurement",
+      "mnemonic": "N5",
+      "category": "Measurement",
+      "description": "Power Measurements (Special Function 9.1-9.4). N5=Source Off (uncal), N6=Source On (uncal), N7=Source Off (cal), N8=Source On (cal).",
+      "set": "N<5-8>",
+      "parameters": [
+        { "name": "state", "range": "N5=off/uncal, N6=on/uncal, N7=off/cal, N8=on/cal" }
+      ],
+      "examples": ["N5", "N8"]
+    },
+    {
+      "name": "voltmeter_mode_source_off",
+      "mnemonic": "VC",
+      "category": "Measurement",
+      "description": "Voltmeter Mode with Noise Source Off (Special Function 80.0).",
+      "set": "VC",
+      "parameters": [],
+      "examples": ["VC"]
+    },
+    {
+      "name": "voltmeter_mode_source_on",
+      "mnemonic": "VH",
+      "category": "Measurement",
+      "description": "Voltmeter Mode with Noise Source On (Special Function 81.0).",
+      "set": "VH",
+      "parameters": [],
+      "examples": ["VH"]
+    },
+    {
+      "name": "oscilloscope_output",
+      "mnemonic": "A0",
+      "category": "Output",
+      "description": "Output to Oscilloscope (Special Function 7.0-7.5). A0=Noise Figure and Gain, A1=Test Pattern, A2=Noise Figure Only, A3=Gain Only, A8=Cursor enabled, A9=Cursor disabled.",
+      "set": "A0 | A1 | A2 | A3 | A8 | A9",
+      "parameters": [
+        { "name": "selection", "range": "A0=NF+Gain, A1=test pattern, A2=NF, A3=Gain, A8/A9=cursor on/off" }
+      ],
+      "examples": ["A0", "A2"]
+    },
+    {
+      "name": "oscilloscope_limit",
+      "mnemonic": "NL",
+      "category": "Output",
+      "description": "Enter Oscilloscope Limits (Special Function 8.1-8.4). NL=Noise Figure Lower Limit, NU=Noise Figure Upper Limit, GL=Gain Lower Limit, GU=Gain Upper Limit. Follow with value and EN.",
+      "set": "NL <value> EN | NU <value> EN | GL <value> EN | GU <value> EN",
+      "parameters": [
+        { "name": "value", "units": ["dB"] }
+      ],
+      "examples": ["NL0EN", "GU30EN"]
+    },
+    {
+      "name": "plot_noise_figure",
+      "mnemonic": "A4",
+      "category": "Plot",
+      "description": "Recorder/plot output. A4=Plot Noise Figure (Special Function 22.0), A5=Plot Gain (Special Function 23.0), A6=X-axis Noise Figure / Y-axis Gain strip-chart mode (Special Function 24.0).",
+      "set": "A4 | A5 | A6",
+      "parameters": [
+        { "name": "selection", "range": "A4=plot NF, A5=plot gain, A6=strip chart" }
+      ],
+      "examples": ["A4", "A6"]
+    },
+    {
+      "name": "recorder_go_lower_left",
+      "mnemonic": "LL",
+      "category": "Plot",
+      "description": "Go to Lower Left (Special Function 20.0) for X-Y recorder pen positioning.",
+      "set": "LL",
+      "parameters": [],
+      "examples": ["LL"]
+    },
+    {
+      "name": "recorder_go_upper_right",
+      "mnemonic": "UR",
+      "category": "Plot",
+      "description": "Go to Upper Right (Special Function 21.0) for X-Y recorder pen positioning.",
+      "set": "UR",
+      "parameters": [],
+      "examples": ["UR"]
+    },
+    {
+      "name": "plotter_function",
+      "mnemonic": "PA",
+      "category": "Plot",
+      "description": "Plotter Functions (Special Function 25.0-25.5). PA=Plot Grid and Data, PG=Plot Grid and Axes Labels, PD=Plot Data Only, NP=Select Noise Pen Number, GP=Select Gain Pen Number, WT=Enter Plot Name.",
+      "set": "PA | PG | PD | NP <n> EN | GP <n> EN | WT <name>",
+      "parameters": [
+        { "name": "value", "range": "pen number or plot name where applicable" }
+      ],
+      "examples": ["PA", "NP1EN"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "ST",
+      "category": "Memory",
+      "description": "STORE key. Stores the complete instrument configuration into one of ten registers (0-9). Follow with a single-digit register number.",
+      "set": "ST <register>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9" }
+      ],
+      "examples": ["ST2"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "Memory",
+      "description": "RECALL key. Recalls the instrument configuration from one of ten registers (0-9). Follow with a single-digit register number.",
+      "set": "RC <register>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9" }
+      ],
+      "examples": ["RC2"]
+    },
+    {
+      "name": "sequence",
+      "mnemonic": "SQ",
+      "category": "Memory",
+      "description": "SEQ key. Recalls storage registers 1 through 9 in a preset sequence (used with Special Function 35).",
+      "set": "SQ",
+      "parameters": [],
+      "examples": ["SQ"]
+    },
+    {
+      "name": "sequence_functions",
+      "mnemonic": "QM",
+      "category": "Memory",
+      "description": "Sequence Functions (Special Function 35.0-35.3). QM=Manual, QA=Automatic, QS=Set, QC=Clear.",
+      "set": "QM | QA | QS | QC",
+      "parameters": [
+        { "name": "mode", "range": "QM=manual, QA=automatic, QS=set, QC=clear" }
+      ],
+      "examples": ["QA", "QC"]
+    },
+    {
+      "name": "preset",
+      "mnemonic": "PR",
+      "category": "System",
+      "description": "PRESET key. Returns the instrument to the known preset state (Mode 1.0 defaults). Equivalent to a Device Clear.",
+      "set": "PR",
+      "parameters": [],
+      "examples": ["PR"]
+    },
+    {
+      "name": "special_function",
+      "mnemonic": "SP",
+      "category": "System",
+      "description": "SPECIAL FUNCTION key. Terminates entry of a Special Function code number, activating that function. Most special functions can be programmed either as <code-number>SP or by the dedicated two-letter HP-IB code. Refer to the special-function table for code numbers (e.g. 1.0=Mode 1.0, 13.2=smoothing factor, 44.x=SRQ enables).",
+      "set": "<code-number> SP",
+      "parameters": [
+        { "name": "code", "range": "special function number, e.g. 0.0 to 99.9" }
+      ],
+      "examples": ["1.0SP", "13.2SP", "0.9SP"]
+    },
+    {
+      "name": "initialize_special_functions",
+      "mnemonic": "CS",
+      "category": "System",
+      "description": "Initialize Special Functions (Special Function 0.0). Initializes many special functions. (Special Function 0.9, entered as 0.9SP, initializes or sets defaults for all special functions to factory conditions.)",
+      "set": "CS",
+      "parameters": [],
+      "examples": ["CS", "0.9SP"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "Q0",
+      "category": "Status",
+      "description": "Service Request enables (Special Function 44.0-44.8). Q0=Disable SRQ capability (clears all enabled conditions), Q1=Data Ready, Q2=Cal Complete, Q3=HP-IB Code Error, Q4=SRQ on SIB, Q5=NFM received control on SIB, Q6=Instrument Error, Q8=Extended Status Byte. RM (44.7) and RE (44.9) set the status-byte and extended-status-byte masks.",
+      "set": "Q<0-8>",
+      "parameters": [
+        { "name": "condition", "range": "Q0=disable, Q1=data ready, Q2=cal complete, Q3=code error, Q4=SIB SRQ, Q5=received control, Q6=instr error, Q8=ext status" }
+      ],
+      "examples": ["Q1", "Q0"]
+    },
+    {
+      "name": "set_status_byte_mask",
+      "mnemonic": "RM",
+      "category": "Status",
+      "description": "Set Status Byte Mask (Special Function 44.7). Enables the desired conditions in the main Status Byte to cause an SRQ. Follow with the mask value and EN.",
+      "set": "RM <mask> EN",
+      "parameters": [
+        { "name": "mask" }
+      ],
+      "examples": ["RM128EN"]
+    },
+    {
+      "name": "set_extended_status_byte_mask",
+      "mnemonic": "RE",
+      "category": "Status",
+      "description": "Set Extended Status Byte Mask (Special Function 44.9). Enables the desired conditions in the Extended Status Byte. Follow with the mask value and EN.",
+      "set": "RE <mask> EN",
+      "parameters": [
+        { "name": "mask" }
+      ],
+      "examples": ["RE1EN"]
+    },
+    {
+      "name": "output_both_status_bytes",
+      "mnemonic": "OS",
+      "category": "Status",
+      "description": "Output both Status Bytes. The next read returns the main Status Byte and the Extended Status Byte.",
+      "set": "OS",
+      "query": "OS",
+      "parameters": [],
+      "examples": ["OS"]
+    },
+    {
+      "name": "reset_status_bytes",
+      "mnemonic": "RS",
+      "category": "Status",
+      "description": "Reset Status Bytes. Clears the main and extended status bytes.",
+      "set": "RS",
+      "parameters": [],
+      "examples": ["RS"]
+    },
+    {
+      "name": "recall_last_error",
+      "mnemonic": "ER",
+      "category": "Status",
+      "description": "Recalls the last error issued (Special Function 99.1). Outputs the error in the 12-byte error format.",
+      "set": "ER",
+      "query": "ER",
+      "parameters": [],
+      "examples": ["ER"]
+    },
+    {
+      "name": "software_date",
+      "mnemonic": "SD",
+      "category": "System",
+      "description": "Displays the current software date on the front-panel display (Special Function 99.9).",
+      "set": "SD",
+      "parameters": [],
+      "examples": ["SD"]
+    },
+    {
+      "name": "special_function_catalog",
+      "mnemonic": "G0",
+      "category": "System",
+      "description": "Special Function Catalog (Special Function 50.0-50.8). G0=scan catalog lines, G1-G8=display line 1 through line 8 status. With HP-IB output set appropriately, G1-G8 can be read one line at a time.",
+      "set": "G<0-8>",
+      "parameters": [
+        { "name": "line", "range": "G0=scan, G1..G8=line status" }
+      ],
+      "examples": ["G0", "G1"]
+    },
+    {
+      "name": "system_lo_program",
+      "mnemonic": "J0",
+      "category": "System LO",
+      "description": "System LO Program selection (Special Function 41.0-41.5). J0=HP 8350B Sweep Oscillator, J2=HP 8671B/8672A Syn. Signal Generator, J3=HP 8673B/C/G Syn. Signal Generator, J4=HP 8340B/8341B Sweep Oscillator, J5=Custom Local Oscillator.",
+      "set": "J<0-5>",
+      "parameters": [
+        { "name": "program", "range": "J0=8350B, J2=8671B/8672A, J3=8673B/C/G, J4=8340B/8341B, J5=custom" }
+      ],
+      "examples": ["J2", "J5"]
+    },
+    {
+      "name": "system_lo_command",
+      "mnemonic": "AC",
+      "category": "System LO",
+      "description": "System LO Commands (Special Function 42.0-42.7). AC=Auxiliary commands, PS=CW prefix/suffix, TM=Settling time in ms, MN=Minimum frequency in MHz, MX=Maximum frequency in MHz, PL=System LO power level, PC=Power prefix/suffix for custom LO, FC=Frequency prefix/suffix for custom LO. Follow value entries with EN.",
+      "set": "AC | PS | TM <ms> EN | MN <MHz> EN | MX <MHz> EN | PL <value> EN | PC | FC",
+      "parameters": [
+        { "name": "value", "units": ["ms", "MHz"], "range": "depends on subfunction" }
+      ],
+      "examples": ["TM50EN", "PL10EN"]
+    },
+    {
+      "name": "noise_figure_test_set_control",
+      "mnemonic": "TE",
+      "category": "Test Set",
+      "description": "Noise Figure Test Set Control (Special Function 45.0-45.2). TE=Enable test set in Modes 1.5-1.9, TS=Enable test set in all Modes (1.0-1.9), TD=Disable test set in all modes.",
+      "set": "TE | TS | TD",
+      "parameters": [
+        { "name": "state", "range": "TE=enable 1.5-1.9, TS=enable all, TD=disable" }
+      ],
+      "examples": ["TE", "TD"]
+    },
+    {
+      "name": "test_set_fine_tuning_calibration",
+      "mnemonic": "FT",
+      "category": "Calibration",
+      "description": "Noise Figure Test Set YIG Filter Fine Tuning Calibration (Special Function 36.0-36.4). FT=fine tuning cal with measurement-system cal (warn E28 if needed), FD=disable fine tuning before cal, FW=disable fine tuning and warning E28, PF=fine tune from start to stop frequencies, FF=fine tune at current frequency.",
+      "set": "FT | FD | FW | PF | FF",
+      "parameters": [
+        { "name": "selection", "range": "FT/FD/FW/PF/FF per 36.0-36.4" }
+      ],
+      "examples": ["FT", "FF"]
+    },
+    {
+      "name": "test_set_coarse_tuning_calibration",
+      "mnemonic": "CP",
+      "category": "Calibration",
+      "description": "Noise Figure Test Set YIG Filter Coarse Tuning Calibration (Special Function 64.0-64.1). CP=Enable coarse tuning calibration, CU=Select upper frequency of test set.",
+      "set": "CP | CU",
+      "parameters": [
+        { "name": "selection", "range": "CP=enable coarse cal, CU=select upper freq" }
+      ],
+      "examples": ["CP", "CU"]
+    },
+    {
+      "name": "test_set_internal_sideband",
+      "mnemonic": "B4",
+      "category": "Sideband",
+      "description": "Noise Figure Test Set Internal Sideband Frequency Offset (Special Function 17.0-17.2). B4=Single sideband operation (Modes 1.5-1.9), B5=Double sideband operation (Modes 1.5-1.9), CF=Upper/lower sideband crossover frequency selection.",
+      "set": "B4 | B5 | CF <value> MZ",
+      "parameters": [
+        { "name": "selection", "range": "B4=SSB, B5=DSB, CF=crossover freq" }
+      ],
+      "examples": ["B4", "B5"]
+    },
+    {
+      "name": "internal_if_selection",
+      "mnemonic": "S2",
+      "category": "Frequency",
+      "description": "Noise Figure Measurement System Internal IF (Special Function 19.2-19.5). S2=Display/enter internal IF for SSB2, S3=internal IF for SSB3, S4=internal IF for DSB, S5=Display NFM input frequency. Defaults: SSB2=700, SSB3=450, DSB=25 MHz.",
+      "set": "S2 <MHz> EN | S3 <MHz> EN | S4 <MHz> EN | S5",
+      "parameters": [
+        { "name": "if", "units": ["MHz"], "range": "SSB2 default 700, SSB3 default 450, DSB default 25" }
+      ],
+      "examples": ["S2700EN", "S5"]
+    },
+    {
+      "name": "sib_controller",
+      "mnemonic": "SC",
+      "category": "System Interface Bus",
+      "description": "System Interface Bus (SIB) Controller (Special Function 48.0-48.2). SC=Enable NFM as System Controller on the SIB, NC=Disable NFM as System Controller, DC=Disable Error 48 (E48).",
+      "set": "SC | NC | DC",
+      "parameters": [
+        { "name": "state", "range": "SC=enable controller, NC=disable, DC=disable E48" }
+      ],
+      "examples": ["SC", "NC"]
+    },
+    {
+      "name": "system_lo_sib_control",
+      "mnemonic": "LE",
+      "category": "System Interface Bus",
+      "description": "System Local Oscillator Control on the SIB (Special Function 46.0-46.1). LE=Enable system LO on the SIB, LD=Disable system LO on the SIB.",
+      "set": "LE | LD",
+      "parameters": [
+        { "name": "state", "range": "LE=enable, LD=disable" }
+      ],
+      "examples": ["LE", "LD"]
+    },
+    {
+      "name": "plotter_control",
+      "mnemonic": "PI",
+      "category": "System Interface Bus",
+      "description": "Plotter Control (Special Function 47.0-47.1). PI=Plotter is on the SIB, PM=Enable plot data to be read on the HP-IB.",
+      "set": "PI | PM",
+      "parameters": [
+        { "name": "state", "range": "PI=plotter on SIB, PM=plot data read on HP-IB" }
+      ],
+      "examples": ["PI", "PM"]
+    },
+    {
+      "name": "sib_sharing_control",
+      "mnemonic": "DP",
+      "category": "System Interface Bus",
+      "description": "Sharing Control on the SIB (Special Function 49.0-49.7). DP=Disable auto pass control, EP=Enable auto pass control, CR=Release control of SIB, CT=Take control of SIB, SB=Serial poll on SIB, DD=Selective device clear of pass-through device, DS=Device clear on SIB (if active controller), IS=Interface clear on SIB (if system controller).",
+      "set": "DP | EP | CR | CT | SB | DD | DS | IS",
+      "parameters": [
+        { "name": "selection", "range": "DP/EP/CR/CT/SB/DD/DS/IS per 49.0-49.7" }
+      ],
+      "examples": ["EP", "CT"]
+    },
+    {
+      "name": "scalar_analyzer_control",
+      "mnemonic": "ZP",
+      "category": "System Interface Bus",
+      "description": "HP 8757 Scalar Analyzer Control (Special Function 47.2-47.5). ZP=Enable plot to HP 8757, ZQ=Disable plot to HP 8757, ZR=Display/enter HP 8757 SIB address, ZS=Number of measurement frequencies per HP 8757 display refresh.",
+      "set": "ZP | ZQ | ZR <addr> EN | ZS <n> EN",
+      "parameters": [
+        { "name": "value", "range": "address or count where applicable" }
+      ],
+      "examples": ["ZP", "ZQ"]
+    },
+    {
+      "name": "individual_rf_attenuator",
+      "mnemonic": "Z0",
+      "category": "Attenuation",
+      "description": "Individual RF Attenuator Selection (Special Function 63.0-63.5). Z0=Select RF thru path, Z1=Select 10 dB pad No.1, Z2=Select 20 dB input amplifier, Z4=Select 10 dB pad No.2, Z5=Select 10 dB pad No.3.",
+      "set": "Z0 | Z1 | Z2 | Z4 | Z5",
+      "parameters": [
+        { "name": "selection", "range": "Z0=thru, Z1=10dB#1, Z2=20dB amp, Z4=10dB#2, Z5=10dB#3" }
+      ],
+      "examples": ["Z0", "Z1"]
+    },
+    {
+      "name": "display_test",
+      "mnemonic": "DT",
+      "category": "Test",
+      "description": "Enable Display Test (Special Function 91.0).",
+      "set": "DT",
+      "parameters": [],
+      "examples": ["DT"]
+    },
+    {
+      "name": "keyboard_test",
+      "mnemonic": "KY",
+      "category": "Test",
+      "description": "Keyboard Test (Special Function 90.0-90.8). KY=Display key codes, K1-K8=Key test row 1 through row 8.",
+      "set": "KY | K<1-8>",
+      "parameters": [
+        { "name": "selection", "range": "KY=display key codes, K1..K8=row test" }
+      ],
+      "examples": ["KY", "K1"]
+    },
+    {
+      "name": "recorder_test",
+      "mnemonic": "A7",
+      "category": "Test",
+      "description": "Recorder Test Functions (Special Function 82.0-82.2). A7=Enable recorder test, XV=X-axis test, YV=Y-axis test.",
+      "set": "A7 | XV | YV",
+      "parameters": [
+        { "name": "selection", "range": "A7=enable, XV=X-axis, YV=Y-axis" }
+      ],
+      "examples": ["A7", "XV"]
+    }
+  ]
+}

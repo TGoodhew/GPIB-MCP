@@ -1,0 +1,691 @@
+{
+  "model": "8903B",
+  "manufacturer": "HP",
+  "category": "Audio Analyzer",
+  "description": "HP 8903B Audio Analyzer (20 Hz to 100 kHz) combining a low-distortion audio source with a signal analyzer. Performs AC level, DC level, distortion, distortion level, SINAD, signal-to-noise ratio, and frequency-count measurements. Legacy HP-IB (IEEE-488) instrument controlled by an alphameric program-code language, NOT SCPI. Each code is typically equivalent to a front-panel keystroke; codes are concatenated into one program string in the order [Automatic Operation][Source Frequency][Source Amplitude][Measurement][Filters][Special Functions][Log/Lin][Ratio][Start Frequency][Stop Frequency][Plot Limit][Sweep][Trigger] (e.g. AUFR440HZAP1VLM3L1LGT3). Numeric data uses a signed mantissa of up to five digits with an optional decimal point and an optional one- or two-digit signed exponent (the exponent is introduced by EN, e.g. 1EN3). Lower-case alpha characters are treated as upper case. Special Functions are entered as a number followed by SP (the SPCL key), e.g. 47.1SP. Filter, Low-Pass, Ratio, and Sweep groups do not toggle in remote mode; each has a dedicated 'all off' code (H0, L0, R0, W0). The instrument outputs measurement data when commanded with RR/RL (or 20.0SP/20.1SP) in the fixed format +-DDDDDE+-NN followed by CR LF, always in fundamental units (Hz, %, dB, or V). It supports a one-byte status-byte serial poll but has no identify query (predates *IDN?). Powers up at 1 kHz source frequency, 0 V amplitude, 600 ohm output impedance, and Service Request Condition 22.2 (HP-IB error).",
+  "source": "8903b.pdf",
+  "aliases": ["8903B", "HP8903B", "8903A", "8903E"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "automatic_operation",
+      "mnemonic": "AU",
+      "category": "Control",
+      "description": "Sets all instrument functions to automatic ranging and cancels all functions that light the SPCL key. Recommended at the start of a program string. The converse is the Hold Settings special function (prefix 9).",
+      "set": "AU",
+      "query": false,
+      "parameters": [],
+      "examples": ["AU", "AUFR1KZAP1VLM1"]
+    },
+    {
+      "name": "source_frequency",
+      "mnemonic": "FR",
+      "category": "Source",
+      "description": "Sets the internal source output frequency. Follow with numeric data and a frequency unit (HZ or KZ). Range 20 Hz to 100 kHz. Powers up at 1 kHz.",
+      "set": "FR <value> <unit>",
+      "query": false,
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+      ],
+      "examples": ["FR440HZ", "FR20KZ"]
+    },
+    {
+      "name": "source_amplitude",
+      "mnemonic": "AP",
+      "category": "Source",
+      "description": "Sets the open-circuit source output level. Follow with numeric data and an amplitude unit: VL (volts), MV (millivolts), or DV (dBm into 600 ohm, equivalent to dBre 0.775 V). Range 0.6 mV to 6 V. Powers up at 0 V (oscillator stays on).",
+      "set": "AP <value> <unit>",
+      "query": false,
+      "parameters": [
+        { "name": "amplitude", "units": ["VL", "MV", "DV"], "range": "0.6 mV to 6 V" }
+      ],
+      "examples": ["AP1.5VL", "AP600MV", "AP0DV"]
+    },
+    {
+      "name": "amplitude_increment",
+      "mnemonic": "AN",
+      "category": "Source",
+      "description": "Sets the source amplitude increment (step) value used by the UP/DN step codes. Follow with numeric data and an amplitude unit.",
+      "set": "AN <value> <unit>",
+      "query": false,
+      "parameters": [
+        { "name": "increment", "units": ["VL", "MV", "DV"] }
+      ],
+      "examples": ["AN100MV", "AN1DV"]
+    },
+    {
+      "name": "frequency_increment",
+      "mnemonic": "FN",
+      "category": "Source",
+      "description": "Sets the source frequency increment (step) value used by the UP/DN step codes. Follow with numeric data and a frequency unit.",
+      "set": "FN <value> <unit>",
+      "query": false,
+      "parameters": [
+        { "name": "increment", "units": ["HZ", "KZ"] }
+      ],
+      "examples": ["FN10HZ", "FN1KZ"]
+    },
+    {
+      "name": "step_up",
+      "mnemonic": "UP",
+      "category": "Source",
+      "description": "Increments the currently selected source function (frequency or amplitude) by its increment value (set with FN or AN).",
+      "set": "UP",
+      "query": false,
+      "parameters": [],
+      "examples": ["UP", "FNUP"]
+    },
+    {
+      "name": "step_down",
+      "mnemonic": "DN",
+      "category": "Source",
+      "description": "Decrements the currently selected source function (frequency or amplitude) by its increment value (set with FN or AN).",
+      "set": "DN",
+      "query": false,
+      "parameters": [],
+      "examples": ["DN"]
+    },
+    {
+      "name": "output_impedance_600",
+      "mnemonic": "47.0SP",
+      "category": "Source",
+      "description": "Special Function 47.0: sets the source output impedance to 600 ohm (power-up default).",
+      "set": "47.0SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["47.0SP"]
+    },
+    {
+      "name": "output_impedance_50",
+      "mnemonic": "47.1SP",
+      "category": "Source",
+      "description": "Special Function 47.1: sets the source output impedance to 50 ohm (lights the IMPEDANCE annunciator).",
+      "set": "47.1SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["47.1SP"]
+    },
+    {
+      "name": "measure_ac_level",
+      "mnemonic": "M1",
+      "category": "Measurement",
+      "description": "Selects the AC Level measurement: measures the differential true-rms (or average-responding) ac voltage between the HIGH and LOW INPUT connectors. Displayable in V, mV, dBm into 600 ohm, or watts.",
+      "set": "M1",
+      "query": false,
+      "parameters": [],
+      "examples": ["M1"]
+    },
+    {
+      "name": "measure_sinad",
+      "mnemonic": "M2",
+      "category": "Measurement",
+      "description": "Selects the SINAD measurement (ratio of signal-plus-noise-plus-distortion to noise-plus-distortion, in dB). Heavily filtered for noisy receiver signals; automatically tunes the notch filter to the source frequency.",
+      "set": "M2",
+      "query": false,
+      "parameters": [],
+      "examples": ["M2"]
+    },
+    {
+      "name": "measure_distortion",
+      "mnemonic": "M3",
+      "category": "Measurement",
+      "description": "Selects the Distortion measurement (THD+N). The analyzer automatically tunes to and notch-filters the fundamental; result displayable in % or dB.",
+      "set": "M3",
+      "query": false,
+      "parameters": [],
+      "examples": ["M3"]
+    },
+    {
+      "name": "measure_dc_level",
+      "mnemonic": "S1",
+      "category": "Measurement",
+      "description": "Selects the DC Level measurement: 0 to 300 Vdc. The voltage value is always read out to the HP-IB regardless of the Read Display setting.",
+      "set": "S1",
+      "query": false,
+      "parameters": [],
+      "examples": ["S1"]
+    },
+    {
+      "name": "measure_signal_to_noise",
+      "mnemonic": "S2",
+      "category": "Measurement",
+      "description": "Selects the Signal-to-Noise ratio measurement (in dB). The analyzer monitors ac level while turning the source on and off; true-rms detected and filtered for repeatability.",
+      "set": "S2",
+      "query": false,
+      "parameters": [],
+      "examples": ["S2"]
+    },
+    {
+      "name": "measure_distortion_level",
+      "mnemonic": "S3",
+      "category": "Measurement",
+      "description": "Selects the Distortion Level measurement: displays the absolute level of the distortion-plus-noise (fundamental removed) in V, mV, dBm into 600 ohm, or %/dB.",
+      "set": "S3",
+      "query": false,
+      "parameters": [],
+      "examples": ["S3"]
+    },
+    {
+      "name": "rms_detector",
+      "mnemonic": "A0",
+      "category": "Detector",
+      "description": "Selects the true-rms detector for ac measurements (also selectable via Special Function 5.0/5.1 for fast/slow rms post-notch response).",
+      "set": "A0",
+      "query": false,
+      "parameters": [],
+      "examples": ["A0"]
+    },
+    {
+      "name": "avg_detector",
+      "mnemonic": "A1",
+      "category": "Detector",
+      "description": "Selects the average-responding (rms-calibrated) detector for ac measurements (also selectable via Special Function 5.2/5.3 for fast/slow average post-notch response).",
+      "set": "A1",
+      "query": false,
+      "parameters": [],
+      "examples": ["A1"]
+    },
+    {
+      "name": "quasi_peak_detector",
+      "mnemonic": "5.7SP",
+      "category": "Detector",
+      "description": "Special Function 5.7: selects the quasi-peak post-notch detector response (instruments with the appropriate serial prefix).",
+      "set": "5.7SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["5.7SP"]
+    },
+    {
+      "name": "automatic_notch_tuning",
+      "mnemonic": "N0",
+      "category": "Measurement",
+      "description": "Enables automatic notch tuning: the notch filter automatically tunes to the fundamental for distortion/SINAD measurements. Also available as Special Function 6.0.",
+      "set": "N0",
+      "query": false,
+      "parameters": [],
+      "examples": ["N0"]
+    },
+    {
+      "name": "notch_hold",
+      "mnemonic": "N1",
+      "category": "Measurement",
+      "description": "Holds the notch filter at its present tuning (no automatic retuning). Also available as Special Function 6.1.",
+      "set": "N1",
+      "query": false,
+      "parameters": [],
+      "examples": ["N1"]
+    },
+    {
+      "name": "plugin_filter_left",
+      "mnemonic": "H1",
+      "category": "Filter",
+      "description": "Turns on the left internal plug-in high-pass/bandpass filter (optional plug-in, e.g. CCITT/C-message/psophometric weighting depending on installed option).",
+      "set": "H1",
+      "query": false,
+      "parameters": [],
+      "examples": ["H1"]
+    },
+    {
+      "name": "plugin_filter_right",
+      "mnemonic": "H2",
+      "category": "Filter",
+      "description": "Turns on the right internal plug-in high-pass/bandpass filter (optional plug-in).",
+      "set": "H2",
+      "query": false,
+      "parameters": [],
+      "examples": ["H2"]
+    },
+    {
+      "name": "plugin_filters_off",
+      "mnemonic": "H0",
+      "category": "Filter",
+      "description": "Turns off all internal plug-in high-pass/bandpass filters (the group does not toggle in remote mode, so this dedicated 'all off' code is required).",
+      "set": "H0",
+      "query": false,
+      "parameters": [],
+      "examples": ["H0"]
+    },
+    {
+      "name": "lp_filter_30khz",
+      "mnemonic": "L1",
+      "category": "Filter",
+      "description": "Turns on the 30 kHz low-pass filter (30 +/-2 kHz, 3 dB cutoff).",
+      "set": "L1",
+      "query": false,
+      "parameters": [],
+      "examples": ["L1"]
+    },
+    {
+      "name": "lp_filter_80khz",
+      "mnemonic": "L2",
+      "category": "Filter",
+      "description": "Turns on the 80 kHz low-pass filter (80 +/-4 kHz, 3 dB cutoff).",
+      "set": "L2",
+      "query": false,
+      "parameters": [],
+      "examples": ["L2"]
+    },
+    {
+      "name": "lp_filters_off",
+      "mnemonic": "L0",
+      "category": "Filter",
+      "description": "Turns off all low-pass filters (dedicated 'all off' code; the group does not toggle in remote mode).",
+      "set": "L0",
+      "query": false,
+      "parameters": [],
+      "examples": ["L0"]
+    },
+    {
+      "name": "ratio_on",
+      "mnemonic": "R1",
+      "category": "Display",
+      "description": "Turns Ratio mode on: displays the current measurement as a ratio (in % or dB) referenced to an entered or measured value.",
+      "set": "R1",
+      "query": false,
+      "parameters": [],
+      "examples": ["R1"]
+    },
+    {
+      "name": "ratio_off",
+      "mnemonic": "R0",
+      "category": "Display",
+      "description": "Turns Ratio mode off (dedicated 'off' code; does not toggle in remote mode).",
+      "set": "R0",
+      "query": false,
+      "parameters": [],
+      "examples": ["R0"]
+    },
+    {
+      "name": "log",
+      "mnemonic": "LG",
+      "category": "Display",
+      "description": "Selects logarithmic display units (dB, or dBm into 600 ohm for level measurements).",
+      "set": "LG",
+      "query": false,
+      "parameters": [],
+      "examples": ["LG"]
+    },
+    {
+      "name": "linear",
+      "mnemonic": "LN",
+      "category": "Display",
+      "description": "Selects linear display units (% for distortion/ratio, or V/mV for level measurements).",
+      "set": "LN",
+      "query": false,
+      "parameters": [],
+      "examples": ["LN"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Sweep",
+      "description": "Sets the source sweep start frequency. Follow with numeric data and a frequency unit. Defines the X-axis start for swept measurements and plots.",
+      "set": "FA <value> <unit>",
+      "query": false,
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+      ],
+      "examples": ["FA20HZ", "FA1KZ"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Sweep",
+      "description": "Sets the source sweep stop frequency. Follow with numeric data and a frequency unit. Defines the X-axis stop for swept measurements and plots.",
+      "set": "FB <value> <unit>",
+      "query": false,
+      "parameters": [
+        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+      ],
+      "examples": ["FB20KZ", "FB100KZ"]
+    },
+    {
+      "name": "plot_limit",
+      "mnemonic": "PL",
+      "category": "Sweep",
+      "description": "Sets a Y-axis plot scaling limit for the X-Y recorder output. Enter the upper limit qualified by UL and/or the lower limit qualified by LL with numeric data and the appropriate measurement unit.",
+      "set": "PL <value> <unit> <UL|LL>",
+      "query": false,
+      "parameters": [
+        { "name": "value", "units": ["UL", "LL", "DB", "VL", "MV", "DV"], "range": "depends on selected measurement units" }
+      ],
+      "examples": ["PL0DBUL", "PL-80DBLL"]
+    },
+    {
+      "name": "sweep_on",
+      "mnemonic": "W1",
+      "category": "Sweep",
+      "description": "Starts a logarithmic source frequency sweep from the start (FA) to the stop (FB) frequency.",
+      "set": "W1",
+      "query": false,
+      "parameters": [],
+      "examples": ["W1"]
+    },
+    {
+      "name": "sweep_off",
+      "mnemonic": "W0",
+      "category": "Sweep",
+      "description": "Turns the source sweep off (dedicated 'off' code; does not toggle in remote mode).",
+      "set": "W0",
+      "query": false,
+      "parameters": [],
+      "examples": ["W0"]
+    },
+    {
+      "name": "free_run",
+      "mnemonic": "T0",
+      "category": "Trigger",
+      "description": "Trigger mode Free Run: the Audio Analyzer makes measurements continuously and updates the display/output without external triggering.",
+      "set": "T0",
+      "query": false,
+      "parameters": [],
+      "examples": ["T0"]
+    },
+    {
+      "name": "hold",
+      "mnemonic": "T1",
+      "category": "Trigger",
+      "description": "Trigger mode Hold: stops free-running measurements so that triggered measurements (T2 or T3, or the Group Execute Trigger bus command) can be set up.",
+      "set": "T1",
+      "query": false,
+      "parameters": [],
+      "examples": ["T1"]
+    },
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "T2",
+      "category": "Trigger",
+      "description": "Triggers an immediate measurement using the current instrument settings (no additional settling).",
+      "set": "T2",
+      "query": false,
+      "parameters": [],
+      "examples": ["T2"]
+    },
+    {
+      "name": "trigger_with_settling",
+      "mnemonic": "T3",
+      "category": "Trigger",
+      "description": "Triggers a measurement after allowing the instrument to settle (re-range, re-tune, re-level). Equivalent to the Group Execute Trigger (GET) bus command and to the front-panel CLEAR key.",
+      "set": "T3",
+      "query": false,
+      "parameters": [],
+      "examples": ["T3"]
+    },
+    {
+      "name": "read_right_display",
+      "mnemonic": "RR",
+      "category": "Output",
+      "description": "Reads the right display value to the HP-IB on the next talk. Equivalent to Special Function 20.0 (20.0SP). Output format +-DDDDDE+-NN CR LF in fundamental units (Hz, %, dB, or V).",
+      "set": "RR",
+      "query": true,
+      "parameters": [],
+      "examples": ["RR", "20.0SP"]
+    },
+    {
+      "name": "read_left_display",
+      "mnemonic": "RL",
+      "category": "Output",
+      "description": "Reads the left display value to the HP-IB on the next talk. Equivalent to Special Function 20.1 (20.1SP). Output format +-DDDDDE+-NN CR LF in fundamental units.",
+      "set": "RL",
+      "query": true,
+      "parameters": [],
+      "examples": ["RL", "20.1SP"]
+    },
+    {
+      "name": "rapid_frequency_count",
+      "mnemonic": "RF",
+      "category": "Output",
+      "description": "Enters the Rapid Frequency Count binary programming mode, which provides a packed four-byte counter output for fast frequency counting. Output is not in the standard ASCII data format.",
+      "set": "RF",
+      "query": true,
+      "parameters": [],
+      "examples": ["RF"]
+    },
+    {
+      "name": "rapid_source",
+      "mnemonic": "RS",
+      "category": "Source",
+      "description": "Enters the Rapid Source binary programming mode for fast source-frequency tuning. In this mode the data input format differs from the standard numeric format (see the manual's Rapid Source detailed instructions).",
+      "set": "RS",
+      "query": false,
+      "parameters": [],
+      "examples": ["RS"]
+    },
+    {
+      "name": "special_function",
+      "mnemonic": "SP",
+      "category": "Special Function",
+      "description": "Special Function entry: send a special-function number followed by SP (the SPCL key). Categories include Input Level Range (1.x, DC Level 2.x), Post Notch Gain (3.x), Hold Decimal Point (4.x), Post Notch Detector Response (5.x), Notch Tune (6.x), SINAD Meter Range (7.x), Error Disable (8.x), Hold Settings (9.0), Display Source Settings (10.0), Re-enter Ratio (11.x), Signal-to-Noise Delay (12.x), X-Y Recorder enable/disable plot (13.0/13.1), Time Between Measurements (14.x), SINAD/SNR Resolution (16.x), Sweep Resolution (17.x), Display Level in Watts (19.x), Read Display (20.x), HP-IB Address (21.x), Service Request Condition (22.NSP), and Output Impedance (47.x). SS (SPCL SPCL) accesses a second special-function level.",
+      "set": "<number>SP",
+      "query": false,
+      "parameters": [
+        { "name": "function", "range": "documented special-function numbers, e.g. 1.0-1.19, 2.0-2.4, 3.0-3.4, 4.0-4.8, 5.0-5.7, 6.0-6.1, 7.0-7.1, 8.0-8.3, 9.0, 10.0, 11.0-11.1, 12.0-12.9, 13.0-13.1, 14.0-14.1, 16.0-16.1, 17.0-17.9, 19.0/19.NNN, 20.0-20.1, 21.0-21.1, 22.N, 47.0-47.1" }
+      ],
+      "examples": ["1.0SP", "9.0SP"]
+    },
+    {
+      "name": "special_function_second_level",
+      "mnemonic": "SS",
+      "category": "Special Function",
+      "description": "SS is the program code for pressing the SPCL key twice (SPCL SPCL), used to enter the second-level special-function menu.",
+      "set": "SS",
+      "query": false,
+      "parameters": [],
+      "examples": ["SS"]
+    },
+    {
+      "name": "input_level_range_auto",
+      "mnemonic": "1.0SP",
+      "category": "Special Function",
+      "description": "Special Function 1.0: automatic input level range selection (except DC Level). Manual ranges 1.1SP (300 V) through 1.19SP (0.0754 V) are also available.",
+      "set": "1.0SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["1.0SP", "1.6SP"]
+    },
+    {
+      "name": "input_level_range_dc_auto",
+      "mnemonic": "2.0SP",
+      "category": "Special Function",
+      "description": "Special Function 2.0: automatic input level range selection for DC Level. Manual ranges: 2.1SP (300 V), 2.2SP (64 V), 2.3SP (16 V), 2.4SP (4 V).",
+      "set": "2.0SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["2.0SP", "2.4SP"]
+    },
+    {
+      "name": "post_notch_gain",
+      "mnemonic": "3.0SP",
+      "category": "Special Function",
+      "description": "Special Function 3.x: post-notch gain. 3.0SP automatic, 3.1SP 0 dB, 3.2SP 20 dB, 3.3SP 40 dB, 3.4SP 60 dB.",
+      "set": "3.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "gain", "range": "3.0 (auto), 3.1 (0 dB), 3.2 (20 dB), 3.3 (40 dB), 3.4 (60 dB)" }
+      ],
+      "examples": ["3.0SP", "3.4SP"]
+    },
+    {
+      "name": "hold_decimal_point",
+      "mnemonic": "4.0SP",
+      "category": "Special Function",
+      "description": "Special Function 4.x: hold the display decimal point / resolution. 4.0SP automatic; 4.1SP-4.8SP select fixed display ranges.",
+      "set": "4.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "range", "range": "4.0 (auto) through 4.8" }
+      ],
+      "examples": ["4.0SP", "4.3SP"]
+    },
+    {
+      "name": "sinad_meter_range",
+      "mnemonic": "7.0SP",
+      "category": "Special Function",
+      "description": "Special Function 7.x: SINAD meter range. 7.0SP = 0 to ~18 dB range; 7.1SP = 0 to ~24 dB range.",
+      "set": "7.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "range", "range": "7.0 (0 to ~18 dB), 7.1 (0 to ~24 dB)" }
+      ],
+      "examples": ["7.0SP", "7.1SP"]
+    },
+    {
+      "name": "error_disable",
+      "mnemonic": "8.0SP",
+      "category": "Special Function",
+      "description": "Special Function 8.x: error reporting control. 8.0SP all errors enabled; 8.1SP disable analyzer errors (12-17, 31, 96); 8.2SP disable source errors (18, 19); 8.3SP disable both analyzer and source errors.",
+      "set": "8.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "mode", "range": "8.0 (all on), 8.1 (analyzer off), 8.2 (source off), 8.3 (both off)" }
+      ],
+      "examples": ["8.0SP", "8.3SP"]
+    },
+    {
+      "name": "hold_settings",
+      "mnemonic": "9.0SP",
+      "category": "Special Function",
+      "description": "Special Function 9.0: holds input level ranges, post-notch gain, decimal point, and notch tuning at their present settings (converse of Automatic Operation).",
+      "set": "9.0SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["9.0SP"]
+    },
+    {
+      "name": "display_source_settings",
+      "mnemonic": "10.0SP",
+      "category": "Special Function",
+      "description": "Special Function 10.0: displays the source settings as entered (frequency in left display, amplitude in right display).",
+      "set": "10.0SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["10.0SP"]
+    },
+    {
+      "name": "reenter_ratio",
+      "mnemonic": "11.0SP",
+      "category": "Special Function",
+      "description": "Special Function 11.x: ratio reference control. 11.0SP restores the last RATIO reference and re-enters RATIO mode if allowed; 11.1SP displays the RATIO reference.",
+      "set": "11.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "mode", "range": "11.0 (re-enter ratio), 11.1 (display reference)" }
+      ],
+      "examples": ["11.0SP", "11.1SP"]
+    },
+    {
+      "name": "signal_to_noise_delay",
+      "mnemonic": "12.0SP",
+      "category": "Special Function",
+      "description": "Special Function 12.x: signal-to-noise measurement delay. 12.0SP automatic; 12.1SP-12.9SP select fixed delays from 200 ms to 1.8 s in 200 ms steps.",
+      "set": "12.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "delay", "range": "12.0 (auto), 12.1 (200 ms) through 12.9 (1.8 s)" }
+      ],
+      "examples": ["12.0SP", "12.5SP"]
+    },
+    {
+      "name": "plot_enable",
+      "mnemonic": "13.0SP",
+      "category": "Special Function",
+      "description": "Special Function 13.0: enable plotting to the X-Y recorder. 13.1SP disables plot.",
+      "set": "13.0SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["13.0SP"]
+    },
+    {
+      "name": "plot_disable",
+      "mnemonic": "13.1SP",
+      "category": "Special Function",
+      "description": "Special Function 13.1: disable plotting to the X-Y recorder.",
+      "set": "13.1SP",
+      "query": false,
+      "parameters": [],
+      "examples": ["13.1SP"]
+    },
+    {
+      "name": "time_between_measurements",
+      "mnemonic": "14.0SP",
+      "category": "Special Function",
+      "description": "Special Function 14.x: 14.0SP minimum time between measurements; 14.1SP add 1 s between measurements.",
+      "set": "14.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "mode", "range": "14.0 (minimum), 14.1 (+1 s)" }
+      ],
+      "examples": ["14.0SP", "14.1SP"]
+    },
+    {
+      "name": "sinad_snr_resolution",
+      "mnemonic": "16.0SP",
+      "category": "Special Function",
+      "description": "Special Function 16.x: SINAD and Signal-to-Noise display resolution. 16.0SP = 0.01 dB above 25 dB, 0.5 dB below 25 dB; 16.1SP = 0.01 dB on all ranges.",
+      "set": "16.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "mode", "range": "16.0 (mixed), 16.1 (0.01 dB all)" }
+      ],
+      "examples": ["16.0SP", "16.1SP"]
+    },
+    {
+      "name": "sweep_resolution",
+      "mnemonic": "17.0SP",
+      "category": "Special Function",
+      "description": "Special Function 17.x: sweep resolution in points per decade (maximum 255 points/sweep). 17.0SP/17.4SP = 10 pts/dec, 17.1SP = 1, 17.2SP = 2, 17.3SP = 5, 17.5SP = 20, 17.6SP = 50, 17.7SP = 100, 17.8SP = 200, 17.9SP = 500.",
+      "set": "17.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "points_per_decade", "range": "17.1 (1) through 17.9 (500)" }
+      ],
+      "examples": ["17.0SP", "17.9SP"]
+    },
+    {
+      "name": "display_level_watts",
+      "mnemonic": "19.0SP",
+      "category": "Special Function",
+      "description": "Special Function 19.x: display ac level in watts. 19.0SP = watts into 8 ohm; 19.NNNSP = watts into a specified NNN-ohm load.",
+      "set": "19.<load>SP",
+      "query": false,
+      "parameters": [
+        { "name": "load", "units": ["ohm"], "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load" }
+      ],
+      "examples": ["19.0SP", "19.016SP"]
+    },
+    {
+      "name": "hpib_address_display",
+      "mnemonic": "21.0SP",
+      "category": "Status",
+      "description": "Special Function 21.x: 21.0SP displays the HP-IB address in binary in the left display and the talk/listen/SRQ configuration (TLS) in the right display; 21.1SP displays the HP-IB address in decimal. The address itself is set by internal switches (factory 28 decimal).",
+      "set": "21.<n>SP",
+      "query": false,
+      "parameters": [
+        { "name": "mode", "range": "21.0 (binary), 21.1 (decimal)" }
+      ],
+      "examples": ["21.0SP", "21.1SP"]
+    },
+    {
+      "name": "service_request_condition",
+      "mnemonic": "22.NSP",
+      "category": "Status",
+      "description": "Special Function 22.N: enables conditions that cause a Service Request (SRQ). N is the sum of weighted conditions: 1 = Data Ready, 2 = HP-IB error, 4 = Instrument error. The instrument powers up in state 22.2 (HP-IB error only).",
+      "set": "22.<N>SP",
+      "query": false,
+      "parameters": [
+        { "name": "mask", "range": "N = 1 (Data Ready) + 2 (HP-IB error) + 4 (Instrument error); e.g. 22.3 = Data Ready + HP-IB error" }
+      ],
+      "examples": ["22.2SP", "22.3SP"]
+    },
+    {
+      "name": "clear",
+      "mnemonic": "CL",
+      "category": "Data",
+      "description": "Clears the current numeric data entry (front-panel CLEAR-style data clear). Distinct from the HP-IB Device Clear bus message.",
+      "set": "CL",
+      "query": false,
+      "parameters": [],
+      "examples": ["CL"]
+    }
+  ]
+}

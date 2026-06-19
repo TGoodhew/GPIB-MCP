@@ -1,0 +1,231 @@
+{
+  "model": "5342A",
+  "manufacturer": "HP",
+  "category": "Frequency Counter",
+  "description": "HP 5342A Microwave Frequency Counter (10 Hz to 18 GHz) with HP-IB Interface Option 011. Uses a function-code (program-code) remote language. Each complete program code is executed by the microprocessor as if entered from the front panel, so codes in a string must appear in the same order as front-panel entry. Provides automatic/manual frequency mode, manual center frequency, amplitude measurement, frequency and amplitude offsets (including automatic offsets), resolution and range selection, FM/CW mode, four sample-rate (trigger/hold) modes, and output-mode control. Measurement data is returned in fixed-length ASCII formats terminated by CR LF.",
+  "source": "5342A.pdf",
+  "aliases": ["5342A", "HP5342A", "Agilent 5342A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "commands": [
+    {
+      "name": "frequency_mode_auto",
+      "mnemonic": "AU",
+      "category": "Measurement Function",
+      "description": "Frequency Mode Select - Automatic. Selects the automatic frequency acquisition mode (analogous to the front panel AUTO operation).",
+      "set": "AU",
+      "examples": ["AU"]
+    },
+    {
+      "name": "frequency_mode_manual",
+      "mnemonic": "M",
+      "category": "Measurement Function",
+      "description": "Frequency Mode Select - Manual. Selects manual frequency mode; the center frequency is set with the SM (Set Manual Center Frequency) command.",
+      "set": "M",
+      "examples": ["M"]
+    },
+    {
+      "name": "set_manual_center_frequency",
+      "mnemonic": "SM",
+      "category": "Measurement Configuration",
+      "description": "Set Manual Center Frequency. Sets the manual center frequency. The data string is a nonfixed-length string of up to 5 characters in MHz, terminated by E. Decimal points cause the entire string to be ignored; + signs and spaces are allowed. The number must be less than 18 GHz or it is ignored.",
+      "set": "SM<value>E",
+      "parameters": [
+        { "name": "value", "units": "MHz", "range": "up to 5 characters, must be < 18000 (18 GHz); decimal points cause the string to be ignored" }
+      ],
+      "examples": ["SM10000E", "SM775E"]
+    },
+    {
+      "name": "amplitude_mode_off",
+      "mnemonic": "AM9",
+      "category": "Measurement Function",
+      "description": "Amplitude Mode Select - Off. Turns the amplitude measurement off (frequency only).",
+      "set": "AM9",
+      "examples": ["AM9"]
+    },
+    {
+      "name": "amplitude_mode_on",
+      "mnemonic": "AM1",
+      "category": "Measurement Function",
+      "description": "Amplitude Mode Select - On. Turns the amplitude measurement on; both frequency and amplitude are measured and output.",
+      "set": "AM1",
+      "examples": ["AM1"]
+    },
+    {
+      "name": "frequency_offset_off",
+      "mnemonic": "OM9",
+      "category": "Measurement Configuration",
+      "description": "Frequency Offset Mode Select - Off. Disables the frequency offset.",
+      "set": "OM9",
+      "examples": ["OM9"]
+    },
+    {
+      "name": "frequency_offset_on",
+      "mnemonic": "OM1",
+      "category": "Measurement Configuration",
+      "description": "Frequency Offset Mode Select - On. Enables the frequency offset set with the SOM command.",
+      "set": "OM1",
+      "examples": ["OM1"]
+    },
+    {
+      "name": "set_frequency_offset",
+      "mnemonic": "SOM",
+      "category": "Measurement Configuration",
+      "description": "Set Frequency Offset. Sets the frequency offset value. The data string is a nonfixed-length signed value in MHz terminated by E. Spaces are ignored.",
+      "set": "SOM<sign><value>E",
+      "parameters": [
+        { "name": "value", "units": "MHz", "range": "signed nonfixed-length value (e.g. +/-XXXXX.XXXXXX); spaces ignored" }
+      ],
+      "examples": ["SOM10.7E", "SOM-4000.25E"]
+    },
+    {
+      "name": "amplitude_offset_off",
+      "mnemonic": "OB9",
+      "category": "Measurement Configuration",
+      "description": "Amplitude Offset Mode - Off. Disables the amplitude offset.",
+      "set": "OB9",
+      "examples": ["OB9"]
+    },
+    {
+      "name": "amplitude_offset_on",
+      "mnemonic": "OB1",
+      "category": "Measurement Configuration",
+      "description": "Amplitude Offset Mode - On. Enables the amplitude offset set with the SOB command.",
+      "set": "OB1",
+      "examples": ["OB1"]
+    },
+    {
+      "name": "set_amplitude_offset",
+      "mnemonic": "SOB",
+      "category": "Measurement Configuration",
+      "description": "Set Amplitude Offset. Sets the amplitude offset value. The data string is a nonfixed-length signed value in dB terminated by E. Spaces are ignored.",
+      "set": "SOB<sign><value>E",
+      "parameters": [
+        { "name": "value", "units": "dB", "range": "signed nonfixed-length value (e.g. +/-XX.X); spaces ignored" }
+      ],
+      "examples": ["SOB-10.1E", "SOB3.5E"]
+    },
+    {
+      "name": "resolution",
+      "mnemonic": "SR",
+      "category": "Measurement Configuration",
+      "description": "Resolution. Selects the measurement resolution. SR3=1 Hz, SR4=10 Hz, SR5=100 Hz, SR6=1 kHz, SR7=10 kHz, SR8=100 kHz, SR9=1 MHz. (Note: SR1 is the separate Check Mode code.)",
+      "set": "SR<n>",
+      "parameters": [
+        { "name": "n", "range": "3=1 Hz | 4=10 Hz | 5=100 Hz | 6=1 kHz | 7=10 kHz | 8=100 kHz | 9=1 MHz" }
+      ],
+      "examples": ["SR3", "SR7"]
+    },
+    {
+      "name": "range_low",
+      "mnemonic": "L",
+      "category": "Measurement Configuration",
+      "description": "Range Select - Low. Selects the 10 Hz to 500 MHz range.",
+      "set": "L",
+      "examples": ["L"]
+    },
+    {
+      "name": "range_high",
+      "mnemonic": "H",
+      "category": "Measurement Configuration",
+      "description": "Range Select - High. Selects the 500 MHz to 18 GHz range.",
+      "set": "H",
+      "examples": ["H"]
+    },
+    {
+      "name": "cw_mode",
+      "mnemonic": "C",
+      "category": "Measurement Configuration",
+      "description": "FM/CW Mode - CW. Selects CW (continuous wave) measurement mode.",
+      "set": "C",
+      "examples": ["C"]
+    },
+    {
+      "name": "fm_mode",
+      "mnemonic": "F",
+      "category": "Measurement Configuration",
+      "description": "FM/CW Mode - FM. Selects FM measurement mode.",
+      "set": "F",
+      "examples": ["F"]
+    },
+    {
+      "name": "sample_rate_front_panel",
+      "mnemonic": "T0",
+      "category": "Triggering",
+      "description": "Sample Rate Mode - Front panel. Sample rate is determined by the front panel SAMPLE RATE control.",
+      "set": "T0",
+      "examples": ["T0"]
+    },
+    {
+      "name": "sample_rate_hold",
+      "mnemonic": "T1",
+      "category": "Triggering",
+      "description": "Sample Rate Mode - Hold. Places the counter in hold; a trigger message (e.g. trg 7) must be sent to start a measurement. If the 5342A is in remote and addressed to listen and not already in Hold (T1), a trigger command automatically puts it into Sample-then-Hold (T3).",
+      "set": "T1",
+      "examples": ["T1"]
+    },
+    {
+      "name": "sample_rate_fast",
+      "mnemonic": "T2",
+      "category": "Triggering",
+      "description": "Sample Rate Mode - Fast sample (no delay). The counter ignores any sample-rate run-down and initiates a new measurement as soon as the previous measurement is over.",
+      "set": "T2",
+      "examples": ["T2"]
+    },
+    {
+      "name": "sample_rate_sample_then_hold",
+      "mnemonic": "T3",
+      "category": "Triggering",
+      "description": "Sample Rate Mode - Sample then Hold. The counter takes a measurement and holds until the next trigger message.",
+      "set": "T3",
+      "examples": ["T3"]
+    },
+    {
+      "name": "output_mode_only_when_addressed",
+      "mnemonic": "ST1",
+      "category": "Data Output",
+      "description": "Output Mode - Output only when addressed. At the end of a measurement the counter pulls SRQ and checks if it has been addressed to talk; if not, it clears SRQ and starts the next measurement. If addressed to talk it outputs the measurement, clears SRQ, and starts the next measurement.",
+      "set": "ST1",
+      "examples": ["ST1"]
+    },
+    {
+      "name": "output_mode_wait_until_addressed",
+      "mnemonic": "ST2",
+      "category": "Data Output",
+      "description": "Output Mode - Wait until addressed. At the end of a measurement the counter pulls SRQ and waits in a loop until addressed to talk, then outputs the measurement, clears SRQ, and starts the next measurement. Use this mode when triggering in HOLD (T1) and then addressing to talk.",
+      "set": "ST2",
+      "examples": ["ST2"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "RE",
+      "category": "System",
+      "description": "Reset. Blanks the display and initiates a new measurement. If in Hold (T1) the measurement is not completed but stays in Hold. Does not return control to local.",
+      "set": "RE",
+      "examples": ["RE"]
+    },
+    {
+      "name": "automatic_frequency_offset",
+      "mnemonic": "SOMB",
+      "category": "Measurement Configuration",
+      "description": "Automatic Frequency Offset. Sets the frequency offset automatically to the current measured value.",
+      "set": "SOMB",
+      "examples": ["SOMB"]
+    },
+    {
+      "name": "automatic_amplitude_offset",
+      "mnemonic": "SOBB",
+      "category": "Measurement Configuration",
+      "description": "Automatic Amplitude Offset. Sets the amplitude offset automatically to the current measured value.",
+      "set": "SOBB",
+      "examples": ["SOBB"]
+    },
+    {
+      "name": "check_mode",
+      "mnemonic": "SR1",
+      "category": "Diagnostics",
+      "description": "Check Mode. Internal check function. No input may be present at the RF connector and the counter must be set to SAMPLE RATE full counter-clockwise. Send the RESET command (RE) before making other measurements.",
+      "set": "SR1",
+      "examples": ["SR1"]
+    }
+  ]
+}
