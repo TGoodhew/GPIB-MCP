@@ -1,0 +1,1443 @@
+{
+  "model": "DM3058",
+  "manufacturer": "Rigol",
+  "category": "Digital Multimeter",
+  "description": "Rigol DM3058 / DM3058E 5.5-digit bench digital multimeter with SCPI remote control over USB, GPIB, RS-232 and LAN (GPIB and LAN are only available on the DM3058). This definition covers the native RIGOL command set (IEEE 488 common commands, STATus, SYSTem, and the :CALCulate / :FUNCtion / :FUNCtion2 / :LXI / :MEASure / :RATE / :SYSTem / :TRIGger / :UTILity subsystems). The instrument also accepts compatible Agilent and Fluke command languages, which are not enumerated here.",
+  "source": "DM3058_Programming Guide.pdf",
+  "aliases": ["DM3058", "DM3058E"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "DM3058",
+    "description": "Standard SCPI identification query. Returns an instrument ID string of at least 35 characters."
+  },
+  "commands": [
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common / IEEE 488",
+      "description": "Resets the values in all Event Registers and clears the Error Queue.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common / IEEE 488",
+      "description": "Sets or queries the enable value of the Event Status Register (ESR).",
+      "set": "*ESE <enable_value>",
+      "query": "*ESE?",
+      "parameters": [
+        { "name": "enable_value", "range": "0 to 189" }
+      ],
+      "examples": ["*ESE 16", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common / IEEE 488",
+      "description": "Queries the event value of the Event Status Register (ESR).",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common / IEEE 488",
+      "description": "Queries the equipment ID. Returns a string of at least 35 characters.",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common / IEEE 488",
+      "description": "Sets the Operation Complete bit (bit 0) of the ESR to 1 after the current operation completes. The query returns 1 when the current operation has finished.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "power_on_status_clear",
+      "mnemonic": "*PSC",
+      "category": "Common / IEEE 488",
+      "description": "Sets or queries the power-on status clear flag. *PSC 0 keeps register enable values at last state on power-on; *PSC 1 resets them on power-on.",
+      "set": "*PSC {0|1}",
+      "query": "*PSC?",
+      "parameters": [
+        { "name": "state", "range": "0 or 1" }
+      ],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common / IEEE 488",
+      "description": "Resets the instrument.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common / IEEE 488",
+      "description": "Sets or queries the enable value of the Status Byte Register (STB).",
+      "set": "*SRE <enable_value>",
+      "query": "*SRE?",
+      "parameters": [
+        { "name": "enable_value", "range": "0 to 188" }
+      ],
+      "examples": ["*SRE 32", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common / IEEE 488",
+      "description": "Queries the condition value of the Status Byte Register (STB).",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common / IEEE 488",
+      "description": "Generates a trigger signal when the instrument is in the Wait-for-trigger state.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common / IEEE 488",
+      "description": "Queries the self-test result. Returns 0 (pass) or 1 (failure).",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common / IEEE 488",
+      "description": "Waits until all pending operations complete.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+
+    {
+      "name": "status_operation_condition",
+      "mnemonic": "STATus:OPERation:CONDition?",
+      "category": "Status",
+      "description": "Queries the Condition Register of the Operation Status Register queue.",
+      "query": "STATus:OPERation:CONDition?",
+      "examples": ["STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Sets or queries the Enable Register of the Operation Status Register queue.",
+      "set": "STATus:OPERation:ENABle <enable_value>",
+      "query": "STATus:OPERation:ENABle?",
+      "parameters": [
+        { "name": "enable_value", "range": "0 to 1841" }
+      ],
+      "examples": ["STAT:OPER:ENAB 2", "STAT:OPER:ENAB?"]
+    },
+    {
+      "name": "status_operation_event",
+      "mnemonic": "STATus:OPERation:EVENt?",
+      "category": "Status",
+      "description": "Queries the Event Register of the Operation Status Register queue.",
+      "query": "STATus:OPERation[:EVENt]?",
+      "examples": ["STAT:OPER:EVEN?"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STATus:PRESet",
+      "category": "Status",
+      "description": "Resets the Enable Register of both the Operation Status Register and the Questionable Status Register queues.",
+      "set": "STATus:PRESet",
+      "examples": ["STAT:PRES"]
+    },
+    {
+      "name": "status_questionable_condition",
+      "mnemonic": "STATus:QUEStionable:CONDition?",
+      "category": "Status",
+      "description": "Queries the Condition Register of the Questionable Status Register queue.",
+      "query": "STATus:QUEStionable:CONDition?",
+      "examples": ["STAT:QUES:COND?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STATus:QUEStionable:ENABle",
+      "category": "Status",
+      "description": "Sets or queries the Enable Register of the Questionable Status Register queue.",
+      "set": "STATus:QUEStionable:ENABle <enable_value>",
+      "query": "STATus:QUEStionable:ENABle?",
+      "parameters": [
+        { "name": "enable_value", "range": "0 to 24375" }
+      ],
+      "examples": ["STAT:QUES:ENAB 1", "STAT:QUES:ENAB?"]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": "STATus:QUEStionable:EVENt?",
+      "category": "Status",
+      "description": "Queries the Event Register of the Questionable Status Register queue.",
+      "query": "STATus:QUEStionable[:EVENt]?",
+      "examples": ["STAT:QUES:EVEN?"]
+    },
+
+    {
+      "name": "system_beeper",
+      "mnemonic": "SYSTem:BEEPer",
+      "category": "System",
+      "description": "Issues a single beep immediately. The beeper must be enabled (SYSTem:BEEPer:STATe ON) for this to take effect.",
+      "set": "SYSTem:BEEPer",
+      "examples": ["SYST:BEEP"]
+    },
+    {
+      "name": "system_beeper_state",
+      "mnemonic": "SYSTem:BEEPer:STATe",
+      "category": "System",
+      "description": "Sets or queries the beeper state. ON (1) enables, OFF (0) disables.",
+      "set": "SYSTem:BEEPer:STATe {ON|OFF|1|0}",
+      "query": "SYSTem:BEEPer:STATe?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": ["SYST:BEEP:STAT ON", "SYST:BEEP:STAT?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYSTem:ERRor?",
+      "category": "System",
+      "description": "Queries the next error in the error queue. Returns the error number and description, or 0,\"No error\".",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYSTem:VERSion?",
+      "category": "System",
+      "description": "Queries the SCPI version supported by the instrument, e.g. 1999.0.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+
+    {
+      "name": "calculate_function",
+      "mnemonic": ":CALCulate:FUNCtion",
+      "category": "Calculate",
+      "description": "Sets or queries the math function. Default NONE disables math.",
+      "set": ":CALCulate:FUNCtion {NONE|REL|DB|DBM|MIN|MAX|AVERAGE|TOTAL|PF}",
+      "query": ":CALCulate:FUNCtion?",
+      "parameters": [
+        { "name": "function", "range": "{NONE|REL|DB|DBM|MIN|MAX|AVERAGE|TOTAL|PF}", "description": "TOTAL enables MIN, MAX and AVERAGE statistics together; PF is the limit (pass/fail) operation." }
+      ],
+      "examples": [":CALC:FUNC REL", ":CALC:FUNC?"]
+    },
+    {
+      "name": "calculate_statistic_min",
+      "mnemonic": ":CALCulate:STATistic:MIN?",
+      "category": "Calculate",
+      "description": "Queries the minimum of the current statistic. Valid only when MIN operation is enabled.",
+      "query": ":CALCulate:STATistic:MIN?",
+      "examples": [":CALC:STAT:MIN?"]
+    },
+    {
+      "name": "calculate_statistic_max",
+      "mnemonic": ":CALCulate:STATistic:MAX?",
+      "category": "Calculate",
+      "description": "Queries the maximum of the current statistic. Valid only when MAX operation is enabled.",
+      "query": ":CALCulate:STATistic:MAX?",
+      "examples": [":CALC:STAT:MAX?"]
+    },
+    {
+      "name": "calculate_statistic_average",
+      "mnemonic": ":CALCulate:STATistic:AVERage?",
+      "category": "Calculate",
+      "description": "Queries the average of the current statistic. Valid only when AVERAGE operation is enabled.",
+      "query": ":CALCulate:STATistic:AVERage?",
+      "examples": [":CALC:STAT:AVER?"]
+    },
+    {
+      "name": "calculate_statistic_count",
+      "mnemonic": ":CALCulate:STATistic:COUNt?",
+      "category": "Calculate",
+      "description": "Queries the number of measurements counted for the current statistic. Counting restarts when the measurement function changes.",
+      "query": ":CALCulate:STATistic:COUNt?",
+      "examples": [":CALC:STAT:COUN?"]
+    },
+    {
+      "name": "calculate_statistic_state",
+      "mnemonic": ":CALCulate:STATistic:STATe",
+      "category": "Calculate",
+      "description": "Sets or queries the statistic state.",
+      "set": ":CALCulate:STATistic:STATe {ON|OFF|1|0}",
+      "query": ":CALCulate:STATistic:STATe?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":CALC:STAT:STAT OFF", ":CALC:STAT:STAT?"]
+    },
+    {
+      "name": "calculate_rel_offset",
+      "mnemonic": ":CALCulate:REL:OFFSet",
+      "category": "Calculate",
+      "description": "Sets or queries the offset of the REL (relative) operation for the current measurement. Range depends on measurement type.",
+      "set": ":CALCulate:REL:OFFSet {<range>|MIN|MAX|DEF|CURR}",
+      "query": ":CALCulate:REL:OFFSet?",
+      "parameters": [
+        { "name": "range", "description": "Consecutive real number; DEF=0. Type-dependent: DCV +/-1200 V, ACV +/-900 V, DCI/ACI +/-12 A, Resistance +/-1.2e8 Ohm, Capacitance +/-1.2e-2 F, Frequency +/-1.2e6 Hz." }
+      ],
+      "examples": [":CALC:REL:OFFS 1.5", ":CALC:REL:OFFS?"]
+    },
+    {
+      "name": "calculate_rel_state",
+      "mnemonic": ":CALCulate:REL:STATe",
+      "category": "Calculate",
+      "description": "Sets or queries the REL (relative) operation state.",
+      "set": ":CALCulate:REL:STATe {ON|OFF|1|0}",
+      "query": ":CALCulate:REL:STATe?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":CALC:REL:STAT ON", ":CALC:REL:STAT?"]
+    },
+    {
+      "name": "calculate_db",
+      "mnemonic": ":CALCulate:DB?",
+      "category": "Calculate",
+      "description": "Queries the dB value of the current measurement. Valid only when dB operation is enabled.",
+      "query": ":CALCulate:DB?",
+      "examples": [":CALC:DB?"]
+    },
+    {
+      "name": "calculate_db_reference",
+      "mnemonic": ":CALCulate:DB:REFErence",
+      "category": "Calculate",
+      "description": "Sets or queries the dB reference value. Valid only when dB operation is enabled.",
+      "set": ":CALCulate:DB:REFErence {<range>|MIN|MAX|DEF}",
+      "query": ":CALCulate:DB:REFErence?",
+      "parameters": [
+        { "name": "range", "units": ["dBm"], "range": "-120 dBm to +120 dBm; MIN=-120, MAX=+120, DEF=0" }
+      ],
+      "examples": [":CALC:DB:REF 0", ":CALC:DB:REF?"]
+    },
+    {
+      "name": "calculate_db_state",
+      "mnemonic": ":CALCulate:DB:STATe",
+      "category": "Calculate",
+      "description": "Sets or queries the dB operation state.",
+      "set": ":CALCulate:DB:STATe {ON|OFF|1|0}",
+      "query": ":CALCulate:DB:STATe?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":CALC:DB:STAT OFF", ":CALC:DB:STAT?"]
+    },
+    {
+      "name": "calculate_dbm",
+      "mnemonic": ":CALCulate:DBM?",
+      "category": "Calculate",
+      "description": "Queries the dBm value of the current measurement. Valid only when dBm operation is enabled.",
+      "query": ":CALCulate:DBM?",
+      "examples": [":CALC:DBM?"]
+    },
+    {
+      "name": "calculate_dbm_reference",
+      "mnemonic": ":CALCulate:DBM:REFErence",
+      "category": "Calculate",
+      "description": "Sets or queries the dBm reference resistance. Valid only when dBm operation is enabled.",
+      "set": ":CALCulate:DBM:REFErence {<range>|MIN|MAX|DEF}",
+      "query": ":CALCulate:DBM:REFErence?",
+      "parameters": [
+        { "name": "range", "units": ["Ohm"], "range": "2 to 8000 Ohm; MIN=2, MAX=8000, DEF=600" }
+      ],
+      "examples": [":CALC:DBM:REF 600", ":CALC:DBM:REF?"]
+    },
+    {
+      "name": "calculate_dbm_state",
+      "mnemonic": ":CALCulate:DBM:STATe",
+      "category": "Calculate",
+      "description": "Sets or queries the dBm operation state.",
+      "set": ":CALCulate:DBM:STATe {ON|OFF|1|0}",
+      "query": ":CALCulate:DBM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":CALC:DBM:STAT OFF", ":CALC:DBM:STAT?"]
+    },
+    {
+      "name": "calculate_pf",
+      "mnemonic": ":CALCulate:PF?",
+      "category": "Calculate",
+      "description": "Queries the result of the current PF (pass/fail) operation. Returns PASS, HI or LO.",
+      "query": ":CALCulate:PF?",
+      "examples": [":CALC:PF?"]
+    },
+    {
+      "name": "calculate_pf_lower",
+      "mnemonic": ":CALCulate:PF:LOWEr",
+      "category": "Calculate",
+      "description": "Sets or queries the lower limit of the PF operation. Range depends on measurement type.",
+      "set": ":CALCulate:PF:LOWEr {<range>|MIN|MAX|DEF}",
+      "query": ":CALCulate:PF:LOWEr?",
+      "parameters": [
+        { "name": "range", "description": "Type-dependent (Table 3-3): DCV +/-1200 V, ACV 0-900 V, DCI +/-12 A, ACI 0-12 A, Resistance 0-1.2e8 Ohm, Capacitance 0-1.2e-2 F, Period 1.0e-6 to 100 s, Frequency 0-1.2e6 Hz. DEF=0." }
+      ],
+      "examples": [":CALC:PF:LOW 0", ":CALC:PF:LOW?"]
+    },
+    {
+      "name": "calculate_pf_upper",
+      "mnemonic": ":CALCulate:PF:UPPEr",
+      "category": "Calculate",
+      "description": "Sets or queries the upper limit of the PF operation. Range depends on measurement type (see Table 3-3). DEF=1.",
+      "set": ":CALCulate:PF:UPPEr {<range>|MIN|MAX|DEF}",
+      "query": ":CALCulate:PF:UPPEr?",
+      "parameters": [
+        { "name": "range", "description": "Same type-dependent ranges as :CALCulate:PF:LOWEr." }
+      ],
+      "examples": [":CALC:PF:UPP 10", ":CALC:PF:UPP?"]
+    },
+    {
+      "name": "calculate_pf_state",
+      "mnemonic": ":CALCulate:PF:STATe",
+      "category": "Calculate",
+      "description": "Sets or queries the PF (pass/fail) operation state.",
+      "set": ":CALCulate:PF:STATe {ON|OFF|1|0}",
+      "query": ":CALCulate:PF:STATe?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":CALC:PF:STAT OFF", ":CALC:PF:STAT?"]
+    },
+
+    {
+      "name": "function_query",
+      "mnemonic": ":FUNCtion?",
+      "category": "Function",
+      "description": "Queries the current (main-display) measurement function. Returns DCV, ACV, DCI, ACI, RESISTANCE, CAPACITANCE, CONTINUITY, FRESISTANCE, DIODE, FREQUENCY or PERIOD.",
+      "query": ":FUNCtion?",
+      "examples": [":FUNC?"]
+    },
+    {
+      "name": "function_voltage_dc",
+      "mnemonic": ":FUNCtion:VOLTage:DC",
+      "category": "Function",
+      "description": "Enables DC voltage measurement (:FUNCtion? returns DCV).",
+      "set": ":FUNCtion:VOLTage:DC",
+      "examples": [":FUNC:VOLT:DC"]
+    },
+    {
+      "name": "function_voltage_ac",
+      "mnemonic": ":FUNCtion:VOLTage:AC",
+      "category": "Function",
+      "description": "Enables AC voltage measurement (:FUNCtion? returns ACV).",
+      "set": ":FUNCtion:VOLTage:AC",
+      "examples": [":FUNC:VOLT:AC"]
+    },
+    {
+      "name": "function_current_dc",
+      "mnemonic": ":FUNCtion:CURRent:DC",
+      "category": "Function",
+      "description": "Enables DC current measurement (:FUNCtion? returns DCI).",
+      "set": ":FUNCtion:CURRent:DC",
+      "examples": [":FUNC:CURR:DC"]
+    },
+    {
+      "name": "function_current_ac",
+      "mnemonic": ":FUNCtion:CURRent:AC",
+      "category": "Function",
+      "description": "Enables AC current measurement (:FUNCtion? returns ACI).",
+      "set": ":FUNCtion:CURRent:AC",
+      "examples": [":FUNC:CURR:AC"]
+    },
+    {
+      "name": "function_resistance",
+      "mnemonic": ":FUNCtion:RESistance",
+      "category": "Function",
+      "description": "Enables 2-wire resistance measurement (:FUNCtion? returns 2WR).",
+      "set": ":FUNCtion:RESistance",
+      "examples": [":FUNC:RES"]
+    },
+    {
+      "name": "function_fresistance",
+      "mnemonic": ":FUNCtion:FRESistance",
+      "category": "Function",
+      "description": "Enables 4-wire resistance measurement (:FUNCtion? returns 4WR).",
+      "set": ":FUNCtion:FRESistance",
+      "examples": [":FUNC:FRES"]
+    },
+    {
+      "name": "function_frequency",
+      "mnemonic": ":FUNCtion:FREQuency",
+      "category": "Function",
+      "description": "Enables frequency measurement (:FUNCtion? returns FREQ).",
+      "set": ":FUNCtion:FREQuency",
+      "examples": [":FUNC:FREQ"]
+    },
+    {
+      "name": "function_period",
+      "mnemonic": ":FUNCtion:PERiod",
+      "category": "Function",
+      "description": "Enables period measurement (:FUNCtion? returns PERI).",
+      "set": ":FUNCtion:PERiod",
+      "examples": [":FUNC:PER"]
+    },
+    {
+      "name": "function_continuity",
+      "mnemonic": ":FUNCtion:CONTinuity",
+      "category": "Function",
+      "description": "Enables continuity measurement (:FUNCtion? returns CONT).",
+      "set": ":FUNCtion:CONTinuity",
+      "examples": [":FUNC:CONT"]
+    },
+    {
+      "name": "function_diode",
+      "mnemonic": ":FUNCtion:DIODe",
+      "category": "Function",
+      "description": "Enables diode measurement (:FUNCtion? returns DIODE).",
+      "set": ":FUNCtion:DIODe",
+      "examples": [":FUNC:DIOD"]
+    },
+    {
+      "name": "function_capacitance",
+      "mnemonic": ":FUNCtion:CAPacitance",
+      "category": "Function",
+      "description": "Enables capacitance measurement (:FUNCtion? returns CAP).",
+      "set": ":FUNCtion:CAPacitance",
+      "examples": [":FUNC:CAP"]
+    },
+
+    {
+      "name": "function2_query",
+      "mnemonic": ":FUNCtion2?",
+      "category": "Function (Dual Display)",
+      "description": "Queries the current vice (secondary) display measurement. Valid only when dual display is enabled. Returns DCV, ACV, DCI, ACI, 2WR, CAP, 4WR, FREQ or PERI.",
+      "query": ":FUNCtion2?",
+      "examples": [":FUNC2?"]
+    },
+    {
+      "name": "function2_value1",
+      "mnemonic": ":FUNCtion2:VALUe1?",
+      "category": "Function (Dual Display)",
+      "description": "Queries the measured value of the main display. Valid only when dual display is enabled.",
+      "query": ":FUNCtion2:VALUe1?",
+      "examples": [":FUNC2:VALU1?"]
+    },
+    {
+      "name": "function2_value2",
+      "mnemonic": ":FUNCtion2:VALUe2?",
+      "category": "Function (Dual Display)",
+      "description": "Queries the measured value of the vice (secondary) display. Valid only when dual display is enabled.",
+      "query": ":FUNCtion2:VALUe2?",
+      "examples": [":FUNC2:VALU2?"]
+    },
+    {
+      "name": "function2_voltage_dc",
+      "mnemonic": ":FUNCtion2:VOLTage:DC",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to DC voltage measurement.",
+      "set": ":FUNCtion2:VOLTage:DC",
+      "examples": [":FUNC2:VOLT:DC"]
+    },
+    {
+      "name": "function2_voltage_ac",
+      "mnemonic": ":FUNCtion2:VOLTage:AC",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to AC voltage measurement.",
+      "set": ":FUNCtion2:VOLTage:AC",
+      "examples": [":FUNC2:VOLT:AC"]
+    },
+    {
+      "name": "function2_current_dc",
+      "mnemonic": ":FUNCtion2:CURRent:DC",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to DC current measurement.",
+      "set": ":FUNCtion2:CURRent:DC",
+      "examples": [":FUNC2:CURR:DC"]
+    },
+    {
+      "name": "function2_current_ac",
+      "mnemonic": ":FUNCtion2:CURRent:AC",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to AC current measurement.",
+      "set": ":FUNCtion2:CURRent:AC",
+      "examples": [":FUNC2:CURR:AC"]
+    },
+    {
+      "name": "function2_frequency",
+      "mnemonic": ":FUNCtion2:FREQuency",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to frequency measurement.",
+      "set": ":FUNCtion2:FREQuency",
+      "examples": [":FUNC2:FREQ"]
+    },
+    {
+      "name": "function2_period",
+      "mnemonic": ":FUNCtion2:PERiod",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to period measurement.",
+      "set": ":FUNCtion2:PERiod",
+      "examples": [":FUNC2:PER"]
+    },
+    {
+      "name": "function2_resistance",
+      "mnemonic": ":FUNCtion2:RESistance",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to 2-wire resistance measurement.",
+      "set": ":FUNCtion2:RESistance",
+      "examples": [":FUNC2:RES"]
+    },
+    {
+      "name": "function2_fresistance",
+      "mnemonic": ":FUNCtion2:FRESistance",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to 4-wire resistance measurement.",
+      "set": ":FUNCtion2:FRESistance",
+      "examples": [":FUNC2:FRES"]
+    },
+    {
+      "name": "function2_capacitance",
+      "mnemonic": ":FUNCtion2:CAPacitance",
+      "category": "Function (Dual Display)",
+      "description": "Sets the vice display to capacitance measurement.",
+      "set": ":FUNCtion2:CAPacitance",
+      "examples": [":FUNC2:CAP"]
+    },
+    {
+      "name": "function2_on",
+      "mnemonic": ":FUNCtion2:ON?",
+      "category": "Function (Dual Display)",
+      "description": "Queries the current vice display function.",
+      "query": ":FUNCtion2:ON?",
+      "examples": [":FUNC2:ON?"]
+    },
+    {
+      "name": "function2_clear",
+      "mnemonic": ":FUNCtion2:CLEar",
+      "category": "Function (Dual Display)",
+      "description": "Disables the vice (dual) display.",
+      "set": ":FUNCtion2:CLEar",
+      "examples": [":FUNC2:CLE"]
+    },
+
+    {
+      "name": "lxi_identify",
+      "mnemonic": ":LXI:IDENtify",
+      "category": "LXI (DM3058 only)",
+      "description": "Turns on or off the display of the LXI label in the user interface. DM3058 only.",
+      "set": ":LXI:IDENtify[:STATe] {ON|OFF|1|0}",
+      "query": ":LXI:IDENtify[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":LXI:IDEN ON", ":LXI:IDEN?"]
+    },
+    {
+      "name": "lxi_mdns_enable",
+      "mnemonic": ":LXI:MDNS:ENABle",
+      "category": "LXI (DM3058 only)",
+      "description": "Turns on or off the multicast DNS (mDNS) of the instrument. DM3058 only.",
+      "set": ":LXI:MDNS:ENABle {ON|OFF|1|0}",
+      "query": ":LXI:MDNS:ENABle?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":LXI:MDNS:ENAB ON", ":LXI:MDNS:ENAB?"]
+    },
+    {
+      "name": "lxi_mdns_hostname_desired",
+      "mnemonic": ":LXI:MDNS:HNAMe:DESired",
+      "category": "LXI (DM3058 only)",
+      "description": "Sets or queries the desired mDNS host name (ASCII string). DM3058 only.",
+      "set": ":LXI:MDNS:HNAMe:DESired <name>",
+      "query": ":LXI:MDNS:HNAMe:DESired?",
+      "parameters": [
+        { "name": "name", "description": "ASCII string host name." }
+      ],
+      "examples": [":LXI:MDNS:HNAM:DES \"DM3058\"", ":LXI:MDNS:HNAM:DES?"]
+    },
+    {
+      "name": "lxi_mdns_hostname_resolved",
+      "mnemonic": ":LXI:MDNS:HNAMe:RESolved?",
+      "category": "LXI (DM3058 only)",
+      "description": "Queries the mDNS host name currently in effect (ASCII string). DM3058 only.",
+      "query": ":LXI:MDNS:HNAMe[:RESolved]?",
+      "examples": [":LXI:MDNS:HNAM?"]
+    },
+    {
+      "name": "lxi_mdns_servicename_desired",
+      "mnemonic": ":LXI:MDNS:SNAMe:DESired",
+      "category": "LXI (DM3058 only)",
+      "description": "Sets or queries the desired mDNS service name (ASCII string). DM3058 only.",
+      "set": ":LXI:MDNS:SNAMe:DESired <name>",
+      "query": ":LXI:MDNS:SNAMe:DESired?",
+      "parameters": [
+        { "name": "name", "description": "ASCII string service name." }
+      ],
+      "examples": [":LXI:MDNS:SNAM:DES \"DMM\"", ":LXI:MDNS:SNAM:DES?"]
+    },
+    {
+      "name": "lxi_mdns_servicename_resolved",
+      "mnemonic": ":LXI:MDNS:SNAMe:RESolved?",
+      "category": "LXI (DM3058 only)",
+      "description": "Queries the mDNS service name currently in effect (ASCII string). DM3058 only.",
+      "query": ":LXI:MDNS:SNAMe[:RESolved]?",
+      "examples": [":LXI:MDNS:SNAM?"]
+    },
+    {
+      "name": "lxi_reset",
+      "mnemonic": ":LXI:RESet",
+      "category": "LXI (DM3058 only)",
+      "description": "Restores the LAN parameters of the instrument to their default values. DM3058 only.",
+      "set": ":LXI:RESet",
+      "examples": [":LXI:RES"]
+    },
+    {
+      "name": "lxi_restart",
+      "mnemonic": ":LXI:RESTart",
+      "category": "LXI (DM3058 only)",
+      "description": "Restarts the LAN using the current parameters. DM3058 only.",
+      "set": ":LXI:RESTart",
+      "examples": [":LXI:REST"]
+    },
+
+    {
+      "name": "measure_new_data",
+      "mnemonic": ":MEASure?",
+      "category": "Measurement",
+      "description": "Queries whether new data has been acquired under the current trigger setting. Returns TRUE or FALSE.",
+      "query": ":MEASure?",
+      "examples": [":MEAS?"]
+    },
+    {
+      "name": "measure_type",
+      "mnemonic": ":MEASure",
+      "category": "Measurement",
+      "description": "Selects the measurement type as Auto or Manual.",
+      "set": ":MEASure {AUTO|MANU}",
+      "parameters": [
+        { "name": "type", "range": "{AUTO|MANU}" }
+      ],
+      "examples": [":MEAS MANU", ":MEAS AUTO"]
+    },
+    {
+      "name": "measure_voltage_dc_query",
+      "mnemonic": ":MEASure:VOLTage:DC?",
+      "category": "Measurement",
+      "description": "Queries the current measured DC voltage value in scientific notation (V). Unavailable in dual display.",
+      "query": ":MEASure:VOLTage:DC?",
+      "examples": [":MEAS:VOLT:DC?"]
+    },
+    {
+      "name": "measure_voltage_dc_range",
+      "mnemonic": ":MEASure:VOLTage:DC",
+      "category": "Measurement",
+      "description": "Sets the range (and resolution) of DC voltage measurement; switches to Manual type. Codes 0..4 = 200 mV / 2 V / 20 V / 200 V / 1000 V.",
+      "set": ":MEASure:VOLTage:DC {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4}|MIN|MAX|DEF", "description": "0=200mV,1=2V,2=20V(DEF),3=200V,4=1000V; MIN=200mV, MAX=1000V." }
+      ],
+      "examples": [":MEAS:VOLT:DC 3", ":MEAS:VOLT:DC MIN"]
+    },
+    {
+      "name": "measure_voltage_dc_range_query",
+      "mnemonic": ":MEASure:VOLTage:DC:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current DC voltage range code (0..4). DC voltage must have been used at least once.",
+      "query": ":MEASure:VOLTage:DC:RANGe?",
+      "examples": [":MEAS:VOLT:DC:RANG?"]
+    },
+    {
+      "name": "measure_voltage_dc_impedance",
+      "mnemonic": ":MEASure:VOLTage:DC:IMPEdance",
+      "category": "Measurement",
+      "description": "Sets or queries the DC input impedance. 10G (>10 GOhm) is available only on the 200mV and 2V ranges.",
+      "set": ":MEASure:VOLTage:DC:IMPEdance {10M|10G}",
+      "query": ":MEASure:VOLTage:DC:IMPEdance?",
+      "parameters": [
+        { "name": "impedance", "range": "{10M|10G}", "description": "10M = 10 MOhm, 10G = >10 GOhm." }
+      ],
+      "examples": [":MEAS:VOLT:DC:IMPE 10G", ":MEAS:VOLT:DC:IMPE?"]
+    },
+    {
+      "name": "measure_voltage_dc_filter",
+      "mnemonic": ":MEASure:VOLTage:DC:FILTer",
+      "category": "Measurement",
+      "description": "Sets or queries the AC filter state under DC voltage measurement.",
+      "set": ":MEASure:VOLTage:DC:FILTer[:STATe] {ON|OFF|1|0}",
+      "query": ":MEASure:VOLTage:DC:FILTer[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":MEAS:VOLT:DC:FILT ON", ":MEAS:VOLT:DC:FILT?"]
+    },
+    {
+      "name": "measure_voltage_ac_query",
+      "mnemonic": ":MEASure:VOLTage:AC?",
+      "category": "Measurement",
+      "description": "Queries the current measured AC voltage value in scientific notation (V). Unavailable in dual display.",
+      "query": ":MEASure:VOLTage:AC?",
+      "examples": [":MEAS:VOLT:AC?"]
+    },
+    {
+      "name": "measure_voltage_ac_range",
+      "mnemonic": ":MEASure:VOLTage:AC",
+      "category": "Measurement",
+      "description": "Sets the range of AC voltage measurement. Codes 0..4 = 200 mV / 2 V / 20 V / 200 V / 750 V.",
+      "set": ":MEASure:VOLTage:AC {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4}|MIN|MAX|DEF", "description": "0=200mV,1=2V,2=20V(DEF),3=200V,4=750V; MIN=200mV, MAX=750V." }
+      ],
+      "examples": [":MEAS:VOLT:AC 4", ":MEAS:VOLT:AC MAX"]
+    },
+    {
+      "name": "measure_voltage_ac_range_query",
+      "mnemonic": ":MEASure:VOLTage:AC:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current AC voltage range code (0..4).",
+      "query": ":MEASure:VOLTage:AC:RANGe?",
+      "examples": [":MEAS:VOLT:AC:RANG?"]
+    },
+    {
+      "name": "measure_current_dc_query",
+      "mnemonic": ":MEASure:CURRent:DC?",
+      "category": "Measurement",
+      "description": "Queries the current measured DC current value in scientific notation (A). Unavailable in dual display.",
+      "query": ":MEASure:CURRent:DC?",
+      "examples": [":MEAS:CURR:DC?"]
+    },
+    {
+      "name": "measure_current_dc_range",
+      "mnemonic": ":MEASure:CURRent:DC",
+      "category": "Measurement",
+      "description": "Sets the range (and resolution) of DC current measurement; switches to Manual type. Codes 0..5 = 200 uA / 2 mA / 20 mA / 200 mA / 2 A / 10 A.",
+      "set": ":MEASure:CURRent:DC {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4|5}|MIN|MAX|DEF", "description": "0=200uA(MIN),1=2mA,2=20mA,3=200mA(DEF),4=2A,5=10A(MAX)." }
+      ],
+      "examples": [":MEAS:CURR:DC 5", ":MEAS:CURR:DC MAX"]
+    },
+    {
+      "name": "measure_current_dc_range_query",
+      "mnemonic": ":MEASure:CURRent:DC:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current DC current range code (0..5).",
+      "query": ":MEASure:CURRent:DC:RANGe?",
+      "examples": [":MEAS:CURR:DC:RANG?"]
+    },
+    {
+      "name": "measure_current_dc_filter",
+      "mnemonic": ":MEASure:CURRent:DC:FILTer",
+      "category": "Measurement",
+      "description": "Sets or queries the AC filter state under DC current measurement.",
+      "set": ":MEASure:CURRent:DC:FILTer[:STATe] {ON|OFF|1|0}",
+      "query": ":MEASure:CURRent:DC:FILTer[:STATe]?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":MEAS:CURR:DC:FILT ON", ":MEAS:CURR:DC:FILT?"]
+    },
+    {
+      "name": "measure_current_ac_query",
+      "mnemonic": ":MEASure:CURRent:AC?",
+      "category": "Measurement",
+      "description": "Queries the current measured AC current value in scientific notation (A). Unavailable in dual display.",
+      "query": ":MEASure:CURRent:AC?",
+      "examples": [":MEAS:CURR:AC?"]
+    },
+    {
+      "name": "measure_current_ac_range",
+      "mnemonic": ":MEASure:CURRent:AC",
+      "category": "Measurement",
+      "description": "Sets the range of AC current measurement; switches to Manual type. Codes 0..3 = 20 mA / 200 mA / 2 A / 10 A.",
+      "set": ":MEASure:CURRent:AC {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3}|MIN|MAX|DEF", "description": "0=20mA(MIN),1=200mA(DEF),2=2A,3=10A(MAX)." }
+      ],
+      "examples": [":MEAS:CURR:AC 3", ":MEAS:CURR:AC MAX"]
+    },
+    {
+      "name": "measure_current_ac_range_query",
+      "mnemonic": ":MEASure:CURRent:AC:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current AC current range code (0..3). Valid only when AC current measurement is enabled.",
+      "query": ":MEASure:CURRent:AC:RANGe?",
+      "examples": [":MEAS:CURR:AC:RANG?"]
+    },
+    {
+      "name": "measure_resistance_query",
+      "mnemonic": ":MEASure:RESistance?",
+      "category": "Measurement",
+      "description": "Queries the measured 2-wire resistance value in scientific notation (Ohm). Unavailable in dual display.",
+      "query": ":MEASure:RESistance?",
+      "examples": [":MEAS:RES?"]
+    },
+    {
+      "name": "measure_resistance_range",
+      "mnemonic": ":MEASure:RESistance",
+      "category": "Measurement",
+      "description": "Sets the 2-wire resistance range. Codes 0..6 = 200 Ohm / 2 kOhm / 20 kOhm / 200 kOhm / 1 MOhm / 10 MOhm / 100 MOhm.",
+      "set": ":MEASure:RESistance {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4|5|6}|MIN|MAX|DEF", "description": "0=200Ohm(MIN),1=2k,2=20k,3=200k(DEF),4=1M,5=10M,6=100M(MAX)." }
+      ],
+      "examples": [":MEAS:RES 0", ":MEAS:RES MIN"]
+    },
+    {
+      "name": "measure_resistance_range_query",
+      "mnemonic": ":MEASure:RESistance:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current 2-wire resistance range code (0..6).",
+      "query": ":MEASure:RESistance:RANGe?",
+      "examples": [":MEAS:RES:RANG?"]
+    },
+    {
+      "name": "measure_fresistance_query",
+      "mnemonic": ":MEASure:FRESistance?",
+      "category": "Measurement",
+      "description": "Queries the measured 4-wire resistance value in scientific notation (Ohm). Unavailable in dual display.",
+      "query": ":MEASure:FRESistance?",
+      "examples": [":MEAS:FRES?"]
+    },
+    {
+      "name": "measure_fresistance_range",
+      "mnemonic": ":MEASure:FRESistance",
+      "category": "Measurement",
+      "description": "Sets the 4-wire resistance range. Codes 0..6 same as 2-wire (200 Ohm .. 100 MOhm).",
+      "set": ":MEASure:FRESistance {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4|5|6}|MIN|MAX|DEF", "description": "0=200Ohm(MIN)..6=100MOhm(MAX); DEF=200kOhm." }
+      ],
+      "examples": [":MEAS:FRES 0", ":MEAS:FRES MIN"]
+    },
+    {
+      "name": "measure_fresistance_range_query",
+      "mnemonic": ":MEASure:FRESistance:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current 4-wire resistance range code (0..6).",
+      "query": ":MEASure:FRESistance:RANGe?",
+      "examples": [":MEAS:FRES:RANG?"]
+    },
+    {
+      "name": "measure_frequency_query",
+      "mnemonic": ":MEASure:FREQuency?",
+      "category": "Measurement",
+      "description": "Queries the measured frequency value of the AC signal in scientific notation (Hz). Frequency range 20 Hz to 1 MHz. Unavailable in dual display.",
+      "query": ":MEASure:FREQuency?",
+      "examples": [":MEAS:FREQ?"]
+    },
+    {
+      "name": "measure_frequency_range",
+      "mnemonic": ":MEASure:FREQuency",
+      "category": "Measurement",
+      "description": "Sets the input-signal voltage range used under frequency measurement (same range codes as AC voltage, 0..4).",
+      "set": ":MEASure:FREQuency {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4}|MIN|MAX|DEF", "description": "Same as AC voltage ranges (200mV..750V); DEF=20V." }
+      ],
+      "examples": [":MEAS:FREQ DEF", ":MEAS:FREQ 2"]
+    },
+    {
+      "name": "measure_frequency_range_query",
+      "mnemonic": ":MEASure:FREQuency:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the AC voltage range code (0..4) used under frequency measurement.",
+      "query": ":MEASure:FREQuency:RANGe?",
+      "examples": [":MEAS:FREQ:RANG?"]
+    },
+    {
+      "name": "measure_period_query",
+      "mnemonic": ":MEASure:PERiod?",
+      "category": "Measurement",
+      "description": "Queries the measured period value of the AC signal in scientific notation (s). Unavailable in dual display.",
+      "query": ":MEASure:PERiod?",
+      "examples": [":MEAS:PER?"]
+    },
+    {
+      "name": "measure_period_range",
+      "mnemonic": ":MEASure:PERiod",
+      "category": "Measurement",
+      "description": "Sets the input-signal voltage range used under period measurement (same range codes as AC voltage, 0..4). Period range 1 us to 50 ms.",
+      "set": ":MEASure:PERiod {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4}|MIN|MAX|DEF", "description": "Same as AC voltage ranges; DEF=20V." }
+      ],
+      "examples": [":MEAS:PER DEF", ":MEAS:PER 2"]
+    },
+    {
+      "name": "measure_period_range_query",
+      "mnemonic": ":MEASure:PERiod:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the AC voltage range code (0..4) used under period measurement.",
+      "query": ":MEASure:PERiod:RANGe?",
+      "examples": [":MEAS:PER:RANG?"]
+    },
+    {
+      "name": "measure_continuity_query",
+      "mnemonic": ":MEASure:CONTinuity?",
+      "category": "Measurement",
+      "description": "Queries the measured resistance value under continuity measurement in scientific notation (Ohm).",
+      "query": ":MEASure:CONTinuity?",
+      "examples": [":MEAS:CONT?"]
+    },
+    {
+      "name": "measure_continuity_threshold",
+      "mnemonic": ":MEASure:CONTinuity",
+      "category": "Measurement",
+      "description": "Sets the resistance limit (beep threshold) under continuity measurement. Consecutive integer 1 to 2000 Ohm, default 10 Ohm.",
+      "set": ":MEASure:CONTinuity {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["Ohm"], "range": "1 to 2000 Ohm; DEF=10" }
+      ],
+      "examples": [":MEAS:CONT 1000", ":MEAS:CONT?"]
+    },
+    {
+      "name": "measure_diode_query",
+      "mnemonic": ":MEASure:DIODe?",
+      "category": "Measurement",
+      "description": "Queries the voltage across the diode in scientific notation (V). Default beep condition is 1 V <= Vmeasured <= 2.4 V.",
+      "query": ":MEASure:DIODe?",
+      "examples": [":MEAS:DIOD?"]
+    },
+    {
+      "name": "measure_capacitance_query",
+      "mnemonic": ":MEASure:CAPacitance?",
+      "category": "Measurement",
+      "description": "Queries the measured capacitance value in scientific notation (F). Unavailable in dual display.",
+      "query": ":MEASure:CAPacitance?",
+      "examples": [":MEAS:CAP?"]
+    },
+    {
+      "name": "measure_capacitance_range",
+      "mnemonic": ":MEASure:CAPacitance",
+      "category": "Measurement",
+      "description": "Sets the capacitance range. Codes 0..5 = 2 nF / 20 nF / 200 nF / 2 uF / 200 uF / 10000 uF.",
+      "set": ":MEASure:CAPacitance {<range>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "range": "{0|1|2|3|4|5}|MIN|MAX|DEF", "description": "0=2nF(MIN),1=20nF,2=200nF(DEF),3=2uF,4=200uF,5=10000uF(MAX)." }
+      ],
+      "examples": [":MEAS:CAP 3", ":MEAS:CAP?"]
+    },
+    {
+      "name": "measure_capacitance_range_query",
+      "mnemonic": ":MEASure:CAPacitance:RANGe?",
+      "category": "Measurement",
+      "description": "Queries the current capacitance range code (0..5).",
+      "query": ":MEASure:CAPacitance:RANGe?",
+      "examples": [":MEAS:CAP:RANG?"]
+    },
+
+    {
+      "name": "rate_voltage_dc",
+      "mnemonic": ":RATE:VOLTage:DC",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of DC voltage. F=Fast (123 rdg/s), M=Medium (20 rdg/s), S=Slow (2.5 rdg/s). Query valid only when DCV is enabled.",
+      "set": ":RATE:VOLTage:DC {F|M|S}",
+      "query": ":RATE:VOLTage:DC?",
+      "parameters": [
+        { "name": "rate", "range": "{F|M|S}" }
+      ],
+      "examples": [":RATE:VOLT:DC M", ":RATE:VOLT:DC?"]
+    },
+    {
+      "name": "rate_voltage_ac",
+      "mnemonic": ":RATE:VOLTage:AC",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of AC voltage (F/M/S). Query valid only when ACV is enabled.",
+      "set": ":RATE:VOLTage:AC {F|M|S}",
+      "query": ":RATE:VOLTage:AC?",
+      "parameters": [
+        { "name": "rate", "range": "{F|M|S}" }
+      ],
+      "examples": [":RATE:VOLT:AC M", ":RATE:VOLT:AC?"]
+    },
+    {
+      "name": "rate_current_dc",
+      "mnemonic": ":RATE:CURRent:DC",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of DC current (F/M/S). Query valid only when DC current is enabled.",
+      "set": ":RATE:CURRent:DC {F|M|S}",
+      "query": ":RATE:CURRent:DC?",
+      "parameters": [
+        { "name": "rate", "range": "{F|M|S}" }
+      ],
+      "examples": [":RATE:CURR:DC M", ":RATE:CURR:DC?"]
+    },
+    {
+      "name": "rate_current_ac",
+      "mnemonic": ":RATE:CURRent:AC",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of AC current (F/M/S). Query valid only when AC current is enabled.",
+      "set": ":RATE:CURRent:AC {F|M|S}",
+      "query": ":RATE:CURRent:AC?",
+      "parameters": [
+        { "name": "rate", "range": "{F|M|S}" }
+      ],
+      "examples": [":RATE:CURR:AC M", ":RATE:CURR:AC?"]
+    },
+    {
+      "name": "rate_resistance",
+      "mnemonic": ":RATE:RESistance",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of 2-wire resistance (F/M/S). Query valid only when 2-wire resistance is enabled.",
+      "set": ":RATE:RESistance {F|M|S}",
+      "query": ":RATE:RESistance?",
+      "parameters": [
+        { "name": "rate", "range": "{F|M|S}" }
+      ],
+      "examples": [":RATE:RES M", ":RATE:RES?"]
+    },
+    {
+      "name": "rate_fresistance",
+      "mnemonic": ":RATE:FRESistance",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of 4-wire resistance (F/M/S). Query valid only when 4-wire resistance is enabled.",
+      "set": ":RATE:FRESistance {F|M|S}",
+      "query": ":RATE:FRESistance?",
+      "parameters": [
+        { "name": "rate", "range": "{F|M|S}" }
+      ],
+      "examples": [":RATE:FRES M", ":RATE:FRES?"]
+    },
+    {
+      "name": "rate_sensor",
+      "mnemonic": ":RATE:SENSor",
+      "category": "Rate",
+      "description": "Sets or queries the measuring rate of sensor measurement (M or S only). Query valid only when sensor function is enabled.",
+      "set": ":RATE:SENSor {M|S}",
+      "query": ":RATE:SENSor?",
+      "parameters": [
+        { "name": "rate", "range": "{M|S}" }
+      ],
+      "examples": [":RATE:SENS M", ":RATE:SENS?"]
+    },
+
+    {
+      "name": "system_configure_powerswitch",
+      "mnemonic": ":SYSTem:CONFigure:POWESwitch",
+      "category": "System (RIGOL)",
+      "description": "Enables or disables the front-panel power switch at power-on. OFF|0 starts automatically when powered; ON|1 requires pressing the front-panel power switch.",
+      "set": ":SYSTem:CONFigure:POWESwitch {ON|OFF|1|0}",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":SYST:CONF:POWES ON"]
+    },
+    {
+      "name": "system_configure_poweron",
+      "mnemonic": ":SYSTem:CONFigure:POWEron",
+      "category": "System (RIGOL)",
+      "description": "Sets the power-on mode. LAST restores the configuration before the last power cut; DEF uses default configuration.",
+      "set": ":SYSTem:CONFigure:POWEron {LAST|DEF}",
+      "parameters": [
+        { "name": "mode", "range": "{LAST|DEF}" }
+      ],
+      "examples": [":SYST:CONF:POWE LAST"]
+    },
+    {
+      "name": "system_configure_default",
+      "mnemonic": ":SYSTem:CONFigure:DEFault",
+      "category": "System (RIGOL)",
+      "description": "Sets the system configuration to default.",
+      "set": ":SYSTem:CONFigure:DEFault",
+      "examples": [":SYST:CONF:DEF"]
+    },
+    {
+      "name": "system_language",
+      "mnemonic": ":SYSTem:LANGuage",
+      "category": "System (RIGOL)",
+      "description": "Sets or queries the system language.",
+      "set": ":SYSTem:LANGuage {CHINESE|ENGLISH}",
+      "query": ":SYSTem:LANGuage?",
+      "parameters": [
+        { "name": "language", "range": "{CHINESE|ENGLISH}" }
+      ],
+      "examples": [":SYST:LANG ENGLISH", ":SYST:LANG?"]
+    },
+    {
+      "name": "system_format_decimal",
+      "mnemonic": ":SYSTem:FORMat:DECImal",
+      "category": "System (RIGOL)",
+      "description": "Sets or queries the decimal display format. Note: changing this can also affect the data delimiter.",
+      "set": ":SYSTem:FORMat:DECImal {COMMA|DOT}",
+      "query": ":SYSTem:FORMat:DECImal?",
+      "parameters": [
+        { "name": "format", "range": "{COMMA|DOT}" }
+      ],
+      "examples": [":SYST:FORM:DEC DOT", ":SYST:FORM:DEC?"]
+    },
+    {
+      "name": "system_format_separate",
+      "mnemonic": ":SYSTem:FORMat:SEPArate",
+      "category": "System (RIGOL)",
+      "description": "Sets or queries the data delimiter format. ON = default comma, NONE = no delimiter, SPACE = a space.",
+      "set": ":SYSTem:FORMat:SEPArate {ON|NONE|SPACE}",
+      "query": ":SYSTem:FORMat:SEPArate?",
+      "parameters": [
+        { "name": "format", "range": "{ON|NONE|SPACE}" }
+      ],
+      "examples": [":SYST:FORM:SEPA ON", ":SYST:FORM:SEPA?"]
+    },
+    {
+      "name": "system_display_bright",
+      "mnemonic": ":SYSTem:DISPlay:BRIGht",
+      "category": "System (RIGOL)",
+      "description": "Sets or queries the screen brightness. Integer 0 to 32, default 22.",
+      "set": ":SYSTem:DISPlay:BRIGht <value>",
+      "query": ":SYSTem:DISPlay:BRIGht?",
+      "parameters": [
+        { "name": "value", "range": "0 to 32; DEF=22" }
+      ],
+      "examples": [":SYST:DISP:BRIG 25", ":SYST:DISP:BRIG?"]
+    },
+    {
+      "name": "system_display_contrast",
+      "mnemonic": ":SYSTem:DISPlay:CONTrast",
+      "category": "System (RIGOL)",
+      "description": "Sets or queries the screen contrast. Integer 0 to 32, default 19.",
+      "set": ":SYSTem:DISPlay:CONTrast <value>",
+      "query": ":SYSTem:DISPlay:CONTrast?",
+      "parameters": [
+        { "name": "value", "range": "0 to 32; DEF=19" }
+      ],
+      "examples": [":SYST:DISP:CONT 19", ":SYST:DISP:CONT?"]
+    },
+    {
+      "name": "system_display_invert",
+      "mnemonic": ":SYSTem:DISPlay:INVErt",
+      "category": "System (RIGOL)",
+      "description": "Enables inverse (inverted) screen display.",
+      "set": ":SYSTem:DISPlay:INVErt",
+      "examples": [":SYST:DISP:INVE"]
+    },
+
+    {
+      "name": "trigger_source",
+      "mnemonic": ":TRIGger:SOURce",
+      "category": "Trigger",
+      "description": "Sets or queries the trigger source. AUTO = auto trigger, SINGLE = single trigger, EXT = external trigger.",
+      "set": ":TRIGger:SOURce {AUTO|SINGLE|EXT}",
+      "query": ":TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "{AUTO|SINGLE|EXT}" }
+      ],
+      "examples": [":TRIG:SOUR SINGLE", ":TRIG:SOUR?"]
+    },
+    {
+      "name": "trigger_auto_interval",
+      "mnemonic": ":TRIGger:AUTO:INTErval",
+      "category": "Trigger",
+      "description": "Sets or queries the auto-trigger interval (ms). Min interval and default depend on rate: Fast default 8 ms (range 8-2000), Medium default 50 ms (range 50-2000), Slow default 400 ms (range 400-2000).",
+      "set": ":TRIGger:AUTO:INTErval <value>",
+      "query": ":TRIGger:AUTO:INTErval?",
+      "parameters": [
+        { "name": "value", "units": ["ms"], "range": "rate-dependent, up to 2000 ms" }
+      ],
+      "examples": [":TRIG:AUTO:INTE 400", ":TRIG:AUTO:INTE?"]
+    },
+    {
+      "name": "trigger_auto_hold",
+      "mnemonic": ":TRIGger:AUTO:HOLD",
+      "category": "Trigger",
+      "description": "Sets or queries the reading-hold function under auto trigger.",
+      "set": ":TRIGger:AUTO:HOLD {ON|OFF|1|0}",
+      "query": ":TRIGger:AUTO:HOLD?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":TRIG:AUTO:HOLD ON", ":TRIG:AUTO:HOLD?"]
+    },
+    {
+      "name": "trigger_auto_hold_sensitivity",
+      "mnemonic": ":TRIGger:AUTO:HOLD:SENSitivity",
+      "category": "Trigger",
+      "description": "Sets or queries the auto-trigger hold sensitivity. Codes: 0=0.01% (MIN), 1=0.1%, 2=1% (DEF), 3=10% (MAX).",
+      "set": ":TRIGger:AUTO:HOLD:SENSitivity {<value>|MIN|MAX|DEF}",
+      "query": ":TRIGger:AUTO:HOLD:SENSitivity?",
+      "parameters": [
+        { "name": "value", "range": "{0|1|2|3}|MIN|MAX|DEF", "description": "0=0.01%,1=0.1%,2=1%(DEF),3=10%." }
+      ],
+      "examples": [":TRIG:AUTO:HOLD:SENS 2", ":TRIG:AUTO:HOLD:SENS?"]
+    },
+    {
+      "name": "trigger_single",
+      "mnemonic": ":TRIGger:SINGle",
+      "category": "Trigger",
+      "description": "Sets or queries the number of samples per single trigger. Integer 1 to 2000, default 1.",
+      "set": ":TRIGger:SINGle {<value>|MIN|MAX|DEF}",
+      "query": ":TRIGger:SINGle?",
+      "parameters": [
+        { "name": "value", "range": "1 to 2000; DEF=1" }
+      ],
+      "examples": [":TRIG:SING 10", ":TRIG:SING?"]
+    },
+    {
+      "name": "trigger_single_triggered",
+      "mnemonic": ":TRIGger:SINGle:TRIGgered",
+      "category": "Trigger",
+      "description": "Triggers the multimeter once manually (equivalent to a manual single trigger from the front panel).",
+      "set": ":TRIGger:SINGle:TRIGgered",
+      "examples": [":TRIG:SING:TRIG"]
+    },
+    {
+      "name": "trigger_ext",
+      "mnemonic": ":TRIGger:EXT",
+      "category": "Trigger",
+      "description": "Sets or queries the external trigger type. RISE (default), FALL, HIGH (high level) or LOW (low level).",
+      "set": ":TRIGger:EXT {RISE|FALL|HIGH|LOW}",
+      "query": ":TRIGger:EXT?",
+      "parameters": [
+        { "name": "type", "range": "{RISE|FALL|HIGH|LOW}" }
+      ],
+      "examples": [":TRIG:EXT FALL", ":TRIG:EXT?"]
+    },
+    {
+      "name": "trigger_vmc_polarity",
+      "mnemonic": ":TRIGger:VMComplete:POLAr",
+      "category": "Trigger",
+      "description": "Sets or queries the VM Complete (VMC) output polarity. POS (positive, default) or NEG (negative).",
+      "set": ":TRIGger:VMComplete:POLAr {POS|NEG}",
+      "query": ":TRIGger:VMComplete:POLAr?",
+      "parameters": [
+        { "name": "polarity", "range": "{POS|NEG}" }
+      ],
+      "examples": [":TRIG:VMC:POLA POS", ":TRIG:VMC:POLA?"]
+    },
+    {
+      "name": "trigger_vmc_pulsewidth",
+      "mnemonic": ":TRIGger:VMComplete:PULSewidth",
+      "category": "Trigger",
+      "description": "Sets or queries the VM Complete (VMC) output pulse width in ms (default 100 ms). Allowed range depends on sample rate: S 1-399 ms, M 1-49 ms, F 1-7 ms.",
+      "set": ":TRIGger:VMComplete:PULSewidth <value>",
+      "query": ":TRIGger:VMComplete:PULSewidth?",
+      "parameters": [
+        { "name": "value", "units": ["ms"], "range": "rate-dependent: S 1-399, M 1-49, F 1-7; DEF=100" }
+      ],
+      "examples": [":TRIG:VMC:PULS 100", ":TRIG:VMC:PULS?"]
+    },
+
+    {
+      "name": "utility_lan_dhcp",
+      "mnemonic": ":UTILity:INTErface:LAN:DHCP",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the DHCP state for the LAN interface. DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:DHCP {ON|OFF|1|0}",
+      "query": ":UTILity:INTErface:LAN:DHCP?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":UTIL:INTE:LAN:DHCP ON", ":UTIL:INTE:LAN:DHCP?"]
+    },
+    {
+      "name": "utility_lan_autoip",
+      "mnemonic": ":UTILity:INTErface:LAN:AUTOip",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the Auto IP state for the LAN interface. DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:AUTOip {ON|OFF|1|0}",
+      "query": ":UTILity:INTErface:LAN:AUTOip?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":UTIL:INTE:LAN:AUTO ON", ":UTIL:INTE:LAN:AUTO?"]
+    },
+    {
+      "name": "utility_lan_manuip",
+      "mnemonic": ":UTILity:INTErface:LAN:MANUip",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the Manual IP state for the LAN interface. DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:MANUip {ON|OFF|1|0}",
+      "query": ":UTILity:INTErface:LAN:MANUip?",
+      "parameters": [
+        { "name": "state", "range": "{ON|OFF|1|0}" }
+      ],
+      "examples": [":UTIL:INTE:LAN:MANU ON", ":UTIL:INTE:LAN:MANU?"]
+    },
+    {
+      "name": "utility_lan_ip",
+      "mnemonic": ":UTILity:INTErface:LAN:IP",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the IP address for LAN connection (default 168.254.0.238). DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:IP <ip_address>",
+      "query": ":UTILity:INTErface:LAN:IP?",
+      "parameters": [
+        { "name": "ip_address", "description": "User-defined IP address string." }
+      ],
+      "examples": [":UTIL:INTE:LAN:IP 192.168.1.10", ":UTIL:INTE:LAN:IP?"]
+    },
+    {
+      "name": "utility_lan_mask",
+      "mnemonic": ":UTILity:INTErface:LAN:MASK",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the subnet mask for LAN connection (default 255.255.255.0). DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:MASK <ip_address>",
+      "query": ":UTILity:INTErface:LAN:MASK?",
+      "parameters": [
+        { "name": "ip_address", "description": "User-defined subnet mask string." }
+      ],
+      "examples": [":UTIL:INTE:LAN:MASK 255.255.255.0", ":UTIL:INTE:LAN:MASK?"]
+    },
+    {
+      "name": "utility_lan_gateway",
+      "mnemonic": ":UTILity:INTErface:LAN:GATEway",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the gateway for LAN connection (default 172.16.3.1). DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:GATEway <ip_address>",
+      "query": ":UTILity:INTErface:LAN:GATEway?",
+      "parameters": [
+        { "name": "ip_address", "description": "User-defined gateway string." }
+      ],
+      "examples": [":UTIL:INTE:LAN:GATE 192.168.1.1", ":UTIL:INTE:LAN:GATE?"]
+    },
+    {
+      "name": "utility_lan_dns",
+      "mnemonic": ":UTILity:INTErface:LAN:DNS",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the DNS server address for LAN connection (default 0.0.0.0). DM3058 only.",
+      "set": ":UTILity:INTErface:LAN:DNS <ip_address>",
+      "query": ":UTILity:INTErface:LAN:DNS?",
+      "parameters": [
+        { "name": "ip_address", "description": "User-defined DNS server address string." }
+      ],
+      "examples": [":UTIL:INTE:LAN:DNS 8.8.8.8", ":UTIL:INTE:LAN:DNS?"]
+    },
+    {
+      "name": "utility_gpib_address",
+      "mnemonic": ":UTILity:INTErface:GPIB:ADDRess",
+      "category": "Utility (DM3058 LAN/GPIB)",
+      "description": "Sets or queries the GPIB address. Integer 0 to 30, default 7. DM3058 only.",
+      "set": ":UTILity:INTErface:GPIB:ADDRess <value>",
+      "query": ":UTILity:INTErface:GPIB:ADDRess?",
+      "parameters": [
+        { "name": "value", "range": "0 to 30; DEF=7" }
+      ],
+      "examples": [":UTIL:INTE:GPIB:ADDR 7", ":UTIL:INTE:GPIB:ADDR?"]
+    },
+    {
+      "name": "utility_rs232_baud",
+      "mnemonic": ":UTILity:INTErface:RS232:BAUD",
+      "category": "Utility (RS-232)",
+      "description": "Sets or queries the RS-232 baud rate.",
+      "set": ":UTILity:INTErface:RS232:BAUD <value>",
+      "query": ":UTILity:INTErface:RS232:BAUD?",
+      "parameters": [
+        { "name": "value", "range": "{1200|2400|4800|9600|19200|38400|57600|115200}" }
+      ],
+      "examples": [":UTIL:INTE:RS232:BAUD 9600", ":UTIL:INTE:RS232:BAUD?"]
+    },
+    {
+      "name": "utility_rs232_parity",
+      "mnemonic": ":UTILity:INTErface:RS232:PARIty",
+      "category": "Utility (RS-232)",
+      "description": "Sets or queries the RS-232 parity. NONE = no parity / 8 data bits, ODD = odd / 7 data bits, EVEN = even / 7 data bits. Query returns NONE8BITS, ODD7BITS or EVEN7BITS.",
+      "set": ":UTILity:INTErface:RS232:PARIty {NONE|ODD|EVEN}",
+      "query": ":UTILity:INTErface:RS232:PARIty?",
+      "parameters": [
+        { "name": "parity", "range": "{NONE|ODD|EVEN}" }
+      ],
+      "examples": [":UTIL:INTE:RS232:PARI NONE", ":UTIL:INTE:RS232:PARI?"]
+    }
+  ]
+}

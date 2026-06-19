@@ -1,0 +1,2583 @@
+{
+  "model": "DG1000Z",
+  "manufacturer": "Rigol",
+  "category": "Function / Arbitrary Waveform Generator",
+  "description": "Rigol DG1000Z series dual-channel function/arbitrary waveform generator (DG1022Z/DG1032Z/DG1062Z). Controlled by SCPI commands over USB, LAN or GPIB. Parameter ranges shown are based on the DG1062Z.",
+  "source": "DG1000Z Programming Guide.pdf",
+  "aliases": ["DG1000Z", "DG1022Z", "DG1032Z", "DG1062Z"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": { "command": "*IDN?", "matchRegex": "DG10[0-9]{2}Z", "description": "Standard SCPI identification query." },
+  "commands": [
+    {
+      "name": "idn",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Query the instrument identification string (manufacturer, model, serial number, firmware version).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Restore the instrument to its factory default state.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear all event registers and the error queue.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Set or query the enable register for the standard event status register.",
+      "set": "*ESE <value>",
+      "query": "*ESE?",
+      "parameters": [{ "name": "value", "type": "integer", "range": "0 to 255" }],
+      "examples": ["*ESE 16", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Query and clear the standard event status register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Set bit 0 of the standard event status register when the current operation finishes; the query returns 1 when complete.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Query the options currently installed in the instrument.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "power_on_status_clear",
+      "mnemonic": "*PSC",
+      "category": "Common",
+      "description": "Set or query whether the ESE and SRE registers are cleared at power-on.",
+      "set": "*PSC {0|1}",
+      "query": "*PSC?",
+      "parameters": [{ "name": "psc", "type": "discrete", "range": "0|1" }],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recall the instrument state previously stored in the specified storage location.",
+      "set": "*RCL",
+      "examples": ["*RCL"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Save the current instrument state to the specified storage location.",
+      "set": "*SAV",
+      "examples": ["*SAV"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Set or query the enable register for the status byte register.",
+      "set": "*SRE <value>",
+      "query": "*SRE?",
+      "parameters": [{ "name": "value", "type": "integer", "range": "0 to 255" }],
+      "examples": ["*SRE 16", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Query the status byte register.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Generate a trigger event.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Wait for all pending operations to complete before executing further commands.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+
+    {
+      "name": "apply_query",
+      "mnemonic": "SOUR:APPL?",
+      "category": "Output",
+      "description": "Query the waveform type, frequency, amplitude, offset and phase of the specified channel.",
+      "query": "SOUR<n>:APPL?",
+      "parameters": [{ "name": "n", "type": "discrete", "range": "1|2", "default": "1" }],
+      "examples": ["SOUR1:APPL?"]
+    },
+    {
+      "name": "apply_sine",
+      "mnemonic": "SOUR:APPL:SIN",
+      "category": "Output",
+      "description": "Output a sine waveform with the specified frequency, amplitude, offset and phase.",
+      "set": "SOUR<n>:APPL:SIN [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 60MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:SIN 100,3,2,1"]
+    },
+    {
+      "name": "apply_square",
+      "mnemonic": "SOUR:APPL:SQU",
+      "category": "Output",
+      "description": "Output a square waveform with the specified frequency, amplitude, offset and phase.",
+      "set": "SOUR<n>:APPL:SQU [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 25MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:SQU 100,1,2,3"]
+    },
+    {
+      "name": "apply_ramp",
+      "mnemonic": "SOUR:APPL:RAMP",
+      "category": "Output",
+      "description": "Output a ramp waveform with the specified frequency, amplitude, offset and phase.",
+      "set": "SOUR<n>:APPL:RAMP [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 1MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:RAMP 100,1,2,3"]
+    },
+    {
+      "name": "apply_pulse",
+      "mnemonic": "SOUR:APPL:PULS",
+      "category": "Output",
+      "description": "Output a pulse waveform with the specified frequency, amplitude, offset and phase.",
+      "set": "SOUR<n>:APPL:PULS [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 25MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:PULS 100,3,2,1"]
+    },
+    {
+      "name": "apply_noise",
+      "mnemonic": "SOUR:APPL:NOIS",
+      "category": "Output",
+      "description": "Output noise with the specified amplitude and offset.",
+      "set": "SOUR<n>:APPL:NOIS [<amp>[,<offset>]]",
+      "parameters": [
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" }
+      ],
+      "examples": ["SOUR1:APPL:NOIS 1,2"]
+    },
+    {
+      "name": "apply_dc",
+      "mnemonic": "SOUR:APPL:DC",
+      "category": "Output",
+      "description": "Output a DC level with the specified offset. Frequency and amplitude are placeholders only.",
+      "set": "SOUR<n>:APPL:DC [<freq>[,<amp>[,<offset>]]]",
+      "parameters": [
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" }
+      ],
+      "examples": ["SOUR1:APPL:DC 1,1,2"]
+    },
+    {
+      "name": "apply_user",
+      "mnemonic": "SOUR:APPL:USER",
+      "category": "Output",
+      "description": "Set the channel to arbitrary waveform (frequency output mode) with the specified frequency, amplitude, offset and phase. Use FUNCtion:SHAPe to choose the actual arbitrary waveform.",
+      "set": "SOUR<n>:APPL:USER [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 20MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:USER 100,1,2,3"]
+    },
+    {
+      "name": "apply_arbitrary",
+      "mnemonic": "SOUR:APPL:ARB",
+      "category": "Output",
+      "description": "Set the channel to arbitrary waveform (sample-rate output mode) with the specified sample rate, amplitude and offset. Use FUNCtion:SHAPe to choose the actual arbitrary waveform.",
+      "set": "SOUR<n>:APPL:ARB [<sample_rate>[,<amplitude>[,<offset>]]]",
+      "parameters": [
+        { "name": "sample_rate", "type": "real", "unit": "Sa/s", "range": "1uSa/s to 60MSa/s", "default": "20MSa/s" },
+        { "name": "amplitude", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" }
+      ],
+      "examples": ["SOUR1:APPL:ARB 100,1,2"]
+    },
+    {
+      "name": "apply_harmonic",
+      "mnemonic": "SOUR:APPL:HARM",
+      "category": "Output",
+      "description": "Enable the harmonic function and set the fundamental (sine) frequency, amplitude, offset and phase.",
+      "set": "SOUR<n>:APPL:HARM [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 20MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:HARM 100,1,2,3"]
+    },
+    {
+      "name": "apply_triangle",
+      "mnemonic": "SOUR:APPL:TRI",
+      "category": "Output",
+      "description": "Output a triangle waveform (ramp with 100% symmetry) with the specified frequency, amplitude, offset and phase.",
+      "set": "SOUR<n>:APPL:TRI [<freq>[,<amp>[,<offset>[,<phase>]]]]",
+      "parameters": [
+        { "name": "freq", "type": "real", "unit": "Hz", "range": "1uHz to 1MHz", "default": "1kHz" },
+        { "name": "amp", "type": "real", "unit": "Vpp", "default": "5Vpp" },
+        { "name": "offset", "type": "real", "unit": "VDC", "default": "0VDC" },
+        { "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }
+      ],
+      "examples": ["SOUR1:APPL:TRI 100,1,2,3"]
+    },
+
+    {
+      "name": "function_shape",
+      "mnemonic": "SOUR:FUNC",
+      "category": "Function",
+      "description": "Set or query the waveform type of the channel. Accepts basic, harmonic and named arbitrary waveforms.",
+      "set": "SOUR<n>:FUNC <name>",
+      "query": "SOUR<n>:FUNC?",
+      "parameters": [{ "name": "name", "type": "discrete", "range": "SINusoid|SQUare|RAMP|PULSe|NOISe|USER|HARMonic|CUSTom|DC|KAISER|ROUNDPM|SINC|NEGRAMP|... (named arbitrary waveforms)" }],
+      "examples": ["SOUR1:FUNC SQU", "SOUR1:FUNC?"]
+    },
+    {
+      "name": "function_ramp_symmetry",
+      "mnemonic": "SOUR:FUNC:RAMP:SYMM",
+      "category": "Function",
+      "description": "Set or query the symmetry of the ramp waveform.",
+      "set": "SOUR<n>:FUNC:RAMP:SYMM {<symmetry>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:RAMP:SYMM? [MINimum|MAXimum]",
+      "parameters": [{ "name": "symmetry", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:FUNC:RAMP:SYMM 50"]
+    },
+    {
+      "name": "function_square_dcycle",
+      "mnemonic": "SOUR:FUNC:SQU:DCYC",
+      "category": "Function",
+      "description": "Set or query the duty cycle of the square waveform.",
+      "set": "SOUR<n>:FUNC:SQU:DCYC {<percent>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:SQU:DCYC? [MINimum|MAXimum]",
+      "parameters": [{ "name": "percent", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:FUNC:SQU:DCYC 50"]
+    },
+    {
+      "name": "function_square_period",
+      "mnemonic": "SOUR:FUNC:SQU:PER",
+      "category": "Function",
+      "description": "Set or query the period of the square waveform.",
+      "set": "SOUR<n>:FUNC:SQU:PER {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:SQU:PER? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:FUNC:SQU:PER 0.001"]
+    },
+    {
+      "name": "function_arbitrary_mode",
+      "mnemonic": "SOUR:FUNC:ARB:MODE",
+      "category": "Function",
+      "description": "Set or query the arbitrary waveform output mode (frequency or sample rate).",
+      "set": "SOUR<n>:FUNC:ARB:MODE {FREQ|SRATe}",
+      "query": "SOUR<n>:FUNC:ARB:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "FREQ|SRATe" }],
+      "examples": ["SOUR1:FUNC:ARB:MODE SRAT"]
+    },
+    {
+      "name": "function_arbitrary_srate",
+      "mnemonic": "SOUR:FUNC:ARB:SRAT",
+      "category": "Function",
+      "description": "Set or query the sample rate of the arbitrary waveform in sample-rate output mode.",
+      "set": "SOUR<n>:FUNC:ARB:SRAT {<srate>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:ARB:SRAT? [MINimum|MAXimum]",
+      "parameters": [{ "name": "srate", "type": "real", "unit": "Sa/s" }],
+      "examples": ["SOUR1:FUNC:ARB:SRAT 20000000"]
+    },
+    {
+      "name": "function_pulse_dcycle",
+      "mnemonic": "SOUR:FUNC:PULS:DCYC",
+      "category": "Function",
+      "description": "Set or query the pulse duty cycle.",
+      "set": "SOUR<n>:FUNC:PULS:DCYC {<percent>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:PULS:DCYC? [MINimum|MAXimum]",
+      "parameters": [{ "name": "percent", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:FUNC:PULS:DCYC 20"]
+    },
+    {
+      "name": "function_pulse_hold",
+      "mnemonic": "SOUR:FUNC:PULS:HOLD",
+      "category": "Function",
+      "description": "Set or query whether pulse width or duty cycle is held constant when the period changes.",
+      "set": "SOUR<n>:FUNC:PULS:HOLD {WIDTh|DCYCle}",
+      "query": "SOUR<n>:FUNC:PULS:HOLD?",
+      "parameters": [{ "name": "hold", "type": "discrete", "range": "WIDTh|DCYCle" }],
+      "examples": ["SOUR1:FUNC:PULS:HOLD WIDT"]
+    },
+    {
+      "name": "function_pulse_period",
+      "mnemonic": "SOUR:FUNC:PULS:PER",
+      "category": "Function",
+      "description": "Set or query the pulse period.",
+      "set": "SOUR<n>:FUNC:PULS:PER {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:PULS:PER? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:FUNC:PULS:PER 0.001"]
+    },
+    {
+      "name": "function_pulse_width",
+      "mnemonic": "SOUR:FUNC:PULS:WIDT",
+      "category": "Function",
+      "description": "Set or query the pulse width.",
+      "set": "SOUR<n>:FUNC:PULS:WIDT {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:PULS:WIDT? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:FUNC:PULS:WIDT 0.0005"]
+    },
+    {
+      "name": "function_pulse_transition_both",
+      "mnemonic": "SOUR:FUNC:PULS:TRAN",
+      "category": "Function",
+      "description": "Set or query both the leading and trailing edge transition time of the pulse waveform.",
+      "set": "SOUR<n>:FUNC:PULS:TRAN[:BOTH] {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:PULS:TRAN[:BOTH]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:FUNC:PULS:TRAN 0.000001"]
+    },
+    {
+      "name": "function_pulse_transition_leading",
+      "mnemonic": "SOUR:FUNC:PULS:TRAN:LEAD",
+      "category": "Function",
+      "description": "Set or query the leading edge transition time of the pulse waveform.",
+      "set": "SOUR<n>:FUNC:PULS:TRAN:LEAD {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:PULS:TRAN:LEAD? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:FUNC:PULS:TRAN:LEAD 0.000001"]
+    },
+    {
+      "name": "function_pulse_transition_trailing",
+      "mnemonic": "SOUR:FUNC:PULS:TRAN:TRA",
+      "category": "Function",
+      "description": "Set or query the trailing edge transition time of the pulse waveform.",
+      "set": "SOUR<n>:FUNC:PULS:TRAN:TRA {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FUNC:PULS:TRAN:TRA? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:FUNC:PULS:TRAN:TRA 0.000001"]
+    },
+
+    {
+      "name": "frequency",
+      "mnemonic": "SOUR:FREQ",
+      "category": "Frequency",
+      "description": "Set or query the output frequency of the channel.",
+      "set": "SOUR<n>:FREQ[:FIXed] {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FREQ[:FIXed]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FREQ 1000", "SOUR1:FREQ?"]
+    },
+    {
+      "name": "frequency_center",
+      "mnemonic": "SOUR:FREQ:CENT",
+      "category": "Frequency",
+      "description": "Set or query the center frequency in sweep mode.",
+      "set": "SOUR<n>:FREQ:CENT {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FREQ:CENT? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FREQ:CENT 5000"]
+    },
+    {
+      "name": "frequency_span",
+      "mnemonic": "SOUR:FREQ:SPAN",
+      "category": "Frequency",
+      "description": "Set or query the frequency span in sweep mode.",
+      "set": "SOUR<n>:FREQ:SPAN {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FREQ:SPAN? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FREQ:SPAN 1000"]
+    },
+    {
+      "name": "frequency_start",
+      "mnemonic": "SOUR:FREQ:STAR",
+      "category": "Frequency",
+      "description": "Set or query the start frequency in sweep mode.",
+      "set": "SOUR<n>:FREQ:STAR {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FREQ:STAR? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FREQ:STAR 100"]
+    },
+    {
+      "name": "frequency_stop",
+      "mnemonic": "SOUR:FREQ:STOP",
+      "category": "Frequency",
+      "description": "Set or query the stop frequency in sweep mode.",
+      "set": "SOUR<n>:FREQ:STOP {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>:FREQ:STOP? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FREQ:STOP 10000"]
+    },
+    {
+      "name": "frequency_couple_mode",
+      "mnemonic": "SOUR:FREQ:COUP:MODE",
+      "category": "Frequency",
+      "description": "Set or query the frequency coupling mode (offset or ratio).",
+      "set": "SOUR<n>:FREQ:COUP:MODE {OFFSet|RATio}",
+      "query": "SOUR<n>:FREQ:COUP:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "OFFSet|RATio" }],
+      "examples": ["SOUR1:FREQ:COUP:MODE RAT"]
+    },
+    {
+      "name": "frequency_couple_offset",
+      "mnemonic": "SOUR:FREQ:COUP:OFFS",
+      "category": "Frequency",
+      "description": "Set or query the frequency coupling offset.",
+      "set": "SOUR<n>:FREQ:COUP:OFFS <frequency>",
+      "query": "SOUR<n>:FREQ:COUP:OFFS?",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FREQ:COUP:OFFS 100"]
+    },
+    {
+      "name": "frequency_couple_ratio",
+      "mnemonic": "SOUR:FREQ:COUP:RAT",
+      "category": "Frequency",
+      "description": "Set or query the frequency coupling ratio.",
+      "set": "SOUR<n>:FREQ:COUP:RAT <ratio>",
+      "query": "SOUR<n>:FREQ:COUP:RAT?",
+      "parameters": [{ "name": "ratio", "type": "real" }],
+      "examples": ["SOUR1:FREQ:COUP:RAT 2"]
+    },
+    {
+      "name": "frequency_couple_state",
+      "mnemonic": "SOUR:FREQ:COUP",
+      "category": "Frequency",
+      "description": "Enable or disable, or query, the frequency coupling function.",
+      "set": "SOUR<n>:FREQ:COUP[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:FREQ:COUP[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:FREQ:COUP ON"]
+    },
+    {
+      "name": "period",
+      "mnemonic": "SOUR:PER",
+      "category": "Frequency",
+      "description": "Set or query the output period of the channel.",
+      "set": "SOUR<n>:PER[:FIXed] {<period>|MINimum|MAXimum}",
+      "query": "SOUR<n>:PER[:FIXed]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "period", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:PER 0.001"]
+    },
+
+    {
+      "name": "voltage_amplitude",
+      "mnemonic": "SOUR:VOLT",
+      "category": "Voltage",
+      "description": "Set or query the output amplitude of the channel. Minimum 2mVpp; maximum limited by impedance and frequency.",
+      "set": "SOUR<n>:VOLT[:LEVel][:IMMediate][:AMPLitude] {<amplitude>|MINimum|MAXimum}",
+      "query": "SOUR<n>:VOLT[:LEVel][:IMMediate][:AMPLitude]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "amplitude", "type": "real", "unit": "Vpp", "range": "min 2mVpp", "default": "5Vpp" }],
+      "examples": ["SOUR1:VOLT 5", "SOUR1:VOLT?"]
+    },
+    {
+      "name": "voltage_high",
+      "mnemonic": "SOUR:VOLT:HIGH",
+      "category": "Voltage",
+      "description": "Set or query the high level value of the waveform.",
+      "set": "SOUR<n>:VOLT[:LEVel][:IMMediate]:HIGH {<voltage>|MINimum|MAXimum}",
+      "query": "SOUR<n>:VOLT[:LEVel][:IMMediate]:HIGH? [MINimum|MAXimum]",
+      "parameters": [{ "name": "voltage", "type": "real", "unit": "V" }],
+      "examples": ["SOUR1:VOLT:HIGH 2"]
+    },
+    {
+      "name": "voltage_low",
+      "mnemonic": "SOUR:VOLT:LOW",
+      "category": "Voltage",
+      "description": "Set or query the low level value of the waveform.",
+      "set": "SOUR<n>:VOLT[:LEVel][:IMMediate]:LOW {<voltage>|MINimum|MAXimum}",
+      "query": "SOUR<n>:VOLT[:LEVel][:IMMediate]:LOW? [MINimum|MAXimum]",
+      "parameters": [{ "name": "voltage", "type": "real", "unit": "V" }],
+      "examples": ["SOUR1:VOLT:LOW -2"]
+    },
+    {
+      "name": "voltage_offset",
+      "mnemonic": "SOUR:VOLT:OFFS",
+      "category": "Voltage",
+      "description": "Set or query the DC offset voltage of the waveform.",
+      "set": "SOUR<n>:VOLT[:LEVel][:IMMediate]:OFFSet {<voltage>|MINimum|MAXimum}",
+      "query": "SOUR<n>:VOLT[:LEVel][:IMMediate]:OFFSet? [MINimum|MAXimum]",
+      "parameters": [{ "name": "voltage", "type": "real", "unit": "VDC", "default": "0VDC" }],
+      "examples": ["SOUR1:VOLT:OFFS 1"]
+    },
+    {
+      "name": "voltage_unit",
+      "mnemonic": "SOUR:VOLT:UNIT",
+      "category": "Voltage",
+      "description": "Set or query the amplitude unit of the channel.",
+      "set": "SOUR<n>:VOLT:UNIT {VPP|VRMS|DBM}",
+      "query": "SOUR<n>:VOLT:UNIT?",
+      "parameters": [{ "name": "unit", "type": "discrete", "range": "VPP|VRMS|DBM" }],
+      "examples": ["SOUR1:VOLT:UNIT VPP"]
+    },
+    {
+      "name": "voltage_range_auto",
+      "mnemonic": "SOUR:VOLT:RANG:AUTO",
+      "category": "Voltage",
+      "description": "Enable or disable, or query, the auto range function.",
+      "set": "SOUR<n>:VOLT:RANG:AUTO {OFF|ON|0|1}",
+      "query": "SOUR<n>:VOLT:RANG:AUTO?",
+      "parameters": [{ "name": "state", "type": "discrete", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:VOLT:RANG:AUTO ON"]
+    },
+    {
+      "name": "voltage_couple_state",
+      "mnemonic": "SOUR:VOLT:COUP",
+      "category": "Voltage",
+      "description": "Enable or disable, or query, the amplitude coupling function.",
+      "set": "SOUR<n>:VOLT:COUP[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:VOLT:COUP[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:VOLT:COUP ON"]
+    },
+
+    {
+      "name": "phase",
+      "mnemonic": "SOUR:PHAS",
+      "category": "Phase",
+      "description": "Set or query the start phase of the channel.",
+      "set": "SOUR<n>:PHAS[:ADJust] {<phase>|MINimum|MAXimum}",
+      "query": "SOUR<n>:PHAS[:ADJust]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "0" }],
+      "examples": ["SOUR1:PHAS 90"]
+    },
+    {
+      "name": "phase_initiate",
+      "mnemonic": "SOUR:PHAS:INIT",
+      "category": "Phase",
+      "description": "Execute an align-phase operation on the channel.",
+      "set": "SOUR<n>:PHAS:INITiate",
+      "examples": ["SOUR1:PHAS:INIT"]
+    },
+    {
+      "name": "phase_synchronize",
+      "mnemonic": "SOUR:PHAS:SYNC",
+      "category": "Phase",
+      "description": "Align the phases of the two channels.",
+      "set": "SOUR<n>:PHAS:SYNChronize",
+      "examples": ["SOUR1:PHAS:SYNC"]
+    },
+
+    {
+      "name": "am_depth",
+      "mnemonic": "SOUR:MOD:AM",
+      "category": "Modulation",
+      "description": "Set or query the modulation depth of AM.",
+      "set": "SOUR<n>[:MOD]:AM[:DEPTh] {<depth>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:AM[:DEPTh]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "depth", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:AM:DEPT 50"]
+    },
+    {
+      "name": "am_dssc",
+      "mnemonic": "SOUR:MOD:AM:DSSC",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, double-sideband suppressed carrier AM.",
+      "set": "SOUR<n>[:MOD]:AM:DSSC {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:AM:DSSC?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:AM:DSSC ON"]
+    },
+    {
+      "name": "am_internal_frequency",
+      "mnemonic": "SOUR:MOD:AM:INT:FREQ",
+      "category": "Modulation",
+      "description": "Set or query the AM internal modulation frequency.",
+      "set": "SOUR<n>[:MOD]:AM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:AM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:AM:INT:FREQ 100"]
+    },
+    {
+      "name": "am_internal_function",
+      "mnemonic": "SOUR:MOD:AM:INT:FUNC",
+      "category": "Modulation",
+      "description": "Set or query the AM internal modulating waveform.",
+      "set": "SOUR<n>[:MOD]:AM:INTernal:FUNCtion <name>",
+      "query": "SOUR<n>[:MOD]:AM:INTernal:FUNCtion?",
+      "parameters": [{ "name": "name", "type": "discrete" }],
+      "examples": ["SOUR1:AM:INT:FUNC SIN"]
+    },
+    {
+      "name": "am_source",
+      "mnemonic": "SOUR:MOD:AM:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the AM modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:AM:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:AM:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:AM:SOUR INT"]
+    },
+    {
+      "name": "am_state",
+      "mnemonic": "SOUR:MOD:AM:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, AM modulation.",
+      "set": "SOUR<n>[:MOD]:AM:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:AM:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:AM:STAT ON"]
+    },
+
+    {
+      "name": "fm_deviation",
+      "mnemonic": "SOUR:MOD:FM",
+      "category": "Modulation",
+      "description": "Set or query the FM frequency deviation.",
+      "set": "SOUR<n>[:MOD]:FM[:DEViation] {<deviation>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:FM[:DEViation]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FM:DEV 1000"]
+    },
+    {
+      "name": "fm_internal_frequency",
+      "mnemonic": "SOUR:MOD:FM:INT:FREQ",
+      "category": "Modulation",
+      "description": "Set or query the FM internal modulation frequency.",
+      "set": "SOUR<n>[:MOD]:FM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:FM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FM:INT:FREQ 100"]
+    },
+    {
+      "name": "fm_internal_function",
+      "mnemonic": "SOUR:MOD:FM:INT:FUNC",
+      "category": "Modulation",
+      "description": "Set or query the FM internal modulating waveform.",
+      "set": "SOUR<n>[:MOD]:FM:INTernal:FUNCtion <name>",
+      "query": "SOUR<n>[:MOD]:FM:INTernal:FUNCtion?",
+      "parameters": [{ "name": "name", "type": "discrete" }],
+      "examples": ["SOUR1:FM:INT:FUNC SIN"]
+    },
+    {
+      "name": "fm_source",
+      "mnemonic": "SOUR:MOD:FM:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the FM modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:FM:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:FM:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:FM:SOUR INT"]
+    },
+    {
+      "name": "fm_state",
+      "mnemonic": "SOUR:MOD:FM:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, FM modulation.",
+      "set": "SOUR<n>[:MOD]:FM:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:FM:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:FM:STAT ON"]
+    },
+
+    {
+      "name": "pm_deviation",
+      "mnemonic": "SOUR:MOD:PM",
+      "category": "Modulation",
+      "description": "Set or query the PM phase deviation.",
+      "set": "SOUR<n>[:MOD]:PM[:DEViation] {<deviation>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PM[:DEViation]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "deg", "range": "0 to 360" }],
+      "examples": ["SOUR1:PM:DEV 90"]
+    },
+    {
+      "name": "pm_internal_frequency",
+      "mnemonic": "SOUR:MOD:PM:INT:FREQ",
+      "category": "Modulation",
+      "description": "Set or query the PM internal modulation frequency.",
+      "set": "SOUR<n>[:MOD]:PM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:PM:INT:FREQ 100"]
+    },
+    {
+      "name": "pm_internal_function",
+      "mnemonic": "SOUR:MOD:PM:INT:FUNC",
+      "category": "Modulation",
+      "description": "Set or query the PM internal modulating waveform.",
+      "set": "SOUR<n>[:MOD]:PM:INTernal:FUNCtion <name>",
+      "query": "SOUR<n>[:MOD]:PM:INTernal:FUNCtion?",
+      "parameters": [{ "name": "name", "type": "discrete" }],
+      "examples": ["SOUR1:PM:INT:FUNC SIN"]
+    },
+    {
+      "name": "pm_source",
+      "mnemonic": "SOUR:MOD:PM:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the PM modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:PM:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:PM:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:PM:SOUR INT"]
+    },
+    {
+      "name": "pm_state",
+      "mnemonic": "SOUR:MOD:PM:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, PM modulation.",
+      "set": "SOUR<n>[:MOD]:PM:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:PM:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:PM:STAT ON"]
+    },
+
+    {
+      "name": "ask_amplitude",
+      "mnemonic": "SOUR:MOD:ASK:AMPL",
+      "category": "Modulation",
+      "description": "Set or query the ASK modulation amplitude.",
+      "set": "SOUR<n>[:MOD]:ASKey:AMPLitude {<amplitude>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:ASKey:AMPLitude? [MINimum|MAXimum]",
+      "parameters": [{ "name": "amplitude", "type": "real", "unit": "Vpp" }],
+      "examples": ["SOUR1:ASK:AMPL 2"]
+    },
+    {
+      "name": "ask_internal_rate",
+      "mnemonic": "SOUR:MOD:ASK:INT:RATE",
+      "category": "Modulation",
+      "description": "Set or query the ASK internal modulation rate.",
+      "set": "SOUR<n>[:MOD]:ASKey:INTernal[:RATE] {<rate>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:ASKey:INTernal[:RATE]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "rate", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:ASK:INT:RATE 100"]
+    },
+    {
+      "name": "ask_polarity",
+      "mnemonic": "SOUR:MOD:ASK:POL",
+      "category": "Modulation",
+      "description": "Set or query the ASK modulation polarity.",
+      "set": "SOUR<n>[:MOD]:ASKey:POLarity {POSitive|NEGative}",
+      "query": "SOUR<n>[:MOD]:ASKey:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["SOUR1:ASK:POL POS"]
+    },
+    {
+      "name": "ask_source",
+      "mnemonic": "SOUR:MOD:ASK:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the ASK modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:ASKey:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:ASKey:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:ASK:SOUR INT"]
+    },
+    {
+      "name": "ask_state",
+      "mnemonic": "SOUR:MOD:ASK:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, ASK modulation.",
+      "set": "SOUR<n>[:MOD]:ASKey:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:ASKey:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:ASK:STAT ON"]
+    },
+
+    {
+      "name": "fsk_frequency",
+      "mnemonic": "SOUR:MOD:FSK",
+      "category": "Modulation",
+      "description": "Set or query the FSK hop frequency.",
+      "set": "SOUR<n>[:MOD]:FSKey[:FREQuency] {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:FSKey[:FREQuency]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FSK:FREQ 1000"]
+    },
+    {
+      "name": "fsk_internal_rate",
+      "mnemonic": "SOUR:MOD:FSK:INT:RATE",
+      "category": "Modulation",
+      "description": "Set or query the FSK internal modulation rate.",
+      "set": "SOUR<n>[:MOD]:FSKey:INTernal:RATE {<rate>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:FSKey:INTernal:RATE? [MINimum|MAXimum]",
+      "parameters": [{ "name": "rate", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:FSK:INT:RATE 100"]
+    },
+    {
+      "name": "fsk_polarity",
+      "mnemonic": "SOUR:MOD:FSK:POL",
+      "category": "Modulation",
+      "description": "Set or query the FSK modulation polarity.",
+      "set": "SOUR<n>[:MOD]:FSKey:POLarity {POSitive|NEGative}",
+      "query": "SOUR<n>[:MOD]:FSKey:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["SOUR1:FSK:POL POS"]
+    },
+    {
+      "name": "fsk_source",
+      "mnemonic": "SOUR:MOD:FSK:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the FSK modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:FSKey:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:FSKey:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:FSK:SOUR INT"]
+    },
+    {
+      "name": "fsk_state",
+      "mnemonic": "SOUR:MOD:FSK:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, FSK modulation.",
+      "set": "SOUR<n>[:MOD]:FSKey:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:FSKey:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:FSK:STAT ON"]
+    },
+
+    {
+      "name": "psk_internal_rate",
+      "mnemonic": "SOUR:MOD:PSK:INT:RATE",
+      "category": "Modulation",
+      "description": "Set or query the PSK internal modulation rate.",
+      "set": "SOUR<n>[:MOD]:PSKey:INTernal:RATE {<rate>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PSKey:INTernal:RATE? [MINimum|MAXimum]",
+      "parameters": [{ "name": "rate", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:PSK:INT:RATE 100"]
+    },
+    {
+      "name": "psk_phase",
+      "mnemonic": "SOUR:MOD:PSK:PHAS",
+      "category": "Modulation",
+      "description": "Set or query the PSK phase.",
+      "set": "SOUR<n>[:MOD]:PSKey:PHASe {<phase>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PSKey:PHASe? [MINimum|MAXimum]",
+      "parameters": [{ "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360", "default": "180" }],
+      "examples": ["SOUR1:PSK:PHAS 180"]
+    },
+    {
+      "name": "psk_polarity",
+      "mnemonic": "SOUR:MOD:PSK:POL",
+      "category": "Modulation",
+      "description": "Set or query the PSK modulation polarity.",
+      "set": "SOUR<n>[:MOD]:PSKey:POLarity {POSitive|NEGative}",
+      "query": "SOUR<n>[:MOD]:PSKey:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["SOUR1:PSK:POL POS"]
+    },
+    {
+      "name": "psk_source",
+      "mnemonic": "SOUR:MOD:PSK:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the PSK modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:PSKey:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:PSKey:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:PSK:SOUR INT"]
+    },
+    {
+      "name": "psk_state",
+      "mnemonic": "SOUR:MOD:PSK:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, PSK modulation.",
+      "set": "SOUR<n>[:MOD]:PSKey:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:PSKey:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:PSK:STAT ON"]
+    },
+
+    {
+      "name": "pwm_deviation_dcycle",
+      "mnemonic": "SOUR:MOD:PWM:DCYC",
+      "category": "Modulation",
+      "description": "Set or query the PWM duty cycle deviation.",
+      "set": "SOUR<n>[:MOD]:PWM[:DEViation]:DCYCle {<deviation>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PWM[:DEViation]:DCYCle? [MINimum|MAXimum]",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:PWM:DCYC 10"]
+    },
+    {
+      "name": "pwm_deviation_width",
+      "mnemonic": "SOUR:MOD:PWM:WIDT",
+      "category": "Modulation",
+      "description": "Set or query the PWM pulse width deviation.",
+      "set": "SOUR<n>[:MOD]:PWM[:DEViation][:WIDTh] {<deviation>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PWM[:DEViation][:WIDTh]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:PWM:WIDT 0.0001"]
+    },
+    {
+      "name": "pwm_internal_frequency",
+      "mnemonic": "SOUR:MOD:PWM:INT:FREQ",
+      "category": "Modulation",
+      "description": "Set or query the PWM internal modulation frequency.",
+      "set": "SOUR<n>[:MOD]:PWM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>[:MOD]:PWM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:PWM:INT:FREQ 100"]
+    },
+    {
+      "name": "pwm_internal_function",
+      "mnemonic": "SOUR:MOD:PWM:INT:FUNC",
+      "category": "Modulation",
+      "description": "Set or query the PWM internal modulating waveform.",
+      "set": "SOUR<n>[:MOD]:PWM:INTernal:FUNCtion <name>",
+      "query": "SOUR<n>[:MOD]:PWM:INTernal:FUNCtion?",
+      "parameters": [{ "name": "name", "type": "discrete" }],
+      "examples": ["SOUR1:PWM:INT:FUNC SIN"]
+    },
+    {
+      "name": "pwm_source",
+      "mnemonic": "SOUR:MOD:PWM:SOUR",
+      "category": "Modulation",
+      "description": "Set or query the PWM modulation source (internal or external).",
+      "set": "SOUR<n>[:MOD]:PWM:SOURce {INTernal|EXTernal}",
+      "query": "SOUR<n>[:MOD]:PWM:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SOUR1:PWM:SOUR INT"]
+    },
+    {
+      "name": "pwm_state",
+      "mnemonic": "SOUR:MOD:PWM:STAT",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, PWM modulation.",
+      "set": "SOUR<n>[:MOD]:PWM:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>[:MOD]:PWM:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:PWM:STAT ON"]
+    },
+    {
+      "name": "mod_state",
+      "mnemonic": "SOUR:MOD",
+      "category": "Modulation",
+      "description": "Enable or disable, or query, the modulation function.",
+      "set": "SOUR<n>:MOD[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:MOD[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:MOD ON"]
+    },
+    {
+      "name": "mod_type",
+      "mnemonic": "SOUR:MOD:TYP",
+      "category": "Modulation",
+      "description": "Set or query the modulation type.",
+      "set": "SOUR<n>:MOD:TYPe {AM|FM|PM|ASK|FSK|PSK|PWM}",
+      "query": "SOUR<n>:MOD:TYPe?",
+      "parameters": [{ "name": "type", "type": "discrete", "range": "AM|FM|PM|ASK|FSK|PSK|PWM" }],
+      "examples": ["SOUR1:MOD:TYP AM"]
+    },
+
+    {
+      "name": "sum_amplitude",
+      "mnemonic": "SOUR:SUM:AMPL",
+      "category": "Sum",
+      "description": "Set or query the waveform sum amplitude (ratio of the sum waveform).",
+      "set": "SOUR<n>:SUM:AMPLitude {<amplitude>|MINimum|MAXimum}",
+      "query": "SOUR<n>:SUM:AMPLitude? [MINimum|MAXimum]",
+      "parameters": [{ "name": "amplitude", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:SUM:AMPL 50"]
+    },
+    {
+      "name": "sum_internal_frequency",
+      "mnemonic": "SOUR:SUM:INT:FREQ",
+      "category": "Sum",
+      "description": "Set or query the frequency of the sum waveform.",
+      "set": "SOUR<n>:SUM:INTernal:FREQuency {<frequency>|MAXimum|MINimum}",
+      "query": "SOUR<n>:SUM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz", "default": "1kHz" }],
+      "examples": ["SOUR1:SUM:INT:FREQ 1000"]
+    },
+    {
+      "name": "sum_internal_function",
+      "mnemonic": "SOUR:SUM:INT:FUNC",
+      "category": "Sum",
+      "description": "Set or query the sum waveform type.",
+      "set": "SOUR<n>:SUM:INTernal:FUNCtion <name>",
+      "query": "SOUR<n>:SUM:INTernal:FUNCtion?",
+      "parameters": [{ "name": "name", "type": "discrete" }],
+      "examples": ["SOUR1:SUM:INT:FUNC SIN"]
+    },
+    {
+      "name": "sum_state",
+      "mnemonic": "SOUR:SUM",
+      "category": "Sum",
+      "description": "Enable or disable, or query, the waveform sum function.",
+      "set": "SOUR<n>:SUM[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:SUM[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:SUM ON"]
+    },
+
+    {
+      "name": "burst_state",
+      "mnemonic": "SOUR:BURS",
+      "category": "Burst",
+      "description": "Enable or disable, or query, the burst function.",
+      "set": "SOUR<n>:BURSt[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:BURSt[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:BURS ON"]
+    },
+    {
+      "name": "burst_mode",
+      "mnemonic": "SOUR:BURS:MODE",
+      "category": "Burst",
+      "description": "Set or query the burst mode.",
+      "set": "SOUR<n>:BURSt:MODE {TRIGgered|INFinity|GATed}",
+      "query": "SOUR<n>:BURSt:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "TRIGgered|INFinity|GATed" }],
+      "examples": ["SOUR1:BURS:MODE TRIG"]
+    },
+    {
+      "name": "burst_ncycles",
+      "mnemonic": "SOUR:BURS:NCYC",
+      "category": "Burst",
+      "description": "Set or query the number of cycles in N-cycle burst mode.",
+      "set": "SOUR<n>:BURSt:NCYCles {<cycles>|MINimum|MAXimum}",
+      "query": "SOUR<n>:BURSt:NCYCles? [MINimum|MAXimum]",
+      "parameters": [{ "name": "cycles", "type": "integer" }],
+      "examples": ["SOUR1:BURS:NCYC 5"]
+    },
+    {
+      "name": "burst_internal_period",
+      "mnemonic": "SOUR:BURS:INT:PER",
+      "category": "Burst",
+      "description": "Set or query the burst period in N-cycle/internal-triggered mode.",
+      "set": "SOUR<n>:BURSt:INTernal:PERiod {<period>|MINimum|MAXimum}",
+      "query": "SOUR<n>:BURSt:INTernal:PERiod? [MINimum|MAXimum]",
+      "parameters": [{ "name": "period", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:BURS:INT:PER 0.01"]
+    },
+    {
+      "name": "burst_phase",
+      "mnemonic": "SOUR:BURS:PHAS",
+      "category": "Burst",
+      "description": "Set or query the burst start phase.",
+      "set": "SOUR<n>:BURSt:PHASe {<phase>|MINimum|MAXimum}",
+      "query": "SOUR<n>:BURSt:PHASe? [MINimum|MAXimum]",
+      "parameters": [{ "name": "phase", "type": "real", "unit": "deg", "range": "0 to 360" }],
+      "examples": ["SOUR1:BURS:PHAS 0"]
+    },
+    {
+      "name": "burst_tdelay",
+      "mnemonic": "SOUR:BURS:TDEL",
+      "category": "Burst",
+      "description": "Set or query the burst delay (time between trigger and start of burst).",
+      "set": "SOUR<n>:BURSt:TDELay {<delay>|MINimum|MAXimum}",
+      "query": "SOUR<n>:BURSt:TDELay? [MINimum|MAXimum]",
+      "parameters": [{ "name": "delay", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:BURS:TDEL 0.001"]
+    },
+    {
+      "name": "burst_gate_polarity",
+      "mnemonic": "SOUR:BURS:GATE:POL",
+      "category": "Burst",
+      "description": "Set or query the gate polarity in gated burst mode.",
+      "set": "SOUR<n>:BURSt:GATE:POLarity {NORMal|INVerted}",
+      "query": "SOUR<n>:BURSt:GATE:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "NORMal|INVerted" }],
+      "examples": ["SOUR1:BURS:GATE:POL NORM"]
+    },
+    {
+      "name": "burst_trigger_immediate",
+      "mnemonic": "SOUR:BURS:TRIG",
+      "category": "Burst",
+      "description": "Trigger a burst immediately (manual trigger).",
+      "set": "SOUR<n>:BURSt:TRIGger[:IMMediate]",
+      "examples": ["SOUR1:BURS:TRIG"]
+    },
+    {
+      "name": "burst_trigger_slope",
+      "mnemonic": "SOUR:BURS:TRIG:SLOP",
+      "category": "Burst",
+      "description": "Set or query the edge of the external trigger for burst.",
+      "set": "SOUR<n>:BURSt:TRIGger:SLOPe {POSitive|NEGative}",
+      "query": "SOUR<n>:BURSt:TRIGger:SLOPe?",
+      "parameters": [{ "name": "slope", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["SOUR1:BURS:TRIG:SLOP POS"]
+    },
+    {
+      "name": "burst_trigger_source",
+      "mnemonic": "SOUR:BURS:TRIG:SOUR",
+      "category": "Burst",
+      "description": "Set or query the trigger source for burst.",
+      "set": "SOUR<n>:BURSt:TRIGger:SOURce {INTernal|EXTernal|MANual}",
+      "query": "SOUR<n>:BURSt:TRIGger:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal|MANual" }],
+      "examples": ["SOUR1:BURS:TRIG:SOUR INT"]
+    },
+    {
+      "name": "burst_trigger_trigout",
+      "mnemonic": "SOUR:BURS:TRIG:TRIGO",
+      "category": "Burst",
+      "description": "Set or query the edge of the trigger output signal for burst.",
+      "set": "SOUR<n>:BURSt:TRIGger:TRIGOut {POSitive|NEGative|OFF}",
+      "query": "SOUR<n>:BURSt:TRIGger:TRIGOut?",
+      "parameters": [{ "name": "trigout", "type": "discrete", "range": "POSitive|NEGative|OFF" }],
+      "examples": ["SOUR1:BURS:TRIG:TRIGO OFF"]
+    },
+
+    {
+      "name": "sweep_state",
+      "mnemonic": "SOUR:SWE:STAT",
+      "category": "Sweep",
+      "description": "Enable or disable, or query, the sweep function.",
+      "set": "SOUR<n>:SWEep:STATe {ON|1|OFF|0}",
+      "query": "SOUR<n>:SWEep:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:SWE:STAT ON"]
+    },
+    {
+      "name": "sweep_spacing",
+      "mnemonic": "SOUR:SWE:SPAC",
+      "category": "Sweep",
+      "description": "Set or query the sweep type (linear, logarithmic or step).",
+      "set": "SOUR<n>:SWEep:SPACing {LINear|LOGarithmic|STEp}",
+      "query": "SOUR<n>:SWEep:SPACing?",
+      "parameters": [{ "name": "spacing", "type": "discrete", "range": "LINear|LOGarithmic|STEp" }],
+      "examples": ["SOUR1:SWE:SPAC LIN"]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "SOUR:SWE:TIME",
+      "category": "Sweep",
+      "description": "Set or query the sweep time.",
+      "set": "SOUR<n>:SWEep:TIME {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:SWEep:TIME? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:SWE:TIME 1"]
+    },
+    {
+      "name": "sweep_rtime",
+      "mnemonic": "SOUR:SWE:RTIM",
+      "category": "Sweep",
+      "description": "Set or query the sweep return time.",
+      "set": "SOUR<n>:SWEep:RTIMe {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:SWEep:RTIMe? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:SWE:RTIM 0"]
+    },
+    {
+      "name": "sweep_htime_start",
+      "mnemonic": "SOUR:SWE:HTIM:STAR",
+      "category": "Sweep",
+      "description": "Set or query the start hold time of the sweep.",
+      "set": "SOUR<n>:SWEep:HTIMe:STARt {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:SWEep:HTIMe:STARt? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:SWE:HTIM:STAR 0"]
+    },
+    {
+      "name": "sweep_htime_stop",
+      "mnemonic": "SOUR:SWE:HTIM",
+      "category": "Sweep",
+      "description": "Set or query the stop hold time of the sweep.",
+      "set": "SOUR<n>:SWEep:HTIMe[:STOP] {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:SWEep:HTIMe[:STOP]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:SWE:HTIM 0"]
+    },
+    {
+      "name": "sweep_step",
+      "mnemonic": "SOUR:SWE:STEP",
+      "category": "Sweep",
+      "description": "Set or query the number of steps in step sweep mode.",
+      "set": "SOUR<n>:SWEep:STEP {<n>|MINimum|MAXimum}",
+      "query": "SOUR<n>:SWEep:STEP? [MINimum|MAXimum]",
+      "parameters": [{ "name": "steps", "type": "integer" }],
+      "examples": ["SOUR1:SWE:STEP 10"]
+    },
+    {
+      "name": "sweep_trigger_immediate",
+      "mnemonic": "SOUR:SWE:TRIG",
+      "category": "Sweep",
+      "description": "Trigger a sweep immediately (manual trigger).",
+      "set": "SOUR<n>:SWEep:TRIGger[:IMMediate]",
+      "examples": ["SOUR1:SWE:TRIG"]
+    },
+    {
+      "name": "sweep_trigger_slope",
+      "mnemonic": "SOUR:SWE:TRIG:SLOP",
+      "category": "Sweep",
+      "description": "Set or query the edge of the external trigger for sweep.",
+      "set": "SOUR<n>:SWEep:TRIGger:SLOPe {POSitive|NEGative}",
+      "query": "SOUR<n>:SWEep:TRIGger:SLOPe?",
+      "parameters": [{ "name": "slope", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["SOUR1:SWE:TRIG:SLOP POS"]
+    },
+    {
+      "name": "sweep_trigger_source",
+      "mnemonic": "SOUR:SWE:TRIG:SOUR",
+      "category": "Sweep",
+      "description": "Set or query the trigger source for sweep.",
+      "set": "SOUR<n>:SWEep:TRIGger:SOURce {INTernal|EXTernal|MANual}",
+      "query": "SOUR<n>:SWEep:TRIGger:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal|MANual" }],
+      "examples": ["SOUR1:SWE:TRIG:SOUR INT"]
+    },
+    {
+      "name": "sweep_trigger_trigout",
+      "mnemonic": "SOUR:SWE:TRIG:TRIGO",
+      "category": "Sweep",
+      "description": "Set or query the edge of the trigger output signal for sweep.",
+      "set": "SOUR<n>:SWEep:TRIGger:TRIGOut {POSitive|NEGative|OFF}",
+      "query": "SOUR<n>:SWEep:TRIGger:TRIGOut?",
+      "parameters": [{ "name": "trigout", "type": "discrete", "range": "POSitive|NEGative|OFF" }],
+      "examples": ["SOUR1:SWE:TRIG:TRIGO OFF"]
+    },
+
+    {
+      "name": "harmonic_state",
+      "mnemonic": "SOUR:HARM",
+      "category": "Harmonic",
+      "description": "Enable or disable, or query, the harmonic function.",
+      "set": "SOUR<n>:HARMonic[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:HARMonic[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:HARM ON"]
+    },
+    {
+      "name": "harmonic_type",
+      "mnemonic": "SOUR:HARM:TYP",
+      "category": "Harmonic",
+      "description": "Set or query the harmonic type.",
+      "set": "SOUR<n>:HARMonic:TYPe {EVEN|ODD|ALL|USER}",
+      "query": "SOUR<n>:HARMonic:TYPe?",
+      "parameters": [{ "name": "type", "type": "discrete", "range": "EVEN|ODD|ALL|USER" }],
+      "examples": ["SOUR1:HARM:TYP EVEN"]
+    },
+    {
+      "name": "harmonic_order",
+      "mnemonic": "SOUR:HARM:ORDE",
+      "category": "Harmonic",
+      "description": "Set or query the highest harmonic order.",
+      "set": "SOUR<n>:HARMonic:ORDEr {<value>|MINimum|MAXimum}",
+      "query": "SOUR<n>:HARMonic:ORDEr? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "integer" }],
+      "examples": ["SOUR1:HARM:ORDE 4"]
+    },
+    {
+      "name": "harmonic_amplitude",
+      "mnemonic": "SOUR:HARM:AMPL",
+      "category": "Harmonic",
+      "description": "Set or query the amplitude of the specified harmonic.",
+      "set": "SOUR<n>:HARMonic:AMPL <sn>,{<value>|MINimum|MAXimum}",
+      "query": "SOUR<n>:HARMonic:AMPL? <sn>",
+      "parameters": [
+        { "name": "sn", "type": "integer", "description": "Harmonic serial number" },
+        { "name": "value", "type": "real", "unit": "Vpp" }
+      ],
+      "examples": ["SOUR1:HARM:AMPL 2,1"]
+    },
+    {
+      "name": "harmonic_phase",
+      "mnemonic": "SOUR:HARM:PHAS",
+      "category": "Harmonic",
+      "description": "Set or query the phase of the specified harmonic.",
+      "set": "SOUR<n>:HARMonic:PHASe <sn>,{<value>|MINimum|MAXimum}",
+      "query": "SOUR<n>:HARMonic:PHASe? <sn>",
+      "parameters": [
+        { "name": "sn", "type": "integer", "description": "Harmonic serial number" },
+        { "name": "value", "type": "real", "unit": "deg", "range": "0 to 360" }
+      ],
+      "examples": ["SOUR1:HARM:PHAS 2,90"]
+    },
+    {
+      "name": "harmonic_user",
+      "mnemonic": "SOUR:HARM:USER",
+      "category": "Harmonic",
+      "description": "Set or query which harmonics (2nd to 8th) are output in user-defined harmonic mode.",
+      "set": "SOUR<n>:HARMonic:USER <user>",
+      "query": "SOUR<n>:HARMonic:USER?",
+      "parameters": [{ "name": "user", "type": "string", "description": "Binary string selecting harmonics" }],
+      "examples": ["SOUR1:HARM:USER X101"]
+    },
+
+    {
+      "name": "marker_frequency",
+      "mnemonic": "SOUR:MARK:FREQ",
+      "category": "Sweep",
+      "description": "Set or query the sweep marker frequency.",
+      "set": "SOUR<n>:MARKer:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "SOUR<n>:MARKer:FREQuency? [MINimum|MAXimum]",
+      "parameters": [{ "name": "frequency", "type": "real", "unit": "Hz" }],
+      "examples": ["SOUR1:MARK:FREQ 5000"]
+    },
+    {
+      "name": "marker_state",
+      "mnemonic": "SOUR:MARK",
+      "category": "Sweep",
+      "description": "Enable or disable, or query, the sweep marker function.",
+      "set": "SOUR<n>:MARKer[:STATe] {ON|1|OFF|0}",
+      "query": "SOUR<n>:MARKer[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SOUR1:MARK ON"]
+    },
+
+    {
+      "name": "pulse_dcycle",
+      "mnemonic": "SOUR:PULS:DCYC",
+      "category": "Pulse",
+      "description": "Set or query the pulse duty cycle.",
+      "set": "SOUR<n>:PULSe:DCYCle {<percent>|MINimum|MAXimum}",
+      "query": "SOUR<n>:PULSe:DCYCle? [MINimum|MAXimum]",
+      "parameters": [{ "name": "percent", "type": "real", "unit": "%" }],
+      "examples": ["SOUR1:PULS:DCYC 20"]
+    },
+    {
+      "name": "pulse_hold",
+      "mnemonic": "SOUR:PULS:HOLD",
+      "category": "Pulse",
+      "description": "Set or query whether pulse width or duty cycle is held constant.",
+      "set": "SOUR<n>:PULSe:HOLD {WIDTh|DUTY}",
+      "query": "SOUR<n>:PULSe:HOLD?",
+      "parameters": [{ "name": "hold", "type": "discrete", "range": "WIDTh|DUTY" }],
+      "examples": ["SOUR1:PULS:HOLD WIDT"]
+    },
+    {
+      "name": "pulse_width",
+      "mnemonic": "SOUR:PULS:WIDT",
+      "category": "Pulse",
+      "description": "Set or query the pulse width.",
+      "set": "SOUR<n>:PULSe:WIDTh {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:PULSe:WIDTh? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:PULS:WIDT 0.0005"]
+    },
+    {
+      "name": "pulse_transition_leading",
+      "mnemonic": "SOUR:PULS:TRAN",
+      "category": "Pulse",
+      "description": "Set or query the leading edge transition time of the pulse.",
+      "set": "SOUR<n>:PULSe:TRANsition[:LEADing] {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:PULSe:TRANsition[:LEADing]? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:PULS:TRAN 0.000001"]
+    },
+    {
+      "name": "pulse_transition_trailing",
+      "mnemonic": "SOUR:PULS:TRAN:TRA",
+      "category": "Pulse",
+      "description": "Set or query the trailing edge transition time of the pulse.",
+      "set": "SOUR<n>:PULSe:TRANsition:TRAiling {<seconds>|MINimum|MAXimum}",
+      "query": "SOUR<n>:PULSe:TRANsition:TRAiling? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["SOUR1:PULS:TRAN:TRA 0.000001"]
+    },
+
+    {
+      "name": "track",
+      "mnemonic": "SOUR:TRACK",
+      "category": "Function",
+      "description": "Set or query the track function between the two channels.",
+      "set": "SOUR<n>:TRACK {ON|OFF|INVerted}",
+      "query": "SOUR<n>:TRACK?",
+      "parameters": [{ "name": "track", "type": "discrete", "range": "ON|OFF|INVerted" }],
+      "examples": ["SOUR1:TRACK ON"]
+    },
+
+    {
+      "name": "trace_data_catalog",
+      "mnemonic": "SOUR:DATA:CAT?",
+      "category": "Arbitrary Data",
+      "description": "Query the names of the arbitrary waveforms stored in volatile memory.",
+      "query": "SOUR<n>:DATA:CATalog?",
+      "examples": ["SOUR1:DATA:CAT?"]
+    },
+    {
+      "name": "trace_data_copy",
+      "mnemonic": "SOUR:DATA:COPY",
+      "category": "Arbitrary Data",
+      "description": "Copy the named arbitrary waveform to volatile memory.",
+      "set": "SOUR<n>:DATA:COPY <trace_name>,VOLATILE",
+      "parameters": [{ "name": "trace_name", "type": "string" }],
+      "examples": ["SOUR1:DATA:COPY ABC,VOLATILE"]
+    },
+    {
+      "name": "trace_data",
+      "mnemonic": "SOUR:DATA",
+      "category": "Arbitrary Data",
+      "description": "Download arbitrary waveform float point data to volatile memory.",
+      "set": "SOUR<n>:DATA[:DATA] VOLATILE,<value>{,<value>...}",
+      "parameters": [{ "name": "value", "type": "real", "range": "-1 to 1" }],
+      "examples": ["SOUR1:DATA VOLATILE,0,0.5,1,0.5,0"]
+    },
+    {
+      "name": "trace_data_dac",
+      "mnemonic": "SOUR:DATA:DAC",
+      "category": "Arbitrary Data",
+      "description": "Download arbitrary waveform DAC data (14-bit) to volatile memory.",
+      "set": "SOUR<n>:DATA:DAC VOLATILE,<flag>,<data>",
+      "examples": ["SOUR1:DATA:DAC VOLATILE,16383,0"]
+    },
+    {
+      "name": "trace_data_dac16",
+      "mnemonic": "SOUR:DATA:DAC16",
+      "category": "Arbitrary Data",
+      "description": "Download arbitrary waveform 16-bit DAC binary data to volatile memory.",
+      "set": "SOUR<n>:DATA:DAC16 VOLATILE,<flag>,<data>",
+      "parameters": [{ "name": "flag", "type": "discrete", "range": "END|CON" }],
+      "examples": ["SOUR1:DATA:DAC16 VOLATILE,CON,#216<binary>"]
+    },
+    {
+      "name": "trace_data_value",
+      "mnemonic": "SOUR:DATA:VAL",
+      "category": "Arbitrary Data",
+      "description": "Set or query the DAC value of a specified point in volatile memory.",
+      "set": "SOUR<n>:DATA:VALue VOLATILE,<point>,<data>",
+      "query": "SOUR<n>:DATA:VALue? VOLATILE,<point>",
+      "examples": ["SOUR1:DATA:VAL VOLATILE,1,0"]
+    },
+    {
+      "name": "trace_data_points",
+      "mnemonic": "SOUR:DATA:POIN",
+      "category": "Arbitrary Data",
+      "description": "Set or query the number of initialized points of the arbitrary waveform in volatile memory.",
+      "set": "SOUR<n>:DATA:POINts VOLATILE,<points>",
+      "query": "SOUR<n>:DATA:POINts? VOLATILE",
+      "examples": ["SOUR1:DATA:POIN VOLATILE,100"]
+    },
+    {
+      "name": "trace_data_load",
+      "mnemonic": "SOUR:DATA:LOAD?",
+      "category": "Arbitrary Data",
+      "description": "Query the arbitrary waveform data in volatile memory.",
+      "query": "SOUR<n>:DATA:LOAD? VOLATILE",
+      "examples": ["SOUR1:DATA:LOAD? VOLATILE"]
+    },
+    {
+      "name": "trace_data_lock",
+      "mnemonic": "SOUR:DATA:LOCK",
+      "category": "Arbitrary Data",
+      "description": "Lock or unlock, or query, a stored arbitrary waveform.",
+      "set": "SOUR<n>:DATA:LOCK[:STATe] <trace_name>,{ON|OFF|1|0}",
+      "query": "SOUR<n>:DATA:LOCK[:STATe]? <trace_name>",
+      "parameters": [{ "name": "trace_name", "type": "string" }],
+      "examples": ["SOUR1:DATA:LOCK ABC,ON"]
+    },
+    {
+      "name": "trace_data_delete",
+      "mnemonic": "SOUR:DATA:DEL",
+      "category": "Arbitrary Data",
+      "description": "Delete the specified stored arbitrary waveform.",
+      "set": "SOUR<n>:DATA:DELete[:NAME] <trace_name>",
+      "parameters": [{ "name": "trace_name", "type": "string" }],
+      "examples": ["SOUR1:DATA:DEL ABC"]
+    },
+
+    {
+      "name": "output_state",
+      "mnemonic": "OUTP",
+      "category": "Output",
+      "description": "Enable or disable, or query, the channel output.",
+      "set": "OUTP<n>[:STATe] {ON|1|OFF|0}",
+      "query": "OUTP<n>[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["OUTP1 ON", "OUTP1?"]
+    },
+    {
+      "name": "output_impedance",
+      "mnemonic": "OUTP:IMP",
+      "category": "Output",
+      "description": "Set or query the output impedance of the channel.",
+      "set": "OUTP<n>:IMPedance {<ohms>|INFinity|MINimum|MAXimum}",
+      "query": "OUTP<n>:IMPedance? [MINimum|MAXimum]",
+      "parameters": [{ "name": "ohms", "type": "real", "unit": "ohm", "range": "1 to 10k; INFinity = HighZ" }],
+      "examples": ["OUTP1:IMP 50", "OUTP1:IMP INF"]
+    },
+    {
+      "name": "output_load",
+      "mnemonic": "OUTP:LOAD",
+      "category": "Output",
+      "description": "Set or query the output load of the channel.",
+      "set": "OUTP<n>:LOAD {<ohms>|INFinity|MINimum|MAXimum}",
+      "query": "OUTP<n>:LOAD? [MINimum|MAXimum]",
+      "parameters": [{ "name": "ohms", "type": "real", "unit": "ohm" }],
+      "examples": ["OUTP1:LOAD 50"]
+    },
+    {
+      "name": "output_mode",
+      "mnemonic": "OUTP:MODE",
+      "category": "Output",
+      "description": "Set or query the output mode (normal or gated) of the channel.",
+      "set": "OUTP<n>:MODE {NORMal|GATed}",
+      "query": "OUTP<n>:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "NORMal|GATed" }],
+      "examples": ["OUTP1:MODE NORM"]
+    },
+    {
+      "name": "output_polarity",
+      "mnemonic": "OUTP:POL",
+      "category": "Output",
+      "description": "Set or query the output polarity of the channel.",
+      "set": "OUTP<n>:POLarity {NORMal|INVerted}",
+      "query": "OUTP<n>:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "NORMal|INVerted" }],
+      "examples": ["OUTP1:POL NORM"]
+    },
+    {
+      "name": "output_gate_polarity",
+      "mnemonic": "OUTP:GATE:POL",
+      "category": "Output",
+      "description": "Set or query the gate polarity in gated output mode.",
+      "set": "OUTP<n>:GATe:POLarity {POSitive|NEGative}",
+      "query": "OUTP<n>:GATe:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["OUTP1:GATE:POL POS"]
+    },
+    {
+      "name": "output_sync_state",
+      "mnemonic": "OUTP:SYNC",
+      "category": "Output",
+      "description": "Enable or disable, or query, the sync output of the channel.",
+      "set": "OUTP<n>:SYNC[:STATe] {ON|1|OFF|0}",
+      "query": "OUTP<n>:SYNC[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["OUTP1:SYNC ON"]
+    },
+    {
+      "name": "output_sync_polarity",
+      "mnemonic": "OUTP:SYNC:POL",
+      "category": "Output",
+      "description": "Set or query the polarity of the sync output signal.",
+      "set": "OUTP<n>:SYNC:POLarity {POSitive|NEGative}",
+      "query": "OUTP<n>:SYNC:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["OUTP1:SYNC:POL POS"]
+    },
+    {
+      "name": "output_sync_delay",
+      "mnemonic": "OUTP:SYNC:DEL",
+      "category": "Output",
+      "description": "Set or query the delay of the sync output signal.",
+      "set": "OUTP<n>:SYNC:DELay {<delay>|MINimum|MAXimum}",
+      "query": "OUTP<n>:SYNC:DELay? [MINimum|MAXimum]",
+      "parameters": [{ "name": "delay", "type": "real", "unit": "s" }],
+      "examples": ["OUTP1:SYNC:DEL 0"]
+    },
+
+    {
+      "name": "counter_state",
+      "mnemonic": "COUN",
+      "category": "Counter",
+      "description": "Set or query the status of the frequency counter (on/off/run/stop/single).",
+      "set": "COUNter[:STATe] {ON|1|OFF|0|RUN|STOP|SINGLE}",
+      "query": "COUNter[:STATe]?",
+      "parameters": [{ "name": "state", "type": "discrete", "range": "ON|1|OFF|0|RUN|STOP|SINGLE" }],
+      "examples": ["COUN 1", "COUN?"]
+    },
+    {
+      "name": "counter_auto",
+      "mnemonic": "COUN:AUTO",
+      "category": "Counter",
+      "description": "Let the instrument select a proper gate time automatically for the frequency counter.",
+      "set": "COUNter:AUTO",
+      "examples": ["COUN:AUTO"]
+    },
+    {
+      "name": "counter_coupling",
+      "mnemonic": "COUN:COUP",
+      "category": "Counter",
+      "description": "Set or query the coupling mode (AC or DC) of the frequency counter input.",
+      "set": "COUNter:COUPling {AC|DC}",
+      "query": "COUNter:COUPling?",
+      "parameters": [{ "name": "coupling", "type": "discrete", "range": "AC|DC", "default": "AC" }],
+      "examples": ["COUN:COUP DC"]
+    },
+    {
+      "name": "counter_gatetime",
+      "mnemonic": "COUN:GATE",
+      "category": "Counter",
+      "description": "Set or query the gate time of the frequency counter (USER1 to USER6).",
+      "set": "COUNter:GATEtime {USER1|USER2|USER3|USER4|USER5|USER6}",
+      "query": "COUNter:GATEtime?",
+      "parameters": [{ "name": "gate", "type": "discrete", "range": "USER1|USER2|USER3|USER4|USER5|USER6", "default": "USER1" }],
+      "examples": ["COUN:GATE USER2"]
+    },
+    {
+      "name": "counter_hf",
+      "mnemonic": "COUN:HF",
+      "category": "Counter",
+      "description": "Enable or disable, or query, the high-frequency rejection of the frequency counter.",
+      "set": "COUNter:HF {ON|1|OFF|0}",
+      "query": "COUNter:HF?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0", "default": "OFF" }],
+      "examples": ["COUN:HF ON"]
+    },
+    {
+      "name": "counter_level",
+      "mnemonic": "COUN:LEVE",
+      "category": "Counter",
+      "description": "Set or query the trigger level of the frequency counter.",
+      "set": "COUNter:LEVEl {<value>|MINimum|MAXimum}",
+      "query": "COUNter:LEVEl? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "real", "unit": "V", "range": "-2.5 to 2.5", "default": "0" }],
+      "examples": ["COUN:LEVE 1.5"]
+    },
+    {
+      "name": "counter_sensitive",
+      "mnemonic": "COUN:SENS",
+      "category": "Counter",
+      "description": "Set or query the trigger sensitivity of the frequency counter.",
+      "set": "COUNter:SENSitive {<value>|MINimum|MAXimum}",
+      "query": "COUNter:SENSitive? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "real", "unit": "%", "range": "0 to 100", "default": "25" }],
+      "examples": ["COUN:SENS 30"]
+    },
+    {
+      "name": "counter_measure",
+      "mnemonic": "COUN:MEAS?",
+      "category": "Counter",
+      "description": "Query the frequency counter measurement results (frequency, period, duty cycle, positive and negative pulse width).",
+      "query": "COUNter:MEASure?",
+      "examples": ["COUN:MEAS?"]
+    },
+    {
+      "name": "counter_statistics_state",
+      "mnemonic": "COUN:STATI",
+      "category": "Counter",
+      "description": "Enable or disable, or query, the statistics function of the frequency counter.",
+      "set": "COUNter:STATIstics[:STATe] {ON|1|OFF|0}",
+      "query": "COUNter:STATIstics[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0", "default": "OFF" }],
+      "examples": ["COUN:STATI ON"]
+    },
+    {
+      "name": "counter_statistics_display",
+      "mnemonic": "COUN:STATI:DISP",
+      "category": "Counter",
+      "description": "Set or query the display format (digital or curve) of the frequency counter statistics.",
+      "set": "COUNter:STATIstics:DISPlay {DIGITAL|CURVE}",
+      "query": "COUNter:STATIstics:DISPlay?",
+      "parameters": [{ "name": "format", "type": "discrete", "range": "DIGITAL|CURVE", "default": "DIGITAL" }],
+      "examples": ["COUN:STATI:DISP CURVE"]
+    },
+    {
+      "name": "counter_statistics_clear",
+      "mnemonic": "COUN:STATI:CLEA",
+      "category": "Counter",
+      "description": "Clear the frequency counter statistic results.",
+      "set": "COUNter:STATIstics:CLEAr",
+      "examples": ["COUN:STATI:CLEA"]
+    },
+
+    {
+      "name": "coupling_state",
+      "mnemonic": "COUP",
+      "category": "Coupling",
+      "description": "Enable or disable, or query, the channel coupling function.",
+      "set": "COUPling[:STATe] {ON|1|OFF|0}",
+      "query": "COUPling[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["COUP ON"]
+    },
+    {
+      "name": "coupling_freq_state",
+      "mnemonic": "COUP:FREQ",
+      "category": "Coupling",
+      "description": "Enable or disable, or query, frequency coupling.",
+      "set": "COUPling:FREQuency[:STATe] {ON|1|OFF|0}",
+      "query": "COUPling:FREQuency[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["COUP:FREQ ON"]
+    },
+    {
+      "name": "coupling_freq_mode",
+      "mnemonic": "COUP:FREQ:MODE",
+      "category": "Coupling",
+      "description": "Set or query the frequency coupling mode (offset or ratio).",
+      "set": "COUPling:FREQuency:MODE {OFFSet|RATio}",
+      "query": "COUPling:FREQuency:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "OFFSet|RATio" }],
+      "examples": ["COUP:FREQ:MODE RAT"]
+    },
+    {
+      "name": "coupling_freq_deviation",
+      "mnemonic": "COUP:FREQ:DEV",
+      "category": "Coupling",
+      "description": "Set or query the frequency coupling deviation (offset mode).",
+      "set": "COUPling:FREQuency:DEViation <deviation>",
+      "query": "COUPling:FREQuency:DEViation?",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "Hz" }],
+      "examples": ["COUP:FREQ:DEV 100"]
+    },
+    {
+      "name": "coupling_freq_ratio",
+      "mnemonic": "COUP:FREQ:RAT",
+      "category": "Coupling",
+      "description": "Set or query the frequency coupling ratio (ratio mode).",
+      "set": "COUPling:FREQuency:RATio {<value>|MINimum|MAXimum}",
+      "query": "COUPling:FREQuency:RATio? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "real" }],
+      "examples": ["COUP:FREQ:RAT 2"]
+    },
+    {
+      "name": "coupling_ampl_state",
+      "mnemonic": "COUP:AMPL",
+      "category": "Coupling",
+      "description": "Enable or disable, or query, amplitude coupling.",
+      "set": "COUPling:AMPL[:STATe] {ON|1|OFF|0}",
+      "query": "COUPling:AMPL[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["COUP:AMPL ON"]
+    },
+    {
+      "name": "coupling_ampl_mode",
+      "mnemonic": "COUP:AMPL:MODE",
+      "category": "Coupling",
+      "description": "Set or query the amplitude coupling mode (offset or ratio).",
+      "set": "COUPling:AMPL:MODE {OFFSet|RATio}",
+      "query": "COUPling:AMPL:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "OFFSet|RATio" }],
+      "examples": ["COUP:AMPL:MODE RAT"]
+    },
+    {
+      "name": "coupling_ampl_deviation",
+      "mnemonic": "COUP:AMPL:DEV",
+      "category": "Coupling",
+      "description": "Set or query the amplitude coupling deviation (offset mode).",
+      "set": "COUPling:AMPL:DEViation <deviation>",
+      "query": "COUPling:AMPL:DEViation?",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "Vpp" }],
+      "examples": ["COUP:AMPL:DEV 1"]
+    },
+    {
+      "name": "coupling_ampl_ratio",
+      "mnemonic": "COUP:AMPL:RAT",
+      "category": "Coupling",
+      "description": "Set or query the amplitude coupling ratio (ratio mode).",
+      "set": "COUPling:AMPL:RATio {<value>|MINimum|MAXimum}",
+      "query": "COUPling:AMPL:RATio? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "real" }],
+      "examples": ["COUP:AMPL:RAT 2"]
+    },
+    {
+      "name": "coupling_phase_state",
+      "mnemonic": "COUP:PHAS",
+      "category": "Coupling",
+      "description": "Enable or disable, or query, phase coupling.",
+      "set": "COUPling:PHASe[:STATe] {ON|1|OFF|0}",
+      "query": "COUPling:PHASe[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["COUP:PHAS ON"]
+    },
+    {
+      "name": "coupling_phase_mode",
+      "mnemonic": "COUP:PHAS:MODE",
+      "category": "Coupling",
+      "description": "Set or query the phase coupling mode (offset or ratio).",
+      "set": "COUPling:PHASe:MODE {OFFSet|RATio}",
+      "query": "COUPling:PHASe:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "OFFSet|RATio" }],
+      "examples": ["COUP:PHAS:MODE RAT"]
+    },
+    {
+      "name": "coupling_phase_deviation",
+      "mnemonic": "COUP:PHAS:DEV",
+      "category": "Coupling",
+      "description": "Set or query the phase coupling deviation (offset mode).",
+      "set": "COUPling:PHASe:DEViation <deviation>",
+      "query": "COUPling:PHASe:DEViation?",
+      "parameters": [{ "name": "deviation", "type": "real", "unit": "deg", "range": "-360 to 360" }],
+      "examples": ["COUP:PHAS:DEV 90"]
+    },
+    {
+      "name": "coupling_phase_ratio",
+      "mnemonic": "COUP:PHAS:RAT",
+      "category": "Coupling",
+      "description": "Set or query the phase coupling ratio (ratio mode).",
+      "set": "COUPling:PHASe:RATio {<value>|MINimum|MAXimum}",
+      "query": "COUPling:PHASe:RATio? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "real" }],
+      "examples": ["COUP:PHAS:RAT 2"]
+    },
+
+    {
+      "name": "display_brightness",
+      "mnemonic": "DISP:BRIG",
+      "category": "Display",
+      "description": "Set or query the screen brightness.",
+      "set": "DISPlay:BRIGhtness {<brightness>|MINimum|MAXimum}",
+      "query": "DISPlay:BRIGhtness? [MINimum|MAXimum]",
+      "parameters": [{ "name": "brightness", "type": "integer", "unit": "%" }],
+      "examples": ["DISP:BRIG 50"]
+    },
+    {
+      "name": "display_contrast",
+      "mnemonic": "DISP:CONT",
+      "category": "Display",
+      "description": "Set or query the screen contrast.",
+      "set": "DISPlay:CONTrast {<contrast>|MINimum|MAXimum}",
+      "query": "DISPlay:CONTrast? [MINimum|MAXimum]",
+      "parameters": [{ "name": "contrast", "type": "integer", "unit": "%" }],
+      "examples": ["DISP:CONT 50"]
+    },
+    {
+      "name": "display_data",
+      "mnemonic": "DISP:DATA?",
+      "category": "Display",
+      "description": "Read the screen image data (bitmap).",
+      "query": "DISPlay:DATA?",
+      "examples": ["DISP:DATA?"]
+    },
+    {
+      "name": "display_mode",
+      "mnemonic": "DISP:MODE",
+      "category": "Display",
+      "description": "Set or query the display mode (dual parameter view, dual graph view, single view).",
+      "set": "DISPlay:MODE {DPV|DGV|SV}",
+      "query": "DISPlay:MODE?",
+      "parameters": [{ "name": "mode", "type": "discrete", "range": "DPV|DGV|SV" }],
+      "examples": ["DISP:MODE SV"]
+    },
+    {
+      "name": "display_saver_state",
+      "mnemonic": "DISP:SAV",
+      "category": "Display",
+      "description": "Enable or disable, or query, the screen saver.",
+      "set": "DISPlay:SAVer[:STATe] {ON|1|OFF|0}",
+      "query": "DISPlay:SAVer[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["DISP:SAV ON"]
+    },
+    {
+      "name": "display_saver_immediate",
+      "mnemonic": "DISP:SAV:IMM",
+      "category": "Display",
+      "description": "Enter the screen saver state immediately.",
+      "set": "DISPlay:SAVer:IMMediate",
+      "examples": ["DISP:SAV:IMM"]
+    },
+    {
+      "name": "display_state",
+      "mnemonic": "DISP",
+      "category": "Display",
+      "description": "Turn the display on or off, or query its status.",
+      "set": "DISPlay[:STATe] {ON|1|OFF|0}",
+      "query": "DISPlay[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["DISP ON"]
+    },
+    {
+      "name": "display_text",
+      "mnemonic": "DISP:TEXT",
+      "category": "Display",
+      "description": "Display a text string on the screen, or query the displayed text.",
+      "set": "DISPlay:TEXT[:SET] <quoted string>[,x[,y]]",
+      "query": "DISPlay:TEXT?",
+      "parameters": [{ "name": "string", "type": "string" }],
+      "examples": ["DISP:TEXT \"RIGOL\""]
+    },
+    {
+      "name": "display_text_clear",
+      "mnemonic": "DISP:TEXT:CLE",
+      "category": "Display",
+      "description": "Clear the text displayed on the screen.",
+      "set": "DISPlay:TEXT:CLEar",
+      "examples": ["DISP:TEXT:CLE"]
+    },
+
+    {
+      "name": "hcopy_data",
+      "mnemonic": "HCOP:SDUM:DATA?",
+      "category": "Hardcopy",
+      "description": "Read the screen dump image data.",
+      "query": "HCOPy:SDUMp:DATA?",
+      "examples": ["HCOP:SDUM:DATA?"]
+    },
+    {
+      "name": "hcopy_data_format",
+      "mnemonic": "HCOP:SDUM:DATA:FORM",
+      "category": "Hardcopy",
+      "description": "Set or query the format of the screen dump image data.",
+      "set": "HCOPy:SDUMp:DATA:FORMat BMP",
+      "query": "HCOPy:SDUMp:DATA:FORMat?",
+      "parameters": [{ "name": "format", "type": "discrete", "range": "BMP" }],
+      "examples": ["HCOP:SDUM:DATA:FORM BMP"]
+    },
+
+    {
+      "name": "license_install",
+      "mnemonic": "LIC:INST",
+      "category": "License",
+      "description": "Install an option license (serial number / key).",
+      "set": "LICense:INSTall <sn>",
+      "parameters": [{ "name": "sn", "type": "string" }],
+      "examples": ["LIC:INST ABCD..."]
+    },
+
+    {
+      "name": "lxi_identify",
+      "mnemonic": "LXI:IDEN",
+      "category": "LXI",
+      "description": "Enable or disable, or query, the LXI identify indicator.",
+      "set": "LXI:IDENtify[:STATE] {ON|1|OFF|0}",
+      "query": "LXI:IDENtify[:STATE]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["LXI:IDEN ON"]
+    },
+    {
+      "name": "lxi_mdns_enable",
+      "mnemonic": "LXI:MDNS:ENAB",
+      "category": "LXI",
+      "description": "Enable or disable, or query, the mDNS function.",
+      "set": "LXI:MDNS:ENABle {ON|1|OFF|0}",
+      "query": "LXI:MDNS:ENABle?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["LXI:MDNS:ENAB ON"]
+    },
+    {
+      "name": "lxi_mdns_hostname",
+      "mnemonic": "LXI:MDNS:HNAM?",
+      "category": "LXI",
+      "description": "Query the mDNS host name.",
+      "query": "LXI:MDNS:HNAMe[:RESolved]?",
+      "examples": ["LXI:MDNS:HNAM?"]
+    },
+    {
+      "name": "lxi_mdns_sname_desired",
+      "mnemonic": "LXI:MDNS:SNAM:DES",
+      "category": "LXI",
+      "description": "Set or query the desired mDNS service name.",
+      "set": "LXI:MDNS:SNAMe:DESired <name>",
+      "query": "LXI:MDNS:SNAMe:DESired?",
+      "parameters": [{ "name": "name", "type": "string" }],
+      "examples": ["LXI:MDNS:SNAM:DES \"DG1000Z\""]
+    },
+    {
+      "name": "lxi_mdns_sname_resolved",
+      "mnemonic": "LXI:MDNS:SNAM?",
+      "category": "LXI",
+      "description": "Query the resolved mDNS service name.",
+      "query": "LXI:MDNS:SNAMe[:RESolved]?",
+      "examples": ["LXI:MDNS:SNAM?"]
+    },
+    {
+      "name": "lxi_reset",
+      "mnemonic": "LXI:RES",
+      "category": "LXI",
+      "description": "Reset the LAN settings to their default values.",
+      "set": "LXI:RESet",
+      "examples": ["LXI:RES"]
+    },
+    {
+      "name": "lxi_restart",
+      "mnemonic": "LXI:REST",
+      "category": "LXI",
+      "description": "Restart the network with the current LAN settings.",
+      "set": "LXI:RESTart",
+      "examples": ["LXI:REST"]
+    },
+
+    {
+      "name": "memory_nstates",
+      "mnemonic": "MEM:NST?",
+      "category": "Memory",
+      "description": "Query the number of state storage locations.",
+      "query": "MEMory:NSTates?",
+      "examples": ["MEM:NST?"]
+    },
+    {
+      "name": "memory_state_catalog",
+      "mnemonic": "MEM:STAT:CAT?",
+      "category": "Memory",
+      "description": "Query the names of the stored states.",
+      "query": "MEMory:STATe:CATalog?",
+      "examples": ["MEM:STAT:CAT?"]
+    },
+    {
+      "name": "memory_state_delete",
+      "mnemonic": "MEM:STAT:DEL",
+      "category": "Memory",
+      "description": "Delete a stored state.",
+      "set": "MEMory:STATe:DELete",
+      "examples": ["MEM:STAT:DEL 1"]
+    },
+    {
+      "name": "memory_state_lock",
+      "mnemonic": "MEM:STAT:LOCK",
+      "category": "Memory",
+      "description": "Lock or unlock, or query, a state storage location.",
+      "set": "MEMory:STATe:LOCK",
+      "query": "MEMory:STATe:LOCK?",
+      "examples": ["MEM:STAT:LOCK 1,ON"]
+    },
+    {
+      "name": "memory_state_name",
+      "mnemonic": "MEM:STAT:NAME",
+      "category": "Memory",
+      "description": "Set or query the name of a state storage location.",
+      "set": "MEMory:STATe:NAME {0|1|2|3|4|5|6|7|8|9}[,<name>]",
+      "query": "MEMory:STATe:NAME? {0|1|2|3|4|5|6|7|8|9}",
+      "parameters": [{ "name": "name", "type": "string" }],
+      "examples": ["MEM:STAT:NAME 1,STATE1"]
+    },
+    {
+      "name": "memory_state_recall_auto",
+      "mnemonic": "MEM:STAT:REC:AUTO",
+      "category": "Memory",
+      "description": "Enable or disable, or query, automatic recall of the last state at power-on.",
+      "set": "MEMory:STATe:RECall:AUTO {ON|1|OFF|0}",
+      "query": "MEMory:STATe:RECall:AUTO?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["MEM:STAT:REC:AUTO ON"]
+    },
+    {
+      "name": "memory_state_valid",
+      "mnemonic": "MEM:STAT:VAL?",
+      "category": "Memory",
+      "description": "Query whether a state storage location contains valid data.",
+      "query": "MEMory:STATe:VALid?",
+      "examples": ["MEM:STAT:VAL? 1"]
+    },
+
+    {
+      "name": "mmemory_catalog_all",
+      "mnemonic": "MMEM:CAT?",
+      "category": "File",
+      "description": "Query all files and folders in the specified directory.",
+      "query": "MMEMory:CATalog[:ALL]? [<folder>]",
+      "parameters": [{ "name": "folder", "type": "string" }],
+      "examples": ["MMEM:CAT?"]
+    },
+    {
+      "name": "mmemory_catalog_data_arbitrary",
+      "mnemonic": "MMEM:CAT:DATA:ARB?",
+      "category": "File",
+      "description": "Query the arbitrary waveform data files in the specified directory.",
+      "query": "MMEMory:CATalog:DATA:ARBitrary? [<folder>]",
+      "parameters": [{ "name": "folder", "type": "string" }],
+      "examples": ["MMEM:CAT:DATA:ARB?"]
+    },
+    {
+      "name": "mmemory_catalog_state",
+      "mnemonic": "MMEM:CAT:STAT?",
+      "category": "File",
+      "description": "Query the state files in the specified directory.",
+      "query": "MMEMory:CATalog:STATe? [<folder>]",
+      "parameters": [{ "name": "folder", "type": "string" }],
+      "examples": ["MMEM:CAT:STAT?"]
+    },
+    {
+      "name": "mmemory_cdirectory",
+      "mnemonic": "MMEM:CDIR",
+      "category": "File",
+      "description": "Set or query the current working directory.",
+      "set": "MMEMory:CDIRectory <directory_name>",
+      "query": "MMEMory:CDIRectory?",
+      "parameters": [{ "name": "directory_name", "type": "string" }],
+      "examples": ["MMEM:CDIR C:\\"]
+    },
+    {
+      "name": "mmemory_copy",
+      "mnemonic": "MMEM:COPY",
+      "category": "File",
+      "description": "Copy a file into the specified directory.",
+      "set": "MMEMory:COPY <directory_name>,<file_name>",
+      "parameters": [
+        { "name": "directory_name", "type": "string" },
+        { "name": "file_name", "type": "string" }
+      ],
+      "examples": ["MMEM:COPY D:\\,test.RAF"]
+    },
+    {
+      "name": "mmemory_delete",
+      "mnemonic": "MMEM:DEL",
+      "category": "File",
+      "description": "Delete the specified file.",
+      "set": "MMEMory:DELete <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:DEL C:\\test.RAF"]
+    },
+    {
+      "name": "mmemory_load_all",
+      "mnemonic": "MMEM:LOAD",
+      "category": "File",
+      "description": "Load the specified state file (full instrument state).",
+      "set": "MMEMory:LOAD[:ALL] <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:LOAD C:\\state.RSF"]
+    },
+    {
+      "name": "mmemory_load_data",
+      "mnemonic": "MMEM:LOAD:DATA",
+      "category": "File",
+      "description": "Load the specified arbitrary waveform data file into the channel.",
+      "set": "MMEMory:LOAD:DATA[1|2] <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:LOAD:DATA1 C:\\test.RAF"]
+    },
+    {
+      "name": "mmemory_load_state",
+      "mnemonic": "MMEM:LOAD:STAT",
+      "category": "File",
+      "description": "Load the specified state file.",
+      "set": "MMEMory:LOAD:STATe <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:LOAD:STAT C:\\state.RSF"]
+    },
+    {
+      "name": "mmemory_mdirectory",
+      "mnemonic": "MMEM:MDIR",
+      "category": "File",
+      "description": "Create a new directory.",
+      "set": "MMEMory:MDIRectory <dir_name>",
+      "parameters": [{ "name": "dir_name", "type": "string" }],
+      "examples": ["MMEM:MDIR D:\\NEW"]
+    },
+    {
+      "name": "mmemory_rdirectory",
+      "mnemonic": "MMEM:RDIR",
+      "category": "File",
+      "description": "Remove the specified directory, or query the current directory.",
+      "set": "MMEMory:RDIRectory <folder>",
+      "query": "MMEMory:RDIRectory?",
+      "parameters": [{ "name": "folder", "type": "string" }],
+      "examples": ["MMEM:RDIR D:\\NEW"]
+    },
+    {
+      "name": "mmemory_store_all",
+      "mnemonic": "MMEM:STOR",
+      "category": "File",
+      "description": "Store the current instrument state to the specified file.",
+      "set": "MMEMory:STORe[:ALL] <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:STOR C:\\state.RSF"]
+    },
+    {
+      "name": "mmemory_store_data",
+      "mnemonic": "MMEM:STOR:DATA",
+      "category": "File",
+      "description": "Store the channel arbitrary waveform data to the specified file.",
+      "set": "MMEMory:STORe:DATA[1|2] <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:STOR:DATA1 C:\\test.RAF"]
+    },
+    {
+      "name": "mmemory_store_state",
+      "mnemonic": "MMEM:STOR:STAT",
+      "category": "File",
+      "description": "Store the current instrument state to the specified state file.",
+      "set": "MMEMory:STORe:STATe <file_name>",
+      "parameters": [{ "name": "file_name", "type": "string" }],
+      "examples": ["MMEM:STOR:STAT C:\\state.RSF"]
+    },
+
+    {
+      "name": "pa_state",
+      "mnemonic": "PA",
+      "category": "Power Amplifier",
+      "description": "Enable or disable, or query, the power amplifier (DG1000Z-P option).",
+      "set": "PA[:STATe] {ON|1|OFF|0}",
+      "query": "PA[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["PA ON"]
+    },
+    {
+      "name": "pa_gain",
+      "mnemonic": "PA:GAIN",
+      "category": "Power Amplifier",
+      "description": "Set or query the power amplifier gain.",
+      "set": "PA:GAIN {1X|10X}",
+      "query": "PA:GAIN?",
+      "parameters": [{ "name": "gain", "type": "discrete", "range": "1X|10X" }],
+      "examples": ["PA:GAIN 10X"]
+    },
+    {
+      "name": "pa_offset_state",
+      "mnemonic": "PA:OFFS",
+      "category": "Power Amplifier",
+      "description": "Enable or disable, or query, the power amplifier DC offset.",
+      "set": "PA:OFFSet[:STATe] {ON|1|OFF|0}",
+      "query": "PA:OFFSet[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["PA:OFFS ON"]
+    },
+    {
+      "name": "pa_offset_value",
+      "mnemonic": "PA:OFFS:VALU",
+      "category": "Power Amplifier",
+      "description": "Set or query the power amplifier DC offset value.",
+      "set": "PA:OFFSet:VALUe {<value>|MINimum|MAXimum}",
+      "query": "PA:OFFSet:VALUe? [MINimum|MAXimum]",
+      "parameters": [{ "name": "value", "type": "real", "unit": "V" }],
+      "examples": ["PA:OFFS:VALU 1"]
+    },
+    {
+      "name": "pa_output_polarity",
+      "mnemonic": "PA:OUTP:POL",
+      "category": "Power Amplifier",
+      "description": "Set or query the power amplifier output polarity.",
+      "set": "PA:OUTPut:POLarity {NORMal|INVerted}",
+      "query": "PA:OUTPut:POLarity?",
+      "parameters": [{ "name": "polarity", "type": "discrete", "range": "NORMal|INVerted" }],
+      "examples": ["PA:OUTP:POL NORM"]
+    },
+    {
+      "name": "pa_save",
+      "mnemonic": "PA:SAVE",
+      "category": "Power Amplifier",
+      "description": "Save the current power amplifier settings.",
+      "set": "PA:SAVE",
+      "examples": ["PA:SAVE"]
+    },
+
+    {
+      "name": "roscillator_source",
+      "mnemonic": "ROSC:SOUR",
+      "category": "Reference",
+      "description": "Set or query the reference oscillator (clock) source.",
+      "set": "ROSCillator:SOURce {INTernal|EXTernal}",
+      "query": "ROSCillator:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["ROSC:SOUR INT"]
+    },
+    {
+      "name": "roscillator_source_current",
+      "mnemonic": "ROSC:SOUR:CURR?",
+      "category": "Reference",
+      "description": "Query the reference clock source currently in use.",
+      "query": "ROSCillator:SOURce:CURRent?",
+      "examples": ["ROSC:SOUR:CURR?"]
+    },
+
+    {
+      "name": "system_beeper",
+      "mnemonic": "SYST:BEEP",
+      "category": "System",
+      "description": "Generate a beep immediately.",
+      "set": "SYSTem:BEEPer[:IMMediate]",
+      "examples": ["SYST:BEEP"]
+    },
+    {
+      "name": "system_beeper_state",
+      "mnemonic": "SYST:BEEP:STAT",
+      "category": "System",
+      "description": "Enable or disable, or query, the beeper.",
+      "set": "SYSTem:BEEPer:STATe {ON|1|OFF|0}",
+      "query": "SYSTem:BEEPer:STATe?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SYST:BEEP:STAT ON"]
+    },
+    {
+      "name": "system_channel_current",
+      "mnemonic": "SYST:CHAN:CUR",
+      "category": "System",
+      "description": "Set or query the current channel.",
+      "set": "SYSTem:CHANnel:CURrent {CH1|CH2}",
+      "query": "SYSTem:CHANnel:CURrent?",
+      "parameters": [{ "name": "channel", "type": "discrete", "range": "CH1|CH2" }],
+      "examples": ["SYST:CHAN:CUR CH1"]
+    },
+    {
+      "name": "system_channel_number",
+      "mnemonic": "SYST:CHAN:NUMB?",
+      "category": "System",
+      "description": "Query the number of channels of the instrument.",
+      "query": "SYSTem:CHANnel:NUMber?",
+      "examples": ["SYST:CHAN:NUMB?"]
+    },
+    {
+      "name": "system_gpib_address",
+      "mnemonic": "SYST:COMM:GPIB:ADDR",
+      "category": "System",
+      "description": "Set or query the GPIB address.",
+      "set": "SYSTem:COMMunicate:GPIB[:SELF]:ADDRess <integer>",
+      "query": "SYSTem:COMMunicate:GPIB[:SELF]:ADDRess?",
+      "parameters": [{ "name": "address", "type": "integer", "range": "0 to 30" }],
+      "examples": ["SYST:COMM:GPIB:ADDR 7"]
+    },
+    {
+      "name": "system_lan_apply",
+      "mnemonic": "SYST:COMM:LAN:APPL",
+      "category": "System",
+      "description": "Apply the current LAN configuration.",
+      "set": "SYSTem:COMMunicate:LAN:APPLy",
+      "examples": ["SYST:COMM:LAN:APPL"]
+    },
+    {
+      "name": "system_lan_autoip",
+      "mnemonic": "SYST:COMM:LAN:AUTO",
+      "category": "System",
+      "description": "Enable or disable, or query, the auto IP configuration mode.",
+      "set": "SYSTem:COMMunicate:LAN:AUTOip[:STATe] {ON|1|OFF|0}",
+      "query": "SYSTem:COMMunicate:LAN:AUTOip[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SYST:COMM:LAN:AUTO ON"]
+    },
+    {
+      "name": "system_lan_control",
+      "mnemonic": "SYST:COMM:LAN:CONT?",
+      "category": "System",
+      "description": "Query the initial socket control connection port number.",
+      "query": "SYSTem:COMMunicate:LAN:CONTrol?",
+      "examples": ["SYST:COMM:LAN:CONT?"]
+    },
+    {
+      "name": "system_lan_dhcp",
+      "mnemonic": "SYST:COMM:LAN:DHCP",
+      "category": "System",
+      "description": "Enable or disable, or query, the DHCP configuration mode.",
+      "set": "SYSTem:COMMunicate:LAN:DHCP[:STATe] {ON|1|OFF|0}",
+      "query": "SYSTem:COMMunicate:LAN:DHCP[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SYST:COMM:LAN:DHCP ON"]
+    },
+    {
+      "name": "system_lan_dns",
+      "mnemonic": "SYST:COMM:LAN:DNS",
+      "category": "System",
+      "description": "Set or query the DNS server address.",
+      "set": "SYSTem:COMMunicate:LAN:DNS <address>",
+      "query": "SYSTem:COMMunicate:LAN:DNS?",
+      "parameters": [{ "name": "address", "type": "string" }],
+      "examples": ["SYST:COMM:LAN:DNS 192.168.1.1"]
+    },
+    {
+      "name": "system_lan_domain",
+      "mnemonic": "SYST:COMM:LAN:DOM",
+      "category": "System",
+      "description": "Set or query the LAN domain name.",
+      "set": "SYSTem:COMMunicate:LAN:DOMain <name>",
+      "query": "SYSTem:COMMunicate:LAN:DOMain?",
+      "parameters": [{ "name": "name", "type": "string" }],
+      "examples": ["SYST:COMM:LAN:DOM example.com"]
+    },
+    {
+      "name": "system_lan_gateway",
+      "mnemonic": "SYST:COMM:LAN:GATE",
+      "category": "System",
+      "description": "Set or query the default gateway address.",
+      "set": "SYSTem:COMMunicate:LAN:GATEway <address>",
+      "query": "SYSTem:COMMunicate:LAN:GATEway?",
+      "parameters": [{ "name": "address", "type": "string" }],
+      "examples": ["SYST:COMM:LAN:GATE 192.168.1.1"]
+    },
+    {
+      "name": "system_lan_hostname",
+      "mnemonic": "SYST:COMM:LAN:HOST",
+      "category": "System",
+      "description": "Set or query the host name.",
+      "set": "SYSTem:COMMunicate:LAN:HOSTname <name>",
+      "query": "SYSTem:COMMunicate:LAN:HOSTname?",
+      "parameters": [{ "name": "name", "type": "string" }],
+      "examples": ["SYST:COMM:LAN:HOST DG1000Z"]
+    },
+    {
+      "name": "system_lan_ipaddress",
+      "mnemonic": "SYST:COMM:LAN:IPAD",
+      "category": "System",
+      "description": "Set or query the IP address.",
+      "set": "SYSTem:COMMunicate:LAN:IPADdress <ip_address>",
+      "query": "SYSTem:COMMunicate:LAN:IPADdress?",
+      "parameters": [{ "name": "ip_address", "type": "string" }],
+      "examples": ["SYST:COMM:LAN:IPAD 192.168.1.10"]
+    },
+    {
+      "name": "system_lan_mac",
+      "mnemonic": "SYST:COMM:LAN:MAC?",
+      "category": "System",
+      "description": "Query the MAC address.",
+      "query": "SYSTem:COMMunicate:LAN:MAC?",
+      "examples": ["SYST:COMM:LAN:MAC?"]
+    },
+    {
+      "name": "system_lan_smask",
+      "mnemonic": "SYST:COMM:LAN:SMAS",
+      "category": "System",
+      "description": "Set or query the subnet mask.",
+      "set": "SYSTem:COMMunicate:LAN:SMASk <mask>",
+      "query": "SYSTem:COMMunicate:LAN:SMASk?",
+      "parameters": [{ "name": "mask", "type": "string" }],
+      "examples": ["SYST:COMM:LAN:SMAS 255.255.255.0"]
+    },
+    {
+      "name": "system_lan_static",
+      "mnemonic": "SYST:COMM:LAN:STAT",
+      "category": "System",
+      "description": "Enable or disable, or query, the static IP configuration mode.",
+      "set": "SYSTem:COMMunicate:LAN:STATic[:STATe] {ON|1|OFF|0}",
+      "query": "SYSTem:COMMunicate:LAN:STATic[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SYST:COMM:LAN:STAT ON"]
+    },
+    {
+      "name": "system_lan_update",
+      "mnemonic": "SYST:COMM:LAN:UPD",
+      "category": "System",
+      "description": "Update and apply the LAN configuration.",
+      "set": "SYSTem:COMMunicate:LAN:UPDate",
+      "examples": ["SYST:COMM:LAN:UPD"]
+    },
+    {
+      "name": "system_usb_information",
+      "mnemonic": "SYST:COMM:USB:INF?",
+      "category": "System",
+      "description": "Query the USB interface information.",
+      "query": "SYSTem:COMMunicate:USB:INFormation?",
+      "examples": ["SYST:COMM:USB:INF?"]
+    },
+    {
+      "name": "system_usb_class",
+      "mnemonic": "SYST:COMM:USB:CLAS",
+      "category": "System",
+      "description": "Set or query the USB device class (computer or printer).",
+      "set": "SYSTem:COMMunicate:USB[:SELF]:CLASs {COMPuter|PRINter}",
+      "query": "SYSTem:COMMunicate:USB[:SELF]:CLASs?",
+      "parameters": [{ "name": "class", "type": "discrete", "range": "COMPuter|PRINter" }],
+      "examples": ["SYST:COMM:USB:CLAS COMP"]
+    },
+    {
+      "name": "system_cscopy",
+      "mnemonic": "SYST:CSC",
+      "category": "System",
+      "description": "Copy the settings of one channel to the other channel.",
+      "set": "SYSTem:CSCopy <name>,<name>",
+      "parameters": [{ "name": "channels", "type": "string", "range": "CH1,CH2 or CH2,CH1" }],
+      "examples": ["SYST:CSC CH1,CH2"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYST:ERR?",
+      "category": "System",
+      "description": "Query and clear the oldest error in the error queue.",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_klock",
+      "mnemonic": "SYST:KLOC",
+      "category": "System",
+      "description": "Lock or unlock, or query, the front panel keys.",
+      "set": "SYSTem:KLOCk[:STATe] {ON|1|OFF|0}",
+      "query": "SYSTem:KLOCk[:STATe]?",
+      "parameters": [{ "name": "state", "type": "bool", "range": "ON|1|OFF|0" }],
+      "examples": ["SYST:KLOC ON"]
+    },
+    {
+      "name": "system_language",
+      "mnemonic": "SYST:LANG",
+      "category": "System",
+      "description": "Set or query the system language.",
+      "set": "SYSTem:LANGuage {ENGLish|SCHinese}",
+      "query": "SYSTem:LANGuage?",
+      "parameters": [{ "name": "language", "type": "discrete", "range": "ENGLish|SCHinese" }],
+      "examples": ["SYST:LANG ENGL"]
+    },
+    {
+      "name": "system_poweron",
+      "mnemonic": "SYST:POW",
+      "category": "System",
+      "description": "Set or query the power-on configuration (default or last).",
+      "set": "SYSTem:POWeron {DEFault|LAST}",
+      "query": "SYSTem:POWeron?",
+      "parameters": [{ "name": "config", "type": "discrete", "range": "DEFault|LAST" }],
+      "examples": ["SYST:POW DEF"]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": "SYST:PRES",
+      "category": "System",
+      "description": "Restore the instrument to a preset state.",
+      "set": "SYSTem:PRESet",
+      "examples": ["SYST:PRES"]
+    },
+    {
+      "name": "system_roscillator_source",
+      "mnemonic": "SYST:ROSC:SOUR",
+      "category": "System",
+      "description": "Set or query the system reference oscillator source.",
+      "set": "SYSTem:ROSCillator:SOURce {INTernal|EXTernal}",
+      "query": "SYSTem:ROSCillator:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal" }],
+      "examples": ["SYST:ROSC:SOUR INT"]
+    },
+    {
+      "name": "system_security_immediate",
+      "mnemonic": "SYST:SEC:IMM",
+      "category": "System",
+      "description": "Clear all user data and restore factory defaults immediately.",
+      "set": "SYSTem:SECurity:IMMediate",
+      "examples": ["SYST:SEC:IMM"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYST:VERS?",
+      "category": "System",
+      "description": "Query the SCPI version number the instrument complies with.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+
+    {
+      "name": "trigger_immediate",
+      "mnemonic": "TRIG",
+      "category": "Trigger",
+      "description": "Generate an immediate trigger for the specified channel (sweep/burst).",
+      "set": "TRIGger<n>[:IMMediate]",
+      "examples": ["TRIG1"]
+    },
+    {
+      "name": "trigger_delay",
+      "mnemonic": "TRIG:DEL",
+      "category": "Trigger",
+      "description": "Set or query the trigger delay of the specified channel.",
+      "set": "TRIGger<n>:DELay {<seconds>|MINimum|MAXimum}",
+      "query": "TRIGger<n>:DELay? [MINimum|MAXimum]",
+      "parameters": [{ "name": "seconds", "type": "real", "unit": "s" }],
+      "examples": ["TRIG1:DEL 0.001"]
+    },
+    {
+      "name": "trigger_slope",
+      "mnemonic": "TRIG:SLOP",
+      "category": "Trigger",
+      "description": "Set or query the edge of the external trigger signal.",
+      "set": "TRIGger<n>:SLOPe {POSitive|NEGative}",
+      "query": "TRIGger<n>:SLOPe?",
+      "parameters": [{ "name": "slope", "type": "discrete", "range": "POSitive|NEGative" }],
+      "examples": ["TRIG1:SLOP POS"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIG:SOUR",
+      "category": "Trigger",
+      "description": "Set or query the trigger source of the specified channel.",
+      "set": "TRIGger<n>:SOURce {INTernal|EXTernal|BUS}",
+      "query": "TRIGger<n>:SOURce?",
+      "parameters": [{ "name": "source", "type": "discrete", "range": "INTernal|EXTernal|BUS" }],
+      "examples": ["TRIG1:SOUR INT"]
+    }
+  ]
+}

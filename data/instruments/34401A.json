@@ -1,0 +1,814 @@
+{
+  "model": "34401A",
+  "manufacturer": "HP/Agilent",
+  "category": "Digital Multimeter",
+  "description": "HP/Agilent 34401A 6.5-digit digital multimeter. Measures DC/AC voltage and current, 2- and 4-wire resistance, frequency, period, continuity and diodes, with math and limit-testing features. Programmed using SCPI over GPIB (IEEE-488) or RS-232.",
+  "source": "34401A User.pdf",
+  "aliases": ["34401A", "HP34401A", "Agilent 34401A", "HP 34401A", "Agilent34401A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "34401A",
+    "description": "Standard SCPI identification query. Returns the multimeter's identification string (dimension a string of at least 35 characters)."
+  },
+  "commands": [
+    {
+      "name": "measure_dc_voltage",
+      "mnemonic": "MEAS:VOLT:DC?",
+      "category": "Measurement",
+      "description": "Preset and make a DC voltage measurement with the specified range and resolution; the reading is sent to the output buffer.",
+      "query": "MEASure:VOLTage:DC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "100 mV, 1 V, 10 V, 100 V, 1000 V; or MIN|MAX|DEF (DEF = autorange)" },
+        { "name": "resolution", "units": ["V"], "range": "in volts; MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:VOLT:DC?", "MEAS:VOLT:DC? 10,0.003"]
+    },
+    {
+      "name": "measure_dc_voltage_ratio",
+      "mnemonic": "MEAS:VOLT:DC:RATio?",
+      "category": "Measurement",
+      "description": "Preset and make a DC:DC ratio measurement. The specified range applies to the Input terminals; the reference (Sense terminals) is always autoranged.",
+      "query": "MEASure:VOLTage:DC:RATio? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "100 mV to 1000 V; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["V"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:VOLT:DC:RAT? 10,0.001"]
+    },
+    {
+      "name": "measure_ac_voltage",
+      "mnemonic": "MEAS:VOLT:AC?",
+      "category": "Measurement",
+      "description": "Preset and make an AC voltage measurement. For AC, resolution is fixed at 6.5 digits; the resolution parameter only affects the front-panel display.",
+      "query": "MEASure:VOLTage:AC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "100 mV, 1 V, 10 V, 100 V, 750 V; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["V"], "range": "MIN|MAX|DEF (display only)" }
+      ],
+      "examples": ["MEAS:VOLT:AC?", "MEAS:VOLT:AC? 1,0.001"]
+    },
+    {
+      "name": "measure_dc_current",
+      "mnemonic": "MEAS:CURR:DC?",
+      "category": "Measurement",
+      "description": "Preset and make a DC current measurement with the specified range and resolution; the reading is sent to the output buffer.",
+      "query": "MEASure:CURRent:DC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "10 mA, 100 mA, 1 A, 3 A; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["A"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:CURR:DC?", "MEAS:CURR:DC? 1,0.0001"]
+    },
+    {
+      "name": "measure_ac_current",
+      "mnemonic": "MEAS:CURR:AC?",
+      "category": "Measurement",
+      "description": "Preset and make an AC current measurement. For AC, resolution is fixed at 6.5 digits; the resolution parameter only affects the front-panel display.",
+      "query": "MEASure:CURRent:AC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "1 A, 3 A; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["A"], "range": "MIN|MAX|DEF (display only)" }
+      ],
+      "examples": ["MEAS:CURR:AC?"]
+    },
+    {
+      "name": "measure_resistance",
+      "mnemonic": "MEAS:RES?",
+      "category": "Measurement",
+      "description": "Preset and make a 2-wire ohms measurement with the specified range and resolution.",
+      "query": "MEASure:RESistance? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["Ohm"], "range": "100, 1k, 10k, 100k, 1M, 10M, 100M ohms; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["Ohm"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:RES?", "MEAS:RES? 10000,1"]
+    },
+    {
+      "name": "measure_fresistance",
+      "mnemonic": "MEAS:FRES?",
+      "category": "Measurement",
+      "description": "Preset and make a 4-wire ohms measurement with the specified range and resolution.",
+      "query": "MEASure:FRESistance? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["Ohm"], "range": "100 to 100M ohms; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["Ohm"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:FRES?"]
+    },
+    {
+      "name": "measure_frequency",
+      "mnemonic": "MEAS:FREQ?",
+      "category": "Measurement",
+      "description": "Preset and make a frequency measurement. One 'range' covers all inputs between 3 Hz and 300 kHz; with no input applied the result is 0.",
+      "query": "MEASure:FREQuency? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["Hz"], "range": "input voltage range; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["Hz"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:FREQ?"]
+    },
+    {
+      "name": "measure_period",
+      "mnemonic": "MEAS:PER?",
+      "category": "Measurement",
+      "description": "Preset and make a period measurement. One 'range' covers all inputs between 0.33 s and 3.3 us; with no input applied the result is 0.",
+      "query": "MEASure:PERiod? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["s"], "range": "input voltage range; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": ["s"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["MEAS:PER?"]
+    },
+    {
+      "name": "measure_continuity",
+      "mnemonic": "MEAS:CONT?",
+      "category": "Measurement",
+      "description": "Preset and make a continuity measurement. Range and resolution are fixed (1 kohm range, 5.5 digits).",
+      "query": "MEASure:CONTinuity?",
+      "examples": ["MEAS:CONT?"]
+    },
+    {
+      "name": "measure_diode",
+      "mnemonic": "MEAS:DIOD?",
+      "category": "Measurement",
+      "description": "Preset and make a diode measurement. Fixed at 1 Vdc range with 1 mA current source and 5.5 digits.",
+      "query": "MEASure:DIODe?",
+      "examples": ["MEAS:DIOD?"]
+    },
+    {
+      "name": "configure_dc_voltage",
+      "mnemonic": "CONF:VOLT:DC",
+      "category": "Configure",
+      "description": "Preset and configure the multimeter for DC voltage measurements; does not initiate the measurement.",
+      "set": "CONFigure:VOLTage:DC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "100 mV to 1000 V; or MIN|MAX|DEF (DEF = autorange)" },
+        { "name": "resolution", "units": ["V"], "range": "MIN|MAX|DEF" }
+      ],
+      "examples": ["CONF:VOLT:DC 10,0.003", "CONF:VOLT:DC AUTO"]
+    },
+    {
+      "name": "configure_dc_voltage_ratio",
+      "mnemonic": "CONF:VOLT:DC:RATio",
+      "category": "Configure",
+      "description": "Preset and configure for DC:DC ratio measurements; does not initiate the measurement. Range applies to the Input terminals; reference is autoranged.",
+      "set": "CONFigure:VOLTage:DC:RATio {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "examples": ["CONF:VOLT:DC:RAT 10,0.001"]
+    },
+    {
+      "name": "configure_ac_voltage",
+      "mnemonic": "CONF:VOLT:AC",
+      "category": "Configure",
+      "description": "Preset and configure for AC voltage measurements; does not initiate. Resolution is fixed at 6.5 digits (parameter affects display only).",
+      "set": "CONFigure:VOLTage:AC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["V"], "range": "100 mV to 750 V; or MIN|MAX|DEF" }
+      ],
+      "examples": ["CONF:VOLT:AC 1,0.001"]
+    },
+    {
+      "name": "configure_dc_current",
+      "mnemonic": "CONF:CURR:DC",
+      "category": "Configure",
+      "description": "Preset and configure for DC current measurements; does not initiate the measurement.",
+      "set": "CONFigure:CURRent:DC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "10 mA to 3 A; or MIN|MAX|DEF" }
+      ],
+      "examples": ["CONF:CURR:DC 1,0.0001"]
+    },
+    {
+      "name": "configure_ac_current",
+      "mnemonic": "CONF:CURR:AC",
+      "category": "Configure",
+      "description": "Preset and configure for AC current measurements; does not initiate. Resolution fixed at 6.5 digits (parameter affects display only).",
+      "set": "CONFigure:CURRent:AC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["A"], "range": "1 A, 3 A; or MIN|MAX|DEF" }
+      ],
+      "examples": ["CONF:CURR:AC 1"]
+    },
+    {
+      "name": "configure_resistance",
+      "mnemonic": "CONF:RES",
+      "category": "Configure",
+      "description": "Preset and configure for 2-wire ohms measurements; does not initiate the measurement.",
+      "set": "CONFigure:RESistance {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["Ohm"], "range": "100 to 100M ohms; or MIN|MAX|DEF" }
+      ],
+      "examples": ["CONF:RES 10000,1"]
+    },
+    {
+      "name": "configure_fresistance",
+      "mnemonic": "CONF:FRES",
+      "category": "Configure",
+      "description": "Preset and configure for 4-wire ohms measurements; does not initiate the measurement.",
+      "set": "CONFigure:FRESistance {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "parameters": [
+        { "name": "range", "units": ["Ohm"], "range": "100 to 100M ohms; or MIN|MAX|DEF" }
+      ],
+      "examples": ["CONF:FRES 10000,1"]
+    },
+    {
+      "name": "configure_frequency",
+      "mnemonic": "CONF:FREQ",
+      "category": "Configure",
+      "description": "Preset and configure for a frequency measurement; does not initiate. One range covers 3 Hz to 300 kHz.",
+      "set": "CONFigure:FREQuency {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "examples": ["CONF:FREQ"]
+    },
+    {
+      "name": "configure_period",
+      "mnemonic": "CONF:PER",
+      "category": "Configure",
+      "description": "Preset and configure for a period measurement; does not initiate. One range covers 0.33 s to 3.3 us.",
+      "set": "CONFigure:PERiod {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
+      "examples": ["CONF:PER"]
+    },
+    {
+      "name": "configure_continuity",
+      "mnemonic": "CONF:CONT",
+      "category": "Configure",
+      "description": "Preset and configure for continuity measurements; does not initiate. Fixed at 1 kohm range, 5.5 digits.",
+      "set": "CONFigure:CONTinuity",
+      "examples": ["CONF:CONT"]
+    },
+    {
+      "name": "configure_diode",
+      "mnemonic": "CONF:DIOD",
+      "category": "Configure",
+      "description": "Preset and configure for diode measurements; does not initiate. Fixed at 1 Vdc range with 1 mA source and 5.5 digits.",
+      "set": "CONFigure:DIODe",
+      "examples": ["CONF:DIOD"]
+    },
+    {
+      "name": "configure_query",
+      "mnemonic": "CONF?",
+      "category": "Configure",
+      "description": "Query the multimeter's present configuration and return a quoted string.",
+      "query": "CONFigure?",
+      "examples": ["CONF?"]
+    },
+    {
+      "name": "sense_function",
+      "mnemonic": "FUNC",
+      "category": "Measurement Configuration",
+      "description": "Select the measurement function. The function name must be enclosed in quotes, e.g. FUNC \"VOLT:DC\". Valid: VOLTage:DC, VOLTage:DC:RATio, VOLTage:AC, CURRent:DC, CURRent:AC, RESistance, FRESistance, FREQuency, PERiod, CONTinuity, DIODe.",
+      "set": "[SENSe:]FUNCtion \"<function>\"",
+      "query": "[SENSe:]FUNCtion?",
+      "parameters": [
+        { "name": "function", "range": "VOLTage:DC | VOLTage:DC:RATio | VOLTage:AC | CURRent:DC | CURRent:AC | RESistance | FRESistance | FREQuency | PERiod | CONTinuity | DIODe" }
+      ],
+      "examples": ["FUNC \"VOLT:DC\"", "FUNC \"RES\"", "FUNC?"]
+    },
+    {
+      "name": "sense_range",
+      "mnemonic": "<func>:RANGe",
+      "category": "Measurement Configuration",
+      "description": "Select or query the range for the selected function. For frequency and period use FREQuency:VOLTage:RANGe or PERiod:VOLTage:RANGe (range applies to input voltage, not frequency).",
+      "set": "[SENSe:]<function>:RANGe {<range>|MINimum|MAXimum}",
+      "query": "[SENSe:]<function>:RANGe? [MINimum|MAXimum]",
+      "examples": ["VOLT:DC:RANG 10", "RES:RANG? MAX", "FREQ:VOLT:RANG 1"]
+    },
+    {
+      "name": "sense_range_auto",
+      "mnemonic": "<func>:RANGe:AUTO",
+      "category": "Measurement Configuration",
+      "description": "Disable or enable autoranging for the selected function. Thresholds: down-range below 10% of range, up-range above 120% of range. Returns 0 (OFF) or 1 (ON).",
+      "set": "[SENSe:]<function>:RANGe:AUTO {OFF|ON}",
+      "query": "[SENSe:]<function>:RANGe:AUTO?",
+      "parameters": [ { "name": "state", "range": "OFF | ON" } ],
+      "examples": ["VOLT:DC:RANG:AUTO ON", "VOLT:DC:RANG:AUTO?"]
+    },
+    {
+      "name": "sense_resolution",
+      "mnemonic": "<func>:RESolution",
+      "category": "Measurement Configuration",
+      "description": "Select or query the resolution for the specified function (not valid for frequency, period, or ratio). Specify in the same units as the function. MIN = best resolution, MAX = least resolution.",
+      "set": "[SENSe:]<function>:RESolution {<resolution>|MINimum|MAXimum}",
+      "query": "[SENSe:]<function>:RESolution? [MINimum|MAXimum]",
+      "examples": ["VOLT:DC:RES 0.001", "VOLT:DC:RES? MIN"]
+    },
+    {
+      "name": "sense_nplcycles",
+      "mnemonic": "<func>:NPLCycles",
+      "category": "Measurement Configuration",
+      "description": "Select the integration time in number of power line cycles for the present function (default 10 PLC). Valid only for DC volts, ratio, DC current, 2-wire and 4-wire ohms.",
+      "set": "[SENSe:]<function>:NPLCycles {0.02|0.2|1|10|100|MINimum|MAXimum}",
+      "query": "[SENSe:]<function>:NPLCycles? [MINimum|MAXimum]",
+      "parameters": [ { "name": "nplc", "range": "0.02 | 0.2 | 1 | 10 | 100 (MIN=0.02, MAX=100)" } ],
+      "examples": ["VOLT:DC:NPLC 10", "VOLT:DC:NPLC? MAX"]
+    },
+    {
+      "name": "sense_frequency_aperture",
+      "mnemonic": "FREQ:APERture",
+      "category": "Measurement Configuration",
+      "description": "Select the aperture (gate) time for frequency measurements (default 0.1 s). Choose 10 ms (4.5 digits), 100 ms (5.5 digits), or 1 s (6.5 digits).",
+      "set": "[SENSe:]FREQuency:APERture {0.01|0.1|1|MINimum|MAXimum}",
+      "query": "[SENSe:]FREQuency:APERture? [MINimum|MAXimum]",
+      "parameters": [ { "name": "aperture", "units": ["s"], "range": "0.01 | 0.1 | 1 (MIN=0.01, MAX=1)" } ],
+      "examples": ["FREQ:APER 1", "FREQ:APER?"]
+    },
+    {
+      "name": "sense_period_aperture",
+      "mnemonic": "PER:APERture",
+      "category": "Measurement Configuration",
+      "description": "Select the aperture (gate) time for period measurements (default 0.1 s). Choose 10 ms (4.5 digits), 100 ms (5.5 digits), or 1 s (6.5 digits).",
+      "set": "[SENSe:]PERiod:APERture {0.01|0.1|1|MINimum|MAXimum}",
+      "query": "[SENSe:]PERiod:APERture? [MINimum|MAXimum]",
+      "parameters": [ { "name": "aperture", "units": ["s"], "range": "0.01 | 0.1 | 1" } ],
+      "examples": ["PER:APER 0.1"]
+    },
+    {
+      "name": "sense_detector_bandwidth",
+      "mnemonic": "DET:BANDwidth",
+      "category": "Measurement Configuration",
+      "description": "Specify the lowest frequency expected in the input signal; selects the slow, medium (default), or fast AC filter. Query returns +3.000000E+00, +2.000000E+01, or +2.000000E+02.",
+      "set": "[SENSe:]DETector:BANDwidth {3|20|200|MINimum|MAXimum}",
+      "query": "[SENSe:]DETector:BANDwidth? [MINimum|MAXimum]",
+      "parameters": [ { "name": "bandwidth", "units": ["Hz"], "range": "3 | 20 | 200 (MIN=3, MAX=200)" } ],
+      "examples": ["DET:BAND 20", "DET:BAND?"]
+    },
+    {
+      "name": "sense_zero_auto",
+      "mnemonic": "ZERO:AUTO",
+      "category": "Measurement Configuration",
+      "description": "Disable or enable (default) autozero mode. OFF defers a new zero until the next wait-for-trigger state; ONCE issues an immediate zero then behaves like OFF. Query returns 0 (OFF/ONCE) or 1 (ON).",
+      "set": "[SENSe:]ZERO:AUTO {OFF|ONCE|ON}",
+      "query": "[SENSe:]ZERO:AUTO?",
+      "parameters": [ { "name": "state", "range": "OFF | ONCE | ON" } ],
+      "examples": ["ZERO:AUTO ON", "ZERO:AUTO ONCE"]
+    },
+    {
+      "name": "input_impedance_auto",
+      "mnemonic": "INP:IMP:AUTO",
+      "category": "Input",
+      "description": "Disable or enable automatic input resistance for DC voltage. AUTO OFF (default) fixes input at 10 Mohm on all ranges; AUTO ON sets >10 Gohm on the 100 mV, 1 V, and 10 V ranges. Query returns 0 or 1.",
+      "set": "INPut:IMPedance:AUTO {OFF|ON}",
+      "query": "INPut:IMPedance:AUTO?",
+      "parameters": [ { "name": "state", "range": "OFF | ON" } ],
+      "examples": ["INP:IMP:AUTO ON", "INP:IMP:AUTO?"]
+    },
+    {
+      "name": "route_terminals",
+      "mnemonic": "ROUT:TERM?",
+      "category": "Input",
+      "description": "Query whether the front or rear input terminals are selected. Returns FRON or REAR.",
+      "query": "ROUTe:TERMinals?",
+      "examples": ["ROUT:TERM?"]
+    },
+    {
+      "name": "calculate_function",
+      "mnemonic": "CALC:FUNC",
+      "category": "Math",
+      "description": "Select the math function (only one enabled at a time; default NULL). Query returns NULL, DB, DBM, AVER, or LIM.",
+      "set": "CALCulate:FUNCtion {NULL|DB|DBM|AVERage|LIMit}",
+      "query": "CALCulate:FUNCtion?",
+      "parameters": [ { "name": "function", "range": "NULL | DB | DBM | AVERage | LIMit" } ],
+      "examples": ["CALC:FUNC AVER", "CALC:FUNC?"]
+    },
+    {
+      "name": "calculate_state",
+      "mnemonic": "CALC:STAT",
+      "category": "Math",
+      "description": "Disable or enable the selected math function. Query returns 0 (OFF) or 1 (ON).",
+      "set": "CALCulate:STATe {OFF|ON}",
+      "query": "CALCulate:STATe?",
+      "parameters": [ { "name": "state", "range": "OFF | ON" } ],
+      "examples": ["CALC:STAT ON", "CALC:STAT?"]
+    },
+    {
+      "name": "calculate_average_minimum",
+      "mnemonic": "CALC:AVER:MIN?",
+      "category": "Math",
+      "description": "Read the minimum value found during a min-max operation. Cleared when min-max is turned on, at power-up, or after a remote reset.",
+      "query": "CALCulate:AVERage:MINimum?",
+      "examples": ["CALC:AVER:MIN?"]
+    },
+    {
+      "name": "calculate_average_maximum",
+      "mnemonic": "CALC:AVER:MAX?",
+      "category": "Math",
+      "description": "Read the maximum value found during a min-max operation. Cleared when min-max is turned on, at power-up, or after a remote reset.",
+      "query": "CALCulate:AVERage:MAXimum?",
+      "examples": ["CALC:AVER:MAX?"]
+    },
+    {
+      "name": "calculate_average_average",
+      "mnemonic": "CALC:AVER:AVER?",
+      "category": "Math",
+      "description": "Read the average of all readings taken since min-max was enabled.",
+      "query": "CALCulate:AVERage:AVERage?",
+      "examples": ["CALC:AVER:AVER?"]
+    },
+    {
+      "name": "calculate_average_count",
+      "mnemonic": "CALC:AVER:COUN?",
+      "category": "Math",
+      "description": "Read the number of readings taken since min-max was enabled.",
+      "query": "CALCulate:AVERage:COUNt?",
+      "examples": ["CALC:AVER:COUN?"]
+    },
+    {
+      "name": "calculate_null_offset",
+      "mnemonic": "CALC:NULL:OFFS",
+      "category": "Math",
+      "description": "Store a null value in the Null Register (math must be on first). Range 0 to +/-120% of the highest range for the present function.",
+      "set": "CALCulate:NULL:OFFSet {<value>|MINimum|MAXimum}",
+      "query": "CALCulate:NULL:OFFSet? [MINimum|MAXimum]",
+      "examples": ["CALC:NULL:OFFS 1.5", "CALC:NULL:OFFS? MAX"]
+    },
+    {
+      "name": "calculate_db_reference",
+      "mnemonic": "CALC:DB:REF",
+      "category": "Math",
+      "description": "Store a relative value in the dB Relative Register (math must be on first). Range 0 to +/-200 dBm (MIN=-200, MAX=200).",
+      "set": "CALCulate:DB:REFerence {<value>|MINimum|MAXimum}",
+      "query": "CALCulate:DB:REFerence? [MINimum|MAXimum]",
+      "parameters": [ { "name": "value", "units": ["dBm"], "range": "-200.00 to 200.00 dBm" } ],
+      "examples": ["CALC:DB:REF 10", "CALC:DB:REF?"]
+    },
+    {
+      "name": "calculate_dbm_reference",
+      "mnemonic": "CALC:DBM:REF",
+      "category": "Math",
+      "description": "Select the dBm reference resistance. Choices: 50, 75, 93, 110, 124, 125, 135, 150, 250, 300, 500, 600, 800, 900, 1000, 1200, or 8000 ohms (MIN=50, MAX=8000). Stored in non-volatile memory.",
+      "set": "CALCulate:DBM:REFerence {<value>|MINimum|MAXimum}",
+      "query": "CALCulate:DBM:REFerence? [MINimum|MAXimum]",
+      "parameters": [ { "name": "value", "units": ["Ohm"], "range": "50 to 8000 ohms (discrete set)" } ],
+      "examples": ["CALC:DBM:REF 600", "CALC:DBM:REF?"]
+    },
+    {
+      "name": "calculate_limit_lower",
+      "mnemonic": "CALC:LIM:LOW",
+      "category": "Math",
+      "description": "Set the lower limit for limit testing. Range 0 to +/-120% of the highest range for the present function.",
+      "set": "CALCulate:LIMit:LOWer {<value>|MINimum|MAXimum}",
+      "query": "CALCulate:LIMit:LOWer? [MINimum|MAXimum]",
+      "examples": ["CALC:LIM:LOW 1.0", "CALC:LIM:LOW?"]
+    },
+    {
+      "name": "calculate_limit_upper",
+      "mnemonic": "CALC:LIM:UPP",
+      "category": "Math",
+      "description": "Set the upper limit for limit testing. Range 0 to +/-120% of the highest range for the present function.",
+      "set": "CALCulate:LIMit:UPPer {<value>|MINimum|MAXimum}",
+      "query": "CALCulate:LIMit:UPPer? [MINimum|MAXimum]",
+      "examples": ["CALC:LIM:UPP 5.0", "CALC:LIM:UPP?"]
+    },
+    {
+      "name": "data_feed",
+      "mnemonic": "DATA:FEED",
+      "category": "Math",
+      "description": "Select whether readings taken via INITiate are stored in internal memory. \"CALCulate\" (default) stores up to 512 readings; \"\" disables storage (useful with min-max to avoid storing individual values). Query returns CALC or empty.",
+      "set": "DATA:FEED RDG_STORE, {\"CALCulate\"|\"\"}",
+      "query": "DATA:FEED?",
+      "examples": ["DATA:FEED RDG_STORE, \"CALCulate\"", "DATA:FEED RDG_STORE, \"\""]
+    },
+    {
+      "name": "initiate",
+      "mnemonic": "INIT",
+      "category": "Triggering",
+      "description": "Change the trigger system from idle to wait-for-trigger. Readings are stored in internal memory (up to 512); retrieve them with FETCh?.",
+      "set": "INITiate",
+      "examples": ["INIT"]
+    },
+    {
+      "name": "read",
+      "mnemonic": "READ?",
+      "category": "Triggering",
+      "description": "Change the trigger system from idle to wait-for-trigger and send readings immediately to the output buffer. Equivalent to INITiate followed by FETCh? but not buffered internally.",
+      "query": "READ?",
+      "examples": ["READ?"]
+    },
+    {
+      "name": "fetch",
+      "mnemonic": "FETC?",
+      "category": "Triggering",
+      "description": "Transfer readings stored in internal memory by the INITiate command to the output buffer for reading into the bus controller.",
+      "query": "FETCh?",
+      "examples": ["FETC?"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIG:SOUR",
+      "category": "Triggering",
+      "description": "Select the trigger source: BUS (software), IMMediate (internal, default), or EXTernal (rear-panel Ext Trig). Query returns BUS, IMM, or EXT.",
+      "set": "TRIGger:SOURce {BUS|IMMediate|EXTernal}",
+      "query": "TRIGger:SOURce?",
+      "parameters": [ { "name": "source", "range": "BUS | IMMediate | EXTernal" } ],
+      "examples": ["TRIG:SOUR EXT", "TRIG:SOUR?"]
+    },
+    {
+      "name": "trigger_delay",
+      "mnemonic": "TRIG:DEL",
+      "category": "Triggering",
+      "description": "Insert a trigger delay between the trigger and each sample. Range 0 to 3600 seconds (MIN=0, MAX=3600).",
+      "set": "TRIGger:DELay {<seconds>|MINimum|MAXimum}",
+      "query": "TRIGger:DELay? [MINimum|MAXimum]",
+      "parameters": [ { "name": "seconds", "units": ["s"], "range": "0 to 3600 s" } ],
+      "examples": ["TRIG:DEL 1", "TRIG:DEL? MAX"]
+    },
+    {
+      "name": "trigger_delay_auto",
+      "mnemonic": "TRIG:DEL:AUTO",
+      "category": "Triggering",
+      "description": "Disable or enable automatic trigger delay (determined by function, range, integration time, and AC filter). Setting a specific delay turns auto off. Query returns 0 or 1.",
+      "set": "TRIGger:DELay:AUTO {OFF|ON}",
+      "query": "TRIGger:DELay:AUTO?",
+      "parameters": [ { "name": "state", "range": "OFF | ON" } ],
+      "examples": ["TRIG:DEL:AUTO ON", "TRIG:DEL:AUTO?"]
+    },
+    {
+      "name": "sample_count",
+      "mnemonic": "SAMP:COUN",
+      "category": "Triggering",
+      "description": "Set the number of readings (samples) taken per trigger. Range 1 to 50000 (MIN=1, MAX=50000).",
+      "set": "SAMPle:COUNt {<value>|MINimum|MAXimum}",
+      "query": "SAMPle:COUNt? [MINimum|MAXimum]",
+      "parameters": [ { "name": "count", "range": "1 to 50000" } ],
+      "examples": ["SAMP:COUN 10", "SAMP:COUN? MAX"]
+    },
+    {
+      "name": "trigger_count",
+      "mnemonic": "TRIG:COUN",
+      "category": "Triggering",
+      "description": "Set the number of triggers accepted before returning to idle. Range 1 to 50000; INFinite continuously accepts triggers (device clear to stop). Infinite query returns 9.90000000E+37.",
+      "set": "TRIGger:COUNt {<value>|MINimum|MAXimum|INFinite}",
+      "query": "TRIGger:COUNt? [MINimum|MAXimum]",
+      "parameters": [ { "name": "count", "range": "1 to 50000 | INFinite" } ],
+      "examples": ["TRIG:COUN 5", "TRIG:COUN INF"]
+    },
+    {
+      "name": "display_state",
+      "mnemonic": "DISP",
+      "category": "System",
+      "description": "Turn the front-panel display off or on. Query returns 0 (OFF) or 1 (ON).",
+      "set": "DISPlay {OFF|ON}",
+      "query": "DISPlay?",
+      "parameters": [ { "name": "state", "range": "OFF | ON" } ],
+      "examples": ["DISP OFF", "DISP?"]
+    },
+    {
+      "name": "display_text",
+      "mnemonic": "DISP:TEXT",
+      "category": "System",
+      "description": "Display a message on the front panel (up to 12 characters; extra characters truncated). Query returns the message as a quoted string.",
+      "set": "DISPlay:TEXT <quoted string>",
+      "query": "DISPlay:TEXT?",
+      "examples": ["DISP:TEXT \"TESTING\"", "DISP:TEXT?"]
+    },
+    {
+      "name": "display_text_clear",
+      "mnemonic": "DISP:TEXT:CLE",
+      "category": "System",
+      "description": "Clear the message displayed on the front panel.",
+      "set": "DISPlay:TEXT:CLEar",
+      "examples": ["DISP:TEXT:CLE"]
+    },
+    {
+      "name": "system_beeper",
+      "mnemonic": "SYST:BEEP",
+      "category": "System",
+      "description": "Issue a single beep immediately.",
+      "set": "SYSTem:BEEPer",
+      "examples": ["SYST:BEEP"]
+    },
+    {
+      "name": "system_beeper_state",
+      "mnemonic": "SYST:BEEP:STAT",
+      "category": "System",
+      "description": "Disable or enable the front-panel beeper (stored in non-volatile memory). Query returns 0 (OFF) or 1 (ON).",
+      "set": "SYSTem:BEEPer:STATe {OFF|ON}",
+      "query": "SYSTem:BEEPer:STATe?",
+      "parameters": [ { "name": "state", "range": "OFF | ON" } ],
+      "examples": ["SYST:BEEP:STAT OFF", "SYST:BEEP:STAT?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYST:ERR?",
+      "category": "System",
+      "description": "Query the error queue (up to 20 errors, FIFO order, each up to 80 characters).",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYST:VERS?",
+      "category": "System",
+      "description": "Query the present SCPI version implemented by the multimeter.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "data_points",
+      "mnemonic": "DATA:POIN?",
+      "category": "System",
+      "description": "Query the number of readings currently stored in internal memory.",
+      "query": "DATA:POINts?",
+      "examples": ["DATA:POIN?"]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": "SYST:LOC",
+      "category": "RS-232",
+      "description": "Place the multimeter in local mode for RS-232 operation; all front-panel keys are fully functional.",
+      "set": "SYSTem:LOCal",
+      "examples": ["SYST:LOC"]
+    },
+    {
+      "name": "system_remote",
+      "mnemonic": "SYST:REM",
+      "category": "RS-232",
+      "description": "Place the multimeter in remote mode for RS-232 operation; all front-panel keys except LOCAL are disabled.",
+      "set": "SYSTem:REMote",
+      "examples": ["SYST:REM"]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": "SYST:RWL",
+      "category": "RS-232",
+      "description": "Place the multimeter in remote mode with all front-panel keys disabled including LOCAL.",
+      "set": "SYSTem:RWLock",
+      "examples": ["SYST:RWL"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STAT:QUES:ENAB",
+      "category": "Status",
+      "description": "Enable bits in the Questionable Data enable register; selected bits are reported to the Status Byte. Query returns the binary-weighted decimal of enabled bits.",
+      "set": "STATus:QUEStionable:ENABle <enable value>",
+      "query": "STATus:QUEStionable:ENABle?",
+      "examples": ["STAT:QUES:ENAB 512", "STAT:QUES:ENAB?"]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": "STAT:QUES:EVEN?",
+      "category": "Status",
+      "description": "Query the Questionable Data event register. Returns the binary-weighted decimal sum of all set bits.",
+      "query": "STATus:QUEStionable:EVENt?",
+      "examples": ["STAT:QUES:EVEN?"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STAT:PRES",
+      "category": "Status",
+      "description": "Clear all bits in the Questionable Data enable register.",
+      "set": "STATus:PRESet",
+      "examples": ["STAT:PRES"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear the Status Byte summary register and all event registers.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Enable bits in the Standard Event enable register; selected bits are reported to the Status Byte. Query returns binary-weighted decimal of enabled bits.",
+      "set": "*ESE <enable value>",
+      "query": "*ESE?",
+      "examples": ["*ESE 1", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Query the Standard Event register. Returns binary-weighted decimal of set bits.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Set the operation complete bit (bit 0) in the Standard Event register after the command is executed.",
+      "set": "*OPC",
+      "examples": ["*OPC"]
+    },
+    {
+      "name": "operation_complete_query",
+      "mnemonic": "*OPC?",
+      "category": "Common",
+      "description": "Return 1 to the output buffer after the command is executed (used for synchronization).",
+      "query": "*OPC?",
+      "examples": ["*OPC?"]
+    },
+    {
+      "name": "power_on_status_clear",
+      "mnemonic": "*PSC",
+      "category": "Common",
+      "description": "Power-on status clear. *PSC 1 clears the Status Byte and Standard Event enable masks at power-on; *PSC 0 preserves them. Stored in non-volatile memory. Query returns 0 or 1.",
+      "set": "*PSC {0|1}",
+      "query": "*PSC?",
+      "parameters": [ { "name": "value", "range": "0 | 1" } ],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Enable bits in the Status Byte enable register. Query returns binary-weighted decimal of enabled bits.",
+      "set": "*SRE <enable value>",
+      "query": "*SRE?",
+      "examples": ["*SRE 32", "*SRE?"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Query the Status Byte summary register. Similar to a serial poll but processed like any other command; the request-service bit (bit 6) is not cleared.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Reset the multimeter to its power-on configuration.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Perform a complete self-test. Returns 0 if successful, 1 if it fails.",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Bus trigger. Triggers the multimeter when TRIGger:SOURce is set to BUS (equivalent to an IEEE-488 Group Execute Trigger).",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Read the multimeter's identification string (dimension a string of at least 35 characters).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "calibration_query",
+      "mnemonic": "CAL?",
+      "category": "Calibration",
+      "description": "Perform a calibration using the value set by CALibration:VALue. The multimeter must first be unsecured with the correct security code.",
+      "query": "CALibration?",
+      "examples": ["CAL?"]
+    },
+    {
+      "name": "calibration_count",
+      "mnemonic": "CAL:COUN?",
+      "category": "Calibration",
+      "description": "Query the number of times the multimeter has been calibrated (increments to 32767 then wraps to 0). Stored in non-volatile memory.",
+      "query": "CALibration:COUNt?",
+      "examples": ["CAL:COUN?"]
+    },
+    {
+      "name": "calibration_secure_code",
+      "mnemonic": "CAL:SEC:CODE",
+      "category": "Calibration",
+      "description": "Enter a new calibration security code (up to 12 characters). The multimeter must first be unsecured with the old code. Stored in non-volatile memory.",
+      "set": "CALibration:SECure:CODE <new code>",
+      "examples": ["CAL:SEC:CODE HP034401"]
+    },
+    {
+      "name": "calibration_secure_state",
+      "mnemonic": "CAL:SEC:STAT",
+      "category": "Calibration",
+      "description": "Unsecure or secure the multimeter for calibration using the security code (up to 12 characters). Query returns 0 (OFF) or 1 (ON). Stored in non-volatile memory.",
+      "set": "CALibration:SECure:STATe {OFF|ON},<code>",
+      "query": "CALibration:SECure:STATe?",
+      "examples": ["CAL:SEC:STAT OFF,HP034401", "CAL:SEC:STAT?"]
+    },
+    {
+      "name": "calibration_string",
+      "mnemonic": "CAL:STR",
+      "category": "Calibration",
+      "description": "Record a calibration message (up to 40 characters; only 12 shown on the front panel). Can only be written from the remote interface. Stored in non-volatile memory.",
+      "set": "CALibration:STRing <quoted string>",
+      "query": "CALibration:STRing?",
+      "examples": ["CAL:STR \"CAL 19-JUN-2026\"", "CAL:STR?"]
+    },
+    {
+      "name": "calibration_value",
+      "mnemonic": "CAL:VAL",
+      "category": "Calibration",
+      "description": "Specify (or query) the value of the known calibration signal used by the calibration procedure.",
+      "set": "CALibration:VALue <value>",
+      "query": "CALibration:VALue?",
+      "examples": ["CAL:VAL 10.0", "CAL:VAL?"]
+    }
+  ]
+}

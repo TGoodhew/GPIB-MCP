@@ -1,0 +1,1023 @@
+{
+  "model": "DP800",
+  "manufacturer": "Rigol",
+  "category": "DC Power Supply",
+  "description": "Rigol DP800 series programmable linear DC power supply (DP831/DP832/DP821/DP811 and A variants). SCPI command set over USB, LAN, RS-232 and GPIB, supporting single and multi-channel output, OVP/OCP/OTP protection, measurement, timer/delay output and tracking.",
+  "source": "DP800Programming.pdf",
+  "aliases": ["DP800", "DP831", "DP831A", "DP832", "DP832A", "DP821", "DP821A", "DP811", "DP811A", "DP822", "DP822A", "DP813", "DP813A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "DP8[0-9]{2}",
+    "description": "Standard SCPI identification query. Returns manufacturer, model, serial number and digital-board firmware version separated by commas."
+  },
+  "commands": [
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Query the instrument ID string (manufacturer, model, serial number, digital board version).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear all the event registers.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Set/query the enable register of the standard event register.",
+      "set": "*ESE <enable value>",
+      "query": "*ESE?",
+      "parameters": [ { "name": "enable_value", "range": "0 to 255 (decimal bit weights)" } ],
+      "examples": ["*ESE 20", "*ESE?"]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Query (and clear) the event register of the standard event register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Set the OPC bit in the standard event register when the operation completes; query returns 1 when complete.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Query the installation status of options (high resolution, analyzer, monitor, LAN, RS232, trigger).",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "power_on_status_clear",
+      "mnemonic": "*PSC",
+      "category": "Common",
+      "description": "Enable/disable clearing of the status byte and standard event enable registers at power-on.",
+      "set": "*PSC {0|1}",
+      "query": "*PSC?",
+      "parameters": [ { "name": "state", "range": "0|1" } ],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recall an instrument state stored in internal memory (locations 1 to 10).",
+      "set": "*RCL {1|2|3|4|5|6|7|8|9|10}",
+      "parameters": [ { "name": "location", "range": "1 to 10" } ],
+      "examples": ["*RCL 5"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Restore the power supply to factory state and clear the error queue.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Save the current instrument state to internal memory (locations 1 to 10) using the default filename.",
+      "set": "*SAV {1|2|3|4|5|6|7|8|9|10}",
+      "parameters": [ { "name": "location", "range": "1 to 10" } ],
+      "examples": ["*SAV 5"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Set/query the enable register of the status byte register.",
+      "set": "*SRE <enable value>",
+      "query": "*SRE?",
+      "parameters": [ { "name": "enable_value", "range": "0 to 255 (decimal bit weights)" } ],
+      "examples": ["*SRE 24", "*SRE?"]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Query the summary register of the status byte register (without clearing it).",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Generate a trigger operation. Only available when bus (software) trigger is selected.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Query the self-test results of the instrument (TopBoard, BottomBoard and fan).",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Make the instrument wait for all pending operations to complete before executing further commands.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+    {
+      "name": "apply",
+      "mnemonic": "APPLy",
+      "category": "Source",
+      "description": "Select a channel and set its voltage and current in a single command; query the voltage/current of the specified channel.",
+      "set": ":APPLy {CH1|CH2|CH3}[,<volt>|MINimum|MAXimum|DEF[,<curr>|MINimum|MAXimum|DEF]]",
+      "query": ":APPLy? [CH1|CH2|CH3[,CURRent|VOLTage]]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3" },
+        { "name": "voltage", "units": ["V"], "range": "model/channel dependent (e.g. 0 to 32V on CH1 of DP832A)" },
+        { "name": "current", "units": ["A"], "range": "model/channel dependent (e.g. 0 to 3.2A on CH1 of DP832A)" }
+      ],
+      "examples": [":APPL CH1,5,1", ":APPL? CH1,VOLTage"]
+    },
+    {
+      "name": "set_voltage",
+      "mnemonic": "SOUR:VOLT",
+      "category": "Source",
+      "description": "Set/query the output voltage of the specified (or current) channel. Accepts MINimum, MAXimum, UP or DOWN.",
+      "set": "[SOURce[<n>]:]VOLTage[:LEVel][:IMMediate][:AMPLitude] {<voltage>|MINimum|MAXimum|UP|DOWN}",
+      "query": "[SOURce[<n>]:]VOLTage[:LEVel][:IMMediate][:AMPLitude]? [{MINimum|MAXimum}]",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "voltage", "units": ["V"], "range": "model/channel dependent (see Table 2-1)" }
+      ],
+      "examples": [":VOLT 7.5", ":SOUR1:VOLT 5", ":VOLT?"]
+    },
+    {
+      "name": "voltage_step",
+      "mnemonic": "SOUR:VOLT:STEP",
+      "category": "Source",
+      "description": "Set/query the voltage change step used by UP/DOWN of the voltage command for the specified channel.",
+      "set": "[SOURce[<n>]:]VOLTage[:LEVel][:IMMediate]:STEP[:INCRement] {<numeric value>|DEFault}",
+      "query": "[SOURce[<n>]:]VOLTage[:LEVel][:IMMediate]:STEP[:INCRement]? [{DEFault}]",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "step", "units": ["V"], "range": "0 to max voltage of channel; default 0.001V or 0.01V model dependent" }
+      ],
+      "examples": [":VOLT:STEP 0.1", ":VOLT:STEP?"]
+    },
+    {
+      "name": "voltage_triggered",
+      "mnemonic": "SOUR:VOLT:TRIG",
+      "category": "Source",
+      "description": "Set/query the trigger voltage of the specified channel applied when a trigger occurs.",
+      "set": "[SOURce[<n>]:]VOLTage[:LEVel]:TRIGgered[:AMPLitude] {<voltage>|MIN|MAX}",
+      "query": "[SOURce[<n>]:]VOLTage[:LEVel]:TRIGgered[:AMPLitude]? {MIN|MAX}",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "voltage", "units": ["V"], "range": "0 to maximum voltage of channel; default 0V" }
+      ],
+      "examples": [":VOLT:TRIG 1", ":VOLT:TRIG?"]
+    },
+    {
+      "name": "voltage_protection_clear",
+      "mnemonic": "SOUR:VOLT:PROT:CLE",
+      "category": "Source",
+      "description": "Clear the OVP circuit and label of the specified channel and turn the channel output on.",
+      "set": "[SOURce[<n>]:]VOLTage:PROTection:CLEar",
+      "parameters": [ { "name": "channel", "range": "1|2|3" } ],
+      "examples": [":VOLT:PROT:CLE"]
+    },
+    {
+      "name": "voltage_protection_level",
+      "mnemonic": "SOUR:VOLT:PROT",
+      "category": "Source",
+      "description": "Set/query the overvoltage protection (OVP) value of the specified channel.",
+      "set": "[SOURce[<n>]:]VOLTage:PROTection[:LEVel] {<voltage>|MINimum|MAXimum}",
+      "query": "[SOURce[<n>]:]VOLTage:PROTection[:LEVel]? [{MINimum|MAXimum}]",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "voltage", "units": ["V"], "range": "model/channel dependent (see Table 2-2)" }
+      ],
+      "examples": [":VOLT:PROT 8.8", ":VOLT:PROT?"]
+    },
+    {
+      "name": "voltage_protection_state",
+      "mnemonic": "SOUR:VOLT:PROT:STAT",
+      "category": "Source",
+      "description": "Enable/disable and query the overvoltage protection (OVP) function of the specified channel.",
+      "set": "[SOURce[<n>]:]VOLTage:PROTection:STATe {ON|OFF}",
+      "query": "[SOURce[<n>]:]VOLTage:PROTection:STATe?",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": [":VOLT:PROT:STAT ON", ":VOLT:PROT:STAT?"]
+    },
+    {
+      "name": "voltage_protection_tripped",
+      "mnemonic": "SOUR:VOLT:PROT:TRIP?",
+      "category": "Source",
+      "description": "Query whether OVP occurred on the specified channel. Returns YES or NO.",
+      "query": "[SOURce[<n>]:]VOLTage:PROTection:TRIPped?",
+      "parameters": [ { "name": "channel", "range": "1|2|3" } ],
+      "examples": [":VOLT:PROT:TRIP?"]
+    },
+    {
+      "name": "voltage_range",
+      "mnemonic": "SOUR:VOLT:RANG",
+      "category": "Source",
+      "description": "Select/query the output range of the channel (single-channel models DP813A/DP813/DP811A/DP811 only).",
+      "set": "[SOURce[<n>]:]VOLTage:RANGe {P8V|P20V|P40V|LOW|HIGH}",
+      "query": "[SOURce[<n>]:]VOLTage:RANGe?",
+      "parameters": [ { "name": "range", "range": "P8V|P20V|P40V|LOW|HIGH" } ],
+      "examples": [":VOLT:RANG P20V", ":VOLT:RANG?"]
+    },
+    {
+      "name": "set_current",
+      "mnemonic": "SOUR:CURR",
+      "category": "Source",
+      "description": "Set/query the output current of the specified (or current) channel. Accepts MINimum, MAXimum, UP or DOWN.",
+      "set": "[SOURce[<n>]:]CURRent[:LEVel][:IMMediate][:AMPLitude] {<current>|MINimum|MAXimum|UP|DOWN}",
+      "query": "[SOURce[<n>]:]CURRent[:LEVel][:IMMediate][:AMPLitude]? [{MINimum|MAXimum}]",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "current", "units": ["A"], "range": "model/channel dependent (see Table 2-1)" }
+      ],
+      "examples": [":CURR 1.5", ":SOUR1:CURR 1", ":CURR?"]
+    },
+    {
+      "name": "current_step",
+      "mnemonic": "SOUR:CURR:STEP",
+      "category": "Source",
+      "description": "Set/query the current change step used by UP/DOWN of the current command for the specified channel.",
+      "set": "[SOURce[<n>]:]CURRent[:LEVel][:IMMediate]:STEP[:INCRement] {<numeric value>|DEFault}",
+      "query": "[SOURce[<n>]:]CURRent[:LEVel][:IMMediate]:STEP[:INCRement]? [{DEFault}]",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "step", "units": ["A"], "range": "0 to max current of channel; default model dependent" }
+      ],
+      "examples": [":CURR:STEP 0.1", ":CURR:STEP?"]
+    },
+    {
+      "name": "current_triggered",
+      "mnemonic": "SOUR:CURR:TRIG",
+      "category": "Source",
+      "description": "Set/query the trigger current of the specified channel applied when a trigger occurs.",
+      "set": "[SOURce[<n>]:]CURRent[:LEVel]:TRIGgered[:AMPLitude] {<current>|MIN|MAX}",
+      "query": "[SOURce[<n>]:]CURRent[:LEVel]:TRIGgered[:AMPLitude]? {MIN|MAX}",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "current", "units": ["A"], "range": "0 to maximum current of channel; default 0.1A" }
+      ],
+      "examples": [":CURR:TRIG 1", ":CURR:TRIG?"]
+    },
+    {
+      "name": "current_protection_clear",
+      "mnemonic": "SOUR:CURR:PROT:CLE",
+      "category": "Source",
+      "description": "Clear the OCP circuit and label of the specified channel and turn the channel output on.",
+      "set": "[SOURce[<n>]:]CURRent:PROTection:CLEar",
+      "parameters": [ { "name": "channel", "range": "1|2|3" } ],
+      "examples": [":CURR:PROT:CLE"]
+    },
+    {
+      "name": "current_protection_level",
+      "mnemonic": "SOUR:CURR:PROT",
+      "category": "Source",
+      "description": "Set/query the overcurrent protection (OCP) value of the specified channel.",
+      "set": "[SOURce[<n>]:]CURRent:PROTection[:LEVel] {<current>|MINimum|MAXimum}",
+      "query": "[SOURce[<n>]:]CURRent:PROTection[:LEVel]? [{MINimum|MAXimum}]",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "current", "units": ["A"], "range": "model/channel dependent (see Table 2-2)" }
+      ],
+      "examples": [":CURR:PROT 5", ":CURR:PROT?"]
+    },
+    {
+      "name": "current_protection_state",
+      "mnemonic": "SOUR:CURR:PROT:STAT",
+      "category": "Source",
+      "description": "Enable/disable and query the overcurrent protection (OCP) function of the specified channel.",
+      "set": "[SOURce[<n>]:]CURRent:PROTection:STATe {ON|OFF}",
+      "query": "[SOURce[<n>]:]CURRent:PROTection:STATe?",
+      "parameters": [
+        { "name": "channel", "range": "1|2|3" },
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": [":CURR:PROT:STAT ON", ":CURR:PROT:STAT?"]
+    },
+    {
+      "name": "current_protection_tripped",
+      "mnemonic": "SOUR:CURR:PROT:TRIP?",
+      "category": "Source",
+      "description": "Query whether OCP occurred on the specified channel. Returns YES or NO.",
+      "query": "[SOURce[<n>]:]CURRent:PROTection:TRIPped?",
+      "parameters": [ { "name": "channel", "range": "1|2|3" } ],
+      "examples": [":CURR:PROT:TRIP?"]
+    },
+    {
+      "name": "measure_all",
+      "mnemonic": "MEAS:ALL?",
+      "category": "Measure",
+      "description": "Query the voltage, current and power measured at the output terminal of the specified channel.",
+      "query": ":MEASure:ALL[:DC]? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":MEAS:ALL? CH1"]
+    },
+    {
+      "name": "measure_current",
+      "mnemonic": "MEAS:CURR?",
+      "category": "Measure",
+      "description": "Query the current measured at the output terminal of the specified channel.",
+      "query": ":MEASure:CURRent[:DC]? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":MEAS:CURR? CH1"]
+    },
+    {
+      "name": "measure_power",
+      "mnemonic": "MEAS:POWE?",
+      "category": "Measure",
+      "description": "Query the power measured at the output terminal of the specified channel.",
+      "query": ":MEASure:POWEr[:DC]? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":MEAS:POWE? CH1"]
+    },
+    {
+      "name": "measure_voltage",
+      "mnemonic": "MEAS:VOLT?",
+      "category": "Measure",
+      "description": "Query the voltage measured at the output terminal of the specified channel.",
+      "query": ":MEASure[:VOLTage][:DC]? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":MEAS? CH1", ":MEAS:VOLT? CH1"]
+    },
+    {
+      "name": "select_channel",
+      "mnemonic": "INST",
+      "category": "Channel",
+      "description": "Select/query the current channel by name (multi-channel models only).",
+      "set": ":INSTrument[:SELect] {CH1|CH2|CH3}",
+      "query": ":INSTrument[:SELect]?",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default CH1)" } ],
+      "examples": [":INST CH3", ":INST?"]
+    },
+    {
+      "name": "select_channel_numeric",
+      "mnemonic": "INST:NSEL",
+      "category": "Channel",
+      "description": "Select/query the current channel by number 1/2/3 (multi-channel models only).",
+      "set": ":INSTrument:NSELect {1|2|3}",
+      "query": ":INSTrument:NSELect?",
+      "parameters": [ { "name": "channel", "range": "1|2|3 (default 1)" } ],
+      "examples": [":INST:NSEL 3", ":INST:NSEL?"]
+    },
+    {
+      "name": "instrument_couple_trigger",
+      "mnemonic": "INST:COUP",
+      "category": "Channel",
+      "description": "Select/query the trigger coupling channels (multi-channel models only).",
+      "set": ":INSTrument:COUPle[:TRIGger] {ALL|NONE|<list>}",
+      "query": ":INSTrument:COUPle[:TRIGger]?",
+      "parameters": [ { "name": "list", "range": "ALL|NONE or comma-separated channels e.g. CH1,CH2" } ],
+      "examples": [":INST:COUP CH1,CH2", ":INST:COUP?"]
+    },
+    {
+      "name": "output_state",
+      "mnemonic": "OUTP",
+      "category": "Output",
+      "description": "Enable/disable and query the output of the specified channel.",
+      "set": ":OUTPut[:STATe] [CH1|CH2|CH3,]{ON|OFF}",
+      "query": ":OUTPut[:STATe]? [CH1|CH2|CH3]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" },
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": [":OUTP CH1,ON", ":OUTP? CH1"]
+    },
+    {
+      "name": "output_mode",
+      "mnemonic": "OUTP:MODE?",
+      "category": "Output",
+      "description": "Query the current output mode of the specified channel. Returns CV, CC or UR. :OUTP:CVCC? is an alias.",
+      "query": ":OUTPut:MODE? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":OUTP:MODE? CH1", ":OUTP:CVCC? CH1"]
+    },
+    {
+      "name": "output_ocp_state",
+      "mnemonic": "OUTP:OCP",
+      "category": "Output",
+      "description": "Enable/disable and query the overcurrent protection (OCP) function of the specified channel.",
+      "set": ":OUTPut:OCP[:STATe] [CH1|CH2|CH3,]{ON|OFF}",
+      "query": ":OUTPut:OCP[:STATe]? [CH1|CH2|CH3]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" },
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": [":OUTP:OCP CH1,ON", ":OUTP:OCP? CH1"]
+    },
+    {
+      "name": "output_ocp_value",
+      "mnemonic": "OUTP:OCP:VAL",
+      "category": "Output",
+      "description": "Set/query the overcurrent protection (OCP) value of the specified channel.",
+      "set": ":OUTPut:OCP:VALue [CH1|CH2|CH3,]{<value>|MINimum|MAXimum}",
+      "query": ":OUTPut:OCP:VALue? {CH1|CH2|CH3}[,MINimum|MAXimum]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3" },
+        { "name": "value", "units": ["A"], "range": "model/channel dependent (see Table 2-2)" }
+      ],
+      "examples": [":OUTP:OCP:VAL CH1,5", ":OUTP:OCP:VAL? CH1"]
+    },
+    {
+      "name": "output_ocp_clear",
+      "mnemonic": "OUTP:OCP:CLEAR",
+      "category": "Output",
+      "description": "Clear the OCP occurred label on the specified channel.",
+      "set": ":OUTPut:OCP:CLEAR [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":OUTP:OCP:CLEAR CH1"]
+    },
+    {
+      "name": "output_ocp_alarm",
+      "mnemonic": "OUTP:OCP:QUES?",
+      "category": "Output",
+      "description": "Query whether OCP occurred on the specified channel. Returns YES or NO. :OUTP:OCP:ALAR? is an alias.",
+      "query": ":OUTPut:OCP:QUES? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":OUTP:OCP:QUES? CH1", ":OUTP:OCP:ALAR? CH1"]
+    },
+    {
+      "name": "output_ovp_state",
+      "mnemonic": "OUTP:OVP",
+      "category": "Output",
+      "description": "Enable/disable and query the overvoltage protection (OVP) function of the specified channel.",
+      "set": ":OUTPut:OVP[:STATe] [CH1|CH2|CH3,]{ON|OFF}",
+      "query": ":OUTPut:OVP[:STATe]? [CH1|CH2|CH3]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" },
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": [":OUTP:OVP CH1,ON", ":OUTP:OVP? CH1"]
+    },
+    {
+      "name": "output_ovp_value",
+      "mnemonic": "OUTP:OVP:VAL",
+      "category": "Output",
+      "description": "Set/query the overvoltage protection (OVP) value of the specified channel.",
+      "set": ":OUTPut:OVP:VALue [CH1|CH2|CH3,]{<value>|MINimum|MAXimum}",
+      "query": ":OUTPut:OVP:VALue? {CH1|CH2|CH3}[,MINimum|MAXimum]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3" },
+        { "name": "value", "units": ["V"], "range": "model/channel dependent (see Table 2-2)" }
+      ],
+      "examples": [":OUTP:OVP:VAL CH1,8.8", ":OUTP:OVP:VAL? CH1"]
+    },
+    {
+      "name": "output_ovp_clear",
+      "mnemonic": "OUTP:OVP:CLEAR",
+      "category": "Output",
+      "description": "Clear the OVP occurred label on the specified channel.",
+      "set": ":OUTPut:OVP:CLEAR [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":OUTP:OVP:CLEAR CH1"]
+    },
+    {
+      "name": "output_ovp_alarm",
+      "mnemonic": "OUTP:OVP:QUES?",
+      "category": "Output",
+      "description": "Query whether OVP occurred on the specified channel. Returns YES or NO. :OUTP:OVP:ALAR? is an alias.",
+      "query": ":OUTPut:OVP:QUES? [CH1|CH2|CH3]",
+      "parameters": [ { "name": "channel", "range": "CH1|CH2|CH3 (default current channel)" } ],
+      "examples": [":OUTP:OVP:QUES? CH1", ":OUTP:OVP:ALAR? CH1"]
+    },
+    {
+      "name": "output_range",
+      "mnemonic": "OUTP:RANG",
+      "category": "Output",
+      "description": "Select/query the current output range of the channel (single-channel models DP813A/DP813/DP811A/DP811 only).",
+      "set": ":OUTPut:RANGe {P8V|P20V|P40V|LOW|HIGH}",
+      "query": ":OUTPut:RANGe?",
+      "parameters": [ { "name": "range", "range": "P8V|P20V|P40V|LOW|HIGH (default P20V)" } ],
+      "examples": [":OUTP:RANG P20V", ":OUTP:RANG?"]
+    },
+    {
+      "name": "output_sense",
+      "mnemonic": "OUTP:SENS",
+      "category": "Output",
+      "description": "Enable/disable and query the remote Sense function of the channel (only on channels that support Sense).",
+      "set": ":OUTPut:SENSe [CH1|CH2|CH3,]{ON|OFF}",
+      "query": ":OUTPut:SENSe? [CH1|CH2|CH3]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3" },
+        { "name": "state", "range": "ON|OFF (default OFF; returns NONE if unsupported)" }
+      ],
+      "examples": [":OUTP:SENS CH1,ON", ":OUTP:SENS? CH1"]
+    },
+    {
+      "name": "output_timer",
+      "mnemonic": "OUTP:TIMEr",
+      "category": "Output",
+      "description": "Set a group of timer parameters (voltage/current/time) for the specified channel; query the first 5 groups.",
+      "set": ":OUTPut:TIMEr {P8V|P30V|N30V},<secnum>,<volt>,<curr>,<time>",
+      "query": ":OUTPut:TIMEr? {P8V|P30V|N30V}",
+      "parameters": [
+        { "name": "channel", "range": "P8V|P30V|N30V" },
+        { "name": "secnum", "range": "0 to 2047 (group number)" },
+        { "name": "volt", "units": ["V"], "range": "voltage range of channel" },
+        { "name": "curr", "units": ["A"], "range": "current range of channel" },
+        { "name": "time", "units": ["s"], "range": "1 to 99999" }
+      ],
+      "examples": [":OUTP:TIME P8V,1,5,1,10", ":OUTP:TIME? P8V"]
+    },
+    {
+      "name": "output_timer_state",
+      "mnemonic": "OUTP:TIMEr:STAT",
+      "category": "Output",
+      "description": "Turn on/off and query the timer output function of the specified channel.",
+      "set": ":OUTPut:TIMEr:STATe {P8V|P30V|N30V},{ON|OFF}",
+      "query": ":OUTPut:TIMEr:STATe? {P8V|P30V|N30V}",
+      "parameters": [
+        { "name": "channel", "range": "P8V|P30V|N30V" },
+        { "name": "state", "range": "ON|OFF (default OFF)" }
+      ],
+      "examples": [":OUTP:TIME:STAT P8V,ON", ":OUTP:TIME:STAT? P8V"]
+    },
+    {
+      "name": "output_track",
+      "mnemonic": "OUTP:TRAC",
+      "category": "Output",
+      "description": "Enable/disable and query the track function of the specified channel (only on tracking-capable channels).",
+      "set": ":OUTPut:TRACk [CH1|CH2|CH3,]{ON|OFF}",
+      "query": ":OUTPut:TRACk? [CH1|CH2|CH3]",
+      "parameters": [
+        { "name": "channel", "range": "CH1|CH2|CH3" },
+        { "name": "state", "range": "ON|OFF (default OFF; returns NONE if unsupported)" }
+      ],
+      "examples": [":OUTP:TRAC CH2,ON", ":OUTP:TRAC? CH2"]
+    },
+    {
+      "name": "initiate",
+      "mnemonic": "INIT",
+      "category": "Trigger",
+      "description": "Initialize the trigger system.",
+      "set": ":INITiate[:IMMediate]",
+      "examples": [":INIT"]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": "TRIG:SOUR",
+      "category": "Trigger",
+      "description": "Set/query the trigger source of the sequence trigger system.",
+      "set": ":TRIGger[:SEQuence]:SOURce {BUS|IMMediate}",
+      "query": ":TRIGger[:SEQuence]:SOURce?",
+      "parameters": [ { "name": "source", "range": "BUS|IMMediate" } ],
+      "examples": [":TRIG:SOUR BUS", ":TRIG:SOUR?"]
+    },
+    {
+      "name": "trigger_delay",
+      "mnemonic": "TRIG:DEL",
+      "category": "Trigger",
+      "description": "Set/query the trigger delay time of the sequence trigger system.",
+      "set": ":TRIGger[:SEQuence]:DELay <value>",
+      "query": ":TRIGger[:SEQuence]:DELay?",
+      "parameters": [ { "name": "delay", "units": ["s"] } ],
+      "examples": [":TRIG:DEL 3", ":TRIG:DEL?"]
+    },
+    {
+      "name": "delay_state",
+      "mnemonic": "DELAY",
+      "category": "Delay",
+      "description": "Enable/disable and query the delay output function of the current channel.",
+      "set": ":DELAY[:STATe] {ON|OFF}",
+      "query": ":DELAY[:STATe]?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF)" } ],
+      "examples": [":DELAY ON", ":DELAY?"]
+    },
+    {
+      "name": "delay_cycles",
+      "mnemonic": "DELAY:CYCLE",
+      "category": "Delay",
+      "description": "Set/query the number of cycles of the delayer (N for finite, I for infinite).",
+      "set": ":DELAY:CYCLEs {N|I}[,<value>]",
+      "query": ":DELAY:CYCLEs?",
+      "parameters": [
+        { "name": "mode", "range": "N|I" },
+        { "name": "value", "range": "1 to 99999 (default 1)" }
+      ],
+      "examples": [":DELAY:CYCLE N,100", ":DELAY:CYCLE?"]
+    },
+    {
+      "name": "delay_groups",
+      "mnemonic": "DELAY:GROUP",
+      "category": "Delay",
+      "description": "Set/query the number of output groups of the delayer.",
+      "set": ":DELAY:GROUPs <value>",
+      "query": ":DELAY:GROUPs?",
+      "parameters": [ { "name": "groups", "range": "1 to 2048 (default 1)" } ],
+      "examples": [":DELAY:GROUP 125", ":DELAY:GROUP?"]
+    },
+    {
+      "name": "delay_parameter",
+      "mnemonic": "DELAY:PARA",
+      "category": "Delay",
+      "description": "Set/query the delayer parameters (output state and time) of the specified group(s).",
+      "set": ":DELAY:PARAmeter <secnum>,{ON|OFF},<time>",
+      "query": ":DELAY:PARAmeter? <firnum>[,<timercount>]",
+      "parameters": [
+        { "name": "secnum", "range": "0 to 2047 (group number)" },
+        { "name": "state", "range": "ON|OFF" },
+        { "name": "time", "units": ["s"], "range": "1 to 99999" }
+      ],
+      "examples": [":DELAY:PARA 1,ON,2", ":DELAY:PARA? 3,2"]
+    },
+    {
+      "name": "delay_endstate",
+      "mnemonic": "DELAY:ENDS",
+      "category": "Delay",
+      "description": "Set/query the end state of the delayer (output on/off/last after completion).",
+      "set": ":DELAY:ENDState {ON|OFF|LAST}",
+      "query": ":DELAY:ENDState?",
+      "parameters": [ { "name": "endstate", "range": "ON|OFF|LAST (default OFF)" } ],
+      "examples": [":DELAY:ENDS LAST", ":DELAY:ENDS?"]
+    },
+    {
+      "name": "delay_stop",
+      "mnemonic": "DELAY:STOP",
+      "category": "Delay",
+      "description": "Set/query the stop condition of the delayer based on voltage, current or power thresholds.",
+      "set": ":DELAY:STOP {NONE|<V|>V|<C|>C|<P|>P}[,<value>|MINimum|MAXimum]",
+      "query": ":DELAY:STOP? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "condition", "range": "NONE|<V|>V|<C|>C|<P|>P" },
+        { "name": "value", "range": "0 to max voltage/current/power of channel" }
+      ],
+      "examples": [":DELAY:STOP >V,8", ":DELAY:STOP?"]
+    },
+    {
+      "name": "timer_state",
+      "mnemonic": "TIMEr",
+      "category": "Timer",
+      "description": "Enable/disable and query the timing output function.",
+      "set": ":TIMEr[:STATe] {ON|OFF}",
+      "query": ":TIMEr[:STATe]?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF)" } ],
+      "examples": [":TIME ON", ":TIME?"]
+    },
+    {
+      "name": "timer_cycles",
+      "mnemonic": "TIMEr:CYCLE",
+      "category": "Timer",
+      "description": "Set/query the number of cycles of the timer (N for finite, I for infinite).",
+      "set": ":TIMEr:CYCLEs {N|I}[,<value>]",
+      "query": ":TIMEr:CYCLEs?",
+      "parameters": [
+        { "name": "mode", "range": "N|I" },
+        { "name": "value", "range": "1 to 99999 (default 1)" }
+      ],
+      "examples": [":TIME:CYCLE N,20", ":TIME:CYCLE?"]
+    },
+    {
+      "name": "timer_groups",
+      "mnemonic": "TIMEr:GROUP",
+      "category": "Timer",
+      "description": "Set/query the number of output groups of the timer.",
+      "set": ":TIMEr:GROUPs <value>",
+      "query": ":TIMEr:GROUPs?",
+      "parameters": [ { "name": "groups", "range": "1 to 2048 (default 1)" } ],
+      "examples": [":TIME:GROUP 10", ":TIME:GROUP?"]
+    },
+    {
+      "name": "timer_parameter",
+      "mnemonic": "TIMEr:PARA",
+      "category": "Timer",
+      "description": "Set/query the timer parameters (voltage, current, time) of the specified group(s).",
+      "set": ":TIMEr:PARAmeter <secnum>,<volt>,<curr>,<time>",
+      "query": ":TIMEr:PARAmeter? <firnum>[,<timercount>]",
+      "parameters": [
+        { "name": "secnum", "range": "0 to 2047 (group number)" },
+        { "name": "volt", "units": ["V"] },
+        { "name": "curr", "units": ["A"] },
+        { "name": "time", "units": ["s"], "range": "1 to 99999" }
+      ],
+      "examples": [":TIME:PARA 1,8,1,10", ":TIME:PARA? 1,2"]
+    },
+    {
+      "name": "timer_endstate",
+      "mnemonic": "TIMEr:ENDS",
+      "category": "Timer",
+      "description": "Set/query the end state of the timer (output off or last after completion).",
+      "set": ":TIMEr:ENDState {OFF|LAST}",
+      "query": ":TIMEr:ENDState?",
+      "parameters": [ { "name": "endstate", "range": "OFF|LAST (default OFF)" } ],
+      "examples": [":TIME:ENDS LAST", ":TIME:ENDS?"]
+    },
+    {
+      "name": "status_questionable_condition",
+      "mnemonic": "STAT:QUES:COND?",
+      "category": "Status",
+      "description": "Query the condition register of the questionable status register (single-channel models).",
+      "query": ":STATus:QUEStionable:CONDition?",
+      "examples": [":STAT:QUES:COND?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STAT:QUES:ENAB",
+      "category": "Status",
+      "description": "Set/query the enable register of the questionable status register.",
+      "set": ":STATus:QUEStionable:ENABle <enable value>",
+      "query": ":STATus:QUEStionable:ENABle?",
+      "parameters": [ { "name": "enable_value", "range": "decimal bit weights" } ],
+      "examples": [":STAT:QUES:ENAB 17", ":STAT:QUES:ENAB?"]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": "STAT:QUES?",
+      "category": "Status",
+      "description": "Query (and clear) the event register of the questionable status register.",
+      "query": ":STATus:QUEStionable[:EVENt]?",
+      "examples": [":STAT:QUES?"]
+    },
+    {
+      "name": "status_questionable_instrument_enable",
+      "mnemonic": "STAT:QUES:INST:ENAB",
+      "category": "Status",
+      "description": "Set/query the enable register of the channel questionable status register (multi-channel models).",
+      "set": ":STATus:QUEStionable:INSTrument:ENABle <enable value>",
+      "query": ":STATus:QUEStionable:INSTrument:ENABle?",
+      "parameters": [ { "name": "enable_value", "range": "decimal bit weights" } ],
+      "examples": [":STAT:QUES:INST:ENAB 14", ":STAT:QUES:INST:ENAB?"]
+    },
+    {
+      "name": "status_questionable_instrument_event",
+      "mnemonic": "STAT:QUES:INST?",
+      "category": "Status",
+      "description": "Query (and clear) the event register of the channel questionable status register (multi-channel models).",
+      "query": ":STATus:QUEStionable:INSTrument[:EVENt]?",
+      "examples": [":STAT:QUES:INST?"]
+    },
+    {
+      "name": "system_beeper_immediate",
+      "mnemonic": "SYST:BEEP:IMM",
+      "category": "System",
+      "description": "Sound the beeper immediately.",
+      "set": ":SYSTem:BEEPer:IMMediate",
+      "examples": [":SYST:BEEP:IMM"]
+    },
+    {
+      "name": "system_beeper_state",
+      "mnemonic": "SYST:BEEP",
+      "category": "System",
+      "description": "Enable/disable and query the beeper.",
+      "set": ":SYSTem:BEEPer[:STATe] {ON|OFF}",
+      "query": ":SYSTem:BEEPer[:STATe]?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default ON)" } ],
+      "examples": [":SYST:BEEP ON", ":SYST:BEEP?"]
+    },
+    {
+      "name": "system_brightness",
+      "mnemonic": "SYST:BRIG",
+      "category": "System",
+      "description": "Set/query the screen brightness.",
+      "set": ":SYSTem:BRIGhtness {<brightness>|MINimum|MAXimum}",
+      "query": ":SYSTem:BRIGhtness? [{MINimum|MAXimum}]",
+      "parameters": [ { "name": "brightness", "range": "1 to 100 (default 50)" } ],
+      "examples": [":SYST:BRIG 60", ":SYST:BRIG?"]
+    },
+    {
+      "name": "system_gpib_address",
+      "mnemonic": "SYST:COMM:GPIB:ADDR",
+      "category": "System",
+      "description": "Set/query the GPIB address.",
+      "set": ":SYSTem:COMMunicate:GPIB:ADDRess <gpibaddress>",
+      "query": ":SYSTem:COMMunicate:GPIB:ADDRess?",
+      "parameters": [ { "name": "address", "range": "0 to 30 (default 2)" } ],
+      "examples": [":SYST:COMM:GPIB:ADDR 5", ":SYST:COMM:GPIB:ADDR?"]
+    },
+    {
+      "name": "system_rs232_baud",
+      "mnemonic": "SYST:COMM:RS232:BAUD",
+      "category": "System",
+      "description": "Set/query the RS232 baud rate.",
+      "set": ":SYSTem:COMMunicate:RS232:BAUD {4800|7200|9600|14400|19200|38400|57600|115200|128000}",
+      "query": ":SYSTem:COMMunicate:RS232:BAUD?",
+      "parameters": [ { "name": "baud", "range": "4800|7200|9600|14400|19200|38400|57600|115200|128000 (default 9600)" } ],
+      "examples": [":SYST:COMM:RS232:BAUD 19200", ":SYST:COMM:RS232:BAUD?"]
+    },
+    {
+      "name": "system_rs232_databit",
+      "mnemonic": "SYST:COMM:RS232:DATAB",
+      "category": "System",
+      "description": "Set/query the RS232 data bit.",
+      "set": ":SYSTem:COMMunicate:RS232:DATABit {5|6|7|8}",
+      "query": ":SYSTem:COMMunicate:RS232:DATABit?",
+      "parameters": [ { "name": "databit", "range": "5|6|7|8 (default 8)" } ],
+      "examples": [":SYST:COMM:RS232:DATAB 8", ":SYST:COMM:RS232:DATAB?"]
+    },
+    {
+      "name": "system_rs232_parity",
+      "mnemonic": "SYST:COMM:RS232:PARI",
+      "category": "System",
+      "description": "Set/query the RS232 parity mode.",
+      "set": ":SYSTem:COMMunicate:RS232:PARItybit {NONE|ODD|EVEN}",
+      "query": ":SYSTem:COMMunicate:RS232:PARItybit?",
+      "parameters": [ { "name": "parity", "range": "NONE|ODD|EVEN (default NONE)" } ],
+      "examples": [":SYST:COMM:RS232:PARI ODD", ":SYST:COMM:RS232:PARI?"]
+    },
+    {
+      "name": "system_rs232_stopbit",
+      "mnemonic": "SYST:COMM:RS232:STOPB",
+      "category": "System",
+      "description": "Set/query the RS232 stop bit.",
+      "set": ":SYSTem:COMMunicate:RS232:STOPBit {1|2}",
+      "query": ":SYSTem:COMMunicate:RS232:STOPBit?",
+      "parameters": [ { "name": "stopbit", "range": "1|2 (default 1)" } ],
+      "examples": [":SYST:COMM:RS232:STOPB 2", ":SYST:COMM:RS232:STOPB?"]
+    },
+    {
+      "name": "system_contrast",
+      "mnemonic": "SYST:CONT",
+      "category": "System",
+      "description": "Set/query the screen contrast.",
+      "set": ":SYSTem:CONTrast {<value>|MINimum|MAXimum}",
+      "query": ":SYSTem:CONTrast? [{MINimum|MAXimum}]",
+      "parameters": [ { "name": "contrast", "range": "1 to 100 (default 25)" } ],
+      "examples": [":SYST:CONT 50", ":SYST:CONT?"]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": "SYST:ERR?",
+      "category": "System",
+      "description": "Query and clear the error messages in the error queue.",
+      "query": ":SYSTem:ERRor?",
+      "examples": [":SYST:ERR?"]
+    },
+    {
+      "name": "system_key_lock",
+      "mnemonic": "SYST:KLOC",
+      "category": "System",
+      "description": "Lock or unlock a specified front-panel key; query whether a key is locked.",
+      "set": ":SYSTem:KLOCk <key>,{ON|OFF|0|1}",
+      "query": ":SYSTem:KLOCk? <key>",
+      "parameters": [
+        { "name": "key", "range": "e.g. DISPLAY|STORAGE|UTILITY|CH1|CH2|CH3|OUTPUT1|...|ALL" },
+        { "name": "state", "range": "ON|OFF|1|0 (default OFF)" }
+      ],
+      "examples": [":SYST:KLOC CH1,ON", ":SYST:KLOC? CH1"]
+    },
+    {
+      "name": "system_remote_lock_state",
+      "mnemonic": "SYST:KLOC:STAT",
+      "category": "System",
+      "description": "Enable/disable and query the remote lock.",
+      "set": ":SYSTem:KLOCk:STATe {ON|OFF}",
+      "query": ":SYSTem:KLOCk:STATe?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF)" } ],
+      "examples": [":SYST:KLOC:STAT ON", ":SYST:KLOC:STAT?"]
+    },
+    {
+      "name": "system_language",
+      "mnemonic": "SYST:LANG:TYPE",
+      "category": "System",
+      "description": "Set/query the system language.",
+      "set": ":SYSTem:LANGuage:TYPE {EN|CH|JAP|KOR|GER|POR|POL|CHT|RUS}",
+      "query": ":SYSTem:LANGuage:TYPE?",
+      "parameters": [ { "name": "language", "range": "EN|CH|JAP|KOR|GER|POR|POL|CHT|RUS (default CH)" } ],
+      "examples": [":SYST:LANG:TYPE EN", ":SYST:LANG:TYPE?"]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": "SYST:LOC",
+      "category": "System",
+      "description": "Return the power supply from remote mode to local mode.",
+      "set": ":SYSTem:LOCal",
+      "examples": [":SYST:LOC"]
+    },
+    {
+      "name": "system_remote",
+      "mnemonic": "SYST:REM",
+      "category": "System",
+      "description": "Return the power supply from local mode to remote mode.",
+      "set": ":SYSTem:REMote",
+      "examples": [":SYST:REM"]
+    },
+    {
+      "name": "system_lock",
+      "mnemonic": "SYST:LOCK",
+      "category": "System",
+      "description": "Lock or unlock the front panel; query whether the front panel is locked.",
+      "set": ":SYSTem:LOCK {ON|OFF}",
+      "query": ":SYSTem:LOCK?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF)" } ],
+      "examples": [":SYST:LOCK ON", ":SYST:LOCK?"]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": "SYST:RWL",
+      "category": "System",
+      "description": "Turn on or off the remote lock (front panel disabled).",
+      "set": ":SYSTem:RWLock[:STATe] [ON|OFF]",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF; omitted defaults to ON)" } ],
+      "examples": [":SYST:RWL ON"]
+    },
+    {
+      "name": "system_onoff_sync",
+      "mnemonic": "SYST:ONOFFS",
+      "category": "System",
+      "description": "Turn on/off and query the output on/off sync function (tracking-capable channels).",
+      "set": ":SYSTem:ONOFFSync {ON|OFF}",
+      "query": ":SYSTem:ONOFFSync?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF)" } ],
+      "examples": [":SYST:ONOFFS ON", ":SYST:ONOFFS?"]
+    },
+    {
+      "name": "system_otp",
+      "mnemonic": "SYST:OTP",
+      "category": "System",
+      "description": "Enable/disable and query the over-temperature protection (OTP) function.",
+      "set": ":SYSTem:OTP {ON|OFF}",
+      "query": ":SYSTem:OTP?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default ON)" } ],
+      "examples": [":SYST:OTP ON", ":SYST:OTP?"]
+    },
+    {
+      "name": "system_poweron",
+      "mnemonic": "SYST:POWE",
+      "category": "System",
+      "description": "Select/query the configuration used at power-on (factory default or last state).",
+      "set": ":SYSTem:POWEron {DEFault|LAST}",
+      "query": ":SYSTem:POWEron?",
+      "parameters": [ { "name": "config", "range": "DEFault|LAST (default DEFault)" } ],
+      "examples": [":SYST:POWE LAST", ":SYST:POWE?"]
+    },
+    {
+      "name": "system_saver",
+      "mnemonic": "SYST:SAV",
+      "category": "System",
+      "description": "Enable/disable and query the screen saver function.",
+      "set": ":SYSTem:SAVer {ON|OFF}",
+      "query": ":SYSTem:SAVer?",
+      "parameters": [ { "name": "state", "range": "ON|OFF (default OFF)" } ],
+      "examples": [":SYST:SAV ON", ":SYST:SAV?"]
+    },
+    {
+      "name": "system_selftest_board",
+      "mnemonic": "SYST:SELF:TEST:BOARD?",
+      "category": "System",
+      "description": "Query the self-test results of TopBoard and BottomBoard. Returns PASS or FAIL.",
+      "query": ":SYSTem:SELF:TEST:BOARD? [{TOP|BOTTOM}]",
+      "parameters": [ { "name": "board", "range": "TOP|BOTTOM (omit for both)" } ],
+      "examples": [":SYST:SELF:TEST:BOARD?"]
+    },
+    {
+      "name": "system_selftest_fan",
+      "mnemonic": "SYST:SELF:TEST:FAN?",
+      "category": "System",
+      "description": "Query the self-test result of the fan. Returns PASS or FAIL.",
+      "query": ":SYSTem:SELF:TEST:FAN?",
+      "examples": [":SYST:SELF:TEST:FAN?"]
+    },
+    {
+      "name": "system_selftest_temp",
+      "mnemonic": "SYST:SELF:TEST:TEMP?",
+      "category": "System",
+      "description": "Query the self-test result of the temperature. Returns the temperature in degrees C.",
+      "query": ":SYSTem:SELF:TEST:TEMP?",
+      "examples": [":SYST:SELF:TEST:TEMP?"]
+    },
+    {
+      "name": "system_track_mode",
+      "mnemonic": "SYST:TRACKMode",
+      "category": "System",
+      "description": "Set/query the track mode (synchronous or independent) for tracking-capable channels.",
+      "set": ":SYSTem:TRACKMode {SYNC|INDE}",
+      "query": ":SYSTem:TRACKMode?",
+      "parameters": [ { "name": "mode", "range": "SYNC|INDE (default SYNC)" } ],
+      "examples": [":SYST:TRACKM SYNC", ":SYST:TRACKM?"]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": "SYST:VERS?",
+      "category": "System",
+      "description": "Query the SCPI version number of the system (YYYY.V form).",
+      "query": ":SYSTem:VERSion?",
+      "examples": [":SYST:VERS?"]
+    }
+  ]
+}

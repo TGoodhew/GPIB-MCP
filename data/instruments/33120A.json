@@ -1,0 +1,949 @@
+{
+  "model": "33120A",
+  "manufacturer": "HP/Agilent",
+  "category": "Function / Arbitrary Waveform Generator",
+  "description": "15 MHz function and arbitrary waveform generator with AM/FM/FSK modulation, burst, linear/log frequency sweep, and downloadable arbitrary waveforms. Programmable via SCPI over GPIB (IEEE-488) or RS-232.",
+  "source": "33120A User.pdf",
+  "aliases": ["33120A", "HP33120A", "Agilent 33120A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": { "command": "*IDN?", "matchRegex": "33120A", "description": "Standard SCPI identification query." },
+  "commands": [
+    {
+      "name": "apply_sinusoid",
+      "mnemonic": "APPL:SIN",
+      "category": "APPLy",
+      "description": "Outputs a sine wave with the specified frequency, amplitude, and offset in a single command.",
+      "set": "APPLy:SINusoid [<frequency> [,<amplitude> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 15 MHz (sine)" },
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"], "range": "50 mVpp to 10 Vpp into 50 ohms" },
+        { "name": "offset", "units": ["V"], "range": "function/amplitude dependent" }
+      ],
+      "examples": ["APPL:SIN 5.0E+3, 3.0, -2.5", "APPL:SIN 5 KHZ, 3.0 VPP, -2.5 V"]
+    },
+    {
+      "name": "apply_square",
+      "mnemonic": "APPL:SQU",
+      "category": "APPLy",
+      "description": "Outputs a square wave with the specified frequency, amplitude, and offset.",
+      "set": "APPLy:SQUare [<frequency> [,<amplitude> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 15 MHz" },
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"], "range": "50 mVpp to 10 Vpp into 50 ohms" },
+        { "name": "offset", "units": ["V"] }
+      ],
+      "examples": ["APPL:SQU 2000, 4.0, 0"]
+    },
+    {
+      "name": "apply_triangle",
+      "mnemonic": "APPL:TRI",
+      "category": "APPLy",
+      "description": "Outputs a triangle wave with the specified frequency, amplitude, and offset.",
+      "set": "APPLy:TRIangle [<frequency> [,<amplitude> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 100 kHz" },
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
+        { "name": "offset", "units": ["V"] }
+      ],
+      "examples": ["APPL:TRI 1000, 2.0, 0"]
+    },
+    {
+      "name": "apply_ramp",
+      "mnemonic": "APPL:RAMP",
+      "category": "APPLy",
+      "description": "Outputs a ramp wave with the specified frequency, amplitude, and offset.",
+      "set": "APPLy:RAMP [<frequency> [,<amplitude> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 100 kHz" },
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
+        { "name": "offset", "units": ["V"] }
+      ],
+      "examples": ["APPL:RAMP 1000, 5.0, 0"]
+    },
+    {
+      "name": "apply_noise",
+      "mnemonic": "APPL:NOIS",
+      "category": "APPLy",
+      "description": "Outputs noise with the specified amplitude and offset. The frequency parameter is ignored but a value or DEFault must be specified.",
+      "set": "APPLy:NOISe [<frequency|DEFault> [,<amplitude> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "ignored; specify value or DEFault" },
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
+        { "name": "offset", "units": ["V"] }
+      ],
+      "examples": ["APPL:NOIS DEF, 5.0, 0"]
+    },
+    {
+      "name": "apply_dc",
+      "mnemonic": "APPL:DC",
+      "category": "APPLy",
+      "description": "Outputs a DC voltage. Frequency and amplitude parameters are ignored but a value or DEFault must be specified; the offset sets the DC level.",
+      "set": "APPLy:DC [<frequency|DEFault> [,<amplitude|DEFault> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "ignored; specify value or DEFault" },
+        { "name": "amplitude", "units": ["V"], "range": "ignored; specify value or DEFault" },
+        { "name": "offset", "units": ["V"] }
+      ],
+      "examples": ["APPL:DC DEF, DEF, 2.5"]
+    },
+    {
+      "name": "apply_user",
+      "mnemonic": "APPL:USER",
+      "category": "APPLy",
+      "description": "Outputs the arbitrary waveform currently selected by FUNCtion:USER, with the specified frequency, amplitude, and offset.",
+      "set": "APPLy:USER [<frequency> [,<amplitude> [,<offset>]]]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 5 MHz (arb point dependent)" },
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
+        { "name": "offset", "units": ["V"] }
+      ],
+      "examples": ["APPL:USER 1000, 5.0, 0"]
+    },
+    {
+      "name": "apply_query",
+      "mnemonic": "APPL?",
+      "category": "APPLy",
+      "description": "Queries the current function, frequency, amplitude, and offset configuration.",
+      "query": "APPLy?",
+      "examples": ["APPL?"]
+    },
+    {
+      "name": "set_function",
+      "mnemonic": "FUNC:SHAP",
+      "category": "Output",
+      "description": "Selects the output function (waveform shape).",
+      "set": "[SOURce:]FUNCtion:SHAPe {SINusoid|SQUare|TRIangle|RAMP|NOISe|DC|USER}",
+      "query": "[SOURce:]FUNCtion:SHAPe?",
+      "parameters": [
+        { "name": "shape", "range": "SINusoid|SQUare|TRIangle|RAMP|NOISe|DC|USER" }
+      ],
+      "examples": ["FUNC:SHAP SIN", "FUNC:SHAP?"]
+    },
+    {
+      "name": "set_frequency",
+      "mnemonic": "FREQ",
+      "category": "Output",
+      "description": "Sets the output frequency. Range depends on the selected function.",
+      "set": "[SOURce:]FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]FREQuency? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 15 MHz (function dependent)" }
+      ],
+      "examples": ["FREQ 5.0E+3", "FREQ? MAX"]
+    },
+    {
+      "name": "set_pulse_duty_cycle",
+      "mnemonic": "PULS:DCYC",
+      "category": "Output",
+      "description": "Sets the duty cycle in percent for square waves.",
+      "set": "[SOURce:]PULSe:DCYCle {<percent>|MINimum|MAXimum}",
+      "query": "[SOURce:]PULSe:DCYCle? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "percent", "units": ["%"], "range": "square waves only" }
+      ],
+      "examples": ["PULS:DCYC 45", "PULS:DCYC?"]
+    },
+    {
+      "name": "set_voltage",
+      "mnemonic": "VOLT",
+      "category": "Output",
+      "description": "Sets the output amplitude. Range depends on the selected function and output termination.",
+      "set": "[SOURce:]VOLTage {<amplitude>|MINimum|MAXimum}",
+      "query": "[SOURce:]VOLTage? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"], "range": "50 mVpp to 10 Vpp into 50 ohms" }
+      ],
+      "examples": ["VOLT 3.0", "VOLT? MAX"]
+    },
+    {
+      "name": "set_voltage_offset",
+      "mnemonic": "VOLT:OFFS",
+      "category": "Output",
+      "description": "Sets the DC offset voltage.",
+      "set": "[SOURce:]VOLTage:OFFSet {<offset>|MINimum|MAXimum}",
+      "query": "[SOURce:]VOLTage:OFFSet? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "offset", "units": ["V"], "range": "amplitude/function dependent" }
+      ],
+      "examples": ["VOLT:OFFS -2.5", "VOLT:OFFS?"]
+    },
+    {
+      "name": "set_voltage_unit",
+      "mnemonic": "VOLT:UNIT",
+      "category": "Output",
+      "description": "Selects the units used to specify output amplitude.",
+      "set": "[SOURce:]VOLTage:UNIT {VPP|VRMS|DBM|DEFault}",
+      "query": "[SOURce:]VOLTage:UNIT?",
+      "parameters": [
+        { "name": "unit", "range": "VPP|VRMS|DBM|DEFault" }
+      ],
+      "examples": ["VOLT:UNIT VPP", "VOLT:UNIT?"]
+    },
+    {
+      "name": "set_output_load",
+      "mnemonic": "OUTP:LOAD",
+      "category": "Output",
+      "description": "Specifies the output termination (load impedance) for amplitude and offset.",
+      "set": "OUTPut:LOAD {50|INFinity|MINimum|MAXimum}",
+      "query": "OUTPut:LOAD? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "load", "units": ["ohm"], "range": "50|INFinity (open circuit)" }
+      ],
+      "examples": ["OUTP:LOAD 50", "OUTP:LOAD INF"]
+    },
+    {
+      "name": "set_output_sync",
+      "mnemonic": "OUTP:SYNC",
+      "category": "Output",
+      "description": "Enables or disables the front-panel Sync signal output.",
+      "set": "OUTPut:SYNC {OFF|ON}",
+      "query": "OUTPut:SYNC?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["OUTP:SYNC ON", "OUTP:SYNC?"]
+    },
+    {
+      "name": "set_am_depth",
+      "mnemonic": "AM:DEPT",
+      "category": "Modulation",
+      "description": "Sets the amplitude modulation depth in percent.",
+      "set": "[SOURce:]AM:DEPTh {<depth in percent>|MINimum|MAXimum}",
+      "query": "[SOURce:]AM:DEPTh? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "depth", "units": ["%"] }
+      ],
+      "examples": ["AM:DEPT 80", "AM:DEPT?"]
+    },
+    {
+      "name": "set_am_internal_function",
+      "mnemonic": "AM:INT:FUNC",
+      "category": "Modulation",
+      "description": "Selects the internal modulating waveform shape for AM.",
+      "set": "[SOURce:]AM:INTernal:FUNCtion {SINusoid|SQUare|TRIangle|RAMP|NOISe|USER}",
+      "query": "[SOURce:]AM:INTernal:FUNCtion?",
+      "parameters": [
+        { "name": "shape", "range": "SINusoid|SQUare|TRIangle|RAMP|NOISe|USER" }
+      ],
+      "examples": ["AM:INT:FUNC SIN", "AM:INT:FUNC?"]
+    },
+    {
+      "name": "set_am_internal_frequency",
+      "mnemonic": "AM:INT:FREQ",
+      "category": "Modulation",
+      "description": "Sets the internal modulating frequency for AM.",
+      "set": "[SOURce:]AM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]AM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["AM:INT:FREQ 100", "AM:INT:FREQ?"]
+    },
+    {
+      "name": "set_am_source",
+      "mnemonic": "AM:SOUR",
+      "category": "Modulation",
+      "description": "Selects the source of the AM modulating signal.",
+      "set": "[SOURce:]AM:SOURce {BOTH|EXTernal}",
+      "query": "[SOURce:]AM:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "BOTH|EXTernal" }
+      ],
+      "examples": ["AM:SOUR BOTH", "AM:SOUR?"]
+    },
+    {
+      "name": "set_am_state",
+      "mnemonic": "AM:STAT",
+      "category": "Modulation",
+      "description": "Enables or disables amplitude modulation.",
+      "set": "[SOURce:]AM:STATe {OFF|ON}",
+      "query": "[SOURce:]AM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["AM:STAT ON", "AM:STAT?"]
+    },
+    {
+      "name": "set_fm_deviation",
+      "mnemonic": "FM:DEV",
+      "category": "Modulation",
+      "description": "Sets the peak frequency deviation in Hz for frequency modulation.",
+      "set": "[SOURce:]FM:DEViation {<peak deviation in Hz>|MINimum|MAXimum}",
+      "query": "[SOURce:]FM:DEViation? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "deviation", "units": ["Hz"] }
+      ],
+      "examples": ["FM:DEV 100", "FM:DEV?"]
+    },
+    {
+      "name": "set_fm_internal_function",
+      "mnemonic": "FM:INT:FUNC",
+      "category": "Modulation",
+      "description": "Selects the internal modulating waveform shape for FM.",
+      "set": "[SOURce:]FM:INTernal:FUNCtion {SINusoid|SQUare|TRIangle|RAMP|NOISe|USER}",
+      "query": "[SOURce:]FM:INTernal:FUNCtion?",
+      "parameters": [
+        { "name": "shape", "range": "SINusoid|SQUare|TRIangle|RAMP|NOISe|USER" }
+      ],
+      "examples": ["FM:INT:FUNC SIN", "FM:INT:FUNC?"]
+    },
+    {
+      "name": "set_fm_internal_frequency",
+      "mnemonic": "FM:INT:FREQ",
+      "category": "Modulation",
+      "description": "Sets the internal modulating frequency for FM.",
+      "set": "[SOURce:]FM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]FM:INTernal:FREQuency? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["FM:INT:FREQ 100", "FM:INT:FREQ?"]
+    },
+    {
+      "name": "set_fm_state",
+      "mnemonic": "FM:STAT",
+      "category": "Modulation",
+      "description": "Enables or disables frequency modulation.",
+      "set": "[SOURce:]FM:STATe {OFF|ON}",
+      "query": "[SOURce:]FM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["FM:STAT ON", "FM:STAT?"]
+    },
+    {
+      "name": "set_burst_ncycles",
+      "mnemonic": "BM:NCYC",
+      "category": "Burst",
+      "description": "Sets the number of cycles per burst.",
+      "set": "[SOURce:]BM:NCYCles {<# cycles>|INFinity|MINimum|MAXimum}",
+      "query": "[SOURce:]BM:NCYCles? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "cycles", "range": "count or INFinity" }
+      ],
+      "examples": ["BM:NCYC 3", "BM:NCYC?"]
+    },
+    {
+      "name": "set_burst_phase",
+      "mnemonic": "BM:PHAS",
+      "category": "Burst",
+      "description": "Sets the starting phase angle of a burst in degrees.",
+      "set": "[SOURce:]BM:PHASe {<degrees>|MINimum|MAXimum}",
+      "query": "[SOURce:]BM:PHASe? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "phase", "units": ["degrees"], "range": "-360 to +360" }
+      ],
+      "examples": ["BM:PHAS 0", "BM:PHAS?"]
+    },
+    {
+      "name": "set_burst_internal_rate",
+      "mnemonic": "BM:INT:RATE",
+      "category": "Burst",
+      "description": "Sets the internal burst rate (frequency).",
+      "set": "[SOURce:]BM:INTernal:RATE {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]BM:INTernal:RATE? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "rate", "units": ["Hz"] }
+      ],
+      "examples": ["BM:INT:RATE 100", "BM:INT:RATE?"]
+    },
+    {
+      "name": "set_burst_source",
+      "mnemonic": "BM:SOUR",
+      "category": "Burst",
+      "description": "Selects the burst source (gated burst mode).",
+      "set": "[SOURce:]BM:SOURce {INTernal|EXTernal}",
+      "query": "[SOURce:]BM:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal" }
+      ],
+      "examples": ["BM:SOUR INT", "BM:SOUR?"]
+    },
+    {
+      "name": "set_burst_state",
+      "mnemonic": "BM:STAT",
+      "category": "Burst",
+      "description": "Enables or disables burst modulation.",
+      "set": "[SOURce:]BM:STATe {OFF|ON}",
+      "query": "[SOURce:]BM:STATe?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["BM:STAT ON", "BM:STAT?"]
+    },
+    {
+      "name": "set_fsk_frequency",
+      "mnemonic": "FSK:FREQ",
+      "category": "FSK",
+      "description": "Sets the FSK 'hop' (alternate) frequency.",
+      "set": "[SOURce:]FSKey:FREQuency {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]FSKey:FREQuency? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["FSK:FREQ 500", "FSK:FREQ?"]
+    },
+    {
+      "name": "set_fsk_internal_rate",
+      "mnemonic": "FSK:INT:RATE",
+      "category": "FSK",
+      "description": "Sets the internal rate at which output shifts between carrier and hop frequency.",
+      "set": "[SOURce:]FSKey:INTernal:RATE {<rate in Hz>|MINimum|MAXimum}",
+      "query": "[SOURce:]FSKey:INTernal:RATE? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "rate", "units": ["Hz"] }
+      ],
+      "examples": ["FSK:INT:RATE 100", "FSK:INT:RATE?"]
+    },
+    {
+      "name": "set_fsk_source",
+      "mnemonic": "FSK:SOUR",
+      "category": "FSK",
+      "description": "Selects the internal or external source for the FSK rate.",
+      "set": "[SOURce:]FSKey:SOURce {INTernal|EXTernal}",
+      "query": "[SOURce:]FSKey:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "INTernal|EXTernal" }
+      ],
+      "examples": ["FSK:SOUR INT", "FSK:SOUR?"]
+    },
+    {
+      "name": "set_fsk_state",
+      "mnemonic": "FSK:STAT",
+      "category": "FSK",
+      "description": "Enables or disables FSK (frequency-shift keying) modulation.",
+      "set": "[SOURce:]FSKey:STATe {OFF|ON}",
+      "query": "[SOURce:]FSKey:STATe?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["FSK:STAT ON", "FSK:STAT?"]
+    },
+    {
+      "name": "set_frequency_start",
+      "mnemonic": "FREQ:STAR",
+      "category": "Sweep",
+      "description": "Sets the start frequency for a frequency sweep.",
+      "set": "[SOURce:]FREQuency:STARt {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]FREQuency:STARt? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["FREQ:STAR 100", "FREQ:STAR?"]
+    },
+    {
+      "name": "set_frequency_stop",
+      "mnemonic": "FREQ:STOP",
+      "category": "Sweep",
+      "description": "Sets the stop frequency for a frequency sweep.",
+      "set": "[SOURce:]FREQuency:STOP {<frequency>|MINimum|MAXimum}",
+      "query": "[SOURce:]FREQuency:STOP? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "frequency", "units": ["Hz"] }
+      ],
+      "examples": ["FREQ:STOP 10000", "FREQ:STOP?"]
+    },
+    {
+      "name": "set_sweep_spacing",
+      "mnemonic": "SWE:SPAC",
+      "category": "Sweep",
+      "description": "Selects linear or logarithmic spacing for the frequency sweep.",
+      "set": "[SOURce:]SWEep:SPACing {LINear|LOGarithmic}",
+      "query": "[SOURce:]SWEep:SPACing?",
+      "parameters": [
+        { "name": "spacing", "range": "LINear|LOGarithmic" }
+      ],
+      "examples": ["SWE:SPAC LIN", "SWE:SPAC?"]
+    },
+    {
+      "name": "set_sweep_time",
+      "mnemonic": "SWE:TIME",
+      "category": "Sweep",
+      "description": "Sets the number of seconds required to sweep from start to stop frequency.",
+      "set": "[SOURce:]SWEep:TIME {<seconds>|MINimum|MAXimum}",
+      "query": "[SOURce:]SWEep:TIME? [MINimum|MAXimum]",
+      "parameters": [
+        { "name": "seconds", "units": ["s"] }
+      ],
+      "examples": ["SWE:TIME 1", "SWE:TIME?"]
+    },
+    {
+      "name": "set_sweep_state",
+      "mnemonic": "SWE:STAT",
+      "category": "Sweep",
+      "description": "Enables or disables the frequency sweep mode.",
+      "set": "[SOURce:]SWEep:STATe {OFF|ON}",
+      "query": "[SOURce:]SWEep:STATe?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["SWE:STAT ON", "SWE:STAT?"]
+    },
+    {
+      "name": "set_function_user",
+      "mnemonic": "FUNC:USER",
+      "category": "Arbitrary",
+      "description": "Selects one of the built-in or a user-defined arbitrary waveform to be output when FUNCtion:SHAPe USER is active.",
+      "set": "[SOURce:]FUNCtion:USER {<arb name>|VOLATILE}",
+      "query": "[SOURce:]FUNCtion:USER?",
+      "parameters": [
+        { "name": "arb_name", "range": "built-in waveform, user-defined name, or VOLATILE" }
+      ],
+      "examples": ["FUNC:USER VOLATILE", "FUNC:USER?"]
+    },
+    {
+      "name": "download_data_volatile",
+      "mnemonic": "DATA VOLATILE",
+      "category": "Arbitrary",
+      "description": "Downloads floating-point values (between -1 and +1) into volatile memory as an arbitrary waveform.",
+      "set": "DATA VOLATILE, <value>,<value>, . . .",
+      "parameters": [
+        { "name": "values", "range": "8 to 16000 points, each -1.0 to +1.0" }
+      ],
+      "examples": ["DATA VOLATILE, 1, 0.67, 0.33, 0, -0.33, -0.67, -1"]
+    },
+    {
+      "name": "download_data_dac",
+      "mnemonic": "DATA:DAC",
+      "category": "Arbitrary",
+      "description": "Downloads integer DAC values into volatile memory as an arbitrary waveform, as a binary block or comma-separated values.",
+      "set": "DATA:DAC VOLATILE, {<binary block>|<value>,<value>, . . . }",
+      "parameters": [
+        { "name": "values", "range": "integer DAC codes; binary block or value list" }
+      ],
+      "examples": ["DATA:DAC VOLATILE, 2047, 1024, 0, -1024, -2047"]
+    },
+    {
+      "name": "query_data_average",
+      "mnemonic": "DATA:ATTR:AVER?",
+      "category": "Arbitrary",
+      "description": "Queries the arithmetic average of all data points for the specified arbitrary waveform.",
+      "query": "DATA:ATTRibute:AVERage? [<arb name>]",
+      "parameters": [
+        { "name": "arb_name", "range": "optional arb name" }
+      ],
+      "examples": ["DATA:ATTR:AVER?", "DATA:ATTR:AVER? VOLATILE"]
+    },
+    {
+      "name": "query_data_cfactor",
+      "mnemonic": "DATA:ATTR:CFAC?",
+      "category": "Arbitrary",
+      "description": "Queries the crest factor of the specified arbitrary waveform.",
+      "query": "DATA:ATTRibute:CFACtor? [<arb name>]",
+      "parameters": [
+        { "name": "arb_name", "range": "optional arb name" }
+      ],
+      "examples": ["DATA:ATTR:CFAC?"]
+    },
+    {
+      "name": "query_data_points",
+      "mnemonic": "DATA:ATTR:POIN?",
+      "category": "Arbitrary",
+      "description": "Queries the number of points in the specified arbitrary waveform.",
+      "query": "DATA:ATTRibute:POINts? [<arb name>]",
+      "parameters": [
+        { "name": "arb_name", "range": "optional arb name" }
+      ],
+      "examples": ["DATA:ATTR:POIN? VOLATILE"]
+    },
+    {
+      "name": "query_data_ptpeak",
+      "mnemonic": "DATA:ATTR:PTP?",
+      "category": "Arbitrary",
+      "description": "Queries the peak-to-peak value of the specified arbitrary waveform.",
+      "query": "DATA:ATTRibute:PTPeak? [<arb name>]",
+      "parameters": [
+        { "name": "arb_name", "range": "optional arb name" }
+      ],
+      "examples": ["DATA:ATTR:PTP?"]
+    },
+    {
+      "name": "query_data_catalog",
+      "mnemonic": "DATA:CAT?",
+      "category": "Arbitrary",
+      "description": "Lists the names of all waveforms currently in memory (built-in, user, and volatile).",
+      "query": "DATA:CATalog?",
+      "examples": ["DATA:CAT?"]
+    },
+    {
+      "name": "copy_data",
+      "mnemonic": "DATA:COPY",
+      "category": "Arbitrary",
+      "description": "Copies the waveform from volatile memory to a named waveform in non-volatile memory.",
+      "set": "DATA:COPY <destination arb name> [,VOLATILE]",
+      "parameters": [
+        { "name": "destination", "range": "destination arb name" }
+      ],
+      "examples": ["DATA:COPY ARB_1", "DATA:COPY ARB_1, VOLATILE"]
+    },
+    {
+      "name": "delete_data",
+      "mnemonic": "DATA:DEL",
+      "category": "Arbitrary",
+      "description": "Deletes the specified arbitrary waveform from memory.",
+      "set": "DATA:DELete <arb name>",
+      "parameters": [
+        { "name": "arb_name", "range": "waveform name" }
+      ],
+      "examples": ["DATA:DEL ARB_1"]
+    },
+    {
+      "name": "delete_data_all",
+      "mnemonic": "DATA:DEL:ALL",
+      "category": "Arbitrary",
+      "description": "Deletes all user-defined arbitrary waveforms from memory.",
+      "set": "DATA:DELete:ALL",
+      "examples": ["DATA:DEL:ALL"]
+    },
+    {
+      "name": "query_data_nvolatile_catalog",
+      "mnemonic": "DATA:NVOL:CAT?",
+      "category": "Arbitrary",
+      "description": "Lists the names of all user-defined arbitrary waveforms in non-volatile memory.",
+      "query": "DATA:NVOLatile:CATalog?",
+      "examples": ["DATA:NVOL:CAT?"]
+    },
+    {
+      "name": "query_data_nvolatile_free",
+      "mnemonic": "DATA:NVOL:FREE?",
+      "category": "Arbitrary",
+      "description": "Queries the number of non-volatile memory slots free to store user-defined waveforms.",
+      "query": "DATA:NVOLatile:FREE?",
+      "examples": ["DATA:NVOL:FREE?"]
+    },
+    {
+      "name": "set_format_border",
+      "mnemonic": "FORM:BORD",
+      "category": "Arbitrary",
+      "description": "Specifies the byte order used for binary block transfers of DAC data.",
+      "set": "FORMat:BORDer {NORMal|SWAPped}",
+      "query": "FORMat:BORDer?",
+      "parameters": [
+        { "name": "order", "range": "NORMal|SWAPped" }
+      ],
+      "examples": ["FORM:BORD SWAP", "FORM:BORD?"]
+    },
+    {
+      "name": "set_trigger_source",
+      "mnemonic": "TRIG:SOUR",
+      "category": "Trigger",
+      "description": "Selects the trigger source for triggered burst and sweep modes.",
+      "set": "TRIGger:SOURce {IMMediate|EXTernal|BUS}",
+      "query": "TRIGger:SOURce?",
+      "parameters": [
+        { "name": "source", "range": "IMMediate|EXTernal|BUS" }
+      ],
+      "examples": ["TRIG:SOUR EXT", "TRIG:SOUR?"]
+    },
+    {
+      "name": "set_trigger_slope",
+      "mnemonic": "TRIG:SLOP",
+      "category": "Trigger",
+      "description": "Selects whether triggering occurs on the rising or falling edge of the external trigger signal.",
+      "set": "TRIGger:SLOPe {POSitive|NEGative}",
+      "query": "TRIGger:SLOPe?",
+      "parameters": [
+        { "name": "slope", "range": "POSitive|NEGative" }
+      ],
+      "examples": ["TRIG:SLOP POS", "TRIG:SLOP?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Trigger",
+      "description": "Triggers a burst or sweep from the remote interface when the bus (software) trigger source is selected.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "set_display",
+      "mnemonic": "DISP",
+      "category": "System",
+      "description": "Turns the front-panel display on or off.",
+      "set": "DISPlay {OFF|ON}",
+      "query": "DISPlay?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" }
+      ],
+      "examples": ["DISP OFF", "DISP?"]
+    },
+    {
+      "name": "set_display_text",
+      "mnemonic": "DISP:TEXT",
+      "category": "System",
+      "description": "Displays a text message on the front-panel display.",
+      "set": "DISPlay:TEXT <quoted string>",
+      "query": "DISPlay:TEXT?",
+      "parameters": [
+        { "name": "text", "range": "quoted string" }
+      ],
+      "examples": ["DISP:TEXT \"TESTING\"", "DISP:TEXT?"]
+    },
+    {
+      "name": "clear_display_text",
+      "mnemonic": "DISP:TEXT:CLE",
+      "category": "System",
+      "description": "Clears the text message shown on the front-panel display.",
+      "set": "DISPlay:TEXT:CLEar",
+      "examples": ["DISP:TEXT:CLE"]
+    },
+    {
+      "name": "system_beep",
+      "mnemonic": "SYST:BEEP",
+      "category": "System",
+      "description": "Issues a single beep from the function generator.",
+      "set": "SYSTem:BEEPer",
+      "examples": ["SYST:BEEP"]
+    },
+    {
+      "name": "query_system_error",
+      "mnemonic": "SYST:ERR?",
+      "category": "System",
+      "description": "Reads and clears one error from the error queue.",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "query_system_version",
+      "mnemonic": "SYST:VERS?",
+      "category": "System",
+      "description": "Queries the SCPI version the instrument complies with.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": "SYST:LOC",
+      "category": "RS-232",
+      "description": "Places the function generator in local mode (RS-232 interface).",
+      "set": "SYSTem:LOCal",
+      "examples": ["SYST:LOC"]
+    },
+    {
+      "name": "system_remote",
+      "mnemonic": "SYST:REM",
+      "category": "RS-232",
+      "description": "Places the function generator in remote mode (RS-232 interface).",
+      "set": "SYSTem:REMote",
+      "examples": ["SYST:REM"]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": "SYST:RWL",
+      "category": "RS-232",
+      "description": "Places the function generator in remote mode with the front-panel keys locked out (RS-232 interface).",
+      "set": "SYSTem:RWLock",
+      "examples": ["SYST:RWL"]
+    },
+    {
+      "name": "calibration_query",
+      "mnemonic": "CAL?",
+      "category": "Calibration",
+      "description": "Performs a calibration and returns a value indicating whether calibration succeeded.",
+      "query": "CALibration?",
+      "examples": ["CAL?"]
+    },
+    {
+      "name": "query_calibration_count",
+      "mnemonic": "CAL:COUN?",
+      "category": "Calibration",
+      "description": "Queries the number of times the instrument has been calibrated.",
+      "query": "CALibration:COUNt?",
+      "examples": ["CAL:COUN?"]
+    },
+    {
+      "name": "set_calibration_secure_code",
+      "mnemonic": "CAL:SEC:CODE",
+      "category": "Calibration",
+      "description": "Sets a new calibration security code (instrument must be unsecured).",
+      "set": "CALibration:SECure:CODE <new code>",
+      "parameters": [
+        { "name": "code", "range": "new security code string" }
+      ],
+      "examples": ["CAL:SEC:CODE \"HP33120A\""]
+    },
+    {
+      "name": "set_calibration_secure_state",
+      "mnemonic": "CAL:SEC:STAT",
+      "category": "Calibration",
+      "description": "Secures or unsecures the instrument for calibration using the security code.",
+      "set": "CALibration:SECure:STATe {OFF|ON},<code>",
+      "query": "CALibration:SECure:STATe?",
+      "parameters": [
+        { "name": "state", "range": "OFF|ON" },
+        { "name": "code", "range": "security code" }
+      ],
+      "examples": ["CAL:SEC:STAT OFF, \"HP33120A\"", "CAL:SEC:STAT?"]
+    },
+    {
+      "name": "set_calibration_setup",
+      "mnemonic": "CAL:SET",
+      "category": "Calibration",
+      "description": "Configures the function generator's internal state for each of the calibration steps.",
+      "set": "CALibration:SETup <0|1|2|3| . . . |84>",
+      "query": "CALibration:SETup?",
+      "parameters": [
+        { "name": "setup", "range": "0 to 84" }
+      ],
+      "examples": ["CAL:SET 1", "CAL:SET?"]
+    },
+    {
+      "name": "set_calibration_string",
+      "mnemonic": "CAL:STR",
+      "category": "Calibration",
+      "description": "Stores a message in the calibration memory (e.g. last cal date).",
+      "set": "CALibration:STRing <quoted string>",
+      "query": "CALibration:STRing?",
+      "parameters": [
+        { "name": "text", "range": "quoted string" }
+      ],
+      "examples": ["CAL:STR \"CAL 19-JUN-2026\"", "CAL:STR?"]
+    },
+    {
+      "name": "set_calibration_value",
+      "mnemonic": "CAL:VAL",
+      "category": "Calibration",
+      "description": "Specifies the value of the known calibration signal applied during calibration.",
+      "set": "CALibration:VALue <value>",
+      "query": "CALibration:VALue?",
+      "parameters": [
+        { "name": "value", "range": "known calibration value" }
+      ],
+      "examples": ["CAL:VAL 1.0", "CAL:VAL?"]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "*SAV",
+      "category": "Memory",
+      "description": "Stores the current instrument state in one of four storage locations. State 0 is the power-down state; states 1-3 are user-defined.",
+      "set": "*SAV {0|1|2|3}",
+      "parameters": [
+        { "name": "location", "range": "0|1|2|3" }
+      ],
+      "examples": ["*SAV 1"]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "*RCL",
+      "category": "Memory",
+      "description": "Recalls the instrument state stored in the specified storage location.",
+      "set": "*RCL {0|1|2|3}",
+      "parameters": [
+        { "name": "location", "range": "0|1|2|3" }
+      ],
+      "examples": ["*RCL 1"]
+    },
+    {
+      "name": "delete_memory_state",
+      "mnemonic": "MEM:STAT:DEL",
+      "category": "Memory",
+      "description": "Deletes a stored instrument state from the specified location.",
+      "set": "MEMory:STATe:DELete {0|1|2|3}",
+      "parameters": [
+        { "name": "location", "range": "0|1|2|3" }
+      ],
+      "examples": ["MEM:STAT:DEL 1"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Status",
+      "description": "Clears the event registers in all register groups and clears the error queue.",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "set_event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Status",
+      "description": "Enables bits in the Standard Event enable register.",
+      "set": "*ESE <enable value>",
+      "query": "*ESE?",
+      "parameters": [
+        { "name": "value", "range": "0 to 255" }
+      ],
+      "examples": ["*ESE 16", "*ESE?"]
+    },
+    {
+      "name": "query_event_status_register",
+      "mnemonic": "*ESR?",
+      "category": "Status",
+      "description": "Queries the Standard Event register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Status",
+      "description": "Sets the Operation Complete bit in the Standard Event register after the previous commands complete.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": ["*OPC", "*OPC?"]
+    },
+    {
+      "name": "set_power_on_status_clear",
+      "mnemonic": "*PSC",
+      "category": "Status",
+      "description": "Enables or disables clearing of the Status Byte and Standard Event enable registers at power-on.",
+      "set": "*PSC {0|1}",
+      "query": "*PSC?",
+      "parameters": [
+        { "name": "value", "range": "0|1" }
+      ],
+      "examples": ["*PSC 1", "*PSC?"]
+    },
+    {
+      "name": "set_service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Status",
+      "description": "Enables bits in the Status Byte enable register.",
+      "set": "*SRE <enable value>",
+      "query": "*SRE?",
+      "parameters": [
+        { "name": "value", "range": "0 to 255" }
+      ],
+      "examples": ["*SRE 32", "*SRE?"]
+    },
+    {
+      "name": "query_status_byte",
+      "mnemonic": "*STB?",
+      "category": "Status",
+      "description": "Queries the Status Byte summary register.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Status",
+      "description": "Waits for all pending operations to complete before executing any additional commands.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Returns the instrument identification string (manufacturer, model, serial, firmware).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the function generator to its factory default state.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Performs a complete self-test and returns a value indicating pass (0) or fail.",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    }
+  ]
+}

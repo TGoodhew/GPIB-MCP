@@ -1,0 +1,1401 @@
+{
+  "model": "53131A",
+  "manufacturer": "HP/Agilent",
+  "category": "Frequency Counter",
+  "description": "HP/Agilent 53131A 225 MHz universal frequency counter (3-channel optional). Programmed via SCPI 1992.0 over GPIB/RS-232. Command set is shared with the 53132A.",
+  "source": "53131A Programming Guide.pdf",
+  "aliases": ["53131A", "HP53131A", "Agilent 53131A", "53132A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": { "command": "*IDN?", "matchRegex": "5313[12]A", "description": "Standard SCPI identification query." },
+  "commands": [
+    {
+      "name": "calibration_query",
+      "mnemonic": "*CAL?",
+      "category": "Common",
+      "description": "Performs an internal interpolator self-calibration and returns a value indicating whether it completed without error.",
+      "query": "*CAL?",
+      "examples": ["*CAL?"]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears the status data structures (event registers and error queue).",
+      "set": "*CLS",
+      "examples": ["*CLS"]
+    },
+    {
+      "name": "define_device_trigger",
+      "mnemonic": "*DDT",
+      "category": "Common",
+      "description": "Defines INIT, FETC?, READ?, or nothing to be executed when the counter receives a GET or *TRG.",
+      "set": "*DDT <arbitrary_block>",
+      "query": "*DDT?",
+      "examples": ["*DDT #14INIT"]
+    },
+    {
+      "name": "define_macro",
+      "mnemonic": "*DMC",
+      "category": "Common",
+      "description": "Assigns a sequence of zero or more commands/queries to a macro label. No query form.",
+      "set": "*DMC <string>,<arbitrary_block>",
+      "examples": ["*DMC 'MYMAC',#15INIT;"]
+    },
+    {
+      "name": "enable_macro",
+      "mnemonic": "*EMC",
+      "category": "Common",
+      "description": "Enables (non-zero) or disables (zero) expansion of macros.",
+      "set": "*EMC <NRf>",
+      "query": "*EMC?",
+      "examples": ["*EMC 1", "*EMC?"]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Sets or queries the Standard Event Status Enable Register.",
+      "set": "*ESE <NRf>",
+      "query": "*ESE?",
+      "examples": ["*ESE 16", "*ESE?"]
+    },
+    {
+      "name": "event_status_register_query",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Queries the Standard Event Status Register.",
+      "query": "*ESR?",
+      "examples": ["*ESR?"]
+    },
+    {
+      "name": "get_macro_contents_query",
+      "mnemonic": "*GMC?",
+      "category": "Common",
+      "description": "Queries the current definition of a defined macro label.",
+      "query": "*GMC? <string>",
+      "examples": ["*GMC? 'MYMAC'"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Queries the counter identification (manufacturer, model, serial, firmware).",
+      "query": "*IDN?",
+      "examples": ["*IDN?"]
+    },
+    {
+      "name": "learn_macro_query",
+      "mnemonic": "*LMC?",
+      "category": "Common",
+      "description": "Queries the currently defined macro labels.",
+      "query": "*LMC?",
+      "examples": ["*LMC?"]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Sets the operation complete bit in the Standard Event Status Register when all pending operations finish.",
+      "set": "*OPC",
+      "examples": ["*OPC"]
+    },
+    {
+      "name": "operation_complete_query",
+      "mnemonic": "*OPC?",
+      "category": "Common",
+      "description": "Places an ASCII 1 in the output queue when all pending operations are completed.",
+      "query": "*OPC?",
+      "examples": ["*OPC?"]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Identifies the options installed in the counter.",
+      "query": "*OPT?",
+      "examples": ["*OPT?"]
+    },
+    {
+      "name": "purge_macro",
+      "mnemonic": "*PMC",
+      "category": "Common",
+      "description": "Deletes all macros previously defined using *DMC.",
+      "set": "*PMC",
+      "examples": ["*PMC"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Restores the counter state from a copy stored in non-volatile memory (registers 0 through 20).",
+      "set": "*RCL <NRf>",
+      "parameters": [ { "name": "register", "range": "0 to 20" } ],
+      "examples": ["*RCL 1"]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the counter to a known state optimized for remote operation.",
+      "set": "*RST",
+      "examples": ["*RST"]
+    },
+    {
+      "name": "save",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Stores the current counter state in non-volatile memory (registers 1 through 20).",
+      "set": "*SAV <NRf>",
+      "parameters": [ { "name": "register", "range": "1 to 20" } ],
+      "examples": ["*SAV 1"]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Sets or queries the Service Request Enable register.",
+      "set": "*SRE <NRf>",
+      "query": "*SRE?",
+      "examples": ["*SRE 32", "*SRE?"]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Queries the Status Byte and Master Summary Status bit.",
+      "query": "*STB?",
+      "examples": ["*STB?"]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Device-specific analog of the IEEE 488.1 GET. Initiates a measurement unless *DDT redefined the device trigger.",
+      "set": "*TRG",
+      "examples": ["*TRG"]
+    },
+    {
+      "name": "self_test_query",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Executes an internal self-test and reports the results.",
+      "query": "*TST?",
+      "examples": ["*TST?"]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Makes the counter wait until all pending operations complete before executing following commands.",
+      "set": "*WAI",
+      "examples": ["*WAI"]
+    },
+
+    {
+      "name": "abort",
+      "mnemonic": "ABOR",
+      "category": "System",
+      "description": "Aborts the measurement in progress. Event; no query.",
+      "set": "ABORt",
+      "examples": ["ABOR"]
+    },
+
+    {
+      "name": "configure",
+      "mnemonic": "CONF",
+      "category": "Measurement",
+      "description": "Configures the instrument to perform the specified measurement without initiating it.",
+      "set": "CONFigure[:SCALar]:<function> [<parameters>][,<source_list>]",
+      "query": "CONFigure?",
+      "examples": ["CONF:FREQ 10MHZ,1HZ,(@1)", "CONF?"]
+    },
+    {
+      "name": "measure_frequency",
+      "mnemonic": "MEAS:FREQ?",
+      "category": "Measurement",
+      "description": "Configures, initiates, and queries a frequency measurement on the specified channel.",
+      "set": "CONF:FREQ",
+      "query": "MEASure[:SCALar][:VOLTage]:FREQuency? [<expected>[,<resolution>]][,<source>]",
+      "parameters": [ { "name": "source", "range": "(@1), (@2), or (@3)" } ],
+      "examples": ["MEAS:FREQ? 10MHZ,1HZ,(@1)", "MEAS:FREQ? (@1)"]
+    },
+    {
+      "name": "measure_frequency_ratio",
+      "mnemonic": "MEAS:FREQ:RAT?",
+      "category": "Measurement",
+      "description": "Measures the frequency ratio between two channels (1:2, 1:3, 2:1, or 3:1).",
+      "set": "CONF:FREQ:RAT",
+      "query": "MEASure[:SCALar][:VOLTage]:FREQuency:RATio? [<expected>[,<resolution>]][,<source_list>]",
+      "parameters": [ { "name": "source_list", "range": "(@1),(@2) | (@1),(@3) | (@2),(@1) | (@3),(@1)" } ],
+      "examples": ["MEAS:FREQ:RAT? (@1),(@2)"]
+    },
+    {
+      "name": "measure_period",
+      "mnemonic": "MEAS:PER?",
+      "category": "Measurement",
+      "description": "Measures period on channel 1, 2, or 3.",
+      "set": "CONF:PER",
+      "query": "MEASure[:SCALar][:VOLTage]:PERiod? [<expected>[,<resolution>]][,<source>]",
+      "parameters": [ { "name": "source", "range": "(@1), (@2), or (@3)" } ],
+      "examples": ["MEAS:PER? (@1)"]
+    },
+    {
+      "name": "measure_time_interval",
+      "mnemonic": "MEAS:TINT?",
+      "category": "Measurement",
+      "description": "Measures the time interval from channel 1 to channel 2.",
+      "set": "CONF:TINT",
+      "query": "MEASure[:SCALar][:VOLTage]:TINTerval? (@1),(@2)",
+      "examples": ["MEAS:TINT? (@1),(@2)"]
+    },
+    {
+      "name": "measure_phase",
+      "mnemonic": "MEAS:PHAS?",
+      "category": "Measurement",
+      "description": "Measures the phase of channel 1 relative to channel 2.",
+      "set": "CONF:PHAS",
+      "query": "MEASure[:SCALar][:VOLTage]:PHASe? (@1),(@2)",
+      "examples": ["MEAS:PHAS? (@1),(@2)"]
+    },
+    {
+      "name": "measure_duty_cycle",
+      "mnemonic": "MEAS:DCYC?",
+      "category": "Measurement",
+      "description": "Measures the positive duty cycle on channel 1.",
+      "set": "CONF:DCYC",
+      "query": "MEASure[:SCALar][:VOLTage]:DCYCle? [<reference>][,(@1)]",
+      "examples": ["MEAS:DCYC? (@1)"]
+    },
+    {
+      "name": "measure_fall_time",
+      "mnemonic": "MEAS:FTIM?",
+      "category": "Measurement",
+      "description": "Measures the fall time on channel 1.",
+      "set": "CONF:FTIM",
+      "query": "MEASure[:SCALar][:VOLTage]:FTIMe? [<lower_ref>[,<upper_ref>]][,(@1)]",
+      "examples": ["MEAS:FTIM? (@1)"]
+    },
+    {
+      "name": "measure_rise_time",
+      "mnemonic": "MEAS:RTIM?",
+      "category": "Measurement",
+      "description": "Measures the rise time on channel 1.",
+      "set": "CONF:RTIM",
+      "query": "MEASure[:SCALar][:VOLTage]:RTIMe? [<lower_ref>[,<upper_ref>]][,(@1)]",
+      "examples": ["MEAS:RTIM? (@1)"]
+    },
+    {
+      "name": "measure_negative_width",
+      "mnemonic": "MEAS:NWID?",
+      "category": "Measurement",
+      "description": "Measures the negative pulse width on channel 1.",
+      "set": "CONF:NWID",
+      "query": "MEASure[:SCALar][:VOLTage]:NWIDth? [<reference>][,(@1)]",
+      "examples": ["MEAS:NWID? (@1)"]
+    },
+    {
+      "name": "measure_positive_width",
+      "mnemonic": "MEAS:PWID?",
+      "category": "Measurement",
+      "description": "Measures the positive pulse width on channel 1.",
+      "set": "CONF:PWID",
+      "query": "MEASure[:SCALar][:VOLTage]:PWIDth? [<reference>][,(@1)]",
+      "examples": ["MEAS:PWID? (@1)"]
+    },
+    {
+      "name": "measure_voltage_maximum",
+      "mnemonic": "MEAS:VOLT:MAX?",
+      "category": "Measurement",
+      "description": "Measures the maximum voltage on channel 1 or 2.",
+      "set": "CONF:VOLT:MAX",
+      "query": "MEASure[:SCALar]:VOLTage:MAXimum? [(@1) | (@2)]",
+      "examples": ["MEAS:VOLT:MAX? (@1)"]
+    },
+    {
+      "name": "measure_voltage_minimum",
+      "mnemonic": "MEAS:VOLT:MIN?",
+      "category": "Measurement",
+      "description": "Measures the minimum voltage on channel 1 or 2.",
+      "set": "CONF:VOLT:MIN",
+      "query": "MEASure[:SCALar]:VOLTage:MINimum? [(@1) | (@2)]",
+      "examples": ["MEAS:VOLT:MIN? (@1)"]
+    },
+    {
+      "name": "measure_voltage_ptpeak",
+      "mnemonic": "MEAS:VOLT:PTP?",
+      "category": "Measurement",
+      "description": "Measures the peak-to-peak voltage on channel 1 or 2.",
+      "set": "CONF:VOLT:PTP",
+      "query": "MEASure[:SCALar]:VOLTage:PTPeak? [(@1) | (@2)]",
+      "examples": ["MEAS:VOLT:PTP? (@1)"]
+    },
+    {
+      "name": "configure_totalize_timed",
+      "mnemonic": "CONF:TOT:TIM",
+      "category": "Measurement",
+      "description": "Configures a timed totalize measurement on channel 1 over a gate time.",
+      "set": "CONFigure[:SCALar][:VOLTage]:TOTalize:TIMed [<gate_time>][,(@1)]",
+      "examples": ["CONF:TOT:TIM 1.0,(@1)"]
+    },
+    {
+      "name": "configure_totalize_continuous",
+      "mnemonic": "CONF:TOT:CONT",
+      "category": "Measurement",
+      "description": "Configures a continuous totalize measurement on channel 1. Only allowed with CONFigure.",
+      "set": "CONFigure[:SCALar][:VOLTage]:TOTalize:CONTinuous [(@1)]",
+      "examples": ["CONF:TOT:CONT (@1)"]
+    },
+    {
+      "name": "read",
+      "mnemonic": "READ?",
+      "category": "Measurement",
+      "description": "Initiates a measurement and queries the result (performs a FETCh on fresh data).",
+      "query": "READ[[:SCALar]:<function>]?",
+      "examples": ["READ?"]
+    },
+    {
+      "name": "fetch",
+      "mnemonic": "FETC?",
+      "category": "Measurement",
+      "description": "Queries the result of the current measurement without re-acquiring.",
+      "query": "FETCh[[:SCALar]:<function>]?",
+      "examples": ["FETC?"]
+    },
+
+    {
+      "name": "initiate_immediate",
+      "mnemonic": "INIT",
+      "category": "Trigger",
+      "description": "Initiates the number of measurements specified by TRIGger:COUNt:AUTO. Event; no query.",
+      "set": "INITiate[:IMMediate]",
+      "examples": ["INIT"]
+    },
+    {
+      "name": "initiate_continuous",
+      "mnemonic": "INIT:CONT",
+      "category": "Trigger",
+      "description": "Enables or disables continuously initiated measurements.",
+      "set": "INITiate:CONTinuous <Boolean>",
+      "query": "INITiate:CONTinuous?",
+      "examples": ["INIT:CONT ON"]
+    },
+    {
+      "name": "initiate_auto",
+      "mnemonic": "INIT:AUTO",
+      "category": "Trigger",
+      "description": "AUTO ON stops measuring on a limit test failure; AUTO OFF disables the automatic stop.",
+      "set": "INITiate:AUTO <Boolean>",
+      "query": "INITiate:AUTO?",
+      "examples": ["INIT:AUTO ON"]
+    },
+    {
+      "name": "trigger_count_auto",
+      "mnemonic": "TRIG:COUN:AUTO",
+      "category": "Trigger",
+      "description": "Controls the number of measurements made when INIT:IMM is performed.",
+      "set": "TRIGger:COUNt:AUTO <Boolean>",
+      "query": "TRIGger:COUNt:AUTO?",
+      "examples": ["TRIG:COUN:AUTO ON"]
+    },
+
+    {
+      "name": "input_attenuation",
+      "mnemonic": "INP:ATT",
+      "category": "Input",
+      "description": "Sets the input attenuation (1 or 10) for channel 1 or 2.",
+      "set": "INPut[1|2]:ATTenuation <1|10>",
+      "query": "INPut[1|2]:ATTenuation?",
+      "parameters": [ { "name": "attenuation", "range": "1 or 10" } ],
+      "examples": ["INP1:ATT 10"]
+    },
+    {
+      "name": "input_coupling",
+      "mnemonic": "INP:COUP",
+      "category": "Input",
+      "description": "Sets the input coupling (AC or DC) for channel 1 or 2.",
+      "set": "INPut[1|2]:COUPling <AC|DC>",
+      "query": "INPut[1|2]:COUPling?",
+      "parameters": [ { "name": "coupling", "range": "AC or DC" } ],
+      "examples": ["INP1:COUP DC"]
+    },
+    {
+      "name": "input_filter_state",
+      "mnemonic": "INP:FILT",
+      "category": "Input",
+      "description": "Enables or disables the low pass filter in the measurement signal path for channel 1 or 2.",
+      "set": "INPut[1|2]:FILTer[:LPASs][:STATe] <Boolean>",
+      "query": "INPut[1|2]:FILTer[:LPASs][:STATe]?",
+      "examples": ["INP1:FILT ON"]
+    },
+    {
+      "name": "input_filter_frequency_query",
+      "mnemonic": "INP:FILT:FREQ?",
+      "category": "Input",
+      "description": "Returns the cutoff frequency (Hz) of the low pass filter.",
+      "query": "INPut[1|2]:FILTer[:LPASs]:FREQuency?",
+      "examples": ["INP1:FILT:FREQ?"]
+    },
+    {
+      "name": "input_impedance",
+      "mnemonic": "INP:IMP",
+      "category": "Input",
+      "description": "Sets the input impedance (50 ohm or 1 Mohm) for channel 1 or 2.",
+      "set": "INPut[1|2]:IMPedance <numeric_value>[OHM]",
+      "query": "INPut[1|2]:IMPedance?",
+      "parameters": [ { "name": "impedance", "range": "50 or 1E6", "units": ["OHM"] } ],
+      "examples": ["INP1:IMP 50"]
+    },
+    {
+      "name": "input3_coupling_query",
+      "mnemonic": "INP3:COUP?",
+      "category": "Input",
+      "description": "Returns the channel 3 input coupling. Query only.",
+      "query": "INPut3:COUPling?",
+      "examples": ["INP3:COUP?"]
+    },
+    {
+      "name": "input3_impedance_query",
+      "mnemonic": "INP3:IMP?",
+      "category": "Input",
+      "description": "Returns the channel 3 input impedance. Query only.",
+      "query": "INPut3:IMPedance?",
+      "examples": ["INP3:IMP?"]
+    },
+
+    {
+      "name": "sense_data_query",
+      "mnemonic": "SENS:DATA?",
+      "category": "Sense",
+      "description": "Returns the current measurement result data of the SENSe subsystem (no scale or offset applied).",
+      "query": "[SENSe]:DATA? ['[:]SENSe[1]']",
+      "examples": ["SENS:DATA?"]
+    },
+    {
+      "name": "sense_function",
+      "mnemonic": "SENS:FUNC",
+      "category": "Sense",
+      "description": "Selects the sensor function to be sensed by the instrument.",
+      "set": "[SENSe]:FUNCtion[:ON] <sensor_function>",
+      "query": "[SENSe]:FUNCtion[:ON]?",
+      "examples": ["SENS:FUNC 'FREQ 1'", "SENS:FUNC 'PER 1'"]
+    },
+    {
+      "name": "sense_event_level_absolute",
+      "mnemonic": "SENS:EVEN:LEV",
+      "category": "Sense",
+      "description": "Sets the trigger level (V) at the center of the hysteresis window for event channel 1 or 2.",
+      "set": "[SENSe]:EVENt[1|2]:LEVel[:ABSolute] <numeric_value>[V]",
+      "query": "[SENSe]:EVENt[1|2]:LEVel[:ABSolute]?",
+      "examples": ["SENS:EVEN1:LEV 0.5"]
+    },
+    {
+      "name": "sense_event_level_auto",
+      "mnemonic": "SENS:EVEN:LEV:AUTO",
+      "category": "Sense",
+      "description": "Sets the auto-trigger enable for event channel 1 or 2.",
+      "set": "[SENSe]:EVENt[1|2]:LEVel[:ABSolute]:AUTO <Boolean>",
+      "query": "[SENSe]:EVENt[1|2]:LEVel[:ABSolute]:AUTO?",
+      "examples": ["SENS:EVEN1:LEV:AUTO ON"]
+    },
+    {
+      "name": "sense_event_level_relative",
+      "mnemonic": "SENS:EVEN:LEV:REL",
+      "category": "Sense",
+      "description": "Sets the percentage (0-100%) of the peak-to-peak range at which the instrument auto-triggers.",
+      "set": "[SENSe]:EVENt[1|2]:LEVel:RELative <numeric_value>[PCT]",
+      "query": "[SENSe]:EVENt[1|2]:LEVel:RELative?",
+      "parameters": [ { "name": "percent", "range": "0 to 100", "units": ["PCT"] } ],
+      "examples": ["SENS:EVEN1:LEV:REL 50"]
+    },
+    {
+      "name": "sense_event_hysteresis_relative",
+      "mnemonic": "SENS:EVEN:HYST:REL",
+      "category": "Sense",
+      "description": "Sets the size of the hysteresis window as a percentage of allowable hysteresis for event channel 1 or 2.",
+      "set": "[SENSe]:EVENt[1|2]:HYSTeresis:RELative <numeric_value>[PCT]",
+      "query": "[SENSe]:EVENt[1|2]:HYSTeresis:RELative?",
+      "parameters": [ { "name": "percent", "range": "0 to 100", "units": ["PCT"] } ],
+      "examples": ["SENS:EVEN1:HYST:REL 100"]
+    },
+    {
+      "name": "sense_event_slope",
+      "mnemonic": "SENS:EVEN:SLOP",
+      "category": "Sense",
+      "description": "Sets which edge (POSitive or NEGative) of the input signal is considered an event for channel 1 or 2.",
+      "set": "[SENSe]:EVENt[1|2]:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:EVENt[1|2]:SLOPe?",
+      "examples": ["SENS:EVEN1:SLOP POS"]
+    },
+    {
+      "name": "sense_event2_feed",
+      "mnemonic": "SENS:EVEN2:FEED",
+      "category": "Sense",
+      "description": "Sets common/separate mode for time interval. INPut2 = separate, INPut1 = common.",
+      "set": "[SENSe]:EVENt2:FEED <'INPut1'|'INPut2'>",
+      "query": "[SENSe]:EVENt2:FEED?",
+      "examples": ["SENS:EVEN2:FEED 'INP2'"]
+    },
+    {
+      "name": "sense_event3_level_query",
+      "mnemonic": "SENS:EVEN3:LEV?",
+      "category": "Sense",
+      "description": "Returns the channel 3 input trigger level. Query only.",
+      "query": "[SENSe]:EVENt3:LEVel[:ABSolute]?",
+      "examples": ["SENS:EVEN3:LEV?"]
+    },
+    {
+      "name": "sense_event3_slope_query",
+      "mnemonic": "SENS:EVEN3:SLOP?",
+      "category": "Sense",
+      "description": "Returns the channel 3 input edge considered an event. Query only.",
+      "query": "[SENSe]:EVENt3:SLOPe?",
+      "examples": ["SENS:EVEN3:SLOP?"]
+    },
+    {
+      "name": "sense_frequency_expected",
+      "mnemonic": "SENS:FREQ:EXP",
+      "category": "Sense",
+      "description": "Specifies the approximate expected frequency of the signal at channel 1, 2, or 3.",
+      "set": "[SENSe]:FREQuency:EXPected[1|2|3] <numeric_value>[HZ]",
+      "query": "[SENSe]:FREQuency:EXPected[1|2|3]?",
+      "examples": ["SENS:FREQ:EXP1 10MHZ"]
+    },
+    {
+      "name": "sense_frequency_expected_auto",
+      "mnemonic": "SENS:FREQ:EXP:AUTO",
+      "category": "Sense",
+      "description": "Configures the counter to perform a pre-measurement step to determine the approximate frequency automatically.",
+      "set": "[SENSe]:FREQuency:EXPected[1|2|3]:AUTO ON",
+      "examples": ["SENS:FREQ:EXP1:AUTO ON"]
+    },
+    {
+      "name": "sense_frequency_arm_start_slope",
+      "mnemonic": "SENS:FREQ:ARM:STAR:SLOP",
+      "category": "Sense",
+      "description": "Sets the slope of the external start arm signal for frequency, ratio, and period measurements.",
+      "set": "[SENSe]:FREQuency:ARM[:STARt]:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:FREQuency:ARM[:STARt]:SLOPe?",
+      "examples": ["SENS:FREQ:ARM:STAR:SLOP POS"]
+    },
+    {
+      "name": "sense_frequency_arm_start_source",
+      "mnemonic": "SENS:FREQ:ARM:STAR:SOUR",
+      "category": "Sense",
+      "description": "Sets the start arm source for frequency, ratio, and period measurements.",
+      "set": "[SENSe]:FREQuency:ARM[:STARt]:SOURce <IMMediate|EXTernal>",
+      "query": "[SENSe]:FREQuency:ARM[:STARt]:SOURce?",
+      "examples": ["SENS:FREQ:ARM:STAR:SOUR IMM"]
+    },
+    {
+      "name": "sense_frequency_arm_stop_source",
+      "mnemonic": "SENS:FREQ:ARM:STOP:SOUR",
+      "category": "Sense",
+      "description": "Sets the stop arm source for frequency, ratio, and period measurements.",
+      "set": "[SENSe]:FREQuency:ARM:STOP:SOURce <IMMediate|EXTernal|TIMer|DIGits>",
+      "query": "[SENSe]:FREQuency:ARM:STOP:SOURce?",
+      "examples": ["SENS:FREQ:ARM:STOP:SOUR TIM"]
+    },
+    {
+      "name": "sense_frequency_arm_stop_slope",
+      "mnemonic": "SENS:FREQ:ARM:STOP:SLOP",
+      "category": "Sense",
+      "description": "Sets the slope of the external stop arm signal for frequency, ratio, and period measurements.",
+      "set": "[SENSe]:FREQuency:ARM:STOP:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:FREQuency:ARM:STOP:SLOPe?",
+      "examples": ["SENS:FREQ:ARM:STOP:SLOP NEG"]
+    },
+    {
+      "name": "sense_frequency_arm_stop_digits",
+      "mnemonic": "SENS:FREQ:ARM:STOP:DIG",
+      "category": "Sense",
+      "description": "Sets the resolution in digits used in arming frequency, ratio, and period measurements (when STOP:SOUR DIGits).",
+      "set": "[SENSe]:FREQuency:ARM:STOP:DIGits <numeric_value>",
+      "query": "[SENSe]:FREQuency:ARM:STOP:DIGits?",
+      "examples": ["SENS:FREQ:ARM:STOP:DIG 4"]
+    },
+    {
+      "name": "sense_frequency_arm_stop_timer",
+      "mnemonic": "SENS:FREQ:ARM:STOP:TIM",
+      "category": "Sense",
+      "description": "Sets the gate time used in arming frequency, ratio, and period measurements (when STOP:SOUR TIMer).",
+      "set": "[SENSe]:FREQuency:ARM:STOP:TIMer <numeric_value>[S]",
+      "query": "[SENSe]:FREQuency:ARM:STOP:TIMer?",
+      "examples": ["SENS:FREQ:ARM:STOP:TIM 0.1"]
+    },
+    {
+      "name": "sense_phase_arm_start_slope",
+      "mnemonic": "SENS:PHAS:ARM:STAR:SLOP",
+      "category": "Sense",
+      "description": "Sets the slope of the external start arm signal for phase measurements.",
+      "set": "[SENSe]:PHASe:ARM[:STARt]:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:PHASe:ARM[:STARt]:SLOPe?",
+      "examples": ["SENS:PHAS:ARM:STAR:SLOP POS"]
+    },
+    {
+      "name": "sense_phase_arm_start_source",
+      "mnemonic": "SENS:PHAS:ARM:STAR:SOUR",
+      "category": "Sense",
+      "description": "Sets the start arm source for phase measurements.",
+      "set": "[SENSe]:PHASe:ARM[:STARt]:SOURce <IMMediate|EXTernal>",
+      "query": "[SENSe]:PHASe:ARM[:STARt]:SOURce?",
+      "examples": ["SENS:PHAS:ARM:STAR:SOUR IMM"]
+    },
+    {
+      "name": "sense_tinterval_arm_start_slope",
+      "mnemonic": "SENS:TINT:ARM:STAR:SLOP",
+      "category": "Sense",
+      "description": "Sets the slope of the external start arm signal for time interval, rise/fall time, duty cycle, and pulse width.",
+      "set": "[SENSe]:TINTerval:ARM[:STARt]:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:TINTerval:ARM[:STARt]:SLOPe?",
+      "examples": ["SENS:TINT:ARM:STAR:SLOP POS"]
+    },
+    {
+      "name": "sense_tinterval_arm_start_source",
+      "mnemonic": "SENS:TINT:ARM:STAR:SOUR",
+      "category": "Sense",
+      "description": "Sets the start arm source for time interval measurements.",
+      "set": "[SENSe]:TINTerval:ARM[:STARt]:SOURce <IMMediate|EXTernal>",
+      "query": "[SENSe]:TINTerval:ARM[:STARt]:SOURce?",
+      "examples": ["SENS:TINT:ARM:STAR:SOUR IMM"]
+    },
+    {
+      "name": "sense_tinterval_arm_stop_source",
+      "mnemonic": "SENS:TINT:ARM:STOP:SOUR",
+      "category": "Sense",
+      "description": "Sets the stop arm (delay) source for time interval measurements.",
+      "set": "[SENSe]:TINTerval:ARM:STOP:SOURce <IMMediate|TIMer>",
+      "query": "[SENSe]:TINTerval:ARM:STOP:SOURce?",
+      "examples": ["SENS:TINT:ARM:STOP:SOUR TIM"]
+    },
+    {
+      "name": "sense_tinterval_arm_stop_timer",
+      "mnemonic": "SENS:TINT:ARM:STOP:TIM",
+      "category": "Sense",
+      "description": "Sets the delay time used to delay the stop arm for time interval measurements (when STOP:SOUR TIMer).",
+      "set": "[SENSe]:TINTerval:ARM:STOP:TIMer <numeric_value>[S]",
+      "query": "[SENSe]:TINTerval:ARM:STOP:TIMer?",
+      "examples": ["SENS:TINT:ARM:STOP:TIM 10E-3"]
+    },
+    {
+      "name": "sense_totalize_arm_start_slope",
+      "mnemonic": "SENS:TOT:ARM:STAR:SLOP",
+      "category": "Sense",
+      "description": "Sets the slope of the external start arm signal for totalize measurements.",
+      "set": "[SENSe]:TOTalize:ARM[:STARt]:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:TOTalize:ARM[:STARt]:SLOPe?",
+      "examples": ["SENS:TOT:ARM:STAR:SLOP POS"]
+    },
+    {
+      "name": "sense_totalize_arm_start_source",
+      "mnemonic": "SENS:TOT:ARM:STAR:SOUR",
+      "category": "Sense",
+      "description": "Sets the start arm source for totalize measurements.",
+      "set": "[SENSe]:TOTalize:ARM[:STARt]:SOURce <EXTernal|IMMediate>",
+      "query": "[SENSe]:TOTalize:ARM[:STARt]:SOURce?",
+      "examples": ["SENS:TOT:ARM:STAR:SOUR IMM"]
+    },
+    {
+      "name": "sense_totalize_arm_stop_slope",
+      "mnemonic": "SENS:TOT:ARM:STOP:SLOP",
+      "category": "Sense",
+      "description": "Sets the slope of the external stop arm signal for totalize measurements.",
+      "set": "[SENSe]:TOTalize:ARM:STOP:SLOPe <POSitive|NEGative>",
+      "query": "[SENSe]:TOTalize:ARM:STOP:SLOPe?",
+      "examples": ["SENS:TOT:ARM:STOP:SLOP NEG"]
+    },
+    {
+      "name": "sense_totalize_arm_stop_source",
+      "mnemonic": "SENS:TOT:ARM:STOP:SOUR",
+      "category": "Sense",
+      "description": "Sets the stop arm source for totalize measurements.",
+      "set": "[SENSe]:TOTalize:ARM:STOP:SOURce <EXTernal|TIMer|IMMediate>",
+      "query": "[SENSe]:TOTalize:ARM:STOP:SOURce?",
+      "examples": ["SENS:TOT:ARM:STOP:SOUR TIM"]
+    },
+    {
+      "name": "sense_totalize_arm_stop_timer",
+      "mnemonic": "SENS:TOT:ARM:STOP:TIM",
+      "category": "Sense",
+      "description": "Sets the gate time used in totalize measurements (when STOP:SOUR TIMer).",
+      "set": "[SENSe]:TOTalize:ARM:STOP:TIMer <numeric_value>[S]",
+      "query": "[SENSe]:TOTalize:ARM:STOP:TIMer?",
+      "examples": ["SENS:TOT:ARM:STOP:TIM 1.0"]
+    },
+    {
+      "name": "sense_roscillator_source",
+      "mnemonic": "SENS:ROSC:SOUR",
+      "category": "Sense",
+      "description": "Selects the reference timebase (INTernal or EXTernal).",
+      "set": "[SENSe]:ROSCillator:SOURce <INTernal|EXTernal>",
+      "query": "[SENSe]:ROSCillator:SOURce?",
+      "examples": ["SENS:ROSC:SOUR INT"]
+    },
+    {
+      "name": "sense_roscillator_source_auto",
+      "mnemonic": "SENS:ROSC:SOUR:AUTO",
+      "category": "Sense",
+      "description": "Enables or disables automatic selection of the reference timebase.",
+      "set": "[SENSe]:ROSCillator:SOURce:AUTO <Boolean>",
+      "query": "[SENSe]:ROSCillator:SOURce:AUTO?",
+      "examples": ["SENS:ROSC:SOUR:AUTO ON"]
+    },
+    {
+      "name": "sense_roscillator_external_check",
+      "mnemonic": "SENS:ROSC:EXT:CHEC",
+      "category": "Sense",
+      "description": "Enables checking the validity and presence of the external reference.",
+      "set": "[SENSe]:ROSCillator:EXTernal:CHECk <ON|OFF|ONCE>",
+      "query": "[SENSe]:ROSCillator:EXTernal:CHECk?",
+      "examples": ["SENS:ROSC:EXT:CHEC ON"]
+    },
+    {
+      "name": "sense_roscillator_external_frequency_query",
+      "mnemonic": "SENS:ROSC:EXT:FREQ?",
+      "category": "Sense",
+      "description": "Returns the frequency value of the external reference oscillator. Query only.",
+      "query": "[SENSe]:ROSCillator:EXTernal:FREQuency?",
+      "examples": ["SENS:ROSC:EXT:FREQ?"]
+    },
+
+    {
+      "name": "calc_data_query",
+      "mnemonic": "CALC:DATA?",
+      "category": "Calculate",
+      "description": "Returns the scaled/offset measurement result. Query only.",
+      "query": "CALCulate[1]:DATA?",
+      "examples": ["CALC:DATA?"]
+    },
+    {
+      "name": "calc_feed",
+      "mnemonic": "CALC:FEED",
+      "category": "Calculate",
+      "description": "Sets the data flow fed into the CALCulate block.",
+      "set": "CALCulate[1]:FEED '[:]SENSe[1]'",
+      "query": "CALCulate[1]:FEED?",
+      "examples": ["CALC:FEED 'SENS1'"]
+    },
+    {
+      "name": "calc_immediate",
+      "mnemonic": "CALC:IMM",
+      "category": "Calculate",
+      "description": "Causes the counter to recalculate existing data without re-acquiring.",
+      "set": "CALCulate[1]:IMMediate",
+      "query": "CALCulate[1]:IMMediate?",
+      "examples": ["CALC:IMM"]
+    },
+    {
+      "name": "calc_immediate_auto",
+      "mnemonic": "CALC:IMM:AUTO",
+      "category": "Calculate",
+      "description": "Enables or disables automatic post-processing for CALCulate.",
+      "set": "CALCulate[1]:IMMediate:AUTO <Boolean>",
+      "query": "CALCulate[1]:IMMediate:AUTO?",
+      "examples": ["CALC:IMM:AUTO OFF"]
+    },
+    {
+      "name": "calc_math_state",
+      "mnemonic": "CALC:MATH:STAT",
+      "category": "Calculate",
+      "description": "Enables or disables math (scale/offset) processing. Must be enabled for other CALC settings.",
+      "set": "CALCulate[1]:MATH:STATe <Boolean>",
+      "query": "CALCulate[1]:MATH:STATe?",
+      "examples": ["CALC:MATH:STAT ON"]
+    },
+    {
+      "name": "calc_math_expression_select",
+      "mnemonic": "CALC:MATH:NAME",
+      "category": "Calculate",
+      "description": "Sets the name of the selected math expression (equation).",
+      "set": "CALCulate[1]:MATH[:EXPRession]:NAME SCALE_OFFSET",
+      "query": "CALCulate[1]:MATH[:EXPRession]:NAME?",
+      "examples": ["CALC:MATH:NAME SCALE_OFFSET"]
+    },
+    {
+      "name": "calc_math_expression_catalog_query",
+      "mnemonic": "CALC:MATH:CAT?",
+      "category": "Calculate",
+      "description": "Returns the name of the defined equation, SCALE_OFFSET. Query only.",
+      "query": "CALCulate[1]:MATH[:EXPRession]:CATalog?",
+      "examples": ["CALC:MATH:CAT?"]
+    },
+    {
+      "name": "calc2_feed",
+      "mnemonic": "CALC2:FEED",
+      "category": "Calculate",
+      "description": "Sets the data flow fed into the CALCulate2 (limit testing) block.",
+      "set": "CALCulate2:FEED '[:]CALCulate[1]'",
+      "query": "CALCulate2:FEED?",
+      "examples": ["CALC2:FEED 'CALC1'"]
+    },
+    {
+      "name": "calc2_immediate",
+      "mnemonic": "CALC2:IMM",
+      "category": "Calculate",
+      "description": "Causes the counter to recalculate existing data for limit testing without re-acquiring. Event; no query.",
+      "set": "CALCulate2:IMMediate",
+      "examples": ["CALC2:IMM"]
+    },
+    {
+      "name": "calc2_immediate_auto",
+      "mnemonic": "CALC2:IMM:AUTO",
+      "category": "Calculate",
+      "description": "Enables or disables automatic post-processing for CALCulate2.",
+      "set": "CALCulate2:IMMediate:AUTO <Boolean>",
+      "query": "CALCulate2:IMMediate:AUTO?",
+      "examples": ["CALC2:IMM:AUTO OFF"]
+    },
+    {
+      "name": "calc2_limit_state",
+      "mnemonic": "CALC2:LIM:STAT",
+      "category": "Calculate",
+      "description": "Enables the limit test. Must be enabled for other CALC2 settings to be used.",
+      "set": "CALCulate2:LIMit:STATe <Boolean>",
+      "query": "CALCulate2:LIMit:STATe?",
+      "examples": ["CALC2:LIM:STAT ON"]
+    },
+    {
+      "name": "calc2_limit_lower",
+      "mnemonic": "CALC2:LIM:LOW",
+      "category": "Calculate",
+      "description": "Sets the lower limit used in limit testing.",
+      "set": "CALCulate2:LIMit:LOWer[:DATA] <numeric_value>[HZ|S|DEG]",
+      "query": "CALCulate2:LIMit:LOWer[:DATA]?",
+      "examples": ["CALC2:LIM:LOW 1E6"]
+    },
+    {
+      "name": "calc2_limit_upper",
+      "mnemonic": "CALC2:LIM:UPP",
+      "category": "Calculate",
+      "description": "Sets the upper limit used in limit testing.",
+      "set": "CALCulate2:LIMit:UPPer[:DATA] <numeric_value>[HZ|S|DEG]",
+      "query": "CALCulate2:LIMit:UPPer[:DATA]?",
+      "examples": ["CALC2:LIM:UPP 2E6"]
+    },
+    {
+      "name": "calc2_limit_display",
+      "mnemonic": "CALC2:LIM:DISP",
+      "category": "Calculate",
+      "description": "Sets whether the measurement display is numeric or symbolic (on a graph).",
+      "set": "CALCulate2:LIMit:DISPlay <GRAPh|NUMBer>",
+      "query": "CALCulate2:LIMit:DISPlay?",
+      "examples": ["CALC2:LIM:DISP NUMB"]
+    },
+    {
+      "name": "calc2_limit_fail_query",
+      "mnemonic": "CALC2:LIM:FAIL?",
+      "category": "Calculate",
+      "description": "Returns 0 (pass) or 1 (fail) for the last tested measurement. Query only.",
+      "query": "CALCulate2:LIMit:FAIL?",
+      "examples": ["CALC2:LIM:FAIL?"]
+    },
+    {
+      "name": "calc2_limit_clear_immediate",
+      "mnemonic": "CALC2:LIM:CLE",
+      "category": "Calculate",
+      "description": "Clears the limit test results. Event; no query.",
+      "set": "CALCulate2:LIMit:CLEar[:IMMediate]",
+      "examples": ["CALC2:LIM:CLE"]
+    },
+    {
+      "name": "calc2_limit_clear_auto",
+      "mnemonic": "CALC2:LIM:CLE:AUTO",
+      "category": "Calculate",
+      "description": "Enables automatic clearing of limit test results.",
+      "set": "CALCulate2:LIMit:CLEar:AUTO <Boolean>",
+      "query": "CALCulate2:LIMit:CLEar:AUTO?",
+      "examples": ["CALC2:LIM:CLE:AUTO ON"]
+    },
+    {
+      "name": "calc2_limit_fcount_lower_query",
+      "mnemonic": "CALC2:LIM:FCO:LOW?",
+      "category": "Calculate",
+      "description": "Returns the number of limit test failures at the lower limit. Query only.",
+      "query": "CALCulate2:LIMit:FCOunt:LOWer?",
+      "examples": ["CALC2:LIM:FCO:LOW?"]
+    },
+    {
+      "name": "calc2_limit_fcount_upper_query",
+      "mnemonic": "CALC2:LIM:FCO:UPP?",
+      "category": "Calculate",
+      "description": "Returns the number of limit test failures at the upper limit. Query only.",
+      "query": "CALCulate2:LIMit:FCOunt:UPPer?",
+      "examples": ["CALC2:LIM:FCO:UPP?"]
+    },
+    {
+      "name": "calc2_limit_fcount_total_query",
+      "mnemonic": "CALC2:LIM:FCO?",
+      "category": "Calculate",
+      "description": "Returns the total number of measurements that failed the limit test. Query only.",
+      "query": "CALCulate2:LIMit:FCOunt[:TOTal]?",
+      "examples": ["CALC2:LIM:FCO?"]
+    },
+    {
+      "name": "calc2_limit_pcount_total_query",
+      "mnemonic": "CALC2:LIM:PCO?",
+      "category": "Calculate",
+      "description": "Returns the total number of measurements that passed the limit test. Query only.",
+      "query": "CALCulate2:LIMit:PCOunt[:TOTal]?",
+      "examples": ["CALC2:LIM:PCO?"]
+    },
+    {
+      "name": "calc3_data_query",
+      "mnemonic": "CALC3:DATA?",
+      "category": "Calculate",
+      "description": "Returns the statistic result specified by CALC3:AVER:TYPE. Query only.",
+      "query": "CALCulate3:DATA?",
+      "examples": ["CALC3:DATA?"]
+    },
+    {
+      "name": "calc3_feed",
+      "mnemonic": "CALC3:FEED",
+      "category": "Calculate",
+      "description": "Sets the data flow fed into the CALCulate3 (statistics) block.",
+      "set": "CALCulate3:FEED '[:]CALCulate[1]'",
+      "query": "CALCulate3:FEED?",
+      "examples": ["CALC3:FEED 'CALC1'"]
+    },
+    {
+      "name": "calc3_average_state",
+      "mnemonic": "CALC3:AVER:STAT",
+      "category": "Calculate",
+      "description": "Enables or disables statistics post-processing. Must be enabled for other CALC3 settings.",
+      "set": "CALCulate3:AVERage[:STATe] <Boolean>",
+      "query": "CALCulate3:AVERage[:STATe]?",
+      "examples": ["CALC3:AVER:STAT ON"]
+    },
+    {
+      "name": "calc3_average_count",
+      "mnemonic": "CALC3:AVER:COUN",
+      "category": "Calculate",
+      "description": "Selects the number of measurements to combine for statistics.",
+      "set": "CALCulate3:AVERage:COUNt <numeric_value>",
+      "query": "CALCulate3:AVERage:COUNt?",
+      "examples": ["CALC3:AVER:COUN 100"]
+    },
+    {
+      "name": "calc3_average_count_current_query",
+      "mnemonic": "CALC3:AVER:COUN:CURR?",
+      "category": "Calculate",
+      "description": "Returns the current number of data values collected so far. Query only.",
+      "query": "CALCulate3:AVERage:COUNt:CURRent?",
+      "examples": ["CALC3:AVER:COUN:CURR?"]
+    },
+    {
+      "name": "calc3_average_type",
+      "mnemonic": "CALC3:AVER:TYPE",
+      "category": "Calculate",
+      "description": "Selects which statistic appears in CALC3:DATA? and on the front-panel display.",
+      "set": "CALCulate3:AVERage:TYPE <MAXimum|MINimum|SDEViation|MEAN>",
+      "query": "CALCulate3:AVERage:TYPE?",
+      "examples": ["CALC3:AVER:TYPE MEAN"]
+    },
+    {
+      "name": "calc3_average_all_query",
+      "mnemonic": "CALC3:AVER:ALL?",
+      "category": "Calculate",
+      "description": "Returns all four statistics results (mean, standard deviation, maximum, minimum). Query only.",
+      "query": "CALCulate3:AVERage:ALL?",
+      "examples": ["CALC3:AVER:ALL?"]
+    },
+    {
+      "name": "calc3_average_clear",
+      "mnemonic": "CALC3:AVER:CLE",
+      "category": "Calculate",
+      "description": "Clears the statistics results and statistics count. Event; no query.",
+      "set": "CALCulate3:AVERage:CLEar",
+      "examples": ["CALC3:AVER:CLE"]
+    },
+    {
+      "name": "calc3_lfilter_state",
+      "mnemonic": "CALC3:LFIL:STAT",
+      "category": "Calculate",
+      "description": "Sets the statistics limit-filter enable.",
+      "set": "CALCulate3:LFILter:STATe <Boolean>",
+      "query": "CALCulate3:LFILter:STATe?",
+      "examples": ["CALC3:LFIL:STAT ON"]
+    },
+    {
+      "name": "calc3_lfilter_lower",
+      "mnemonic": "CALC3:LFIL:LOW",
+      "category": "Calculate",
+      "description": "Sets the statistics filter lower limit.",
+      "set": "CALCulate3:LFILter:LOWer[:DATA] <numeric_value>[HZ|S|DEG]",
+      "query": "CALCulate3:LFILter:LOWer[:DATA]?",
+      "examples": ["CALC3:LFIL:LOW 1E6"]
+    },
+    {
+      "name": "calc3_lfilter_upper",
+      "mnemonic": "CALC3:LFIL:UPP",
+      "category": "Calculate",
+      "description": "Sets the statistics filter upper limit.",
+      "set": "CALCulate3:LFILter:UPPer[:DATA] <numeric_value>[HZ|S|DEG]",
+      "query": "CALCulate3:LFILter:UPPer[:DATA]?",
+      "examples": ["CALC3:LFIL:UPP 2E6"]
+    },
+    {
+      "name": "calc3_path_query",
+      "mnemonic": "CALC3:PATH?",
+      "category": "Calculate",
+      "description": "Returns the statistics path (LFIL, AVER). Query only.",
+      "query": "CALCulate3:PATH?",
+      "examples": ["CALC3:PATH?"]
+    },
+
+    {
+      "name": "calibration_all_query",
+      "mnemonic": "CAL?",
+      "category": "Calibration",
+      "description": "Causes an internal interpolator self-calibration. Query only.",
+      "query": "CALibration[:ALL]?",
+      "examples": ["CAL?"]
+    },
+    {
+      "name": "calibration_count_query",
+      "mnemonic": "CAL:COUN?",
+      "category": "Calibration",
+      "description": "Returns the number of times the counter has been calibrated. Query only.",
+      "query": "CALibration:COUNt?",
+      "examples": ["CAL:COUN?"]
+    },
+    {
+      "name": "calibration_data",
+      "mnemonic": "CAL:DATA",
+      "category": "Calibration",
+      "description": "Transfers the calibration data (input gain, input offset, reference oscillator, time interval).",
+      "set": "CALibration:DATA <arbitrary_block>",
+      "query": "CALibration:DATA?",
+      "examples": ["CAL:DATA?"]
+    },
+    {
+      "name": "calibration_security_code",
+      "mnemonic": "CAL:SEC:CODE",
+      "category": "Calibration",
+      "description": "Sets the calibration security code. No query.",
+      "set": "CALibration:SECurity:CODE <NRf>",
+      "examples": ["CAL:SEC:CODE 12345"]
+    },
+    {
+      "name": "calibration_security_state",
+      "mnemonic": "CAL:SEC:STAT",
+      "category": "Calibration",
+      "description": "Enables or prevents calibration. Query returns 0 (unsecure) or 1 (secure).",
+      "set": "CALibration:SECurity:STATe <Boolean>,<NRf>",
+      "query": "CALibration:SECurity:STATe?",
+      "examples": ["CAL:SEC:STAT ON,12345"]
+    },
+
+    {
+      "name": "diag_cal_input_gain_auto",
+      "mnemonic": "DIAG:CAL:INP:GAIN:AUTO",
+      "category": "Diagnostic",
+      "description": "ONCE calibrates the input gain for the specified channel.",
+      "set": "DIAGnostic:CALibration:INPut[1|2]:GAIN:AUTO <ONCE|OFF>",
+      "examples": ["DIAG:CAL:INP1:GAIN:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_input_offset_auto",
+      "mnemonic": "DIAG:CAL:INP:OFFS:AUTO",
+      "category": "Diagnostic",
+      "description": "ONCE calibrates the input offset for the specified channel.",
+      "set": "DIAGnostic:CALibration:INPut[1|2]:OFFSet:AUTO <ONCE|OFF>",
+      "examples": ["DIAG:CAL:INP1:OFFS:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_interpolator_auto",
+      "mnemonic": "DIAG:CAL:INT:AUTO",
+      "category": "Diagnostic",
+      "description": "ONCE calibrates the interpolators.",
+      "set": "DIAGnostic:CALibration:INTerpolator:AUTO <ONCE|OFF|ON>",
+      "examples": ["DIAG:CAL:INT:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_roscillator_auto",
+      "mnemonic": "DIAG:CAL:ROSC:AUTO",
+      "category": "Diagnostic",
+      "description": "ONCE calibrates the timebase (requires medium or high stability oscillator option).",
+      "set": "DIAGnostic:CALibration:ROSCillator:AUTO <ONCE|OFF>",
+      "examples": ["DIAG:CAL:ROSC:AUTO ONCE"]
+    },
+    {
+      "name": "diag_cal_status_query",
+      "mnemonic": "DIAG:CAL:STAT?",
+      "category": "Diagnostic",
+      "description": "Returns the status of the last calibration: 0 = pass, 1 = fail. Query only.",
+      "query": "DIAGnostic:CALibration:STATus?",
+      "examples": ["DIAG:CAL:STAT?"]
+    },
+    {
+      "name": "diag_cal_tinterval_quick",
+      "mnemonic": "DIAG:CAL:TINT:QUIC",
+      "category": "Diagnostic",
+      "description": "Calibrates out channel 1/2 electrical path length differences. Event; no query.",
+      "set": "DIAGnostic:CALibration:TINTerval:QUICk",
+      "examples": ["DIAG:CAL:TINT:QUIC"]
+    },
+    {
+      "name": "diag_cal_tinterval_fine",
+      "mnemonic": "DIAG:CAL:TINT:FINE",
+      "category": "Diagnostic",
+      "description": "Four-step fine calibration of channel 1/2 electrical path length differences. Event; no query.",
+      "set": "DIAGnostic:CALibration:TINTerval:FINE <1|2|3|4>",
+      "examples": ["DIAG:CAL:TINT:FINE 1"]
+    },
+
+    {
+      "name": "display_enable",
+      "mnemonic": "DISP:ENAB",
+      "category": "Display",
+      "description": "Controls whether the whole display is visible.",
+      "set": "DISPlay:ENABle <Boolean>",
+      "query": "DISPlay:ENABle?",
+      "examples": ["DISP:ENAB ON"]
+    },
+    {
+      "name": "display_menu_state",
+      "mnemonic": "DISP:MENU",
+      "category": "Display",
+      "description": "Sets the counter to switch from the menu display to the result display.",
+      "set": "DISPlay:MENU[:STATe] OFF",
+      "examples": ["DISP:MENU OFF"]
+    },
+    {
+      "name": "display_text_feed",
+      "mnemonic": "DISP:TEXT:FEED",
+      "category": "Display",
+      "description": "Sets which data flow is fed into the display (CALCulate2 = measurement, CALCulate3 = statistics).",
+      "set": "DISPlay[:WINDow]:TEXT:FEED <'[:]CALCulate2'|'[:]CALCulate3'>",
+      "query": "DISPlay[:WINDow]:TEXT:FEED?",
+      "examples": ["DISP:TEXT:FEED 'CALC2'"]
+    },
+    {
+      "name": "display_text_radix",
+      "mnemonic": "DISP:TEXT:RAD",
+      "category": "Display",
+      "description": "Sets the character used to separate integral and fractional portions of a number.",
+      "set": "DISPlay[:WINDow]:TEXT:RADix <COMMa|DPOint>",
+      "query": "DISPlay[:WINDow]:TEXT:RADix?",
+      "examples": ["DISP:TEXT:RAD DPO"]
+    },
+
+    {
+      "name": "format_data",
+      "mnemonic": "FORM",
+      "category": "Format",
+      "description": "Sets the data format for transferring numeric information.",
+      "set": "FORMat[:DATA] <ASCii|REAL>",
+      "query": "FORMat[:DATA]?",
+      "examples": ["FORM ASC"]
+    },
+
+    {
+      "name": "hcopy_continuous",
+      "mnemonic": "HCOP:CONT",
+      "category": "Hardcopy",
+      "description": "Enables or disables printing of results.",
+      "set": "HCOPy:CONTinuous <Boolean>",
+      "query": "HCOPy:CONTinuous?",
+      "examples": ["HCOP:CONT OFF"]
+    },
+
+    {
+      "name": "memory_delete_macro",
+      "mnemonic": "MEM:DEL:MACR",
+      "category": "Memory",
+      "description": "Deletes the macro with the specified name. Event; no query.",
+      "set": "MEMory:DELete:MACRo <string>",
+      "examples": ["MEM:DEL:MACR 'MYMAC'"]
+    },
+    {
+      "name": "memory_free_macro_query",
+      "mnemonic": "MEM:FREE:MACR?",
+      "category": "Memory",
+      "description": "Returns memory usage and availability for macro data. Query only.",
+      "query": "MEMory:FREE:MACRo?",
+      "examples": ["MEM:FREE:MACR?"]
+    },
+    {
+      "name": "memory_nstates_query",
+      "mnemonic": "MEM:NST?",
+      "category": "Memory",
+      "description": "Returns the number of available *SAV/*RCL states in the instrument. Query only.",
+      "query": "MEMory:NSTates?",
+      "examples": ["MEM:NST?"]
+    },
+
+    {
+      "name": "trace_catalog_query",
+      "mnemonic": "TRAC:CAT?",
+      "category": "Trace",
+      "description": "Returns the list of intrinsic constants. Query only.",
+      "query": "TRACe:CATalog?",
+      "examples": ["TRAC:CAT?"]
+    },
+    {
+      "name": "trace_offset",
+      "mnemonic": "TRAC OFFSET",
+      "category": "Trace",
+      "description": "Sets or queries the offset value used in scale/offset math.",
+      "set": "TRACe[:DATA] OFFSET,<numeric_value>[HZ|S|DEG]",
+      "query": "TRACe[:DATA]? OFFSET",
+      "examples": ["TRAC OFFSET,1E3", "TRAC? OFFSET"]
+    },
+    {
+      "name": "trace_scale",
+      "mnemonic": "TRAC SCALE",
+      "category": "Trace",
+      "description": "Sets or queries the scale value used in scale/offset math.",
+      "set": "TRACe[:DATA] SCALE,<numeric_value>",
+      "query": "TRACe[:DATA]? SCALE",
+      "examples": ["TRAC SCALE,2.0", "TRAC? SCALE"]
+    },
+
+    {
+      "name": "status_operation_condition_query",
+      "mnemonic": "STAT:OPER:COND?",
+      "category": "Status",
+      "description": "Queries the Operation Condition Status Register. Query only.",
+      "query": "STATus:OPERation:CONDition?",
+      "examples": ["STAT:OPER:COND?"]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": "STAT:OPER:ENAB",
+      "category": "Status",
+      "description": "Sets the Operation Event Status Enable Register; query returns the Operation Event Status Register.",
+      "set": "STATus:OPERation:ENABle <NRf>",
+      "query": "STATus:OPERation[:EVENt]?",
+      "examples": ["STAT:OPER:ENAB 16", "STAT:OPER:EVEN?"]
+    },
+    {
+      "name": "status_operation_ntransition",
+      "mnemonic": "STAT:OPER:NTR",
+      "category": "Status",
+      "description": "Sets the negative transition filter for the Operation status reporting structure.",
+      "set": "STATus:OPERation:NTRansition <NRf>",
+      "query": "STATus:OPERation:NTRansition?",
+      "examples": ["STAT:OPER:NTR 0"]
+    },
+    {
+      "name": "status_operation_ptransition",
+      "mnemonic": "STAT:OPER:PTR",
+      "category": "Status",
+      "description": "Sets the positive transition filter for the Operation status reporting structure.",
+      "set": "STATus:OPERation:PTRansition <NRf>",
+      "query": "STATus:OPERation:PTRansition?",
+      "examples": ["STAT:OPER:PTR 32767"]
+    },
+    {
+      "name": "status_questionable_condition_query",
+      "mnemonic": "STAT:QUES:COND?",
+      "category": "Status",
+      "description": "Queries the Questionable Data Condition Status Register. Query only.",
+      "query": "STATus:QUEStionable:CONDition?",
+      "examples": ["STAT:QUES:COND?"]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": "STAT:QUES:ENAB",
+      "category": "Status",
+      "description": "Sets the Questionable Data Event Status Enable Register; query returns the Questionable Data Event Status Register.",
+      "set": "STATus:QUEStionable:ENABle <NRf>",
+      "query": "STATus:QUEStionable[:EVENt]?",
+      "examples": ["STAT:QUES:ENAB 16", "STAT:QUES:EVEN?"]
+    },
+    {
+      "name": "status_questionable_ntransition",
+      "mnemonic": "STAT:QUES:NTR",
+      "category": "Status",
+      "description": "Sets the negative transition filter for the Questionable Data status reporting structure.",
+      "set": "STATus:QUEStionable:NTRansition <NRf>",
+      "query": "STATus:QUEStionable:NTRansition?",
+      "examples": ["STAT:QUES:NTR 0"]
+    },
+    {
+      "name": "status_questionable_ptransition",
+      "mnemonic": "STAT:QUES:PTR",
+      "category": "Status",
+      "description": "Sets the positive transition filter for the Questionable Data status reporting structure.",
+      "set": "STATus:QUEStionable:PTRansition <NRf>",
+      "query": "STATus:QUEStionable:PTRansition?",
+      "examples": ["STAT:QUES:PTR 32767"]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": "STAT:PRES",
+      "category": "Status",
+      "description": "Presets the enable registers and transition filters of the Operation and Questionable structures. Event; no query.",
+      "set": "STATus:PRESet",
+      "examples": ["STAT:PRES"]
+    },
+
+    {
+      "name": "system_error_query",
+      "mnemonic": "SYST:ERR?",
+      "category": "System",
+      "description": "Queries the oldest error in the error queue and removes it (first in, first out). Query only.",
+      "query": "SYSTem:ERRor?",
+      "examples": ["SYST:ERR?"]
+    },
+    {
+      "name": "system_version_query",
+      "mnemonic": "SYST:VERS?",
+      "category": "System",
+      "description": "Returns the SCPI version number with which the counter complies. Query only.",
+      "query": "SYSTem:VERSion?",
+      "examples": ["SYST:VERS?"]
+    },
+    {
+      "name": "system_key",
+      "mnemonic": "SYST:KEY",
+      "category": "System",
+      "description": "Simulates the pressing of a front-panel key.",
+      "set": "SYSTem:KEY <numeric_value>",
+      "query": "SYSTem:KEY?",
+      "examples": ["SYST:KEY 1"]
+    },
+    {
+      "name": "system_key_log_query",
+      "mnemonic": "SYST:KEY:LOG?",
+      "category": "System",
+      "description": "Returns a comma-separated list of integers representing all entries in the key queue. Query only.",
+      "query": "SYSTem:KEY:LOG?",
+      "examples": ["SYST:KEY:LOG?"]
+    },
+    {
+      "name": "system_comm_serial_control_dtr",
+      "mnemonic": "SYST:COMM:SER:CONT:DTR",
+      "category": "System",
+      "description": "Sets the usage of the DTR line of the RS-232 port.",
+      "set": "SYSTem:COMMunicate:SERial:CONTrol:DTR <IBFull|ON|LIMit>",
+      "query": "SYSTem:COMMunicate:SERial:CONTrol:DTR?",
+      "examples": ["SYST:COMM:SER:CONT:DTR IBF"]
+    },
+    {
+      "name": "system_comm_serial_baud",
+      "mnemonic": "SYST:COMM:SER:TRAN:BAUD",
+      "category": "System",
+      "description": "Sets the RS-232 baud rate.",
+      "set": "SYSTem:COMMunicate:SERial:TRANsmit:BAUD <numeric_value>",
+      "query": "SYSTem:COMMunicate:SERial:TRANsmit:BAUD?",
+      "examples": ["SYST:COMM:SER:TRAN:BAUD 9600"]
+    },
+    {
+      "name": "system_comm_serial_pace",
+      "mnemonic": "SYST:COMM:SER:TRAN:PACE",
+      "category": "System",
+      "description": "Sets the RS-232 software pacing scheme.",
+      "set": "SYSTem:COMMunicate:SERial:TRANsmit:PACE <XON|NONE>",
+      "query": "SYSTem:COMMunicate:SERial:TRANsmit:PACE?",
+      "examples": ["SYST:COMM:SER:TRAN:PACE XON"]
+    },
+    {
+      "name": "system_comm_serial_parity",
+      "mnemonic": "SYST:COMM:SER:TRAN:PAR",
+      "category": "System",
+      "description": "Sets the RS-232 parity scheme.",
+      "set": "SYSTem:COMMunicate:SERial:TRANsmit:PARity[:TYPE] <EVEN|ODD|NONE>",
+      "query": "SYSTem:COMMunicate:SERial:TRANsmit:PARity[:TYPE]?",
+      "examples": ["SYST:COMM:SER:TRAN:PAR NONE"]
+    }
+  ]
+}
