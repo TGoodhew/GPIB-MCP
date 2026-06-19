@@ -51,7 +51,7 @@
       "description": "Manual Measurement Mode. Same effect as the MANUAL key: selects INPUT 1, Manual mode. An optional Manual Center Frequency parameter may be specified in Hertz. If no frequency is passed, or if 'LASTF' is passed, the last measurement is used as the Manual Center Frequency. The current measurement cycle is aborted.",
       "set": "MANUAL[,<freq>]",
       "parameters": [
-        { "name": "frequency", "units": "Hz", "range": "INPUT 1 range (500 MHz to 20 GHz); or LASTF for last measurement" }
+        { "name": "frequency", "units": ["Hz"], "range": "INPUT 1 range (500 MHz to 20 GHz); or LASTF for last measurement" }
       ],
       "examples": ["OUTPUT 714;\"MANUAL,5E08\"", "OUTPUT 714;\"MANUAL,LASTF\""]
     },
@@ -128,7 +128,7 @@
       "set": "OFFSET[,<ON|OFF>][,<freq|LASTF>]",
       "parameters": [
         { "name": "state", "range": "ON, OFF" },
-        { "name": "offset_frequency", "units": "Hz", "range": "positive or negative; or LASTF" }
+        { "name": "offset_frequency", "units": ["Hz"], "range": "positive or negative; or LASTF" }
       ],
       "examples": ["OUTPUT 714;\"OFFSET,LASTF,ON\"", "OUTPUT 714;\"OFFSET,OFF\""]
     },

@@ -20,8 +20,8 @@
       "set": "APPLy {<voltage>|DEF|MIN|MAX}[,{<current>|DEF|MIN|MAX}]",
       "query": "APPLy?",
       "parameters": [
-        { "name": "voltage", "units": "V", "range": "0 to 8.24 (8V range) or 0 to 20.60 (20V range) for E3633A; 0 to 25.75 (25V range) or 0 to 51.5 (50V range) for E3634A; or DEF|MIN|MAX" },
-        { "name": "current", "units": "A", "range": "0 to 20.60 (8V range) or 0 to 10.30 (20V range) for E3633A; 0 to 7.21 (25V range) or 0 to 4.12 (50V range) for E3634A; or DEF|MIN|MAX" }
+        { "name": "voltage", "units": ["V"], "range": "0 to 8.24 (8V range) or 0 to 20.60 (20V range) for E3633A; 0 to 25.75 (25V range) or 0 to 51.5 (50V range) for E3634A; or DEF|MIN|MAX" },
+        { "name": "current", "units": ["A"], "range": "0 to 20.60 (8V range) or 0 to 10.30 (20V range) for E3633A; 0 to 7.21 (25V range) or 0 to 4.12 (50V range) for E3634A; or DEF|MIN|MAX" }
       ],
       "examples": ["APPLy 3.5,1.5", "APPLy?"]
     },
@@ -33,7 +33,7 @@
       "set": "CURRent {<current>|MIN|MAX|UP|DOWN}",
       "query": "CURRent? [MIN|MAX]",
       "parameters": [
-        { "name": "current", "units": "A", "range": "0 to range maximum (e.g. 20.60 A E3633A 8V range); or MIN|MAX|UP|DOWN" }
+        { "name": "current", "units": ["A"], "range": "0 to range maximum (e.g. 20.60 A E3633A 8V range); or MIN|MAX|UP|DOWN" }
       ],
       "examples": ["CURR 1.5", "CURR UP", "CURR? MAX"]
     },
@@ -45,7 +45,7 @@
       "set": "CURRent:STEP {<numeric value>|DEFault}",
       "query": "CURRent:STEP? {DEFault}",
       "parameters": [
-        { "name": "step", "units": "A", "range": "numeric value or DEFault (min resolution ~0.32 mA E3633A, ~0.13 mA E3634A)" }
+        { "name": "step", "units": ["A"], "range": "numeric value or DEFault (min resolution ~0.32 mA E3633A, ~0.13 mA E3634A)" }
       ],
       "examples": ["CURR:STEP 0.01", "CURR:STEP? DEF"]
     },
@@ -57,7 +57,7 @@
       "set": "CURRent:TRIGgered {<current>|MIN|MAX}",
       "query": "CURRent:TRIGgered? [MIN|MAX]",
       "parameters": [
-        { "name": "current", "units": "A", "range": "0 to range maximum; or MIN|MAX" }
+        { "name": "current", "units": ["A"], "range": "0 to range maximum; or MIN|MAX" }
       ],
       "examples": ["CURR:TRIG 1.0", "CURR:TRIG? MAX"]
     },
@@ -69,7 +69,7 @@
       "set": "CURRent:PROTection {<current>|MIN|MAX}",
       "query": "CURRent:PROTection? {MIN|MAX}",
       "parameters": [
-        { "name": "current", "units": "A", "range": "programmable OCP trip level; or MIN|MAX" }
+        { "name": "current", "units": ["A"], "range": "programmable OCP trip level; or MIN|MAX" }
       ],
       "examples": ["CURR:PROT 22.0", "CURR:PROT? MAX"]
     },
@@ -109,7 +109,7 @@
       "set": "VOLTage {<voltage>|MIN|MAX|UP|DOWN}",
       "query": "VOLTage? [MIN|MAX]",
       "parameters": [
-        { "name": "voltage", "units": "V", "range": "0 to range maximum (e.g. 8.24 V E3633A 8V range); or MIN|MAX|UP|DOWN" }
+        { "name": "voltage", "units": ["V"], "range": "0 to range maximum (e.g. 8.24 V E3633A 8V range); or MIN|MAX|UP|DOWN" }
       ],
       "examples": ["VOLT 5.0", "VOLT UP", "VOLT? MAX"]
     },
@@ -121,7 +121,7 @@
       "set": "VOLTage:STEP {<numeric value>|DEFault}",
       "query": "VOLTage:STEP? {DEFault}",
       "parameters": [
-        { "name": "step", "units": "V", "range": "numeric value or DEFault (min resolution ~0.36 mV E3633A, ~0.95 mV E3634A)" }
+        { "name": "step", "units": ["V"], "range": "numeric value or DEFault (min resolution ~0.36 mV E3633A, ~0.95 mV E3634A)" }
       ],
       "examples": ["VOLT:STEP 0.01", "VOLT:STEP? DEF"]
     },
@@ -133,7 +133,7 @@
       "set": "VOLTage:TRIGgered {<voltage>|MIN|MAX}",
       "query": "VOLTage:TRIGgered? [MIN|MAX]",
       "parameters": [
-        { "name": "voltage", "units": "V", "range": "0 to range maximum; or MIN|MAX" }
+        { "name": "voltage", "units": ["V"], "range": "0 to range maximum; or MIN|MAX" }
       ],
       "examples": ["VOLT:TRIG 3.0", "VOLT:TRIG? MAX"]
     },
@@ -145,7 +145,7 @@
       "set": "VOLTage:PROTection {<voltage>|MIN|MAX}",
       "query": "VOLTage:PROTection? {MIN|MAX}",
       "parameters": [
-        { "name": "voltage", "units": "V", "range": "programmable OVP trip level; or MIN|MAX" }
+        { "name": "voltage", "units": ["V"], "range": "programmable OVP trip level; or MIN|MAX" }
       ],
       "examples": ["VOLT:PROT 22.0", "VOLT:PROT? MAX"]
     },
@@ -221,7 +221,7 @@
       "set": "TRIGger:DELay {<seconds>|MIN|MAX}",
       "query": "TRIGger:DELay?",
       "parameters": [
-        { "name": "seconds", "units": "s", "range": "0 to 3600 (MIN = 0, MAX = 3600)" }
+        { "name": "seconds", "units": ["s"], "range": "0 to 3600 (MIN = 0, MAX = 3600)" }
       ],
       "examples": ["TRIG:DEL 5", "TRIG:DEL?"]
     },
@@ -364,7 +364,7 @@
       "description": "Enter a current value read from an external meter (calibration must be unsecured and output ON). Select the calibration level first (CAL:CURR:LEV MIN, then MID, then MAX); three successive values must be entered, after which new constants are stored in non-volatile memory.",
       "set": "CALibration:CURRent[:DATA] <numeric value>",
       "parameters": [
-        { "name": "value", "units": "A", "range": "current value measured by external meter" }
+        { "name": "value", "units": ["A"], "range": "current value measured by external meter" }
       ],
       "examples": ["CAL:CURR 1.0"]
     },
@@ -438,7 +438,7 @@
       "description": "Enter a voltage value read from an external meter (calibration must be unsecured and output ON). Select the calibration level first (CAL:VOLT:LEV MIN, then MID, then MAX); three successive values must be entered, after which new constants are stored in non-volatile memory.",
       "set": "CALibration:VOLTage[:DATA] <numeric value>",
       "parameters": [
-        { "name": "value", "units": "V", "range": "voltage value measured by external meter" }
+        { "name": "value", "units": ["V"], "range": "voltage value measured by external meter" }
       ],
       "examples": ["CAL:VOLT 5.0"]
     },

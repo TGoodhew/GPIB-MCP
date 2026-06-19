@@ -32,8 +32,8 @@
       "set": "ACBAND [<low_frequency>][,<high_frequency>]",
       "query": "ACBAND?",
       "parameters": [
-        { "name": "low_frequency", "units": "Hz", "range": "power-on 20 Hz; default 20 Hz" },
-        { "name": "high_frequency", "units": "Hz", "range": "power-on 20 MHz; default 2 MHz" }
+        { "name": "low_frequency", "units": ["Hz"], "range": "power-on 20 Hz; default 20 Hz" },
+        { "name": "high_frequency", "units": ["Hz"], "range": "power-on 20 MHz; default 2 MHz" }
       ],
       "examples": ["ACBAND 500,1000", "ACBAND?"]
     },
@@ -57,7 +57,7 @@
       "set": "APER [<aperture>]",
       "query": "APER?",
       "parameters": [
-        { "name": "aperture", "units": "s", "range": "0 to 1 s in 100 ns increments; values <500 ns select 500 ns minimum; default 500 ns" }
+        { "name": "aperture", "units": ["s"], "range": "0 to 1 s in 100 ns increments; values <500 ns select 500 ns minimum; default 500 ns" }
       ],
       "examples": ["APER 10E-6", "APER?"]
     },
@@ -204,7 +204,7 @@
       "set": "DELAY [<time>]",
       "query": "DELAY?",
       "parameters": [
-        { "name": "time", "units": "s", "range": "1E-7 to 6000 s (10 ns increments for sampling, 100 ns otherwise); 0 selects minimum; -1 returns to automatic" }
+        { "name": "time", "units": ["s"], "range": "1E-7 to 6000 s (10 ns increments for sampling, 100 ns otherwise); 0 selects minimum; -1 returns to automatic" }
       ],
       "examples": ["DELAY 5", "DELAY -1"]
     },
@@ -247,7 +247,7 @@
       "description": "Direct-Sampling (digitizing). DSAC measures only the AC component; DSDC measures combined AC+DC. Uses the 2 ns track/hold and 12 MHz input path. No autorange; range set by max._input.",
       "set": "DSAC [<max._input>][,<%_resolution>] | DSDC [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "V", "range": "selects range 10mV..1000V (0 to 1E3); default 10V" },
+        { "name": "max._input", "units": ["V"], "range": "selects range 10mV..1000V (0 to 1E3); default 10V" },
         { "name": "%_resolution", "range": "ignored (allowed for syntax consistency)" }
       ],
       "examples": ["DSDC 10", "DSAC 1"]
@@ -362,7 +362,7 @@
       "description": "Selects DC voltage measurements (FUNC DCV). Ranges 100mV, 1V, 10V, 100V, 1000V.",
       "set": "DCV [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "V", "range": "0 to 1E3 selects 100mV..1000V; -1 or AUTO for autorange" },
+        { "name": "max._input", "units": ["V"], "range": "0 to 1E3 selects 100mV..1000V; -1 or AUTO for autorange" },
         { "name": "%_resolution", "range": "percentage of max._input" }
       ],
       "examples": ["DCV 10", "DCV 6,.00167"]
@@ -374,7 +374,7 @@
       "description": "Selects AC voltage measurements (FUNC ACV). Conversion method set by SETACV. Ranges 10mV..1000V.",
       "set": "ACV [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "V", "range": "0 to 1E3 selects 10mV..1000V; -1 or AUTO for autorange" },
+        { "name": "max._input", "units": ["V"], "range": "0 to 1E3 selects 10mV..1000V; -1 or AUTO for autorange" },
         { "name": "%_resolution", "range": "percentage of max._input" }
       ],
       "examples": ["ACV 10", "ACV"]
@@ -386,7 +386,7 @@
       "description": "Selects AC+DC voltage measurements (FUNC ACDCV). Conversion method set by SETACV.",
       "set": "ACDCV [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "V", "range": "0 to 1E3 selects 10mV..1000V; -1 or AUTO for autorange" }
+        { "name": "max._input", "units": ["V"], "range": "0 to 1E3 selects 10mV..1000V; -1 or AUTO for autorange" }
       ],
       "examples": ["ACDCV 10", "ACDCV"]
     },
@@ -397,7 +397,7 @@
       "description": "Selects 2-wire ohms measurements (FUNC OHM). Ranges 10Ω..1GΩ.",
       "set": "OHM [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "ohm", "range": "0 to 1.2E9 selects 10Ω..1GΩ; -1 or AUTO for autorange" },
+        { "name": "max._input", "units": ["ohm"], "range": "0 to 1.2E9 selects 10Ω..1GΩ; -1 or AUTO for autorange" },
         { "name": "%_resolution", "range": "percentage of max._input" }
       ],
       "examples": ["OHM 1E3,.001", "OHM"]
@@ -409,7 +409,7 @@
       "description": "Selects 4-wire ohms measurements (FUNC OHMF). Ranges 10Ω..1GΩ.",
       "set": "OHMF [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "ohm", "range": "0 to 1.2E9 selects 10Ω..1GΩ; -1 or AUTO for autorange" }
+        { "name": "max._input", "units": ["ohm"], "range": "0 to 1.2E9 selects 10Ω..1GΩ; -1 or AUTO for autorange" }
       ],
       "examples": ["OHMF 1E3", "OHMF"]
     },
@@ -420,7 +420,7 @@
       "description": "Selects DC current measurements (FUNC DCI). Ranges 0.1uA..1A.",
       "set": "DCI [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "A", "range": "0 to 1.2 selects .1uA..1A; -1 or AUTO for autorange" }
+        { "name": "max._input", "units": ["A"], "range": "0 to 1.2 selects .1uA..1A; -1 or AUTO for autorange" }
       ],
       "examples": ["DCI 1", "DCI"]
     },
@@ -431,7 +431,7 @@
       "description": "Selects AC current measurements (FUNC ACI). Ranges 100uA..1A.",
       "set": "ACI [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "A", "range": "0 to 1.2 selects 100uA..1A; -1 or AUTO for autorange" }
+        { "name": "max._input", "units": ["A"], "range": "0 to 1.2 selects 100uA..1A; -1 or AUTO for autorange" }
       ],
       "examples": ["ACI 1", "ACI"]
     },
@@ -442,7 +442,7 @@
       "description": "Selects AC+DC current measurements (FUNC ACDCI). Ranges 100uA..1A.",
       "set": "ACDCI [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "A", "range": "0 to 1.2 selects 100uA..1A; -1 or AUTO for autorange" }
+        { "name": "max._input", "units": ["A"], "range": "0 to 1.2 selects 100uA..1A; -1 or AUTO for autorange" }
       ],
       "examples": ["ACDCI 1", "ACDCI"]
     },
@@ -482,7 +482,7 @@
       "set": "LEVEL [<percentage>][,<coupling>]",
       "query": "LEVEL?",
       "parameters": [
-        { "name": "percentage", "units": "%", "range": "-500% to +500% (5% steps, sampling) or -120% to 120% (1% steps, DCV); power-on 0%" },
+        { "name": "percentage", "units": ["%"], "range": "-500% to +500% (5% steps, sampling) or -120% to 120% (1% steps, DCV); power-on 0%" },
         { "name": "coupling", "range": "DC(1) | AC(2); power-on AC" }
       ],
       "examples": ["LEVEL 50,AC", "LEVEL 250,DC"]
@@ -507,7 +507,7 @@
       "set": "LFREQ [<frequency>] | LFREQ LINE",
       "query": "LFREQ?",
       "parameters": [
-        { "name": "frequency", "units": "Hz", "range": "45-65 Hz or 360-440 Hz (divided by 8); or LINE to measure" }
+        { "name": "frequency", "units": ["Hz"], "range": "45-65 Hz or 360-440 Hz (divided by 8); or LINE to measure" }
       ],
       "examples": ["LFREQ LINE", "LFREQ 60"]
     },
@@ -920,7 +920,7 @@
       "description": "Sub-Sampling (digitizing of periodic signals). SSAC measures only the AC component; SSDC measures combined AC+DC. No autorange/autozero; range set by max._input. Interval and sample count set by SWEEP.",
       "set": "SSAC [<max._input>][,<%_resolution>] | SSDC [<max._input>][,<%_resolution>]",
       "parameters": [
-        { "name": "max._input", "units": "V", "range": "selects range 10mV..1000V (0 to 1E3); default 10V" },
+        { "name": "max._input", "units": ["V"], "range": "selects range 10mV..1000V (0 to 1E3); default 10V" },
         { "name": "%_resolution", "range": "ignored (allowed for syntax consistency)" }
       ],
       "examples": ["SSDC 10", "SSAC 1"]
@@ -992,7 +992,7 @@
       "set": "SWEEP [<effective_interval>][,<#_samples>]",
       "query": "SWEEP?",
       "parameters": [
-        { "name": "effective_interval", "units": "s", "range": "10E-9 to 6000 s (sub-sampling) or 1/max-rate to 6000 s; power-on 100E-9, default 20us" },
+        { "name": "effective_interval", "units": ["s"], "range": "10E-9 to 6000 s (sub-sampling) or 1/max-rate to 6000 s; power-on 100E-9, default 20us" },
         { "name": "#_samples", "range": "1 to 1.67E7; power-on/default 1024" }
       ],
       "examples": ["SWEEP 30E-6,200", "SWEEP 5E-6,200"]
@@ -1066,7 +1066,7 @@
       "set": "TIMER [<time>]",
       "query": "TIMER?",
       "parameters": [
-        { "name": "time", "units": "s", "range": "1/max-rate to 6000 s in 100 ns increments; power-on/default 1 s" }
+        { "name": "time", "units": ["s"], "range": "1/max-rate to 6000 s in 100 ns increments; power-on/default 1 s" }
       ],
       "examples": ["TIMER 200E-3", "TIMER 2"]
     },

@@ -36,7 +36,7 @@
       "description": "Sets a programmable step attenuator to a desired attenuation level by combining A (ON) and B (OFF) commands across that attenuator's section digits. ATTEN X uses digits 1-4, ATTEN Y uses digits 5-8. Each section that must be inserted is listed after A, each that must be removed after B; a digit must not appear in both fields. The dB weighting of each section depends on the attenuator model (e.g. 4-section 1/2/4/4 dB, 10/20/40/40 dB, or 3-section 10/20/40 dB). For example, on a 0-110 dB attenuator A1B234 = 1 dB and A1234 = 11 dB on ATTEN X; A5678 = 110 dB on ATTEN Y.",
       "set": "A<sections>B<sections>",
       "parameters": [
-        { "name": "sections", "units": "section number", "range": "ATTEN X: digits 1-4; ATTEN Y: digits 5-8. Digit-to-dB weighting per attenuator model (see Table 6-3)." }
+        { "name": "sections", "units": ["section number"], "range": "ATTEN X: digits 1-4; ATTEN Y: digits 5-8. Digit-to-dB weighting per attenuator model (see Table 6-3)." }
       ],
       "examples": ["OUTPUT 728;\"A1B234\"", "OUTPUT 728;\"A12B34A56B78\""]
     },

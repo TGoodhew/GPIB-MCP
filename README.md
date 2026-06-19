@@ -314,8 +314,11 @@ The server ships with a **user-extensible database of instrument command referen
 you can tell Claude *"an 8563E is at GPIB 18"* and it can look up what that instrument
 understands, confirm its identity, and drive it — instead of you supplying raw commands.
 
-Each model is one JSON file describing its identity query, command mnemonics, parameters,
-units, and examples (see [`data/instruments/`](data/instruments/)).
+It comes prepopulated with **55 instrument models / ~6,400 documented commands** (HP/Agilent,
+Keithley, Tektronix, Rigol, Rohde & Schwarz, Datron) — see the
+[catalog](data/instruments/README.md). Each model is one JSON file describing its identity
+query, command mnemonics, parameters, units, and examples (see
+[`data/instruments/`](data/instruments/)).
 
 **Ask what's known:**
 > *"Please tell me what GPIB instruments you know about."* → `instrument_list_models`
@@ -342,12 +345,38 @@ On first run the bundled defaults are **copied into the user database** (never o
 your edits), giving you an editable, prepopulated database. User definitions override
 bundled ones with the same model name.
 
-#### Extending it
+#### Extending the database
 
-Drop a new `<model>.json` into the user database directory, or ask Claude to add one via
-`instrument_db_save` (it writes to the user directory and confirms before saving). Assignments
-and saves both follow a **confirm-before-write** flow: the first call reports what it *would*
-do, and only persists when called again with `confirm: true`.
+You own the database and can grow it. Two ways to add a model:
+
+- **Ask Claude:** *"Add a definition for my <instrument>…"* → `instrument_db_save` writes a
+  `<model>.json` into the user database directory (confirming before it writes).
+- **By hand:** drop a `<model>.json` into the user database directory, following the shape of
+  any file in [`data/instruments/`](data/instruments/).
+
+New or changed definitions are picked up the next time the server starts.
+
+#### Correcting it — making the database reflect reality
+
+The bundled definitions come from manuals, which can differ from the instrument actually on
+your bench (firmware revisions, options, OCR slips, or a model the manual only partly covers).
+Keep the database honest:
+
+- **Verify identity automatically.** `assign_instrument` sends the model's identity query and
+  checks the response; if it *doesn't* match, it tells Claude so before anything is saved —
+  surfacing a wrong model/address or a bad `matchRegex`.
+- **Override, don't edit the bundled file.** A `<model>.json` in your **user** directory
+  overrides the bundled one of the same name. Fix a wrong command, add a missing one, or
+  correct an identity pattern there (or via `instrument_db_save`) and your version wins —
+  bundled defaults stay intact and your correction survives upgrades.
+- **Confirm-before-write everywhere.** `assign_instrument`, `unassign_instrument`, and
+  `instrument_db_save` all report what they *would* do first and only persist when called
+  again with `confirm: true`, so nothing changes on disk without your go-ahead.
+
+> Partial / missing by design: a few instruments whose programming guide isn't in the manual
+> library (e.g. N9320A, DSA800, full E4436B/E4406A) are intentionally absent or partial rather
+> than guessed. Add the relevant programming guide and ask Claude to extract it, or author the
+> JSON yourself.
 
 ### Manual test from a terminal
 

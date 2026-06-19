@@ -36,7 +36,7 @@
       "description": "Program output level RANGE in 10 dB steps. Code K followed by an argument: 0=0 dBm, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, : (colon)=-100, ; (semicolon)=-110. The +10 dBm (over-range) position is set via the ALC code, not here.",
       "set": "K<arg>",
       "parameters": [
-        { "name": "range", "units": "dBm", "range": "0=0, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, :=-100, ;=-110" }
+        { "name": "range", "units": ["dBm"], "range": "0=0, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, :=-100, ;=-110" }
       ],
       "examples": ["K9", "K1"]
     },
@@ -47,7 +47,7 @@
       "description": "Program output level VERNIER in 1 dB steps from +3 to -10 dB. Code L followed by an argument: ( =+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, : =-7, ; =-8, < =-9, = =-10 dB.",
       "set": "L<arg>",
       "parameters": [
-        { "name": "vernier", "units": "dB", "range": "+3 to -10 dB in 1 dB steps; (=+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, :=-7, ;=-8, <=-9, ==-10" }
+        { "name": "vernier", "units": ["dB"], "range": "+3 to -10 dB in 1 dB steps; (=+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, :=-7, ;=-8, <=-9, ==-10" }
       ],
       "examples": ["L7", "L3"]
     },

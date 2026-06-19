@@ -109,7 +109,7 @@
       "parameters": [
         {
           "name": "<mdep>",
-          "units": "pts",
+          "units": ["pts"],
           "range": "{AUTO|12000|120000|1200000|12000000|24000000} for single channel; varies with number of enabled channels"
         }
       ],
@@ -268,7 +268,7 @@
         },
         {
           "name": "<offset>",
-          "units": "V",
+          "units": ["V"],
           "range": "Related to vertical scale and probe ratio (e.g. probe 1X: -2V to +2V for scale<500mV/div, -100V to +100V for scale>=500mV/div)"
         }
       ],
@@ -291,7 +291,7 @@
         },
         {
           "name": "<range>",
-          "units": "V",
+          "units": ["V"],
           "range": "Related to probe ratio; probe 1X: 8mV to 80V; probe 10X: 80mV to 800V"
         }
       ],
@@ -314,7 +314,7 @@
         },
         {
           "name": "<val>",
-          "units": "s",
+          "units": ["s"],
           "range": "-100ns to 100ns"
         }
       ],
@@ -337,7 +337,7 @@
         },
         {
           "name": "<scale>",
-          "units": "V",
+          "units": ["V"],
           "range": "Related to probe ratio; probe 1X: 1mV to 10V; probe 10X: 10mV to 100V"
         }
       ],
@@ -1440,7 +1440,7 @@
         },
         {
           "name": "<baud>",
-          "units": "bps",
+          "units": ["bps"],
           "range": "110 to 20M"
         }
       ],
@@ -1727,7 +1727,7 @@
         },
         {
           "name": "<tmo>",
-          "units": "s",
+          "units": ["s"],
           "range": "Related to current timebase"
         }
       ],
@@ -1992,7 +1992,7 @@
         },
         {
           "name": "<time>",
-          "units": "s",
+          "units": ["s"],
           "range": "0.00s to 100ms"
         }
       ],
@@ -2015,7 +2015,7 @@
         },
         {
           "name": "<comp>",
-          "units": "s",
+          "units": ["s"],
           "range": "-100ms to 100ms"
         }
       ],
@@ -2108,7 +2108,7 @@
       "parameters": [
         {
           "name": "<time>",
-          "units": "s",
+          "units": ["s"],
           "range": "{MIN|0.1|0.2|0.5|1|5|10|INFinite}"
         }
       ],
@@ -2357,7 +2357,7 @@
       "parameters": [
         {
           "name": "<interval>",
-          "units": "s",
+          "units": ["s"],
           "range": "100ns to 10s"
         }
       ],
@@ -2476,7 +2476,7 @@
       "parameters": [
         {
           "name": "<interval>",
-          "units": "s",
+          "units": ["s"],
           "range": "100ns to 10s"
         }
       ],
@@ -2845,7 +2845,7 @@
         },
         {
           "name": "<thre>",
-          "units": "V",
+          "units": ["V"],
           "range": "-15.0V to +15.0V"
         }
       ],
@@ -2900,7 +2900,7 @@
       "parameters": [
         {
           "name": "<tcal>",
-          "units": "s",
+          "units": ["s"],
           "range": "-100ns to 100ns"
         }
       ],
@@ -3163,7 +3163,7 @@
       "parameters": [
         {
           "name": "<hsc>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "1/1000, 1/400, 1/200, 1/100, 1/40, or 1/20 of the FFT sample rate"
         }
       ],
@@ -3182,7 +3182,7 @@
       "parameters": [
         {
           "name": "<cent>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "TRACe: 0 to 0.4 x FFT sample rate; MEMory: 0 to 0.5 x FFT sample rate"
         }
       ],
@@ -3237,7 +3237,7 @@
       "parameters": [
         {
           "name": "<freq1>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "LPASs/HPASs: 0.005 to 0.1 x screen sample rate; BPASs/BSTOP: 0.005 to 0.095 x screen sample rate"
         }
       ],
@@ -3256,7 +3256,7 @@
       "parameters": [
         {
           "name": "<freq2>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0.01 to 0.1 x screen sample rate"
         }
       ],
@@ -3329,7 +3329,7 @@
       "parameters": [
         {
           "name": "<sens>",
-          "units": "div",
+          "units": ["div"],
           "range": "0 to 0.96, step 0.08"
         }
       ],
@@ -3384,7 +3384,7 @@
       "parameters": [
         {
           "name": "<thre>",
-          "units": "V",
+          "units": ["V"],
           "range": "(-4 x VerticalScale - VerticalOffset) to (4 x VerticalScale - VerticalOffset)"
         }
       ],
@@ -3403,7 +3403,7 @@
       "parameters": [
         {
           "name": "<thre>",
-          "units": "V",
+          "units": ["V"],
           "range": "(-4 x VerticalScale - VerticalOffset) to (4 x VerticalScale - VerticalOffset)"
         }
       ],
@@ -3584,7 +3584,7 @@
       "parameters": [
         {
           "name": "<x>",
-          "units": "div",
+          "units": ["div"],
           "range": "0.02 to 4, step 0.02"
         }
       ],
@@ -3603,7 +3603,7 @@
       "parameters": [
         {
           "name": "<y>",
-          "units": "div",
+          "units": ["div"],
           "range": "0.04 to 5.12, step 0.04"
         }
       ],
@@ -4230,7 +4230,7 @@
         },
         {
           "name": "<frequency>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "Sine: 0.1Hz to 25MHz; Square: 0.1Hz to 15MHz; Pulse: 0.1Hz to 1MHz; Ramp: 0.1Hz to 100kHz; Arb: 0.1Hz to 10MHz"
         }
       ],
@@ -4253,7 +4253,7 @@
         },
         {
           "name": "<phase>",
-          "units": "degree",
+          "units": ["degree"],
           "range": "0 to 360"
         }
       ],
@@ -4336,7 +4336,7 @@
         },
         {
           "name": "<Amplitude>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         }
       ],
@@ -4359,7 +4359,7 @@
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2); 50 ohm: (-1.25V + amplitude/2) to (1.25V - amplitude/2)"
         }
       ],
@@ -4470,7 +4470,7 @@
         },
         {
           "name": "<frequency>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "1Hz to 50kHz"
         }
       ],
@@ -4493,7 +4493,7 @@
         },
         {
           "name": "<frequency>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "1Hz to 50kHz"
         }
       ],
@@ -4560,7 +4560,7 @@
         },
         {
           "name": "<dev>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0Hz to the carrier waveform frequency"
         }
       ],
@@ -4598,12 +4598,12 @@
         },
         {
           "name": "<amp>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2)"
         }
       ],
@@ -4624,22 +4624,22 @@
         },
         {
           "name": "<freq>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0.1Hz to 1MHz"
         },
         {
           "name": "<amp>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2)"
         },
         {
           "name": "<phase>",
-          "units": "degree",
+          "units": ["degree"],
           "range": "0 to 360"
         }
       ],
@@ -4660,22 +4660,22 @@
         },
         {
           "name": "<freq>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0.1Hz to 100kHz"
         },
         {
           "name": "<amp>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2)"
         },
         {
           "name": "<phase>",
-          "units": "degree",
+          "units": ["degree"],
           "range": "0 to 360"
         }
       ],
@@ -4696,22 +4696,22 @@
         },
         {
           "name": "<freq>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0.1Hz to 25MHz"
         },
         {
           "name": "<amp>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2)"
         },
         {
           "name": "<phase>",
-          "units": "degree",
+          "units": ["degree"],
           "range": "0 to 360"
         }
       ],
@@ -4732,22 +4732,22 @@
         },
         {
           "name": "<freq>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0.1Hz to 15MHz"
         },
         {
           "name": "<amp>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2)"
         },
         {
           "name": "<phase>",
-          "units": "degree",
+          "units": ["degree"],
           "range": "0 to 360"
         }
       ],
@@ -4768,22 +4768,22 @@
         },
         {
           "name": "<freq>",
-          "units": "Hz",
+          "units": ["Hz"],
           "range": "0.1Hz to 10MHz"
         },
         {
           "name": "<amp>",
-          "units": "Vpp",
+          "units": ["Vpp"],
           "range": "HighZ: 20mVpp to 5Vpp; 50 ohm: 10mVpp to 2.5Vpp"
         },
         {
           "name": "<offset>",
-          "units": "VDC",
+          "units": ["VDC"],
           "range": "HighZ: (-2.5V + amplitude/2) to (2.5V - amplitude/2)"
         },
         {
           "name": "<phase>",
-          "units": "degree",
+          "units": ["degree"],
           "range": "0 to 360"
         }
       ],
@@ -5190,7 +5190,7 @@
       "parameters": [
         {
           "name": "<offset>",
-          "units": "s",
+          "units": ["s"],
           "range": "-(LeftTime - DelayRange/2) to (RightTime - DelayRange/2)"
         }
       ],
@@ -5209,7 +5209,7 @@
       "parameters": [
         {
           "name": "<scale>",
-          "units": "s/div",
+          "units": ["s/div"],
           "range": "Related to main timebase; in 1-2-5 step"
         }
       ],
@@ -5228,7 +5228,7 @@
       "parameters": [
         {
           "name": "<offset>",
-          "units": "s",
+          "units": ["s"],
           "range": "Related to run/stop state and timebase mode"
         }
       ],
@@ -5247,7 +5247,7 @@
       "parameters": [
         {
           "name": "<scale>",
-          "units": "s/div",
+          "units": ["s/div"],
           "range": "YT mode: 5ns/div to 50s/div (1-2-5 step); Roll mode: 200ms/div to 50s/div"
         }
       ],
@@ -5348,7 +5348,7 @@
       "parameters": [
         {
           "name": "<value>",
-          "units": "s",
+          "units": ["s"],
           "range": "16ns to 10s"
         }
       ],
@@ -5485,7 +5485,7 @@
       "parameters": [
         {
           "name": "<width>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 10s"
         }
       ],
@@ -5504,7 +5504,7 @@
       "parameters": [
         {
           "name": "<width>",
-          "units": "s",
+          "units": ["s"],
           "range": "16ns to 10s"
         }
       ],
@@ -5523,7 +5523,7 @@
       "parameters": [
         {
           "name": "<width>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 9.99s"
         }
       ],
@@ -5596,7 +5596,7 @@
       "parameters": [
         {
           "name": "<time>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 10s"
         }
       ],
@@ -5615,7 +5615,7 @@
       "parameters": [
         {
           "name": "<time>",
-          "units": "s",
+          "units": ["s"],
           "range": "16ns to 10s"
         }
       ],
@@ -5634,7 +5634,7 @@
       "parameters": [
         {
           "name": "<time>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 9.99s"
         }
       ],
@@ -5909,7 +5909,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "LESS: 8ns to 10s; GLESs: 16ns to 10s"
         }
       ],
@@ -5928,7 +5928,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 9.99s"
         }
       ],
@@ -5983,7 +5983,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "16ns to 10s"
         }
       ],
@@ -6056,7 +6056,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "LESS: 8ns to 10s; GLESs: 16ns to 10s"
         }
       ],
@@ -6075,7 +6075,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "GREater: 8ns to 10s; GLESs: 8ns to 9.99s"
         }
       ],
@@ -6184,7 +6184,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 10s"
         }
       ],
@@ -6329,7 +6329,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "16ns to 10s"
         }
       ],
@@ -6348,7 +6348,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "GREater: 8ns to 10s; GOUT or GLESs: 8ns to 9.99s"
         }
       ],
@@ -6457,7 +6457,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 1s"
         }
       ],
@@ -6476,7 +6476,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "8ns to 1s"
         }
       ],
@@ -6531,7 +6531,7 @@
       "parameters": [
         {
           "name": "<NR3>",
-          "units": "s",
+          "units": ["s"],
           "range": "16ns to 10s"
         }
       ],
@@ -6694,7 +6694,7 @@
       "parameters": [
         {
           "name": "<baud_rate>",
-          "units": "bps",
+          "units": ["bps"],
           "range": "{2400|4800|9600|19200|38400|57600|115200|230400|460800|921600|1000000|USER}"
         }
       ],
@@ -6713,7 +6713,7 @@
       "parameters": [
         {
           "name": "<user_baud>",
-          "units": "bps",
+          "units": ["bps"],
           "range": "110 to 20000000"
         }
       ],
@@ -7002,7 +7002,7 @@
       "parameters": [
         {
           "name": "<time_value>",
-          "units": "s",
+          "units": ["s"],
           "range": "100ns to 1s"
         }
       ],

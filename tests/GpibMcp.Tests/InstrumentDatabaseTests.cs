@@ -78,6 +78,30 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Load_AcceptsScalarOrArrayForStringListFields()
+        {
+            string dir = NewTempDir();
+            try
+            {
+                // units/aliases/examples written as scalars (a common hand-authoring mistake)
+                // must still load, coerced to single-element lists.
+                File.WriteAllText(Path.Combine(dir, "scalar.json"),
+                    "{\"model\":\"S\",\"aliases\":\"S1\"," +
+                    "\"commands\":[{\"name\":\"f\",\"examples\":\"FREQ 1\"," +
+                    "\"parameters\":[{\"name\":\"freq\",\"units\":\"Hz\"}]}]}");
+
+                var db = InstrumentDatabase.Load(new[] { dir });
+
+                Assert.True(db.TryGet("S", out var s));
+                Assert.True(db.TryGet("S1", out _)); // scalar alias coerced + indexed
+                var p = s.Commands[0].Parameters[0];
+                Assert.Equal(new[] { "Hz" }, p.Units);
+                Assert.Equal(new[] { "FREQ 1" }, s.Commands[0].Examples.ToArray());
+            }
+            finally { Directory.Delete(dir, true); }
+        }
+
+        [Fact]
         public void Load_SkipsMalformedFiles()
         {
             string dir = NewTempDir();

@@ -565,7 +565,7 @@
       "description": "Sets the maximum of the Histogram probability (Y-axis) scale. *RST=100.",
       "set": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MAXimum <numeric>[PCT]",
       "query": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MAXimum?",
-      "parameters": [{ "name": "value", "units": "PCT" }],
+      "parameters": [{ "name": "value", "units": ["PCT"] }],
       "examples": [":DISP:TRAC:PROB:MAX 20"]
     },
     {
@@ -575,7 +575,7 @@
       "description": "Sets the minimum of the Histogram probability (Y-axis) scale. *RST=0.",
       "set": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MINimum <numeric>[PCT]",
       "query": ":DISPlay:WINDow:TRACe:PROBability:SCALe:MINimum?",
-      "parameters": [{ "name": "value", "units": "PCT" }],
+      "parameters": [{ "name": "value", "units": ["PCT"] }],
       "examples": [":DISP:TRAC:PROB:MIN 1"]
     },
     {
@@ -645,7 +645,7 @@
       "description": "Sets the input impedance for channel (1=A, 2=B). Enter 50 OHM or 1 MOHM. *RST=1 MOHM.",
       "set": ":INPut[1|2]:IMPedance <numeric>[OHM]",
       "query": ":INPut[1|2]:IMPedance?",
-      "parameters": [{ "name": "impedance", "units": "OHM", "range": "50 or 1E6" }],
+      "parameters": [{ "name": "impedance", "units": ["OHM"], "range": "50 or 1E6" }],
       "examples": [":INP:IMP 50"]
     },
 
@@ -666,7 +666,7 @@
       "description": "Sets the position of frequency marker 1 or 2. *RST: POS1=85 MHZ, POS2=115 MHZ.",
       "set": ":MARKer:FREQuency:POSition[1|2] <numeric>[HZ]",
       "query": ":MARKer:FREQuency:POSition[1|2]?",
-      "parameters": [{ "name": "position", "units": "HZ" }],
+      "parameters": [{ "name": "position", "units": ["HZ"] }],
       "examples": [":MARK:FREQ:POS1 100 MHZ"]
     },
     {
@@ -714,7 +714,7 @@
       "description": "Sets the position of Time marker 1 or 2. *RST: POS1=-0.4E-3, POS2=+0.4E-3.",
       "set": ":MARKer:TIME:POSition[1|2] <numeric>[S]",
       "query": ":MARKer:TIME:POSition[1|2]?",
-      "parameters": [{ "name": "position", "units": "S" }],
+      "parameters": [{ "name": "position", "units": ["S"] }],
       "examples": [":MARK:TIME:POS1 -0.4E-3"]
     },
     {
@@ -734,7 +734,7 @@
       "description": "Sets the position of TI marker 1 or 2. *RST: POS1=0.7E-3, POS2=1.3E-3.",
       "set": ":MARKer:TINTerval:POSition[1|2] <numeric>[S]",
       "query": ":MARKer:TINTerval:POSition[1|2]?",
-      "parameters": [{ "name": "position", "units": "S" }],
+      "parameters": [{ "name": "position", "units": ["S"] }],
       "examples": [":MARK:TINT:POS1 0.7E-3"]
     },
     {
@@ -819,7 +819,7 @@
       "description": "Sets the input event hysteresis as 0-100% for channel (1=A, 2=B). *RST=0.",
       "set": ":EVENt[1|2]:HYSTeresis:RELative <numeric>[PCT]",
       "query": ":EVENt[1|2]:HYSTeresis:RELative?",
-      "parameters": [{ "name": "hysteresis", "units": "PCT", "range": "0-100" }],
+      "parameters": [{ "name": "hysteresis", "units": ["PCT"], "range": "0-100" }],
       "examples": [":EVEN2:HYST:REL 30"]
     },
     {
@@ -829,7 +829,7 @@
       "description": "Sets the input event (trigger) level voltage for channel (1=A, 2=B). *RST=0 V.",
       "set": ":EVENt[1|2]:LEVel <numeric>[V]",
       "query": ":EVENt[1|2]:LEVel?",
-      "parameters": [{ "name": "level", "units": "V" }],
+      "parameters": [{ "name": "level", "units": ["V"] }],
       "examples": [":EVEN2:LEV 5"]
     },
     {
@@ -849,7 +849,7 @@
       "description": "Sampling interval at center frequency for ARM:SOURce AUTO. 1=A, 2=B, 3=C. *RST=5E-5.",
       "set": ":FREQuency:ARM:CFINterval[1|2|3] <numeric>[S]",
       "query": ":FREQuency:ARM:CFINterval[1|2|3]?",
-      "parameters": [{ "name": "interval", "units": "S" }],
+      "parameters": [{ "name": "interval", "units": ["S"] }],
       "examples": [":FREQ:ARM:CFIN 4.762E-6"]
     },
     {
@@ -887,7 +887,7 @@
       "description": "External arm level; applies when SOURce EXTernal, or SOURce LINK and frequency C selected. *RST=1.5 V.",
       "set": ":FREQuency:ARM:LEVel <numeric>[V]",
       "query": ":FREQuency:ARM:LEVel?",
-      "parameters": [{ "name": "level", "units": "V" }],
+      "parameters": [{ "name": "level", "units": ["V"] }],
       "examples": [":FREQ:ARM:LEV 0"]
     },
     {
@@ -925,7 +925,7 @@
       "description": "Time sampling interval (when SOURce TIMer). *RST=50.0E-6.",
       "set": ":FREQuency:ARM:TIMer <numeric>[S]",
       "query": ":FREQuency:ARM:TIMer?",
-      "parameters": [{ "name": "interval", "units": "S" }],
+      "parameters": [{ "name": "interval", "units": ["S"] }],
       "examples": [":FREQ:ARM:TIM 5E-3"]
     },
     {
@@ -943,7 +943,7 @@
       "description": "Sets the upper frequency range. 1=A, 2=B, 3=C. *RST: A=125 MHZ, B=70 MHZ, C=1.375 GHZ.",
       "set": ":FREQuency:RANGe[1|2|3]:UPPer <numeric>[HZ]",
       "query": ":FREQuency:RANGe[1|2|3]:UPPer?",
-      "parameters": [{ "name": "frequency", "units": "HZ" }],
+      "parameters": [{ "name": "frequency", "units": ["HZ"] }],
       "examples": [":FREQ:RANG 10 MHZ"]
     },
     {
@@ -973,7 +973,7 @@
       "description": "Sets the lower frequency range. 1=A, 2=B, 3=C. *RST: A=75 MHZ, B=30 MHZ, C=625 MHZ.",
       "set": ":FREQuency:RANGe[1|2|3]:LOWer <numeric>[HZ]",
       "query": ":FREQuency:RANGe[1|2|3]:LOWer?",
-      "parameters": [{ "name": "frequency", "units": "HZ" }],
+      "parameters": [{ "name": "frequency", "units": ["HZ"] }],
       "examples": [":FREQ:RANG:LOW 5 MHZ"]
     },
     {
@@ -1003,7 +1003,7 @@
       "description": "External arm level for Fast Histogram (SOURce EXTernal required). *RST=1.5 V.",
       "set": ":HISTogram:ARM:LEVel <numeric>[V]",
       "query": ":HISTogram:ARM:LEVel?",
-      "parameters": [{ "name": "level", "units": "V" }],
+      "parameters": [{ "name": "level", "units": ["V"] }],
       "examples": [":HIST:ARM:LEV 1.5"]
     },
     {
@@ -1075,7 +1075,7 @@
       "description": "Main timebase delay. *RST=0.",
       "set": ":SWEep:TIME:DELay <numeric>[S]",
       "query": ":SWEep:TIME:DELay?",
-      "parameters": [{ "name": "delay", "units": "S" }],
+      "parameters": [{ "name": "delay", "units": ["S"] }],
       "examples": [":SWE:TIME:DEL 5E-3"]
     },
     {
@@ -1105,7 +1105,7 @@
       "description": "Panorama timebase delay. *RST=0.",
       "set": ":SWEep:TIME:PANorama:DELay <numeric>[S]",
       "query": ":SWEep:TIME:PANorama:DELay?",
-      "parameters": [{ "name": "delay", "units": "S" }],
+      "parameters": [{ "name": "delay", "units": ["S"] }],
       "examples": [":SWE:TIME:PAN:DEL 2E-3"]
     },
     {
@@ -1125,7 +1125,7 @@
       "description": "Panorama timebase span. *RST=1E-3.",
       "set": ":SWEep:TIME:PANorama:SPAN <numeric>[S]",
       "query": ":SWEep:TIME:PANorama:SPAN?",
-      "parameters": [{ "name": "span", "units": "S" }],
+      "parameters": [{ "name": "span", "units": ["S"] }],
       "examples": [":SWE:TIME:PAN:SPAN 1E-3"]
     },
     {
@@ -1155,7 +1155,7 @@
       "description": "Main timebase span. *RST=1E-3.",
       "set": ":SWEep:TIME:SPAN <numeric>[S]",
       "query": ":SWEep:TIME:SPAN?",
-      "parameters": [{ "name": "span", "units": "S" }],
+      "parameters": [{ "name": "span", "units": ["S"] }],
       "examples": [":SWE:TIME:SPAN 2E-1"]
     },
     {
@@ -1183,7 +1183,7 @@
       "description": "External arm level (SOURce EXTernal required). *RST=1.5 V.",
       "set": ":TINTerval:ARM:LEVel <numeric>[V]",
       "query": ":TINTerval:ARM:LEVel?",
-      "parameters": [{ "name": "level", "units": "V" }],
+      "parameters": [{ "name": "level", "units": ["V"] }],
       "examples": [":TINT:ARM:LEV 0"]
     },
     {
@@ -1213,7 +1213,7 @@
       "description": "Time sampling interval (when SOURce TIMer). *RST=10E-6.",
       "set": ":TINTerval:ARM:TIMer <numeric>[S]",
       "query": ":TINTerval:ARM:TIMer?",
-      "parameters": [{ "name": "interval", "units": "S" }],
+      "parameters": [{ "name": "interval", "units": ["S"] }],
       "examples": [":TINT:ARM:TIM 500 MS"]
     },
     {
@@ -1223,7 +1223,7 @@
       "description": "Sets the upper time-interval range. *RST=1.4E-3.",
       "set": ":TINTerval:RANGe:UPPer <numeric>[S]",
       "query": ":TINTerval:RANGe:UPPer?",
-      "parameters": [{ "name": "interval", "units": "S" }],
+      "parameters": [{ "name": "interval", "units": ["S"] }],
       "examples": [":TINT:RANG 3E-3"]
     },
     {
@@ -1253,7 +1253,7 @@
       "description": "Sets the lower time-interval range. *RST=600E-9.",
       "set": ":TINTerval:RANGe:LOWer <numeric>[S]",
       "query": ":TINTerval:RANGe:LOWer?",
-      "parameters": [{ "name": "interval", "units": "S" }],
+      "parameters": [{ "name": "interval", "units": ["S"] }],
       "examples": [":TINT:RANG:LOW 600E-9"]
     },
     {
@@ -1522,7 +1522,7 @@
       "description": "Frequency-trigger value. 1=frequency A, 2=frequency B, 3=frequency C. Applies when SOURce LINK and measuring frequency. *RST: A=100 MHZ, B=50 MHZ, C=1 GHZ.",
       "set": ":TRIGger:FREQuency:LEVel[1|2|3] <numeric>[HZ]",
       "query": ":TRIGger:FREQuency:LEVel[1|2|3]?",
-      "parameters": [{ "name": "frequency", "units": "HZ" }],
+      "parameters": [{ "name": "frequency", "units": ["HZ"] }],
       "examples": [":TRIG:FREQ:LEV 5 MHZ"]
     },
     {
@@ -1562,7 +1562,7 @@
       "description": "External-trigger level (SOURce EXTernal). *RST=1.5 V.",
       "set": ":TRIGger:LEVel <numeric>[V]",
       "query": ":TRIGger:LEVel?",
-      "parameters": [{ "name": "level", "units": "V" }],
+      "parameters": [{ "name": "level", "units": ["V"] }],
       "examples": [":TRIG:LEV 1.5"]
     },
     {
@@ -1600,7 +1600,7 @@
       "description": "Time-interval-trigger value. Applies when SOURce LINK and measuring TI. *RST=1E-3.",
       "set": ":TRIGger:TINTerval:LEVel <numeric>[S]",
       "query": ":TRIGger:TINTerval:LEVel?",
-      "parameters": [{ "name": "interval", "units": "S" }],
+      "parameters": [{ "name": "interval", "units": ["S"] }],
       "examples": [":TRIG:TINT:LEV 1E-3"]
     },
     {

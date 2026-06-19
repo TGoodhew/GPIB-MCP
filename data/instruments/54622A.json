@@ -411,7 +411,7 @@
       "set": ":ACQuire:COMPlete <complete>",
       "query": ":ACQuire:COMPlete?",
       "parameters": [
-        { "name": "complete", "units": "%", "range": "100 (integer, NR1)" }
+        { "name": "complete", "units": ["%"], "range": "100 (integer, NR1)" }
       ],
       "examples": [":ACQuire:COMPlete 100", ":ACQuire:COMPlete?"]
     },
@@ -457,7 +457,7 @@
       "description": "Returns the current acquisition sample rate in samples per second.",
       "query": ":ACQuire:SRATe?",
       "parameters": [
-        { "name": "sample rate", "units": "samples/s", "range": "NR3 format" }
+        { "name": "sample rate", "units": ["samples/s"], "range": "NR3 format" }
       ],
       "examples": [":ACQuire:SRATe?"]
     },
@@ -599,7 +599,7 @@
       "query": ":CHANnel<n>:OFFSet?",
       "parameters": [
         { "name": "n", "range": "1-2 or 1-4 (NR1)" },
-        { "name": "offset", "units": "V", "range": "vertical offset value (NR3)" },
+        { "name": "offset", "units": ["V"], "range": "vertical offset value (NR3)" },
         { "name": "suffix", "range": "{V | mV}" }
       ],
       "examples": [":CHANnel1:OFFSet 0.5V", ":CHANnel1:OFFSet?"]
@@ -626,7 +626,7 @@
       "query": ":CHANnel<n>:PROBe:SKEW?",
       "parameters": [
         { "name": "n", "range": "1-2 (NR1), 54640-series only" },
-        { "name": "skew_value", "units": "s", "range": "-100 ns to +100 ns (NR3)" }
+        { "name": "skew_value", "units": ["s"], "range": "-100 ns to +100 ns (NR3)" }
       ],
       "examples": [":CHANnel1:PROBe:SKEW 10E-9", ":CHANnel1:PROBe:SKEW?"]
     },
@@ -652,7 +652,7 @@
       "query": ":CHANnel<n>:RANGe?",
       "parameters": [
         { "name": "n", "range": "1-2 or 1-4 (NR1)" },
-        { "name": "range", "units": "V", "range": "vertical full-scale range value (NR3)" },
+        { "name": "range", "units": ["V"], "range": "vertical full-scale range value (NR3)" },
         { "name": "suffix", "range": "{V | mV}" }
       ],
       "examples": [":CHANnel1:RANGe 8V", ":CHANnel1:RANGe?"]
@@ -666,7 +666,7 @@
       "query": ":CHANnel<n>:SCALe?",
       "parameters": [
         { "name": "n", "range": "1-2 or 1-4 (NR1)" },
-        { "name": "scale", "units": "V/div", "range": "vertical units per division (NR3)" },
+        { "name": "scale", "units": ["V/div"], "range": "vertical units per division (NR3)" },
         { "name": "suffix", "range": "{V | mV}" }
       ],
       "examples": [":CHANnel1:SCALe 1V", ":CHANnel1:SCALe?"]
@@ -732,7 +732,7 @@
       "query": ":DIGital<n>:THReshold?",
       "parameters": [
         { "name": "n", "range": "0-15 (NR1)" },
-        { "name": "value", "units": "V", "range": "{CMOS | ECL | TTL | user value -8.00 to +8.00 (NR3)}" },
+        { "name": "value", "units": ["V"], "range": "{CMOS | ECL | TTL | user value -8.00 to +8.00 (NR3)}" },
         { "name": "suffix", "range": "{V | mV | uV}" }
       ],
       "examples": [":DIGital0:THReshold TTL", ":DIGital0:THReshold 1.5V"]
@@ -875,7 +875,7 @@
       "set": ":EXTernal:RANGe <range>[<suffix>]",
       "query": ":EXTernal:RANGe?",
       "parameters": [
-        { "name": "range", "units": "V", "range": "vertical full-scale range value (NR3)" },
+        { "name": "range", "units": ["V"], "range": "vertical full-scale range value (NR3)" },
         { "name": "suffix", "range": "{V | mV}" }
       ],
       "examples": [":EXTernal:RANGe 8V", ":EXTernal:RANGe?"]
@@ -900,7 +900,7 @@
       "set": ":FUNCtion:CENTer <frequency>",
       "query": ":FUNCtion:CENTer?",
       "parameters": [
-        { "name": "frequency", "units": "Hz", "range": "0 Hz to 25.00 GHz (NR3)" }
+        { "name": "frequency", "units": ["Hz"], "range": "0 Hz to 25.00 GHz (NR3)" }
       ],
       "examples": [":FUNCtion:CENTer 1E6", ":FUNCtion:CENTer?"]
     },
@@ -960,7 +960,7 @@
       "set": ":FUNCtion:REFerence <level>",
       "query": ":FUNCtion:REFerence?",
       "parameters": [
-        { "name": "level", "units": "dBV", "range": "-400.0 dBV to +400.0 dBV (NR3)" }
+        { "name": "level", "units": ["dBV"], "range": "-400.0 dBV to +400.0 dBV (NR3)" }
       ],
       "examples": [":FUNCtion:REFerence 0", ":FUNCtion:REFerence?"]
     },
@@ -997,7 +997,7 @@
       "set": ":FUNCtion:SPAN <span>",
       "query": ":FUNCtion:SPAN?",
       "parameters": [
-        { "name": "span", "units": "Hz", "range": "1 Hz to 100 GHz (NR3)" }
+        { "name": "span", "units": ["Hz"], "range": "1 Hz to 100 GHz (NR3)" }
       ],
       "examples": [":FUNCtion:SPAN 1E6", ":FUNCtion:SPAN?"]
     },
@@ -1200,7 +1200,7 @@
       "query": ":MEASure:COUNter? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n>} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "Hz", "range": "counter frequency (NR3)" }
+        { "name": "return_value", "units": ["Hz"], "range": "counter frequency (NR3)" }
       ],
       "examples": [":MEASure:COUNter CHANnel1", ":MEASure:COUNter? CHANnel1"]
     },
@@ -1226,7 +1226,7 @@
       "query": ":MEASure:DELay? [<source1>][,<source2>]",
       "parameters": [
         { "name": "source1,2", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "delay time in seconds (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "delay time in seconds (NR3)" }
       ],
       "examples": [":MEASure:DELay? CHANnel1,CHANnel2"]
     },
@@ -1252,7 +1252,7 @@
       "query": ":MEASure:FALLtime? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "time between lower and upper thresholds (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "time between lower and upper thresholds (NR3)" }
       ],
       "examples": [":MEASure:FALLtime? CHANnel1"]
     },
@@ -1265,7 +1265,7 @@
       "query": ":MEASure:FREQuency? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "Hz", "range": "frequency (NR3)" }
+        { "name": "return_value", "units": ["Hz"], "range": "frequency (NR3)" }
       ],
       "examples": [":MEASure:FREQuency? CHANnel1"]
     },
@@ -1278,7 +1278,7 @@
       "query": ":MEASure:NWIDth? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "negative pulse width (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "negative pulse width (NR3)" }
       ],
       "examples": [":MEASure:NWIDth? CHANnel1"]
     },
@@ -1291,7 +1291,7 @@
       "query": ":MEASure:OVERshoot? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "%", "range": "percent overshoot (NR3)" }
+        { "name": "return_value", "units": ["%"], "range": "percent overshoot (NR3)" }
       ],
       "examples": [":MEASure:OVERshoot? CHANnel1"]
     },
@@ -1304,7 +1304,7 @@
       "query": ":MEASure:PERiod? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "waveform period (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "waveform period (NR3)" }
       ],
       "examples": [":MEASure:PERiod? CHANnel1"]
     },
@@ -1317,7 +1317,7 @@
       "query": ":MEASure:PHASe? [<source1>][,<source2>]",
       "parameters": [
         { "name": "source1,2", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "degrees", "range": "phase angle (NR3)" }
+        { "name": "return_value", "units": ["degrees"], "range": "phase angle (NR3)" }
       ],
       "examples": [":MEASure:PHASe? CHANnel1,CHANnel2"]
     },
@@ -1330,7 +1330,7 @@
       "query": ":MEASure:PREShoot? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "%", "range": "percent preshoot (NR3)" }
+        { "name": "return_value", "units": ["%"], "range": "percent preshoot (NR3)" }
       ],
       "examples": [":MEASure:PREShoot? CHANnel1"]
     },
@@ -1343,7 +1343,7 @@
       "query": ":MEASure:PWIDth? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "positive pulse width (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "positive pulse width (NR3)" }
       ],
       "examples": [":MEASure:PWIDth? CHANnel1"]
     },
@@ -1356,7 +1356,7 @@
       "query": ":MEASure:RISEtime? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "rise time (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "rise time (NR3)" }
       ],
       "examples": [":MEASure:RISEtime? CHANnel1"]
     },
@@ -1396,7 +1396,7 @@
         { "name": "slope", "range": "direction of the waveform" },
         { "name": "occurrence", "range": "the transition to be reported" },
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "time of the specified transition (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "time of the specified transition (NR3)" }
       ],
       "examples": [":MEASure:TEDGe? +1,CHANnel1"]
     },
@@ -1407,11 +1407,11 @@
       "description": "Returns the time at which the waveform crosses a specified voltage value.",
       "query": ":MEASure:TVALue? <value>,[<slope>]<occurrence>[,<source>]",
       "parameters": [
-        { "name": "value", "units": "V", "range": "voltage level the waveform must cross" },
+        { "name": "value", "units": ["V"], "range": "voltage level the waveform must cross" },
         { "name": "slope", "range": "direction of the waveform when <value> is crossed" },
         { "name": "occurrence", "range": "transition reported" },
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "s", "range": "time of specified voltage crossing (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "time of specified voltage crossing (NR3)" }
       ],
       "examples": [":MEASure:TVALue? 0.0,+1,CHANnel1"]
     },
@@ -1424,7 +1424,7 @@
       "query": ":MEASure:VAMPlitude? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "amplitude (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "amplitude (NR3)" }
       ],
       "examples": [":MEASure:VAMPlitude? CHANnel1"]
     },
@@ -1437,7 +1437,7 @@
       "query": ":MEASure:VAVerage? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "calculated average voltage (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "calculated average voltage (NR3)" }
       ],
       "examples": [":MEASure:VAVerage? CHANnel1"]
     },
@@ -1450,7 +1450,7 @@
       "query": ":MEASure:VBASe? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "base_voltage", "units": "V", "range": "voltage at the base of the waveform (NR3)" }
+        { "name": "base_voltage", "units": ["V"], "range": "voltage at the base of the waveform (NR3)" }
       ],
       "examples": [":MEASure:VBASe? CHANnel1"]
     },
@@ -1463,7 +1463,7 @@
       "query": ":MEASure:VMAX? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "maximum voltage (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "maximum voltage (NR3)" }
       ],
       "examples": [":MEASure:VMAX? CHANnel1"]
     },
@@ -1476,7 +1476,7 @@
       "query": ":MEASure:VMIN? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "minimum voltage (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "minimum voltage (NR3)" }
       ],
       "examples": [":MEASure:VMIN? CHANnel1"]
     },
@@ -1489,7 +1489,7 @@
       "query": ":MEASure:VPP? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "peak-to-peak voltage (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "peak-to-peak voltage (NR3)" }
       ],
       "examples": [":MEASure:VPP? CHANnel1"]
     },
@@ -1502,7 +1502,7 @@
       "query": ":MEASure:VRMS? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "calculated dc RMS voltage (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "calculated dc RMS voltage (NR3)" }
       ],
       "examples": [":MEASure:VRMS? CHANnel1"]
     },
@@ -1513,9 +1513,9 @@
       "description": "Returns the voltage at a specified time from the trigger.",
       "query": ":MEASure:VTIMe? <vtime>[,<source>]",
       "parameters": [
-        { "name": "vtime", "units": "s", "range": "displayed time from trigger (NR3)" },
+        { "name": "vtime", "units": ["s"], "range": "displayed time from trigger (NR3)" },
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "voltage at the specified time (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "voltage at the specified time (NR3)" }
       ],
       "examples": [":MEASure:VTIMe? 1E-6,CHANnel1"]
     },
@@ -1528,7 +1528,7 @@
       "query": ":MEASure:VTOP? [<source>]",
       "parameters": [
         { "name": "source", "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4" },
-        { "name": "return_value", "units": "V", "range": "voltage at the top of the waveform (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "voltage at the top of the waveform (NR3)" }
       ],
       "examples": [":MEASure:VTOP? CHANnel1"]
     },
@@ -1580,7 +1580,7 @@
       "query": ":POD<n>:THReshold?",
       "parameters": [
         { "name": "n", "range": "1-2 (NR1)" },
-        { "name": "type", "units": "V", "range": "{CMOS | ECL | TTL | <user defined value> (NR3)}" },
+        { "name": "type", "units": ["V"], "range": "{CMOS | ECL | TTL | <user defined value> (NR3)}" },
         { "name": "suffix", "range": "{V | mV | uV}" }
       ],
       "examples": [":POD1:THReshold TTL", ":POD1:THReshold 1.5V"]
@@ -1676,7 +1676,7 @@
       "set": ":TIMebase:POSition <pos>",
       "query": ":TIMebase:POSition?",
       "parameters": [
-        { "name": "pos", "units": "s", "range": "time from trigger event to display reference point (NR3)" }
+        { "name": "pos", "units": ["s"], "range": "time from trigger event to display reference point (NR3)" }
       ],
       "examples": [":TIMebase:POSition 0", ":TIMebase:POSition?"]
     },
@@ -1688,7 +1688,7 @@
       "set": ":TIMebase:RANGe <range_value>",
       "query": ":TIMebase:RANGe?",
       "parameters": [
-        { "name": "range_value", "units": "s", "range": "50 ns to 500 s (54620-series); 10 ns to 500 s (54640-series) (NR3)" }
+        { "name": "range_value", "units": ["s"], "range": "50 ns to 500 s (54620-series); 10 ns to 500 s (54640-series) (NR3)" }
       ],
       "examples": [":TIMebase:RANGe 1E-3", ":TIMebase:RANGe?"]
     },
@@ -1712,7 +1712,7 @@
       "set": ":TIMebase:SCALe <scale_value>",
       "query": ":TIMebase:SCALe?",
       "parameters": [
-        { "name": "scale_value", "units": "s/div", "range": "scale value in seconds (NR3)" }
+        { "name": "scale_value", "units": ["s/div"], "range": "scale value in seconds (NR3)" }
       ],
       "examples": [":TIMebase:SCALe 1E-4", ":TIMebase:SCALe?"]
     },
@@ -1724,7 +1724,7 @@
       "set": ":TIMebase:WINDow:POSition <pos>",
       "query": ":TIMebase:WINDow:POSition?",
       "parameters": [
-        { "name": "pos", "units": "s", "range": "time from trigger event to delayed view reference point (NR3)" }
+        { "name": "pos", "units": ["s"], "range": "time from trigger event to delayed view reference point (NR3)" }
       ],
       "examples": [":TIMebase:WINDow:POSition 0", ":TIMebase:WINDow:POSition?"]
     },
@@ -1736,7 +1736,7 @@
       "set": ":TIMebase:WINDow:RANGe <range_value>",
       "query": ":TIMebase:WINDow:RANGe?",
       "parameters": [
-        { "name": "range_value", "units": "s", "range": "range value in seconds for the delayed window (NR3)" }
+        { "name": "range_value", "units": ["s"], "range": "range value in seconds for the delayed window (NR3)" }
       ],
       "examples": [":TIMebase:WINDow:RANGe 1E-4", ":TIMebase:WINDow:RANGe?"]
     },
@@ -1748,7 +1748,7 @@
       "set": ":TIMebase:WINDow:SCALe <scale_value>",
       "query": ":TIMebase:WINDow:SCALe?",
       "parameters": [
-        { "name": "scale_value", "units": "s/div", "range": "scale value in seconds for the delayed window (NR3)" }
+        { "name": "scale_value", "units": ["s/div"], "range": "scale value in seconds for the delayed window (NR3)" }
       ],
       "examples": [":TIMebase:WINDow:SCALe 1E-5", ":TIMebase:WINDow:SCALe?"]
     },
@@ -1822,7 +1822,7 @@
       "set": ":TRIGger:CAN:SAMPlepoint <value>",
       "query": ":TRIGger:CAN:SAMPlepoint?",
       "parameters": [
-        { "name": "value", "units": "%", "range": "{60 | 62.5 | 68 | 70 | 75 | 87.5} (NR3)" }
+        { "name": "value", "units": ["%"], "range": "{60 | 62.5 | 68 | 70 | 75 | 87.5} (NR3)" }
       ],
       "examples": [":TRIGger:CAN:SAMPlepoint 75"]
     },
@@ -1834,7 +1834,7 @@
       "set": ":TRIGger:CAN:SIGNal:BAUDrate <baudrate>",
       "query": ":TRIGger:CAN:SIGNal:BAUDrate?",
       "parameters": [
-        { "name": "baudrate", "units": "bit/s", "range": "{10000 | 20000 | 33300 | 50000 | 62500 | 83300 | 100000 | 125000 | 250000 | 500000 | 800000 | 1000000}" }
+        { "name": "baudrate", "units": ["bit/s"], "range": "{10000 | 20000 | 33300 | 50000 | 62500 | 83300 | 100000 | 125000 | 250000 | 500000 | 800000 | 1000000}" }
       ],
       "examples": [":TRIGger:CAN:SIGNal:BAUDrate 500000"]
     },
@@ -1882,7 +1882,7 @@
       "set": ":TRIGger:DURation:GREaterthan <greater than time>[suffix]",
       "query": ":TRIGger:DURation:GREaterthan?",
       "parameters": [
-        { "name": "greater than time", "units": "s", "range": "5 ns to 10 s (NR3)" },
+        { "name": "greater than time", "units": ["s"], "range": "5 ns to 10 s (NR3)" },
         { "name": "suffix", "range": "{s | ms | us | ns | ps}" }
       ],
       "examples": [":TRIGger:DURation:GREaterthan 100ns"]
@@ -1895,7 +1895,7 @@
       "set": ":TRIGger:DURation:LESSthan <less than time>[suffix]",
       "query": ":TRIGger:DURation:LESSthan?",
       "parameters": [
-        { "name": "less than time", "units": "s", "range": "5 ns to 10 s (NR3)" },
+        { "name": "less than time", "units": ["s"], "range": "5 ns to 10 s (NR3)" },
         { "name": "suffix", "range": "{s | ms | us | ns | ps}" }
       ],
       "examples": [":TRIGger:DURation:LESSthan 1us"]
@@ -1933,8 +1933,8 @@
       "set": ":TRIGger:DURation:RANGe <greater than time>[suffix],<less than time>[suffix]",
       "query": ":TRIGger:DURation:RANGe?",
       "parameters": [
-        { "name": "greater than time", "units": "s", "range": "min duration 10 ns to 9.99 s (NR3)" },
-        { "name": "less than time", "units": "s", "range": "max duration 15 ns to 10 s (NR3)" },
+        { "name": "greater than time", "units": ["s"], "range": "min duration 10 ns to 9.99 s (NR3)" },
+        { "name": "less than time", "units": ["s"], "range": "max duration 15 ns to 10 s (NR3)" },
         { "name": "suffix", "range": "{s | ms | us | ns | ps}" }
       ],
       "examples": [":TRIGger:DURation:RANGe 100ns,1us"]
@@ -1959,7 +1959,7 @@
       "set": ":TRIGger:[EDGE:]LEVel <level>[,<source>]",
       "query": ":TRIGger:[EDGE:]LEVel? [<source>]",
       "parameters": [
-        { "name": "level", "units": "V", "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 8 V" },
+        { "name": "level", "units": ["V"], "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 8 V" },
         { "name": "source", "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | EXTernal} for 546xxD; <n> ::= 1-2 or 1-4" }
       ],
       "examples": [":TRIGger:EDGE:LEVel 1.0,CHANnel1", ":TRIGger:EDGE:LEVel? CHANnel1"]
@@ -2008,7 +2008,7 @@
       "set": ":TRIGger:GLITch:GREaterthan <greater than time>[suffix]",
       "query": ":TRIGger:GLITch:GREaterthan?",
       "parameters": [
-        { "name": "greater than time", "units": "s", "range": "5 ns to 10 s (NR3)" },
+        { "name": "greater than time", "units": ["s"], "range": "5 ns to 10 s (NR3)" },
         { "name": "suffix", "range": "{s | ms | us | ns | ps}" }
       ],
       "examples": [":TRIGger:GLITch:GREaterthan 100ns"]
@@ -2021,7 +2021,7 @@
       "set": ":TRIGger:GLITch:LESSthan <less than time>[suffix]",
       "query": ":TRIGger:GLITch:LESSthan?",
       "parameters": [
-        { "name": "less than time", "units": "s", "range": "5 ns to 10 s (NR3)" },
+        { "name": "less than time", "units": ["s"], "range": "5 ns to 10 s (NR3)" },
         { "name": "suffix", "range": "{s | ms | us | ns | ps}" }
       ],
       "examples": [":TRIGger:GLITch:LESSthan 1us"]
@@ -2034,7 +2034,7 @@
       "set": ":TRIGger:GLITch:LEVel <level>[<source>]",
       "query": ":TRIGger:GLITch:LEVel?",
       "parameters": [
-        { "name": "level", "units": "V", "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 6 V" },
+        { "name": "level", "units": ["V"], "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 6 V" },
         { "name": "source", "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4" }
       ],
       "examples": [":TRIGger:GLITch:LEVel 1.0,CHANnel1"]
@@ -2071,8 +2071,8 @@
       "set": ":TRIGger:GLITch:RANGe <greater than time>[suffix],<less than time>[suffix]",
       "query": ":TRIGger:GLITch:RANGe?",
       "parameters": [
-        { "name": "greater than time", "units": "s", "range": "start time 10 ns to 9.99 s (NR3)" },
-        { "name": "less than time", "units": "s", "range": "stop time 15 ns to 10 s (NR3)" },
+        { "name": "greater than time", "units": ["s"], "range": "start time 10 ns to 9.99 s (NR3)" },
+        { "name": "less than time", "units": ["s"], "range": "stop time 15 ns to 10 s (NR3)" },
         { "name": "suffix", "range": "{s | ms | us | ns | ps}" }
       ],
       "examples": [":TRIGger:GLITch:RANGe 100ns,1us"]
@@ -2109,7 +2109,7 @@
       "set": ":TRIGger:HOLDoff <holdoff_time>",
       "query": ":TRIGger:HOLDoff?",
       "parameters": [
-        { "name": "holdoff_time", "units": "s", "range": "60 ns to 10 s (NR3)" }
+        { "name": "holdoff_time", "units": ["s"], "range": "60 ns to 10 s (NR3)" }
       ],
       "examples": [":TRIGger:HOLDoff 1E-6", ":TRIGger:HOLDoff?"]
     },
@@ -2193,7 +2193,7 @@
       "set": ":TRIGger:LIN:SIGNal:BAUDrate <baudrate>",
       "query": ":TRIGger:LIN:SIGNal:BAUDrate?",
       "parameters": [
-        { "name": "baudrate", "units": "bit/s", "range": "{2400 | 9600 | 19200}" }
+        { "name": "baudrate", "units": ["bit/s"], "range": "{2400 | 9600 | 19200}" }
       ],
       "examples": [":TRIGger:LIN:SIGNal:BAUDrate 9600"]
     },
@@ -2346,7 +2346,7 @@
       "set": ":TRIGger:SEQuence:TIMer <time_value>",
       "query": ":TRIGger:SEQuence:TIMer?",
       "parameters": [
-        { "name": "time_value", "units": "s", "range": "100 ns to 10 s (NR3)" }
+        { "name": "time_value", "units": ["s"], "range": "100 ns to 10 s (NR3)" }
       ],
       "examples": [":TRIGger:SEQuence:TIMer 1E-3"]
     },
@@ -2384,7 +2384,7 @@
       "set": ":TRIGger:SPI:CLOCk:TIMeout <time_value>",
       "query": ":TRIGger:SPI:CLOCk:TIMeout?",
       "parameters": [
-        { "name": "time_value", "units": "s", "range": "time in seconds (NR1)" }
+        { "name": "time_value", "units": ["s"], "range": "time in seconds (NR1)" }
       ],
       "examples": [":TRIGger:SPI:CLOCk:TIMeout 1E-6"]
     },
@@ -2716,7 +2716,7 @@
       "description": "Returns the x-increment (time between data points) from the current preamble.",
       "query": ":WAVeform:XINCrement?",
       "parameters": [
-        { "name": "return_value", "units": "s", "range": "x-increment (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "x-increment (NR3)" }
       ],
       "examples": [":WAVeform:XINCrement?"]
     },
@@ -2727,7 +2727,7 @@
       "description": "Returns the x-origin (time of the first data point) from the current preamble.",
       "query": ":WAVeform:XORigin?",
       "parameters": [
-        { "name": "return_value", "units": "s", "range": "x-origin value (NR3)" }
+        { "name": "return_value", "units": ["s"], "range": "x-origin value (NR3)" }
       ],
       "examples": [":WAVeform:XORigin?"]
     },
@@ -2749,7 +2749,7 @@
       "description": "Returns the y-increment (voltage per code level) from the current preamble.",
       "query": ":WAVeform:YINCrement?",
       "parameters": [
-        { "name": "return_value", "units": "V", "range": "y-increment value (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "y-increment value (NR3)" }
       ],
       "examples": [":WAVeform:YINCrement?"]
     },
@@ -2760,7 +2760,7 @@
       "description": "Returns the y-origin (voltage at y-reference) from the current preamble.",
       "query": ":WAVeform:YORigin?",
       "parameters": [
-        { "name": "return_value", "units": "V", "range": "y-origin value (NR3)" }
+        { "name": "return_value", "units": ["V"], "range": "y-origin value (NR3)" }
       ],
       "examples": [":WAVeform:YORigin?"]
     },

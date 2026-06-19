@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
@@ -129,6 +131,50 @@ namespace GpibMcp.Tests
             store.Set("GPIB0::18::INSTR", "8563E");
             var text = Tool("list_assignments", db, store, visa).Invoke(new JObject());
             Assert.Contains("GPIB0::18::INSTR -> 8563E", text);
+        }
+
+        [Fact]
+        public void DbSave_ConfirmFlow_WritesFileAndUpsertsLiveDatabase()
+        {
+            // Proves user-extensibility: instrument_db_save writes a definition to the user
+            // database directory and makes it immediately usable, only when confirm=true.
+            string tempDir = Path.Combine(Path.GetTempPath(), "gpibdb_save_" + Path.GetRandomFileName());
+            string prevEnv = Environment.GetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB");
+            try
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", tempDir);
+                var db = InstrumentDatabase.Empty();
+                var store = AssignmentStore.InMemory();
+                var visa = new FakeInstrumentManager();
+                var save = Tool("instrument_db_save", db, store, visa);
+
+                var def = new JObject
+                {
+                    ["model"] = "TESTGEN",
+                    ["category"] = "Signal Generator",
+                    ["identity"] = new JObject { ["command"] = "*IDN?", ["matchRegex"] = "TESTGEN" },
+                    ["commands"] = new JArray { new JObject { ["name"] = "set_freq", ["mnemonic"] = "FREQ" } }
+                };
+                string file = Path.Combine(tempDir, "TESTGEN.json");
+
+                // Without confirm: proposed only — nothing written, not in the live DB.
+                var proposed = save.Invoke(new JObject { ["definition"] = def });
+                Assert.Contains("PROPOSED", proposed);
+                Assert.False(File.Exists(file));
+                Assert.False(db.TryGet("TESTGEN", out _));
+
+                // With confirm: file written AND the live DB now resolves the model.
+                var saved = save.Invoke(new JObject { ["definition"] = def, ["confirm"] = true });
+                Assert.Contains("Saved model", saved);
+                Assert.True(File.Exists(file));
+                Assert.True(db.TryGet("TESTGEN", out var d));
+                Assert.Equal("Signal Generator", d.Category);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", prevEnv);
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
         }
 
         [Fact]

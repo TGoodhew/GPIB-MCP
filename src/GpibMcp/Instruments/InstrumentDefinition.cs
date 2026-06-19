@@ -16,7 +16,9 @@ namespace GpibMcp.Instruments
         [JsonProperty("source")] public string Source { get; set; }
 
         /// <summary>Alternate model names this definition also answers to (e.g. "8563EC").</summary>
-        [JsonProperty("aliases")] public List<string> Aliases { get; set; }
+        [JsonProperty("aliases")]
+        [JsonConverter(typeof(FlexibleStringListConverter))]
+        public List<string> Aliases { get; set; }
 
         [JsonProperty("termination")] public TerminationSpec Termination { get; set; }
         [JsonProperty("identity")] public IdentitySpec Identity { get; set; }
@@ -57,7 +59,10 @@ namespace GpibMcp.Instruments
         [JsonProperty("query")] public string Query { get; set; }
 
         [JsonProperty("parameters")] public List<CommandParameter> Parameters { get; set; }
-        [JsonProperty("examples")] public List<string> Examples { get; set; }
+
+        [JsonProperty("examples")]
+        [JsonConverter(typeof(FlexibleStringListConverter))]
+        public List<string> Examples { get; set; }
     }
 
     /// <summary>A parameter accepted by a command.</summary>
@@ -65,7 +70,11 @@ namespace GpibMcp.Instruments
     {
         [JsonProperty("name")] public string Name { get; set; }
         [JsonProperty("description")] public string Description { get; set; }
-        [JsonProperty("units")] public List<string> Units { get; set; }
+
+        [JsonProperty("units")]
+        [JsonConverter(typeof(FlexibleStringListConverter))]
+        public List<string> Units { get; set; }
+
         [JsonProperty("range")] public string Range { get; set; }
     }
 }

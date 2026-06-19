@@ -80,7 +80,7 @@
       "description": "Set the display frequency multiplier (MU or MY) followed by the multiplier number and the XF terminator. All frequencies (except offset) are multiplied by this value for display.",
       "set": "MU<value>XF",
       "parameters": [
-        { "name": "multiplier", "units": "XF", "range": "1 to 99" }
+        { "name": "multiplier", "units": ["XF"], "range": "1 to 99" }
       ],
       "examples": ["MY2XF", "MU2XF"]
     },
@@ -189,7 +189,7 @@
       "description": "Select the FM peak-deviation range. D2=0.03 MHz, D3=0.1 MHz, D4=0.3 MHz, D5=1 MHz, D6=3 MHz, D7=10 MHz. Actual deviation is set by the amplitude of the external modulating signal at the FM IN connector.",
       "set": "D<n>",
       "parameters": [
-        { "name": "range", "units": "MHz", "range": "D2=0.03, D3=0.1, D4=0.3, D5=1, D6=3, D7=10 MHz" }
+        { "name": "range", "units": ["MHz"], "range": "D2=0.03, D3=0.1, D4=0.3, D5=1, D6=3, D7=10 MHz" }
       ],
       "examples": ["D3", "D7"]
     },
@@ -355,7 +355,7 @@
       "set": "DW<value>MS",
       "query": "DWOA",
       "parameters": [
-        { "name": "dwell", "units": "MS", "range": "1 to 255 ms per step" }
+        { "name": "dwell", "units": ["MS"], "range": "1 to 255 ms per step" }
       ],
       "examples": ["DW20MS"]
     },

@@ -20,9 +20,9 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W (per UNIT:POWer)", "range": "DEF | MIN | MAX | sensor range" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "expected_value", "units": ["dBm or W (per UNIT:POWer)"], "range": "DEF | MIN | MAX | sensor range" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["CONF:POW:AC 20DBM,2,(@1)", "CONF1?"]
     },
@@ -34,9 +34,9 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["CONF2:REL -50DBM,3,(@1)"]
     },
@@ -48,9 +48,9 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["CONF:POW:AC:DIFF 20DBM,2,(@1),(@2)"]
     },
@@ -62,9 +62,9 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["CONF:POW:AC:DIFF:REL 20DBM,2,(@1),(@2)"]
     },
@@ -76,9 +76,9 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "expected_value", "units": "dB or % (per UNIT:POWer:RATio)", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "expected_value", "units": ["dB or % (per UNIT:POWer:RATio)"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["CONF:POW:AC:RAT 20DBM,2,(@1),(@2)"]
     },
@@ -90,9 +90,9 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "expected_value", "units": "dB or %", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "expected_value", "units": ["dB or %"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["CONF:POW:AC:RAT:REL 20DBM,2,(@1),(@2)"]
     },
@@ -104,9 +104,9 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["FETC1?", "FETC:POW:AC? 20DBM,2,(@1)"]
     },
@@ -118,9 +118,9 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["FETC:POW:AC:REL?"]
     },
@@ -132,9 +132,9 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["FETC:POW:AC:DIFF? 20DBM,2,(@1),(@2)"]
     },
@@ -146,7 +146,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["FETC:POW:AC:DIFF:REL? 20DBM,2,(@1),(@2)"]
     },
@@ -158,7 +158,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["FETC:POW:AC:RAT? 20DBM,2,(@1),(@2)"]
     },
@@ -170,7 +170,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["FETC:POW:AC:RAT:REL? 20DBM,2,(@1),(@2)"]
     },
@@ -182,9 +182,9 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["READ1?", "READ:POW:AC? 20DBM,2,(@1)"]
     },
@@ -196,7 +196,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["READ:POW:AC:REL?"]
     },
@@ -208,7 +208,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["READ:POW:AC:DIFF? 20DBM,2,(@1),(@2)"]
     },
@@ -220,7 +220,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["READ:POW:AC:DIFF:REL? 20DBM,2,(@1),(@2)"]
     },
@@ -232,7 +232,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["READ:POW:AC:RAT? 20DBM,2,(@1),(@2)"]
     },
@@ -244,7 +244,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["READ:POW:AC:RAT:REL? 20DBM,2,(@1),(@2)"]
     },
@@ -256,9 +256,9 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "expected_value", "units": "dBm or W", "range": "DEF | MIN | MAX" },
-        { "name": "resolution", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" },
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "expected_value", "units": ["dBm or W"], "range": "DEF | MIN | MAX" },
+        { "name": "resolution", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" },
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["MEAS1?", "MEAS2:POW:AC? -70DBM,1,(@1)"]
     },
@@ -270,7 +270,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "channel list, e.g. (@1)" }
+        { "name": "source_list", "units": [""], "range": "channel list, e.g. (@1)" }
       ],
       "examples": ["MEAS1:REL? -50DBM,2,(@2)"]
     },
@@ -282,7 +282,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["MEAS:POW:AC:DIFF? 20DBM,2,(@1),(@2)"]
     },
@@ -294,7 +294,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["MEAS:POW:AC:DIFF:REL? 20DBM,2,(@1),(@2)"]
     },
@@ -306,7 +306,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["MEAS:POW:AC:RAT? 20DBM,2,(@1),(@2)"]
     },
@@ -318,7 +318,7 @@
       "set": false,
       "query": true,
       "parameters": [
-        { "name": "source_list", "units": "", "range": "two channels, e.g. (@1),(@2)" }
+        { "name": "source_list", "units": [""], "range": "two channels, e.g. (@1),(@2)" }
       ],
       "examples": ["MEAS:POW:AC:RAT:REL? 20DBM,2,(@1),(@2)"]
     },
@@ -330,7 +330,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dB", "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dB"], "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
       ],
       "examples": ["CALC1:GAIN 10", "CALC1:GAIN?"]
     },
@@ -342,7 +342,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["CALC1:GAIN:STAT ON", "CALC1:GAIN:STAT?"]
     },
@@ -354,7 +354,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+        { "name": "value", "units": [""], "range": "ON | OFF | 1 | 0 | ONCE" }
       ],
       "examples": ["CALC1:LIM:CLE:AUTO ONCE", "CALC1:LIM:CLE:AUTO?"]
     },
@@ -396,7 +396,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W or dB/% per measurement", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W or dB/% per measurement"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["CALC1:LIM:LOW -10DBM", "CALC1:LIM:LOW?"]
     },
@@ -408,7 +408,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["CALC1:LIM:STAT ON", "CALC1:LIM:STAT?"]
     },
@@ -420,7 +420,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W or dB/% per measurement", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W or dB/% per measurement"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["CALC1:LIM:UPP 2DBM", "CALC1:LIM:UPP?"]
     },
@@ -432,7 +432,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "math expression string, e.g. \"(SENS1)\", \"(SENS1/SENS2)\", \"(SENS1-SENS2)\"" }
+        { "name": "string", "units": [""], "range": "math expression string, e.g. \"(SENS1)\", \"(SENS1/SENS2)\", \"(SENS1-SENS2)\"" }
       ],
       "examples": ["CALC1:MATH \"(SENS1)\"", "CALC1:MATH?"]
     },
@@ -454,7 +454,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+        { "name": "value", "units": [""], "range": "ON | OFF | 1 | 0 | ONCE" }
       ],
       "examples": ["CALC1:REL:AUTO ONCE", "CALC1:REL:AUTO?"]
     },
@@ -466,7 +466,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["CALC1:REL:STAT ON", "CALC1:REL:STAT?"]
     },
@@ -488,7 +488,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+        { "name": "value", "units": [""], "range": "ON | OFF | 1 | 0 | ONCE" }
       ],
       "examples": ["CAL1:AUTO ONCE", "CAL1:AUTO?"]
     },
@@ -500,7 +500,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["CAL1:ECON:STAT ON", "CAL1:ECON:STAT?"]
     },
@@ -512,7 +512,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["CAL1:RCAL ON", "CAL1:RCAL?"]
     },
@@ -524,7 +524,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "PCT (%)", "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["PCT (%)"], "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
       ],
       "examples": ["CAL:RCF 98.7PCT", "CAL1:RCF?"]
     },
@@ -536,7 +536,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+        { "name": "value", "units": [""], "range": "ON | OFF | 1 | 0 | ONCE" }
       ],
       "examples": ["CAL1:ZERO:AUTO ONCE", "CAL1:ZERO:AUTO?"]
     },
@@ -548,7 +548,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "", "range": "0 to 1 | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": [""], "range": "0 to 1 | DEF | MIN | MAX" }
       ],
       "examples": ["DISP:CONT 0.5", "DISP:CONT?"]
     },
@@ -560,7 +560,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["DISP:ENAB OFF", "DISP:ENAB?"]
     },
@@ -572,7 +572,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "character_data", "units": "", "range": "DIGital | ANALog" }
+        { "name": "character_data", "units": [""], "range": "DIGital | ANALog" }
       ],
       "examples": ["DISP:WIND1:FORM DIG", "DISP:WIND1:FORM?"]
     },
@@ -584,7 +584,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["DISP:WIND1:MET:LOW -50DBM", "DISP:WIND1:MET:LOW?"]
     },
@@ -596,7 +596,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["DISP:WIND1:MET:UPP 20DBM", "DISP:WIND1:MET:UPP?"]
     },
@@ -608,7 +608,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "digits", "range": "1 to 4 | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["digits"], "range": "1 to 4 | DEF | MIN | MAX" }
       ],
       "examples": ["DISP:WIND1:RES 3", "DISP:WIND1:RES?"]
     },
@@ -630,7 +630,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["DISP:WIND1:STAT ON", "DISP:WIND1:STAT?"]
     },
@@ -642,7 +642,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "order", "units": "", "range": "NORMal | SWAPped" }
+        { "name": "order", "units": [""], "range": "NORMal | SWAPped" }
       ],
       "examples": ["FORM:BORD NORM", "FORM:BORD?"]
     },
@@ -654,7 +654,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "type", "units": "", "range": "ASCii | REAL" }
+        { "name": "type", "units": [""], "range": "ASCii | REAL" }
       ],
       "examples": ["FORM ASCII", "FORM?"]
     },
@@ -696,7 +696,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "string", "units": "", "range": "memory item name" }
+        { "name": "string", "units": [""], "range": "memory item name" }
       ],
       "examples": ["MEM:CLE \"SENSOR_A\""]
     },
@@ -768,8 +768,8 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "state name" },
-        { "name": "numeric_value", "units": "", "range": "register number" }
+        { "name": "string", "units": [""], "range": "state name" },
+        { "name": "numeric_value", "units": [""], "range": "register number" }
       ],
       "examples": ["MEM:STAT:DEF \"SETUP1\",1", "MEM:STAT:DEF? \"SETUP1\""]
     },
@@ -781,7 +781,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value list", "units": "Hz (kHz/MHz/GHz suffixes)", "range": "1 kHz to 999.999 GHz per point" }
+        { "name": "numeric_value list", "units": ["Hz (kHz/MHz/GHz suffixes)"], "range": "1 kHz to 999.999 GHz per point" }
       ],
       "examples": ["MEM:TABL:FREQ 50MHZ,1GHZ,2GHZ", "MEM:TABL:FREQ?"]
     },
@@ -803,7 +803,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value list", "units": "PCT (%)", "range": "1.0 to 150.0 PCT per point" }
+        { "name": "numeric_value list", "units": ["PCT (%)"], "range": "1.0 to 150.0 PCT per point" }
       ],
       "examples": ["MEM:TABL:GAIN 95.0,96.5,97.2", "MEM:TABL:GAIN?"]
     },
@@ -825,8 +825,8 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "old_name", "units": "", "range": "existing table name" },
-        { "name": "new_name", "units": "", "range": "new table name" }
+        { "name": "old_name", "units": [""], "range": "existing table name" },
+        { "name": "new_name", "units": [""], "range": "new table name" }
       ],
       "examples": ["MEM:TABL:MOVE \"TABLE1\",\"TABLE2\""]
     },
@@ -838,7 +838,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "table name" }
+        { "name": "string", "units": [""], "range": "table name" }
       ],
       "examples": ["MEM:TABL:SEL \"HP8481A\"", "MEM:TABL:SEL?"]
     },
@@ -850,7 +850,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["OUTP:REC1:LIM:LOW -50DBM", "OUTP:REC1:LIM:LOW?"]
     },
@@ -862,7 +862,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["OUTP:REC1:LIM:UPP 20DBM", "OUTP:REC1:LIM:UPP?"]
     },
@@ -874,7 +874,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["OUTP:REC1:STAT ON", "OUTP:REC1:STAT?"]
     },
@@ -886,7 +886,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["OUTP:ROSC ON", "OUTP:ROSC?"]
     },
@@ -898,7 +898,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "level", "units": "", "range": "HIGH | LOW" }
+        { "name": "level", "units": [""], "range": "HIGH | LOW" }
       ],
       "examples": ["OUTP:TTL1:ACT HIGH", "OUTP:TTL1:ACT?"]
     },
@@ -910,7 +910,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "feed source string" }
+        { "name": "string", "units": [""], "range": "feed source string" }
       ],
       "examples": ["OUTP:TTL1:FEED \"CALC1:LIM\"", "OUTP:TTL1:FEED?"]
     },
@@ -922,7 +922,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["OUTP:TTL1:STAT ON", "OUTP:TTL1:STAT?"]
     },
@@ -934,7 +934,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "readings", "range": "1 to 1024 | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["readings"], "range": "1 to 1024 | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:AVER:COUN 16", "SENS1:AVER:COUN?"]
     },
@@ -946,7 +946,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+        { "name": "value", "units": [""], "range": "ON | OFF | 1 | 0 | ONCE" }
       ],
       "examples": ["SENS1:AVER:COUN:AUTO ON", "SENS1:AVER:COUN:AUTO?"]
     },
@@ -958,7 +958,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:AVER:SDET ON", "SENS1:AVER:SDET?"]
     },
@@ -970,7 +970,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:AVER ON", "SENS1:AVER?"]
     },
@@ -982,7 +982,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "calibration table name" }
+        { "name": "string", "units": [""], "range": "calibration table name" }
       ],
       "examples": ["SENS1:CORR:CSET:SEL \"HP8481A\"", "SENS1:CORR:CSET:SEL?"]
     },
@@ -994,7 +994,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:CORR:CSET:STAT ON", "SENS1:CORR:CSET:STAT?"]
     },
@@ -1006,7 +1006,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "PCT (%)", "range": "0.001 to 99.999 PCT | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["PCT (%)"], "range": "0.001 to 99.999 PCT | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:CORR:DCYC 16PCT", "SENS1:CORR:DCYC?"]
     },
@@ -1018,7 +1018,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:CORR:DCYC:STAT ON", "SENS1:CORR:DCYC:STAT?"]
     },
@@ -1030,7 +1030,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "PCT (cal factor) or dB (gain)", "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["PCT (cal factor) or dB (gain)"], "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
       ],
       "examples": ["SENS:CORR:CFAC 97.5PCT", "SENS1:CORR:GAIN2?"]
     },
@@ -1042,7 +1042,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:CORR:GAIN2:STAT ON", "SENS1:CORR:GAIN2:STAT?"]
     },
@@ -1064,7 +1064,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dB", "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dB"], "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:CORR:LOSS2 10", "SENS1:CORR:LOSS2?"]
     },
@@ -1076,7 +1076,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:CORR:LOSS2:STAT ON", "SENS1:CORR:LOSS2:STAT?"]
     },
@@ -1088,7 +1088,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "Hz (kHz/MHz/GHz suffixes; default 50 MHz)", "range": "1 kHz to 999.999 GHz | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["Hz (kHz/MHz/GHz suffixes; default 50 MHz)"], "range": "1 kHz to 999.999 GHz | DEF | MIN | MAX" }
       ],
       "examples": ["FREQ 500kHz", "SENS1:FREQ?"]
     },
@@ -1100,7 +1100,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "value", "units": "", "range": "ON | OFF | 1 | 0 | ONCE" }
+        { "name": "value", "units": [""], "range": "ON | OFF | 1 | 0 | ONCE" }
       ],
       "examples": ["SENS1:LIM:CLE:AUTO ONCE", "SENS1:LIM:CLE:AUTO?"]
     },
@@ -1142,7 +1142,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:LIM:LOW -10DBM", "SENS1:LIM:LOW?"]
     },
@@ -1154,7 +1154,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:LIM:STAT ON", "SENS1:LIM:STAT?"]
     },
@@ -1166,7 +1166,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "dBm/W", "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["dBm/W"], "range": "-150.0 to 230.0 dBm | DEF | MIN | MAX" }
       ],
       "examples": ["SENS2:LIM:UPP:DATA -20DBM", "SENS1:LIM:UPP?"]
     },
@@ -1178,7 +1178,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "range index", "range": "0 (lower) | 1 (upper) | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["range index"], "range": "0 (lower) | 1 (upper) | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:POW:AC:RANG 1", "SENS1:POW:AC:RANG?"]
     },
@@ -1190,7 +1190,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["SENS1:POW:AC:RANG:AUTO ON", "SENS1:POW:AC:RANG:AUTO?"]
     },
@@ -1202,7 +1202,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "readings/s", "range": "20 | 40 | 200 | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": ["readings/s"], "range": "20 | 40 | 200 | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:SPE 200", "SENS1:SPE?"]
     },
@@ -1214,7 +1214,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "type", "units": "", "range": "ATYPe | DTYPe" }
+        { "name": "type", "units": [""], "range": "ATYPe | DTYPe" }
       ],
       "examples": ["SENS1:V2P ATYP", "SENS1:V2P?"]
     },
@@ -1226,7 +1226,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER?", "STAT:OPER:ENAB 256"]
     },
@@ -1238,7 +1238,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER:CAL?", "STAT:OPER:CAL:ENAB 3"]
     },
@@ -1250,7 +1250,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER:LLF?", "STAT:OPER:LLF:ENAB 3"]
     },
@@ -1262,7 +1262,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER:MEAS?", "STAT:OPER:MEAS:ENAB 3"]
     },
@@ -1274,7 +1274,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER:SENS?", "STAT:OPER:SENS:ENAB 3"]
     },
@@ -1286,7 +1286,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER:TRIG?", "STAT:OPER:TRIG:ENAB 3"]
     },
@@ -1298,7 +1298,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:OPER:ULF?", "STAT:OPER:ULF:ENAB 3"]
     },
@@ -1320,7 +1320,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:QUES?", "STAT:QUES:ENAB 8"]
     },
@@ -1332,7 +1332,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:QUES:CAL?", "STAT:QUES:CAL:ENAB 3"]
     },
@@ -1344,7 +1344,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ENABle/PTR/NTR mask", "units": "", "range": "0 to 32767" }
+        { "name": "ENABle/PTR/NTR mask", "units": [""], "range": "0 to 32767" }
       ],
       "examples": ["STAT:QUES:POW?", "STAT:QUES:POW:ENAB 3"]
     },
@@ -1356,7 +1356,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "", "range": "0 to 30" }
+        { "name": "numeric_value", "units": [""], "range": "0 to 30" }
       ],
       "examples": ["SYST:COMM:GPIB:ADDR 13", "SYST:COMM:GPIB:ADDR?"]
     },
@@ -1368,7 +1368,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "mode", "units": "", "range": "ON | OFF | IBFull" }
+        { "name": "mode", "units": [""], "range": "ON | OFF | IBFull" }
       ],
       "examples": ["SYST:COMM:SER:CONT:DTR IBF", "SYST:COMM:SER:CONT:DTR?"]
     },
@@ -1380,7 +1380,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "mode", "units": "", "range": "ON | OFF | IBFull" }
+        { "name": "mode", "units": [""], "range": "ON | OFF | IBFull" }
       ],
       "examples": ["SYST:COMM:SER:CONT:RTS IBF", "SYST:COMM:SER:CONT:RTS?"]
     },
@@ -1392,7 +1392,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "baud", "range": "standard rates, e.g. 1200..115200" }
+        { "name": "numeric_value", "units": ["baud"], "range": "standard rates, e.g. 1200..115200" }
       ],
       "examples": ["SYST:COMM:SER:BAUD 9600", "SYST:COMM:SER:BAUD?"]
     },
@@ -1404,7 +1404,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "bits", "range": "7 | 8" }
+        { "name": "numeric_value", "units": ["bits"], "range": "7 | 8" }
       ],
       "examples": ["SYST:COMM:SER:BITS 8", "SYST:COMM:SER:BITS?"]
     },
@@ -1416,7 +1416,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "pace", "units": "", "range": "XON | NONE" }
+        { "name": "pace", "units": [""], "range": "XON | NONE" }
       ],
       "examples": ["SYST:COMM:SER:PACE XON", "SYST:COMM:SER:PACE?"]
     },
@@ -1428,7 +1428,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "parity", "units": "", "range": "EVEN | ODD | ZERO | ONE | NONE" }
+        { "name": "parity", "units": [""], "range": "EVEN | ODD | ZERO | ONE | NONE" }
       ],
       "examples": ["SYST:COMM:SER:PAR EVEN", "SYST:COMM:SER:PAR?"]
     },
@@ -1440,7 +1440,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "bits", "range": "1 | 2" }
+        { "name": "numeric_value", "units": ["bits"], "range": "1 | 2" }
       ],
       "examples": ["SYST:COMM:SER:SBITS 1", "SYST:COMM:SER:SBITS?"]
     },
@@ -1462,7 +1462,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "baud", "range": "standard rates" }
+        { "name": "numeric_value", "units": ["baud"], "range": "standard rates" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:BAUD 9600", "SYST:COMM:SER:TRAN:BAUD?"]
     },
@@ -1474,7 +1474,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "bits", "range": "7 | 8" }
+        { "name": "numeric_value", "units": ["bits"], "range": "7 | 8" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:BITS 8", "SYST:COMM:SER:TRAN:BITS?"]
     },
@@ -1486,7 +1486,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "mode", "units": "", "range": "ON | OFF" }
+        { "name": "mode", "units": [""], "range": "ON | OFF" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:ECHO OFF", "SYST:COMM:SER:TRAN:ECHO?"]
     },
@@ -1498,7 +1498,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "pace", "units": "", "range": "XON | NONE" }
+        { "name": "pace", "units": [""], "range": "XON | NONE" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:PACE XON", "SYST:COMM:SER:TRAN:PACE?"]
     },
@@ -1510,7 +1510,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "parity", "units": "", "range": "EVEN | ODD | ZERO | ONE | NONE" }
+        { "name": "parity", "units": [""], "range": "EVEN | ODD | ZERO | ONE | NONE" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:PAR EVEN", "SYST:COMM:SER:TRAN:PAR?"]
     },
@@ -1522,7 +1522,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": "bits", "range": "1 | 2" }
+        { "name": "numeric_value", "units": ["bits"], "range": "1 | 2" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:SBITS 1", "SYST:COMM:SER:TRAN:SBITS?"]
     },
@@ -1544,7 +1544,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "character_data", "units": "", "range": "SCPI | (legacy compatibility language)" }
+        { "name": "character_data", "units": [""], "range": "SCPI | (legacy compatibility language)" }
       ],
       "examples": ["SYST:LANG SCPI", "SYST:LANG?"]
     },
@@ -1586,7 +1586,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "interface", "units": "", "range": "GPIB | RS232 | RS422" }
+        { "name": "interface", "units": [""], "range": "GPIB | RS232 | RS422" }
       ],
       "examples": ["SYST:RINT GPIB", "SYST:RINT?"]
     },
@@ -1628,7 +1628,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["INIT1:CONT ON", "INIT1:CONT?"]
     },
@@ -1650,7 +1650,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "Boolean", "units": "", "range": "ON | OFF | 1 | 0" }
+        { "name": "Boolean", "units": [""], "range": "ON | OFF | 1 | 0" }
       ],
       "examples": ["TRIG1:DEL:AUTO ON", "TRIG1:DEL:AUTO?"]
     },
@@ -1672,7 +1672,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "source", "units": "", "range": "BUS | IMMediate | HOLD" }
+        { "name": "source", "units": [""], "range": "BUS | IMMediate | HOLD" }
       ],
       "examples": ["TRIG1:SOUR IMM", "TRIG1:SOUR?"]
     },
@@ -1684,7 +1684,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "amplitude_unit", "units": "", "range": "W | DBM" }
+        { "name": "amplitude_unit", "units": [""], "range": "W | DBM" }
       ],
       "examples": ["UNIT1:POW DBM", "UNIT2:POW?"]
     },
@@ -1696,7 +1696,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "ratio_unit", "units": "", "range": "DB | PCT" }
+        { "name": "ratio_unit", "units": [""], "range": "DB | PCT" }
       ],
       "examples": ["UNIT1:POW:RAT DB", "UNIT1:POW:RAT?"]
     },
@@ -1708,7 +1708,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "option string" }
+        { "name": "string", "units": [""], "range": "option string" }
       ],
       "examples": ["SERV:OPT?"]
     },
@@ -1760,7 +1760,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "alpha_numeric", "units": "", "range": "serial number string" }
+        { "name": "alpha_numeric", "units": [""], "range": "serial number string" }
       ],
       "examples": ["SERV:SNUM?"]
     },
@@ -1772,7 +1772,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "version string" }
+        { "name": "string", "units": [""], "range": "version string" }
       ],
       "examples": ["SERV:VERS:PROC?"]
     },
@@ -1784,7 +1784,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "string", "units": "", "range": "version string" }
+        { "name": "string", "units": [""], "range": "version string" }
       ],
       "examples": ["SERV:VERS:SYST?"]
     },
@@ -1806,7 +1806,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "data", "units": "", "range": "arbitrary block program data or string program data" }
+        { "name": "data", "units": [""], "range": "arbitrary block program data or string program data" }
       ],
       "examples": ["*DDT #15INIT1", "*DDT?"]
     },
@@ -1818,7 +1818,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "NRf", "units": "", "range": "0 to 255" }
+        { "name": "NRf", "units": [""], "range": "0 to 255" }
       ],
       "examples": ["*ESE 60", "*ESE?"]
     },
@@ -1870,7 +1870,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "NRf", "units": "", "range": "register number (0 to NSTates-1)" }
+        { "name": "NRf", "units": [""], "range": "register number (0 to NSTates-1)" }
       ],
       "examples": ["*RCL 1"]
     },
@@ -1892,7 +1892,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "NRf", "units": "", "range": "register number (0 to NSTates-1)" }
+        { "name": "NRf", "units": [""], "range": "register number (0 to NSTates-1)" }
       ],
       "examples": ["*SAV 1"]
     },
@@ -1904,7 +1904,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "NRf", "units": "", "range": "0 to 255" }
+        { "name": "NRf", "units": [""], "range": "0 to 255" }
       ],
       "examples": ["*SRE 32", "*SRE?"]
     },

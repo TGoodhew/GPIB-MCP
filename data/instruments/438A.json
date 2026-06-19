@@ -98,7 +98,7 @@
       "parameters": [
         {
           "name": "calFactor",
-          "units": "percent",
+          "units": ["percent"],
           "range": "1.0 to 150.0"
         }
       ],
@@ -114,7 +114,7 @@
       "parameters": [
         {
           "name": "refCalFactor",
-          "units": "percent",
+          "units": ["percent"],
           "range": "50.0 to 120.0 (negative value selects external reference)"
         }
       ],
@@ -148,7 +148,7 @@
       "parameters": [
         {
           "name": "range",
-          "units": "range number",
+          "units": ["range number"],
           "range": "1 to 5"
         }
       ],
@@ -182,7 +182,7 @@
       "parameters": [
         {
           "name": "filterNumber",
-          "units": "exponent of 2 (length = 2^n, 1 to 512)",
+          "units": ["exponent of 2 (length = 2^n, 1 to 512)"],
           "range": "0 to 9"
         }
       ],
@@ -207,7 +207,7 @@
       "parameters": [
         {
           "name": "offset",
-          "units": "dB",
+          "units": ["dB"],
           "range": "-99.99 to +99.99 (0.01 dB increments)"
         }
       ],
@@ -232,7 +232,7 @@
       "parameters": [
         {
           "name": "lowLimit",
-          "units": "dBm",
+          "units": ["dBm"],
           "range": "signed value sxxx.xxx"
         }
       ],
@@ -248,7 +248,7 @@
       "parameters": [
         {
           "name": "highLimit",
-          "units": "dBm",
+          "units": ["dBm"],
           "range": "signed value sxxx.xxx"
         }
       ],
@@ -345,7 +345,7 @@
       "parameters": [
         {
           "name": "register",
-          "units": "register number",
+          "units": ["register number"],
           "range": "1 to 19"
         }
       ],
@@ -361,7 +361,7 @@
       "parameters": [
         {
           "name": "register",
-          "units": "register number",
+          "units": ["register number"],
           "range": "0 to 19"
         }
       ],
@@ -494,7 +494,7 @@
       "parameters": [
         {
           "name": "maskByte",
-          "units": "8-bit value (sum of enabled bit weights)",
+          "units": ["8-bit value (sum of enabled bit weights)"],
           "range": "0 to 255"
         }
       ],

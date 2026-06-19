@@ -58,7 +58,7 @@
       "description": "Selects the spot test frequency. F11=10 kHz, F12=20 kHz (30 kHz with Option 004), F13=40 kHz (50 kHz), F14=100 kHz, F15=200 kHz (300 kHz), F16=400 kHz (500 kHz), F17=1 MHz, F18=2 MHz (3 MHz), F19=4 MHz (5 MHz), F20=10 MHz. The frequencies in parentheses are used with Option 004. F21 and F22 are additional frequency steps.",
       "set": "F",
       "parameters": [
-        { "name": "code", "units": "Hz", "range": "F11=10kHz, F12=20(30)kHz, F13=40(50)kHz, F14=100kHz, F15=200(300)kHz, F16=400(500)kHz, F17=1MHz, F18=2(3)MHz, F19=4(5)MHz, F20=10MHz, F21, F22" }
+        { "name": "code", "units": ["Hz"], "range": "F11=10kHz, F12=20(30)kHz, F13=40(50)kHz, F14=100kHz, F15=200(300)kHz, F16=400(500)kHz, F17=1MHz, F18=2(3)MHz, F19=4(5)MHz, F20=10MHz, F21, F22" }
       ],
       "examples": ["F14", "F17"]
     },
@@ -189,7 +189,7 @@
       "description": "Sets the internal DC bias voltage (requires Option 001 or 002). Format is 'BI<mantissa>E<exponent>V' with 3 digits of mantissa and 2 digits of exponent. If polarity of the mantissa or exponent is not specified it defaults to plus (+).",
       "set": "BI",
       "parameters": [
-        { "name": "voltage", "units": "V", "range": "BI<3-digit mantissa>E<2-digit exponent>V" }
+        { "name": "voltage", "units": ["V"], "range": "BI<3-digit mantissa>E<2-digit exponent>V" }
       ],
       "examples": ["BI100E-01V", "BI+200E+00V"]
     }

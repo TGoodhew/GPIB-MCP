@@ -30,7 +30,7 @@
       "description": "Set Manual Center Frequency. Sets the manual center frequency. The data string is a nonfixed-length string of up to 5 characters in MHz, terminated by E. Decimal points cause the entire string to be ignored; + signs and spaces are allowed. The number must be less than 18 GHz or it is ignored.",
       "set": "SM<value>E",
       "parameters": [
-        { "name": "value", "units": "MHz", "range": "up to 5 characters, must be < 18000 (18 GHz); decimal points cause the string to be ignored" }
+        { "name": "value", "units": ["MHz"], "range": "up to 5 characters, must be < 18000 (18 GHz); decimal points cause the string to be ignored" }
       ],
       "examples": ["SM10000E", "SM775E"]
     },
@@ -73,7 +73,7 @@
       "description": "Set Frequency Offset. Sets the frequency offset value. The data string is a nonfixed-length signed value in MHz terminated by E. Spaces are ignored.",
       "set": "SOM<sign><value>E",
       "parameters": [
-        { "name": "value", "units": "MHz", "range": "signed nonfixed-length value (e.g. +/-XXXXX.XXXXXX); spaces ignored" }
+        { "name": "value", "units": ["MHz"], "range": "signed nonfixed-length value (e.g. +/-XXXXX.XXXXXX); spaces ignored" }
       ],
       "examples": ["SOM10.7E", "SOM-4000.25E"]
     },
@@ -100,7 +100,7 @@
       "description": "Set Amplitude Offset. Sets the amplitude offset value. The data string is a nonfixed-length signed value in dB terminated by E. Spaces are ignored.",
       "set": "SOB<sign><value>E",
       "parameters": [
-        { "name": "value", "units": "dB", "range": "signed nonfixed-length value (e.g. +/-XX.X); spaces ignored" }
+        { "name": "value", "units": ["dB"], "range": "signed nonfixed-length value (e.g. +/-XX.X); spaces ignored" }
       ],
       "examples": ["SOB-10.1E", "SOB3.5E"]
     },

@@ -29,7 +29,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "ref_cal_factor", "units": "%", "range": "50.0 to 120.0" }
+        { "name": "ref_cal_factor", "units": ["%"], "range": "50.0 to 120.0" }
       ],
       "examples": ["CL98.5EN", "CL98.5%"]
     },
@@ -50,7 +50,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "cal_factor", "units": "%", "range": "1.0 to 150.0" }
+        { "name": "cal_factor", "units": ["%"], "range": "1.0 to 150.0" }
       ],
       "examples": ["KB99.9%", "KB95.0EN"]
     },
@@ -62,7 +62,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": "GHz/MHz/kHz/Hz (GZ|MZ|KZ|HZ)", "range": "0.0001 to 999.9999 GHz" }
+        { "name": "frequency", "units": ["GHz/MHz/kHz/Hz (GZ|MZ|KZ|HZ)"], "range": "0.0001 to 999.9999 GHz" }
       ],
       "examples": ["FR300MZ", "FR1.0GZ"]
     },
@@ -128,7 +128,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "resolution", "units": "", "range": "1 to 3" }
+        { "name": "resolution", "units": [""], "range": "1 to 3" }
       ],
       "examples": ["RE2EN", "RE3EN"]
     },
@@ -167,7 +167,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "offset", "units": "dB", "range": "-99.99 to +99.99" }
+        { "name": "offset", "units": ["dB"], "range": "-99.99 to +99.99" }
       ],
       "examples": ["OS10EN", "OS3.0EN"]
     },
@@ -197,7 +197,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "duty_cycle", "units": "%", "range": "0.001 to 99.999" }
+        { "name": "duty_cycle", "units": ["%"], "range": "0.001 to 99.999" }
       ],
       "examples": ["DY98.5EN", "DY50%"]
     },
@@ -263,7 +263,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "range", "units": "", "range": "0 to 5 (0 = auto)" }
+        { "name": "range", "units": [""], "range": "0 to 5 (0 = auto)" }
       ],
       "examples": ["RM3EN", "RM0EN"]
     },
@@ -293,7 +293,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "filter_length", "units": "readings", "range": "1 to 512 (binary progression)" }
+        { "name": "filter_length", "units": ["readings"], "range": "1 to 512 (binary progression)" }
       ],
       "examples": ["FM128EN", "FM32EN"]
     },
@@ -332,7 +332,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "high_limit", "units": "dBm", "range": "-299.999 to +299.999" }
+        { "name": "high_limit", "units": ["dBm"], "range": "-299.999 to +299.999" }
       ],
       "examples": ["LH30.00EN"]
     },
@@ -344,7 +344,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "low_limit", "units": "dBm", "range": "-299.999 to +299.999" }
+        { "name": "low_limit", "units": ["dBm"], "range": "-299.999 to +299.999" }
       ],
       "examples": ["LL-90.00EN"]
     },
@@ -419,7 +419,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "table", "units": "", "range": "0 to 9" }
+        { "name": "table", "units": [""], "range": "0 to 9" }
       ],
       "examples": ["SE5EN", "SE0EN"]
     },
@@ -431,8 +431,8 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "table", "units": "", "range": "0 to 9" },
-        { "name": "id_label", "units": "", "range": "up to 7 chars: 0-9, A-Z, underscore" }
+        { "name": "table", "units": [""], "range": "0 to 9" },
+        { "name": "id_label", "units": [""], "range": "up to 7 chars: 0-9, A-Z, underscore" }
       ],
       "examples": ["SN21234567", "SN1SN_4567"]
     },
@@ -444,7 +444,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "table", "units": "", "range": "0 to 9" }
+        { "name": "table", "units": [""], "range": "0 to 9" }
       ],
       "examples": ["CT3", "CT0"]
     },
@@ -456,8 +456,8 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "table", "units": "", "range": "0 to 9" },
-        { "name": "ref_cal_factor", "units": "%", "range": "sensor REF CF" }
+        { "name": "table", "units": [""], "range": "0 to 9" },
+        { "name": "ref_cal_factor", "units": ["%"], "range": "sensor REF CF" }
       ],
       "examples": ["RF398.5%", "RF0100EN"]
     },
@@ -469,7 +469,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "table", "units": "", "range": "0 to 9" }
+        { "name": "table", "units": [""], "range": "0 to 9" }
       ],
       "examples": ["ET3 1.00MZ 98.5% EN", "ET3"]
     },
@@ -481,7 +481,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "register", "units": "", "range": "1 to 10" }
+        { "name": "register", "units": [""], "range": "1 to 10" }
       ],
       "examples": ["ST2EN"]
     },
@@ -493,7 +493,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "register", "units": "", "range": "0 to 10" }
+        { "name": "register", "units": [""], "range": "0 to 10" }
       ],
       "examples": ["RC2EN", "RC0EN"]
     },
@@ -568,7 +568,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "message", "units": "", "range": "up to 12 chars: 0-9, A-Z, space" }
+        { "name": "message", "units": [""], "range": "up to 12 chars: 0-9, A-Z, space" }
       ],
       "examples": ["DU CONNECT DUT"]
     },
@@ -616,7 +616,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "mask", "units": "", "range": "0 to 255" }
+        { "name": "mask", "units": [""], "range": "0 to 255" }
       ],
       "examples": ["@116", "*SRE 16"]
     },
@@ -628,7 +628,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "mask", "units": "", "range": "0 to 255" }
+        { "name": "mask", "units": [""], "range": "0 to 255" }
       ],
       "examples": ["*SRE 16", "*SRE?"]
     },
@@ -676,7 +676,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "mask", "units": "", "range": "0 to 255" }
+        { "name": "mask", "units": [""], "range": "0 to 255" }
       ],
       "examples": ["*ESE 32", "*ESE?"]
     },
