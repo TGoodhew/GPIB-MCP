@@ -1,79 +1,201 @@
 # GPIB-MCP
 
-An [MCP](https://modelcontextprotocol.io) server that connects Claude (or any MCP
-client) directly to your test-and-measurement instruments over **GPIB, USB-TMC,
-LXI/TCPIP, and serial**, using the **NI-VISA** and **NI-488.2** .NET libraries.
+An [MCP](https://modelcontextprotocol.io) (Model Context Protocol) server that
+connects Claude — or any MCP client — directly to your test-and-measurement
+instruments over **GPIB, USB-TMC, LXI/TCPIP, and serial**, using the **NI-VISA**
+and **NI-488.2** .NET libraries.
 
 It speaks JSON-RPC 2.0 over a stdio transport and exposes a set of tools the model
-can call to discover instruments and exchange SCPI/IEEE-488.2 commands with them.
+can call to discover instruments and exchange SCPI / IEEE-488.2 commands with them.
 
-- **Language / runtime:** C#, .NET Framework 4.7.2
-- **Platform:** **x86** (NI VISA.NET is installed 32-bit only on this machine)
-- **Primary path:** NI-VISA (`Ivi.Visa` + `NationalInstruments.Visa`) — works across every bus
-- **Native path:** NI-488.2 (`NationalInstruments.NI4882`) — addresses GPIB board/primary/secondary directly
+| | |
+|---|---|
+| **Language / runtime** | C#, .NET Framework 4.7.2 |
+| **Platform** | `x86` — see [Why x86?](#why-x86) |
+| **Primary path** | NI-VISA (`Ivi.Visa` + `NationalInstruments.Visa`) — works across every bus |
+| **Native path** | NI-488.2 (`NationalInstruments.NI4882`) — address GPIB board/primary/secondary directly |
+| **Transport** | JSON-RPC 2.0 over newline-delimited stdio |
+| **License** | [MIT](LICENSE) |
 
-## Requirements
+---
 
-- Windows with **NI-VISA** and **NI-488.2** runtimes installed (the driver assemblies
-  are referenced from their installed locations — see `src/GpibMcp/GpibMcp.csproj`).
-- .NET Framework 4.7.2 developer pack (or build with the bundled
-  `Microsoft.NETFramework.ReferenceAssemblies` package via the .NET SDK).
+## Contents
 
-## Build
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Install](#install)
+  - [1. Clone the repository](#1-clone-the-repository)
+  - [2. Point the project at your NI assemblies](#2-point-the-project-at-your-ni-assemblies)
+  - [3. Build](#3-build)
+- [Configure an MCP client](#configure-an-mcp-client)
+  - [Claude Desktop](#claude-desktop)
+  - [Other MCP clients](#other-mcp-clients)
+- [Usage](#usage)
+  - [Tool reference](#tool-reference)
+  - [Typical workflow](#typical-workflow)
+  - [Manual test from a terminal](#manual-test-from-a-terminal)
+- [Why x86?](#why-x86)
+- [Project layout](#project-layout)
+- [Troubleshooting](#troubleshooting)
+- [Extending](#extending)
+- [License](#license)
 
-With Visual Studio MSBuild:
+---
 
-```powershell
-& "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\MSBuild.exe" `
-    GPIB-MCP.sln /p:Configuration=Release /p:Platform=x86
+## Features
+
+- **Auto-discovery** of every connected VISA resource (GPIB, USB-TMC, TCPIP/LXI, serial).
+- **Message-based I/O**: query (write + read), write-only, read, and device-clear.
+- **Cached sessions** — an instrument stays open, addressed, and configured across
+  multiple tool calls until you explicitly close it.
+- **Native NI-488.2 path** to address a GPIB instrument by board / primary / secondary
+  without needing a VISA resource alias.
+- **Single, self-contained executable** — no external MCP SDK dependency; protocol
+  handling is implemented directly so it runs cleanly on .NET Framework.
+
+## Prerequisites
+
+You need the following installed on a **Windows** machine:
+
+1. **NI-VISA** runtime, including the **VISA.NET** components
+   (provides `Ivi.Visa.dll` and `NationalInstruments.Visa.dll`).
+   Download: <https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html>
+2. **NI-488.2** driver, including its **.NET** support
+   (provides `NationalInstruments.NI4882.dll` and `NationalInstruments.Common.dll`).
+   Download: <https://www.ni.com/en/support/downloads/drivers/download.ni-488-2.html>
+3. A way to build a .NET Framework 4.7.2 project, **either**:
+   - **Visual Studio 2019+** with the *.NET desktop development* workload, **or**
+   - the **.NET SDK** (`dotnet` CLI) — the project pulls in
+     `Microsoft.NETFramework.ReferenceAssemblies` so the SDK can target net472
+     without a full Visual Studio install.
+
+> The NI drivers must be installed regardless of how you build, because the server
+> calls into the live NI runtime to talk to hardware.
+
+## Install
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/TGoodhew/GPIB-MCP.git
+cd GPIB-MCP
 ```
 
-Or with the .NET SDK:
+### 2. Point the project at your NI assemblies
+
+The project references four NI driver assemblies by path. Because NI installs them
+to versioned folders that differ between machines and driver releases, **verify the
+`HintPath` for each reference** in
+[`src/GpibMcp/GpibMcp.csproj`](src/GpibMcp/GpibMcp.csproj) and adjust if needed.
+
+| Reference | Typical location |
+|-----------|------------------|
+| `Ivi.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components <ver>\Ivi.Visa.dll` |
+| `NationalInstruments.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET <ver>\NationalInstruments.Visa.dll` |
+| `NationalInstruments.Common` | `C:\Program Files (x86)\National Instruments\Measurement Studio\DotNET\v4.0\AnyCPU\NationalInstruments.Common <ver>\NationalInstruments.Common.dll` |
+| `NationalInstruments.NI4882` | `C:\Program Files (x86)\National Instruments\MeasurementStudioVS2012\DotNET\Assemblies\Current\NationalInstruments.NI4882.dll` |
+
+To find the exact paths on your machine (PowerShell):
 
 ```powershell
+Get-ChildItem "C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET" -Recurse `
+  -Include Ivi.Visa.dll, NationalInstruments.Visa.dll | Select-Object FullName
+Get-ChildItem "C:\Program Files (x86)\National Instruments" -Recurse `
+  -Include NationalInstruments.NI4882.dll, NationalInstruments.Common.dll | Select-Object FullName
+```
+
+> These assemblies are typically also registered in the GAC, so in many cases the
+> build resolves them even if a `HintPath` is slightly off — but setting the paths
+> correctly is the reliable option.
+
+### 3. Build
+
+With the **.NET SDK**:
+
+```bash
 dotnet build GPIB-MCP.sln -c Release
 ```
 
-Output: `src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe`
+Or with **MSBuild** (from a *Developer Command Prompt* / *Developer PowerShell*):
 
-## Tools
+```powershell
+msbuild GPIB-MCP.sln /p:Configuration=Release /p:Platform=x86
+```
 
-| Tool | Purpose |
-|------|---------|
-| `visa_list_resources` | Discover connected VISA resources (GPIB/USB/TCPIP/serial) |
-| `visa_query` | Write a command and read the response (e.g. `*IDN?`) |
-| `visa_write` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
-| `visa_read` | Read a pending response |
-| `visa_identify` | Convenience `*IDN?` query |
-| `visa_clear` | IEEE 488.2 device clear |
-| `visa_list_open` | List sessions this server holds open |
-| `visa_close` | Close a held-open session |
-| `gpib488_query` | Native NI-488.2 query by board / primary / secondary address |
+The resulting executable is:
 
-Sessions opened via the VISA tools are cached and reused, so an instrument stays
-addressed and configured across multiple tool calls until `visa_close` is invoked.
+```
+src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe
+```
 
-## Connect to Claude Desktop
+## Configure an MCP client
 
-Add the server to `claude_desktop_config.json`
-(`%APPDATA%\Claude\claude_desktop_config.json`):
+### Claude Desktop
+
+Edit Claude Desktop's config file (create it if it does not exist):
+
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add a `gpib` server entry pointing at the built executable. Use the **absolute path**
+to `GpibMcp.exe` on your machine, with **escaped backslashes**:
 
 ```json
 {
   "mcpServers": {
     "gpib": {
-      "command": "C:\\Users\\Tony\\source\\GPIBMCP\\src\\GpibMcp\\bin\\x86\\Release\\net472\\GpibMcp.exe"
+      "command": "C:\\path\\to\\GPIB-MCP\\src\\GpibMcp\\bin\\x86\\Release\\net472\\GpibMcp.exe"
     }
   }
 }
 ```
 
-Restart Claude Desktop. You should then be able to ask things like
-*"List my instruments and identify the one at GPIB0::9."*
+Restart Claude Desktop. The `gpib` tools then appear and you can ask things like
+*"List my instruments, then identify the one at GPIB0::9."*
 
-## Quick manual test
+### Other MCP clients
 
-Pipe JSON-RPC frames (one per line) into the executable:
+Any client that launches a stdio MCP server works the same way: run
+`GpibMcp.exe` as the server command. The server reads JSON-RPC requests on stdin and
+writes responses on stdout (one JSON object per line); all diagnostics go to stderr.
+
+## Usage
+
+### Tool reference
+
+| Tool | Required args | Optional args | Purpose |
+|------|---------------|---------------|---------|
+| `visa_list_resources` | — | `filter` | Discover connected VISA resources |
+| `visa_query` | `resource`, `command` | `timeout_ms` | Write a command and read the response (e.g. `*IDN?`) |
+| `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
+| `visa_read` | `resource` | `timeout_ms` | Read a pending response |
+| `visa_identify` | `resource` | — | Convenience `*IDN?` query |
+| `visa_clear` | `resource` | — | IEEE 488.2 device clear |
+| `visa_list_open` | — | — | List sessions this server holds open |
+| `visa_close` | `resource` | — | Close a held-open session |
+| `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
+
+Argument notes:
+
+- `resource` — a VISA resource string such as `GPIB0::5::INSTR`,
+  `TCPIP0::192.168.1.50::INSTR`, `USB0::0x0699::0x0408::C012345::INSTR`, or `ASRL1::INSTR`.
+- `command` — sent verbatim; a newline terminator is appended if you omit one.
+- `timeout_ms` — I/O timeout in milliseconds (default `5000`).
+- `board` — GPIB controller index (default `0`).
+- `secondary_address` — `0` means "no secondary address" (the default).
+
+### Typical workflow
+
+1. `visa_list_resources` → see what is connected.
+2. `visa_identify` (or `visa_query` with `*IDN?`) → confirm which instrument is which.
+3. `visa_write` / `visa_query` → configure and measure.
+4. `visa_close` → release the instrument when finished.
+
+Sessions are cached, so steps 2–3 reuse the same open connection automatically.
+
+### Manual test from a terminal
+
+You can drive the server directly without an MCP client by piping JSON-RPC frames
+(one per line) into it. PowerShell:
 
 ```powershell
 $exe = "src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe"
@@ -83,14 +205,28 @@ $exe = "src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe"
 ) -join "`n" | & $exe
 ```
 
+You should see an `initialize` result followed by a list of discovered resources.
+
+## Why x86?
+
+NI's VISA.NET assemblies are commonly installed under a 32-bit
+(`Framework32`) folder only. To bind against them, the server is configured to
+build and run as a **32-bit (x86)** process (`<PlatformTarget>x86</PlatformTarget>`
+in the project file). If your installation provides 64-bit VISA.NET assemblies and
+you prefer a 64-bit build, update the `HintPath`s to the 64-bit assemblies and
+change the platform accordingly.
+
 ## Project layout
 
 ```
 GPIB-MCP.sln
+LICENSE
+README.md
 src/GpibMcp/
+  GpibMcp.csproj                   net472 / x86 project + NI references
   Program.cs                       entry point + stdio/UTF-8 setup
   Mcp/
-    McpServer.cs                   JSON-RPC 2.0 dispatch (initialize/tools/ping)
+    McpServer.cs                   JSON-RPC 2.0 dispatch (initialize / tools / ping)
     McpTool.cs                     tool + registry + error types
   Instruments/
     VisaInstrumentManager.cs       NI-VISA session manager (primary path)
@@ -99,10 +235,25 @@ src/GpibMcp/
     InstrumentTools.cs             tool definitions + JSON Schemas
 ```
 
-## Notes / next steps
+## Troubleshooting
 
-- stdout carries protocol traffic only; diagnostics go to stderr.
-- The server is single-threaded and synchronous — instrument I/O is serialized,
-  which is the safe default for shared GPIB buses.
-- Ideas to extend: binary block reads (`visa_read_bytes`), service-request/status-byte
-  polling, instrument-specific helper tools, and a configurable default terminator.
+| Symptom | Likely cause / fix |
+|---------|--------------------|
+| Build error: *metadata file `Ivi.Visa.dll` could not be found* | A `HintPath` in `GpibMcp.csproj` does not match your machine — update it (see [Install step 2](#2-point-the-project-at-your-ni-assemblies)). |
+| `visa_list_resources` returns nothing | No instruments powered/connected, or NI-VISA not installed. Confirm devices appear in **NI MAX** (Measurement & Automation Explorer). |
+| `BadImageFormatException` at runtime | A bitness mismatch — ensure the build is `x86` and matches your installed NI runtime (see [Why x86?](#why-x86)). |
+| A query times out | Instrument needs a different terminator or longer timeout; raise `timeout_ms`, and check the instrument's programming manual for the expected line ending. |
+| Tools never appear in Claude Desktop | Check the `command` path in `claude_desktop_config.json` is absolute and backslash-escaped, then fully restart Claude Desktop. |
+
+## Extending
+
+Ideas for follow-on work:
+
+- Binary block reads (`visa_read_bytes`) for waveform/screenshot transfers.
+- Service-request (SRQ) / status-byte polling.
+- Instrument-specific helper tools (e.g. measurement presets).
+- A configurable default line terminator.
+
+## License
+
+Released under the [MIT License](LICENSE).
