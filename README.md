@@ -189,24 +189,53 @@ $env:GPIB_MCP_LOG_LEVEL = "Debug"   # then re-run; logs appear on stderr
 
 ### Claude Desktop
 
-Edit Claude Desktop's config file (create it if it does not exist):
-
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-Add a `gpib` server entry pointing at the built executable. Use the **absolute path**
-to `GpibMcp.exe` on your machine, with **escaped backslashes**:
+Add a `gpib` server entry to Claude Desktop's `claude_desktop_config.json`. Use the
+**absolute path** to `GpibMcp.exe` on your machine, with **escaped backslashes**:
 
 ```json
 {
   "mcpServers": {
     "gpib": {
-      "command": "C:\\path\\to\\GPIB-MCP\\src\\GpibMcp\\bin\\x86\\Release\\net472\\GpibMcp.exe"
+      "command": "C:\\path\\to\\GPIB-MCP\\src\\GpibMcp\\bin\\x86\\Release\\net472\\GpibMcp.exe",
+      "env": { "GPIB_MCP_LOG_LEVEL": "Info" }
     }
   }
 }
 ```
 
-Restart Claude Desktop. The `gpib` tools then appear and you can ask things like
+If the file already has content (e.g. a `preferences` block), **merge** the `mcpServers`
+key into the existing JSON rather than replacing the file.
+
+#### Where the config file lives
+
+The location depends on **how Claude Desktop was installed** — this matters on Windows:
+
+| Install type | Config path |
+|--------------|-------------|
+| **Standard installer** (downloaded `.exe`) | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **Microsoft Store / MSIX package** | `%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude\claude_desktop_config.json` |
+
+The Store/MSIX build runs with a **virtualized AppData**, so it does *not* read the
+standard `%APPDATA%\Claude` path — editing that file has no effect. Find the real path
+for the packaged build with:
+
+```powershell
+# Lists the package roots; the folder name contains the <id>, e.g. Claude_pzs8sxrjxfjjc
+Get-ChildItem "$env:LOCALAPPDATA\Packages" -Filter "Claude_*"
+
+# Open (or create) the active config for the packaged app:
+$cfg = Get-ChildItem "$env:LOCALAPPDATA\Packages\Claude_*\LocalCache\Roaming\Claude\claude_desktop_config.json"
+$cfg.FullName
+```
+
+If you are unsure which build you have, check for a running process: a packaged install
+runs from `C:\Program Files\WindowsApps\Claude_...`.
+
+#### Apply the change
+
+Claude Desktop only re-reads the config on a **full restart**: quit it from the system
+tray (right-click → Quit — closing the window is not enough), then relaunch. The `gpib`
+tools then appear and you can ask things like
 *"List my instruments, then identify the one at GPIB0::9."*
 
 ### Other MCP clients
