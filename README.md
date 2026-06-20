@@ -396,6 +396,13 @@ collects the HP-GL, which is then rasterized by [`Hpgl.Rendering`](src/Hpgl.Rend
 - Only models with a `capture` profile in the database are supported (the 8563E ships with one;
   add others as data — `{ "method": "hpgl", "plotCommand": "...", "preRoll": "..." }`).
 - `return_hpgl=true` also returns the raw HP-GL/2 source; `background`, `width`, `height` tune the image.
+- Every capture is also **saved to a PNG file** (default `%LOCALAPPDATA%\GpibMcp\captures`, override with
+  `save_path` or the `GPIB_MCP_CAPTURE_DIR` env var) and the path is reported in the result.
+
+> **Note on Claude Desktop:** the tool returns a spec-correct MCP image content block, but Claude
+> Desktop does not reliably render tool-result images inline (when it does, the image is inside the
+> expandable tool-call block). The saved-to-disk path is the dependable way to view the capture;
+> the model still receives the image and can describe/act on it.
 
 > The capture/render technique is derived from the HP7470A Plotter Emulator (`7470.cpp`) by
 > John Miles, KE5FX — <http://www.ke5fx.com/>.
