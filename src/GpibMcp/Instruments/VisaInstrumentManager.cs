@@ -238,6 +238,27 @@ namespace GpibMcp.Instruments
             }
         }
 
+        /// <summary>
+        /// Polls the status byte until any <paramref name="mask"/> bit is set or the timeout elapses.
+        /// Reading the latched status byte is the reliable completion signal (it stays set until read),
+        /// so this avoids the SRQ-event/serial-poll race where the cause is cleared before it is read.
+        /// </summary>
+        public StatusByteWaitResult WaitForStatusBits(string resource, int mask, int timeoutMs, int pollIntervalMs)
+        {
+            if (timeoutMs <= 0) timeoutMs = DefaultTimeoutMs;
+            if (pollIntervalMs <= 0) pollIntervalMs = 100;
+            var watch = Stopwatch.StartNew();
+            while (true)
+            {
+                int stb = SerialPoll(resource); // locks per call; reads (and clears) the latched bits
+                if ((stb & mask) != 0)
+                    return new StatusByteWaitResult(stb, true, watch.ElapsedMilliseconds);
+                if (watch.ElapsedMilliseconds >= timeoutMs)
+                    return new StatusByteWaitResult(stb, false, watch.ElapsedMilliseconds);
+                System.Threading.Thread.Sleep(pollIntervalMs);
+            }
+        }
+
         /// <summary>Returns up to <paramref name="max"/> of the most recent commands for a resource.</summary>
         public IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max) =>
             _history.Snapshot(resource, max);

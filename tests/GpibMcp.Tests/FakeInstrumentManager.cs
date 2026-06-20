@@ -78,6 +78,16 @@ namespace GpibMcp.Tests
             return SrqResult;
         }
 
+        /// <summary>Canned status-byte wait result (used by instrument_wait_complete).</summary>
+        public StatusByteWaitResult StatusWait = new StatusByteWaitResult(0x10, true, 100);
+        public readonly List<string> StatusWaits = new List<string>();
+
+        public StatusByteWaitResult WaitForStatusBits(string resource, int mask, int timeoutMs, int pollIntervalMs)
+        {
+            StatusWaits.Add(resource + "|" + mask + "|" + timeoutMs);
+            return StatusWait;
+        }
+
         public void Clear(string resource, int timeoutMs) => Clears.Add(resource);
 
         public IList<string> ListOpen() => new List<string>(OpenSessions);

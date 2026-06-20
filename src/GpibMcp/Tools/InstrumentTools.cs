@@ -342,25 +342,29 @@ namespace GpibMcp.Tools
             if (sm.EnableMask == null || string.IsNullOrEmpty(sm.EnableMask.SetCommand))
                 return Txt(PromptMissing(model, operation, "statusModel.enableMask.setCommand is missing"));
 
-            // State 3: complete -> run the SRQ flow.
+            // State 3: complete -> run the completion flow.
+            // The mask enables completion + (if defined) the error bit so a failure interrupts the wait.
             int? errorBit = sm.BitValue("error");
             int mask = expect.Value | (errorBit ?? 0);
 
             try
             {
+                // Pre-clear any STALE latched status (e.g. an END OF SWEEP left set by a prior sweep),
+                // so the just-armed mask does not fire on old state and we wait for a FRESH completion.
+                try { visa.SerialPoll(resource); } catch (GpibOperationException) { /* pre-clear is best effort */ }
+
                 string setCmd = sm.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
-                visa.Write(resource, setCmd, VisaInstrumentManager.DefaultTimeoutMs);
+                visa.Write(resource, setCmd, VisaInstrumentManager.DefaultTimeoutMs); // arm the SRQ mask
                 if (!string.IsNullOrEmpty(op.Arm))
-                    visa.Write(resource, op.Arm, VisaInstrumentManager.DefaultTimeoutMs);
+                    visa.Write(resource, op.Arm, VisaInstrumentManager.DefaultTimeoutMs); // start the operation
 
-                SrqWaitResult wait = visa.WaitForSrq(resource, timeoutMs);
-
-                // Serial-poll to confirm/clear regardless of how the wait returned: on SRQ this reads
-                // the cause; on a wait timeout it is the safety net for an SRQ that fired before the
-                // event was armed (the bit may already be set), so a fast op is not falsely a timeout.
-                int stb = visa.SerialPoll(resource);
+                // Confirm completion by polling the LATCHED status byte (reliable: bits stay set until
+                // read). This returns the instant the expected/error bit appears - no fixed-time guess,
+                // and none of the SRQ-event/separate-poll race that cleared the cause before it was read.
+                StatusByteWaitResult wait = visa.WaitForStatusBits(resource, mask, timeoutMs, 0);
                 ClearMask(visa, resource, sm); // best effort
 
+                int stb = wait.StatusByte;
                 bool done = (stb & expect.Value) == expect.Value;
                 bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
                 string stbText = stb + " (0x" + stb.ToString("X2") + ")";
@@ -368,20 +372,16 @@ namespace GpibMcp.Tools
 
                 if (err)
                     return Err("Instrument signalled an ERROR during '" + operation + "' on " + resource +
-                               ". Status byte " + stbText + " [" + bits + "]. Check the instrument's error queue.");
+                               " after " + wait.ElapsedMs + " ms. Status byte " + stbText + " [" + bits + "]." +
+                               (done ? " (The expected completion bit is also set.)" : "") +
+                               " Check the instrument's error/status.");
                 if (done)
-                    return Txt("Completed: '" + operation + "' on " + resource + " - " +
-                               (wait.Asserted
-                                   ? "SRQ after " + wait.ElapsedMs + " ms"
-                                   : "confirmed by serial poll (SRQ event not caught) after " + wait.ElapsedMs + " ms") +
-                               ". Status byte " + stbText + " [" + bits + "].");
-                if (!wait.Asserted)
-                    return Err("Timed out after " + timeoutMs + " ms waiting for '" + operation + "' on " + resource +
-                               " - no SRQ and the expected bit (" + op.ExpectBit + ") is not set. Status byte " + stbText +
-                               " [" + bits + "]. Mask cleared; bus left usable.");
-                return Txt("SRQ asserted for '" + operation + "' on " + resource + " but the expected bit (" +
-                           op.ExpectBit + ") is not set - possibly a different condition. Status byte " + stbText +
-                           " [" + bits + "].");
+                    return Txt("Completed: '" + operation + "' on " + resource + " after " + wait.ElapsedMs +
+                               " ms (confirmed by status poll). Status byte " + stbText + " [" + bits + "].");
+                // Timed out (or matched some other bit without completion/error).
+                return Err("Timed out after " + timeoutMs + " ms waiting for '" + operation + "' on " + resource +
+                           " - the expected bit (" + op.ExpectBit + ") was not set. Status byte " + stbText +
+                           " [" + bits + "]. Mask cleared; bus left usable.");
             }
             catch (GpibOperationException gex)
             {

@@ -462,10 +462,13 @@ server can wait on that bus event:
 > *"Take a sweep on the analyzer at GPIB0::18 and wait until it's actually complete."*
 
 `instrument_wait_complete(resource, operation)` is **data-driven** by the model's `statusModel` in the
-database (so SRQ masks are never hardcoded). It resolves the assigned model, arms the operation's SRQ
-mask, waits for SRQ, serial-polls to confirm the expected status bit, and clears the mask — returning
-the instant the operation truly completes, with the timeout only as a backstop. Three explicit states,
-no silent guessing:
+database (so SRQ masks are never hardcoded). It resolves the assigned model, pre-clears any stale
+status, arms the operation's SRQ mask, starts the operation, and confirms completion by **polling the
+latched status byte** until the expected (or error) bit appears — then clears the mask. It returns the
+instant the operation truly completes, with the timeout only as a backstop. (Polling the latched status
+byte is the reliable read — the bits stay set until read — and avoids the race where an SRQ event can
+clear the cause before a separate poll reads it; `visa_wait_srq` remains available as a pure event
+primitive.) Three explicit states, no silent guessing:
 
 - model declares `srqSupported: false` → the tool **refuses** (no timed fallback);
 - `statusModel`/operation missing → it **asks** you for the definitions (save them with
