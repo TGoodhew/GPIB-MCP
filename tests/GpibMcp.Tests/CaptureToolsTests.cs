@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
@@ -11,6 +12,13 @@ namespace GpibMcp.Tests
 {
     public class CaptureToolsTests
     {
+        static CaptureToolsTests()
+        {
+            // Keep default-path captures out of %LOCALAPPDATA% during tests.
+            Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR",
+                Path.Combine(Path.GetTempPath(), "gpibmcp_captures_test"));
+        }
+
         private static InstrumentDefinition WithCaptureProfile() => new InstrumentDefinition
         {
             Model = "8563E",
@@ -71,6 +79,25 @@ namespace GpibMcp.Tests
 
             Assert.Contains(output.Content, b => b.Kind == ToolContentKind.Image);
             Assert.Contains(output.Content, b => b.Kind == ToolContentKind.Text && b.Text.Contains("PLOT") == false && b.Text.Contains("SP0;"));
+        }
+
+        [Fact]
+        public void Capture_SavesPngToFile_AndReportsPath()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            string path = Path.Combine(Path.GetTempPath(), "captest_" + Path.GetRandomFileName() + ".png");
+            try
+            {
+                var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                    .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["save_path"] = path });
+
+                Assert.False(output.IsError);
+                Assert.True(File.Exists(path));
+                Assert.Contains("saved to: " + path, output.AsText());
+                var bytes = File.ReadAllBytes(path);
+                Assert.True(bytes.Length > 8 && bytes[0] == 0x89 && bytes[1] == 0x50); // PNG
+            }
+            finally { if (File.Exists(path)) File.Delete(path); }
         }
 
         [Fact]
