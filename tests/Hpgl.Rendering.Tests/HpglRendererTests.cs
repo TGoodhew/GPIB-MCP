@@ -287,6 +287,65 @@ namespace Hpgl.Rendering.Tests
                 Assert.True(CountNonBackgroundPixels(bf, Color.Black) > 4 * CountNonBackgroundPixels(bo, Color.Black));
         }
 
+        // ---- 7550A polygons (issue #8 §4.1: PM/EP/FP) ----------------------
+
+        // Define a triangle in polygon mode, then fill or edge it.
+        private const string Triangle =
+            "IN;SP1;PA2000,2000;PM0;PD8000,2000;PD5000,8000;PD2000,2000;PM2;";
+
+        [Fact]
+        public void Polygon_DefinedInPolygonMode_DrawsNothingUntilEpOrFp()
+        {
+            // PM0..PM2 only records; with no EP/FP nothing is emitted.
+            string svg = HpglRenderer.RenderToSvg(Triangle);
+            Assert.DoesNotContain("<polyline", svg);
+            Assert.DoesNotContain("<polygon", svg);
+        }
+
+        [Fact]
+        public void Polygon_FP_SolidFillsBufferedPolygon()
+        {
+            string svg = HpglRenderer.RenderToSvg(Triangle + "FP;");
+            Assert.Contains("<polygon", svg);   // FT default solid
+        }
+
+        [Fact]
+        public void Polygon_EP_StrokesBufferedOutline()
+        {
+            string svg = HpglRenderer.RenderToSvg(Triangle + "EP;");
+            Assert.Contains("<polyline", svg);
+            Assert.DoesNotContain("<polygon", svg);
+        }
+
+        [Fact]
+        public void Polygon_FP_HatchEmitsSpans()
+        {
+            // FT set after the triangle (whose leading IN would otherwise reset the fill type).
+            string svg = HpglRenderer.RenderToSvg(Triangle + "FT3,200;FP;");
+            Assert.DoesNotContain("<polygon", svg);
+            Assert.True(Polylines(svg) > 5, "hatch fill should emit many spans; got " + Polylines(svg));
+        }
+
+        [Fact]
+        public void Polygon_MultiContour_HatchUsesEvenOdd_LeavingAHole()
+        {
+            // Outer square with an inner square hole (second contour via a pen-up move inside PM).
+            string hpgl =
+                "IN;SP1;FT3,150;PA1000,1000;PM0;" +
+                "PD9000,1000;PD9000,9000;PD1000,9000;PD1000,1000;" +   // outer contour
+                "PU4000,4000;PD6000,4000;PD6000,6000;PD4000,6000;PD4000,4000;" + // inner contour (hole)
+                "PM2;FP;";
+            var opt = new HpglRenderOptions { Width = 300, Height = 300, Background = HpglBackground.Black, Antialias = false };
+            using (var withHole = HpglRenderer.RenderToBitmap(hpgl, opt))
+            using (var solidHpgl = HpglRenderer.RenderToBitmap(
+                "IN;SP1;FT3,150;PA1000,1000;PM0;PD9000,1000;PD9000,9000;PD1000,9000;PD1000,1000;PM2;FP;", opt))
+            {
+                // The hole leaves a gap, so fewer painted pixels than the solid-hatched square.
+                Assert.True(CountNonBackgroundPixels(withHole, Color.Black) <
+                            CountNonBackgroundPixels(solidHpgl, Color.Black));
+            }
+        }
+
         [Fact]
         public void Geometry_RendersToBitmapWithoutThrowing()
         {

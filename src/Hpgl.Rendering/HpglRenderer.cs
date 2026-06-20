@@ -11,7 +11,8 @@
 // capture profile, not here. Covered so far (issue #8): IN/DF, IP/SC, SP,
 // PU/PD/PA/PR, LB/DT/SI/SR/DI, arcs/circles/wedges (CI/AA/AR/EW) and edge
 // rectangles (EA/ER) via chord subdivision, line types (LT) as dash patterns,
-// and area fill (RA/RR/WG, FT/PT) - solid via polygon fill, hatch as line spans.
+// area fill (RA/RR/WG, FT/PT) - solid via polygon fill, hatch as line spans -
+// and 7550A polygons (PM/EP/FP) with even-odd multi-contour fill.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -116,19 +117,25 @@ namespace Hpgl.Rendering
         private static void Execute(IList<HpglInstruction> instructions, IPlotSink sink)
         {
             var state = new PlotterState();
+            PolygonRecorder recorder = null;   // non-null while in polygon mode (PM0..PM2)
             foreach (var instruction in instructions)
             {
+                // While in polygon mode, geometry records into the buffer instead of drawing.
+                IPlotSink geom = recorder ?? sink;
                 switch (instruction.Mnemonic)
                 {
                     case "IN":
-                    case "DF": state.Reset(); sink.SetLineType(HpglLineTypes.Solid); break;
+                    case "DF": state.Reset(); sink.SetLineType(HpglLineTypes.Solid); recorder = null; break;
+                    case "PM": recorder = PolygonMode(instruction.Parameters, state, recorder); break;
+                    case "EP": EdgePolygon(state, sink); break;
+                    case "FP": FillPolygonBuffer(state, sink); break;
                     case "LT": sink.SetLineType(instruction.Parameters.Count > 0
                                    ? (int)instruction.Parameters[0] : HpglLineTypes.Solid); break;
                     case "SP": state.Pen = instruction.Parameters.Count > 0 ? (int)instruction.Parameters[0] : 0; break;
-                    case "PU": state.PenDown = false; Move(state, instruction.Parameters, sink); break;
-                    case "PD": state.PenDown = true; Move(state, instruction.Parameters, sink); break;
-                    case "PA": state.Absolute = true; Move(state, instruction.Parameters, sink); break;
-                    case "PR": state.Absolute = false; Move(state, instruction.Parameters, sink); break;
+                    case "PU": state.PenDown = false; Move(state, instruction.Parameters, geom); break;
+                    case "PD": state.PenDown = true; Move(state, instruction.Parameters, geom); break;
+                    case "PA": state.Absolute = true; Move(state, instruction.Parameters, geom); break;
+                    case "PR": state.Absolute = false; Move(state, instruction.Parameters, geom); break;
                     case "SC": state.SetScale(instruction.Parameters); break;
                     case "IP": state.SetInputPoints(instruction.Parameters); break;
                     case "SI": state.SetCharSizeCm(instruction.Parameters); break;
@@ -136,17 +143,17 @@ namespace Hpgl.Rendering
                     case "DI": state.SetDirection(instruction.Parameters); break;
                     case "LB": sink.Label(state, instruction.Text); break;
                     case "CT": if (instruction.Parameters.Count > 0) { /* chord mode (deg/dev) - degrees only */ } break;
-                    case "CI": Circle(state, instruction.Parameters, sink); break;
-                    case "AA": Arc(state, instruction.Parameters, sink, relativeCenter: false); break;
-                    case "AR": Arc(state, instruction.Parameters, sink, relativeCenter: true); break;
-                    case "EA": EdgeRect(state, instruction.Parameters, sink, relative: false); break;
-                    case "ER": EdgeRect(state, instruction.Parameters, sink, relative: true); break;
-                    case "EW": EdgeWedge(state, instruction.Parameters, sink); break;
+                    case "CI": Circle(state, instruction.Parameters, geom); break;
+                    case "AA": Arc(state, instruction.Parameters, geom, relativeCenter: false); break;
+                    case "AR": Arc(state, instruction.Parameters, geom, relativeCenter: true); break;
+                    case "EA": EdgeRect(state, instruction.Parameters, geom, relative: false); break;
+                    case "ER": EdgeRect(state, instruction.Parameters, geom, relative: true); break;
+                    case "EW": EdgeWedge(state, instruction.Parameters, geom); break;
                     case "FT": state.SetFill(instruction.Parameters); break;
                     case "PT": state.SetPenThickness(instruction.Parameters); break;
-                    case "RA": FillRect(state, instruction.Parameters, sink, relative: false); break;
-                    case "RR": FillRect(state, instruction.Parameters, sink, relative: true); break;
-                    case "WG": FillWedge(state, instruction.Parameters, sink); break;
+                    case "RA": FillRect(state, instruction.Parameters, geom, relative: false); break;
+                    case "RR": FillRect(state, instruction.Parameters, geom, relative: true); break;
+                    case "WG": FillWedge(state, instruction.Parameters, geom); break;
                     // IW/PG and other non-geometry ops are ignored for layout in v1.
                 }
             }
@@ -275,7 +282,8 @@ namespace Hpgl.Rendering
             if (relative) { x2 = s.X + s.DeltaX(p[0]); y2 = s.Y + s.DeltaY(p[1]); }
             else s.UserToPlot(p[0], p[1], out x2, out y2);
             double x1 = s.X, y1 = s.Y;
-            FillRegion(s, sink, new[] { x1, x2, x2, x1 }, new[] { y1, y1, y2, y2 });
+            var rect = new[] { new PointD(x1, y1), new PointD(x2, y1), new PointD(x2, y2), new PointD(x1, y2) };
+            FillContours(s, sink, new[] { rect });
             // pen position unchanged
         }
 
@@ -289,74 +297,117 @@ namespace Hpgl.Rendering
             double cx = s.X, cy = s.Y;
 
             int steps = Math.Max(1, (int)Math.Ceiling(Math.Abs(sweep) / Math.Max(0.1, Math.Abs(chord))));
-            var xs = new List<double> { cx };
-            var ys = new List<double> { cy };
+            var pts = new List<PointD> { new PointD(cx, cy) };
             for (int k = 0; k <= steps; k++)
             {
                 double a = (startDeg + sweep * k / steps) * DegToRad;
-                xs.Add(cx + rx * Math.Cos(a));
-                ys.Add(cy + ry * Math.Sin(a));
+                pts.Add(new PointD(cx + rx * Math.Cos(a), cy + ry * Math.Sin(a)));
             }
-            FillRegion(s, sink, xs.ToArray(), ys.ToArray());
+            FillContours(s, sink, new[] { pts.ToArray() });
             // pen position unchanged (centre)
         }
 
-        /// <summary>Fills a closed polygon per the current fill type: solid via the sink, else hatch spans.</summary>
-        private static void FillRegion(PlotterState s, IPlotSink sink, double[] xs, double[] ys)
+        // ---- 7550A polygons (PM / EP / FP) ----------------------------------
+
+        /// <summary>PM n: 0 = enter/clear the buffer, 1 = close sub-contour, 2 = exit (finalize onto state).</summary>
+        private static PolygonRecorder PolygonMode(IReadOnlyList<double> p, PlotterState s, PolygonRecorder rec)
         {
-            int t = s.FillType;
-            if (t == 3 || t == 4)
+            int mode = p.Count > 0 ? (int)p[0] : 0;
+            if (mode == 0) return new PolygonRecorder();          // begin a fresh polygon buffer
+            if (mode == 1) { rec?.Break(); return rec ?? new PolygonRecorder(); }
+            if (rec != null) s.Polygon = rec.Finish();            // mode 2: finalize and exit
+            return null;
+        }
+
+        /// <summary>EP: stroke the stored polygon outline (every sub-contour).</summary>
+        private static void EdgePolygon(PlotterState s, IPlotSink sink)
+        {
+            if (s.Polygon == null) return;
+            foreach (var c in s.Polygon)
+                for (int i = 0; i + 1 < c.Length; i++)
+                    sink.Line(c[i].X, c[i].Y, c[i + 1].X, c[i + 1].Y, s.Pen);
+        }
+
+        /// <summary>FP: fill the stored polygon with the current fill type (even-odd across sub-contours).</summary>
+        private static void FillPolygonBuffer(PlotterState s, IPlotSink sink)
+        {
+            if (s.Polygon != null) FillContours(s, sink, s.Polygon);
+        }
+
+        /// <summary>
+        /// Fills one or more closed contours per the current fill type: solid (FT 1/2) via the sink's
+        /// native polygon fill; hatch (FT 3 parallel, 4 cross-hatch) as Line spans. Multiple contours
+        /// are filled even-odd together (so 7550A polygons with holes hatch correctly).
+        /// </summary>
+        private static void FillContours(PlotterState s, IPlotSink sink, IReadOnlyList<PointD[]> contours)
+        {
+            if (contours.Count == 0) return;
+            if (s.FillType == 3 || s.FillType == 4)
             {
                 double spacing = s.FillSpacingUnits > 0 ? s.FillSpacingUnits : 0.01 * s.FrameDiagonal;
                 if (spacing <= 0) spacing = 1;
-                EmitHatch(sink, xs, ys, s.FillAngleDeg, spacing, s.Pen);
-                if (t == 4) EmitHatch(sink, xs, ys, s.FillAngleDeg + 90, spacing, s.Pen); // cross-hatch
+                EmitHatch(sink, contours, s.FillAngleDeg, spacing, s.Pen);
+                if (s.FillType == 4) EmitHatch(sink, contours, s.FillAngleDeg + 90, spacing, s.Pen);
             }
             else
             {
-                sink.FillPolygon(xs, ys, s.Pen); // FT 1/2 (and shading) -> solid
+                foreach (var c in contours)
+                {
+                    if (c.Length < 3) continue;
+                    var xs = new double[c.Length]; var ys = new double[c.Length];
+                    for (int i = 0; i < c.Length; i++) { xs[i] = c[i].X; ys[i] = c[i].Y; }
+                    sink.FillPolygon(xs, ys, s.Pen); // FT 1/2 (and shading) -> solid (holes not subtracted)
+                }
             }
         }
 
         /// <summary>
-        /// Scanline hatch: emits parallel fill lines at <paramref name="angleDeg"/> spaced by
-        /// <paramref name="spacing"/> across the polygon, clipped to it (even-odd), as Line spans.
-        /// Works by rotating into a frame where the hatch lines are horizontal, scanning, then rotating back.
+        /// Scanline hatch over one or more contours: parallel fill lines at <paramref name="angleDeg"/>
+        /// spaced by <paramref name="spacing"/>, clipped to the contours (even-odd across all of them),
+        /// emitted as Line spans. Rotates into a frame where hatch lines are horizontal, scans, rotates back.
         /// </summary>
-        private static void EmitHatch(IPlotSink sink, double[] xs, double[] ys,
+        private static void EmitHatch(IPlotSink sink, IReadOnlyList<PointD[]> contours,
             double angleDeg, double spacing, int pen)
         {
-            int n = xs.Length;
-            if (n < 3 || spacing <= 0) return;
+            if (spacing <= 0) return;
             double ca = Math.Cos(-angleDeg * DegToRad), sa = Math.Sin(-angleDeg * DegToRad);
 
-            // Rotate vertices into the hatch frame (hatch lines become horizontal).
-            var rx = new double[n];
-            var ry = new double[n];
+            var rot = new List<PointD[]>(contours.Count);
             double minY = double.MaxValue, maxY = double.MinValue;
-            for (int i = 0; i < n; i++)
+            foreach (var c in contours)
             {
-                rx[i] = xs[i] * ca - ys[i] * sa;
-                ry[i] = xs[i] * sa + ys[i] * ca;
-                if (ry[i] < minY) minY = ry[i];
-                if (ry[i] > maxY) maxY = ry[i];
+                if (c.Length < 3) continue;
+                var rc = new PointD[c.Length];
+                for (int i = 0; i < c.Length; i++)
+                {
+                    double ry = c[i].X * sa + c[i].Y * ca;
+                    rc[i] = new PointD(c[i].X * ca - c[i].Y * sa, ry);
+                    if (ry < minY) minY = ry;
+                    if (ry > maxY) maxY = ry;
+                }
+                rot.Add(rc);
             }
+            if (rot.Count == 0) return;
 
-            double back = angleDeg * DegToRad; // rotate spans back to world space
+            double back = angleDeg * DegToRad;
             double cb = Math.Cos(back), sb = Math.Sin(back);
             var crossings = new List<double>();
             int guard = 0;
-            for (double yy = minY + spacing / 2.0; yy < maxY && guard < 100000; yy += spacing, guard++)
+            for (double yy = minY + spacing / 2.0; yy < maxY && guard < 200000; yy += spacing, guard++)
             {
                 crossings.Clear();
-                for (int i = 0; i < n; i++)
+                foreach (var rc in rot)
                 {
-                    int j = (i + 1) % n;
-                    double y0 = ry[i], y1 = ry[j];
-                    if ((y0 <= yy && y1 > yy) || (y1 <= yy && y0 > yy))
+                    int n = rc.Length;
+                    for (int i = 0; i < n; i++)
                     {
-                        double tt = (yy - y0) / (y1 - y0);
-                        crossings.Add(rx[i] + tt * (rx[j] - rx[i]));
+                        int j = (i + 1) % n;
+                        double y0 = rc[i].Y, y1 = rc[j].Y;
+                        if ((y0 <= yy && y1 > yy) || (y1 <= yy && y0 > yy))
+                        {
+                            double tt = (yy - y0) / (y1 - y0);
+                            crossings.Add(rc[i].X + tt * (rc[j].X - rc[i].X));
+                        }
                     }
                 }
                 crossings.Sort();
@@ -376,8 +427,18 @@ namespace Hpgl.Rendering
     // The final auto-fit transform normalizes whatever range results.
     // -------------------------------------------------------------------------
 
+    /// <summary>A point in plot-unit space.</summary>
+    internal struct PointD
+    {
+        public double X, Y;
+        public PointD(double x, double y) { X = x; Y = y; }
+    }
+
     internal sealed class PlotterState
     {
+        /// <summary>The finalized 7550A polygon buffer (PM2), one entry per sub-contour. Null when none.</summary>
+        public List<PointD[]> Polygon;
+
         // Default input-point frame; only the proportions matter (auto-fit normalizes).
         private double _ipX1 = 0, _ipY1 = 0, _ipX2 = 10000, _ipY2 = 10000;
         private double _scXmin, _scXmax, _scYmin, _scYmax;
@@ -406,6 +467,7 @@ namespace Hpgl.Rendering
             DirCos = 1; DirSin = 0;
             ChordAngleDeg = 5.0;
             FillType = 1; FillSpacingUnits = 0; FillAngleDeg = 0; PenThicknessMm = 0.3;
+            Polygon = null;
         }
 
         /// <summary>Diagonal of the P1-P2 (IP) frame in plot units - the basis for default hatch spacing.</summary>
@@ -557,6 +619,50 @@ namespace Hpgl.Rendering
             for (int i = 0; i < pat.Length; i++) arr[i] = (float)Math.Max(0.5, pat[i] * unit);
             return arr;
         }
+    }
+
+    /// <summary>
+    /// Captures geometry as polygon contours while in 7550A polygon mode (PM0..PM2). It is an
+    /// <see cref="IPlotSink"/>, so the existing Move/arc/rectangle helpers record into it unchanged:
+    /// each <see cref="Line"/> appends to the current contour, and a discontinuity (the segment does
+    /// not start where the last ended - e.g. after a pen-up move) begins a new contour. <see cref="Break"/>
+    /// forces a new contour for PM1.
+    /// </summary>
+    internal sealed class PolygonRecorder : IPlotSink
+    {
+        public readonly List<List<PointD>> Contours = new List<List<PointD>>();
+        private List<PointD> _cur;
+        private bool _break = true;
+        private double _lx, _ly;
+        private bool _have;
+
+        public void Line(double x1, double y1, double x2, double y2, int pen)
+        {
+            if (_break || !_have || x1 != _lx || y1 != _ly)
+            {
+                _cur = new List<PointD> { new PointD(x1, y1) };
+                Contours.Add(_cur);
+                _break = false;
+            }
+            _cur.Add(new PointD(x2, y2));
+            _lx = x2; _ly = y2; _have = true;
+        }
+
+        /// <summary>Ends the current contour so the next vector starts a fresh one (PM1).</summary>
+        public void Break() { _break = true; _have = false; }
+
+        /// <summary>The finalized buffer: contours with at least an edge, as arrays.</summary>
+        public List<PointD[]> Finish()
+        {
+            var result = new List<PointD[]>();
+            foreach (var c in Contours)
+                if (c.Count >= 2) result.Add(c.ToArray());
+            return result;
+        }
+
+        public void Label(PlotterState state, string text) { }
+        public void SetLineType(int lineType) { }
+        public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen) { }
     }
 
     internal sealed class MeasureSink : IPlotSink
