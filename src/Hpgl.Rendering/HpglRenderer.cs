@@ -8,8 +8,9 @@
 //
 // This is a clean, general HP-GL/2 vector renderer. Unlike 7470.cpp it contains
 // no per-instrument fix-ups; instrument-specific quirks belong in the caller's
-// capture profile, not here. It covers the primitive set emitted by HP 8560/8566
-// -class spectrum analyzers: IN/DF, IP/SC/IW, SP, PU/PD/PA/PR, LB/DT/SI/SR/DI.
+// capture profile, not here. Covered so far (issue #8): IN/DF, IP/SC, SP,
+// PU/PD/PA/PR, LB/DT/SI/SR/DI, arcs/circles/wedges (CI/AA/AR/EW) and edge
+// rectangles (EA/ER) via chord subdivision, and line types (LT) as dash patterns.
 // -----------------------------------------------------------------------------
 
 using System;
