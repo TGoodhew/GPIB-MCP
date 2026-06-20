@@ -24,3 +24,11 @@ changed and this image needs to be regenerated intentionally, re-render `test.pl
 options above and review the diff before committing.
 
 ![expected render](test-expected.png)
+
+## 7440-test.bmp
+
+The **KE5FX reference render** of the same plot, produced by the HP7470A Plotter Emulator
+(`7470.cpp`) by John Miles, KE5FX — <http://www.ke5fx.com/>. 800×600 BMP. This is the visual
+**alignment target**: known differences from our current output are the **trace colour** (KE5FX
+blue vs our cyan) and the **annotation font** (KE5FX's wider, letter-spaced stroke-style font).
+See issue #21.
