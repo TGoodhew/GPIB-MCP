@@ -19,7 +19,7 @@ namespace GpibMcp.Tests
         [Fact]
         public void ListResources_NoneFound_ReportsEmpty()
         {
-            var text = Get(new FakeInstrumentManager(), "visa_list_resources").Invoke(new JObject());
+            var text = Get(new FakeInstrumentManager(), "visa_list_resources").InvokeText(new JObject());
             Assert.Equal("No VISA resources found.", text);
         }
 
@@ -30,7 +30,7 @@ namespace GpibMcp.Tests
             fake.ResourceList.Add("GPIB0::5::INSTR");
             fake.ResourceList.Add("TCPIP0::10.0.0.1::INSTR");
 
-            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+            var text = Get(fake, "visa_list_resources").InvokeText(new JObject());
 
             Assert.Contains("Found 2", text);
             Assert.Contains("GPIB0::5::INSTR", text);
@@ -45,7 +45,7 @@ namespace GpibMcp.Tests
             for (int addr = 0; addr <= 30; addr++)
                 fake.ResourceList.Add("GPIB0::" + addr + "::INSTR");
 
-            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+            var text = Get(fake, "visa_list_resources").InvokeText(new JObject());
 
             Assert.Contains("WARNING", text);
             Assert.Contains("37204A", text);
@@ -60,7 +60,7 @@ namespace GpibMcp.Tests
             fake.ResourceList.Add("GPIB0::18::INSTR");
             fake.ResourceList.Add("GPIB0::22::INSTR");
 
-            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+            var text = Get(fake, "visa_list_resources").InvokeText(new JObject());
 
             Assert.DoesNotContain("37204A", text);
             Assert.Contains("GPIB0::9::INSTR", text);
@@ -74,7 +74,7 @@ namespace GpibMcp.Tests
             for (int i = 0; i < 25; i++)
                 fake.ResourceList.Add("TCPIP0::10.0.0." + i + "::INSTR");
 
-            var text = Get(fake, "visa_list_resources").Invoke(new JObject());
+            var text = Get(fake, "visa_list_resources").InvokeText(new JObject());
 
             Assert.DoesNotContain("37204A", text);
         }
@@ -86,7 +86,7 @@ namespace GpibMcp.Tests
             fake.QueryResponses["MEAS?"] = "1.234\r\n";
 
             var args = new JObject { ["resource"] = "GPIB0::5::INSTR", ["command"] = "MEAS?" };
-            var text = Get(fake, "visa_query").Invoke(args);
+            var text = Get(fake, "visa_query").InvokeText(args);
 
             Assert.Equal("1.234", text);
         }
@@ -95,7 +95,7 @@ namespace GpibMcp.Tests
         public void Clear_IsForwardedToManager()
         {
             var fake = new FakeInstrumentManager();
-            Get(fake, "visa_clear").Invoke(new JObject { ["resource"] = "GPIB0::5::INSTR" });
+            Get(fake, "visa_clear").InvokeText(new JObject { ["resource"] = "GPIB0::5::INSTR" });
             Assert.Equal("GPIB0::5::INSTR", Assert.Single(fake.Clears));
         }
 
@@ -103,7 +103,7 @@ namespace GpibMcp.Tests
         public void Close_UnknownSession_ReportsNoOpenSession()
         {
             var text = Get(new FakeInstrumentManager(), "visa_close")
-                .Invoke(new JObject { ["resource"] = "GPIB0::5::INSTR" });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::5::INSTR" });
             Assert.Contains("No open session", text);
         }
 
@@ -111,7 +111,7 @@ namespace GpibMcp.Tests
         public void Query_MissingResource_Throws()
         {
             var tool = Get(new FakeInstrumentManager(), "visa_query");
-            Assert.Throws<ArgumentException>(() => tool.Invoke(new JObject { ["command"] = "*IDN?" }));
+            Assert.Throws<ArgumentException>(() => tool.InvokeText(new JObject { ["command"] = "*IDN?" }));
         }
 
         [Theory]
@@ -123,7 +123,7 @@ namespace GpibMcp.Tests
             // Validation must reject the address before any native NI-488.2 call is attempted.
             var tool = Get(new FakeInstrumentManager(), "gpib488_query");
             var args = new JObject { ["primary_address"] = primary, ["command"] = "*IDN?" };
-            Assert.Throws<ArgumentException>(() => tool.Invoke(args));
+            Assert.Throws<ArgumentException>(() => tool.InvokeText(args));
         }
 
         [Fact]

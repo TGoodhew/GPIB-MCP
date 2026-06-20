@@ -41,7 +41,7 @@ namespace GpibMcp.Tests
         public void ListModels_ReportsKnownInstruments()
         {
             var (db, store, visa) = Fixture();
-            var text = Tool("instrument_list_models", db, store, visa).Invoke(new JObject());
+            var text = Tool("instrument_list_models", db, store, visa).InvokeText(new JObject());
             Assert.Contains("8563E", text);
             Assert.Contains("Spectrum Analyzer", text);
         }
@@ -50,7 +50,7 @@ namespace GpibMcp.Tests
         public void Reference_UnknownModel_ReportsUnknown()
         {
             var (db, store, visa) = Fixture();
-            var text = Tool("instrument_reference", db, store, visa).Invoke(new JObject { ["model"] = "ZZZ" });
+            var text = Tool("instrument_reference", db, store, visa).InvokeText(new JObject { ["model"] = "ZZZ" });
             Assert.Contains("Unknown model", text);
         }
 
@@ -58,7 +58,7 @@ namespace GpibMcp.Tests
         public void Reference_KnownModel_ReturnsIndex()
         {
             var (db, store, visa) = Fixture();
-            var text = Tool("instrument_reference", db, store, visa).Invoke(new JObject { ["model"] = "8563E" });
+            var text = Tool("instrument_reference", db, store, visa).InvokeText(new JObject { ["model"] = "8563E" });
             var json = JObject.Parse(text);
             Assert.Equal("8563E", (string)json["model"]);
             Assert.NotNull(json["commandIndex"]);
@@ -69,7 +69,7 @@ namespace GpibMcp.Tests
         {
             var (db, store, visa) = Fixture();
             var text = Tool("instrument_reference", db, store, visa)
-                .Invoke(new JObject { ["model"] = "8563E", ["command"] = "CF" });
+                .InvokeText(new JObject { ["model"] = "8563E", ["command"] = "CF" });
             var json = JObject.Parse(text);
             Assert.Equal("center_frequency", (string)json["name"]);
             Assert.Equal("CF?", (string)json["query"]);
@@ -82,7 +82,7 @@ namespace GpibMcp.Tests
             visa.QueryResponses["ID?"] = "HP8563E";
 
             var text = Tool("assign_instrument", db, store, visa)
-                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
 
             Assert.Contains("NOT yet saved", text);
             Assert.Contains("matches 8563E", text);   // verification ran
@@ -96,7 +96,7 @@ namespace GpibMcp.Tests
             visa.QueryResponses["ID?"] = "HP8563E";
 
             var text = Tool("assign_instrument", db, store, visa)
-                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["confirm"] = true });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["confirm"] = true });
 
             Assert.Contains("Saved assignment", text);
             Assert.Equal("8563E", store.Get("GPIB0::18::INSTR"));
@@ -107,7 +107,7 @@ namespace GpibMcp.Tests
         {
             var (db, store, visa) = Fixture();
             var text = Tool("assign_instrument", db, store, visa)
-                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "NOPE", ["confirm"] = true });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "NOPE", ["confirm"] = true });
             Assert.Contains("Unknown model", text);
             Assert.Empty(store.All());
         }
@@ -119,7 +119,7 @@ namespace GpibMcp.Tests
             visa.QueryResponses["ID?"] = "SOMETHING ELSE";
 
             var text = Tool("assign_instrument", db, store, visa)
-                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
 
             Assert.Contains("does NOT match", text);
         }
@@ -129,7 +129,7 @@ namespace GpibMcp.Tests
         {
             var (db, store, visa) = Fixture();
             store.Set("GPIB0::18::INSTR", "8563E");
-            var text = Tool("list_assignments", db, store, visa).Invoke(new JObject());
+            var text = Tool("list_assignments", db, store, visa).InvokeText(new JObject());
             Assert.Contains("GPIB0::18::INSTR -> 8563E", text);
         }
 
@@ -158,13 +158,13 @@ namespace GpibMcp.Tests
                 string file = Path.Combine(tempDir, "TESTGEN.json");
 
                 // Without confirm: proposed only — nothing written, not in the live DB.
-                var proposed = save.Invoke(new JObject { ["definition"] = def });
+                var proposed = save.InvokeText(new JObject { ["definition"] = def });
                 Assert.Contains("PROPOSED", proposed);
                 Assert.False(File.Exists(file));
                 Assert.False(db.TryGet("TESTGEN", out _));
 
                 // With confirm: file written AND the live DB now resolves the model.
-                var saved = save.Invoke(new JObject { ["definition"] = def, ["confirm"] = true });
+                var saved = save.InvokeText(new JObject { ["definition"] = def, ["confirm"] = true });
                 Assert.Contains("Saved model", saved);
                 Assert.True(File.Exists(file));
                 Assert.True(db.TryGet("TESTGEN", out var d));
@@ -184,12 +184,12 @@ namespace GpibMcp.Tests
             store.Set("GPIB0::18::INSTR", "8563E");
 
             var proposal = Tool("unassign_instrument", db, store, visa)
-                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
             Assert.Contains("Call again with confirm=true", proposal);
             Assert.Equal("8563E", store.Get("GPIB0::18::INSTR")); // still there
 
             var done = Tool("unassign_instrument", db, store, visa)
-                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["confirm"] = true });
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR", ["confirm"] = true });
             Assert.Contains("Removed", done);
             Assert.Null(store.Get("GPIB0::18::INSTR"));
         }

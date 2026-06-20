@@ -172,5 +172,66 @@ namespace GpibMcp.Tests
             Assert.Single(responses);
             Assert.Equal(10, (int)responses[0]["id"]);
         }
+
+        // ---- image content -------------------------------------------------------
+
+        /// <summary>Runs the server with a caller-supplied registry (for custom/image tools).</summary>
+        private static List<JObject> RunRegistry(ToolRegistry registry, params string[] requests)
+        {
+            var input = new StringReader(string.Join("\n", requests) + "\n");
+            var output = new StringWriter();
+            new McpServer(registry, input, output).Run();
+            return output.ToString()
+                .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(JObject.Parse)
+                .ToList();
+        }
+
+        private static string CallTool(string name) =>
+            "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"" + name + "\",\"arguments\":{}}}";
+
+        [Fact]
+        public void ToolsCall_ImageOutput_ReturnsImageContentBlock()
+        {
+            byte[] png = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4 };
+            var registry = new ToolRegistry().Add(new McpTool(
+                "snap", "returns an image", new JObject { ["type"] = "object" },
+                _ => ToolOutput.Image(png, "image/png")));
+
+            var content = (JArray)RunRegistry(registry, Init(), CallTool("snap")).Last()["result"]["content"];
+
+            var image = content.Single();
+            Assert.Equal("image", (string)image["type"]);
+            Assert.Equal("image/png", (string)image["mimeType"]);
+            Assert.Equal(png, Convert.FromBase64String((string)image["data"])); // round-trips to the bytes
+        }
+
+        [Fact]
+        public void ToolsCall_TextThenImage_ReturnsBothBlocksInOrder()
+        {
+            byte[] png = { 0x89, 0x50, 0x4E, 0x47, 9, 9 };
+            var registry = new ToolRegistry().Add(new McpTool(
+                "snap2", "caption + image", new JObject { ["type"] = "object" },
+                _ => ToolOutput.Image(png, "image/png", caption: "8563E screen")));
+
+            var content = (JArray)RunRegistry(registry, Init(), CallTool("snap2")).Last()["result"]["content"];
+
+            Assert.Equal(2, content.Count);
+            Assert.Equal("text", (string)content[0]["type"]);
+            Assert.Equal("8563E screen", (string)content[0]["text"]);
+            Assert.Equal("image", (string)content[1]["type"]);
+        }
+
+        [Fact]
+        public void ToolsCall_StringTool_StillReturnsTextBlock()
+        {
+            // Back-compat: a plain string handler still yields a single text content block.
+            var registry = new ToolRegistry().Add(new McpTool(
+                "say", "text tool", new JObject { ["type"] = "object" }, _ => "hello"));
+
+            var content = (JArray)RunRegistry(registry, Init(), CallTool("say")).Last()["result"]["content"];
+            Assert.Equal("text", (string)content.Single()["type"]);
+            Assert.Equal("hello", (string)content.Single()["text"]);
+        }
     }
 }

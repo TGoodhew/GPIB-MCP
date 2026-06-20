@@ -14,9 +14,16 @@ namespace GpibMcp.Mcp
         public string Name { get; }
         public string Description { get; }
         public JObject InputSchema { get; }
-        private readonly Func<JObject, string> _handler;
+        private readonly Func<JObject, ToolOutput> _handler;
 
+        /// <summary>Text-returning tool: the string becomes a single text content block.</summary>
         public McpTool(string name, string description, JObject inputSchema, Func<JObject, string> handler)
+            : this(name, description, inputSchema, Wrap(handler))
+        {
+        }
+
+        /// <summary>Rich tool: returns one or more content blocks (text and/or images).</summary>
+        public McpTool(string name, string description, JObject inputSchema, Func<JObject, ToolOutput> handler)
         {
             Name = name;
             Description = description;
@@ -24,7 +31,13 @@ namespace GpibMcp.Mcp
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public string Invoke(JObject arguments) => _handler(arguments ?? new JObject());
+        private static Func<JObject, ToolOutput> Wrap(Func<JObject, string> handler)
+        {
+            if (handler == null) throw new ArgumentNullException(nameof(handler));
+            return args => ToolOutput.Text(handler(args));
+        }
+
+        public ToolOutput Invoke(JObject arguments) => _handler(arguments ?? new JObject());
 
         /// <summary>Serializes this tool into the shape expected by tools/list.</summary>
         public JObject ToDescriptor()

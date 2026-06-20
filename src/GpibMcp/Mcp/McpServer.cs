@@ -169,28 +169,36 @@ namespace GpibMcp.Mcp
             Log.Debug("tools/call '" + name + "' args=" + arguments.ToString(Formatting.None));
             try
             {
-                string text = tool.Invoke(arguments);
-                return ToolResult(text, false);
+                ToolOutput output = tool.Invoke(arguments);
+                return ToToolResult(output);
             }
             catch (Exception ex)
             {
                 // Tool execution failures are reported as a normal result with isError=true,
                 // per the MCP spec, so the model can see and react to the error text.
                 Log.Warn("Tool '" + name + "' failed: " + ex.Message);
-                return ToolResult("Error: " + ex.Message, true);
+                return ToToolResult(ToolOutput.Text("Error: " + ex.Message).AsError());
             }
         }
 
-        private static JObject ToolResult(string text, bool isError)
+        private static JObject ToToolResult(ToolOutput output)
         {
-            var result = new JObject
+            var content = new JArray();
+            foreach (var block in output.Content)
             {
-                ["content"] = new JArray
-                {
-                    new JObject { ["type"] = "text", ["text"] = text ?? string.Empty }
-                }
-            };
-            if (isError) result["isError"] = true;
+                if (block.Kind == ToolContentKind.Image)
+                    content.Add(new JObject
+                    {
+                        ["type"] = "image",
+                        ["data"] = block.Data,
+                        ["mimeType"] = block.MimeType
+                    });
+                else
+                    content.Add(new JObject { ["type"] = "text", ["text"] = block.Text ?? string.Empty });
+            }
+
+            var result = new JObject { ["content"] = content };
+            if (output.IsError) result["isError"] = true;
             return result;
         }
 
