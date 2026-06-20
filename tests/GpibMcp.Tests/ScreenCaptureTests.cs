@@ -141,5 +141,34 @@ namespace GpibMcp.Tests
             Run(ch2, new CaptureOptions { OeReply = "0" });
             Assert.Contains("0\r\n", ch2.Sent);
         }
+
+        [Theory]
+        [InlineData("OA", "500,500,0")]
+        [InlineData("OC", "1,2,0")]
+        [InlineData("OF", "40,40")]
+        public void OaOcOf_OnlyAnsweredWhenConfigured(string op, string reply)
+        {
+            // Default: the query is not answered - only the plot command was sent.
+            var unconfigured = new FakeChannel(new[]
+            {
+                Step.Data_("PA1,1;" + op), Step.Timeout(),
+                Step.Data_(Bytes(130, "SP0;")), Step.Timeout()
+            });
+            Run(unconfigured);
+            Assert.Equal(new[] { "PLOT 550,279,9750,7479;" }, unconfigured.Sent);
+
+            // Configured: the query is answered with the supplied reply (+ terminator).
+            var configured = new FakeChannel(new[]
+            {
+                Step.Data_("PA1,1;" + op), Step.Timeout(),
+                Step.Data_(Bytes(130, "SP0;")), Step.Timeout()
+            });
+            var options = new CaptureOptions();
+            if (op == "OA") options.OaReply = reply;
+            else if (op == "OC") options.OcReply = reply;
+            else if (op == "OF") options.OfReply = reply;
+            Run(configured, options);
+            Assert.Contains(reply + "\r\n", configured.Sent);
+        }
     }
 }
