@@ -104,5 +104,41 @@ namespace Hpgl.Rendering.Tests
             byte[] png = HpglRenderer.RenderToPng(bytes);
             Assert.Equal(0x89, png[0]);
         }
+
+        // ---- SVG output ------------------------------------------------------
+
+        [Fact]
+        public void RenderToSvg_ProducesWellFormedDocumentWithGeometryAndLabel()
+        {
+            string svg = HpglRenderer.RenderToSvg(SamplePlot,
+                new HpglRenderOptions { Width = 800, Height = 600 });
+
+            Assert.StartsWith("<svg", svg);
+            Assert.EndsWith("</svg>", svg);
+            Assert.Contains("width=\"800\"", svg);
+            Assert.Contains("viewBox=\"0 0 800 600\"", svg);
+            Assert.Contains("<polyline", svg);          // border/trace vectors
+            Assert.Contains("<text", svg);              // the annotation label
+            Assert.Contains("CF 300 MHz", svg);         // label text survived (XML-escaped)
+            Assert.DoesNotContain("\u0003", svg);       // control terminator stripped
+        }
+
+        [Fact]
+        public void RenderToSvg_CoalescesConnectedSegmentsIntoFewPolylines()
+        {
+            // The five-segment border is one connected pen-down run => a single polyline.
+            string hpgl = "IN;SP1;PU0,0;PD10000,0;PD10000,7000;PD0,7000;PD0,0;SP0;";
+            string svg = HpglRenderer.RenderToSvg(hpgl);
+            int polylines = svg.Split(new[] { "<polyline" }, System.StringSplitOptions.None).Length - 1;
+            Assert.Equal(1, polylines);
+        }
+
+        [Fact]
+        public void RenderToSvg_EmptyInput_ProducesCanvasWithoutThrowing()
+        {
+            string svg = HpglRenderer.RenderToSvg("", new HpglRenderOptions { Width = 100, Height = 80 });
+            Assert.Contains("<rect", svg);             // background fill only
+            Assert.DoesNotContain("<polyline", svg);
+        }
     }
 }

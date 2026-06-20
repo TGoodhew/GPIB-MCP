@@ -66,6 +66,44 @@ namespace Hpgl.Rendering
         public static byte[] RenderToPng(byte[] hpglBytes, HpglRenderOptions options = null) =>
             RenderToPng(DecodeLatin1(hpglBytes), options);
 
+        /// <summary>
+        /// Renders HP-GL/2 text to a self-contained SVG document (a string). The SVG uses the
+        /// same auto-fit transform and pen palette as the raster path, but stays vector and
+        /// compact (consecutive connected segments are merged into a single &lt;polyline&gt;).
+        /// This is the form that can be shown inline in a chat as an SVG artifact.
+        /// </summary>
+        public static string RenderToSvg(string hpgl, HpglRenderOptions options = null)
+        {
+            options = options ?? new HpglRenderOptions();
+            var instructions = HpglParser.Parse(hpgl ?? string.Empty);
+
+            var measure = new MeasureSink();
+            Execute(instructions, measure);
+
+            var sb = new StringBuilder();
+            sb.Append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").Append(options.Width)
+              .Append("\" height=\"").Append(options.Height)
+              .Append("\" viewBox=\"0 0 ").Append(options.Width).Append(' ').Append(options.Height)
+              .Append("\">\n");
+            sb.Append("<rect width=\"").Append(options.Width).Append("\" height=\"").Append(options.Height)
+              .Append("\" fill=\"").Append(SvgSink.ToHex(options.ResolveBackground())).Append("\"/>\n");
+
+            if (measure.HasExtent)
+            {
+                var transform = PlotTransform.Fit(measure, options);
+                var sink = new SvgSink(sb, transform, options);
+                Execute(instructions, sink);
+                sink.Flush();
+            }
+
+            sb.Append("</svg>");
+            return sb.ToString();
+        }
+
+        /// <summary>Renders raw HP-GL/2 bytes (decoded as Latin-1) to an SVG document string.</summary>
+        public static string RenderToSvg(byte[] hpglBytes, HpglRenderOptions options = null) =>
+            RenderToSvg(DecodeLatin1(hpglBytes), options);
+
         private static string DecodeLatin1(byte[] bytes) =>
             bytes == null ? string.Empty : Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
 
@@ -341,6 +379,98 @@ namespace Hpgl.Rendering
         {
             foreach (var p in _pens.Values) p.Dispose();
             _pens.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Emits SVG elements for the fitted plot. Consecutive pen-down segments that share a pen
+    /// and join end-to-end are coalesced into one &lt;polyline&gt; so a dense trace stays small.
+    /// Coordinates are rounded to whole pixels - sub-pixel precision is invisible at screen sizes
+    /// and would only bloat the document.
+    /// </summary>
+    internal sealed class SvgSink : IPlotSink
+    {
+        private readonly StringBuilder _sb;
+        private readonly PlotTransform _t;
+        private readonly HpglRenderOptions _opt;
+
+        private readonly StringBuilder _points = new StringBuilder();
+        private int _pen = int.MinValue;
+        private int _lastX, _lastY;
+        private bool _open;
+
+        public SvgSink(StringBuilder sb, PlotTransform t, HpglRenderOptions opt) { _sb = sb; _t = t; _opt = opt; }
+
+        public void Line(double x1, double y1, double x2, double y2, int pen)
+        {
+            int ax = R(_t.MapX(x1)), ay = R(_t.MapY(y1));
+            int bx = R(_t.MapX(x2)), by = R(_t.MapY(y2));
+
+            if (_open && pen == _pen && ax == _lastX && ay == _lastY)
+            {
+                _points.Append(' ').Append(bx).Append(',').Append(by);
+            }
+            else
+            {
+                Flush();
+                _pen = pen;
+                _points.Append(ax).Append(',').Append(ay).Append(' ').Append(bx).Append(',').Append(by);
+                _open = true;
+            }
+            _lastX = bx; _lastY = by;
+        }
+
+        public void Label(PlotterState state, string text)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            Flush(); // keep label text painted after the geometry around it
+
+            int px = R(_t.MapX(state.X)), py = R(_t.MapY(state.Y));
+            int size = (int)Math.Max(6.0, state.CharHeightUnits * _t.Scale);
+            double angleDeg = Math.Atan2(-state.DirSin, state.DirCos) * 180.0 / Math.PI;
+
+            _sb.Append("<text x=\"").Append(px).Append("\" y=\"").Append(py)
+               .Append("\" fill=\"").Append(ToHex(_opt.ResolvePen(state.Pen)))
+               .Append("\" font-family=\"sans-serif\" font-size=\"").Append(size).Append("px\"");
+            if (Math.Abs(angleDeg) > 0.01)
+                _sb.Append(" transform=\"rotate(").Append(R((float)angleDeg))
+                   .Append(' ').Append(px).Append(' ').Append(py).Append(")\"");
+            _sb.Append('>').Append(Escape(text)).Append("</text>\n");
+        }
+
+        /// <summary>Writes the pending polyline (if any) and resets the batch.</summary>
+        public void Flush()
+        {
+            if (!_open) return;
+            _sb.Append("<polyline fill=\"none\" stroke=\"").Append(ToHex(_opt.ResolvePen(_pen)))
+               .Append("\" stroke-width=\"1\" points=\"").Append(_points).Append("\"/>\n");
+            _points.Clear();
+            _open = false;
+        }
+
+        private static int R(float v) => (int)Math.Round(v);
+
+        internal static string ToHex(Color c) =>
+            "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+
+        private static string Escape(string s)
+        {
+            var sb = new StringBuilder(s.Length);
+            foreach (char c in s)
+            {
+                switch (c)
+                {
+                    case '&': sb.Append("&amp;"); break;
+                    case '<': sb.Append("&lt;"); break;
+                    case '>': sb.Append("&gt;"); break;
+                    case '"': sb.Append("&quot;"); break;
+                    default:
+                        // Drop control characters (e.g. a stray label terminator) that are illegal in XML.
+                        if (c >= ' ' || c == '\t') sb.Append(c);
+                        break;
+                }
+            }
+            return sb.ToString();
         }
     }
 }

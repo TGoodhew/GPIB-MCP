@@ -20,9 +20,12 @@ namespace GpibMcp.Tools
         {
             registry.Add(new McpTool(
                 "instrument_capture_screen",
-                "Capture the instrument's screen as an image. Uses HP-GL plotter emulation per the " +
-                "model's capture profile (e.g. an HP 8563E spectrum analyzer), renders it, and returns " +
-                "the screenshot inline. The model is taken from the resource's assignment unless given.",
+                "Capture the instrument's screen. Uses HP-GL plotter emulation per the model's capture " +
+                "profile (e.g. an HP 8563E spectrum analyzer), renders it, and returns it so it can be " +
+                "shown INLINE in the chat. The result includes an SVG you should display by creating an " +
+                "image/svg+xml artifact (Claude Desktop does not render tool-result image blocks inline). " +
+                "The PNG is also saved to the user's Pictures folder; pass save_dir to store it elsewhere. " +
+                "The model is taken from the resource's assignment unless given.",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'."),
                     Prop("model", "string", "Model/profile to use if the resource isn't assigned."),
@@ -30,7 +33,9 @@ namespace GpibMcp.Tools
                     Prop("height", "integer", "Output image height in pixels (default 768)."),
                     Prop("background", "string", "'black' (default) or 'white'."),
                     Prop("return_hpgl", "boolean", "Also return the raw HP-GL/2 source text (default false)."),
-                    Prop("save_path", "string", "Optional path to also save the PNG to. Defaults to a captures folder; the saved path is reported so you can open the image even if it isn't shown inline."),
+                    Prop("inline_svg", "boolean", "Return an SVG to display inline as an artifact (default true). Set false to fall back to image-block + saved-file only."),
+                    Prop("save_dir", "string", "Folder to save the PNG into (e.g. 'C:\\\\Users\\\\me\\\\Pictures\\\\captures'). Defaults to the user's Pictures folder. Use this for 'capture the screen and store it in <folder>'."),
+                    Prop("save_path", "string", "Full path (including filename) to save the PNG to. Overrides save_dir."),
                     Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000).")),
                 (Func<Newtonsoft.Json.Linq.JObject, ToolOutput>)(args =>
                 {
@@ -84,26 +89,46 @@ namespace GpibMcp.Tools
                             ? HpglBackground.White : HpglBackground.Black
                     };
 
+                    byte[] hpglBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);
+                    bool inlineSvg = Bool(args, "inline_svg", true);
+
                     byte[] png;
+                    string svg = null;
                     try
                     {
-                        png = HpglRenderer.RenderToPng(
-                            Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl), renderOptions);
+                        png = HpglRenderer.RenderToPng(hpglBytes, renderOptions);
+                        if (inlineSvg) svg = HpglRenderer.RenderToSvg(hpglBytes, renderOptions);
                     }
                     catch (Exception ex)
                     {
                         return Error("Captured " + capture.ByteCount + " bytes but rendering failed: " + ex.Message);
                     }
 
-                    // Also save the PNG to a file - Claude Desktop does not reliably render
-                    // tool-result images inline, so a path the user can open is the dependable path.
+                    // Always save the PNG so the user has a durable copy (default: their Pictures folder).
                     string savedTo = SaveCapture(args, def.Model, png);
 
-                    string caption = def.Model + " screen - " + capture.ByteCount + " bytes HP-GL, " +
-                                     capture.Completion + ", " + capture.ElapsedMs + " ms";
-                    if (savedTo != null) caption += "  |  saved to: " + savedTo;
+                    string meta = def.Model + " screen - " + capture.ByteCount + " bytes HP-GL, " +
+                                  capture.Completion + ", " + capture.ElapsedMs + " ms";
+                    if (savedTo != null) meta += "  |  saved to: " + savedTo;
 
-                    var output = ToolOutput.Image(png, "image/png", caption);
+                    var output = new ToolOutput();
+                    if (inlineSvg && svg != null)
+                    {
+                        // Claude Desktop won't paint a tool-result image block inline, but it WILL render
+                        // an SVG artifact. Hand the model the SVG and tell it to display it inline.
+                        output.AddText(
+                            meta + "\n\n" +
+                            "To show this capture inline in the chat, create an image/svg+xml artifact " +
+                            "from the SVG below (render it - do not just describe it). " +
+                            "The same image was also saved" +
+                            (savedTo != null ? " to " + savedTo : "") + ".\n\n" + svg);
+                        output.AddImage(png, "image/png"); // also provide the raster for vision / future clients
+                    }
+                    else
+                    {
+                        output.AddText(meta);
+                        output.AddImage(png, "image/png");
+                    }
                     if (Bool(args, "return_hpgl", false)) output.AddText(capture.Hpgl);
                     return output;
                 })));
@@ -111,7 +136,11 @@ namespace GpibMcp.Tools
 
         private static ToolOutput Error(string message) => ToolOutput.Text(message).AsError();
 
-        /// <summary>Saves the PNG to disk (best effort) and returns the path, or null on failure.</summary>
+        /// <summary>
+        /// Saves the PNG to disk (best effort) and returns the path, or null on failure.
+        /// Destination precedence: save_path (full file) &gt; save_dir (folder) &gt;
+        /// GPIB_MCP_CAPTURE_DIR env &gt; the user's Pictures folder (\GpibMcp Captures).
+        /// </summary>
         private static string SaveCapture(JObject args, string model, byte[] png)
         {
             try
@@ -119,11 +148,13 @@ namespace GpibMcp.Tools
                 string path = Str(args, "save_path", null);
                 if (string.IsNullOrEmpty(path))
                 {
-                    string dir = Environment.GetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR");
+                    string dir = Str(args, "save_dir", null);
+                    if (string.IsNullOrWhiteSpace(dir))
+                        dir = Environment.GetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR");
                     if (string.IsNullOrWhiteSpace(dir))
                         dir = Path.Combine(
-                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                            "GpibMcp", "captures");
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+                            "GpibMcp Captures");
                     Directory.CreateDirectory(dir);
                     path = Path.Combine(dir, "capture-" + SanitizeFileName(model) + "-" +
                                              DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".png");

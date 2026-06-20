@@ -101,6 +101,50 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Capture_Default_ReturnsInlineSvgForArtifact()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+
+            Assert.False(output.IsError);
+            string text = output.AsText();
+            Assert.Contains("<svg", text);                 // SVG handed to the model to render inline
+            Assert.Contains("artifact", text);             // instruction to display it
+            Assert.Contains(output.Content, b => b.Kind == ToolContentKind.Image); // raster kept too
+        }
+
+        [Fact]
+        public void Capture_InlineSvgFalse_FallsBackToImageOnly()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["inline_svg"] = false });
+
+            Assert.False(output.IsError);
+            Assert.DoesNotContain("<svg", output.AsText());
+            Assert.Contains(output.Content, b => b.Kind == ToolContentKind.Image);
+        }
+
+        [Fact]
+        public void Capture_SaveDir_WritesIntoFolderAndReportsPath()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            string dir = Path.Combine(Path.GetTempPath(), "captest_" + Path.GetRandomFileName());
+            try
+            {
+                var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                    .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["save_dir"] = dir });
+
+                Assert.False(output.IsError);
+                var pngs = Directory.GetFiles(dir, "*.png");
+                Assert.Single(pngs);
+                Assert.Contains("saved to: " + pngs[0], output.AsText());
+            }
+            finally { if (Directory.Exists(dir)) Directory.Delete(dir, true); }
+        }
+
+        [Fact]
         public void Capture_NoModelKnown_ReturnsError()
         {
             var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });

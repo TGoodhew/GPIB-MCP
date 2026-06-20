@@ -271,7 +271,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `list_assignments` | — | — | List recorded resource→model assignments |
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `timeout_ms` | Capture the instrument's screen as an inline image (HP-GL plotter emulation) |
+| `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen (HP-GL plotter emulation); returns an SVG to show inline + saves a PNG to Pictures |
 
 Argument notes:
 
@@ -384,25 +384,37 @@ Keep the database honest:
 
 For instruments that can plot to an HP 7470A-style plotter (e.g. the **HP 8563E** spectrum
 analyzer), `instrument_capture_screen` grabs the **actual screen** — graticule, trace, markers,
-and annotation — and returns it as an inline PNG. Ask Claude:
+and annotation. Ask Claude:
 
-> *"Capture the screen of the analyzer at GPIB0::18."*
+> *"Capture the screen of the analyzer at GPIB0::18 and show it to me."*
 
 It works by **plotter emulation**: the server sends the model's plot command (from its capture
 profile), plays the role of the plotter — answering the instrument's `OS` status handshake — and
-collects the HP-GL, which is then rasterized by [`Hpgl.Rendering`](src/Hpgl.Rendering/).
+collects the HP-GL, which [`Hpgl.Rendering`](src/Hpgl.Rendering/) renders to **both** a PNG and a
+compact **SVG**.
 
 - The model is taken from the resource's [assignment](#instrument-command-database), or pass `model=`.
 - Only models with a `capture` profile in the database are supported (the 8563E ships with one;
   add others as data — `{ "method": "hpgl", "plotCommand": "...", "preRoll": "..." }`).
 - `return_hpgl=true` also returns the raw HP-GL/2 source; `background`, `width`, `height` tune the image.
-- Every capture is also **saved to a PNG file** (default `%LOCALAPPDATA%\GpibMcp\captures`, override with
-  `save_path` or the `GPIB_MCP_CAPTURE_DIR` env var) and the path is reported in the result.
+- Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
+  (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
+  (`save_dir`), or pass `save_path` for a full filename. The saved path is reported in the result.
 
-> **Note on Claude Desktop:** the tool returns a spec-correct MCP image content block, but Claude
-> Desktop does not reliably render tool-result images inline (when it does, the image is inside the
-> expandable tool-call block). The saved-to-disk path is the dependable way to view the capture;
-> the model still receives the image and can describe/act on it.
+#### Showing it inline in the chat
+
+Claude Desktop does **not** render MCP tool-result *image* blocks inline in the conversation — a
+[known client limitation](https://github.com/anthropics/claude-ai-mcp/issues/238) (the image is
+visible to the model and, at best, buried inside the expandable tool-call block). It **does**,
+however, render **SVG artifacts** inline. So the tool returns the capture as an SVG and asks Claude
+to display it as an `image/svg+xml` artifact — which appears inline with the rest of the chat. The
+spec-correct PNG image block is still included (for the model's vision and for clients that do render
+it), and the PNG is always saved to disk regardless.
+
+- `inline_svg=true` (default) returns the SVG + the instruction to render it as an artifact.
+- `inline_svg=false` falls back to the image-block + saved-file behaviour only.
+- The vector SVG is small (a real 8563E capture is ~9 KB), so it reproduces reliably as an artifact.
+  You can preview the exact look by opening [`Test/test.svg`](Test/test.svg) in a browser.
 
 > The capture/render technique is derived from the HP7470A Plotter Emulator (`7470.cpp`) by
 > John Miles, KE5FX — <http://www.ke5fx.com/>.
