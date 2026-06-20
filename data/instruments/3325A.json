@@ -25,7 +25,7 @@
       "rqs": 64
     },
     "operations": {
-      "sweepComplete": { "arm": "SS;", "expectBit": "stop" }
+      "sweepComplete": { "arm": "RSW;SS;", "expectBit": "stop" }
     }
   },
   "commands": [
