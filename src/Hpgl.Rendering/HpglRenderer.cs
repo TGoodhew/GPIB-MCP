@@ -119,7 +119,9 @@ namespace Hpgl.Rendering
                 switch (instruction.Mnemonic)
                 {
                     case "IN":
-                    case "DF": state.Reset(); break;
+                    case "DF": state.Reset(); sink.SetLineType(HpglLineTypes.Solid); break;
+                    case "LT": sink.SetLineType(instruction.Parameters.Count > 0
+                                   ? (int)instruction.Parameters[0] : HpglLineTypes.Solid); break;
                     case "SP": state.Pen = instruction.Parameters.Count > 0 ? (int)instruction.Parameters[0] : 0; break;
                     case "PU": state.PenDown = false; Move(state, instruction.Parameters, sink); break;
                     case "PD": state.PenDown = true; Move(state, instruction.Parameters, sink); break;
@@ -138,7 +140,7 @@ namespace Hpgl.Rendering
                     case "EA": EdgeRect(state, instruction.Parameters, sink, relative: false); break;
                     case "ER": EdgeRect(state, instruction.Parameters, sink, relative: true); break;
                     case "EW": EdgeWedge(state, instruction.Parameters, sink); break;
-                    // LT/IW/PG and other non-geometry ops are ignored for layout in v1.
+                    // IW/PG and other non-geometry ops are ignored for layout in v1.
                 }
             }
         }
@@ -374,6 +376,45 @@ namespace Hpgl.Rendering
     {
         void Line(double x1, double y1, double x2, double y2, int pen);
         void Label(PlotterState state, string text);
+        /// <summary>Sets the current line type for subsequent vectors (-1 = solid; 0-6 = HP-GL patterns).</summary>
+        void SetLineType(int lineType);
+    }
+
+    /// <summary>
+    /// HP-GL line-type (LT) patterns rendered as dash arrays. Each pattern is a sequence of
+    /// on/off run lengths; the full repeat is scaled to a fraction of the canvas diagonal (HP-GL
+    /// default 4% of the P1-P2 diagonal), so dashes look right at any output size.
+    /// </summary>
+    internal static class HpglLineTypes
+    {
+        // Sentinel distinct from every real line type (-6..6); negative reals are adaptive variants.
+        public const int Solid = int.MinValue;
+        public const double DefaultLengthFraction = 0.04;
+
+        // Relative on/off run lengths per LT (LT0 ≈ dots; LT1-6 dashes/dash-dots).
+        private static readonly Dictionary<int, double[]> Patterns = new Dictionary<int, double[]>
+        {
+            [0] = new[] { 0.5, 2.0 },
+            [1] = new[] { 1.0, 2.0 },
+            [2] = new[] { 3.0, 3.0 },
+            [3] = new[] { 6.0, 3.0 },
+            [4] = new[] { 6.0, 3.0, 1.0, 3.0 },
+            [5] = new[] { 6.0, 3.0, 1.0, 3.0, 1.0, 3.0 },
+            [6] = new[] { 3.0, 3.0, 1.0, 3.0 },
+        };
+
+        /// <summary>Returns the scaled dash run-lengths (pixels) for a line type, or null for solid.</summary>
+        public static float[] DashArray(int lineType, double canvasDiagonalPx)
+        {
+            if (lineType == Solid) return null;
+            double[] pat;
+            if (!Patterns.TryGetValue(Math.Abs(lineType), out pat)) return null; // solid / unknown
+            double sum = 0; foreach (var v in pat) sum += v;
+            double unit = DefaultLengthFraction * canvasDiagonalPx / sum;
+            var arr = new float[pat.Length];
+            for (int i = 0; i < pat.Length; i++) arr[i] = (float)Math.Max(0.5, pat[i] * unit);
+            return arr;
+        }
     }
 
     internal sealed class MeasureSink : IPlotSink
@@ -386,6 +427,8 @@ namespace Hpgl.Rendering
         {
             Include(x1, y1); Include(x2, y2);
         }
+
+        public void SetLineType(int lineType) { /* line style does not affect extent */ }
 
         public void Label(PlotterState state, string text)
         {
@@ -452,8 +495,16 @@ namespace Hpgl.Rendering
         private readonly HpglRenderOptions _opt;
         private readonly Dictionary<int, Pen> _pens = new Dictionary<int, Pen>();
         private readonly FontFamily _fontFamily = FontFamily.GenericSansSerif;
+        private readonly double _diag;
+        private int _lineType = HpglLineTypes.Solid;
 
-        public GdiSink(Graphics g, PlotTransform t, HpglRenderOptions opt) { _g = g; _t = t; _opt = opt; }
+        public GdiSink(Graphics g, PlotTransform t, HpglRenderOptions opt)
+        {
+            _g = g; _t = t; _opt = opt;
+            _diag = Math.Sqrt((double)opt.Width * opt.Width + (double)opt.Height * opt.Height);
+        }
+
+        public void SetLineType(int lineType) { _lineType = lineType; }
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
@@ -491,6 +542,10 @@ namespace Hpgl.Rendering
                 p = new Pen(_opt.ResolvePen(pen), 1f);
                 _pens[pen] = p;
             }
+            // Apply the current line type. (Cached pen mutated per draw - safe single-threaded.)
+            float[] dash = HpglLineTypes.DashArray(_lineType, _diag);
+            if (dash == null) p.DashStyle = DashStyle.Solid;
+            else p.DashPattern = dash;
             return p;
         }
 
@@ -514,18 +569,28 @@ namespace Hpgl.Rendering
         private readonly HpglRenderOptions _opt;
 
         private readonly StringBuilder _points = new StringBuilder();
+        private readonly double _diag;
         private int _pen = int.MinValue;
+        private int _lineType = HpglLineTypes.Solid;
+        private int _runLineType = HpglLineTypes.Solid;
         private int _lastX, _lastY;
         private bool _open;
 
-        public SvgSink(StringBuilder sb, PlotTransform t, HpglRenderOptions opt) { _sb = sb; _t = t; _opt = opt; }
+        public SvgSink(StringBuilder sb, PlotTransform t, HpglRenderOptions opt)
+        {
+            _sb = sb; _t = t; _opt = opt;
+            _diag = Math.Sqrt((double)opt.Width * opt.Width + (double)opt.Height * opt.Height);
+        }
+
+        public void SetLineType(int lineType) { _lineType = lineType; }
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
             int ax = R(_t.MapX(x1)), ay = R(_t.MapY(y1));
             int bx = R(_t.MapX(x2)), by = R(_t.MapY(y2));
 
-            if (_open && pen == _pen && ax == _lastX && ay == _lastY)
+            // Coalesce only when pen, line type, and join point all match.
+            if (_open && pen == _pen && _lineType == _runLineType && ax == _lastX && ay == _lastY)
             {
                 _points.Append(' ').Append(bx).Append(',').Append(by);
             }
@@ -533,6 +598,7 @@ namespace Hpgl.Rendering
             {
                 Flush();
                 _pen = pen;
+                _runLineType = _lineType;
                 _points.Append(ax).Append(',').Append(ay).Append(' ').Append(bx).Append(',').Append(by);
                 _open = true;
             }
@@ -562,7 +628,19 @@ namespace Hpgl.Rendering
         {
             if (!_open) return;
             _sb.Append("<polyline fill=\"none\" stroke=\"").Append(ToHex(_opt.ResolvePen(_pen)))
-               .Append("\" stroke-width=\"1\" points=\"").Append(_points).Append("\"/>\n");
+               .Append("\" stroke-width=\"1\"");
+            float[] dash = HpglLineTypes.DashArray(_runLineType, _diag);
+            if (dash != null)
+            {
+                _sb.Append(" stroke-dasharray=\"");
+                for (int i = 0; i < dash.Length; i++)
+                {
+                    if (i > 0) _sb.Append(',');
+                    _sb.Append(R(dash[i]));
+                }
+                _sb.Append('"');
+            }
+            _sb.Append(" points=\"").Append(_points).Append("\"/>\n");
             _points.Clear();
             _open = false;
         }

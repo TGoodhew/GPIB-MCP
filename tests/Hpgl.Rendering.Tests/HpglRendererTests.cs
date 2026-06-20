@@ -191,6 +191,49 @@ namespace Hpgl.Rendering.Tests
             Assert.Equal(5, Vertices(svg));
         }
 
+        // ---- line types (issue #8 §3.5) -------------------------------------
+
+        [Fact]
+        public void LineType_DashedVector_EmitsStrokeDashArray()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;LT2;PU0,0;PD10000,0;");
+            Assert.Contains("<polyline", svg);
+            Assert.Contains("stroke-dasharray=", svg);
+        }
+
+        [Fact]
+        public void LineType_Solid_HasNoDashArray()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PU0,0;PD10000,0;");
+            Assert.Contains("<polyline", svg);
+            Assert.DoesNotContain("stroke-dasharray", svg);
+        }
+
+        [Fact]
+        public void LineType_RestoredToSolid_BySubsequentLT()
+        {
+            // LT2 dashes, then LT (no params) restores solid -> two polylines, one dashed one not.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;LT2;PU0,0;PD5000,0;LT;PU0,1000;PD5000,1000;");
+            Assert.Equal(2, Polylines(svg));
+            int dashed = svg.Split(new[] { "stroke-dasharray" }, System.StringSplitOptions.None).Length - 1;
+            Assert.Equal(1, dashed); // only the LT2 run carries a dash array
+        }
+
+        [Fact]
+        public void LineType_ChangeBreaksPolylineCoalescing()
+        {
+            // A connected path whose line type changes mid-run must split into separate polylines.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PU0,0;PD5000,0;LT3;PD5000,5000;");
+            Assert.Equal(2, Polylines(svg));
+        }
+
+        [Fact]
+        public void LineType_ResetByIN_BackToSolid()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;LT2;IN;SP1;PU0,0;PD9000,0;");
+            Assert.DoesNotContain("stroke-dasharray", svg);
+        }
+
         [Fact]
         public void Geometry_RendersToBitmapWithoutThrowing()
         {
