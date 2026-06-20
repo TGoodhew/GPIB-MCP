@@ -79,6 +79,57 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Load_MergesMissingTopLevelBlock_FromBundledIntoUserCopy()
+        {
+            // #25: a user copy that predates a bundled improvement (here: lacks a statusModel) must
+            // still pick up the new block from the bundled default, while keeping its own overrides.
+            string bundled = NewTempDir();
+            string user = NewTempDir();
+            try
+            {
+                File.WriteAllText(Path.Combine(bundled, "x.json"),
+                    "{\"model\":\"X\",\"category\":\"bundled\"," +
+                    "\"statusModel\":{\"srqSupported\":true,\"bits\":{\"stop\":2}," +
+                    "\"operations\":{\"sweepComplete\":{\"arm\":\"SS;\",\"expectBit\":\"stop\"}}}}");
+                // user copy has its own category but NO statusModel (old, pre-improvement)
+                File.WriteAllText(Path.Combine(user, "x.json"),
+                    "{\"model\":\"X\",\"category\":\"user\"}");
+
+                var db = InstrumentDatabase.Load(new[] { bundled, user });
+
+                Assert.True(db.TryGet("X", out var x));
+                Assert.Equal("user", x.Category);          // user's own block still wins
+                Assert.NotNull(x.StatusModel);             // ...and the bundled block fell through
+                Assert.True(x.StatusModel.SrqSupported);
+                Assert.Equal("sweepComplete", x.StatusModel.Operations.Keys.Single());
+            }
+            finally { Directory.Delete(bundled, true); Directory.Delete(user, true); }
+        }
+
+        [Fact]
+        public void Load_UserBlockWinsWholesale_NoFieldLevelMerge()
+        {
+            // The merge is coarse (per top-level block): if the user defines a block, it wins entirely -
+            // no franken-mix of the user's and bundled's fields within that block.
+            string bundled = NewTempDir();
+            string user = NewTempDir();
+            try
+            {
+                File.WriteAllText(Path.Combine(bundled, "x.json"),
+                    "{\"model\":\"X\",\"statusModel\":{\"srqSupported\":true,\"bits\":{\"a\":1,\"b\":2}}}");
+                File.WriteAllText(Path.Combine(user, "x.json"),
+                    "{\"model\":\"X\",\"statusModel\":{\"srqSupported\":true,\"bits\":{\"a\":9}}}");
+
+                var db = InstrumentDatabase.Load(new[] { bundled, user });
+
+                Assert.True(db.TryGet("X", out var x));
+                Assert.Equal(9, x.StatusModel.BitValue("a"));   // user's block, intact
+                Assert.Null(x.StatusModel.BitValue("b"));        // bundled's 'b' did NOT leak in
+            }
+            finally { Directory.Delete(bundled, true); Directory.Delete(user, true); }
+        }
+
+        [Fact]
         public void Load_AcceptsScalarOrArrayForStringListFields()
         {
             string dir = NewTempDir();

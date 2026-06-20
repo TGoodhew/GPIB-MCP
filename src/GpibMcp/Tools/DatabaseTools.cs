@@ -28,8 +28,13 @@ namespace GpibMcp.Tools
         };
 
         public static void Register(ToolRegistry registry, InstrumentDatabase db,
-                                    AssignmentStore assignments, IInstrumentManager visa)
+                                    AssignmentStore assignments, IInstrumentManager visa,
+                                    string bundledDir = null)
         {
+            // Where the shipped definitions live (next to the exe in production); injectable for tests.
+            bundledDir = bundledDir ?? InstrumentPaths.BundledDatabaseDir(
+                Path.GetDirectoryName(typeof(DatabaseTools).Assembly.Location));
+
             // ---- What instruments do you know about? ----------------------------
             registry.Add(new McpTool(
                 "instrument_list_models",
@@ -295,6 +300,55 @@ namespace GpibMcp.Tools
                     db.Upsert(def); // make it usable immediately
                     return "Saved model '" + def.Model + "' (" + cmds + " commands) to " + file + ".";
                 }));
+
+            // ---- Reset a user copy back to the bundled (shipped) definition -----
+            registry.Add(new McpTool(
+                "instrument_db_refresh",
+                "Reset a model's USER database copy back to the bundled (shipped) definition so bundled " +
+                "fixes/updates take effect. Use when a shipped definition was corrected but your saved copy " +
+                "still has the old values (new bundled BLOCKS are merged automatically on load; whole-block " +
+                "value changes you already have are not - this pulls them in). Backs the user copy up to " +
+                "<file>.bak and removes it (the bundled default is then used). Does NOT change anything " +
+                "unless confirm=true.",
+                Schema(
+                    Required("model", "string", "Model name or alias to restore from the bundled defaults."),
+                    Prop("confirm", "boolean", "Set true to actually reset the user copy (default false).")),
+                args =>
+                {
+                    string model = ReqStr(args, "model");
+                    string userDir = InstrumentPaths.UserDatabaseDir();
+
+                    JObject bundled; string bundledFile;
+                    if (!TryFindByModel(bundledDir, model, out bundled, out bundledFile))
+                        return "No bundled definition matches '" + model + "'. instrument_db_refresh only " +
+                               "restores shipped models; there is nothing to reset to.";
+                    string canonical = (string)bundled.GetValue("model", StringComparison.OrdinalIgnoreCase);
+
+                    JObject userObj; string userFile;
+                    if (!TryFindByModel(userDir, model, out userObj, out userFile))
+                        return "No user override exists for '" + canonical +
+                               "' - the bundled definition is already in effect.";
+
+                    if (!Bool(args, "confirm", false))
+                        return "PROPOSED refresh of '" + canonical + "':\n" +
+                               "  user copy:  " + userFile + "  (backed up to *.bak, then removed)\n" +
+                               "  restored to: " + bundledFile + "\n\n" +
+                               "ASSISTANT: Confirm with the user, then call again with confirm=true. Restart the " +
+                               "server (Claude Desktop) afterwards so the change is fully reloaded.";
+
+                    string backup = userFile + ".bak";
+                    File.Copy(userFile, backup, overwrite: true);
+                    File.Delete(userFile);
+
+                    InstrumentDefinition def;
+                    try { def = bundled.ToObject<InstrumentDefinition>(); }
+                    catch (Exception ex) { return "Removed user copy but the bundled '" + canonical +
+                        "' failed to parse: " + ex.Message + " (old copy at " + backup + ")."; }
+                    db.Upsert(def); // make the bundled def effective immediately
+
+                    return "Refreshed '" + canonical + "' to the bundled definition. Old user copy backed up to " +
+                           backup + ". Restart the server to fully reload.";
+                }));
         }
 
         // ------------------------------------------------------------------------
@@ -324,6 +378,24 @@ namespace GpibMcp.Tools
                 ok = false;
                 return "Identity query " + def.Identity.Command + " failed: " + ex.Message;
             }
+        }
+
+        /// <summary>Finds the *.json in <paramref name="dir"/> whose model name or alias matches.</summary>
+        private static bool TryFindByModel(string dir, string model, out JObject jo, out string file)
+        {
+            jo = null; file = null;
+            if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir)) return false;
+            foreach (var f in Directory.GetFiles(dir, "*.json"))
+            {
+                JObject o;
+                try { o = JObject.Parse(File.ReadAllText(f)); } catch { continue; }
+                string m = (string)o.GetValue("model", StringComparison.OrdinalIgnoreCase);
+                bool match = string.Equals(m, model, StringComparison.OrdinalIgnoreCase);
+                if (!match && o.GetValue("aliases", StringComparison.OrdinalIgnoreCase) is JArray aliases)
+                    match = aliases.Any(a => string.Equals((string)a, model, StringComparison.OrdinalIgnoreCase));
+                if (match) { jo = o; file = f; return true; }
+            }
+            return false;
         }
 
         private static InstrumentCommand FindCommand(InstrumentDefinition def, string key)

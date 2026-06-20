@@ -276,6 +276,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `list_assignments` | — | — | List recorded resource→model assignments |
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
+| `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
 | `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen (HP-GL plotter emulation); returns an SVG to show inline + saves a PNG to Pictures |
 
 Argument notes:
@@ -379,7 +380,13 @@ frequency of my 8563E to that, with a span of 100 MHz":*
 
 On first run the bundled defaults are **copied into the user database** (never overwriting
 your edits), giving you an editable, prepopulated database. User definitions override
-bundled ones with the same model name.
+bundled ones with the same model name — but **per top-level block**, not whole-file: a user
+copy that predates a bundled improvement (say it has no `statusModel` yet) still inherits that
+new block from the bundled default, while your own blocks keep winning. So shipped *additions*
+reach an existing user copy automatically, with no hand-merging. A shipped *change to a value
+you already override* is not auto-merged (that would mix old and new fields); pull it in
+deliberately with `instrument_db_refresh <model>`, which backs your copy up to `<file>.bak` and
+restores the bundled definition.
 
 #### Extending the database
 
@@ -404,7 +411,9 @@ Keep the database honest:
 - **Override, don't edit the bundled file.** A `<model>.json` in your **user** directory
   overrides the bundled one of the same name. Fix a wrong command, add a missing one, or
   correct an identity pattern there (or via `instrument_db_save`) and your version wins —
-  bundled defaults stay intact and your correction survives upgrades.
+  bundled defaults stay intact and your correction survives upgrades. New blocks added to a
+  bundled definition still flow through to your copy (per-block merge, above); to discard your
+  override and take a corrected bundled definition wholesale, use `instrument_db_refresh`.
 - **Confirm-before-write everywhere.** `assign_instrument`, `unassign_instrument`, and
   `instrument_db_save` all report what they *would* do first and only persist when called
   again with `confirm: true`, so nothing changes on disk without your go-ahead.

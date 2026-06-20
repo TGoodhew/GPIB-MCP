@@ -178,6 +178,55 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void DbRefresh_ConfirmFlow_ResetsUserCopyToBundled_WithBackup()
+        {
+            // #25: instrument_db_refresh restores a model's user copy to the bundled definition
+            // (so a corrected shipped value takes effect), backing the old copy up first.
+            string bundledDir = Path.Combine(Path.GetTempPath(), "gpibdb_bundled_" + Path.GetRandomFileName());
+            string userDir = Path.Combine(Path.GetTempPath(), "gpibdb_user_" + Path.GetRandomFileName());
+            string prevEnv = Environment.GetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB");
+            try
+            {
+                Directory.CreateDirectory(bundledDir);
+                Directory.CreateDirectory(userDir);
+                Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", userDir);
+                File.WriteAllText(Path.Combine(bundledDir, "X.json"), "{\"model\":\"X\",\"category\":\"corrected\"}");
+                string userFile = Path.Combine(userDir, "X.json");
+                File.WriteAllText(userFile, "{\"model\":\"X\",\"category\":\"stale\"}");
+
+                // DB started from the stale user copy.
+                var db = InstrumentDatabase.FromDefinitions(new[] { new InstrumentDefinition { Model = "X", Category = "stale" } });
+                var registry = new GpibMcp.Mcp.ToolRegistry();
+                DatabaseTools.Register(registry, db, AssignmentStore.InMemory(), new FakeInstrumentManager(), bundledDir);
+                registry.TryGet("instrument_db_refresh", out var refresh);
+
+                // Without confirm: proposal only — nothing changed.
+                var proposed = refresh.InvokeText(new JObject { ["model"] = "X" });
+                Assert.Contains("PROPOSED", proposed);
+                Assert.True(File.Exists(userFile));
+                Assert.False(File.Exists(userFile + ".bak"));
+
+                // With confirm: user copy backed up + removed, live DB now has the bundled value.
+                var done = refresh.InvokeText(new JObject { ["model"] = "X", ["confirm"] = true });
+                Assert.Contains("Refreshed", done);
+                Assert.False(File.Exists(userFile));
+                Assert.True(File.Exists(userFile + ".bak"));
+                Assert.True(db.TryGet("X", out var x));
+                Assert.Equal("corrected", x.Category);
+
+                // No user override remains -> a second refresh is a no-op.
+                var again = refresh.InvokeText(new JObject { ["model"] = "X", ["confirm"] = true });
+                Assert.Contains("No user override", again);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", prevEnv);
+                if (Directory.Exists(bundledDir)) Directory.Delete(bundledDir, true);
+                if (Directory.Exists(userDir)) Directory.Delete(userDir, true);
+            }
+        }
+
+        [Fact]
         public void Unassign_ConfirmFlow()
         {
             var (db, store, visa) = Fixture();
