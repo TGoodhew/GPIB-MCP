@@ -42,6 +42,13 @@ namespace GpibMcp.Instruments
         [JsonProperty("enableMask")] public EnableMaskSpec EnableMask { get; set; }
         [JsonProperty("doneSupport")] public DoneSupportSpec DoneSupport { get; set; }
 
+        /// <summary>
+        /// Name (in <see cref="Bits"/>) of the bit that signals an operation FAILURE, so the waiter
+        /// includes it in the mask and a failure interrupts the wait. Instrument-specific - e.g.
+        /// "error" on the 8560 series, "fail" on the 3325. Optional.
+        /// </summary>
+        [JsonProperty("errorBit")] public string ErrorBit { get; set; }
+
         /// <summary>Named status-byte bits and their decimal weights (e.g. "endOfSweep" -&gt; 16).</summary>
         [JsonProperty("bits")] public Dictionary<string, int> Bits { get; set; }
 
@@ -95,14 +102,17 @@ namespace GpibMcp.Instruments
         [JsonProperty("mnemonic")] public string Mnemonic { get; set; }
     }
 
-    /// <summary>A named completion operation: how to arm it, and which status bit confirms it.</summary>
+    /// <summary>A named completion operation: how to arm it, which status bit confirms it, optional restore.</summary>
     public sealed class StatusOperation
     {
-        /// <summary>Commands that start the operation (the waiter sends the enable mask first), e.g. "TS;".</summary>
+        /// <summary>Commands that start the operation (the waiter sends the enable mask first), e.g. "SNGLS;TS;".</summary>
         [JsonProperty("arm")] public string Arm { get; set; }
 
         /// <summary>Name (in <see cref="StatusModel.Bits"/>) of the bit that signals completion.</summary>
         [JsonProperty("expectBit")] public string ExpectBit { get; set; }
+
+        /// <summary>Optional command sent after completion to restore prior state, e.g. "CONTS;" (resume continuous sweep).</summary>
+        [JsonProperty("restore")] public string Restore { get; set; }
     }
 
     /// <summary>How to capture this instrument's screen (e.g. HP-GL plotter emulation).</summary>

@@ -478,6 +478,14 @@ primitive.) Three explicit states, no silent guessing:
 The 8563E ships with `sweepComplete` and `sweepAndPeak` operations; the lower-level
 `visa_serial_poll` and `visa_wait_srq` tools are available standalone for debugging.
 
+The `statusModel` is **self-describing** so the waiter never guesses: it names the completion bit
+per operation (`expectBit`), the failure bit (`errorBit` — e.g. `error` on the 8560, `fail` on the
+3325), the enable-mask commands, and an optional `restore`. The completion state machine lives in
+[`src/GpibMcp/Instruments/Completion/`](src/GpibMcp/Instruments/Completion/) — decoupled from VISA via
+`IStatusChannel` — and is validated headlessly by `CompletionWaiterTests` against a simulated
+instrument with a virtual clock (no hardware), so the timing/race-sensitive logic is tested
+deterministically.
+
 ### Manual test from a terminal
 
 You can drive the server directly without an MCP client by piping JSON-RPC frames

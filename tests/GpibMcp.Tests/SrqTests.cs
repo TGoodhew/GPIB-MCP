@@ -16,6 +16,7 @@ namespace GpibMcp.Tests
             SrqSupported = true,
             SerialPoll = new SerialPollSpec { ClearsRqs = true },
             EnableMask = new EnableMaskSpec { SetCommand = "RQS {mask}", ClearCommand = "RQS 0" },
+            ErrorBit = "error",
             Bits = new Dictionary<string, int>
             {
                 ["trigger"] = 4, ["message"] = 8, ["endOfSweep"] = 16,
@@ -23,7 +24,7 @@ namespace GpibMcp.Tests
             },
             Operations = new Dictionary<string, StatusOperation>
             {
-                ["sweepComplete"] = new StatusOperation { Arm = "TS;", ExpectBit = "endOfSweep" }
+                ["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "endOfSweep", Restore = "CONTS;" }
             }
         };
 
@@ -184,53 +185,31 @@ namespace GpibMcp.Tests
         [Fact]
         public void WaitComplete_HappyPath_PreClearsArmsConfirmsAndClears()
         {
-            // endOfSweep(16) confirmed -> completed; mask = endOfSweep|error = 16|64 = 80.
-            var visa = new FakeInstrumentManager { StatusWait = new StatusByteWaitResult(0x10, true, 250) };
+            // endOfSweep(16) present -> completed; mask = endOfSweep|error = 16|64 = 80.
+            // (The fake's status byte is constant, so the first poll matches - flow/wiring test only;
+            // timing and stale-bit correctness are covered headlessly in CompletionWaiterTests.)
+            var visa = new FakeInstrumentManager { StatusByteValue = 0x10 };
             var (tool, _) = WaitSetup(visa, Def8563());
 
             var output = tool.Invoke(WaitArgs());
 
             Assert.False(output.IsError);
             Assert.Contains("Completed", output.AsText());
-            Assert.Contains("250 ms", output.AsText());
             Assert.NotEmpty(visa.SerialPolls);                          // pre-cleared stale status first
-            Assert.Contains("GPIB0::18::INSTR|RQS 80", visa.Writes);    // mask armed
-            Assert.Contains("GPIB0::18::INSTR|TS;", visa.Writes);       // operation armed
+            Assert.Contains("GPIB0::18::INSTR|RQS 80", visa.Writes);    // mask = endOfSweep|error
+            Assert.Contains("GPIB0::18::INSTR|SNGLS;TS;", visa.Writes); // operation armed
             Assert.Contains("GPIB0::18::INSTR|RQS 0", visa.Writes);     // mask cleared
-            Assert.Contains("GPIB0::18::INSTR|80|5000", visa.StatusWaits); // polled for endOfSweep|error
+            Assert.Contains("GPIB0::18::INSTR|CONTS;", visa.Writes);    // state restored
         }
 
         [Fact]
         public void WaitComplete_ErrorBitSet_ReportsInstrumentError()
         {
-            var visa = new FakeInstrumentManager { StatusWait = new StatusByteWaitResult(0x40, true, 40) }; // error(64)
+            var visa = new FakeInstrumentManager { StatusByteValue = 0x40 }; // error(64)
             var (tool, _) = WaitSetup(visa, Def8563());
             var output = tool.Invoke(WaitArgs());
             Assert.True(output.IsError);
             Assert.Contains("signalled an ERROR", output.AsText());
-        }
-
-        [Fact]
-        public void WaitComplete_ErrorAndCompletionBothSet_ReportsErrorButNotesCompletion()
-        {
-            // The exact case seen on hardware: 0x50 = endOfSweep(16) + error(64).
-            var visa = new FakeInstrumentManager { StatusWait = new StatusByteWaitResult(0x50, true, 300) };
-            var (tool, _) = WaitSetup(visa, Def8563());
-            var output = tool.Invoke(WaitArgs());
-            Assert.True(output.IsError);
-            Assert.Contains("signalled an ERROR", output.AsText());
-            Assert.Contains("expected completion bit is also set", output.AsText());
-        }
-
-        [Fact]
-        public void WaitComplete_BitNeverSet_TimesOutDistinctly()
-        {
-            var visa = new FakeInstrumentManager { StatusWait = new StatusByteWaitResult(0x00, false, 5000) };
-            var (tool, _) = WaitSetup(visa, Def8563());
-            var output = tool.Invoke(WaitArgs());
-            Assert.True(output.IsError);
-            Assert.Contains("Timed out", output.AsText());
-            Assert.Contains("GPIB0::18::INSTR|RQS 0", visa.Writes); // mask still cleared
         }
     }
 }

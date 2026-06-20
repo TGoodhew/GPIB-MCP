@@ -10,22 +10,6 @@ namespace GpibMcp.Instruments
         public SrqWaitResult(bool asserted, long elapsedMs) { Asserted = asserted; ElapsedMs = elapsedMs; }
     }
 
-    /// <summary>
-    /// Outcome of waiting for status-byte bits: the last status byte read, whether any of the
-    /// requested mask bits were seen before the timeout, and the elapsed time.
-    /// </summary>
-    public sealed class StatusByteWaitResult
-    {
-        public int StatusByte { get; }
-        public bool Matched { get; }
-        public long ElapsedMs { get; }
-        public StatusByteWaitResult(int statusByte, bool matched, long elapsedMs)
-        {
-            StatusByte = statusByte;
-            Matched = matched;
-            ElapsedMs = elapsedMs;
-        }
-    }
 
     /// <summary>
     /// Abstraction over the instrument I/O layer consumed by the MCP tools.
@@ -78,13 +62,6 @@ namespace GpibMcp.Instruments
         /// Pure mechanism - does not serial-poll. Always tears down the event registration.
         /// </summary>
         SrqWaitResult WaitForSrq(string resource, int timeoutMs);
-
-        /// <summary>
-        /// Serial-polls the status byte repeatedly until any bit in <paramref name="mask"/> is set or
-        /// the timeout elapses. The latched status byte is the reliable completion read (it stays set
-        /// until read), avoiding the event/poll race of SRQ + a separate poll.
-        /// </summary>
-        StatusByteWaitResult WaitForStatusBits(string resource, int mask, int timeoutMs, int pollIntervalMs);
 
         /// <summary>
         /// Captures an HP-GL plot from the instrument (plotter emulation): sends pre-roll + plot

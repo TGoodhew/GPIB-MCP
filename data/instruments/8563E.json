@@ -21,6 +21,7 @@
     "serialPoll": { "clearsRqs": true },
     "enableMask": { "setCommand": "RQS {mask}", "clearCommand": "RQS 0", "maskFormat": "decimal" },
     "doneSupport": { "supported": true, "mnemonic": "DONE" },
+    "errorBit": "error",
     "bits": {
       "trigger": 4,
       "message": 8,
@@ -30,8 +31,8 @@
       "rqs": 128
     },
     "operations": {
-      "sweepComplete": { "arm": "TS;", "expectBit": "endOfSweep" },
-      "sweepAndPeak": { "arm": "TS;MKPK HI;DONE;", "expectBit": "commandComplete" }
+      "sweepComplete": { "arm": "SNGLS;TS;", "expectBit": "endOfSweep", "restore": "CONTS;" },
+      "sweepAndPeak": { "arm": "SNGLS;TS;MKPK HI;DONE;", "expectBit": "commandComplete", "restore": "CONTS;" }
     }
   },
   "commands": [

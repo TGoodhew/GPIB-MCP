@@ -16,6 +16,7 @@
     "serialPoll": { "clearsRqs": true },
     "enableMask": { "setCommand": "ESTB {mask}", "clearCommand": "ESTB 0", "maskFormat": "decimal" },
     "doneSupport": { "supported": false },
+    "errorBit": "fail",
     "bits": {
       "error": 1,
       "stop": 2,

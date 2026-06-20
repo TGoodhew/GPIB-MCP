@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Text;
 using GpibMcp.Instruments;
+using GpibMcp.Instruments.Completion;
 using GpibMcp.Mcp;
 using Newtonsoft.Json.Linq;
 using static GpibMcp.Tools.ToolArgs;
@@ -307,7 +306,9 @@ namespace GpibMcp.Tools
         // ---------------------------------------------------------------------
 
         // ---------------------------------------------------------------------
-        // instrument_wait_complete - 3-state dispatch + the SRQ completion flow.
+        // instrument_wait_complete - thin adapter over the CompletionWaiter component.
+        // The dispatch + flow logic lives in GpibMcp.Instruments.Completion (decoupled
+        // from VISA and headlessly testable); this only resolves the model and bridges I/O.
         // ---------------------------------------------------------------------
 
         private static ToolOutput WaitComplete(InstrumentDatabase db, AssignmentStore assignments,
@@ -322,111 +323,41 @@ namespace GpibMcp.Tools
             if (!db.TryGet(model, out def))
                 return Err("Unknown model '" + model + "' assigned to " + resource + ".");
 
-            StatusModel sm = def.StatusModel;
-
-            // State 1: explicitly no SRQ -> refuse, never guess.
-            if (sm != null && !sm.SrqSupported)
-                return Err("Model '" + model + "' declares no SRQ support (srqSupported=false). This tool " +
-                           "will not fall back to a timed guess - use visa_query with an explicit timeout if appropriate.");
-
-            // State 2: supports SRQ (or unknown) but the definition is absent/incomplete -> prompt, don't guess.
-            if (sm == null)
-                return Txt(PromptMissing(model, operation, "has no statusModel defined"));
-            StatusOperation op;
-            if (sm.Operations == null || !sm.Operations.TryGetValue(operation, out op))
-                return Txt(PromptOperation(model, operation, sm));
-            int? expect = sm.BitValue(op.ExpectBit);
-            if (expect == null)
-                return Txt(PromptMissing(model, operation,
-                    "operation '" + operation + "' expects bit '" + op.ExpectBit + "', which is not defined in statusModel.bits"));
-            if (sm.EnableMask == null || string.IsNullOrEmpty(sm.EnableMask.SetCommand))
-                return Txt(PromptMissing(model, operation, "statusModel.enableMask.setCommand is missing"));
-
-            // State 3: complete -> run the completion flow.
-            // The mask enables completion + (if defined) the error bit so a failure interrupts the wait.
-            int? errorBit = sm.BitValue("error");
-            int mask = expect.Value | (errorBit ?? 0);
-
+            var channel = new VisaStatusChannel(visa, resource);
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            CompletionResult result;
             try
             {
-                // Pre-clear any STALE latched status (e.g. an END OF SWEEP left set by a prior sweep),
-                // so the just-armed mask does not fire on old state and we wait for a FRESH completion.
-                try { visa.SerialPoll(resource); } catch (GpibOperationException) { /* pre-clear is best effort */ }
-
-                string setCmd = sm.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
-                visa.Write(resource, setCmd, VisaInstrumentManager.DefaultTimeoutMs); // arm the SRQ mask
-                if (!string.IsNullOrEmpty(op.Arm))
-                    visa.Write(resource, op.Arm, VisaInstrumentManager.DefaultTimeoutMs); // start the operation
-
-                // Confirm completion by polling the LATCHED status byte (reliable: bits stay set until
-                // read). This returns the instant the expected/error bit appears - no fixed-time guess,
-                // and none of the SRQ-event/separate-poll race that cleared the cause before it was read.
-                StatusByteWaitResult wait = visa.WaitForStatusBits(resource, mask, timeoutMs, 0);
-                ClearMask(visa, resource, sm); // best effort
-
-                int stb = wait.StatusByte;
-                bool done = (stb & expect.Value) == expect.Value;
-                bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
-                string stbText = stb + " (0x" + stb.ToString("X2") + ")";
-                string bits = DescribeSetBits(sm, stb);
-
-                if (err)
-                    return Err("Instrument signalled an ERROR during '" + operation + "' on " + resource +
-                               " after " + wait.ElapsedMs + " ms. Status byte " + stbText + " [" + bits + "]." +
-                               (done ? " (The expected completion bit is also set.)" : "") +
-                               " Check the instrument's error/status.");
-                if (done)
-                    return Txt("Completed: '" + operation + "' on " + resource + " after " + wait.ElapsedMs +
-                               " ms (confirmed by status poll). Status byte " + stbText + " [" + bits + "].");
-                // Timed out (or matched some other bit without completion/error).
-                return Err("Timed out after " + timeoutMs + " ms waiting for '" + operation + "' on " + resource +
-                           " - the expected bit (" + op.ExpectBit + ") was not set. Status byte " + stbText +
-                           " [" + bits + "]. Mask cleared; bus left usable.");
+                result = CompletionWaiter.Wait(def.StatusModel, model, operation, timeoutMs, channel,
+                                               () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep);
             }
-            catch (GpibOperationException gex)
+            catch (GpibOperationException gex) { return Err(gex.Detail); }
+            catch (Exception ex) { return Err("Wait failed for " + resource + ": " + ex.Message); }
+
+            switch (result.Outcome)
             {
-                try { ClearMask(visa, resource, sm); } catch { /* best effort */ }
-                return Err(gex.Detail);
-            }
-            catch (Exception ex)
-            {
-                try { ClearMask(visa, resource, sm); } catch { /* best effort */ }
-                return Err("Wait failed for " + resource + ": " + ex.Message);
+                case CompletionOutcome.Completed:
+                    return Txt("[" + resource + "] " + result.Message);
+                case CompletionOutcome.InstrumentError:
+                case CompletionOutcome.TimedOut:
+                    return Err("[" + resource + "] " + result.Message);
+                case CompletionOutcome.Refused:
+                default:
+                    return result.Outcome == CompletionOutcome.Refused ? Err(result.Message) : Txt(result.Message);
             }
         }
 
         private static ToolOutput Err(string message) => ToolOutput.Text(message).AsError();
         private static ToolOutput Txt(string message) => ToolOutput.Text(message);
 
-        private static void ClearMask(IInstrumentManager visa, string resource, StatusModel sm)
+        /// <summary>Bridges the decoupled <see cref="IStatusChannel"/> to the instrument manager.</summary>
+        private sealed class VisaStatusChannel : IStatusChannel
         {
-            if (sm.EnableMask == null || string.IsNullOrEmpty(sm.EnableMask.ClearCommand)) return;
-            try { visa.Write(resource, sm.EnableMask.ClearCommand, VisaInstrumentManager.DefaultTimeoutMs); }
-            catch { /* clearing the mask is best effort - never fail the wait over it */ }
-        }
-
-        private static string DescribeSetBits(StatusModel sm, int stb)
-        {
-            var named = sm.SetBitNames(stb);
-            return named.Count > 0 ? string.Join(", ", named) : "no defined bits set";
-        }
-
-        private static string PromptMissing(string model, string operation, string reason) =>
-            "Cannot wait for '" + operation + "' on model '" + model + "': " + reason + ".\n\n" +
-            "This instrument may support SRQ, but I will not guess. To proceed, provide its statusModel: " +
-            "the status-byte bit that signals completion for '" + operation + "', the SRQ enable-mask set/clear " +
-            "commands (with a {mask} placeholder, e.g. \"RQS {mask}\"/\"RQS 0\"), whether a serial poll clears RQS, " +
-            "and the 'arm' command(s) that start the operation. Once you confirm the values, save them to the " +
-            "model with instrument_db_save (a statusModel block), then re-run instrument_wait_complete.";
-
-        private static string PromptOperation(string model, string operation, StatusModel sm)
-        {
-            string known = (sm.Operations != null && sm.Operations.Count > 0)
-                ? "Known operations: " + string.Join(", ", sm.Operations.Keys) + "."
-                : "It has no operations defined yet.";
-            return "Model '" + model + "' has a statusModel but no operation named '" + operation + "'. " + known +
-                   "\n\nDefine '" + operation + "' as { arm, expectBit } (expectBit naming a bit in statusModel.bits) " +
-                   "and save it with instrument_db_save, then re-run.";
+            private readonly IInstrumentManager _visa;
+            private readonly string _resource;
+            public VisaStatusChannel(IInstrumentManager visa, string resource) { _visa = visa; _resource = resource; }
+            public void Send(string command) => _visa.Write(_resource, command, VisaInstrumentManager.DefaultTimeoutMs);
+            public int SerialPoll() => _visa.SerialPoll(_resource);
         }
 
         /// <summary>Resolves the statusModel for a resource via its assignment, or null if none is known.</summary>
