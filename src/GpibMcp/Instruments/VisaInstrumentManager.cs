@@ -176,6 +176,68 @@ namespace GpibMcp.Instruments
             return error;
         }
 
+        /// <summary>Serial-polls the instrument (VISA <c>viReadSTB</c>) and returns the status byte (0-255).</summary>
+        public int SerialPoll(string resource)
+        {
+            lock (_gate)
+            {
+                try
+                {
+                    var session = Open(resource, DefaultTimeoutMs);
+                    int stb = (int)session.ReadStatusByte();
+                    Log.Debug("VISA " + resource + " serial poll -> 0x" + stb.ToString("X2"));
+                    return stb;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.SerialPoll, resource, "<serial poll>", ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Blocks until the instrument asserts SRQ or the backstop timeout elapses, using the VISA
+        /// service-request event. Always disables the event afterward (no leaked registration).
+        /// </summary>
+        public SrqWaitResult WaitForSrq(string resource, int timeoutMs)
+        {
+            if (timeoutMs <= 0) timeoutMs = DefaultTimeoutMs;
+            lock (_gate)
+            {
+                MessageBasedSession session;
+                try { session = Open(resource, timeoutMs); }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.WaitSrq, resource, "<wait srq>", ex);
+                }
+
+                var watch = Stopwatch.StartNew();
+                session.EnableEvent(EventType.ServiceRequest);
+                try
+                {
+                    session.WaitOnEvent(EventType.ServiceRequest, timeoutMs);
+                    watch.Stop();
+                    Log.Debug("VISA " + resource + " SRQ asserted after " + watch.ElapsedMilliseconds + "ms");
+                    return new SrqWaitResult(true, watch.ElapsedMilliseconds);
+                }
+                catch (IOTimeoutException)
+                {
+                    watch.Stop();
+                    Log.Debug("VISA " + resource + " SRQ wait timed out after " + watch.ElapsedMilliseconds + "ms");
+                    return new SrqWaitResult(false, watch.ElapsedMilliseconds);
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.WaitSrq, resource, "<wait srq>", ex);
+                }
+                finally
+                {
+                    try { session.DisableEvent(EventType.ServiceRequest); }
+                    catch (Exception ex) { Log.Warn("WaitForSrq: DisableEvent failed: " + ex.Message); }
+                }
+            }
+        }
+
         /// <summary>Returns up to <paramref name="max"/> of the most recent commands for a resource.</summary>
         public IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max) =>
             _history.Snapshot(resource, max);

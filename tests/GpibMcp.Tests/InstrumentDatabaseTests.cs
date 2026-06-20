@@ -102,6 +102,50 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Load_ReadsStatusModelBlock()
+        {
+            string dir = NewTempDir();
+            try
+            {
+                File.WriteAllText(Path.Combine(dir, "sa.json"),
+                    "{\"model\":\"SA\",\"statusModel\":{" +
+                    "\"srqSupported\":true,\"serialPoll\":{\"clearsRqs\":true}," +
+                    "\"enableMask\":{\"setCommand\":\"RQS {mask}\",\"clearCommand\":\"RQS 0\",\"maskFormat\":\"decimal\"}," +
+                    "\"doneSupport\":{\"supported\":true,\"mnemonic\":\"DONE\"}," +
+                    "\"bits\":{\"endOfSweep\":16,\"commandComplete\":32}," +
+                    "\"operations\":{\"sweepComplete\":{\"arm\":\"TS;\",\"expectBit\":\"endOfSweep\"}}}}");
+
+                var db = InstrumentDatabase.Load(new[] { dir });
+
+                Assert.True(db.TryGet("SA", out var sa));
+                var sm = sa.StatusModel;
+                Assert.NotNull(sm);
+                Assert.True(sm.SrqSupported);
+                Assert.True(sm.SerialPoll.ClearsRqs);
+                Assert.Equal("RQS {mask}", sm.EnableMask.SetCommand);
+                Assert.Equal("DONE", sm.DoneSupport.Mnemonic);
+                Assert.Equal(16, sm.BitValue("endOfSweep"));
+                Assert.Equal("endOfSweep", sm.Operations["sweepComplete"].ExpectBit);
+            }
+            finally { Directory.Delete(dir, true); }
+        }
+
+        [Fact]
+        public void StatusModel_SrqUnsupported_LoadsAsFalse()
+        {
+            string dir = NewTempDir();
+            try
+            {
+                File.WriteAllText(Path.Combine(dir, "nosrq.json"),
+                    "{\"model\":\"N\",\"statusModel\":{\"srqSupported\":false}}");
+                var db = InstrumentDatabase.Load(new[] { dir });
+                Assert.True(db.TryGet("N", out var n));
+                Assert.False(n.StatusModel.SrqSupported);
+            }
+            finally { Directory.Delete(dir, true); }
+        }
+
+        [Fact]
         public void Load_SkipsMalformedFiles()
         {
             string dir = NewTempDir();

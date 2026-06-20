@@ -11,6 +11,22 @@
     "matchRegex": "3325",
     "description": "Short model identify (3325B). IDN? returns the long form. May not be supported on early 3325A units."
   },
+  "statusModel": {
+    "srqSupported": true,
+    "serialPoll": { "clearsRqs": true },
+    "enableMask": { "setCommand": "ESTB {mask}", "clearCommand": "ESTB 0", "maskFormat": "decimal" },
+    "doneSupport": { "supported": false },
+    "bits": {
+      "error": 1,
+      "stop": 2,
+      "start": 4,
+      "fail": 8,
+      "rqs": 64
+    },
+    "operations": {
+      "sweepComplete": { "arm": "SS;", "expectBit": "stop" }
+    }
+  },
   "commands": [
     {
       "name": "frequency",

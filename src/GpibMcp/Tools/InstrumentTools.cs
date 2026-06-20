@@ -186,6 +186,62 @@ namespace GpibMcp.Tools
                         : "No recent error recorded for " + resource + ".";
                 }));
 
+            // ---- SRQ / status: serial poll --------------------------------------
+            registry.Add(new McpTool(
+                "visa_serial_poll",
+                "Serial-poll a GPIB instrument and return its status byte (decimal + hex). When the " +
+                "resource is assigned a model that has a statusModel, also lists the named status bits " +
+                "that are set; otherwise lists the standard IEEE 488.2 bits (RQS/ESB/MAV).",
+                Schema(
+                    Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'.")),
+                args =>
+                {
+                    string resource = ReqStr(args, "resource");
+                    int stb = visa.SerialPoll(resource);
+
+                    var sb = new StringBuilder();
+                    sb.AppendLine("Status byte for " + resource + ": " + stb + " (0x" + stb.ToString("X2") + ")");
+
+                    StatusModel model = ResolveStatusModel(db, assignments, resource);
+                    if (model != null && model.Bits != null)
+                    {
+                        var named = model.SetBitNames(stb);
+                        sb.AppendLine(named.Count > 0 ? "  bits set: " + string.Join(", ", named) : "  bits set: (none)");
+                        if (model.SerialPoll != null)
+                            sb.AppendLine("  serial poll " + (model.SerialPoll.ClearsRqs ? "clears" : "does not clear") + " RQS");
+                    }
+                    else
+                    {
+                        // No model: fall back to the standard IEEE 488.2 bits (note: some legacy
+                        // instruments such as the 8560 series use a non-standard status byte).
+                        var std = StandardStatusBits(stb);
+                        sb.AppendLine(std.Count > 0
+                            ? "  standard bits: " + string.Join(", ", std) + "  (no statusModel; assign a model for an instrument-specific decode)"
+                            : "  no standard bits set (no statusModel for this resource)");
+                    }
+                    return sb.ToString().TrimEnd();
+                }));
+
+            // ---- SRQ / status: wait for SRQ -------------------------------------
+            registry.Add(new McpTool(
+                "visa_wait_srq",
+                "Block until the instrument asserts SRQ (service request) on the GPIB bus, or the " +
+                "backstop timeout expires. Pure mechanism: it does NOT serial-poll (call " +
+                "visa_serial_poll afterward to read/clear the status byte). Returns whether SRQ " +
+                "asserted and the elapsed time.",
+                Schema(
+                    Required("resource", "string", "VISA resource string."),
+                    Prop("timeout_ms", "integer", "Backstop timeout in milliseconds (default 5000).")),
+                args =>
+                {
+                    string resource = ReqStr(args, "resource");
+                    int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
+                    var result = visa.WaitForSrq(resource, timeout);
+                    return result.Asserted
+                        ? "SRQ asserted on " + resource + " after " + result.ElapsedMs + " ms."
+                        : "No SRQ on " + resource + " within " + timeout + " ms (waited " + result.ElapsedMs + " ms).";
+                }));
+
             // ---- NI-488.2: direct GPIB query ------------------------------------
             registry.Add(new McpTool(
                 "gpib488_query",
@@ -231,6 +287,25 @@ namespace GpibMcp.Tools
         // the result cannot be trusted. A physical GPIB segment supports at most
         // ~15 devices, so a count at/above that limit is the tell-tale sign.
         // ---------------------------------------------------------------------
+
+        /// <summary>Resolves the statusModel for a resource via its assignment, or null if none is known.</summary>
+        private static StatusModel ResolveStatusModel(InstrumentDatabase db, AssignmentStore assignments, string resource)
+        {
+            string model = assignments.Get(resource);
+            if (string.IsNullOrEmpty(model)) return null;
+            InstrumentDefinition def;
+            return db.TryGet(model, out def) ? def.StatusModel : null;
+        }
+
+        /// <summary>Standard IEEE 488.2 status-byte bits, for instruments without a statusModel.</summary>
+        private static System.Collections.Generic.List<string> StandardStatusBits(int stb)
+        {
+            var list = new System.Collections.Generic.List<string>();
+            if ((stb & 0x40) != 0) list.Add("RQS(0x40)");
+            if ((stb & 0x20) != 0) list.Add("ESB(0x20)");
+            if ((stb & 0x10) != 0) list.Add("MAV(0x10)");
+            return list;
+        }
 
         private const int DefaultPhantomGpibThreshold = 15;
 

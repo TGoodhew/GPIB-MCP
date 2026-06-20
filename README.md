@@ -265,6 +265,8 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_close` | `resource` | — | Close a held-open session |
 | `visa_command_history` | `resource` | `max` | Show the recent command chain sent to / received from an instrument |
 | `visa_last_error` | — | `resource` | Return the exact, verbatim details (codes + text) of the most recent GPIB/VISA failure |
+| `visa_serial_poll` | `resource` | — | Serial-poll the instrument; return the status byte (decimal + hex) and the named bits set |
+| `visa_wait_srq` | `resource` | `timeout_ms` | Block until the instrument asserts SRQ, or the backstop timeout expires |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |

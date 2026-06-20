@@ -6,7 +6,7 @@ using GpibMcp.Diagnostics;
 namespace GpibMcp.Instruments
 {
     /// <summary>The instrument operation that failed.</summary>
-    public enum GpibOperation { Query, Write, Read, Clear, Capture, Open }
+    public enum GpibOperation { Query, Write, Read, Clear, Capture, Open, SerialPoll, WaitSrq }
 
     /// <summary>
     /// A GPIB/VISA I/O failure, enriched with everything needed to explain it: the operation +

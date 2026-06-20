@@ -2,6 +2,14 @@ using System.Collections.Generic;
 
 namespace GpibMcp.Instruments
 {
+    /// <summary>Outcome of an SRQ wait: whether the service request asserted, and how long it took.</summary>
+    public sealed class SrqWaitResult
+    {
+        public bool Asserted { get; }
+        public long ElapsedMs { get; }
+        public SrqWaitResult(bool asserted, long elapsedMs) { Asserted = asserted; ElapsedMs = elapsedMs; }
+    }
+
     /// <summary>
     /// Abstraction over the instrument I/O layer consumed by the MCP tools.
     /// <see cref="VisaInstrumentManager"/> implements it for real hardware; tests can
@@ -44,6 +52,15 @@ namespace GpibMcp.Instruments
 
         /// <summary>Records a failure so it is retrievable via <see cref="LastError"/> (e.g. from the NI-488.2 path).</summary>
         void RecordError(GpibOperationException error);
+
+        /// <summary>Serial-polls the instrument and returns its status byte (0-255).</summary>
+        int SerialPoll(string resource);
+
+        /// <summary>
+        /// Blocks until the instrument asserts SRQ or <paramref name="timeoutMs"/> elapses (the backstop).
+        /// Pure mechanism - does not serial-poll. Always tears down the event registration.
+        /// </summary>
+        SrqWaitResult WaitForSrq(string resource, int timeoutMs);
 
         /// <summary>
         /// Captures an HP-GL plot from the instrument (plotter emulation): sends pre-roll + plot

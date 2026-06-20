@@ -16,6 +16,24 @@
     "plotCommand": "PLOT 550,279,9750,7479;",
     "preRoll": "SNGLS;TS;"
   },
+  "statusModel": {
+    "srqSupported": true,
+    "serialPoll": { "clearsRqs": true },
+    "enableMask": { "setCommand": "RQS {mask}", "clearCommand": "RQS 0", "maskFormat": "decimal" },
+    "doneSupport": { "supported": true, "mnemonic": "DONE" },
+    "bits": {
+      "trigger": 4,
+      "message": 8,
+      "endOfSweep": 16,
+      "commandComplete": 32,
+      "error": 64,
+      "rqs": 128
+    },
+    "operations": {
+      "sweepComplete": { "arm": "TS;", "expectBit": "endOfSweep" },
+      "sweepAndPeak": { "arm": "TS;MKPK HI;DONE;", "expectBit": "commandComplete" }
+    }
+  },
   "commands": [
     {
       "name": "preset",

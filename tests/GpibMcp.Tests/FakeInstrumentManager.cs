@@ -62,6 +62,22 @@ namespace GpibMcp.Tests
 
         public GpibOperationException LastError(string resource) => _lastError;
 
+        /// <summary>Canned status byte returned by <see cref="SerialPoll"/>.</summary>
+        public int StatusByteValue;
+        public readonly List<string> SerialPolls = new List<string>();
+
+        /// <summary>Canned SRQ wait result.</summary>
+        public SrqWaitResult SrqResult = new SrqWaitResult(true, 5);
+        public readonly List<string> SrqWaits = new List<string>();
+
+        public int SerialPoll(string resource) { SerialPolls.Add(resource); return StatusByteValue; }
+
+        public SrqWaitResult WaitForSrq(string resource, int timeoutMs)
+        {
+            SrqWaits.Add(resource + "|" + timeoutMs);
+            return SrqResult;
+        }
+
         public void Clear(string resource, int timeoutMs) => Clears.Add(resource);
 
         public IList<string> ListOpen() => new List<string>(OpenSessions);
