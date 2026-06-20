@@ -121,6 +121,30 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
+        [Fact]
+        public void Render_FeatureExercise_ExercisesFullPipeline()
+        {
+            // The hand-authored feature plot exercises every supported instruction family
+            // (vectors, line types, arcs/circles/wedges, edge+solid+hatch+cross fills, RR,
+            // 7550A polygons with a hole, stroke-font labels with SL/DI/DR/SR/SM/CR-LF,
+            // RO rotation, IW clipping). It must render to rich, non-blank output.
+            byte[] hpgl = File.ReadAllBytes(FixturePath("feature-exercise.plt"));
+
+            string svg = HpglRenderer.RenderToSvg(hpgl);
+            int polylines = svg.Split(new[] { "<polyline" }, StringSplitOptions.None).Length - 1;
+            int polygons = svg.Split(new[] { "<polygon" }, StringSplitOptions.None).Length - 1;
+            Assert.True(polylines > 50, "expected many stroke/vector polylines; got " + polylines);
+            Assert.True(polygons >= 2, "expected solid-fill polygons (RA/RR); got " + polygons);
+
+            byte[] png = HpglRenderer.RenderToPng(hpgl);
+            using (var ms = new MemoryStream(png))
+            using (var bmp = new Bitmap(ms))
+            {
+                int drawn = CountWhere(bmp, c => c.R != 0 || c.G != 0 || c.B != 0);
+                Assert.True(drawn > 5000, "expected a substantial plot; got " + drawn + " px");
+            }
+        }
+
         private static int CountWhere(Bitmap bmp, Func<Color, bool> predicate)
         {
             int count = 0;

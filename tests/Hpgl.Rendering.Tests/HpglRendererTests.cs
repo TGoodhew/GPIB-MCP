@@ -117,9 +117,16 @@ namespace Hpgl.Rendering.Tests
             Assert.EndsWith("</svg>", svg);
             Assert.Contains("width=\"800\"", svg);
             Assert.Contains("viewBox=\"0 0 800 600\"", svg);
-            Assert.Contains("<polyline", svg);          // border/trace vectors
-            Assert.Contains("<text", svg);              // the annotation label
-            Assert.Contains("CF 300 MHz", svg);         // label text survived (XML-escaped)
+            Assert.Contains("<polyline", svg);          // border/trace vectors + label strokes
+
+            // Labels are drawn as vector strokes (a single-stroke font), not <text>, so the same
+            // plot without the label produces strictly fewer polylines.
+            string noLabel =
+                "IN;SP1;PU0,0;PD10000,0;PD10000,7000;PD0,7000;PD0,0;" +
+                "SP2;PU500,500;PD9500,6500;PU0,0;SP0;";
+            string svgNoLabel = HpglRenderer.RenderToSvg(noLabel, new HpglRenderOptions { Width = 800, Height = 600 });
+            Assert.True(Polylines(svg) > Polylines(svgNoLabel),
+                "the annotation label should add stroke polylines (" + Polylines(svg) + " vs " + Polylines(svgNoLabel) + ")");
             Assert.DoesNotContain("\u0003", svg);       // control terminator stripped
         }
 
@@ -361,6 +368,75 @@ namespace Hpgl.Rendering.Tests
             string svg = HpglRenderer.RenderToSvg("", new HpglRenderOptions { Width = 100, Height = 80 });
             Assert.Contains("<rect", svg);             // background fill only
             Assert.DoesNotContain("<polyline", svg);
+        }
+
+        // ---- label / text subsystem (issue #8 §3.6) ------------------------
+
+        private const string Etx = "";
+
+        [Fact]
+        public void Label_IsDrawnAsVectorStrokes_NotSystemText()
+        {
+            // Labels render through the built-in single-stroke font, so they are <polyline> strokes
+            // and never <text>. "AB" has multiple strokes.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PU100,100;LBAB" + Etx + ";");
+            Assert.Contains("<polyline", svg);
+            Assert.DoesNotContain("<text", svg);
+            Assert.True(Polylines(svg) >= 3, "two letters should yield several strokes; got " + Polylines(svg));
+        }
+
+        [Fact]
+        public void Label_Slant_SL_ChangesRendering()
+        {
+            string upright = HpglRenderer.RenderToSvg("IN;SP1;PU100,100;LBN" + Etx + ";");
+            string slanted = HpglRenderer.RenderToSvg("IN;SP1;SL1;PU100,100;LBN" + Etx + ";");
+            Assert.NotEqual(upright, slanted);
+        }
+
+        [Fact]
+        public void Label_MultiLine_CrLf_RendersWithoutThrowing()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PU100,100;LBAA\r\nBB" + Etx + ";");
+            Assert.Contains("<polyline", svg);
+        }
+
+        [Fact]
+        public void SymbolMode_SM_PlotsGlyphAtEachPoint()
+        {
+            // '*' is a three-stroke glyph; plotted at three points => several stroke polylines.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;SM*;PU0,0;PA1000,0;PA2000,0;SM;");
+            Assert.True(Polylines(svg) >= 3, "symbols should be drawn at each point; got " + Polylines(svg));
+        }
+
+        // ---- rotation (RO) and soft-clip window (IW) (issue #8 §2.4/§2.5) ---
+
+        [Fact]
+        public void Rotation_RO90_ChangesOrientation()
+        {
+            var opt = new HpglRenderOptions { Width = 400, Height = 400 };
+            string flat = HpglRenderer.RenderToSvg("IN;SP1;PU0,0;PD1000,0;", opt);
+            string rotated = HpglRenderer.RenderToSvg("IN;SP1;RO90;PU0,0;PD1000,0;", opt);
+            Assert.NotEqual(flat, rotated);
+        }
+
+        [Fact]
+        public void Window_IW_DropsSegmentsFullyOutsideIt()
+        {
+            // Two separate segments; the window keeps only the first - the second is clipped away.
+            string body = "PU0,0;PD1000,1000;PU5000,5000;PD6000,6000;";
+            string both = HpglRenderer.RenderToSvg("IN;SP1;" + body);
+            string clipped = HpglRenderer.RenderToSvg("IN;SP1;IW0,0,1500,1500;" + body);
+            Assert.Equal(2, Polylines(both));
+            Assert.Equal(1, Polylines(clipped));
+        }
+
+        [Fact]
+        public void Window_IW_Reset_RestoresFullDrawing()
+        {
+            // IW with no parameters clears the window, so a later segment outside the old window draws.
+            string body = "PU0,0;PD1000,1000;IW;PU5000,5000;PD6000,6000;";
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;IW0,0,1500,1500;" + body);
+            Assert.Equal(2, Polylines(svg));
         }
     }
 }

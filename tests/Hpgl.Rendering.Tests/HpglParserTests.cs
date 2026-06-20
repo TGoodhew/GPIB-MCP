@@ -66,5 +66,24 @@ namespace Hpgl.Rendering.Tests
             var instr = HpglParser.Parse("PA-100,-50.5;");
             Assert.Equal(new double[] { -100, -50.5 }, instr[0].Parameters);
         }
+
+        [Fact]
+        public void Parse_SmCapturesSymbolCharacter_IncludingLetters()
+        {
+            // SMX; sets 'X' as the symbol char (a letter must not be mistaken for a mnemonic).
+            var instr = HpglParser.Parse("SMX;PU0,0;");
+            Assert.Equal("SM", instr[0].Mnemonic);
+            Assert.Equal("X", instr[0].Text);
+            Assert.Equal("PU", instr[1].Mnemonic);
+        }
+
+        [Fact]
+        public void Parse_SmWithNoCharTurnsSymbolModeOff()
+        {
+            var instr = HpglParser.Parse("SM;PA1,1;");
+            Assert.Equal("SM", instr[0].Mnemonic);
+            Assert.Null(instr[0].Text);
+            Assert.Equal("PA", instr[1].Mnemonic);
+        }
     }
 }

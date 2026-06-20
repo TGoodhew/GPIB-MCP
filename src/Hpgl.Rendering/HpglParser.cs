@@ -68,6 +68,23 @@ namespace Hpgl.Rendering
                     continue;
                 }
 
+                if (mnemonic == "SM")
+                {
+                    // SM <char>; sets the symbol plotted at each point; SM; turns it off.
+                    // The character immediately follows SM and may be any printable (incl. a letter).
+                    if (i < n && source[i] != ';')
+                    {
+                        char sym = source[i++];
+                        result.Add(new HpglInstruction("SM", null, sym.ToString()));
+                    }
+                    else
+                    {
+                        result.Add(new HpglInstruction("SM", null)); // symbol mode off
+                    }
+                    if (i < n && source[i] == ';') i++;
+                    continue;
+                }
+
                 if (mnemonic == "DT")
                 {
                     // DT <terminatorChar>[,mode];  - the char immediately follows DT.

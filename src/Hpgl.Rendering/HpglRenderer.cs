@@ -8,11 +8,13 @@
 //
 // This is a clean, general HP-GL/2 vector renderer. Unlike 7470.cpp it contains
 // no per-instrument fix-ups; instrument-specific quirks belong in the caller's
-// capture profile, not here. Covered so far (issue #8): IN/DF, IP/SC, SP,
-// PU/PD/PA/PR, LB/DT/SI/SR/DI, arcs/circles/wedges (CI/AA/AR/EW) and edge
+// capture profile, not here. Covered so far (issue #8): IN/DF, IP/SC, RO, IW
+// (soft-clip), SP, PU/PD/PA/PR, arcs/circles/wedges (CI/AA/AR/EW) and edge
 // rectangles (EA/ER) via chord subdivision, line types (LT) as dash patterns,
 // area fill (RA/RR/WG, FT/PT) - solid via polygon fill, hatch as line spans -
-// and 7550A polygons (PM/EP/FP) with even-odd multi-contour fill.
+// 7550A polygons (PM/EP/FP) with even-odd multi-contour fill, and the full
+// label/text subsystem (LB/DT/SI/SR/SL/DI/DR/CP/ES/SM, CR/LF, mirroring,
+// CS/CA/SS/SA + shift-in/out) drawn from a built-in single-stroke vector font.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -112,16 +114,19 @@ namespace Hpgl.Rendering
 
         // ---------------------------------------------------------------------
         // Execution: replay the instruction list against a sink (measure or draw).
+        // Everything is funnelled through a ClipSink so the IW soft-clip window
+        // applies uniformly to vectors, fills, and label strokes.
         // ---------------------------------------------------------------------
 
-        private static void Execute(IList<HpglInstruction> instructions, IPlotSink sink)
+        private static void Execute(IList<HpglInstruction> instructions, IPlotSink rawSink)
         {
             var state = new PlotterState();
+            var sink = new ClipSink(rawSink, state);
             PolygonRecorder recorder = null;   // non-null while in polygon mode (PM0..PM2)
             foreach (var instruction in instructions)
             {
                 // While in polygon mode, geometry records into the buffer instead of drawing.
-                IPlotSink geom = recorder ?? sink;
+                IPlotSink geom = recorder ?? (IPlotSink)sink;
                 switch (instruction.Mnemonic)
                 {
                     case "IN":
@@ -138,10 +143,23 @@ namespace Hpgl.Rendering
                     case "PR": state.Absolute = false; Move(state, instruction.Parameters, geom); break;
                     case "SC": state.SetScale(instruction.Parameters); break;
                     case "IP": state.SetInputPoints(instruction.Parameters); break;
+                    case "RO": state.SetRotation(instruction.Parameters); break;
+                    case "IW": state.SetWindow(instruction.Parameters); break;
+                    // ---- label / text subsystem ----
                     case "SI": state.SetCharSizeCm(instruction.Parameters); break;
                     case "SR": state.SetCharSizeRelative(instruction.Parameters); break;
+                    case "SL": state.SetSlant(instruction.Parameters); break;
                     case "DI": state.SetDirection(instruction.Parameters); break;
-                    case "LB": sink.Label(state, instruction.Text); break;
+                    case "DR": state.SetDirectionRelative(instruction.Parameters); break;
+                    case "ES": state.SetExtraSpace(instruction.Parameters); break;
+                    case "CP": CharPlot(state, instruction.Parameters); break;
+                    case "CS": state.StandardSet = instruction.Parameters.Count > 0 ? (int)instruction.Parameters[0] : 0; break;
+                    case "CA": state.AlternateSet = instruction.Parameters.Count > 0 ? (int)instruction.Parameters[0] : 0; break;
+                    case "SS": state.ActiveAlternate = false; break;
+                    case "SA": state.ActiveAlternate = true; break;
+                    case "SM": state.SymbolChar = !string.IsNullOrEmpty(instruction.Text) ? instruction.Text[0] : -1; break;
+                    case "LB": DrawLabel(state, instruction.Text, sink); break;
+                    case "DT": break; // label terminator is resolved by the parser
                     case "CT": if (instruction.Parameters.Count > 0) { /* chord mode (deg/dev) - degrees only */ } break;
                     case "CI": Circle(state, instruction.Parameters, geom); break;
                     case "AA": Arc(state, instruction.Parameters, geom, relativeCenter: false); break;
@@ -154,7 +172,6 @@ namespace Hpgl.Rendering
                     case "RA": FillRect(state, instruction.Parameters, geom, relative: false); break;
                     case "RR": FillRect(state, instruction.Parameters, geom, relative: true); break;
                     case "WG": FillWedge(state, instruction.Parameters, geom); break;
-                    // IW/PG and other non-geometry ops are ignored for layout in v1.
                 }
             }
         }
@@ -168,7 +185,97 @@ namespace Hpgl.Rendering
                 if (state.PenDown) sink.Line(state.X, state.Y, nx, ny, state.Pen);
                 state.X = nx;
                 state.Y = ny;
+                if (state.SymbolChar >= 0) DrawSymbol(state, state.SymbolChar, nx, ny, sink);
             }
+        }
+
+        // ---------------------------------------------------------------------
+        // Label / symbol rendering. Glyphs come from the built-in single-stroke
+        // font (StrokeFont) and are emitted as Line() calls, so they honour size
+        // (SI/SR), slant (SL), direction (DI/DR), rotation (RO), clipping (IW),
+        // pen colour and line type exactly like every other vector.
+        // ---------------------------------------------------------------------
+
+        /// <summary>Resolves the rotated text baseline ("along") and perpendicular ("up") unit vectors.</summary>
+        private static void RotatedDir(PlotterState s, out double ax, out double ay, out double ux, out double uy)
+        {
+            double cx = s.DirCos, cy = s.DirSin;
+            s.RotateVector(ref cx, ref cy);
+            ax = cx; ay = cy; ux = -cy; uy = cx;
+        }
+
+        /// <summary>LB: draws a string from the current position, advancing the carry-over cursor.</summary>
+        private static void DrawLabel(PlotterState s, string text, IPlotSink sink)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
+            double sx = s.CharWidthUnits / StrokeFont.Advance;
+            double sy = s.CharHeightUnits / StrokeFont.Cap;
+            double ox = s.X, oy = s.Y, cursorX = 0, lineY = 0;
+            double adv = s.AdvanceXUnits, lineStep = s.LineAdvanceUnits;
+            bool activeAlt = s.ActiveAlternate;
+
+            foreach (char ch in text)
+            {
+                if (ch == '\r') { cursorX = 0; continue; }              // CR -> line origin
+                if (ch == '\n') { cursorX = 0; lineY -= lineStep; continue; } // LF -> next line
+                if (ch == '') { activeAlt = true; continue; }   // shift-out -> alternate set
+                if (ch == '') { activeAlt = false; continue; }  // shift-in  -> standard set
+
+                int[][] glyph = StrokeFont.Get(ch);
+                if (glyph != null)
+                {
+                    foreach (var stroke in glyph)
+                        for (int k = 0; k + 3 < stroke.Length; k += 2)
+                        {
+                            double l0x = stroke[k] * sx + s.SlantTan * (stroke[k + 1] * sy) + cursorX;
+                            double l0y = stroke[k + 1] * sy + lineY;
+                            double l1x = stroke[k + 2] * sx + s.SlantTan * (stroke[k + 3] * sy) + cursorX;
+                            double l1y = stroke[k + 3] * sy + lineY;
+                            sink.Line(ox + l0x * ax + l0y * ux, oy + l0x * ay + l0y * uy,
+                                      ox + l1x * ax + l1y * ux, oy + l1x * ay + l1y * uy, s.Pen);
+                        }
+                }
+                cursorX += adv;
+            }
+            // Carry-over cursor: the pen ends at the position following the last character.
+            s.X = ox + cursorX * ax + lineY * ux;
+            s.Y = oy + cursorX * ay + lineY * uy;
+            s.ActiveAlternate = activeAlt;
+        }
+
+        /// <summary>SM: draws the symbol glyph centred on a plotted point (no cursor advance).</summary>
+        private static void DrawSymbol(PlotterState s, int chCode, double px, double py, IPlotSink sink)
+        {
+            int[][] glyph = StrokeFont.Get((char)chCode);
+            if (glyph == null) return;
+            double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
+            double sx = s.CharWidthUnits / StrokeFont.Advance;
+            double sy = s.CharHeightUnits / StrokeFont.Cap;
+            const double cgx = 2, cgy = 3; // approximate glyph centre in grid units
+
+            foreach (var stroke in glyph)
+                for (int k = 0; k + 3 < stroke.Length; k += 2)
+                {
+                    double l0x = (stroke[k] - cgx) * sx + s.SlantTan * ((stroke[k + 1] - cgy) * sy);
+                    double l0y = (stroke[k + 1] - cgy) * sy;
+                    double l1x = (stroke[k + 2] - cgx) * sx + s.SlantTan * ((stroke[k + 3] - cgy) * sy);
+                    double l1y = (stroke[k + 3] - cgy) * sy;
+                    sink.Line(px + l0x * ax + l0y * ux, py + l0x * ay + l0y * uy,
+                              px + l1x * ax + l1y * ux, py + l1x * ay + l1y * uy, s.Pen);
+                }
+        }
+
+        /// <summary>CP spaces,lines: moves the cursor by N character cells without drawing (CP; = CR+LF).</summary>
+        private static void CharPlot(PlotterState s, IReadOnlyList<double> p)
+        {
+            double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
+            double dCols, dLines;
+            if (p.Count >= 2) { dCols = p[0]; dLines = p[1]; }
+            else { dCols = 0; dLines = -1; } // CP; -> down one line
+            double dx = dCols * s.AdvanceXUnits, dy = dLines * s.LineAdvanceUnits;
+            s.X += dx * ax + dy * ux;
+            s.Y += dx * ay + dy * uy;
         }
 
         // ---------------------------------------------------------------------
@@ -194,7 +301,7 @@ namespace Hpgl.Rendering
         {
             if (p.Count < 3) return;
             double cx, cy;
-            if (relativeCenter) { cx = s.X + s.DeltaX(p[0]); cy = s.Y + s.DeltaY(p[1]); }
+            if (relativeCenter) { double dx, dy; s.DeltaToPlot(p[0], p[1], out dx, out dy); cx = s.X + dx; cy = s.Y + dy; }
             else s.UserToPlot(p[0], p[1], out cx, out cy);
 
             double sweep = p[2];
@@ -213,7 +320,7 @@ namespace Hpgl.Rendering
         {
             if (p.Count < 2) return;
             double x2, y2;
-            if (relative) { x2 = s.X + s.DeltaX(p[0]); y2 = s.Y + s.DeltaY(p[1]); }
+            if (relative) { double dx, dy; s.DeltaToPlot(p[0], p[1], out dx, out dy); x2 = s.X + dx; y2 = s.Y + dy; }
             else s.UserToPlot(p[0], p[1], out x2, out y2);
 
             double x1 = s.X, y1 = s.Y;
@@ -229,7 +336,7 @@ namespace Hpgl.Rendering
         {
             if (p.Count < 3) return;
             double r = Math.Abs(p[0]);
-            double startDeg = p[1], sweep = p[2];
+            double startDeg = p[1] + s.RotationDeg, sweep = p[2];
             double chord = p.Count >= 4 ? p[3] : s.ChordAngleDeg;
             double rx = r * s.ScaleX, ry = r * s.ScaleY;
             double cx = s.X, cy = s.Y;
@@ -279,7 +386,7 @@ namespace Hpgl.Rendering
         {
             if (p.Count < 2) return;
             double x2, y2;
-            if (relative) { x2 = s.X + s.DeltaX(p[0]); y2 = s.Y + s.DeltaY(p[1]); }
+            if (relative) { double dx, dy; s.DeltaToPlot(p[0], p[1], out dx, out dy); x2 = s.X + dx; y2 = s.Y + dy; }
             else s.UserToPlot(p[0], p[1], out x2, out y2);
             double x1 = s.X, y1 = s.Y;
             var rect = new[] { new PointD(x1, y1), new PointD(x2, y1), new PointD(x2, y2), new PointD(x1, y2) };
@@ -291,7 +398,7 @@ namespace Hpgl.Rendering
         private static void FillWedge(PlotterState s, IReadOnlyList<double> p, IPlotSink sink)
         {
             if (p.Count < 3) return;
-            double r = Math.Abs(p[0]), startDeg = p[1], sweep = p[2];
+            double r = Math.Abs(p[0]), startDeg = p[1] + s.RotationDeg, sweep = p[2];
             double chord = p.Count >= 4 ? p[3] : s.ChordAngleDeg;
             double rx = r * s.ScaleX, ry = r * s.ScaleY;
             double cx = s.X, cy = s.Y;
@@ -423,8 +530,9 @@ namespace Hpgl.Rendering
 
     // -------------------------------------------------------------------------
     // Plotter state machine. Coordinates are tracked in "plot units"; SC user
-    // scaling (if present) maps user coordinates into a fixed plot-unit frame.
-    // The final auto-fit transform normalizes whatever range results.
+    // scaling (if present) maps user coordinates into a fixed plot-unit frame,
+    // and RO rotates the emitted plot-unit coordinates. The final auto-fit
+    // transform normalizes whatever range results.
     // -------------------------------------------------------------------------
 
     /// <summary>A point in plot-unit space.</summary>
@@ -449,8 +557,22 @@ namespace Hpgl.Rendering
         public bool Absolute = true;
         public int Pen = 1;
 
-        public double CharHeightUnits = 150; // sensible default until SI/SR seen
+        // Coordinate-system rotation (RO): 0/90/180/270 degrees, applied about the origin.
+        public int RotationDeg;
+
+        // Soft-clip window (IW), in plot units (already rotated); null window when !HasClip.
+        public bool HasClip;
+        public double ClipX1, ClipY1, ClipX2, ClipY2;
+
+        // Character/label state. Width/height are signed (negative = mirrored).
+        public double CharWidthUnits = 150;
+        public double CharHeightUnits = 150;
+        public double SlantTan;
+        public double ExtraSpaceX, ExtraSpaceY;
         public double DirCos = 1, DirSin = 0;
+        public int StandardSet, AlternateSet;
+        public bool ActiveAlternate;
+        public int SymbolChar = -1;          // -1 = symbol mode off
         public double ChordAngleDeg = 5.0;   // arc/circle subdivision step (HP-GL default 5°)
 
         // Area-fill state (FT/PT). Type 1/2 = solid, 3 = parallel hatch, 4 = cross-hatch.
@@ -463,8 +585,13 @@ namespace Hpgl.Rendering
         {
             _scaled = false;
             Absolute = true;
-            CharHeightUnits = 150;
+            RotationDeg = 0;
+            HasClip = false;
+            CharWidthUnits = 150; CharHeightUnits = 150;
+            SlantTan = 0; ExtraSpaceX = 0; ExtraSpaceY = 0;
             DirCos = 1; DirSin = 0;
+            StandardSet = 0; AlternateSet = 0; ActiveAlternate = false;
+            SymbolChar = -1;
             ChordAngleDeg = 5.0;
             FillType = 1; FillSpacingUnits = 0; FillAngleDeg = 0; PenThicknessMm = 0.3;
             Polygon = null;
@@ -473,6 +600,15 @@ namespace Hpgl.Rendering
         /// <summary>Diagonal of the P1-P2 (IP) frame in plot units - the basis for default hatch spacing.</summary>
         public double FrameDiagonal =>
             Math.Sqrt((_ipX2 - _ipX1) * (_ipX2 - _ipX1) + (_ipY2 - _ipY1) * (_ipY2 - _ipY1));
+
+        public double FrameWidth => Math.Abs(_ipX2 - _ipX1);
+        public double FrameHeight => Math.Abs(_ipY2 - _ipY1);
+
+        /// <summary>Per-character cursor advance (plot units), including ES extra space; signed for mirroring.</summary>
+        public double AdvanceXUnits => CharWidthUnits * (1 + ExtraSpaceX);
+
+        /// <summary>Per-line advance (plot units): one cell height (= 2x char height) plus ES extra line space.</summary>
+        public double LineAdvanceUnits => 2 * Math.Abs(CharHeightUnits) * (1 + ExtraSpaceY);
 
         public void SetFill(IReadOnlyList<double> p)
         {
@@ -491,15 +627,32 @@ namespace Hpgl.Rendering
         public double ScaleX => _scaled ? (_ipX2 - _ipX1) / (_scXmax - _scXmin) : 1.0;
         public double ScaleY => _scaled ? (_ipY2 - _ipY1) / (_scYmax - _scYmin) : 1.0;
 
-        /// <summary>Maps a user/plotter coordinate pair to plot units (honours SC scaling).</summary>
+        /// <summary>Maps a user/plotter coordinate pair to plot units (honours SC scaling and RO rotation).</summary>
         public void UserToPlot(double ux, double uy, out double px, out double py)
         {
-            px = UserToPlotX(ux); py = UserToPlotY(uy);
+            double x = UserToPlotX(ux), y = UserToPlotY(uy);
+            RotateVector(ref x, ref y);
+            px = x; py = y;
         }
 
-        /// <summary>Maps a relative coordinate delta to plot units (honours SC scaling).</summary>
-        public double DeltaX(double dx) => DeltaToPlotX(dx);
-        public double DeltaY(double dy) => DeltaToPlotY(dy);
+        /// <summary>Maps a relative coordinate delta to plot units (honours SC scaling and RO rotation).</summary>
+        public void DeltaToPlot(double dx, double dy, out double px, out double py)
+        {
+            double x = DeltaToPlotX(dx), y = DeltaToPlotY(dy);
+            RotateVector(ref x, ref y);
+            px = x; py = y;
+        }
+
+        /// <summary>Rotates a plot-unit vector/point about the origin by the current RO angle.</summary>
+        public void RotateVector(ref double x, ref double y)
+        {
+            switch (RotationDeg)
+            {
+                case 90: { double t = x; x = -y; y = t; break; }
+                case 180: { x = -x; y = -y; break; }
+                case 270: { double t = x; x = y; y = -t; break; }
+            }
+        }
 
         public void SetInputPoints(IReadOnlyList<double> p)
         {
@@ -519,18 +672,36 @@ namespace Hpgl.Rendering
             }
         }
 
+        public void SetRotation(IReadOnlyList<double> p)
+        {
+            int deg = p.Count > 0 ? (int)Math.Round(p[0] / 90.0) * 90 : 0;
+            RotationDeg = ((deg % 360) + 360) % 360;
+        }
+
+        /// <summary>IW X1,Y1,X2,Y2: set the soft-clip window (user coords). IW; resets it.</summary>
+        public void SetWindow(IReadOnlyList<double> p)
+        {
+            if (p.Count < 4) { HasClip = false; return; }
+            double ax, ay, bx, by;
+            UserToPlot(p[0], p[1], out ax, out ay);
+            UserToPlot(p[2], p[3], out bx, out by);
+            ClipX1 = Math.Min(ax, bx); ClipX2 = Math.Max(ax, bx);
+            ClipY1 = Math.Min(ay, by); ClipY2 = Math.Max(ay, by);
+            HasClip = true;
+        }
+
         /// <summary>Computes the next plot-unit position for an absolute/relative coordinate pair.</summary>
         public void NextPosition(double a, double b, out double nx, out double ny)
         {
             if (Absolute)
             {
-                nx = UserToPlotX(a);
-                ny = UserToPlotY(b);
+                UserToPlot(a, b, out nx, out ny);
             }
             else
             {
-                nx = X + DeltaToPlotX(a);
-                ny = Y + DeltaToPlotY(b);
+                double dx, dy;
+                DeltaToPlot(a, b, out dx, out dy);
+                nx = X + dx; ny = Y + dy;
             }
         }
 
@@ -548,24 +719,43 @@ namespace Hpgl.Rendering
 
         public void SetCharSizeCm(IReadOnlyList<double> p)
         {
-            // SI width,height in centimetres; 1 plot unit = 0.025 mm => 400 units/cm.
-            if (p.Count >= 2) CharHeightUnits = Math.Abs(p[1]) * 400.0;
+            // SI width,height in centimetres; 1 plot unit = 0.025 mm => 400 units/cm. Sign = mirror.
+            if (p.Count >= 2) { CharWidthUnits = p[0] * 400.0; CharHeightUnits = p[1] * 400.0; }
+            else { CharWidthUnits = 150; CharHeightUnits = 150; } // SI; -> size default
         }
 
         public void SetCharSizeRelative(IReadOnlyList<double> p)
         {
-            // SR width,height as a percentage of the IP frame.
-            if (p.Count >= 2) CharHeightUnits = Math.Abs(p[1]) / 100.0 * Math.Abs(_ipY2 - _ipY1);
+            // SR width,height as a percentage of the IP frame. SR; -> 0.75% x 1.5%.
+            if (p.Count >= 2) { CharWidthUnits = p[0] / 100.0 * FrameWidth; CharHeightUnits = p[1] / 100.0 * FrameHeight; }
+            else { CharWidthUnits = 0.0075 * FrameWidth; CharHeightUnits = 0.015 * FrameHeight; }
+        }
+
+        public void SetSlant(IReadOnlyList<double> p) => SlantTan = p.Count >= 1 ? p[0] : 0;
+
+        public void SetExtraSpace(IReadOnlyList<double> p)
+        {
+            ExtraSpaceX = p.Count >= 1 ? p[0] : 0;
+            ExtraSpaceY = p.Count >= 2 ? p[1] : 0;
         }
 
         public void SetDirection(IReadOnlyList<double> p)
         {
-            if (p.Count >= 2)
-            {
-                double run = p[0], rise = p[1];
-                double mag = Math.Sqrt(run * run + rise * rise);
-                if (mag > 0) { DirCos = run / mag; DirSin = rise / mag; }
-            }
+            if (p.Count >= 2) Normalize(p[0], p[1]);
+            else { DirCos = 1; DirSin = 0; }
+        }
+
+        public void SetDirectionRelative(IReadOnlyList<double> p)
+        {
+            // DR run,rise are fractions of the P1-P2 frame; scale before normalizing.
+            if (p.Count >= 2) Normalize(p[0] * FrameWidth, p[1] * FrameHeight);
+            else { DirCos = 1; DirSin = 0; }
+        }
+
+        private void Normalize(double run, double rise)
+        {
+            double mag = Math.Sqrt(run * run + rise * rise);
+            if (mag > 0) { DirCos = run / mag; DirSin = rise / mag; }
             else { DirCos = 1; DirSin = 0; }
         }
     }
@@ -577,11 +767,120 @@ namespace Hpgl.Rendering
     internal interface IPlotSink
     {
         void Line(double x1, double y1, double x2, double y2, int pen);
-        void Label(PlotterState state, string text);
         /// <summary>Sets the current line type for subsequent vectors (-1 = solid; 0-6 = HP-GL patterns).</summary>
         void SetLineType(int lineType);
         /// <summary>Solid-fills a closed polygon (plot-unit vertices) - used for FT type 1/2 fills.</summary>
         void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen);
+    }
+
+    /// <summary>
+    /// Applies the IW soft-clip window to everything drawn: line segments are clipped with
+    /// Liang-Barsky and filled polygons with Sutherland-Hodgman, against the current window read
+    /// live from <see cref="PlotterState"/> (so a mid-stream IW change takes effect immediately).
+    /// Pass-through when no window is set.
+    /// </summary>
+    internal sealed class ClipSink : IPlotSink
+    {
+        private readonly IPlotSink _inner;
+        private readonly PlotterState _s;
+
+        public ClipSink(IPlotSink inner, PlotterState s) { _inner = inner; _s = s; }
+
+        public void SetLineType(int lineType) => _inner.SetLineType(lineType);
+
+        public void Line(double x1, double y1, double x2, double y2, int pen)
+        {
+            if (!_s.HasClip) { _inner.Line(x1, y1, x2, y2, pen); return; }
+            if (ClipSegment(ref x1, ref y1, ref x2, ref y2))
+                _inner.Line(x1, y1, x2, y2, pen);
+        }
+
+        public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
+        {
+            if (!_s.HasClip) { _inner.FillPolygon(xs, ys, pen); return; }
+            var clipped = ClipPolygon(xs, ys);
+            if (clipped.Count >= 3)
+            {
+                var cx = new double[clipped.Count]; var cy = new double[clipped.Count];
+                for (int i = 0; i < clipped.Count; i++) { cx[i] = clipped[i].X; cy[i] = clipped[i].Y; }
+                _inner.FillPolygon(cx, cy, pen);
+            }
+        }
+
+        /// <summary>Liang-Barsky clip of a segment to the window; returns false if fully outside.</summary>
+        private bool ClipSegment(ref double x0, ref double y0, ref double x1, ref double y1)
+        {
+            double dx = x1 - x0, dy = y1 - y0;
+            double t0 = 0, t1 = 1;
+            double[] p = { -dx, dx, -dy, dy };
+            double[] q = { x0 - _s.ClipX1, _s.ClipX2 - x0, y0 - _s.ClipY1, _s.ClipY2 - y0 };
+            for (int i = 0; i < 4; i++)
+            {
+                if (p[i] == 0) { if (q[i] < 0) return false; }
+                else
+                {
+                    double t = q[i] / p[i];
+                    if (p[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; }
+                    else { if (t < t0) return false; if (t < t1) t1 = t; }
+                }
+            }
+            double nx0 = x0 + t0 * dx, ny0 = y0 + t0 * dy;
+            double nx1 = x0 + t1 * dx, ny1 = y0 + t1 * dy;
+            x0 = nx0; y0 = ny0; x1 = nx1; y1 = ny1;
+            return true;
+        }
+
+        /// <summary>Sutherland-Hodgman clip of a polygon to the rectangular window.</summary>
+        private List<PointD> ClipPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys)
+        {
+            var poly = new List<PointD>(xs.Count);
+            for (int i = 0; i < xs.Count; i++) poly.Add(new PointD(xs[i], ys[i]));
+            poly = ClipEdge(poly, 0, _s.ClipX1);   // left:   x >= X1
+            poly = ClipEdge(poly, 1, _s.ClipX2);   // right:  x <= X2
+            poly = ClipEdge(poly, 2, _s.ClipY1);   // bottom: y >= Y1
+            poly = ClipEdge(poly, 3, _s.ClipY2);   // top:    y <= Y2
+            return poly;
+        }
+
+        private static bool Inside(PointD pt, int edge, double v)
+        {
+            switch (edge)
+            {
+                case 0: return pt.X >= v;
+                case 1: return pt.X <= v;
+                case 2: return pt.Y >= v;
+                default: return pt.Y <= v;
+            }
+        }
+
+        private static PointD Intersect(PointD a, PointD b, int edge, double v)
+        {
+            double t;
+            if (edge <= 1) t = (v - a.X) / (b.X - a.X);
+            else t = (v - a.Y) / (b.Y - a.Y);
+            return new PointD(a.X + t * (b.X - a.X), a.Y + t * (b.Y - a.Y));
+        }
+
+        private static List<PointD> ClipEdge(List<PointD> input, int edge, double v)
+        {
+            var output = new List<PointD>();
+            if (input.Count == 0) return output;
+            for (int i = 0; i < input.Count; i++)
+            {
+                PointD cur = input[i], prev = input[(i + input.Count - 1) % input.Count];
+                bool curIn = Inside(cur, edge, v), prevIn = Inside(prev, edge, v);
+                if (curIn)
+                {
+                    if (!prevIn) output.Add(Intersect(prev, cur, edge, v));
+                    output.Add(cur);
+                }
+                else if (prevIn)
+                {
+                    output.Add(Intersect(prev, cur, edge, v));
+                }
+            }
+            return output;
+        }
     }
 
     /// <summary>
@@ -660,7 +959,6 @@ namespace Hpgl.Rendering
             return result;
         }
 
-        public void Label(PlotterState state, string text) { }
         public void SetLineType(int lineType) { }
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen) { }
     }
@@ -681,24 +979,6 @@ namespace Hpgl.Rendering
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
         {
             for (int i = 0; i < xs.Count; i++) Include(xs[i], ys[i]);
-        }
-
-        public void Label(PlotterState state, string text)
-        {
-            // Include the label's text extent, not just its baseline anchor: text rises above
-            // the baseline (by ~cap height) and runs along the label direction. Omitting this
-            // makes the auto-fit too tight and clips edge annotations (e.g. the top row).
-            Include(state.X, state.Y);
-            if (string.IsNullOrEmpty(text)) return;
-
-            double h = state.CharHeightUnits;
-            double w = text.Length * state.CharHeightUnits * 0.6; // approx average glyph advance
-            double cos = state.DirCos, sin = state.DirSin;        // text direction
-            double upX = -sin, upY = cos;                          // perpendicular "up" (cap height)
-
-            Include(state.X + w * cos, state.Y + w * sin);                       // baseline end
-            Include(state.X + h * upX, state.Y + h * upY);                       // above anchor
-            Include(state.X + w * cos + h * upX, state.Y + w * sin + h * upY);   // far top corner
         }
 
         private void Include(double x, double y)
@@ -747,7 +1027,6 @@ namespace Hpgl.Rendering
         private readonly PlotTransform _t;
         private readonly HpglRenderOptions _opt;
         private readonly Dictionary<int, Pen> _pens = new Dictionary<int, Pen>();
-        private readonly FontFamily _fontFamily = FontFamily.GenericSansSerif;
         private readonly double _diag;
         private int _lineType = HpglLineTypes.Solid;
 
@@ -771,29 +1050,6 @@ namespace Hpgl.Rendering
             for (int i = 0; i < xs.Count; i++) pts[i] = new PointF(_t.MapX(xs[i]), _t.MapY(ys[i]));
             using (var brush = new SolidBrush(_opt.ResolvePen(pen)))
                 _g.FillPolygon(brush, pts);
-        }
-
-        public void Label(PlotterState state, string text)
-        {
-            if (string.IsNullOrEmpty(text)) return;
-
-            float px = _t.MapX(state.X);
-            float py = _t.MapY(state.Y);
-            float heightPx = (float)Math.Max(6.0, state.CharHeightUnits * _t.Scale);
-
-            // DI direction -> on-screen angle (Y is flipped, so negate the rise).
-            double angleDeg = Math.Atan2(-state.DirSin, state.DirCos) * 180.0 / Math.PI;
-
-            using (var font = new Font(_fontFamily, heightPx, GraphicsUnit.Pixel))
-            using (var brush = new SolidBrush(_opt.ResolvePen(state.Pen)))
-            {
-                var saved = _g.Save();
-                _g.TranslateTransform(px, py);
-                _g.RotateTransform((float)angleDeg);
-                // HP-GL label baseline sits at the pen position; nudge up by the cap height.
-                _g.DrawString(text, font, brush, 0, -heightPx);
-                _g.Restore(saved);
-            }
         }
 
         private Pen PenFor(int pen)
@@ -880,24 +1136,6 @@ namespace Hpgl.Rendering
             _lastX = bx; _lastY = by;
         }
 
-        public void Label(PlotterState state, string text)
-        {
-            if (string.IsNullOrEmpty(text)) return;
-            Flush(); // keep label text painted after the geometry around it
-
-            int px = R(_t.MapX(state.X)), py = R(_t.MapY(state.Y));
-            int size = (int)Math.Max(6.0, state.CharHeightUnits * _t.Scale);
-            double angleDeg = Math.Atan2(-state.DirSin, state.DirCos) * 180.0 / Math.PI;
-
-            _sb.Append("<text x=\"").Append(px).Append("\" y=\"").Append(py)
-               .Append("\" fill=\"").Append(ToHex(_opt.ResolvePen(state.Pen)))
-               .Append("\" font-family=\"sans-serif\" font-size=\"").Append(size).Append("px\"");
-            if (Math.Abs(angleDeg) > 0.01)
-                _sb.Append(" transform=\"rotate(").Append(R((float)angleDeg))
-                   .Append(' ').Append(px).Append(' ').Append(py).Append(")\"");
-            _sb.Append('>').Append(Escape(text)).Append("</text>\n");
-        }
-
         /// <summary>Writes the pending polyline (if any) and resets the batch.</summary>
         public void Flush()
         {
@@ -924,25 +1162,5 @@ namespace Hpgl.Rendering
 
         internal static string ToHex(Color c) =>
             "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
-
-        private static string Escape(string s)
-        {
-            var sb = new StringBuilder(s.Length);
-            foreach (char c in s)
-            {
-                switch (c)
-                {
-                    case '&': sb.Append("&amp;"); break;
-                    case '<': sb.Append("&lt;"); break;
-                    case '>': sb.Append("&gt;"); break;
-                    case '"': sb.Append("&quot;"); break;
-                    default:
-                        // Drop control characters (e.g. a stray label terminator) that are illegal in XML.
-                        if (c >= ' ' || c == '\t') sb.Append(c);
-                        break;
-                }
-            }
-            return sb.ToString();
-        }
     }
 }

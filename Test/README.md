@@ -25,6 +25,22 @@ options above and review the diff before committing.
 
 ![expected render](test-expected.png)
 
+## feature-exercise.plt
+
+A hand-authored HP-GL/2 plot that drives **every supported instruction family** in one image:
+vectors, line types `LT0`–`LT6`, arcs/circles/wedges (`CI`/`AA`/`EW`/`WG`), edge + solid +
+parallel-hatch + cross-hatch + relative rectangles (`EA`/`RA`/`RR`/`FT`/`PT`), a 7550A polygon
+with a hole (`PM`/`FP`/`EP`), stroke-font labels with slant/direction/relative-size/symbol-mode/
+multi-line (`SL`/`DI`/`DR`/`SR`/`SM`/CR-LF), coordinate rotation (`RO`), and soft-clip windows
+(`IW`). Used by the `Render_FeatureExercise_ExercisesFullPipeline` smoke test and as a visual
+sanity check. `feature-exercise.png` / `.svg` are reference renders (library defaults).
+
+![feature exercise](feature-exercise.png)
+
+> To get an independent **baseline** for any `.plt`, render it with [`hp2xx`](https://www.gnu.org/software/hp2xx/)
+> (open-source HP-GL → PNG/SVG). Note its built-in vector font differs from ours, so label glyphs
+> won't match — compare the geometry (vectors, arcs, fills, polygons), not the text shapes.
+
 ## 7440-test.bmp
 
 The **KE5FX reference render** of the same plot, produced by the HP7470A Plotter Emulator

@@ -34,6 +34,9 @@
     <Content Include="..\..\Test\test-expected.png" Link="fixtures\test-expected.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\Test\feature-exercise.plt" Link="fixtures\feature-exercise.plt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
