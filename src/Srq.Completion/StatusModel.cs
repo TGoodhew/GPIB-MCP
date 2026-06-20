@@ -9,6 +9,17 @@ namespace Srq.Completion
     /// instrument database JSON (Json.NET matches the camelCase fields case-insensitively, so this
     /// type carries no serialization attributes and the library stays dependency-free).
     /// Optional; absent means "unknown" and <c>SrqSupported == false</c> means there is no usable SRQ.
+    ///
+    /// This type is the ONLY place instrument-specific completion knowledge lives - the waiter contains
+    /// no per-device logic. Two completion strategies, chosen by whether <see cref="RequestServiceBit"/>
+    /// is set:
+    ///   * <b>SRQ-edge</b> (RequestServiceBit set): poll the GPIB request-service bit (0x40) as the
+    ///     completion signal, after first waiting for the operation to go busy. Most robust; use when
+    ///     the instrument reliably asserts SRQ on the armed condition (e.g. the 8563E).
+    ///   * <b>direct-bit</b> (RequestServiceBit absent): poll the operation's <c>expectBit</c> (or the
+    ///     error bit) directly. Use when request-service is unavailable or unreliable - e.g. the 3325,
+    ///     whose require-service bit only asserts in the unit's physical "Enhancements" mode.
+    /// To add a new SRQ instrument, supply this block in its database JSON; no code changes are needed.
     /// </summary>
     public sealed class StatusModel
     {
@@ -36,6 +47,14 @@ namespace Srq.Completion
         /// is set on every SRQ, NOT an error). Absent =&gt; legacy direct-bit flow (poll the expect bit).
         /// </summary>
         public string RequestServiceBit { get; set; }
+
+        /// <summary>
+        /// SRQ-edge only: how long (ms) to wait for the operation to go BUSY (the expect bit to clear)
+        /// before proceeding to wait for completion. Override per model when an instrument is slow to
+        /// start an operation; null uses <see cref="CompletionWaiter.BusyConfirmMs"/>. Always capped at
+        /// the overall timeout.
+        /// </summary>
+        public int? BusyConfirmMs { get; set; }
 
         /// <summary>Named status-byte bits and their decimal weights (e.g. "endOfSweep" -&gt; 16).</summary>
         public Dictionary<string, int> Bits { get; set; }

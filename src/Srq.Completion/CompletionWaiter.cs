@@ -133,7 +133,9 @@ namespace Srq.Completion
             channel.Send(setCmd); log("send (arm mask): " + setCmd);
             if (!string.IsNullOrEmpty(op.Arm)) { channel.Send(op.Arm); log("send (start op): " + op.Arm); }
 
-            long busyDeadline = start + Math.Min(timeoutMs, BusyConfirmMs);
+            int busyConfirm = (model.BusyConfirmMs.HasValue && model.BusyConfirmMs.Value > 0)
+                ? model.BusyConfirmMs.Value : BusyConfirmMs;
+            long busyDeadline = start + Math.Min(timeoutMs, busyConfirm);
             bool busy = false;
             int stb = 0;
             long elapsed = 0;
