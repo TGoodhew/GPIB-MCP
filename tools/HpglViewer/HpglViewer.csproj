@@ -1,0 +1,41 @@
+<!--
+  HpglViewer - a simple WinForms harness that renders an HP-GL/2 file with the
+  Hpgl.Rendering library and displays it in a window.
+
+  The HP-GL plotter-emulation/render technique behind Hpgl.Rendering is derived
+  from the HP7470A Plotter Emulator (7470.cpp) by John Miles, KE5FX - http://www.ke5fx.com/
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>HpglViewer</AssemblyName>
+    <RootNamespace>HpglViewer</RootNamespace>
+    <Product>HpglViewer</Product>
+    <Description>WinForms harness that renders an HP-GL/2 file via Hpgl.Rendering.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Hpgl.Rendering\Hpgl.Rendering.csproj" />
+  </ItemGroup>
+
+  <!-- Deploy the sample capture next to the exe so it loads by default. -->
+  <ItemGroup>
+    <Content Include="..\..\Test\test.plt" Link="test.plt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
