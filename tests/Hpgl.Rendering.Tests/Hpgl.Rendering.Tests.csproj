@@ -25,4 +25,15 @@
     <ProjectReference Include="..\..\src\Hpgl.Rendering\Hpgl.Rendering.csproj" />
   </ItemGroup>
 
+  <!-- Render-regression fixtures (issue #21): a real 8563E capture and its golden render.
+       Linked from the repo-root Test/ folder and copied next to the test assembly. -->
+  <ItemGroup>
+    <Content Include="..\..\Test\test.plt" Link="fixtures\test.plt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Test\test-expected.png" Link="fixtures\test-expected.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
