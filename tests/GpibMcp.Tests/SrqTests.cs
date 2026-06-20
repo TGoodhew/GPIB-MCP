@@ -3,6 +3,7 @@ using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
 using Newtonsoft.Json.Linq;
+using Srq.Completion;
 using Xunit;
 
 namespace GpibMcp.Tests

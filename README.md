@@ -480,11 +480,18 @@ The 8563E ships with `sweepComplete` and `sweepAndPeak` operations; the lower-le
 
 The `statusModel` is **self-describing** so the waiter never guesses: it names the completion bit
 per operation (`expectBit`), the failure bit (`errorBit` — e.g. `error` on the 8560, `fail` on the
-3325), the enable-mask commands, and an optional `restore`. The completion state machine lives in
-[`src/GpibMcp/Instruments/Completion/`](src/GpibMcp/Instruments/Completion/) — decoupled from VISA via
-`IStatusChannel` — and is validated headlessly by `CompletionWaiterTests` against a simulated
-instrument with a virtual clock (no hardware), so the timing/race-sensitive logic is tested
-deterministically.
+3325), the enable-mask commands, and an optional `restore`.
+
+The completion state machine is a **standalone library**,
+[`src/Srq.Completion/`](src/Srq.Completion/) — decoupled from VISA and the MCP server via
+`IStatusChannel`, so it can be exercised headlessly. Two ways to run it without hardware:
+
+- **`CompletionWaiterTests`** drive the real waiter against `SimulatedInstrument` (a virtual-clock
+  8560 model) — deterministic regression coverage of the timing/race-sensitive logic.
+- **[`SrqHarness`](tools/SrqHarness/)** is a console app that runs the headline scenarios (incl. the
+  5 s sweep, a stale-bit case, an uncal error, and a timeout) and prints a **live trace** of every
+  command and status poll, so the pattern can be watched end-to-end. Run it with
+  `dotnet run --project tools/SrqHarness` (exit code 0 = all scenarios passed).
 
 ### Manual test from a terminal
 

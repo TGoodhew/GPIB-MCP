@@ -12,6 +12,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hpgl.Rendering.Tests", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HpglViewer", "tools\HpglViewer\HpglViewer.csproj", "{F3A4B5C6-D7E8-49FA-1B2C-3D4E5F6A7B80}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Srq.Completion", "src\Srq.Completion\Srq.Completion.csproj", "{A1B2C3D4-E5F6-47A8-89B0-C1D2E3F4A5B6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SrqHarness", "tools\SrqHarness\SrqHarness.csproj", "{B2C3D4E5-F6A7-48B9-9AC1-D2E3F4A5B6C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -38,6 +42,14 @@ Global
 		{F3A4B5C6-D7E8-49FA-1B2C-3D4E5F6A7B80}.Debug|x86.Build.0 = Debug|Any CPU
 		{F3A4B5C6-D7E8-49FA-1B2C-3D4E5F6A7B80}.Release|x86.ActiveCfg = Release|Any CPU
 		{F3A4B5C6-D7E8-49FA-1B2C-3D4E5F6A7B80}.Release|x86.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-47A8-89B0-C1D2E3F4A5B6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-47A8-89B0-C1D2E3F4A5B6}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-47A8-89B0-C1D2E3F4A5B6}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-47A8-89B0-C1D2E3F4A5B6}.Release|x86.Build.0 = Release|Any CPU
+		{B2C3D4E5-F6A7-48B9-9AC1-D2E3F4A5B6C7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B2C3D4E5-F6A7-48B9-9AC1-D2E3F4A5B6C7}.Debug|x86.Build.0 = Debug|Any CPU
+		{B2C3D4E5-F6A7-48B9-9AC1-D2E3F4A5B6C7}.Release|x86.ActiveCfg = Release|Any CPU
+		{B2C3D4E5-F6A7-48B9-9AC1-D2E3F4A5B6C7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

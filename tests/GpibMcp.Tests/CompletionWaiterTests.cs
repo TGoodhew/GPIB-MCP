@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using GpibMcp.Instruments;
-using GpibMcp.Instruments.Completion;
+using Srq.Completion;
+using Srq.Completion.Simulation;
 using Xunit;
 
 namespace GpibMcp.Tests

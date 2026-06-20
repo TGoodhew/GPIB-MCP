@@ -1,0 +1,25 @@
+<!--
+  Srq.Completion - data-driven instrument operation-completion via the GPIB status byte / SRQ.
+
+  Standalone, dependency-free library: the completion state machine (CompletionWaiter) drives an
+  instrument through its statusModel over the minimal IStatusChannel I/O abstraction, so it has no
+  dependency on VISA or the MCP server and can be exercised headlessly (see the bundled
+  Simulation.SimulatedInstrument and the SrqHarness console app).
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>Srq.Completion</AssemblyName>
+    <RootNamespace>Srq.Completion</RootNamespace>
+    <Product>Srq.Completion</Product>
+    <Description>Data-driven GPIB SRQ / status-byte operation-completion waiter, decoupled from any transport for headless testing.</Description>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GpibMcp.Tests" />
+  </ItemGroup>
+
+</Project>

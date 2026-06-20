@@ -1,4 +1,4 @@
-namespace GpibMcp.Instruments.Completion
+namespace Srq.Completion
 {
     /// <summary>
     /// The minimal instrument I/O the completion waiter needs: send a command, and serial-poll the

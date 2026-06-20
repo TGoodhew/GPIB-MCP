@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GpibMcp.Instruments;
+using Srq.Completion;
 using Xunit;
 
 namespace GpibMcp.Tests

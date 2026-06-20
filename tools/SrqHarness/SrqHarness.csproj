@@ -1,0 +1,28 @@
+<!--
+  SrqHarness - a headless console harness that runs the Srq.Completion CompletionWaiter against a
+  simulated 8563E and prints a live trace of every command/poll, so the SRQ completion pattern can
+  be verified without hardware or Claude Desktop. Exits non-zero if any scenario fails.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>SrqHarness</AssemblyName>
+    <RootNamespace>SrqHarness</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Srq.Completion\Srq.Completion.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lets `dotnet build`/`dotnet run` compile net472 without a full VS install. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

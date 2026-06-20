@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hpgl.Rendering\Hpgl.Rendering.csproj" />
+    <ProjectReference Include="..\Srq.Completion\Srq.Completion.csproj" />
   </ItemGroup>
 
   <!-- Bundled instrument command database, deployed next to the exe so it is

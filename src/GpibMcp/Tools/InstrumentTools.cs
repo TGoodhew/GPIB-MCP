@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GpibMcp.Instruments;
-using GpibMcp.Instruments.Completion;
 using GpibMcp.Mcp;
+using Srq.Completion;
 using Newtonsoft.Json.Linq;
 using static GpibMcp.Tools.ToolArgs;
 

@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GpibMcp\GpibMcp.csproj" />
+    <ProjectReference Include="..\..\src\Srq.Completion\Srq.Completion.csproj" />
   </ItemGroup>
 
   <!-- Lets tests construct real VISA exceptions to exercise the error-decoding path (issue #11). -->
