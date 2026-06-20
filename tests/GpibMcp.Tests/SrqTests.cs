@@ -20,6 +20,10 @@ namespace GpibMcp.Tests
             {
                 ["trigger"] = 4, ["message"] = 8, ["endOfSweep"] = 16,
                 ["commandComplete"] = 32, ["error"] = 64, ["rqs"] = 128
+            },
+            Operations = new Dictionary<string, StatusOperation>
+            {
+                ["sweepComplete"] = new StatusOperation { Arm = "TS;", ExpectBit = "endOfSweep" }
             }
         };
 
@@ -118,6 +122,113 @@ namespace GpibMcp.Tests
 
             Assert.Contains("No SRQ", text);
             Assert.Contains("within 3000 ms", text);
+        }
+
+        // ---- instrument_wait_complete (3-state dispatch + flow) -----------------
+
+        private static (McpTool tool, FakeInstrumentManager visa) WaitSetup(
+            FakeInstrumentManager visa, InstrumentDefinition def, string model = "8563E")
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { def });
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::18::INSTR", model);
+            InstrumentTools.BuildRegistry(visa, db, store).TryGet("instrument_wait_complete", out var tool);
+            return (tool, visa);
+        }
+
+        private static JObject WaitArgs(string op = "sweepComplete") =>
+            new JObject { ["resource"] = "GPIB0::18::INSTR", ["operation"] = op, ["timeout_ms"] = 5000 };
+
+        [Fact]
+        public void WaitComplete_NoModelAssigned_Errors()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { Def8563() });
+            InstrumentTools.BuildRegistry(new FakeInstrumentManager(), db, AssignmentStore.InMemory())
+                .TryGet("instrument_wait_complete", out var tool);
+            var output = tool.Invoke(WaitArgs());
+            Assert.True(output.IsError);
+            Assert.Contains("No model is assigned", output.AsText());
+        }
+
+        [Fact]
+        public void WaitComplete_SrqUnsupported_Refuses()
+        {
+            var def = new InstrumentDefinition { Model = "DMM", StatusModel = new StatusModel { SrqSupported = false } };
+            var (tool, _) = WaitSetup(new FakeInstrumentManager(), def, "DMM");
+            var output = tool.Invoke(WaitArgs());
+            Assert.True(output.IsError);
+            Assert.Contains("no SRQ support", output.AsText());
+        }
+
+        [Fact]
+        public void WaitComplete_NoStatusModel_Prompts()
+        {
+            var def = new InstrumentDefinition { Model = "X" };
+            var (tool, _) = WaitSetup(new FakeInstrumentManager(), def, "X");
+            var output = tool.Invoke(WaitArgs());
+            Assert.False(output.IsError);                     // a prompt, not an error
+            Assert.Contains("has no statusModel", output.AsText());
+            Assert.Contains("instrument_db_save", output.AsText());
+        }
+
+        [Fact]
+        public void WaitComplete_UnknownOperation_PromptsWithKnownOps()
+        {
+            var (tool, _) = WaitSetup(new FakeInstrumentManager(), Def8563());
+            var output = tool.Invoke(WaitArgs("bogusOp"));
+            Assert.False(output.IsError);
+            Assert.Contains("no operation named 'bogusOp'", output.AsText());
+            Assert.Contains("sweepComplete", output.AsText());
+        }
+
+        [Fact]
+        public void WaitComplete_HappyPath_ArmsMaskWaitsConfirmsAndClears()
+        {
+            // SRQ asserts and endOfSweep(16) is set -> completed; mask = endOfSweep|error = 16|64 = 80.
+            var visa = new FakeInstrumentManager { SrqResult = new SrqWaitResult(true, 250), StatusByteValue = 0x10 };
+            var (tool, _) = WaitSetup(visa, Def8563());
+
+            var output = tool.Invoke(WaitArgs());
+
+            Assert.False(output.IsError);
+            Assert.Contains("Completed", output.AsText());
+            Assert.Contains("SRQ after 250 ms", output.AsText());
+            Assert.Contains("GPIB0::18::INSTR|RQS 80", visa.Writes);   // mask armed
+            Assert.Contains("GPIB0::18::INSTR|TS;", visa.Writes);      // operation armed
+            Assert.Contains("GPIB0::18::INSTR|RQS 0", visa.Writes);    // mask cleared
+            Assert.Single(visa.SrqWaits);
+        }
+
+        [Fact]
+        public void WaitComplete_ErrorBitSet_ReportsInstrumentError()
+        {
+            var visa = new FakeInstrumentManager { SrqResult = new SrqWaitResult(true, 40), StatusByteValue = 0x40 }; // error(64)
+            var (tool, _) = WaitSetup(visa, Def8563());
+            var output = tool.Invoke(WaitArgs());
+            Assert.True(output.IsError);
+            Assert.Contains("signalled an ERROR", output.AsText());
+        }
+
+        [Fact]
+        public void WaitComplete_NoSrqAndBitUnset_TimesOutDistinctly()
+        {
+            var visa = new FakeInstrumentManager { SrqResult = new SrqWaitResult(false, 5000), StatusByteValue = 0 };
+            var (tool, _) = WaitSetup(visa, Def8563());
+            var output = tool.Invoke(WaitArgs());
+            Assert.True(output.IsError);
+            Assert.Contains("Timed out", output.AsText());
+            Assert.Contains("GPIB0::18::INSTR|RQS 0", visa.Writes); // mask still cleared
+        }
+
+        [Fact]
+        public void WaitComplete_MissedSrqButBitSet_ConfirmedBySerialPoll()
+        {
+            // Wait timed out, but the expected bit is set (SRQ fired before the event was armed).
+            var visa = new FakeInstrumentManager { SrqResult = new SrqWaitResult(false, 5000), StatusByteValue = 0x10 };
+            var (tool, _) = WaitSetup(visa, Def8563());
+            var output = tool.Invoke(WaitArgs());
+            Assert.False(output.IsError);
+            Assert.Contains("confirmed by serial poll", output.AsText());
         }
     }
 }

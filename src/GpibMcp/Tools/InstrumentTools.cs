@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
@@ -242,6 +244,22 @@ namespace GpibMcp.Tools
                         : "No SRQ on " + resource + " within " + timeout + " ms (waited " + result.ElapsedMs + " ms).";
                 }));
 
+            // ---- SRQ: high-level, data-driven completion waiter -----------------
+            registry.Add(new McpTool(
+                "instrument_wait_complete",
+                "Wait for an instrument operation to ACTUALLY complete via SRQ, driven by the model's " +
+                "statusModel - no fixed-timeout guessing. Resolves the model from the resource's " +
+                "assignment, arms the operation's SRQ mask, waits for SRQ, serial-polls to confirm the " +
+                "expected status bit, and clears the mask. Refuses if the model declares no SRQ support; " +
+                "asks for the definitions if the statusModel/operation is missing (it never guesses).",
+                Schema(
+                    Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'."),
+                    Required("operation", "string", "Operation name from the model's statusModel.operations (e.g. 'sweepComplete')."),
+                    Prop("timeout_ms", "integer", "Backstop timeout in ms (default 30000) - a safety net, NOT the completion signal.")),
+                (Func<JObject, ToolOutput>)(args =>
+                    WaitComplete(db, assignments, visa,
+                                 ReqStr(args, "resource"), ReqStr(args, "operation"), Int(args, "timeout_ms", 30000)))));
+
             // ---- NI-488.2: direct GPIB query ------------------------------------
             registry.Add(new McpTool(
                 "gpib488_query",
@@ -287,6 +305,129 @@ namespace GpibMcp.Tools
         // the result cannot be trusted. A physical GPIB segment supports at most
         // ~15 devices, so a count at/above that limit is the tell-tale sign.
         // ---------------------------------------------------------------------
+
+        // ---------------------------------------------------------------------
+        // instrument_wait_complete - 3-state dispatch + the SRQ completion flow.
+        // ---------------------------------------------------------------------
+
+        private static ToolOutput WaitComplete(InstrumentDatabase db, AssignmentStore assignments,
+                                               IInstrumentManager visa, string resource, string operation, int timeoutMs)
+        {
+            string model = assignments.Get(resource);
+            if (string.IsNullOrEmpty(model))
+                return Err("No model is assigned to " + resource +
+                           ". Assign one with assign_instrument so its statusModel can be resolved.");
+
+            InstrumentDefinition def;
+            if (!db.TryGet(model, out def))
+                return Err("Unknown model '" + model + "' assigned to " + resource + ".");
+
+            StatusModel sm = def.StatusModel;
+
+            // State 1: explicitly no SRQ -> refuse, never guess.
+            if (sm != null && !sm.SrqSupported)
+                return Err("Model '" + model + "' declares no SRQ support (srqSupported=false). This tool " +
+                           "will not fall back to a timed guess - use visa_query with an explicit timeout if appropriate.");
+
+            // State 2: supports SRQ (or unknown) but the definition is absent/incomplete -> prompt, don't guess.
+            if (sm == null)
+                return Txt(PromptMissing(model, operation, "has no statusModel defined"));
+            StatusOperation op;
+            if (sm.Operations == null || !sm.Operations.TryGetValue(operation, out op))
+                return Txt(PromptOperation(model, operation, sm));
+            int? expect = sm.BitValue(op.ExpectBit);
+            if (expect == null)
+                return Txt(PromptMissing(model, operation,
+                    "operation '" + operation + "' expects bit '" + op.ExpectBit + "', which is not defined in statusModel.bits"));
+            if (sm.EnableMask == null || string.IsNullOrEmpty(sm.EnableMask.SetCommand))
+                return Txt(PromptMissing(model, operation, "statusModel.enableMask.setCommand is missing"));
+
+            // State 3: complete -> run the SRQ flow.
+            int? errorBit = sm.BitValue("error");
+            int mask = expect.Value | (errorBit ?? 0);
+
+            try
+            {
+                string setCmd = sm.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
+                visa.Write(resource, setCmd, VisaInstrumentManager.DefaultTimeoutMs);
+                if (!string.IsNullOrEmpty(op.Arm))
+                    visa.Write(resource, op.Arm, VisaInstrumentManager.DefaultTimeoutMs);
+
+                SrqWaitResult wait = visa.WaitForSrq(resource, timeoutMs);
+
+                // Serial-poll to confirm/clear regardless of how the wait returned: on SRQ this reads
+                // the cause; on a wait timeout it is the safety net for an SRQ that fired before the
+                // event was armed (the bit may already be set), so a fast op is not falsely a timeout.
+                int stb = visa.SerialPoll(resource);
+                ClearMask(visa, resource, sm); // best effort
+
+                bool done = (stb & expect.Value) == expect.Value;
+                bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
+                string stbText = stb + " (0x" + stb.ToString("X2") + ")";
+                string bits = DescribeSetBits(sm, stb);
+
+                if (err)
+                    return Err("Instrument signalled an ERROR during '" + operation + "' on " + resource +
+                               ". Status byte " + stbText + " [" + bits + "]. Check the instrument's error queue.");
+                if (done)
+                    return Txt("Completed: '" + operation + "' on " + resource + " - " +
+                               (wait.Asserted
+                                   ? "SRQ after " + wait.ElapsedMs + " ms"
+                                   : "confirmed by serial poll (SRQ event not caught) after " + wait.ElapsedMs + " ms") +
+                               ". Status byte " + stbText + " [" + bits + "].");
+                if (!wait.Asserted)
+                    return Err("Timed out after " + timeoutMs + " ms waiting for '" + operation + "' on " + resource +
+                               " - no SRQ and the expected bit (" + op.ExpectBit + ") is not set. Status byte " + stbText +
+                               " [" + bits + "]. Mask cleared; bus left usable.");
+                return Txt("SRQ asserted for '" + operation + "' on " + resource + " but the expected bit (" +
+                           op.ExpectBit + ") is not set - possibly a different condition. Status byte " + stbText +
+                           " [" + bits + "].");
+            }
+            catch (GpibOperationException gex)
+            {
+                try { ClearMask(visa, resource, sm); } catch { /* best effort */ }
+                return Err(gex.Detail);
+            }
+            catch (Exception ex)
+            {
+                try { ClearMask(visa, resource, sm); } catch { /* best effort */ }
+                return Err("Wait failed for " + resource + ": " + ex.Message);
+            }
+        }
+
+        private static ToolOutput Err(string message) => ToolOutput.Text(message).AsError();
+        private static ToolOutput Txt(string message) => ToolOutput.Text(message);
+
+        private static void ClearMask(IInstrumentManager visa, string resource, StatusModel sm)
+        {
+            if (sm.EnableMask == null || string.IsNullOrEmpty(sm.EnableMask.ClearCommand)) return;
+            try { visa.Write(resource, sm.EnableMask.ClearCommand, VisaInstrumentManager.DefaultTimeoutMs); }
+            catch { /* clearing the mask is best effort - never fail the wait over it */ }
+        }
+
+        private static string DescribeSetBits(StatusModel sm, int stb)
+        {
+            var named = sm.SetBitNames(stb);
+            return named.Count > 0 ? string.Join(", ", named) : "no defined bits set";
+        }
+
+        private static string PromptMissing(string model, string operation, string reason) =>
+            "Cannot wait for '" + operation + "' on model '" + model + "': " + reason + ".\n\n" +
+            "This instrument may support SRQ, but I will not guess. To proceed, provide its statusModel: " +
+            "the status-byte bit that signals completion for '" + operation + "', the SRQ enable-mask set/clear " +
+            "commands (with a {mask} placeholder, e.g. \"RQS {mask}\"/\"RQS 0\"), whether a serial poll clears RQS, " +
+            "and the 'arm' command(s) that start the operation. Once you confirm the values, save them to the " +
+            "model with instrument_db_save (a statusModel block), then re-run instrument_wait_complete.";
+
+        private static string PromptOperation(string model, string operation, StatusModel sm)
+        {
+            string known = (sm.Operations != null && sm.Operations.Count > 0)
+                ? "Known operations: " + string.Join(", ", sm.Operations.Keys) + "."
+                : "It has no operations defined yet.";
+            return "Model '" + model + "' has a statusModel but no operation named '" + operation + "'. " + known +
+                   "\n\nDefine '" + operation + "' as { arm, expectBit } (expectBit naming a bit in statusModel.bits) " +
+                   "and save it with instrument_db_save, then re-run.";
+        }
 
         /// <summary>Resolves the statusModel for a resource via its assignment, or null if none is known.</summary>
         private static StatusModel ResolveStatusModel(InstrumentDatabase db, AssignmentStore assignments, string resource)

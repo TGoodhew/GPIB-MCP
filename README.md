@@ -267,6 +267,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_last_error` | — | `resource` | Return the exact, verbatim details (codes + text) of the most recent GPIB/VISA failure |
 | `visa_serial_poll` | `resource` | — | Serial-poll the instrument; return the status byte (decimal + hex) and the named bits set |
 | `visa_wait_srq` | `resource` | `timeout_ms` | Block until the instrument asserts SRQ, or the backstop timeout expires |
+| `instrument_wait_complete` | `resource`, `operation` | `timeout_ms` | Wait for an operation to truly complete via SRQ (data-driven; no fixed-timeout guess) |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
@@ -451,6 +452,28 @@ it), and the PNG is always saved to disk regardless.
 
 > The capture/render technique is derived from the HP7470A Plotter Emulator (`7470.cpp`) by
 > John Miles, KE5FX — <http://www.ke5fx.com/>.
+
+### Waiting for operations to complete (SRQ)
+
+A fixed timeout is a poor proxy for "done" — it reads half-complete sweeps or pads every point with
+slack. GPIB instruments instead assert **SRQ** (service request) when an operation finishes, and the
+server can wait on that bus event:
+
+> *"Take a sweep on the analyzer at GPIB0::18 and wait until it's actually complete."*
+
+`instrument_wait_complete(resource, operation)` is **data-driven** by the model's `statusModel` in the
+database (so SRQ masks are never hardcoded). It resolves the assigned model, arms the operation's SRQ
+mask, waits for SRQ, serial-polls to confirm the expected status bit, and clears the mask — returning
+the instant the operation truly completes, with the timeout only as a backstop. Three explicit states,
+no silent guessing:
+
+- model declares `srqSupported: false` → the tool **refuses** (no timed fallback);
+- `statusModel`/operation missing → it **asks** you for the definitions (save them with
+  `instrument_db_save`), rather than guessing;
+- complete → it runs the SRQ flow above.
+
+The 8563E ships with `sweepComplete` and `sweepAndPeak` operations; the lower-level
+`visa_serial_poll` and `visa_wait_srq` tools are available standalone for debugging.
 
 ### Manual test from a terminal
 
