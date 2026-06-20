@@ -230,7 +230,23 @@ namespace Hpgl.Rendering
             Include(x1, y1); Include(x2, y2);
         }
 
-        public void Label(PlotterState state, string text) => Include(state.X, state.Y);
+        public void Label(PlotterState state, string text)
+        {
+            // Include the label's text extent, not just its baseline anchor: text rises above
+            // the baseline (by ~cap height) and runs along the label direction. Omitting this
+            // makes the auto-fit too tight and clips edge annotations (e.g. the top row).
+            Include(state.X, state.Y);
+            if (string.IsNullOrEmpty(text)) return;
+
+            double h = state.CharHeightUnits;
+            double w = text.Length * state.CharHeightUnits * 0.6; // approx average glyph advance
+            double cos = state.DirCos, sin = state.DirSin;        // text direction
+            double upX = -sin, upY = cos;                          // perpendicular "up" (cap height)
+
+            Include(state.X + w * cos, state.Y + w * sin);                       // baseline end
+            Include(state.X + h * upX, state.Y + h * upY);                       // above anchor
+            Include(state.X + w * cos + h * upX, state.Y + w * sin + h * upY);   // far top corner
+        }
 
         private void Include(double x, double y)
         {

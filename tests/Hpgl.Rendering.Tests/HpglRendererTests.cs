@@ -58,6 +58,26 @@ namespace Hpgl.Rendering.Tests
         }
 
         [Fact]
+        public void RenderToBitmap_DoesNotClipTopEdgeLabels()
+        {
+            // Regression: a label anchored at the top of the coordinate space must not be drawn
+            // flush against / off the top edge. The auto-fit measure must reserve room for the
+            // label's text height, leaving a top margin.
+            string hpgl = "IN;SP1;PU0,0;PD2000,0;PU100,1800;LBTOP" + ((char)3) + ";";
+            var opt = new HpglRenderOptions { Width = 300, Height = 300, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(hpgl, opt))
+            {
+                int firstContentRow = -1;
+                for (int y = 0; y < bmp.Height && firstContentRow < 0; y++)
+                    for (int x = 0; x < bmp.Width; x++)
+                        if (bmp.GetPixel(x, y).ToArgb() != Color.Black.ToArgb()) { firstContentRow = y; break; }
+
+                Assert.True(firstContentRow > 0,
+                    "top edge should retain a margin (no clipped labels); first content row = " + firstContentRow);
+            }
+        }
+
+        [Fact]
         public void RenderToBitmap_EmptyInput_ProducesBlankCanvasWithoutThrowing()
         {
             using (var bmp = HpglRenderer.RenderToBitmap("", new HpglRenderOptions { Width = 100, Height = 80 }))
