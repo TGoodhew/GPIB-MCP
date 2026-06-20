@@ -175,9 +175,12 @@ namespace GpibMcp.Mcp
             catch (Exception ex)
             {
                 // Tool execution failures are reported as a normal result with isError=true,
-                // per the MCP spec, so the model can see and react to the error text.
+                // per the MCP spec, so the model can see and react to the error text. When the
+                // exception carries richer detail (e.g. a GPIB/VISA failure with decoded status
+                // and the command chain), surface that so the model can explain it to the user.
                 Log.Warn("Tool '" + name + "' failed: " + ex.Message);
-                return ToToolResult(ToolOutput.Text("Error: " + ex.Message).AsError());
+                string text = (ex is IDetailedError detailed) ? detailed.Detail : ex.Message;
+                return ToToolResult(ToolOutput.Text("Error: " + text).AsError());
             }
         }
 

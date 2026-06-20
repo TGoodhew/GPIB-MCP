@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using GpibMcp.Diagnostics;
 using NationalInstruments.NI4882;
 
@@ -21,25 +23,46 @@ namespace GpibMcp.Instruments
         /// </summary>
         public static string Query(int board, byte primaryAddress, byte secondaryAddress, string command)
         {
-            using (var device = new Device(board, primaryAddress, secondaryAddress))
+            string address = Address(board, primaryAddress, secondaryAddress);
+            string payload = CommandText.EnsureTerminated(command);
+            var history = new List<CommandHistoryEntry>();
+            try
             {
-                string payload = CommandText.EnsureTerminated(command);
-                Log.Debug(Address(board, primaryAddress, secondaryAddress) + " <- " + CommandText.ForLog(payload));
-                device.Write(payload);
-                string response = device.ReadString();
-                Log.Debug(Address(board, primaryAddress, secondaryAddress) + " -> " + CommandText.ForLog(response));
-                return response;
+                using (var device = new Device(board, primaryAddress, secondaryAddress))
+                {
+                    Log.Debug(address + " <- " + CommandText.ForLog(payload));
+                    history.Add(new CommandHistoryEntry(address, CommandDirection.Sent, payload, DateTime.UtcNow));
+                    device.Write(payload);
+                    string response = device.ReadString();
+                    history.Add(new CommandHistoryEntry(address, CommandDirection.Received, response, DateTime.UtcNow));
+                    Log.Debug(address + " -> " + CommandText.ForLog(response));
+                    return response;
+                }
+            }
+            catch (Exception ex) when (!(ex is GpibOperationException))
+            {
+                throw GpibOperationException.For(GpibOperation.Query, address, command, ex, history);
             }
         }
 
         /// <summary>Writes a command to a device with no expected response.</summary>
         public static void Write(int board, byte primaryAddress, byte secondaryAddress, string command)
         {
-            using (var device = new Device(board, primaryAddress, secondaryAddress))
+            string address = Address(board, primaryAddress, secondaryAddress);
+            string payload = CommandText.EnsureTerminated(command);
+            var history = new List<CommandHistoryEntry>();
+            try
             {
-                string payload = CommandText.EnsureTerminated(command);
-                Log.Debug(Address(board, primaryAddress, secondaryAddress) + " <- " + CommandText.ForLog(payload));
-                device.Write(payload);
+                using (var device = new Device(board, primaryAddress, secondaryAddress))
+                {
+                    Log.Debug(address + " <- " + CommandText.ForLog(payload));
+                    history.Add(new CommandHistoryEntry(address, CommandDirection.Sent, payload, DateTime.UtcNow));
+                    device.Write(payload);
+                }
+            }
+            catch (Exception ex) when (!(ex is GpibOperationException))
+            {
+                throw GpibOperationException.For(GpibOperation.Write, address, command, ex, history);
             }
         }
 

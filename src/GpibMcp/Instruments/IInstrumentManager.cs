@@ -31,6 +31,12 @@ namespace GpibMcp.Instruments
         bool Close(string resource);
 
         /// <summary>
+        /// Returns up to <paramref name="max"/> of the most recent commands sent to / responses
+        /// received from a resource (oldest first) - the chain leading up to now or to an error.
+        /// </summary>
+        IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max);
+
+        /// <summary>
         /// Captures an HP-GL plot from the instrument (plotter emulation): sends pre-roll + plot
         /// command, answers the handshake, and returns the raw HP-GL. Leaves the bus usable.
         /// </summary>

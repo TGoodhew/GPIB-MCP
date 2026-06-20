@@ -5,6 +5,7 @@ using System.Linq;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
+using Ivi.Visa;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -63,7 +64,7 @@ namespace GpibMcp.Tests
             var tools = (JArray)responses.Single()["result"]["tools"];
 
             var names = tools.Select(t => (string)t["name"]).ToList();
-            Assert.Equal(17, names.Count);
+            Assert.Equal(18, names.Count);
             Assert.Contains("visa_list_resources", names);
             Assert.Contains("visa_query", names);
             Assert.Contains("gpib488_query", names);
@@ -71,6 +72,7 @@ namespace GpibMcp.Tests
             Assert.Contains("assign_instrument", names);
             Assert.Contains("instrument_reference", names);
             Assert.Contains("instrument_capture_screen", names);
+            Assert.Contains("visa_command_history", names);
 
             // Every advertised tool must carry an object input schema.
             Assert.All(tools, t => Assert.Equal("object", (string)t["inputSchema"]["type"]));
@@ -139,6 +141,32 @@ namespace GpibMcp.Tests
 
             Assert.True((bool)result["isError"]);
             Assert.StartsWith("Error:", (string)result["content"][0]["text"]);
+        }
+
+        [Fact]
+        public void ToolsCall_GpibFailure_RendersDecodedStatusAndCommandChain()
+        {
+            // A GPIB/VISA failure must come back as an isError result that names the resource,
+            // the decoded VISA status, and the recent command chain - not a bare exception string.
+            var fake = new FakeInstrumentManager();
+            var chain = new List<CommandHistoryEntry>
+            {
+                new CommandHistoryEntry("GPIB0::18::INSTR", CommandDirection.Sent, "MKPK HI?\n", DateTime.UtcNow)
+            };
+            fake.QueryError = GpibOperationException.For(GpibOperation.Query, "GPIB0::18::INSTR", "MKPK HI?",
+                new NativeVisaException(unchecked((int)0xBFFF0015)), chain);
+
+            var request = "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\"," +
+                          "\"params\":{\"name\":\"visa_query\",\"arguments\":" +
+                          "{\"resource\":\"GPIB0::18::INSTR\",\"command\":\"MKPK HI?\"}}}";
+            var result = Run(fake, request).Single()["result"];
+
+            Assert.True((bool)result["isError"]);
+            string text = (string)result["content"][0]["text"];
+            Assert.Contains("GPIB0::18::INSTR", text);
+            Assert.Contains("VI_ERROR_TMO", text);
+            Assert.Contains("Recent command chain", text);
+            Assert.Contains("MKPK HI?", text);
         }
 
         [Fact]

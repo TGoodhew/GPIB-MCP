@@ -19,23 +19,39 @@ namespace GpibMcp.Tests
         public readonly List<string> Closes = new List<string>();
         public readonly List<string> OpenSessions = new List<string>();
 
+        /// <summary>Optional error injected by tests; when set, <see cref="Query"/> throws it.</summary>
+        public Exception QueryError;
+
+        private readonly CommandHistory _history = new CommandHistory();
+
         public IList<string> ListResources(string filter) => new List<string>(ResourceList);
 
         public string Query(string resource, string command, int timeoutMs)
         {
+            if (QueryError != null) throw QueryError;
             string key = (command ?? string.Empty).Trim();
-            if (QueryResponses.TryGetValue(key, out var response)) return response;
-            return "RESPONSE:" + key;
+            _history.Record(resource, CommandDirection.Sent, command ?? string.Empty);
+            string response = QueryResponses.TryGetValue(key, out var canned) ? canned : "RESPONSE:" + key;
+            _history.Record(resource, CommandDirection.Received, response);
+            return response;
         }
 
-        public void Write(string resource, string command, int timeoutMs) =>
+        public void Write(string resource, string command, int timeoutMs)
+        {
             Writes.Add(resource + "|" + command);
+            _history.Record(resource, CommandDirection.Sent, command ?? string.Empty);
+        }
 
         public string Read(string resource, int timeoutMs)
         {
             Reads.Add(resource);
-            return "READ:" + resource;
+            string response = "READ:" + resource;
+            _history.Record(resource, CommandDirection.Received, response);
+            return response;
         }
+
+        public IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max) =>
+            _history.Snapshot(resource, max);
 
         public void Clear(string resource, int timeoutMs) => Clears.Add(resource);
 

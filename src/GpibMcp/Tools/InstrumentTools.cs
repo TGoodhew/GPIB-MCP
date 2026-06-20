@@ -145,6 +145,26 @@ namespace GpibMcp.Tools
                     return visa.Close(resource) ? "Closed " + resource : "No open session for " + resource;
                 }));
 
+            // ---- Diagnostics: recent command chain ------------------------------
+            registry.Add(new McpTool(
+                "visa_command_history",
+                "Show the recent commands this server sent to / received from an instrument - the " +
+                "chain leading up to now (or to an error). Useful for diagnosing what a tool actually did.",
+                Schema(
+                    Required("resource", "string", "VISA resource string, e.g. 'GPIB0::5::INSTR'."),
+                    Prop("max", "integer", "Maximum number of recent entries to return (default 20).")),
+                args =>
+                {
+                    string resource = ReqStr(args, "resource");
+                    int max = Int(args, "max", CommandHistory.DefaultDepth);
+                    var history = visa.RecentCommands(resource, max);
+                    if (history.Count == 0) return "No command history for " + resource + ".";
+                    var sb = new StringBuilder();
+                    sb.AppendLine("Recent commands for " + resource + " (-> sent / <- received):");
+                    foreach (var entry in history) sb.AppendLine("  " + entry.ToLine());
+                    return sb.ToString().TrimEnd();
+                }));
+
             // ---- NI-488.2: direct GPIB query ------------------------------------
             registry.Add(new McpTool(
                 "gpib488_query",

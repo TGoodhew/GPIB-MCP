@@ -263,6 +263,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear |
 | `visa_list_open` | — | — | List sessions this server holds open |
 | `visa_close` | `resource` | — | Close a held-open session |
+| `visa_command_history` | `resource` | `max` | Show the recent command chain sent to / received from an instrument |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
@@ -290,6 +291,16 @@ Argument notes:
 4. `visa_close` → release the instrument when finished.
 
 Sessions are cached, so steps 2–3 reuse the same open connection automatically.
+
+### Error reporting
+
+When a GPIB/VISA operation fails, the tool result is an `isError` message that explains what
+happened rather than a bare exception string. It names the failing operation, the resource, and
+the command, decodes the **VISA status** to a readable name + meaning (e.g. `VI_ERROR_TMO —
+Timeout: the instrument did not respond…`, `VI_ERROR_NLISTENERS — nothing acknowledged at this
+address…`), and appends the **recent command chain** sent to that instrument so the cause is
+visible. The server keeps a bounded per-resource history (default 20 entries, override with the
+`GPIB_MCP_HISTORY_DEPTH` environment variable); fetch it any time with `visa_command_history`.
 
 ### Discovery and bus extenders (HP 37204A)
 

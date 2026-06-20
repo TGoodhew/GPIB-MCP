@@ -27,4 +27,12 @@
     <ProjectReference Include="..\..\src\GpibMcp\GpibMcp.csproj" />
   </ItemGroup>
 
+  <!-- Lets tests construct real VISA exceptions to exercise the error-decoding path (issue #11). -->
+  <ItemGroup>
+    <Reference Include="Ivi.Visa">
+      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components 8.0.2\Ivi.Visa.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -134,5 +134,32 @@ namespace GpibMcp.Tests
             Assert.Contains("primary_address", required.Values<string>());
             Assert.Contains("command", required.Values<string>());
         }
+
+        [Fact]
+        public void CommandHistory_NoHistory_ReportsEmpty()
+        {
+            var text = Get(new FakeInstrumentManager(), "visa_command_history")
+                .InvokeText(new JObject { ["resource"] = "GPIB0::5::INSTR" });
+            Assert.Contains("No command history", text);
+        }
+
+        [Fact]
+        public void CommandHistory_ReturnsRecentChainForResource()
+        {
+            var fake = new FakeInstrumentManager();
+            var registry = InstrumentTools.BuildRegistry(fake);
+            registry.TryGet("visa_query", out var query);
+            registry.TryGet("visa_command_history", out var history);
+
+            query.Invoke(new JObject { ["resource"] = "GPIB0::5::INSTR", ["command"] = "*IDN?" });
+            query.Invoke(new JObject { ["resource"] = "GPIB0::5::INSTR", ["command"] = "MEAS?" });
+
+            var text = history.Invoke(new JObject { ["resource"] = "GPIB0::5::INSTR" }).AsText();
+
+            Assert.Contains("Recent commands for GPIB0::5::INSTR", text);
+            Assert.Contains("-> \"*IDN?\"", text);   // sent
+            Assert.Contains("MEAS?", text);
+            Assert.Contains("<-", text);             // a received line is present
+        }
     }
 }

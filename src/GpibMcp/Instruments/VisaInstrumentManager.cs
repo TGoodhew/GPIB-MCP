@@ -32,6 +32,7 @@ namespace GpibMcp.Instruments
         private readonly Dictionary<string, MessageBasedSession> _sessions =
             new Dictionary<string, MessageBasedSession>(StringComparer.OrdinalIgnoreCase);
         private readonly object _gate = new object();
+        private readonly CommandHistory _history = new CommandHistory();
 
         /// <summary>
         /// Discovers connected VISA resources. The default filter matches any INSTR resource.
@@ -86,13 +87,22 @@ namespace GpibMcp.Instruments
         {
             lock (_gate)
             {
-                var session = Open(resource, timeoutMs);
                 string payload = CommandText.EnsureTerminated(command);
-                Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
-                session.RawIO.Write(payload);
-                string response = session.RawIO.ReadString();
-                Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
-                return response;
+                try
+                {
+                    var session = Open(resource, timeoutMs);
+                    Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    session.RawIO.Write(payload);
+                    string response = session.RawIO.ReadString();
+                    _history.Record(resource, CommandDirection.Received, response);
+                    Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
+                    return response;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw GpibOperationException.For(GpibOperation.Query, resource, command, ex, _history.Snapshot(resource));
+                }
             }
         }
 
@@ -101,10 +111,18 @@ namespace GpibMcp.Instruments
         {
             lock (_gate)
             {
-                var session = Open(resource, timeoutMs);
                 string payload = CommandText.EnsureTerminated(command);
-                Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
-                session.RawIO.Write(payload);
+                try
+                {
+                    var session = Open(resource, timeoutMs);
+                    Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    session.RawIO.Write(payload);
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw GpibOperationException.For(GpibOperation.Write, resource, command, ex, _history.Snapshot(resource));
+                }
             }
         }
 
@@ -113,10 +131,18 @@ namespace GpibMcp.Instruments
         {
             lock (_gate)
             {
-                var session = Open(resource, timeoutMs);
-                string response = session.RawIO.ReadString();
-                Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
-                return response;
+                try
+                {
+                    var session = Open(resource, timeoutMs);
+                    string response = session.RawIO.ReadString();
+                    _history.Record(resource, CommandDirection.Received, response);
+                    Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
+                    return response;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw GpibOperationException.For(GpibOperation.Read, resource, null, ex, _history.Snapshot(resource));
+                }
             }
         }
 
@@ -125,11 +151,23 @@ namespace GpibMcp.Instruments
         {
             lock (_gate)
             {
-                var session = Open(resource, timeoutMs);
-                Log.Debug("VISA " + resource + " device clear");
-                session.Clear();
+                try
+                {
+                    var session = Open(resource, timeoutMs);
+                    Log.Debug("VISA " + resource + " device clear");
+                    _history.Record(resource, CommandDirection.Sent, "<device clear>");
+                    session.Clear();
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw GpibOperationException.For(GpibOperation.Clear, resource, "<device clear>", ex, _history.Snapshot(resource));
+                }
             }
         }
+
+        /// <summary>Returns up to <paramref name="max"/> of the most recent commands for a resource.</summary>
+        public IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max) =>
+            _history.Snapshot(resource, max);
 
         /// <summary>
         /// Captures an HP-GL plot from an instrument via plotter emulation: sends the pre-roll and
