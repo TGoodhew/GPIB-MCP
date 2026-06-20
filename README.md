@@ -484,14 +484,33 @@ per operation (`expectBit`), the failure bit (`errorBit` — e.g. `error` on the
 
 The completion state machine is a **standalone library**,
 [`src/Srq.Completion/`](src/Srq.Completion/) — decoupled from VISA and the MCP server via
-`IStatusChannel`, so it can be exercised headlessly. Two ways to run it without hardware:
+`IStatusChannel`, so it can be exercised headlessly. Three ways to run it:
 
 - **`CompletionWaiterTests`** drive the real waiter against `SimulatedInstrument` (a virtual-clock
   8560 model) — deterministic regression coverage of the timing/race-sensitive logic.
 - **[`SrqHarness`](tools/SrqHarness/)** is a console app that runs the headline scenarios (incl. the
-  5 s sweep, a stale-bit case, an uncal error, and a timeout) and prints a **live trace** of every
-  command and status poll, so the pattern can be watched end-to-end. Run it with
-  `dotnet run --project tools/SrqHarness` (exit code 0 = all scenarios passed).
+  5 s sweep, a stale-bit case, an uncal error, and a timeout) against the simulator and prints a
+  **live trace** of every command and status poll, so the pattern can be watched end-to-end without
+  hardware. Run it with `dotnet run --project tools/SrqHarness` (exit code 0 = all scenarios passed).
+- **[`SrqHwHarness`](tools/SrqHwHarness/)** drives the **same waiter against a real instrument over
+  NI-VISA**, with no Claude Desktop and no MCP/stdio layer in the path. It reuses the production
+  `VisaInstrumentManager`, the bundled+user instrument database (for the `statusModel`), and the same
+  `IStatusChannel` adapter the server uses — so a green run here means `instrument_wait_complete` will
+  behave identically. It must build/run **x86** (NI VISA.NET is 32-bit). Examples:
+
+  ```powershell
+  # discover the bus first
+  dotnet run --project tools/SrqHwHarness -- --list
+
+  # confirm a real 8563E sweep completes (dial in a slow 5 s sweep so timing is observable)
+  dotnet run --project tools/SrqHwHarness -- GPIB0::18::INSTR sweepComplete --setup "CF 300MHZ;SP 100MHZ;ST 5S;"
+
+  # 3325 stop-sweep completion
+  dotnet run --project tools/SrqHwHarness -- GPIB0::10::INSTR sweepComplete --model 3325A
+  ```
+
+  The model is resolved from the saved assignment (like the server), or overridden with `--model`.
+  Exit code: `0`=Completed, `2`=InstrumentError (e.g. the uncal `0x50` case), `3`=TimedOut, `4`=Refused/NeedsDefinition.
 
 ### Manual test from a terminal
 

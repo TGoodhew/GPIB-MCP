@@ -1,0 +1,49 @@
+<!--
+  SrqHwHarness - drives the REAL Srq.Completion CompletionWaiter against REAL hardware over NI-VISA,
+  with no Claude Desktop and no MCP/stdio layer in the path. It reuses the exact production pieces:
+  VisaInstrumentManager for I/O, the bundled+user instrument database for the statusModel, and the
+  same IStatusChannel adapter the server uses. It prints a live trace of every command/poll so an
+  8563E / 3325 SRQ completion can be confirmed on the bench. Exit code: 0=Completed, 2=InstrumentError,
+  3=TimedOut, 4=Refused/NeedsDefinition, 1=usage/error.
+
+  Must build x86 to match the 32-bit NI VISA.NET runtime that GpibMcp links against.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>SrqHwHarness</AssemblyName>
+    <RootNamespace>SrqHwHarness</RootNamespace>
+
+    <!-- NI VISA.NET on this machine is 32-bit only, so match GpibMcp's bitness. -->
+    <PlatformTarget>x86</PlatformTarget>
+    <Platforms>x86</Platforms>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The server itself: VisaInstrumentManager, InstrumentDatabase, InstrumentPaths, AssignmentStore.
+         Brings Srq.Completion transitively, but reference it explicitly for clarity. -->
+    <ProjectReference Include="..\..\src\GpibMcp\GpibMcp.csproj" />
+    <ProjectReference Include="..\..\src\Srq.Completion\Srq.Completion.csproj" />
+  </ItemGroup>
+
+  <!-- Bundled instrument database next to the exe, so the harness resolves the same statusModels
+       the server does even before the user database is seeded. -->
+  <ItemGroup>
+    <Content Include="..\..\data\instruments\*.json"
+             Link="data\instruments\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
