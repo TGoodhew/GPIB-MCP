@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using GpibMcp.Diagnostics;
+using Ivi.Visa;
 using NationalInstruments.Visa;
 
 namespace GpibMcp.Instruments
@@ -126,6 +128,101 @@ namespace GpibMcp.Instruments
                 var session = Open(resource, timeoutMs);
                 Log.Debug("VISA " + resource + " device clear");
                 session.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Captures an HP-GL plot from an instrument via plotter emulation: sends the pre-roll and
+        /// plot command, answers the OS handshake, and collects the HP-GL the instrument streams.
+        /// Always device-clears and returns the instrument to local afterward, leaving the bus usable.
+        /// </summary>
+        public CaptureResult CaptureScreen(string resource, string preRoll, string plotCommand,
+                                           CaptureOptions options = null)
+        {
+            if (string.IsNullOrWhiteSpace(plotCommand))
+                throw new ArgumentException("plotCommand must be provided", nameof(plotCommand));
+            options = options ?? new CaptureOptions();
+
+            lock (_gate)
+            {
+                var session = Open(resource, options.PerReadTimeoutMs);
+
+                byte origTermChar = session.TerminationCharacter;
+                bool origTermEnabled = session.TerminationCharacterEnabled;
+                int origTimeout = session.TimeoutMilliseconds;
+                var watch = Stopwatch.StartNew();
+
+                try
+                {
+                    session.TerminationCharacter = (byte)'\n';   // LF EOS, per the 7470A plot path
+                    session.TerminationCharacterEnabled = true;
+
+                    Log.Info("Capture start: " + resource + " plot='" + plotCommand + "'");
+                    var channel = new VisaCaptureChannel(session, options);
+                    var result = ScreenCapture.Run(channel, preRoll, plotCommand, options,
+                                                   () => watch.ElapsedMilliseconds);
+                    Log.Info("Capture done: " + result.ByteCount + " bytes, " + result.Completion +
+                             ", " + result.ElapsedMs + "ms");
+                    return result;
+                }
+                finally
+                {
+                    // Restore session state and leave the bus in a usable, local state - always.
+                    try
+                    {
+                        session.TerminationCharacter = origTermChar;
+                        session.TerminationCharacterEnabled = origTermEnabled;
+                        session.TimeoutMilliseconds = origTimeout;
+                    }
+                    catch (Exception ex) { Log.Warn("Capture: restoring session state failed: " + ex.Message); }
+
+                    try { session.Clear(); }
+                    catch (Exception ex) { Log.Warn("Capture: device clear failed: " + ex.Message); }
+
+                    ReturnToLocal(session);
+                }
+            }
+        }
+
+        private static void ReturnToLocal(MessageBasedSession session)
+        {
+            try
+            {
+                var gpib = session as GpibSession;
+                if (gpib != null) gpib.SendRemoteLocalCommand(GpibInstrumentRemoteLocalMode.GoToLocal);
+            }
+            catch (Exception ex) { Log.Warn("Capture: return-to-local failed: " + ex.Message); }
+        }
+
+        /// <summary>NI-VISA implementation of <see cref="ICaptureChannel"/> over a message-based session.</summary>
+        private sealed class VisaCaptureChannel : ICaptureChannel
+        {
+            private readonly MessageBasedSession _session;
+            private readonly int _perReadTimeoutMs;
+            private readonly long _chunk;
+
+            public VisaCaptureChannel(MessageBasedSession session, CaptureOptions options)
+            {
+                _session = session;
+                _perReadTimeoutMs = options.PerReadTimeoutMs;
+                _chunk = options.ReadChunkSize;
+            }
+
+            public void Send(string text) => _session.RawIO.Write(text);
+
+            public CaptureRead Read()
+            {
+                _session.TimeoutMilliseconds = _perReadTimeoutMs;
+                try
+                {
+                    return new CaptureRead(_session.RawIO.Read(_chunk), false);
+                }
+                catch (IOTimeoutException ex)
+                {
+                    // A per-read timeout is the instrument pausing/finishing; keep the partial data
+                    // it had already sent (NI-VISA exposes it on the exception).
+                    return new CaptureRead(ex.ActualData ?? Array.Empty<byte>(), true);
+                }
             }
         }
 
