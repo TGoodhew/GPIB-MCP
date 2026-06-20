@@ -167,6 +167,9 @@ namespace GpibMcp.Tools
             // ---- Instrument command database + assignments ----------------------
             DatabaseTools.Register(registry, db, assignments, visa);
 
+            // ---- Screen capture (HP-GL plotter emulation -> image) --------------
+            CaptureTools.Register(registry, db, assignments, visa);
+
             return registry;
         }
 

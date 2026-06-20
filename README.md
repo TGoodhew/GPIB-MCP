@@ -36,6 +36,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [Typical workflow](#typical-workflow)
   - [Discovery and bus extenders (HP 37204A)](#discovery-and-bus-extenders-hp-37204a)
   - [Instrument command database](#instrument-command-database)
+  - [Screen capture (HP-GL plotter emulation)](#screen-capture-hp-gl-plotter-emulation)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [Why x86?](#why-x86)
@@ -270,6 +271,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `list_assignments` | — | — | List recorded resource→model assignments |
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
+| `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `timeout_ms` | Capture the instrument's screen as an inline image (HP-GL plotter emulation) |
 
 Argument notes:
 
@@ -377,6 +379,26 @@ Keep the database honest:
 > library (e.g. N9320A, DSA800, full E4436B/E4406A) are intentionally absent or partial rather
 > than guessed. Add the relevant programming guide and ask Claude to extract it, or author the
 > JSON yourself.
+
+### Screen capture (HP-GL plotter emulation)
+
+For instruments that can plot to an HP 7470A-style plotter (e.g. the **HP 8563E** spectrum
+analyzer), `instrument_capture_screen` grabs the **actual screen** — graticule, trace, markers,
+and annotation — and returns it as an inline PNG. Ask Claude:
+
+> *"Capture the screen of the analyzer at GPIB0::18."*
+
+It works by **plotter emulation**: the server sends the model's plot command (from its capture
+profile), plays the role of the plotter — answering the instrument's `OS` status handshake — and
+collects the HP-GL, which is then rasterized by [`Hpgl.Rendering`](src/Hpgl.Rendering/).
+
+- The model is taken from the resource's [assignment](#instrument-command-database), or pass `model=`.
+- Only models with a `capture` profile in the database are supported (the 8563E ships with one;
+  add others as data — `{ "method": "hpgl", "plotCommand": "...", "preRoll": "..." }`).
+- `return_hpgl=true` also returns the raw HP-GL/2 source; `background`, `width`, `height` tune the image.
+
+> The capture/render technique is derived from the HP7470A Plotter Emulator (`7470.cpp`) by
+> John Miles, KE5FX — <http://www.ke5fx.com/>.
 
 ### Manual test from a terminal
 

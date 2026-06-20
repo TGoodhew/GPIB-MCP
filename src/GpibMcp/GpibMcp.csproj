@@ -24,6 +24,10 @@
     <InternalsVisibleTo Include="GpibMcp.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Hpgl.Rendering\Hpgl.Rendering.csproj" />
+  </ItemGroup>
+
   <!-- Bundled instrument command database, deployed next to the exe so it is
        available at install time and used to prepopulate the user database. -->
   <ItemGroup>

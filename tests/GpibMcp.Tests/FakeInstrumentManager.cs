@@ -46,5 +46,19 @@ namespace GpibMcp.Tests
             Closes.Add(resource);
             return OpenSessions.Remove(resource);
         }
+
+        /// <summary>Canned HP-GL returned by <see cref="CaptureScreen"/> (a small valid plot, &gt;128 bytes).</summary>
+        public string CaptureHpgl =
+            "IN;SP1;PU0,0;PD10000,0;PD10000,7000;PD0,7000;PD0,0;" +
+            "SP2;PU500,500;PD9500,6500;PU2000,2000;PD8000,5000;" +
+            "SP1;PU500,6700;LBSCREEN" + ((char)3) + ";PU0,0;SP0;";
+
+        public readonly List<string> Captures = new List<string>();
+
+        public CaptureResult CaptureScreen(string resource, string preRoll, string plotCommand, CaptureOptions options)
+        {
+            Captures.Add(resource + "|" + preRoll + "|" + plotCommand);
+            return new CaptureResult(CaptureHpgl, CaptureHpgl.Length, 0, CaptureCompletion.PenUp);
+        }
     }
 }

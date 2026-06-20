@@ -29,5 +29,11 @@ namespace GpibMcp.Instruments
 
         /// <summary>Closes a held-open session; returns false if none was open for the resource.</summary>
         bool Close(string resource);
+
+        /// <summary>
+        /// Captures an HP-GL plot from the instrument (plotter emulation): sends pre-roll + plot
+        /// command, answers the handshake, and returns the raw HP-GL. Leaves the bus usable.
+        /// </summary>
+        CaptureResult CaptureScreen(string resource, string preRoll, string plotCommand, CaptureOptions options);
     }
 }

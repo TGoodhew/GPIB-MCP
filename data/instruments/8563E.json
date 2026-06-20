@@ -11,6 +11,11 @@
     "matchRegex": "8563",
     "description": "Returns the model number (e.g. HP8563E/EC) and installed options."
   },
+  "capture": {
+    "method": "hpgl",
+    "plotCommand": "PLOT 550,279,9750,7479;",
+    "preRoll": "SNGLS;TS;"
+  },
   "commands": [
     {
       "name": "preset",

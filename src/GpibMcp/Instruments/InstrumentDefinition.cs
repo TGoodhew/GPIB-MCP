@@ -22,7 +22,24 @@ namespace GpibMcp.Instruments
 
         [JsonProperty("termination")] public TerminationSpec Termination { get; set; }
         [JsonProperty("identity")] public IdentitySpec Identity { get; set; }
+        [JsonProperty("capture")] public CaptureProfile Capture { get; set; }
         [JsonProperty("commands")] public List<InstrumentCommand> Commands { get; set; }
+    }
+
+    /// <summary>How to capture this instrument's screen (e.g. HP-GL plotter emulation).</summary>
+    public sealed class CaptureProfile
+    {
+        /// <summary>Capture method: "hpgl" (plotter emulation). Future: "scpi_block".</summary>
+        [JsonProperty("method")] public string Method { get; set; }
+
+        /// <summary>Command that makes the instrument plot, e.g. "PLOT 550,279,9750,7479;".</summary>
+        [JsonProperty("plotCommand")] public string PlotCommand { get; set; }
+
+        /// <summary>Commands to send before plotting, e.g. "SNGLS;TS;" (single sweep, take sweep).</summary>
+        [JsonProperty("preRoll")] public string PreRoll { get; set; }
+
+        /// <summary>Optional commands to send after capturing, e.g. "CONTS;" to resume continuous sweep.</summary>
+        [JsonProperty("postRoll")] public string PostRoll { get; set; }
     }
 
     /// <summary>Line terminators the instrument expects/returns, if non-default.</summary>
