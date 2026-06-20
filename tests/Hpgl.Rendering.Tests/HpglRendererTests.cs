@@ -234,6 +234,59 @@ namespace Hpgl.Rendering.Tests
             Assert.DoesNotContain("stroke-dasharray", svg);
         }
 
+        // ---- area fill (issue #8 §3.4: RA/RR/WG, FT, PT) --------------------
+
+        [Fact]
+        public void FillRect_RA_SolidByDefault_EmitsPolygon()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA1000,1000;RA5000,4000;");
+            Assert.Contains("<polygon", svg);          // FT default = type 1 (solid)
+            Assert.Contains("fill=\"#", svg);
+        }
+
+        [Fact]
+        public void FillRect_RA_ParallelHatch_EmitsLineSpansNotPolygon()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;FT3,200;PA1000,1000;RA5000,4000;");
+            Assert.DoesNotContain("<polygon", svg);    // hatch is drawn as line spans
+            Assert.True(Polylines(svg) > 5, "parallel hatch should emit many spans; got " + Polylines(svg));
+        }
+
+        [Fact]
+        public void FillRect_CrossHatch_HasRoughlyTwiceTheSpansOfParallel()
+        {
+            string parallel = HpglRenderer.RenderToSvg("IN;SP1;FT3,200;PA1000,1000;RA5000,4000;");
+            string cross = HpglRenderer.RenderToSvg("IN;SP1;FT4,200;PA1000,1000;RA5000,4000;");
+            Assert.True(Polylines(cross) > Polylines(parallel),
+                "cross-hatch adds a second hatch direction (" + Polylines(cross) + " vs " + Polylines(parallel) + ")");
+        }
+
+        [Fact]
+        public void FillRect_RR_IsRelative_AndSolid()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA1000,1000;RR4000,3000;");
+            Assert.Contains("<polygon", svg);
+        }
+
+        [Fact]
+        public void FillWedge_WG_SolidByDefault_EmitsPolygon()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA5000,5000;WG2000,0,90;");
+            Assert.Contains("<polygon", svg);
+        }
+
+        [Fact]
+        public void FillRect_RA_SolidFillsInteriorPixels()
+        {
+            // A solid-filled rectangle marks far more pixels than its outline alone would.
+            string filled = "IN;SP1;PA1000,1000;RA9000,9000;";
+            string outline = "IN;SP1;PA1000,1000;EA9000,9000;";
+            var opt = new HpglRenderOptions { Width = 300, Height = 300, Background = HpglBackground.Black, Antialias = false };
+            using (var bf = HpglRenderer.RenderToBitmap(filled, opt))
+            using (var bo = HpglRenderer.RenderToBitmap(outline, opt))
+                Assert.True(CountNonBackgroundPixels(bf, Color.Black) > 4 * CountNonBackgroundPixels(bo, Color.Black));
+        }
+
         [Fact]
         public void Geometry_RendersToBitmapWithoutThrowing()
         {

@@ -10,7 +10,8 @@
 // no per-instrument fix-ups; instrument-specific quirks belong in the caller's
 // capture profile, not here. Covered so far (issue #8): IN/DF, IP/SC, SP,
 // PU/PD/PA/PR, LB/DT/SI/SR/DI, arcs/circles/wedges (CI/AA/AR/EW) and edge
-// rectangles (EA/ER) via chord subdivision, and line types (LT) as dash patterns.
+// rectangles (EA/ER) via chord subdivision, line types (LT) as dash patterns,
+// and area fill (RA/RR/WG, FT/PT) - solid via polygon fill, hatch as line spans.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -141,6 +142,11 @@ namespace Hpgl.Rendering
                     case "EA": EdgeRect(state, instruction.Parameters, sink, relative: false); break;
                     case "ER": EdgeRect(state, instruction.Parameters, sink, relative: true); break;
                     case "EW": EdgeWedge(state, instruction.Parameters, sink); break;
+                    case "FT": state.SetFill(instruction.Parameters); break;
+                    case "PT": state.SetPenThickness(instruction.Parameters); break;
+                    case "RA": FillRect(state, instruction.Parameters, sink, relative: false); break;
+                    case "RR": FillRect(state, instruction.Parameters, sink, relative: true); break;
+                    case "WG": FillWedge(state, instruction.Parameters, sink); break;
                     // IW/PG and other non-geometry ops are ignored for layout in v1.
                 }
             }
@@ -253,6 +259,115 @@ namespace Hpgl.Rendering
             }
             endX = prevX; endY = prevY;
         }
+
+        // ---------------------------------------------------------------------
+        // Area fill (FT/PT, RA/RR, WG). Solid fills (FT 1/2) use the sink's native
+        // polygon fill (a valid raster/SVG preview shortcut per the spec); hatch
+        // fills (FT 3 parallel, 4 cross-hatch) are generated as Line spans by a
+        // scanline pass so they keep the characteristic plotted-hatch look.
+        // ---------------------------------------------------------------------
+
+        /// <summary>RA/RR X,Y: fill the rectangle between the current position and the (abs/rel) corner.</summary>
+        private static void FillRect(PlotterState s, IReadOnlyList<double> p, IPlotSink sink, bool relative)
+        {
+            if (p.Count < 2) return;
+            double x2, y2;
+            if (relative) { x2 = s.X + s.DeltaX(p[0]); y2 = s.Y + s.DeltaY(p[1]); }
+            else s.UserToPlot(p[0], p[1], out x2, out y2);
+            double x1 = s.X, y1 = s.Y;
+            FillRegion(s, sink, new[] { x1, x2, x2, x1 }, new[] { y1, y1, y2, y2 });
+            // pen position unchanged
+        }
+
+        /// <summary>WG radius,start,sweep[,chord]: fill a pie wedge about the current position.</summary>
+        private static void FillWedge(PlotterState s, IReadOnlyList<double> p, IPlotSink sink)
+        {
+            if (p.Count < 3) return;
+            double r = Math.Abs(p[0]), startDeg = p[1], sweep = p[2];
+            double chord = p.Count >= 4 ? p[3] : s.ChordAngleDeg;
+            double rx = r * s.ScaleX, ry = r * s.ScaleY;
+            double cx = s.X, cy = s.Y;
+
+            int steps = Math.Max(1, (int)Math.Ceiling(Math.Abs(sweep) / Math.Max(0.1, Math.Abs(chord))));
+            var xs = new List<double> { cx };
+            var ys = new List<double> { cy };
+            for (int k = 0; k <= steps; k++)
+            {
+                double a = (startDeg + sweep * k / steps) * DegToRad;
+                xs.Add(cx + rx * Math.Cos(a));
+                ys.Add(cy + ry * Math.Sin(a));
+            }
+            FillRegion(s, sink, xs.ToArray(), ys.ToArray());
+            // pen position unchanged (centre)
+        }
+
+        /// <summary>Fills a closed polygon per the current fill type: solid via the sink, else hatch spans.</summary>
+        private static void FillRegion(PlotterState s, IPlotSink sink, double[] xs, double[] ys)
+        {
+            int t = s.FillType;
+            if (t == 3 || t == 4)
+            {
+                double spacing = s.FillSpacingUnits > 0 ? s.FillSpacingUnits : 0.01 * s.FrameDiagonal;
+                if (spacing <= 0) spacing = 1;
+                EmitHatch(sink, xs, ys, s.FillAngleDeg, spacing, s.Pen);
+                if (t == 4) EmitHatch(sink, xs, ys, s.FillAngleDeg + 90, spacing, s.Pen); // cross-hatch
+            }
+            else
+            {
+                sink.FillPolygon(xs, ys, s.Pen); // FT 1/2 (and shading) -> solid
+            }
+        }
+
+        /// <summary>
+        /// Scanline hatch: emits parallel fill lines at <paramref name="angleDeg"/> spaced by
+        /// <paramref name="spacing"/> across the polygon, clipped to it (even-odd), as Line spans.
+        /// Works by rotating into a frame where the hatch lines are horizontal, scanning, then rotating back.
+        /// </summary>
+        private static void EmitHatch(IPlotSink sink, double[] xs, double[] ys,
+            double angleDeg, double spacing, int pen)
+        {
+            int n = xs.Length;
+            if (n < 3 || spacing <= 0) return;
+            double ca = Math.Cos(-angleDeg * DegToRad), sa = Math.Sin(-angleDeg * DegToRad);
+
+            // Rotate vertices into the hatch frame (hatch lines become horizontal).
+            var rx = new double[n];
+            var ry = new double[n];
+            double minY = double.MaxValue, maxY = double.MinValue;
+            for (int i = 0; i < n; i++)
+            {
+                rx[i] = xs[i] * ca - ys[i] * sa;
+                ry[i] = xs[i] * sa + ys[i] * ca;
+                if (ry[i] < minY) minY = ry[i];
+                if (ry[i] > maxY) maxY = ry[i];
+            }
+
+            double back = angleDeg * DegToRad; // rotate spans back to world space
+            double cb = Math.Cos(back), sb = Math.Sin(back);
+            var crossings = new List<double>();
+            int guard = 0;
+            for (double yy = minY + spacing / 2.0; yy < maxY && guard < 100000; yy += spacing, guard++)
+            {
+                crossings.Clear();
+                for (int i = 0; i < n; i++)
+                {
+                    int j = (i + 1) % n;
+                    double y0 = ry[i], y1 = ry[j];
+                    if ((y0 <= yy && y1 > yy) || (y1 <= yy && y0 > yy))
+                    {
+                        double tt = (yy - y0) / (y1 - y0);
+                        crossings.Add(rx[i] + tt * (rx[j] - rx[i]));
+                    }
+                }
+                crossings.Sort();
+                for (int k = 0; k + 1 < crossings.Count; k += 2)
+                {
+                    double xa = crossings[k], xb = crossings[k + 1];
+                    sink.Line(xa * cb - yy * sb, xa * sb + yy * cb,
+                              xb * cb - yy * sb, xb * sb + yy * cb, pen);
+                }
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -277,6 +392,12 @@ namespace Hpgl.Rendering
         public double DirCos = 1, DirSin = 0;
         public double ChordAngleDeg = 5.0;   // arc/circle subdivision step (HP-GL default 5°)
 
+        // Area-fill state (FT/PT). Type 1/2 = solid, 3 = parallel hatch, 4 = cross-hatch.
+        public int FillType = 1;
+        public double FillSpacingUnits = 0;  // 0 => default (1% of the P1-P2 diagonal)
+        public double FillAngleDeg = 0;
+        public double PenThicknessMm = 0.3;
+
         public void Reset()
         {
             _scaled = false;
@@ -284,6 +405,24 @@ namespace Hpgl.Rendering
             CharHeightUnits = 150;
             DirCos = 1; DirSin = 0;
             ChordAngleDeg = 5.0;
+            FillType = 1; FillSpacingUnits = 0; FillAngleDeg = 0; PenThicknessMm = 0.3;
+        }
+
+        /// <summary>Diagonal of the P1-P2 (IP) frame in plot units - the basis for default hatch spacing.</summary>
+        public double FrameDiagonal =>
+            Math.Sqrt((_ipX2 - _ipX1) * (_ipX2 - _ipX1) + (_ipY2 - _ipY1) * (_ipY2 - _ipY1));
+
+        public void SetFill(IReadOnlyList<double> p)
+        {
+            if (p.Count == 0) { FillType = 1; FillSpacingUnits = 0; FillAngleDeg = 0; return; }
+            FillType = (int)p[0];
+            FillSpacingUnits = p.Count >= 2 ? Math.Abs(p[1]) * Math.Max(ScaleX, ScaleY) : 0;
+            FillAngleDeg = p.Count >= 3 ? p[2] : 0;
+        }
+
+        public void SetPenThickness(IReadOnlyList<double> p)
+        {
+            if (p.Count >= 1 && p[0] > 0) PenThicknessMm = p[0];
         }
 
         /// <summary>Plot-units per user-unit on each axis (1 when scaling is off). Non-uniform under SC.</summary>
@@ -379,6 +518,8 @@ namespace Hpgl.Rendering
         void Label(PlotterState state, string text);
         /// <summary>Sets the current line type for subsequent vectors (-1 = solid; 0-6 = HP-GL patterns).</summary>
         void SetLineType(int lineType);
+        /// <summary>Solid-fills a closed polygon (plot-unit vertices) - used for FT type 1/2 fills.</summary>
+        void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen);
     }
 
     /// <summary>
@@ -430,6 +571,11 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { /* line style does not affect extent */ }
+
+        public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
+        {
+            for (int i = 0; i < xs.Count; i++) Include(xs[i], ys[i]);
+        }
 
         public void Label(PlotterState state, string text)
         {
@@ -512,6 +658,15 @@ namespace Hpgl.Rendering
             _g.DrawLine(PenFor(pen), _t.MapX(x1), _t.MapY(y1), _t.MapX(x2), _t.MapY(y2));
         }
 
+        public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
+        {
+            if (xs.Count < 3) return;
+            var pts = new PointF[xs.Count];
+            for (int i = 0; i < xs.Count; i++) pts[i] = new PointF(_t.MapX(xs[i]), _t.MapY(ys[i]));
+            using (var brush = new SolidBrush(_opt.ResolvePen(pen)))
+                _g.FillPolygon(brush, pts);
+        }
+
         public void Label(PlotterState state, string text)
         {
             if (string.IsNullOrEmpty(text)) return;
@@ -584,6 +739,19 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { _lineType = lineType; }
+
+        public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
+        {
+            if (xs.Count < 3) return;
+            Flush(); // paint the fill beneath any subsequent strokes
+            _sb.Append("<polygon fill=\"").Append(ToHex(_opt.ResolvePen(pen))).Append("\" points=\"");
+            for (int i = 0; i < xs.Count; i++)
+            {
+                if (i > 0) _sb.Append(' ');
+                _sb.Append(R(_t.MapX(xs[i]))).Append(',').Append(R(_t.MapY(ys[i])));
+            }
+            _sb.Append("\"/>\n");
+        }
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
