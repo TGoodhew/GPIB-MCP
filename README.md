@@ -482,6 +482,17 @@ The `statusModel` is **self-describing** so the waiter never guesses: it names t
 per operation (`expectBit`), the failure bit (`errorBit` — e.g. `error` on the 8560, `fail` on the
 3325), the enable-mask commands, and an optional `restore`.
 
+**SRQ-edge flow (hardware-confirmed on the 8563E).** When a model names a `requestServiceBit` (the
+GPIB request-service bit, `0x40`), the waiter uses a more robust flow: it disarms and drains stale
+status, arms `expectBit|errorBit` (**never** the request-service bit — arming that self-fires),
+**waits for the operation to go busy** (the expect bit clears) so a condition that is already true at
+arm-time can't be read as "done", then treats the next request-service assertion as completion and
+classifies by the error bit. This was found the hard way on a real 8563E: the 8560 RQS mask and the
+read-back status byte share one layout (Programming Guide Table 7-266) where `0x40` is request-service
+— *not* an error — so the old "poll the expect bit" model misread every successful sweep as an error
+and could pre-fire on a standing end-of-sweep. Models without a `requestServiceBit` use the legacy
+direct-bit flow. (Making this fully device-agnostic across all SRQ instruments is tracked in #26.)
+
 The completion state machine is a **standalone library**,
 [`src/Srq.Completion/`](src/Srq.Completion/) — decoupled from VISA and the MCP server via
 `IStatusChannel`, so it can be exercised headlessly. Three ways to run it:

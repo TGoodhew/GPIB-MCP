@@ -26,6 +26,17 @@ namespace Srq.Completion
         /// </summary>
         public string ErrorBit { get; set; }
 
+        /// <summary>
+        /// Name (in <see cref="Bits"/>) of the serial-poll REQUEST-SERVICE bit (the GPIB RQS bit,
+        /// 0x40). When set, the waiter uses the robust "SRQ-edge" completion flow: it does NOT arm
+        /// this bit, but treats its assertion as the completion signal, and first waits for the
+        /// operation to go BUSY (the expect bit clears) so a condition that is already true at
+        /// arm-time cannot be mistaken for completion. Hardware-confirmed on the 8563E, where the
+        /// RQS-mask and the read-back status byte share the Table 7-266 layout (request-service=0x40
+        /// is set on every SRQ, NOT an error). Absent =&gt; legacy direct-bit flow (poll the expect bit).
+        /// </summary>
+        public string RequestServiceBit { get; set; }
+
         /// <summary>Named status-byte bits and their decimal weights (e.g. "endOfSweep" -&gt; 16).</summary>
         public Dictionary<string, int> Bits { get; set; }
 

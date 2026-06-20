@@ -22,16 +22,16 @@
     "enableMask": { "setCommand": "RQS {mask}", "clearCommand": "RQS 0", "maskFormat": "decimal" },
     "doneSupport": { "supported": true, "mnemonic": "DONE" },
     "errorBit": "error",
+    "requestServiceBit": "requestService",
     "bits": {
-      "trigger": 4,
-      "message": 8,
-      "endOfSweep": 16,
-      "commandComplete": 32,
-      "error": 64,
-      "rqs": 128
+      "message": 2,
+      "endOfSweep": 4,
+      "commandComplete": 16,
+      "error": 32,
+      "requestService": 64
     },
     "operations": {
-      "sweepComplete": { "arm": "SNGLS;TS;", "expectBit": "endOfSweep", "restore": "CONTS;" },
+      "sweepComplete": { "arm": "SNGLS;TS;", "expectBit": "commandComplete", "restore": "CONTS;" },
       "sweepAndPeak": { "arm": "SNGLS;TS;MKPK HI;DONE;", "expectBit": "commandComplete", "restore": "CONTS;" }
     }
   },

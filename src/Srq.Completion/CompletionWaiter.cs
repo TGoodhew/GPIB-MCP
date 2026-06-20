@@ -54,6 +54,13 @@ namespace Srq.Completion
         public const int DefaultPollIntervalMs = 100;
         public const int DefaultTimeoutMs = 30000;
 
+        /// <summary>
+        /// Upper bound (ms) on the SRQ-edge "busy" phase: how long to wait for the operation to start
+        /// (the expect bit to clear) before proceeding anyway. Capped at the overall timeout. Generous,
+        /// since starting a sweep clears the bit within a poll or two on real hardware.
+        /// </summary>
+        public const int BusyConfirmMs = 5000;
+
         /// <param name="trace">Optional sink that receives a line per phase/poll, for live tracing.</param>
         public static CompletionResult Wait(StatusModel model, string modelName, string operationName,
             int timeoutMs, IStatusChannel channel, Func<long> nowMs, Action<int> sleep,
@@ -86,11 +93,89 @@ namespace Srq.Completion
             if (timeoutMs <= 0) timeoutMs = DefaultTimeoutMs;
             if (pollIntervalMs <= 0) pollIntervalMs = DefaultPollIntervalMs;
 
-            int? errorBit = model.BitValue(model.ErrorBit);   // generic, model-named error/fail bit
-            int mask = expect.Value | (errorBit ?? 0);
+            int? errorBit = model.BitValue(model.ErrorBit);          // model-named error/fail bit
+            int? rqsBit = model.BitValue(model.RequestServiceBit);   // GPIB request-service bit (0x40), if modelled
+
+            return rqsBit.HasValue
+                ? RunSrqEdge(model, modelName, operationName, op, expect.Value, errorBit, rqsBit.Value,
+                             timeoutMs, channel, nowMs, sleep, pollIntervalMs, log)
+                : RunDirectBit(model, modelName, operationName, op, expect.Value, errorBit,
+                               timeoutMs, channel, nowMs, sleep, pollIntervalMs, log);
+        }
+
+        /// <summary>
+        /// Robust SRQ flow, hardware-confirmed on the 8563E. The RQS mask and the read-back status byte
+        /// share one layout (e.g. 8560 Table 7-266): request-service is bit 0x40 - set on EVERY service
+        /// request, NOT an error - so completion is detected by that bit, and the error bit is a separate
+        /// condition. Because a condition bit (e.g. command-complete) can be CURRENTLY TRUE the moment we
+        /// arm - which would assert SRQ instantly and look like a finished operation - we first disarm and
+        /// drain, then wait for the operation to go BUSY (the expect bit clears) before accepting the next
+        /// request-service as the real completion.
+        /// </summary>
+        private static CompletionResult RunSrqEdge(StatusModel model, string modelName, string operationName,
+            StatusOperation op, int expect, int? errorBit, int rqsBit, int timeoutMs, IStatusChannel channel,
+            Func<long> nowMs, Action<int> sleep, int pollIntervalMs, Action<string> log)
+        {
+            // The arm mask deliberately EXCLUDES the request-service bit (arming it self-fires).
+            int mask = expect | (errorBit ?? 0);
+            long start = nowMs();
+            log("run '" + operationName + "' on " + modelName + " [SRQ-edge]: expect '" + op.ExpectBit + "'=0x" +
+                expect.ToString("X2") + ", errorBit '" + (model.ErrorBit ?? "-") + "'=0x" + (errorBit ?? 0).ToString("X2") +
+                ", requestService '" + model.RequestServiceBit + "'=0x" + rqsBit.ToString("X2") +
+                ", mask=" + mask + " (0x" + mask.ToString("X2") + "), timeout=" + timeoutMs + "ms");
+
+            // Disarm + drain so an already-true armed condition cannot pre-fire the next arm.
+            SafeSend(channel, model.EnableMask.ClearCommand, "disarm", log);
+            int drained = channel.SerialPoll();
+            log("drain serial poll -> 0x" + drained.ToString("X2"));
+
+            string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
+            channel.Send(setCmd); log("send (arm mask): " + setCmd);
+            if (!string.IsNullOrEmpty(op.Arm)) { channel.Send(op.Arm); log("send (start op): " + op.Arm); }
+
+            long busyDeadline = start + Math.Min(timeoutMs, BusyConfirmMs);
+            bool busy = false;
+            int stb = 0;
+            long elapsed = 0;
+            while (true)
+            {
+                stb = channel.SerialPoll();
+                elapsed = nowMs() - start;
+                if (!busy)
+                {
+                    log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2") + " (awaiting busy)");
+                    if ((stb & expect) == 0) { busy = true; log("busy confirmed (expect bit cleared - operation running)"); }
+                    else if (nowMs() >= busyDeadline) { busy = true; log("busy not confirmed within " + BusyConfirmMs + " ms; proceeding"); }
+                }
+                else
+                {
+                    log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2"));
+                    if ((stb & rqsBit) != 0) break;    // service requested = operation done (or errored)
+                }
+                if (elapsed >= timeoutMs) break;       // backstop
+                sleep(pollIntervalMs);
+            }
+
+            SafeSend(channel, model.EnableMask.ClearCommand, "clear mask", log);
+            SafeSend(channel, op.Restore, "restore", log);
+
+            bool serviced = (stb & rqsBit) != 0;
+            bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
+            return Finish(model, operationName, op, stb, elapsed, timeoutMs, serviced, err, log);
+        }
+
+        /// <summary>
+        /// Legacy direct-bit flow: arm the mask (expect|error) and poll the status byte until the expect
+        /// (or error) bit appears. Used when the model does not declare a <see cref="StatusModel.RequestServiceBit"/>.
+        /// </summary>
+        private static CompletionResult RunDirectBit(StatusModel model, string modelName, string operationName,
+            StatusOperation op, int expect, int? errorBit, int timeoutMs, IStatusChannel channel,
+            Func<long> nowMs, Action<int> sleep, int pollIntervalMs, Action<string> log)
+        {
+            int mask = expect | (errorBit ?? 0);
             long start = nowMs();
             log("run '" + operationName + "' on " + modelName + ": expect '" + op.ExpectBit + "'=0x" +
-                expect.Value.ToString("X2") + ", errorBit '" + (model.ErrorBit ?? "-") + "'=0x" + (errorBit ?? 0).ToString("X2") +
+                expect.ToString("X2") + ", errorBit '" + (model.ErrorBit ?? "-") + "'=0x" + (errorBit ?? 0).ToString("X2") +
                 ", mask=" + mask + " (0x" + mask.ToString("X2") + "), timeout=" + timeoutMs + "ms");
 
             // Pre-clear any STALE latched status (e.g. an END OF SWEEP left set by a prior sweep) so the
@@ -117,8 +202,15 @@ namespace Srq.Completion
             SafeSend(channel, model.EnableMask.ClearCommand, "clear mask", log);
             SafeSend(channel, op.Restore, "restore", log);
 
-            bool done = (stb & expect.Value) == expect.Value;
+            bool done = (stb & expect) == expect;
             bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
+            return Finish(model, operationName, op, stb, elapsed, timeoutMs, done, err, log);
+        }
+
+        /// <summary>Builds the final result + message from the terminal status byte (shared by both flows).</summary>
+        private static CompletionResult Finish(StatusModel model, string operationName, StatusOperation op,
+            int stb, long elapsed, int timeoutMs, bool done, bool err, Action<string> log)
+        {
             IReadOnlyList<string> bits = model.SetBitNames(stb);
             string detail = "status byte " + stb + " (0x" + stb.ToString("X2") + ") [" + Describe(bits) + "]";
 

@@ -28,8 +28,8 @@ namespace SrqHarness
                 expected: CompletionOutcome.Completed, minElapsedMs: 5000);
 
             failures += RunScenario(
-                "5 s sweep with a STALE end-of-sweep latched before arming (must wait for a fresh sweep)",
-                new SimulatedInstrument(initialLatched: SimulatedInstrument.EndOfSweep) { SweepDurationMs = 5000 },
+                "5 s sweep, idle/complete at arm time (stale - must wait for a fresh sweep, not pre-fire)",
+                new SimulatedInstrument(initialLatched: SimulatedInstrument.CommandComplete | SimulatedInstrument.EndOfSweep) { SweepDurationMs = 5000 },
                 model, "sweepComplete",
                 expected: CompletionOutcome.Completed, minElapsedMs: 5000);
 
@@ -70,7 +70,9 @@ namespace SrqHarness
             return ok ? 0 : 1;
         }
 
-        /// <summary>The 8563E status model (8560E Programming Guide, Table 7-9), mirroring the DB seed.</summary>
+        /// <summary>The 8563E status model in the hardware-confirmed read-back layout (8560E
+        /// Programming Guide, Table 7-266), mirroring the DB seed. Request-service (0x40) is the
+        /// completion signal; command-complete (0x10) is the armed/busy bit; error is 0x20.</summary>
         private static StatusModel Build8563EStatusModel() => new StatusModel
         {
             SrqSupported = true,
@@ -78,14 +80,15 @@ namespace SrqHarness
             EnableMask = new EnableMaskSpec { SetCommand = "RQS {mask}", ClearCommand = "RQS 0", MaskFormat = "decimal" },
             DoneSupport = new DoneSupportSpec { Supported = true, Mnemonic = "DONE" },
             ErrorBit = "error",
+            RequestServiceBit = "requestService",
             Bits = new Dictionary<string, int>
             {
-                ["trigger"] = 4, ["message"] = 8, ["endOfSweep"] = 16,
-                ["commandComplete"] = 32, ["error"] = 64, ["rqs"] = 128
+                ["message"] = 2, ["endOfSweep"] = 4, ["commandComplete"] = 16,
+                ["error"] = 32, ["requestService"] = 64
             },
             Operations = new Dictionary<string, StatusOperation>
             {
-                ["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "endOfSweep", Restore = "CONTS;" },
+                ["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "commandComplete", Restore = "CONTS;" },
                 ["sweepAndPeak"] = new StatusOperation { Arm = "SNGLS;TS;MKPK HI;DONE;", ExpectBit = "commandComplete", Restore = "CONTS;" }
             }
         };
