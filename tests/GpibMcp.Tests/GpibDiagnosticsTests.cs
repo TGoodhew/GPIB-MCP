@@ -138,5 +138,32 @@ namespace GpibMcp.Tests
             Assert.Contains("driver exploded", ex.Message);
             Assert.DoesNotContain("Recent command chain", ex.Detail); // no history -> no chain section
         }
+
+        // ---- verbatim ("exact codes and text") detail ----------------------------
+
+        [Fact]
+        public void DescribeCode_CarriesRawCode()
+        {
+            Assert.Equal(unchecked((int)0xBFFF0015), VisaErrorInfo.DescribeCode(unchecked((int)0xBFFF0015)).Code);
+            Assert.Equal(unchecked((int)0xBFFF005F),
+                VisaErrorInfo.Describe(new NativeVisaException(unchecked((int)0xBFFF005F))).Code);
+        }
+
+        [Fact]
+        public void Exception_VerboseDetail_HasDecodedNameRawCodeInnerTextAndChain()
+        {
+            var ex = GpibOperationException.For(GpibOperation.Query, "GPIB0::18::INSTR", "MKPK HI?",
+                new NativeVisaException(unchecked((int)0xBFFF0015), "raw driver text"), SampleHistory());
+
+            Assert.Equal(unchecked((int)0xBFFF0015), ex.VisaStatusCode);
+
+            string v = ex.VerboseDetail;
+            Assert.Contains("VI_ERROR_TMO", v);                                  // decoded name
+            Assert.Contains("0xBFFF0015", v);                                    // raw code, hex
+            Assert.Contains(unchecked((int)0xBFFF0015).ToString(), v);           // raw code, decimal
+            Assert.Contains("NativeVisaException", v);                           // underlying exception type
+            Assert.Contains("raw driver text", v);                              // underlying message, verbatim
+            Assert.Contains("MKPK HI;", v);                                      // command chain present
+        }
     }
 }

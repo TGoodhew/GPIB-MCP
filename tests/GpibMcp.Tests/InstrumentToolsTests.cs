@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
+using Ivi.Visa;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -160,6 +162,38 @@ namespace GpibMcp.Tests
             Assert.Contains("-> \"*IDN?\"", text);   // sent
             Assert.Contains("MEAS?", text);
             Assert.Contains("<-", text);             // a received line is present
+        }
+
+        [Fact]
+        public void LastError_NoFailure_ReportsNone()
+        {
+            var text = Get(new FakeInstrumentManager(), "visa_last_error").InvokeText(new JObject());
+            Assert.Contains("No GPIB/VISA errors", text);
+        }
+
+        [Fact]
+        public void LastError_AfterFailure_ReturnsVerbatimCodesAndText()
+        {
+            var fake = new FakeInstrumentManager();
+            var chain = new List<CommandHistoryEntry>
+            {
+                new CommandHistoryEntry("GPIB0::29::INSTR", CommandDirection.Sent, "*IDN?\n", DateTime.UtcNow)
+            };
+            fake.QueryError = GpibOperationException.For(GpibOperation.Query, "GPIB0::29::INSTR", "*IDN?",
+                new NativeVisaException(unchecked((int)0xBFFF0015)), chain);
+
+            var registry = InstrumentTools.BuildRegistry(fake);
+            registry.TryGet("visa_query", out var query);
+            registry.TryGet("visa_last_error", out var lastError);
+
+            // The failing query records the error; fetching it returns the exact codes + text.
+            Assert.Throws<GpibOperationException>(() =>
+                query.Invoke(new JObject { ["resource"] = "GPIB0::29::INSTR", ["command"] = "*IDN?" }));
+
+            var text = lastError.Invoke(new JObject()).AsText();
+            Assert.Contains("VI_ERROR_TMO", text);
+            Assert.Contains("0xBFFF0015", text);
+            Assert.Contains("*IDN?", text);
         }
     }
 }

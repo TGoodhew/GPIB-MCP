@@ -11,13 +11,17 @@ namespace GpibMcp.Instruments
     /// </summary>
     internal static class VisaErrorInfo
     {
-        /// <summary>A decoded VISA status: a short name and a plain-English meaning.</summary>
+        /// <summary>A decoded VISA status: a short name, a plain-English meaning, and the raw code.</summary>
         public sealed class Info
         {
             public string Name { get; }
             public string Meaning { get; }
+            /// <summary>The raw VISA status code, when known.</summary>
+            public int? Code { get; }
             public bool HasName => !string.IsNullOrEmpty(Name);
-            public Info(string name, string meaning) { Name = name; Meaning = meaning; }
+            public Info(string name, string meaning, int? code = null) { Name = name; Meaning = meaning; Code = code; }
+            /// <summary>Returns a copy of this info with the raw status code attached.</summary>
+            public Info WithCode(int code) => new Info(Name, Meaning, code);
         }
 
         private static readonly Info None = new Info(null, null);
@@ -26,7 +30,7 @@ namespace GpibMcp.Instruments
         public static Info Describe(Exception ex)
         {
             // IOTimeoutException is a sibling of NativeVisaException (no ErrorCode) - map it directly.
-            if (ex is IOTimeoutException) return Codes[Tmo];
+            if (ex is IOTimeoutException) return DescribeCode(Tmo);
 
             var native = ex as NativeVisaException;
             if (native != null) return DescribeCode(native.ErrorCode);
@@ -34,13 +38,13 @@ namespace GpibMcp.Instruments
             return None;
         }
 
-        /// <summary>Decodes a raw VISA status code to a name + meaning (unknown codes get a hex name).</summary>
+        /// <summary>Decodes a raw VISA status code to a name + meaning + the code (unknown codes get a hex name).</summary>
         public static Info DescribeCode(int code)
         {
             Info info;
-            if (Codes.TryGetValue(code, out info)) return info;
+            if (Codes.TryGetValue(code, out info)) return info.WithCode(code);
             return new Info("VISA 0x" + code.ToString("X8"),
-                "VISA returned status 0x" + code.ToString("X8") + " (see the NI-VISA status-code reference).");
+                "VISA returned status 0x" + code.ToString("X8") + " (see the NI-VISA status-code reference).", code);
         }
 
         // Common VISA status codes, written as the signed int form of 0xBFFF00xx.

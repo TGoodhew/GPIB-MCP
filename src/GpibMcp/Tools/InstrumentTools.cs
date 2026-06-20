@@ -165,6 +165,27 @@ namespace GpibMcp.Tools
                     return sb.ToString().TrimEnd();
                 }));
 
+            // ---- Diagnostics: exact last error ----------------------------------
+            registry.Add(new McpTool(
+                "visa_last_error",
+                "Return the EXACT, verbatim details of the most recent GPIB/VISA failure: the decoded " +
+                "VISA status name, the raw numeric status code (hex + decimal), the meaning, the " +
+                "underlying driver exception text, the timestamp, and the command chain. Use this when " +
+                "the user asks for the precise/exact error codes and text (the normal tool error is a " +
+                "friendlier summary). Pass a resource for that instrument's last error, or omit for the " +
+                "most recent error on any resource.",
+                Schema(
+                    Prop("resource", "string", "Optional VISA resource string; omit for the most recent error on any resource.")),
+                args =>
+                {
+                    string resource = Str(args, "resource", null);
+                    var error = visa.LastError(resource);
+                    if (error != null) return error.VerboseDetail;
+                    return string.IsNullOrEmpty(resource)
+                        ? "No GPIB/VISA errors have been recorded this session."
+                        : "No recent error recorded for " + resource + ".";
+                }));
+
             // ---- NI-488.2: direct GPIB query ------------------------------------
             registry.Add(new McpTool(
                 "gpib488_query",
@@ -181,7 +202,15 @@ namespace GpibMcp.Tools
                     byte primary = (byte)Int(args, "primary_address", -1, 0, 30, "primary_address");
                     byte secondary = (byte)Int(args, "secondary_address", Gpib488Helper.NoSecondaryAddress);
                     string command = ReqStr(args, "command");
-                    return Clean(Gpib488Helper.Query(board, primary, secondary, command));
+                    try
+                    {
+                        return Clean(Gpib488Helper.Query(board, primary, secondary, command));
+                    }
+                    catch (GpibOperationException gex)
+                    {
+                        visa.RecordError(gex); // make it retrievable via visa_last_error too
+                        throw;
+                    }
                 }));
 
             // ---- Instrument command database + assignments ----------------------

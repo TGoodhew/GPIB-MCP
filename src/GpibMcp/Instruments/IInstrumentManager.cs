@@ -37,6 +37,15 @@ namespace GpibMcp.Instruments
         IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max);
 
         /// <summary>
+        /// The most recent GPIB/VISA failure for <paramref name="resource"/>, or - when it is null/empty -
+        /// the most recent failure on any resource. Returns null if none has occurred this session.
+        /// </summary>
+        GpibOperationException LastError(string resource);
+
+        /// <summary>Records a failure so it is retrievable via <see cref="LastError"/> (e.g. from the NI-488.2 path).</summary>
+        void RecordError(GpibOperationException error);
+
+        /// <summary>
         /// Captures an HP-GL plot from the instrument (plotter emulation): sends pre-roll + plot
         /// command, answers the handshake, and returns the raw HP-GL. Leaves the bus usable.
         /// </summary>

@@ -23,12 +23,17 @@ namespace GpibMcp.Tests
         public Exception QueryError;
 
         private readonly CommandHistory _history = new CommandHistory();
+        private GpibOperationException _lastError;
 
         public IList<string> ListResources(string filter) => new List<string>(ResourceList);
 
         public string Query(string resource, string command, int timeoutMs)
         {
-            if (QueryError != null) throw QueryError;
+            if (QueryError != null)
+            {
+                if (QueryError is GpibOperationException gex) RecordError(gex);
+                throw QueryError;
+            }
             string key = (command ?? string.Empty).Trim();
             _history.Record(resource, CommandDirection.Sent, command ?? string.Empty);
             string response = QueryResponses.TryGetValue(key, out var canned) ? canned : "RESPONSE:" + key;
@@ -52,6 +57,10 @@ namespace GpibMcp.Tests
 
         public IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max) =>
             _history.Snapshot(resource, max);
+
+        public void RecordError(GpibOperationException error) { if (error != null) _lastError = error; }
+
+        public GpibOperationException LastError(string resource) => _lastError;
 
         public void Clear(string resource, int timeoutMs) => Clears.Add(resource);
 

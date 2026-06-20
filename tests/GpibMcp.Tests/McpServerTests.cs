@@ -64,7 +64,7 @@ namespace GpibMcp.Tests
             var tools = (JArray)responses.Single()["result"]["tools"];
 
             var names = tools.Select(t => (string)t["name"]).ToList();
-            Assert.Equal(18, names.Count);
+            Assert.Equal(19, names.Count);
             Assert.Contains("visa_list_resources", names);
             Assert.Contains("visa_query", names);
             Assert.Contains("gpib488_query", names);
@@ -73,6 +73,7 @@ namespace GpibMcp.Tests
             Assert.Contains("instrument_reference", names);
             Assert.Contains("instrument_capture_screen", names);
             Assert.Contains("visa_command_history", names);
+            Assert.Contains("visa_last_error", names);
 
             // Every advertised tool must carry an object input schema.
             Assert.All(tools, t => Assert.Equal("object", (string)t["inputSchema"]["type"]));

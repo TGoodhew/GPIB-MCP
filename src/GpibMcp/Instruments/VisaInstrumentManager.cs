@@ -33,6 +33,9 @@ namespace GpibMcp.Instruments
             new Dictionary<string, MessageBasedSession>(StringComparer.OrdinalIgnoreCase);
         private readonly object _gate = new object();
         private readonly CommandHistory _history = new CommandHistory();
+        private readonly Dictionary<string, GpibOperationException> _lastErrorByResource =
+            new Dictionary<string, GpibOperationException>(StringComparer.OrdinalIgnoreCase);
+        private GpibOperationException _lastError;
 
         /// <summary>
         /// Discovers connected VISA resources. The default filter matches any INSTR resource.
@@ -101,7 +104,7 @@ namespace GpibMcp.Instruments
                 }
                 catch (Exception ex) when (!(ex is GpibOperationException))
                 {
-                    throw GpibOperationException.For(GpibOperation.Query, resource, command, ex, _history.Snapshot(resource));
+                    throw Fail(GpibOperation.Query, resource, command, ex);
                 }
             }
         }
@@ -121,7 +124,7 @@ namespace GpibMcp.Instruments
                 }
                 catch (Exception ex) when (!(ex is GpibOperationException))
                 {
-                    throw GpibOperationException.For(GpibOperation.Write, resource, command, ex, _history.Snapshot(resource));
+                    throw Fail(GpibOperation.Write, resource, command, ex);
                 }
             }
         }
@@ -141,7 +144,7 @@ namespace GpibMcp.Instruments
                 }
                 catch (Exception ex) when (!(ex is GpibOperationException))
                 {
-                    throw GpibOperationException.For(GpibOperation.Read, resource, null, ex, _history.Snapshot(resource));
+                    throw Fail(GpibOperation.Read, resource, null, ex);
                 }
             }
         }
@@ -160,14 +163,47 @@ namespace GpibMcp.Instruments
                 }
                 catch (Exception ex) when (!(ex is GpibOperationException))
                 {
-                    throw GpibOperationException.For(GpibOperation.Clear, resource, "<device clear>", ex, _history.Snapshot(resource));
+                    throw Fail(GpibOperation.Clear, resource, "<device clear>", ex);
                 }
             }
+        }
+
+        /// <summary>Builds the enriched failure (with the command chain), records it, and returns it to throw.</summary>
+        private GpibOperationException Fail(GpibOperation op, string resource, string command, Exception inner)
+        {
+            var error = GpibOperationException.For(op, resource, command, inner, _history.Snapshot(resource));
+            RecordError(error);
+            return error;
         }
 
         /// <summary>Returns up to <paramref name="max"/> of the most recent commands for a resource.</summary>
         public IReadOnlyList<CommandHistoryEntry> RecentCommands(string resource, int max) =>
             _history.Snapshot(resource, max);
+
+        /// <summary>Records a failure as the last error for its resource and overall.</summary>
+        public void RecordError(GpibOperationException error)
+        {
+            if (error == null) return;
+            lock (_gate)
+            {
+                _lastError = error;
+                if (!string.IsNullOrEmpty(error.Resource)) _lastErrorByResource[error.Resource] = error;
+            }
+        }
+
+        /// <summary>The most recent failure for a resource, or (null/empty resource) the most recent overall.</summary>
+        public GpibOperationException LastError(string resource)
+        {
+            lock (_gate)
+            {
+                if (!string.IsNullOrEmpty(resource))
+                {
+                    GpibOperationException error;
+                    return _lastErrorByResource.TryGetValue(resource, out error) ? error : null;
+                }
+                return _lastError;
+            }
+        }
 
         /// <summary>
         /// Captures an HP-GL plot from an instrument via plotter emulation: sends the pre-roll and

@@ -264,6 +264,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_list_open` | — | — | List sessions this server holds open |
 | `visa_close` | `resource` | — | Close a held-open session |
 | `visa_command_history` | `resource` | `max` | Show the recent command chain sent to / received from an instrument |
+| `visa_last_error` | — | `resource` | Return the exact, verbatim details (codes + text) of the most recent GPIB/VISA failure |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
@@ -301,6 +302,25 @@ Timeout: the instrument did not respond…`, `VI_ERROR_NLISTENERS — nothing ac
 address…`), and appends the **recent command chain** sent to that instrument so the cause is
 visible. The server keeps a bounded per-resource history (default 20 entries, override with the
 `GPIB_MCP_HISTORY_DEPTH` environment variable); fetch it any time with `visa_command_history`.
+
+That friendly summary is the first-level response. When you want the **exact** error — the raw
+numeric VISA status code (hex + decimal), the decoded name, the underlying driver exception text,
+the timestamp, and the command chain — ask for it (e.g. *"tell me the exact error codes and
+text"*) and the model fetches it via `visa_last_error`:
+
+```
+GPIB/VISA error detail
+  Operation  : Query
+  Resource   : GPIB0::29::INSTR
+  Command    : *IDN?
+  VISA status: VI_ERROR_TMO  (0xBFFF0015 / -1073807339)
+  Meaning    : Timeout - the instrument did not respond in time. …
+  Exception  : Ivi.Visa.IOTimeoutException: …
+  Time       : 2026-06-19 21:46:50
+
+Recent command chain for GPIB0::29::INSTR (-> sent / <- received):
+  21:46:33.258  -> "*IDN?\n"
+```
 
 ### Discovery and bus extenders (HP 37204A)
 
