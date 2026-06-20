@@ -133,6 +133,73 @@ namespace Hpgl.Rendering.Tests
             Assert.Equal(1, polylines);
         }
 
+        // ---- arcs, circles, rectangles (issue #8 §3.3/§3.4) ------------------
+
+        private static int Polylines(string svg) =>
+            svg.Split(new[] { "<polyline" }, System.StringSplitOptions.None).Length - 1;
+
+        // Each "x,y" vertex carries exactly one comma, and nothing else in the SVG does.
+        private static int Vertices(string svg) => svg.Count(c => c == ',');
+
+        [Fact]
+        public void Circle_SubdividesIntoManyChords_AsOneClosedPolyline()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA5000,5000;CI2000;");
+            Assert.Equal(1, Polylines(svg));
+            Assert.True(Vertices(svg) >= 60, "360/5° should be ~72 chords; got " + Vertices(svg));
+        }
+
+        [Fact]
+        public void Circle_HonorsChordParameter_FewerSegments()
+        {
+            // chord = 90° -> 4 segments (a diamond), far fewer than the 5° default.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA5000,5000;CI2000,90;");
+            Assert.Equal(1, Polylines(svg));
+            Assert.Equal(5, Vertices(svg)); // 4 chords + closing point
+        }
+
+        [Fact]
+        public void Circle_DoesNotMoveThePen()
+        {
+            // After CI the pen is back at the centre, so the following PD draws a radial line from it.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA5000,5000;CI1000,90;PD9000,5000;");
+            Assert.True(Polylines(svg) >= 2, "circle + radial line are two separate polylines");
+        }
+
+        [Fact]
+        public void Arc_AA_RendersArcAndMovesPenToEndpoint()
+        {
+            // Quarter circle: start (7000,5000), centre (5000,5000), +90°, then continue drawing.
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA7000,5000;AA5000,5000,90;");
+            Assert.Contains("<polyline", svg);
+            Assert.InRange(Vertices(svg), 15, 25); // 90/5° = 18 chords -> ~19 vertices
+        }
+
+        [Fact]
+        public void EdgeRect_EA_DrawsClosedFourSidedRectangle()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA1000,1000;EA5000,4000;");
+            Assert.Equal(1, Polylines(svg));   // four connected sides coalesce to one polyline
+            Assert.Equal(5, Vertices(svg));    // 4 corners + closing vertex
+        }
+
+        [Fact]
+        public void EdgeRect_ER_IsRelativeToCurrentPosition()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA1000,1000;ER4000,3000;");
+            Assert.Equal(1, Polylines(svg));
+            Assert.Equal(5, Vertices(svg));
+        }
+
+        [Fact]
+        public void Geometry_RendersToBitmapWithoutThrowing()
+        {
+            string hpgl = "IN;SP1;PA5000,5000;CI2000;EW1500,0,120;PA1000,1000;EA9000,9000;";
+            var opt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(hpgl, opt))
+                Assert.True(CountNonBackgroundPixels(bmp, Color.Black) > 200);
+        }
+
         [Fact]
         public void RenderToSvg_EmptyInput_ProducesCanvasWithoutThrowing()
         {

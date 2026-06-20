@@ -131,6 +131,13 @@ namespace Hpgl.Rendering
                     case "SR": state.SetCharSizeRelative(instruction.Parameters); break;
                     case "DI": state.SetDirection(instruction.Parameters); break;
                     case "LB": sink.Label(state, instruction.Text); break;
+                    case "CT": if (instruction.Parameters.Count > 0) { /* chord mode (deg/dev) - degrees only */ } break;
+                    case "CI": Circle(state, instruction.Parameters, sink); break;
+                    case "AA": Arc(state, instruction.Parameters, sink, relativeCenter: false); break;
+                    case "AR": Arc(state, instruction.Parameters, sink, relativeCenter: true); break;
+                    case "EA": EdgeRect(state, instruction.Parameters, sink, relative: false); break;
+                    case "ER": EdgeRect(state, instruction.Parameters, sink, relative: true); break;
+                    case "EW": EdgeWedge(state, instruction.Parameters, sink); break;
                     // LT/IW/PG and other non-geometry ops are ignored for layout in v1.
                 }
             }
@@ -146,6 +153,102 @@ namespace Hpgl.Rendering
                 state.X = nx;
                 state.Y = ny;
             }
+        }
+
+        // ---------------------------------------------------------------------
+        // Curves & rectangles. These draw regardless of pen up/down (HP-GL treats
+        // them as draw commands) and decompose into the same Line sink as vectors,
+        // so both the measure and draw passes see them with no sink changes.
+        // ---------------------------------------------------------------------
+
+        private const double DegToRad = Math.PI / 180.0;
+
+        /// <summary>CI radius[,chord]: circle centred on the current position; pen position unchanged.</summary>
+        private static void Circle(PlotterState s, IReadOnlyList<double> p, IPlotSink sink)
+        {
+            if (p.Count < 1) return;
+            double r = Math.Abs(p[0]);
+            double chord = p.Count >= 2 ? p[1] : s.ChordAngleDeg;
+            double ex, ey;
+            EmitArc(sink, s.X, s.Y, r * s.ScaleX, r * s.ScaleY, 0, 360, chord, s.Pen, out ex, out ey);
+        }
+
+        /// <summary>AA/AR X,Y,sweep[,chord]: arc about the (abs/rel) centre from the current position.</summary>
+        private static void Arc(PlotterState s, IReadOnlyList<double> p, IPlotSink sink, bool relativeCenter)
+        {
+            if (p.Count < 3) return;
+            double cx, cy;
+            if (relativeCenter) { cx = s.X + s.DeltaX(p[0]); cy = s.Y + s.DeltaY(p[1]); }
+            else s.UserToPlot(p[0], p[1], out cx, out cy);
+
+            double sweep = p[2];
+            double chord = p.Count >= 4 ? p[3] : s.ChordAngleDeg;
+            double vx = s.X - cx, vy = s.Y - cy;
+            double r = Math.Sqrt(vx * vx + vy * vy);
+            double startDeg = Math.Atan2(vy, vx) / DegToRad;
+
+            double ex, ey;
+            EmitArc(sink, cx, cy, r, r, startDeg, sweep, chord, s.Pen, out ex, out ey);
+            s.X = ex; s.Y = ey; // the pen ends at the arc endpoint
+        }
+
+        /// <summary>EA/ER X,Y: rectangle between the current position and the (abs/rel) opposite corner.</summary>
+        private static void EdgeRect(PlotterState s, IReadOnlyList<double> p, IPlotSink sink, bool relative)
+        {
+            if (p.Count < 2) return;
+            double x2, y2;
+            if (relative) { x2 = s.X + s.DeltaX(p[0]); y2 = s.Y + s.DeltaY(p[1]); }
+            else s.UserToPlot(p[0], p[1], out x2, out y2);
+
+            double x1 = s.X, y1 = s.Y;
+            sink.Line(x1, y1, x2, y1, s.Pen);
+            sink.Line(x2, y1, x2, y2, s.Pen);
+            sink.Line(x2, y2, x1, y2, s.Pen);
+            sink.Line(x1, y2, x1, y1, s.Pen);
+            // pen position unchanged
+        }
+
+        /// <summary>EW radius,start,sweep[,chord]: wedge outline (two radii + arc) about the current position.</summary>
+        private static void EdgeWedge(PlotterState s, IReadOnlyList<double> p, IPlotSink sink)
+        {
+            if (p.Count < 3) return;
+            double r = Math.Abs(p[0]);
+            double startDeg = p[1], sweep = p[2];
+            double chord = p.Count >= 4 ? p[3] : s.ChordAngleDeg;
+            double rx = r * s.ScaleX, ry = r * s.ScaleY;
+            double cx = s.X, cy = s.Y;
+
+            double ax = cx + rx * Math.Cos(startDeg * DegToRad), ay = cy + ry * Math.Sin(startDeg * DegToRad);
+            sink.Line(cx, cy, ax, ay, s.Pen);            // centre -> arc start
+            double ex, ey;
+            EmitArc(sink, cx, cy, rx, ry, startDeg, sweep, chord, s.Pen, out ex, out ey);
+            sink.Line(ex, ey, cx, cy, s.Pen);            // arc end -> centre
+            // pen position unchanged (returns to centre)
+        }
+
+        /// <summary>
+        /// Subdivides an arc/ellipse into chords and emits them as <see cref="IPlotSink.Line"/> calls.
+        /// Steps by <paramref name="chordDeg"/> (HP-GL default 5°); reports the final point in
+        /// <paramref name="endX"/>/<paramref name="endY"/>. rx/ry differ only under non-uniform SC scaling.
+        /// </summary>
+        private static void EmitArc(IPlotSink sink, double cx, double cy, double rx, double ry,
+            double startDeg, double sweepDeg, double chordDeg, int pen, out double endX, out double endY)
+        {
+            chordDeg = Math.Abs(chordDeg);
+            if (chordDeg < 0.1) chordDeg = 5.0;
+            int steps = Math.Max(1, (int)Math.Ceiling(Math.Abs(sweepDeg) / chordDeg));
+
+            double prevX = cx + rx * Math.Cos(startDeg * DegToRad);
+            double prevY = cy + ry * Math.Sin(startDeg * DegToRad);
+            for (int k = 1; k <= steps; k++)
+            {
+                double a = (startDeg + sweepDeg * k / steps) * DegToRad;
+                double x = cx + rx * Math.Cos(a);
+                double y = cy + ry * Math.Sin(a);
+                sink.Line(prevX, prevY, x, y, pen);
+                prevX = x; prevY = y;
+            }
+            endX = prevX; endY = prevY;
         }
     }
 
@@ -169,6 +272,7 @@ namespace Hpgl.Rendering
 
         public double CharHeightUnits = 150; // sensible default until SI/SR seen
         public double DirCos = 1, DirSin = 0;
+        public double ChordAngleDeg = 5.0;   // arc/circle subdivision step (HP-GL default 5°)
 
         public void Reset()
         {
@@ -176,7 +280,22 @@ namespace Hpgl.Rendering
             Absolute = true;
             CharHeightUnits = 150;
             DirCos = 1; DirSin = 0;
+            ChordAngleDeg = 5.0;
         }
+
+        /// <summary>Plot-units per user-unit on each axis (1 when scaling is off). Non-uniform under SC.</summary>
+        public double ScaleX => _scaled ? (_ipX2 - _ipX1) / (_scXmax - _scXmin) : 1.0;
+        public double ScaleY => _scaled ? (_ipY2 - _ipY1) / (_scYmax - _scYmin) : 1.0;
+
+        /// <summary>Maps a user/plotter coordinate pair to plot units (honours SC scaling).</summary>
+        public void UserToPlot(double ux, double uy, out double px, out double py)
+        {
+            px = UserToPlotX(ux); py = UserToPlotY(uy);
+        }
+
+        /// <summary>Maps a relative coordinate delta to plot units (honours SC scaling).</summary>
+        public double DeltaX(double dx) => DeltaToPlotX(dx);
+        public double DeltaY(double dy) => DeltaToPlotY(dy);
 
         public void SetInputPoints(IReadOnlyList<double> p)
         {
