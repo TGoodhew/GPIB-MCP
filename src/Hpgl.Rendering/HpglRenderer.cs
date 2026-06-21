@@ -220,6 +220,10 @@ namespace Hpgl.Rendering
             ax = cx; ay = cy; ux = -cy; uy = cx;
         }
 
+        // CR/LF and shift-out/shift-in: a label containing any of these isn't a plain single-line run,
+        // so the low-fidelity <text> path declines it and the stroke font handles it instead.
+        private static readonly char[] LabelControlChars = { '\r', '\n', '', '' };
+
         /// <summary>LB: draws a string from the current position, advancing the carry-over cursor.</summary>
         private static void DrawLabel(PlotterState s, string text, IPlotSink sink)
         {
@@ -230,6 +234,19 @@ namespace Hpgl.Rendering
             double ox = s.X, oy = s.Y, cursorX = 0, lineY = 0;
             double adv = s.AdvanceXUnits, lineStep = s.LineAdvanceUnits;
             bool activeAlt = s.ActiveAlternate;
+
+            // Low-fidelity SVG: render the whole label as one <text> element instead of dozens of font
+            // strokes - far smaller/faster to display inline (#23). Only for a plain horizontal, single-
+            // line label (no symbol mode, clip, shift-set, or embedded CR/LF); anything else falls through
+            // to the exact single-stroke font below. SVG-only; the raster path always uses the stroke font.
+            if (sink.TextLabels && !s.HasClip && s.SymbolChar < 0
+                && Math.Abs(ay) < 1e-6 && ax > 0.999 && text.IndexOfAny(LabelControlChars) < 0)
+            {
+                sink.DrawText(ox, oy, text, s.CharHeightUnits, s.Pen);
+                double w = text.Length * adv;
+                s.X = ox + w * ax; s.Y = oy + w * ay;
+                return;
+            }
 
             foreach (char ch in text)
             {
@@ -903,6 +920,10 @@ namespace Hpgl.Rendering
         void SetLineType(int lineType);
         /// <summary>Solid-fills a closed polygon (plot-unit vertices) - used for FT type 1/2 fills.</summary>
         void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen);
+        /// <summary>True if this sink renders labels as &lt;text&gt; (low-fidelity) rather than stroking them.</summary>
+        bool TextLabels { get; }
+        /// <summary>Draws a horizontal label as text at its baseline origin (only called when TextLabels).</summary>
+        void DrawText(double ox, double oy, string text, double capUnits, int pen);
     }
 
     /// <summary>
@@ -919,6 +940,9 @@ namespace Hpgl.Rendering
         public ClipSink(IPlotSink inner, PlotterState s) { _inner = inner; _s = s; }
 
         public void SetLineType(int lineType) => _inner.SetLineType(lineType);
+        public bool TextLabels => _inner.TextLabels;
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen)
+            => _inner.DrawText(ox, oy, text, capUnits, pen);   // text is only emitted when no clip is active
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
@@ -1093,6 +1117,8 @@ namespace Hpgl.Rendering
 
         public void SetLineType(int lineType) { }
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen) { }
+        public bool TextLabels => false;
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen) { }
     }
 
     internal sealed class MeasureSink : IPlotSink
@@ -1107,6 +1133,8 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { /* line style does not affect extent */ }
+        public bool TextLabels => false;   // measure pass strokes labels so their extent is included in auto-fit
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen) { }
 
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
         {
@@ -1169,6 +1197,8 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { _lineType = lineType; }
+        public bool TextLabels => false;   // raster always uses the exact single-stroke font
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen) { }
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
@@ -1243,6 +1273,25 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { _lineType = lineType; }
+
+        /// <summary>Low-fidelity label mode: emit labels as &lt;text&gt; instead of single-stroke font.</summary>
+        public bool TextLabels => _opt.SvgTextLabels;
+
+        /// <summary>Emits a horizontal label as one &lt;text&gt; element (monospace) at its baseline origin.</summary>
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen)
+        {
+            Flush();   // close any pending stroke path so the text paints over the geometry
+            int px = R(_t.MapX(ox)), py = R(_t.MapY(oy));
+            int size = (int)Math.Max(6.0, capUnits * _t.Scale);
+            _sb.Append("<text x=\"").Append(px).Append("\" y=\"").Append(py)
+               .Append("\" fill=\"").Append(ToHex(_opt.ResolvePen(pen)))
+               .Append("\" font-family=\"monospace\" font-size=\"").Append(size).Append("px\">")
+               .Append(Escape(text)).Append("</text>\n");
+        }
+
+        private static string Escape(string s) =>
+            s.IndexOfAny(new[] { '&', '<', '>' }) < 0 ? s
+                : s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
         {

@@ -52,6 +52,15 @@ namespace Hpgl.Rendering
         public double SvgSimplifyTolerancePx { get; set; } = 0.5;
 
         /// <summary>
+        /// SVG only: when true, render labels as compact &lt;text&gt; elements (a system monospace font)
+        /// instead of the exact single-stroke HP plotter font. This is the "low fidelity" mode - the
+        /// glyph shapes differ from a real 7475/7440/7550, but each label is ~one element instead of
+        /// dozens of strokes, so the SVG (and the time to display it inline) shrinks substantially.
+        /// Default false (high fidelity, single-stroke font). The raster (PNG) is always the stroke font.
+        /// </summary>
+        public bool SvgTextLabels { get; set; } = false;
+
+        /// <summary>
         /// Optional explicit pen palette indexed by HP-GL pen number (SP n -&gt; PenColors[n % len]).
         /// When null, a readable default palette is chosen to suit <see cref="Background"/>.
         /// </summary>

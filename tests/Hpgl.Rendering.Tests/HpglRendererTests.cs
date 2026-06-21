@@ -494,6 +494,21 @@ namespace Hpgl.Rendering.Tests
         }
 
         [Fact]
+        public void RenderToSvg_LowFidelity_EmitsTextLabelsAndIsSmaller()
+        {
+            // SvgTextLabels (low fidelity, #23): a horizontal label becomes one compact <text> element
+            // instead of dozens of stroke subpaths - smaller/faster to display inline.
+            const string hpgl = "IN;SP1;PA1000,1000;LBCENTER 460.000kHz" + ";";
+            string hi = HpglRenderer.RenderToSvg(hpgl, new HpglRenderOptions { Width = 800, Height = 600 });
+            string lo = HpglRenderer.RenderToSvg(hpgl, new HpglRenderOptions { Width = 800, Height = 600, SvgTextLabels = true });
+
+            Assert.DoesNotContain("<text", hi);              // high fidelity: stroked glyphs
+            Assert.Contains("<text", lo);                    // low fidelity: a <text> element
+            Assert.Contains("CENTER 460.000kHz", lo);        // with the label content
+            Assert.True(lo.Length < hi.Length, "text labels should be smaller; hi=" + hi.Length + " lo=" + lo.Length);
+        }
+
+        [Fact]
         public void Label_CellPitch_IsMonospacedAndMatchesKe5fx()
         {
             // HP-GL character cells are fixed-pitch: every glyph advances by the same cell. The
