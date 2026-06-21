@@ -641,8 +641,13 @@ namespace Hpgl.Rendering
         /// <summary>The finalized 7550A polygon buffer (PM2), one entry per sub-contour. Null when none.</summary>
         public List<PointD[]> Polygon;
 
-        // Default input-point frame; only the proportions matter (auto-fit normalizes).
-        private double _ipX1 = 0, _ipY1 = 0, _ipX2 = 10000, _ipY2 = 10000;
+        // Default P1/P2 (input-point) frame. A real HP 7475A/7550A defaults P1/P2 to the hard-clip
+        // corners of the paper, which is NON-SQUARE (landscape ~10000 x 7200, ratio ~1.39) - NOT a
+        // square frame. The aspect matters: under SC, scaleX/scaleY = (P2x-P1x)/(P2y-P1y), so a square
+        // user range (e.g. SC 0,500,0,500) yields ELLIPSES on real hardware, and seeds SR char size,
+        // ticks (TL/XT/YT) and the default hatch spacing. (#28)
+        private const double DefP2X = 10000, DefP2Y = 7200;
+        private double _ipX1 = 0, _ipY1 = 0, _ipX2 = DefP2X, _ipY2 = DefP2Y;
         private double _scXmin, _scXmax, _scYmin, _scYmax;
         private bool _scaled;
 
@@ -695,6 +700,7 @@ namespace Hpgl.Rendering
             FillType = 1; FillSpacingUnits = 0; FillAngleDeg = 0; PenThicknessMm = 0.3;
             UserFillGaps = null;
             TickPosFrac = 0.005; TickNegFrac = 0.005;
+            _ipX1 = 0; _ipY1 = 0; _ipX2 = DefP2X; _ipY2 = DefP2Y; // IN/DF restore default P1/P2
             Polygon = null;
         }
 

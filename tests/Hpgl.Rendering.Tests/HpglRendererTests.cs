@@ -353,6 +353,44 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
+        // ---- default P1/P2 frame aspect (issue #28) ------------------------
+
+        private static Rectangle DrawnBBox(string hpgl)
+        {
+            var opt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(hpgl, opt))
+            {
+                int minX = int.MaxValue, minY = int.MaxValue, maxX = -1, maxY = -1;
+                for (int y = 0; y < bmp.Height; y++)
+                    for (int x = 0; x < bmp.Width; x++)
+                        if (bmp.GetPixel(x, y).ToArgb() != Color.Black.ToArgb())
+                        {
+                            if (x < minX) minX = x; if (x > maxX) maxX = x;
+                            if (y < minY) minY = y; if (y > maxY) maxY = y;
+                        }
+                return Rectangle.FromLTRB(minX, minY, maxX + 1, maxY + 1);
+            }
+        }
+
+        [Fact]
+        public void ScaleOnDefaultFrame_DrawsEllipse_NotCircle()
+        {
+            // The default P1/P2 frame is non-square (landscape ~10000x7200), so SC of a SQUARE user
+            // range makes a circle render as a wider ellipse - as a real HP 7475A/7550A does (#28).
+            var b = DrawnBBox("IN;SC0,500,0,500;PA250,250;CI100;");
+            Assert.True(b.Width > b.Height * 1.25,
+                "SC circle on the default frame should be a wider ellipse; w=" + b.Width + " h=" + b.Height);
+        }
+
+        [Fact]
+        public void ScaleOnSquareFrame_DrawsCircle()
+        {
+            // With IP forcing a square P1/P2, the same SC circle stays round.
+            var b = DrawnBBox("IN;IP0,0,10000,10000;SC0,500,0,500;PA250,250;CI100;");
+            double ratio = (double)b.Width / b.Height;
+            Assert.InRange(ratio, 0.9, 1.1);
+        }
+
         // ---- ticks (issue #8 §3.5: TL/XT/YT) -------------------------------
 
         [Fact]
