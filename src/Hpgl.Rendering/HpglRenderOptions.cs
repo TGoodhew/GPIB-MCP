@@ -43,6 +43,15 @@ namespace Hpgl.Rendering
         public bool Antialias { get; set; } = true;
 
         /// <summary>
+        /// SVG only: Ramer-Douglas-Peucker tolerance in pixels for simplifying LONG stroke runs
+        /// (e.g. a spectrum trace) when emitting SVG. The default 0.5 is sub-pixel - visually lossless
+        /// at the render resolution - and roughly halves trace size; short runs (font glyphs, graticule,
+        /// circles, arcs) are never simplified. Set 0 to disable (byte-exact geometry). Does not affect
+        /// the raster (PNG) path, which is always exact.
+        /// </summary>
+        public double SvgSimplifyTolerancePx { get; set; } = 0.5;
+
+        /// <summary>
         /// Optional explicit pen palette indexed by HP-GL pen number (SP n -&gt; PenColors[n % len]).
         /// When null, a readable default palette is chosen to suit <see cref="Background"/>.
         /// </summary>

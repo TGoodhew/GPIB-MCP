@@ -131,9 +131,9 @@ namespace Hpgl.Rendering.Tests
             byte[] hpgl = File.ReadAllBytes(FixturePath("feature-exercise.plt"));
 
             string svg = HpglRenderer.RenderToSvg(hpgl);
-            int polylines = svg.Split(new[] { "<polyline" }, StringSplitOptions.None).Length - 1;
+            int polylines = svg.Split('M').Length - 1;
             int polygons = svg.Split(new[] { "<polygon" }, StringSplitOptions.None).Length - 1;
-            Assert.True(polylines > 50, "expected many stroke/vector polylines; got " + polylines);
+            Assert.True(polylines > 50, "expected many stroke/vector subpaths; got " + polylines);
             Assert.True(polygons >= 2, "expected solid-fill polygons (RA/RR); got " + polygons);
 
             byte[] png = HpglRenderer.RenderToPng(hpgl);
@@ -143,6 +143,19 @@ namespace Hpgl.Rendering.Tests
                 int drawn = CountWhere(bmp, c => c.R != 0 || c.G != 0 || c.B != 0);
                 Assert.True(drawn > 5000, "expected a substantial plot; got " + drawn + " px");
             }
+        }
+
+        [Fact]
+        public void RenderToSvg_TestPlot_StaysUnderSizeBudget()
+        {
+            // #23: keep the inline SVG small so the model re-emits it as an artifact quickly. The
+            // stroke-font labels + a full 601-point trace are ~21 KB; per-pen <path> coalescing plus
+            // sub-pixel trace simplification keep the same 8563E capture well under budget with no
+            // visible change. Guards against a size regression (e.g. reverting the path coalescing).
+            byte[] hpgl = File.ReadAllBytes(FixturePath("test.plt"));
+            string svg = HpglRenderer.RenderToSvg(hpgl);
+            Assert.True(svg.Length < 9000,
+                "8563E capture SVG should stay compact (artifact-reproduction speed); was " + svg.Length + " bytes");
         }
 
         private static int CountWhere(Bitmap bmp, Func<Color, bool> predicate)
