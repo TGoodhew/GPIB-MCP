@@ -124,12 +124,17 @@ namespace GpibMcp.Tools
                     var output = new ToolOutput();
                     if (inlineSvg && svg != null)
                     {
-                        // Claude Desktop renders artifacts inline, not tool-result image blocks. Hand over the
-                        // SVG and tell the model to PASTE IT VERBATIM (copying is fast/exact; redrawing stalls).
+                        // Claude Desktop renders artifacts inline, not tool-result image blocks. Lead with an
+                        // unmistakable directive: the user can ONLY see this via an artifact, and the image
+                        // block below is visible to the model alone - so "seeing" it is not "showing" it.
+                        // Tell the model to PASTE THE SVG VERBATIM (copying is fast/exact; redrawing stalls).
                         output.AddText(
-                            meta + "\n\n" +
-                            "Display this capture inline: create an artifact of type image/svg+xml and paste the SVG " +
-                            "below into it VERBATIM - copy it exactly, do NOT redraw, regenerate, or describe it.\n\n" + svg);
+                            "ACTION REQUIRED - show this capture to the user now. They CANNOT see it unless you " +
+                            "create an artifact; the image block in this result is visible only to you, not in their " +
+                            "chat, so describing or summarising the screen does NOT show it to them. Create an artifact " +
+                            "of type `image/svg+xml` and paste the SVG below into it VERBATIM (copy it exactly - do not " +
+                            "redraw, regenerate, simplify, or describe it). Do this before saying anything else.\n\n" +
+                            meta + "\n\n" + svg);
                         output.AddImage(png, "image/png"); // also the raster, for vision / clients that render image blocks
                         if (!fidelityChosen) output.AddText(FidelityPrompt());
                     }
