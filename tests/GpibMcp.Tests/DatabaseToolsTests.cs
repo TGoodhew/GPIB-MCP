@@ -226,6 +226,43 @@ namespace GpibMcp.Tests
             }
         }
 
+        private static InstrumentDefinition NonIdentifiable(string model) => new InstrumentDefinition
+        {
+            Model = model,
+            Manufacturer = "HP",
+            Category = "Signal Generator",
+            Identity = new IdentitySpec { Supported = false, Description = "Listen-only; no ID query." }
+        };
+
+        [Fact]
+        public void Identify_NonIdentifiableAssignedModel_ReportsCannotVerify()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { NonIdentifiable("8657B") });
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::7::INSTR", "8657B");
+            var visa = new FakeInstrumentManager();
+
+            var text = Tool("instrument_identify", db, store, visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::7::INSTR" });
+
+            Assert.Contains("no remote identification query", text);
+            Assert.Empty(visa.Reads);  // did not attempt any read/query
+        }
+
+        [Fact]
+        public void Assign_NonIdentifiableModel_VerifyNoteSaysCannotVerify_AndDoesNotFail()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { NonIdentifiable("8657B") });
+            var store = AssignmentStore.InMemory();
+            var visa = new FakeInstrumentManager();
+
+            var text = Tool("assign_instrument", db, store, visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::7::INSTR", ["model"] = "8657B" });
+
+            Assert.Contains("identity cannot be verified", text);
+            Assert.DoesNotContain("did not pass", text);  // not flagged as a verification failure
+        }
+
         [Fact]
         public void Unassign_ConfirmFlow()
         {

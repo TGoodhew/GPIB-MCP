@@ -4,16 +4,18 @@
   "category": "RF Power Meter",
   "description": "HP 438A dual-channel (sensor A and B) HP-IB power meter. Measures single-sensor power (A or B), ratio (A/B, B/A) and difference (A-B, B-A) in dBm, Watts, dB relative or percent relative. Uses an alphameric two-letter HP-IB command set. Commands marked as requiring numeric entry must be followed by the value and the EN (ENTER) program code. Identification returns 'HP438A,VERX.XX'.",
   "source": "438A.pdf",
-  "aliases": ["438A", "HP438A"],
+  "aliases": [
+    "438A",
+    "HP438A"
+  ],
   "termination": {
     "write": "\n",
     "read": "\n"
   },
   "identity": {
     "command": "?ID",
-    "response": "HP438A,VERX.XX",
-    "model": "HP438A",
-    "description": "Identification query. When addressed to talk after ?ID, the meter returns the string 'HP438A,VERX.XX' (CR/LF, EOI), where VERX.XX is the firmware version."
+    "matchRegex": "438A",
+    "description": "Identification query (?ID). When addressed to talk after ?ID the meter returns 'HP438A,VERX.XX' (CR/LF, EOI), where VERX.XX is the firmware version. Matched on '438A'."
   },
   "commands": [
     {
@@ -23,7 +25,9 @@
       "description": "Select channel A as the single-sensor active measurement (Sensor A power).",
       "set": true,
       "query": false,
-      "examples": ["AP"]
+      "examples": [
+        "AP"
+      ]
     },
     {
       "name": "Sensor B measurement",
@@ -32,7 +36,9 @@
       "description": "Select channel B as the single-sensor active measurement (Sensor B power).",
       "set": true,
       "query": false,
-      "examples": ["BP"]
+      "examples": [
+        "BP"
+      ]
     },
     {
       "name": "A/B ratio measurement",
@@ -41,7 +47,9 @@
       "description": "Display the ratio of Sensor A to Sensor B (A/B) in dB or percent.",
       "set": true,
       "query": false,
-      "examples": ["AR"]
+      "examples": [
+        "AR"
+      ]
     },
     {
       "name": "B/A ratio measurement",
@@ -50,7 +58,9 @@
       "description": "Display the ratio of Sensor B to Sensor A (B/A) in dB or percent.",
       "set": true,
       "query": false,
-      "examples": ["BR"]
+      "examples": [
+        "BR"
+      ]
     },
     {
       "name": "Sensor A minus Sensor B",
@@ -59,7 +69,9 @@
       "description": "Display the difference measurement A-B in dBm or Watts.",
       "set": true,
       "query": false,
-      "examples": ["AD"]
+      "examples": [
+        "AD"
+      ]
     },
     {
       "name": "Sensor B minus Sensor A",
@@ -68,7 +80,9 @@
       "description": "Display the difference measurement B-A in dBm or Watts.",
       "set": true,
       "query": false,
-      "examples": ["BD"]
+      "examples": [
+        "BD"
+      ]
     },
     {
       "name": "Set A (active entry channel A)",
@@ -77,7 +91,10 @@
       "description": "Select channel A as the active entry channel so that subsequent per-sensor parameters (cal factor, offset, range, filter, limits) apply to sensor A. Front panel SET A.",
       "set": true,
       "query": false,
-      "examples": ["AE", "AEKB99EN"]
+      "examples": [
+        "AE",
+        "AEKB99EN"
+      ]
     },
     {
       "name": "Set B (active entry channel B)",
@@ -86,7 +103,10 @@
       "description": "Select channel B as the active entry channel so that subsequent per-sensor parameters (cal factor, offset, range, filter, limits) apply to sensor B. Front panel SET B.",
       "set": true,
       "query": false,
-      "examples": ["BE", "BEKB99EN"]
+      "examples": [
+        "BE",
+        "BEKB99EN"
+      ]
     },
     {
       "name": "Cal Factor",
@@ -98,11 +118,16 @@
       "parameters": [
         {
           "name": "calFactor",
-          "units": ["percent"],
+          "units": [
+            "percent"
+          ],
           "range": "1.0 to 150.0"
         }
       ],
-      "examples": ["KB99EN", "AEKB98.5EN"]
+      "examples": [
+        "KB99EN",
+        "AEKB98.5EN"
+      ]
     },
     {
       "name": "Cal Adj (reference calibration factor)",
@@ -114,11 +139,16 @@
       "parameters": [
         {
           "name": "refCalFactor",
-          "units": ["percent"],
+          "units": [
+            "percent"
+          ],
           "range": "50.0 to 120.0 (negative value selects external reference)"
         }
       ],
-      "examples": ["CL98.5EN", "AEZECL96EN"]
+      "examples": [
+        "CL98.5EN",
+        "AEZECL96EN"
+      ]
     },
     {
       "name": "Zero",
@@ -127,7 +157,10 @@
       "description": "Initiate the zeroing routine for the active entry channel (no RF power applied). Each sensor must be zeroed separately.",
       "set": true,
       "query": false,
-      "examples": ["ZE", "AEZE"]
+      "examples": [
+        "ZE",
+        "AEZE"
+      ]
     },
     {
       "name": "Auto Range",
@@ -136,7 +169,10 @@
       "description": "Set the active entry channel to automatic ranging. PRESET default for both sensors.",
       "set": true,
       "query": false,
-      "examples": ["RA", "AERA"]
+      "examples": [
+        "RA",
+        "AERA"
+      ]
     },
     {
       "name": "Manual Range",
@@ -148,11 +184,16 @@
       "parameters": [
         {
           "name": "range",
-          "units": ["range number"],
+          "units": [
+            "range number"
+          ],
           "range": "1 to 5"
         }
       ],
-      "examples": ["RM3EN", "AERM3EN"]
+      "examples": [
+        "RM3EN",
+        "AERM3EN"
+      ]
     },
     {
       "name": "Range Hold",
@@ -161,7 +202,9 @@
       "description": "Hold the current range while switching from auto to manual range mode (retains the auto range setting).",
       "set": true,
       "query": false,
-      "examples": ["RH"]
+      "examples": [
+        "RH"
+      ]
     },
     {
       "name": "Auto Filter",
@@ -170,7 +213,10 @@
       "description": "Set the active entry channel to automatic digital filter (averaging) length selection. PRESET default for both sensors.",
       "set": true,
       "query": false,
-      "examples": ["FA", "AEFA"]
+      "examples": [
+        "FA",
+        "AEFA"
+      ]
     },
     {
       "name": "Manual Filter",
@@ -182,11 +228,16 @@
       "parameters": [
         {
           "name": "filterNumber",
-          "units": ["exponent of 2 (length = 2^n, 1 to 512)"],
+          "units": [
+            "exponent of 2 (length = 2^n, 1 to 512)"
+          ],
           "range": "0 to 9"
         }
       ],
-      "examples": ["FM7EN", "AEFM4EN"]
+      "examples": [
+        "FM7EN",
+        "AEFM4EN"
+      ]
     },
     {
       "name": "Filter Hold",
@@ -195,7 +246,9 @@
       "description": "Hold the current filter length while switching from auto to manual filter mode (retains the auto filter setting).",
       "set": true,
       "query": false,
-      "examples": ["FH"]
+      "examples": [
+        "FH"
+      ]
     },
     {
       "name": "Offset",
@@ -207,11 +260,16 @@
       "parameters": [
         {
           "name": "offset",
-          "units": ["dB"],
+          "units": [
+            "dB"
+          ],
           "range": "-99.99 to +99.99 (0.01 dB increments)"
         }
       ],
-      "examples": ["OS10.5EN", "BEOS-20EN"]
+      "examples": [
+        "OS10.5EN",
+        "BEOS-20EN"
+      ]
     },
     {
       "name": "Display Offset",
@@ -220,7 +278,9 @@
       "description": "DSP - OFS: display the current offset value. Valid only when sent immediately after the OFFSET (OS) program code.",
       "set": true,
       "query": false,
-      "examples": ["BPOSDOEN"]
+      "examples": [
+        "BPOSDOEN"
+      ]
     },
     {
       "name": "Low Limit",
@@ -232,11 +292,16 @@
       "parameters": [
         {
           "name": "lowLimit",
-          "units": ["dBm"],
+          "units": [
+            "dBm"
+          ],
           "range": "signed value sxxx.xxx"
         }
       ],
-      "examples": ["LL10EN", "AELL10EN"]
+      "examples": [
+        "LL10EN",
+        "AELL10EN"
+      ]
     },
     {
       "name": "High Limit",
@@ -248,11 +313,16 @@
       "parameters": [
         {
           "name": "highLimit",
-          "units": ["dBm"],
+          "units": [
+            "dBm"
+          ],
           "range": "signed value sxxx.xxx"
         }
       ],
-      "examples": ["LH20EN", "AELL10ENLH20EN"]
+      "examples": [
+        "LH20EN",
+        "AELL10ENLH20EN"
+      ]
     },
     {
       "name": "Enable Limits Checking",
@@ -261,7 +331,10 @@
       "description": "Enable the limits-checking function using the current high and low limit values. PRESET disables limits checking.",
       "set": true,
       "query": false,
-      "examples": ["LM1", "AELL10ENLH20ENLM1"]
+      "examples": [
+        "LM1",
+        "AELL10ENLH20ENLM1"
+      ]
     },
     {
       "name": "Disable Limits Checking",
@@ -270,7 +343,9 @@
       "description": "Disable the limits-checking function.",
       "set": true,
       "query": false,
-      "examples": ["LM0"]
+      "examples": [
+        "LM0"
+      ]
     },
     {
       "name": "Log Units (dB/dBm)",
@@ -279,7 +354,9 @@
       "description": "Select logarithmic display units: dBm for single-sensor/difference, dB for ratio/relative.",
       "set": true,
       "query": false,
-      "examples": ["LG"]
+      "examples": [
+        "LG"
+      ]
     },
     {
       "name": "Linear Units (Watts/%)",
@@ -288,7 +365,9 @@
       "description": "Select linear display units: Watts for single-sensor/difference, percent for ratio/relative.",
       "set": true,
       "query": false,
-      "examples": ["LN"]
+      "examples": [
+        "LN"
+      ]
     },
     {
       "name": "Enter REL mode",
@@ -297,7 +376,9 @@
       "description": "Enter relative measurement mode. The first reading taken becomes the reference; subsequent measurements are displayed relative to it.",
       "set": true,
       "query": false,
-      "examples": ["RL1"]
+      "examples": [
+        "RL1"
+      ]
     },
     {
       "name": "Exit REL mode",
@@ -306,7 +387,9 @@
       "description": "Exit relative measurement mode.",
       "set": true,
       "query": false,
-      "examples": ["RL0"]
+      "examples": [
+        "RL0"
+      ]
     },
     {
       "name": "Reference Oscillator On",
@@ -315,7 +398,9 @@
       "description": "Turn the internal 1.00 mW (0 dBm) 50 MHz power reference oscillator on.",
       "set": true,
       "query": false,
-      "examples": ["OC1"]
+      "examples": [
+        "OC1"
+      ]
     },
     {
       "name": "Reference Oscillator Off",
@@ -324,7 +409,9 @@
       "description": "Turn the internal power reference oscillator off. PRESET default is off.",
       "set": true,
       "query": false,
-      "examples": ["OC0"]
+      "examples": [
+        "OC0"
+      ]
     },
     {
       "name": "Enter",
@@ -333,7 +420,10 @@
       "description": "Terminate a numeric entry. Required after the value for any program code that takes numeric data (CL, KB, OS, RM, FM, LL, LH, ST, RC).",
       "set": true,
       "query": false,
-      "examples": ["KB99EN", "RM3EN"]
+      "examples": [
+        "KB99EN",
+        "RM3EN"
+      ]
     },
     {
       "name": "Store",
@@ -345,11 +435,15 @@
       "parameters": [
         {
           "name": "register",
-          "units": ["register number"],
+          "units": [
+            "register number"
+          ],
           "range": "1 to 19"
         }
       ],
-      "examples": ["ST5EN"]
+      "examples": [
+        "ST5EN"
+      ]
     },
     {
       "name": "Recall",
@@ -361,11 +455,16 @@
       "parameters": [
         {
           "name": "register",
-          "units": ["register number"],
+          "units": [
+            "register number"
+          ],
           "range": "0 to 19"
         }
       ],
-      "examples": ["RC2EN", "RC0EN"]
+      "examples": [
+        "RC2EN",
+        "RC0EN"
+      ]
     },
     {
       "name": "Preset",
@@ -374,7 +473,9 @@
       "description": "Preset the Power Meter to its default state (auto range/filter both sensors, cal factor 100%, offset/limits 0, REL off, reference oscillator off, units Watts, free-run trigger). The Clear message (DCL/SDC) produces the same result.",
       "set": true,
       "query": false,
-      "examples": ["PR"]
+      "examples": [
+        "PR"
+      ]
     },
     {
       "name": "Display All",
@@ -383,7 +484,9 @@
       "description": "Display all segments (front panel display test).",
       "set": true,
       "query": false,
-      "examples": ["DA"]
+      "examples": [
+        "DA"
+      ]
     },
     {
       "name": "Display Disable",
@@ -392,7 +495,9 @@
       "description": "Disable (blank) the front panel display.",
       "set": true,
       "query": false,
-      "examples": ["DD"]
+      "examples": [
+        "DD"
+      ]
     },
     {
       "name": "Display Enable",
@@ -401,7 +506,9 @@
       "description": "Enable (restore) the front panel display.",
       "set": true,
       "query": false,
-      "examples": ["DE"]
+      "examples": [
+        "DE"
+      ]
     },
     {
       "name": "Trigger Hold",
@@ -410,7 +517,9 @@
       "description": "Trigger hold: stop taking measurements (hold the current measurement).",
       "set": true,
       "query": false,
-      "examples": ["TR0"]
+      "examples": [
+        "TR0"
+      ]
     },
     {
       "name": "Trigger Immediate",
@@ -419,7 +528,9 @@
       "description": "Trigger immediate: take one measurement immediately (without waiting for the meter to settle) and output the result.",
       "set": true,
       "query": false,
-      "examples": ["TR1"]
+      "examples": [
+        "TR1"
+      ]
     },
     {
       "name": "Trigger with Delay",
@@ -428,7 +539,9 @@
       "description": "Trigger with delay: take one settled measurement (wait for the meter to settle) and output the result.",
       "set": true,
       "query": false,
-      "examples": ["TR2"]
+      "examples": [
+        "TR2"
+      ]
     },
     {
       "name": "Trigger Free Run",
@@ -437,7 +550,9 @@
       "description": "Free-run trigger: continuously take measurements. PRESET/power-up default trigger mode.",
       "set": true,
       "query": false,
-      "examples": ["TR3"]
+      "examples": [
+        "TR3"
+      ]
     },
     {
       "name": "GET response: Trigger Hold/Ignore",
@@ -446,7 +561,9 @@
       "description": "Set the Group Execute Trigger (GET) bus command to be ignored.",
       "set": true,
       "query": false,
-      "examples": ["GT0"]
+      "examples": [
+        "GT0"
+      ]
     },
     {
       "name": "GET response: Trigger Immediate",
@@ -455,7 +572,9 @@
       "description": "Set the meter to respond to the Group Execute Trigger (GET) bus command with Trigger Immediate (TR1).",
       "set": true,
       "query": false,
-      "examples": ["GT1"]
+      "examples": [
+        "GT1"
+      ]
     },
     {
       "name": "GET response: Trigger with Delay",
@@ -464,7 +583,9 @@
       "description": "Set the meter to respond to the Group Execute Trigger (GET) bus command with Trigger with Delay (TR2). PRESET/turn-on default.",
       "set": true,
       "query": false,
-      "examples": ["GT2"]
+      "examples": [
+        "GT2"
+      ]
     },
     {
       "name": "Status Message",
@@ -473,7 +594,9 @@
       "description": "Request the Status Message. After SM and when addressed to talk, the meter sends a string of 23 ASCII characters (followed by CR, LF, EOI) describing its current state. Updated only after a measurement.",
       "set": false,
       "query": true,
-      "examples": ["SM"]
+      "examples": [
+        "SM"
+      ]
     },
     {
       "name": "Clear Status Byte",
@@ -482,7 +605,9 @@
       "description": "Clear the status byte (status bits remain set until the status byte is cleared).",
       "set": true,
       "query": false,
-      "examples": ["CS"]
+      "examples": [
+        "CS"
+      ]
     },
     {
       "name": "Service Request Mask",
@@ -494,11 +619,15 @@
       "parameters": [
         {
           "name": "maskByte",
-          "units": ["8-bit value (sum of enabled bit weights)"],
+          "units": [
+            "8-bit value (sum of enabled bit weights)"
+          ],
           "range": "0 to 255"
         }
       ],
-      "examples": ["@1,4"]
+      "examples": [
+        "@1,4"
+      ]
     },
     {
       "name": "Service Request Mask Value",
@@ -507,7 +636,9 @@
       "description": "Request the Service Request Mask Value. After RV and when addressed to talk, the meter returns 1 byte (EOI) giving the current mask value.",
       "set": false,
       "query": true,
-      "examples": ["RV"]
+      "examples": [
+        "RV"
+      ]
     },
     {
       "name": "Learn Mode #1",
@@ -516,7 +647,9 @@
       "description": "Learn Mode #1: when addressed to talk after LP1, the meter outputs an ASCII string describing its current configuration (see Learn Mode #1 output format).",
       "set": false,
       "query": true,
-      "examples": ["LP1"]
+      "examples": [
+        "LP1"
+      ]
     },
     {
       "name": "Learn Mode #2",
@@ -525,7 +658,9 @@
       "description": "Learn Mode #2: when addressed to talk after LP2, the meter outputs the 2 ASCII characters '@2' followed by 28 8-bit binary bytes (the last byte sent with EOI) describing its configuration. Requires a controller able to transfer binary data; the data can be returned to the meter to restore the configuration.",
       "set": false,
       "query": true,
-      "examples": ["LP2"]
+      "examples": [
+        "LP2"
+      ]
     },
     {
       "name": "Identification",
@@ -534,7 +669,9 @@
       "description": "Identification query. When addressed to talk after ?ID, the meter returns 'HP438A,VERX.XX' (CR/LF, EOI), giving the model number and firmware version.",
       "set": false,
       "query": true,
-      "examples": ["?ID"]
+      "examples": [
+        "?ID"
+      ]
     }
   ]
 }

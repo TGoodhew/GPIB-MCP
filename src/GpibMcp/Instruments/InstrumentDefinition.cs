@@ -83,7 +83,22 @@ namespace GpibMcp.Instruments
         /// <summary>Regex matched (case-insensitively) against the response to confirm the model.</summary>
         [JsonProperty("matchRegex")] public string MatchRegex { get; set; }
 
+        /// <summary>
+        /// Set <c>false</c> for instruments that have NO remote identification query (common on legacy
+        /// HP-IB units). The server then reports identity as unavailable - and skips assignment
+        /// verification with a clear note - instead of guessing or timing out. Null (or true) means
+        /// identification is supported, in which case <see cref="Command"/> must be present.
+        /// </summary>
+        [JsonProperty("supported")] public bool? Supported { get; set; }
+
         [JsonProperty("description")] public string Description { get; set; }
+
+        /// <summary>
+        /// True when this model can be identified over the bus: not explicitly marked unsupported and
+        /// carrying an identification command. False means "do not attempt identity verification".
+        /// </summary>
+        [JsonIgnore]
+        public bool CanIdentify => Supported != false && !string.IsNullOrEmpty(Command);
     }
 
     /// <summary>One documented command/function the instrument supports.</summary>

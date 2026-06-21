@@ -4,8 +4,12 @@
   "category": "Signal Generator",
   "description": "HP 8657B synthesized signal generator (100 kHz to 2060 MHz). Legacy HP-IB (IEEE-488) instrument using two-letter function/units program codes, NOT SCPI. It is listen-only: the Signal Generator cannot talk, so it has no query forms and no identify query. Carrier parameters use a Function-Data-Units sequence (e.g. FR 123.4 MZ); modulation parameters use a Source-Function-Data-Units sequence. Program codes may be upper or lower case. Pulse modulation (PM/PF) and the RF DEAD (R5) feature are available on the 8657B only.",
   "source": "8657B-OCM.pdf",
-  "aliases": ["8657B", "HP8657B", "8657A", "8656B"],
+  "aliases": ["8657B", "HP8657B"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8657B is listen-only (it cannot be addressed to talk) and has no remote identification query, so its identity cannot be read or verified over HP-IB."
+  },
   "commands": [
     {
       "name": "frequency",
