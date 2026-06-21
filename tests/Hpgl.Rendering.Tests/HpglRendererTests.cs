@@ -494,25 +494,27 @@ namespace Hpgl.Rendering.Tests
         }
 
         [Fact]
-        public void Label_CellPitch_IsMonospacedOneAndAHalfEm()
+        public void Label_CellPitch_IsMonospacedAndMatchesKe5fx()
         {
-            // HP-GL character cells are fixed-pitch: every glyph advances by the same cell width,
-            // which is 1.5x the character (em) width - so text reads as monospaced, matching real
-            // HP plotters / KE5FX (regression for the cramped/proportional-looking spacing bug).
-            // Both labels share one render (so the auto-fit transform is identical): a single 'M'
-            // (top band) measures the em width since 'M' fills the full em; ten 'M's (bottom band)
-            // measure nine pitches + one em. Hence pitch = (w10 - w1) / 9.
+            // HP-GL character cells are fixed-pitch: every glyph advances by the same cell width.
+            // The pitch is tuned to the KE5FX 7470 emulator (#29): per-character cell advance is
+            // ~1.25x the character width, and 'M' (which fills the glyph ink em, grid x 0..4) is
+            // ~0.91x the character width - so pitch / 'M'-width = StrokeFont.Advance/4 ~= 1.375.
+            // An earlier 1.5x rendered text too wide so long fields drifted out of alignment.
+            // Both labels share one render (identical auto-fit transform): a single 'M' (top band)
+            // measures the glyph em width; ten 'M's (bottom band) measure nine pitches + one em,
+            // so pitch = (w10 - w1) / 9.
             var opt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
             using (var bmp = HpglRenderer.RenderToBitmap(
                 "IN;SP1;SI0.5,0.5;PU2000,4000;LBM" + Etx + ";PU2000,2000;LBMMMMMMMMMM" + Etx + ";", opt))
             {
                 var bands = RowBands(bmp);
                 Assert.Equal(2, bands.Count);          // the two labels are vertically separated
-                int w1 = bands[0];                     // top band: single 'M' (one em)
+                int w1 = bands[0];                     // top band: single 'M' (one glyph em)
                 int w10 = bands[1];                    // bottom band: ten 'M' (9 pitches + one em)
                 double pitch = (w10 - w1) / 9.0;
                 double ratio = pitch / w1;
-                Assert.InRange(ratio, 1.35, 1.65);     // cell advance ~= 1.5x em
+                Assert.InRange(ratio, 1.28, 1.47);     // pitch / em-ink = Advance/4 ~= 1.375
             }
         }
 

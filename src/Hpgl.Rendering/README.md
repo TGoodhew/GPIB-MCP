@@ -82,12 +82,13 @@ metric-matched **single-stroke ("Hershey"-style) font** for ASCII Set 0
 approximation, so label text will not match a real plotter (or another renderer)
 glyph-for-glyph.
 
-The font is **fixed-pitch (monospaced)**, like a real HP plotter: each glyph is a
-4-unit ink **em** inside a 6-unit **cell**, so the cursor advance per character is
-`1.5 ×` the HP-GL character width (`SI`/`SR`) and adjacent glyphs are separated by
-uniform inter-character whitespace (#29). This matches the KE5FX reference; the earlier
-mapping treated the character width as the whole cell, which made text render ~1.5× too
-narrow and read as cramped/proportional.
+The font is **fixed-pitch (monospaced)**, like a real HP plotter: every glyph advances by
+the same cell. The cell metrics are tuned to the KE5FX reference rendering the same 8563E
+capture (#29): the per-character pitch is `~1.25 ×` the HP-GL character width (`SI`/`SR`)
+and the glyph ink fills `~0.73` of that pitch, leaving a small uniform inter-character gap.
+This keeps long fields (e.g. `460.000kHz`) aligned with KE5FX. (Earlier revisions mis-set
+this: first the character width was treated as the whole cell — text too narrow and
+cramped; then the pitch was `1.5 ×` — text too wide, so fields drifted out of alignment.)
 
 ### Parsed and ignored (not a renderer's job)
 

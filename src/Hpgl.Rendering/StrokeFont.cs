@@ -10,12 +10,16 @@
 // direction, rotation, clipping, pen colour and line type uniformly with all other
 // geometry (instead of falling back to a host system font).
 //
-// Grid: x 0..Em rightward, y 0 (baseline) .. Cap (capital height) upward;
-// lowercase x-height ~4, descenders to -2. A glyph's drawn ink width is Em units;
-// the cell advance is the wider Advance, so the glyph sits inside the cell with
-// inter-character whitespace (gap = Advance-Em). The current HP-GL character WIDTH
-// (SI/SR) maps to the glyph ink width Em - so the cell advance works out to
-// Advance/Em (= 1.5x) the character width, matching real HP plotters / KE5FX.
+// Grid: x 0..4 rightward (glyph ink), y 0 (baseline) .. Cap (capital height) upward;
+// lowercase x-height ~4, descenders to -2.
+//
+// Cell metrics are matched to the KE5FX 7470 emulator's labels (#29). The HP-GL character
+// WIDTH (SI/SR) maps to Em grid units, and the 4-unit glyph ink therefore fills 4/Em (~0.8)
+// of the character width. The cursor advances one Advance-wide cell per character, so the
+// fixed (monospaced) pitch is Advance/Em (~1.1x) the character width - leaving a small,
+// uniform inter-character gap. Measured against KE5FX rendering the same 8563E capture,
+// this reproduces its per-character pitch (so long fields like "460.000kHz" stay aligned)
+// and its glyph weight; an earlier 1.5x pitch rendered text too wide and drifted.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;
@@ -28,12 +32,13 @@ namespace Hpgl.Rendering
         /// <summary>Capital height in grid units (maps to the current character height).</summary>
         public const int Cap = 6;
 
-        /// <summary>Glyph ink em-width in grid units (maps to the current HP-GL character width).</summary>
-        public const int Em = 4;
+        /// <summary>Grid units that map to one HP-GL character width (SI/SR). The 4-unit-wide
+        /// glyph ink fills 4/Em (~0.73) of the character width, matching KE5FX glyph weight.</summary>
+        public const double Em = 4.4;
 
-        /// <summary>Cell advance in grid units. Wider than <see cref="Em"/> so adjacent glyphs
-        /// are separated by uniform inter-character whitespace (fixed-pitch / monospaced cells).</summary>
-        public const int Advance = 6;
+        /// <summary>Cell advance in grid units; the fixed monospaced pitch is Advance/Em (~1.25x)
+        /// the character width, leaving a small uniform inter-character gap (matched to KE5FX).</summary>
+        public const double Advance = 5.5;
 
         /// <summary>Returns the glyph as a list of pen-down polylines (grid units), or null if undrawn.</summary>
         public static int[][] Get(char c)
