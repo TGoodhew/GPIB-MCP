@@ -270,7 +270,8 @@ namespace GpibMcp.Instruments
         /// <summary>
         /// Captures an HP-GL plot from an instrument via plotter emulation: sends the pre-roll and
         /// plot command, answers the OS handshake, and collects the HP-GL the instrument streams.
-        /// Always device-clears and returns the instrument to local afterward, leaving the bus usable.
+        /// Restores session state and returns the instrument to local afterward. Deliberately does NOT
+        /// device-clear: on 8560-series analyzers a GPIB device clear also presets the instrument.
         /// </summary>
         public CaptureResult CaptureScreen(string resource, string preRoll, string plotCommand,
                                            CaptureOptions options = null)
@@ -312,9 +313,12 @@ namespace GpibMcp.Instruments
                     }
                     catch (Exception ex) { Log.Warn("Capture: restoring session state failed: " + ex.Message); }
 
-                    try { session.Clear(); }
-                    catch (Exception ex) { Log.Warn("Capture: device clear failed: " + ex.Message); }
-
+                    // Do NOT device-clear here. On HP 8560-series analyzers (incl. the 8563E) a GPIB
+                    // device clear (DCL/SDC) ALSO executes an INSTRUMENT PRESET - "CLEAR flushes out the
+                    // output-data and input-data buffers; however, it also executes an instrument preset"
+                    // (8560E Programming Guide, "Clearing the Buffers"). Clearing after every capture was
+                    // wiping the user's setup (center freq / span / ref level). The plot read completes on
+                    // pen-up, so no clear is needed to leave the bus usable - just return the box to local.
                     ReturnToLocal(session);
                 }
             }
