@@ -89,13 +89,13 @@ namespace Hpgl.Rendering
             Execute(instructions, measure);
 
             var sb = new StringBuilder();
-            // Explicit width/height so the SVG renders (a percentage width with no height collapses to
-            // zero height -> blank), plus CSS max-width:100%;height:auto so it scales DOWN to fit its
-            // container (e.g. an artifact panel) instead of overflowing and being clipped on the right.
-            sb.Append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").Append(options.Width)
-              .Append("\" height=\"").Append(options.Height)
-              .Append("\" viewBox=\"0 0 ").Append(options.Width).Append(' ').Append(options.Height)
-              .Append("\" style=\"max-width:100%;height:auto\">\n");
+            // Pure responsive root: a viewBox (the coordinate system) + preserveAspectRatio, and NO fixed
+            // pixel width/height and NO CSS. The SVG has no intrinsic size, so a viewer scales the whole
+            // viewBox to fit its container (e.g. an artifact panel) - there is no declared "1024" for it to
+            // resize/clip to at the end. (Avoid width="100%" with no height: that collapses to zero height.)
+            sb.Append("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ")
+              .Append(options.Width).Append(' ').Append(options.Height)
+              .Append("\">\n");   // preserveAspectRatio defaults to "xMidYMid meet" - scale-to-fit, centered
             sb.Append("<rect width=\"").Append(options.Width).Append("\" height=\"").Append(options.Height)
               .Append("\" fill=\"").Append(SvgSink.ToHex(options.ResolveBackground())).Append("\"/>\n");
 

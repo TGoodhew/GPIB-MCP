@@ -115,8 +115,8 @@ namespace Hpgl.Rendering.Tests
 
             Assert.StartsWith("<svg", svg);
             Assert.EndsWith("</svg>", svg);
-            Assert.Contains("width=\"800\"", svg);
-            Assert.Contains("viewBox=\"0 0 800 600\"", svg);
+            Assert.Contains("viewBox=\"0 0 800 600\"", svg);     // responsive: viewBox only, no fixed svg size
+            Assert.DoesNotContain("<svg xmlns=\"http://www.w3.org/2000/svg\" width=", svg); // svg tag carries no intrinsic px size
             Assert.Contains("<path", svg);          // border/trace vectors + label strokes
 
             // Labels are drawn as vector strokes (a single-stroke font), not <text>, so the same
