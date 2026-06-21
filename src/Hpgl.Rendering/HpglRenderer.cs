@@ -1282,7 +1282,9 @@ namespace Hpgl.Rendering
         {
             Flush();   // close any pending stroke path so the text paints over the geometry
             int px = R(_t.MapX(ox)), py = R(_t.MapY(oy));
-            int size = (int)Math.Max(6.0, capUnits * _t.Scale);
+            // SVG font-size is the em (cap height is ~0.7 of it), so the cap-height value alone renders
+            // too small; scale it up so the text reads at roughly the intended label size.
+            int size = (int)Math.Max(12.0, capUnits * _t.Scale * 2.0);
             _sb.Append("<text x=\"").Append(px).Append("\" y=\"").Append(py)
                .Append("\" fill=\"").Append(ToHex(_opt.ResolvePen(pen)))
                .Append("\" font-family=\"monospace\" font-size=\"").Append(size).Append("px\">")
