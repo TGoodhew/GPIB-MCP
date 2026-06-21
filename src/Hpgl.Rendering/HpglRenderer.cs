@@ -222,7 +222,7 @@ namespace Hpgl.Rendering
         {
             if (string.IsNullOrEmpty(text)) return;
             double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
-            double sx = s.CharWidthUnits / StrokeFont.Advance;
+            double sx = s.CharWidthUnits / StrokeFont.Em;
             double sy = s.CharHeightUnits / StrokeFont.Cap;
             double ox = s.X, oy = s.Y, cursorX = 0, lineY = 0;
             double adv = s.AdvanceXUnits, lineStep = s.LineAdvanceUnits;
@@ -263,9 +263,9 @@ namespace Hpgl.Rendering
             int[][] glyph = StrokeFont.Get((char)chCode);
             if (glyph == null) return;
             double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
-            double sx = s.CharWidthUnits / StrokeFont.Advance;
+            double sx = s.CharWidthUnits / StrokeFont.Em;
             double sy = s.CharHeightUnits / StrokeFont.Cap;
-            const double cgx = 2, cgy = 3; // approximate glyph centre in grid units
+            const double cgx = 2, cgy = 3; // approximate glyph centre in grid units (Em/2, Cap/2)
 
             foreach (var stroke in glyph)
                 for (int k = 0; k + 3 < stroke.Length; k += 2)
@@ -729,8 +729,12 @@ namespace Hpgl.Rendering
         public double FrameWidth => Math.Abs(_ipX2 - _ipX1);
         public double FrameHeight => Math.Abs(_ipY2 - _ipY1);
 
-        /// <summary>Per-character cursor advance (plot units), including ES extra space; signed for mirroring.</summary>
-        public double AdvanceXUnits => CharWidthUnits * (1 + ExtraSpaceX);
+        /// <summary>Per-character cursor advance (plot units), including ES extra space; signed for mirroring.
+        /// The fixed cell is <see cref="StrokeFont.Advance"/> grid units wide while the character width
+        /// maps to the glyph em (<see cref="StrokeFont.Em"/>), so the pitch is Advance/Em (1.5x) the
+        /// character width - giving uniform monospaced cells like real HP plotters / KE5FX.</summary>
+        public double AdvanceXUnits =>
+            CharWidthUnits * StrokeFont.Advance / StrokeFont.Em * (1 + ExtraSpaceX);
 
         /// <summary>Per-line advance (plot units): one cell height (= 2x char height) plus ES extra line space.</summary>
         public double LineAdvanceUnits => 2 * Math.Abs(CharHeightUnits) * (1 + ExtraSpaceY);

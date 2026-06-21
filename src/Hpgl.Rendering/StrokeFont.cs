@@ -10,9 +10,12 @@
 // direction, rotation, clipping, pen colour and line type uniformly with all other
 // geometry (instead of falling back to a host system font).
 //
-// Grid: x 0..(Advance) rightward, y 0 (baseline) .. Cap (capital height) upward;
-// lowercase x-height ~4, descenders to -2. A glyph's drawn width is <= ~4 units so
-// it sits inside the cell with inter-character spacing; the cell advance is Advance.
+// Grid: x 0..Em rightward, y 0 (baseline) .. Cap (capital height) upward;
+// lowercase x-height ~4, descenders to -2. A glyph's drawn ink width is Em units;
+// the cell advance is the wider Advance, so the glyph sits inside the cell with
+// inter-character whitespace (gap = Advance-Em). The current HP-GL character WIDTH
+// (SI/SR) maps to the glyph ink width Em - so the cell advance works out to
+// Advance/Em (= 1.5x) the character width, matching real HP plotters / KE5FX.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;
@@ -25,7 +28,11 @@ namespace Hpgl.Rendering
         /// <summary>Capital height in grid units (maps to the current character height).</summary>
         public const int Cap = 6;
 
-        /// <summary>Cell advance in grid units (maps to the current character width).</summary>
+        /// <summary>Glyph ink em-width in grid units (maps to the current HP-GL character width).</summary>
+        public const int Em = 4;
+
+        /// <summary>Cell advance in grid units. Wider than <see cref="Em"/> so adjacent glyphs
+        /// are separated by uniform inter-character whitespace (fixed-pitch / monospaced cells).</summary>
         public const int Advance = 6;
 
         /// <summary>Returns the glyph as a list of pen-down polylines (grid units), or null if undrawn.</summary>

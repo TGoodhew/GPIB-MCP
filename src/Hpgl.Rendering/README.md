@@ -82,6 +82,13 @@ metric-matched **single-stroke ("Hershey"-style) font** for ASCII Set 0
 approximation, so label text will not match a real plotter (or another renderer)
 glyph-for-glyph.
 
+The font is **fixed-pitch (monospaced)**, like a real HP plotter: each glyph is a
+4-unit ink **em** inside a 6-unit **cell**, so the cursor advance per character is
+`1.5 ×` the HP-GL character width (`SI`/`SR`) and adjacent glyphs are separated by
+uniform inter-character whitespace (#29). This matches the KE5FX reference; the earlier
+mapping treated the character width as the whole cell, which made text render ~1.5× too
+narrow and read as cramped/proportional.
+
 ### Parsed and ignored (not a renderer's job)
 
 The interactive / live-bus instructions return data to the controller or drive hardware and

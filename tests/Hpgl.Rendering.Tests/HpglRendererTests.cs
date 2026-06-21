@@ -494,6 +494,48 @@ namespace Hpgl.Rendering.Tests
         }
 
         [Fact]
+        public void Label_CellPitch_IsMonospacedOneAndAHalfEm()
+        {
+            // HP-GL character cells are fixed-pitch: every glyph advances by the same cell width,
+            // which is 1.5x the character (em) width - so text reads as monospaced, matching real
+            // HP plotters / KE5FX (regression for the cramped/proportional-looking spacing bug).
+            // Both labels share one render (so the auto-fit transform is identical): a single 'M'
+            // (top band) measures the em width since 'M' fills the full em; ten 'M's (bottom band)
+            // measure nine pitches + one em. Hence pitch = (w10 - w1) / 9.
+            var opt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(
+                "IN;SP1;SI0.5,0.5;PU2000,4000;LBM" + Etx + ";PU2000,2000;LBMMMMMMMMMM" + Etx + ";", opt))
+            {
+                var bands = RowBands(bmp);
+                Assert.Equal(2, bands.Count);          // the two labels are vertically separated
+                int w1 = bands[0];                     // top band: single 'M' (one em)
+                int w10 = bands[1];                    // bottom band: ten 'M' (9 pitches + one em)
+                double pitch = (w10 - w1) / 9.0;
+                double ratio = pitch / w1;
+                Assert.InRange(ratio, 1.35, 1.65);     // cell advance ~= 1.5x em
+            }
+        }
+
+        /// <summary>Widths (px) of each contiguous band of non-black rows, top to bottom.</summary>
+        private static System.Collections.Generic.List<int> RowBands(Bitmap bmp)
+        {
+            var widths = new System.Collections.Generic.List<int>();
+            int black = Color.Black.ToArgb();
+            int minX = int.MaxValue, maxX = -1; bool inBand = false;
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                int rMin = int.MaxValue, rMax = -1;
+                for (int x = 0; x < bmp.Width; x++)
+                    if (bmp.GetPixel(x, y).ToArgb() != black) { if (x < rMin) rMin = x; if (x > rMax) rMax = x; }
+                bool rowHasInk = rMax >= 0;
+                if (rowHasInk) { inBand = true; if (rMin < minX) minX = rMin; if (rMax > maxX) maxX = rMax; }
+                else if (inBand) { widths.Add(maxX - minX + 1); minX = int.MaxValue; maxX = -1; inBand = false; }
+            }
+            if (inBand) widths.Add(maxX - minX + 1);
+            return widths;
+        }
+
+        [Fact]
         public void Label_Slant_SL_ChangesRendering()
         {
             string upright = HpglRenderer.RenderToSvg("IN;SP1;PU100,100;LBN" + Etx + ";");
