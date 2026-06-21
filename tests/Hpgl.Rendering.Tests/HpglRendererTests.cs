@@ -353,6 +353,76 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
+        // ---- ticks (issue #8 §3.5: TL/XT/YT) -------------------------------
+
+        [Fact]
+        public void Ticks_XT_YT_DrawTwoCrossedSegments()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;TL2,2;PA5000,5000;XT;YT;");
+            Assert.Equal(2, Polylines(svg));   // one vertical + one horizontal tick
+            Assert.Equal(4, Vertices(svg));    // two endpoints each
+        }
+
+        // ---- user-defined fill (issue #8 §4.2: UF) -------------------------
+
+        [Fact]
+        public void UserFill_UF_VariableSpacingHatch_StillFillsAsSpans()
+        {
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA1000,1000;UF150,400,150;FT3;RA9000,9000;");
+            Assert.DoesNotContain("<polygon", svg);            // hatch, not solid
+            Assert.True(Polylines(svg) > 3, "UF hatch should still emit spans; got " + Polylines(svg));
+        }
+
+        // ---- HP-GL/2 encoded polyline (issue #8 §12: PE) -------------------
+
+        // Encodes deltas the same way the decoder reads them (zig-zag, base-64, terminal high digit).
+        private static string PeEncode(params (double dx, double dy)[] deltas)
+        {
+            var sb = new System.Text.StringBuilder("PE");
+            foreach (var (dx, dy) in deltas) { sb.Append(PeVal(dx)); sb.Append(PeVal(dy)); }
+            return sb.Append(';').ToString();
+        }
+        private static string PeVal(double v)
+        {
+            long zig = v < 0 ? ((long)(-v) << 1) | 1 : (long)v << 1;
+            var sb = new System.Text.StringBuilder();
+            while (zig >= 64) { sb.Append((char)(63 + (int)(zig & 63))); zig >>= 6; }
+            return sb.Append((char)(63 + 64 + (int)zig)).ToString(); // terminal char
+        }
+
+        [Fact]
+        public void EncodedPolyline_PE_DecodesRelativeMovesIntoAConnectedLine()
+        {
+            // A right-then-up step from the origin: two connected pen-down segments => one polyline.
+            string pe = PeEncode((4000, 0), (0, 4000));
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA1000,1000;" + pe);
+            Assert.Equal(1, Polylines(svg));
+            Assert.Equal(3, Vertices(svg)); // start + 2 steps
+        }
+
+        [Fact]
+        public void EncodedPolyline_PE_HandlesNegativeDeltas()
+        {
+            string pe = PeEncode((4000, 0), (-2000, 3000));
+            string svg = HpglRenderer.RenderToSvg("IN;SP1;PA5000,1000;" + pe);
+            Assert.Contains("<polyline", svg);
+            Assert.Equal(3, Vertices(svg));
+        }
+
+        // ---- graceful handling of non-geometry / interactive commands ------
+
+        [Fact]
+        public void InteractiveAndEscapeCommands_AreIgnored_GeometryStillRenders()
+        {
+            // Status-output (OS/OE/OA/OI), digitize (DC), pen dynamics (VS), page (PG), and an
+            // ESC device-control sequence are interleaved with a real vector - none should break it.
+            string hpgl = "IN;SP1;OS;OE;OA;OI;VS10;DC;.(;PU0,0;PD9000,0;.);PG;";
+            string svg = HpglRenderer.RenderToSvg(hpgl);
+            Assert.Contains("<polyline", svg);     // the PD vector survived
+            int polylines = svg.Split(new[] { "<polyline" }, System.StringSplitOptions.None).Length - 1;
+            Assert.Equal(1, polylines);            // and nothing spurious was drawn
+        }
+
         [Fact]
         public void Geometry_RendersToBitmapWithoutThrowing()
         {

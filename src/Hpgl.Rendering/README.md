@@ -53,10 +53,14 @@ and `docs/HPGL-CharacterSet-Font-Reference.md`):
 - **Curves & rectangles:** `CI` (circle), `AA` / `AR` (arcs), `EW` (edge wedge),
   `EA` / `ER` (edge rectangles) — chord-subdivided to the `CT`/chord parameter.
 - **Area fill:** `RA` / `RR` (fill rectangles), `WG` (fill wedge), `FT` (fill type:
-  solid, parallel hatch, cross-hatch), `PT` (pen thickness). Solid fills use a native
-  polygon fill; hatch/cross are emitted as scanline line-spans.
+  solid, parallel hatch, cross-hatch), `PT` (pen thickness), `UF` (user-defined
+  variable-spacing hatch). Solid fills use a native polygon fill; hatch/cross are
+  emitted as scanline line-spans.
 - **7550A polygons:** `PM` / `EP` / `FP` with even-odd multi-contour fill (holes).
-- **Line types:** `LT` rendered as dash/dot patterns (4 % of the diagonal by default).
+- **Line types & ticks:** `LT` rendered as dash/dot patterns (4 % of the diagonal by
+  default); `TL` / `XT` / `YT` tick marks.
+- **Encoded polylines:** `PE` (HP-GL/2 base-64/32 relative-coordinate decoding, incl.
+  the `7` / `&lt;` / `=` / `&gt;` / `:` flags) — newer instruments only.
 - **Labels / text** (drawn from a built-in single-stroke vector font, so text honours
   size, slant, direction, rotation, clipping, pen colour and line type): `LB`, `DT`
   (terminator), `SI` / `SR` (absolute/relative size, incl. mirroring via negative size),
@@ -78,11 +82,19 @@ metric-matched **single-stroke ("Hershey"-style) font** for ASCII Set 0
 approximation, so label text will not match a real plotter (or another renderer)
 glyph-for-glyph.
 
+### Parsed and ignored (not a renderer's job)
+
+The interactive / live-bus instructions return data to the controller or drive hardware and
+produce **no geometry**, so they are parsed and skipped (a stream containing them still
+renders): the output / digitize set (`OA`/`OC`/`OH`/`OI`/`OS`/`OW`/`OE`…, `DC`/`DP`),
+`ESC .` device-control escapes, pen dynamics (`VS`/`FS`/`AS`/`AP`/`CV`), and page / replot /
+memory (`PG`/`AF`/`AH`/`RP`/`WD`/`GM`/`KY`). A *faithful interactive emulator* (answering
+`OE`/`OS`, an error register, exact per-model numeric ranges) would be a separate effort.
+
 ### Not yet supported (see issues)
 
 `UC` user-defined characters and `DL` downloadable glyphs; the 7550A slot/encoding model
 (`DS`/`IV`/`CM`, 7/8-bit + ISO, linked Roman8/Katakana8 sets) and non-ASCII international
-sets; buffered labels (`BL`/`PB`/`OL`); encoded polylines (`PE`); the output/digitize
-instructions (`OA`/`OC`/`OH`/`OI`/`OS`/`OW`…) and `ESC .` device control; page/replot
-(`PG`/`AF`/`AH`/`RP`); and PCL raster. A cross-platform backend (ImageSharp/SkiaSharp) to
-drop the `System.Drawing`/net472 coupling is also tracked as future work.
+sets; buffered labels (`BL`/`PB`/`OL`); and PCL raster. A cross-platform backend
+(ImageSharp/SkiaSharp) to drop the `System.Drawing`/net472 coupling is also tracked as
+future work (#9).

@@ -12,9 +12,12 @@
 // (soft-clip), SP, PU/PD/PA/PR, arcs/circles/wedges (CI/AA/AR/EW) and edge
 // rectangles (EA/ER) via chord subdivision, line types (LT) as dash patterns,
 // area fill (RA/RR/WG, FT/PT) - solid via polygon fill, hatch as line spans -
-// 7550A polygons (PM/EP/FP) with even-odd multi-contour fill, and the full
-// label/text subsystem (LB/DT/SI/SR/SL/DI/DR/CP/ES/SM, CR/LF, mirroring,
-// CS/CA/SS/SA + shift-in/out) drawn from a built-in single-stroke vector font.
+// 7550A polygons (PM/EP/FP) with even-odd multi-contour fill, ticks (TL/XT/YT),
+// user-defined fill (UF), HP-GL/2 encoded polylines (PE), and the full label/text
+// subsystem (LB/DT/SI/SR/SL/DI/DR/CP/ES/SM, CR/LF, mirroring, CS/CA/SS/SA +
+// shift-in/out) drawn from a built-in single-stroke vector font. Device-control
+// escapes and live-bus status/output commands (OA/OE/DC/…) are parsed and ignored:
+// they return data over GPIB and produce no geometry, so they are not a renderer's job.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -172,6 +175,16 @@ namespace Hpgl.Rendering
                     case "RA": FillRect(state, instruction.Parameters, geom, relative: false); break;
                     case "RR": FillRect(state, instruction.Parameters, geom, relative: true); break;
                     case "WG": FillWedge(state, instruction.Parameters, geom); break;
+                    case "UF": state.SetUserFill(instruction.Parameters); break;
+                    // ---- ticks (TL/XT/YT) ----
+                    case "TL": state.SetTickLength(instruction.Parameters); break;
+                    case "XT": Tick(state, geom, vertical: true); break;
+                    case "YT": Tick(state, geom, vertical: false); break;
+                    // ---- HP-GL/2 encoded polyline ----
+                    case "PE": EncodedPolyline(state, instruction.Text, geom); break;
+                    // Everything else (OA/OC/OE/OS/… status-output, DC/DP digitize, VS/FS/AS/AP/CV pen
+                    // dynamics, PG/RP/WD/KY/GM page+memory, BL/PB/OL buffered labels, UC user chars) is
+                    // a live-bus / non-geometry concern - parsed and ignored so the stream still renders.
                 }
             }
         }
@@ -453,8 +466,8 @@ namespace Hpgl.Rendering
             {
                 double spacing = s.FillSpacingUnits > 0 ? s.FillSpacingUnits : 0.01 * s.FrameDiagonal;
                 if (spacing <= 0) spacing = 1;
-                EmitHatch(sink, contours, s.FillAngleDeg, spacing, s.Pen);
-                if (s.FillType == 4) EmitHatch(sink, contours, s.FillAngleDeg + 90, spacing, s.Pen);
+                EmitHatch(sink, contours, s.FillAngleDeg, spacing, s.Pen, s.UserFillGaps);
+                if (s.FillType == 4) EmitHatch(sink, contours, s.FillAngleDeg + 90, spacing, s.Pen, s.UserFillGaps);
             }
             else
             {
@@ -474,7 +487,7 @@ namespace Hpgl.Rendering
         /// emitted as Line spans. Rotates into a frame where hatch lines are horizontal, scans, rotates back.
         /// </summary>
         private static void EmitHatch(IPlotSink sink, IReadOnlyList<PointD[]> contours,
-            double angleDeg, double spacing, int pen)
+            double angleDeg, double spacing, int pen, double[] gaps = null)
         {
             if (spacing <= 0) return;
             double ca = Math.Cos(-angleDeg * DegToRad), sa = Math.Sin(-angleDeg * DegToRad);
@@ -498,9 +511,11 @@ namespace Hpgl.Rendering
 
             double back = angleDeg * DegToRad;
             double cb = Math.Cos(back), sb = Math.Sin(back);
+            bool variable = gaps != null && gaps.Length > 0;
             var crossings = new List<double>();
-            int guard = 0;
-            for (double yy = minY + spacing / 2.0; yy < maxY && guard < 200000; yy += spacing, guard++)
+            int guard = 0, gi = 0;
+            for (double yy = minY + spacing / 2.0; yy < maxY && guard < 200000;
+                 yy += (variable ? gaps[gi++ % gaps.Length] : spacing), guard++)
             {
                 crossings.Clear();
                 foreach (var rc in rot)
@@ -525,6 +540,85 @@ namespace Hpgl.Rendering
                               xb * cb - yy * sb, xb * sb + yy * cb, pen);
                 }
             }
+        }
+
+        // ---- ticks (TL/XT/YT) -----------------------------------------------
+
+        /// <summary>
+        /// XT/YT: draw a tick at the current position. XT (vertical) extends along Y by the tick
+        /// fractions of the frame height; YT (horizontal) along X by the frame width. Honours RO.
+        /// </summary>
+        private static void Tick(PlotterState s, IPlotSink sink, bool vertical)
+        {
+            double range = vertical ? s.FrameHeight : s.FrameWidth;
+            double pos = s.TickPosFrac * range, neg = s.TickNegFrac * range;
+            double dxP = vertical ? 0 : pos, dyP = vertical ? pos : 0;
+            double dxN = vertical ? 0 : -neg, dyN = vertical ? -neg : 0;
+            s.RotateVector(ref dxP, ref dyP);
+            s.RotateVector(ref dxN, ref dyN);
+            sink.Line(s.X + dxN, s.Y + dyN, s.X + dxP, s.Y + dyP, s.Pen);
+        }
+
+        // ---- HP-GL/2 encoded polyline (PE) ----------------------------------
+
+        /// <summary>
+        /// PE: decode an HP-GL/2 encoded polyline (relative, base-64 by default) into pen moves.
+        /// Handles the flag chars: '7' (7-bit/base-32), '&lt;' (pen-up next), '=' (absolute next),
+        /// '&gt;' (fractional bits), ':' (select pen). Optional - emitted by HP-GL/2 instruments newer
+        /// than the 7475A/7550A; older captures never contain it.
+        /// </summary>
+        private static void EncodedPolyline(PlotterState s, string payload, IPlotSink sink)
+        {
+            if (string.IsNullOrEmpty(payload)) return;
+            int i = 0, n = payload.Length;
+            int bits = 6;            // base-64 (8-bit) default; '7' switches to base-32 (5-bit)
+            double frac = 1;         // '>' sets a fractional divisor
+            bool penUp = false, absNext = false;
+
+            while (i < n)
+            {
+                char c = payload[i];
+                if (c == '7') { bits = 5; i++; continue; }
+                if (c == '<') { penUp = true; i++; continue; }
+                if (c == '=') { absNext = true; i++; continue; }
+                if (c == '>') { i++; double fb; if (ReadPeValue(payload, ref i, bits, out fb)) frac = Math.Pow(2, fb); continue; }
+                if (c == ':') { i++; double pen; if (ReadPeValue(payload, ref i, bits, out pen)) s.Pen = (int)pen; continue; }
+                if (c < '?') { i++; continue; } // not a data char (e.g. stray separator)
+
+                double dx, dy;
+                if (!ReadPeValue(payload, ref i, bits, out dx)) break;
+                if (!ReadPeValue(payload, ref i, bits, out dy)) break;
+                dx /= frac; dy /= frac;
+
+                double nx = absNext ? dx : s.X + dx;
+                double ny = absNext ? dy : s.Y + dy;
+                if (!penUp) sink.Line(s.X, s.Y, nx, ny, s.Pen);
+                s.X = nx; s.Y = ny;
+                penUp = false; absNext = false;
+            }
+        }
+
+        /// <summary>Reads one PE-encoded value (zig-zag signed, little-endian base-2^bits, terminal char carries the high digit).</summary>
+        private static bool ReadPeValue(string text, ref int i, int bits, out double value)
+        {
+            value = 0;
+            long acc = 0; int shift = 0; int baseN = 1 << bits;
+            while (i < text.Length)
+            {
+                char ch = text[i];
+                if (ch < '?') return false;       // not a data character
+                i++;
+                int d = ch - 63;
+                if (d >= baseN)                   // terminal character
+                {
+                    acc += (long)(d - baseN) << shift;
+                    value = (acc & 1) != 0 ? -(acc >> 1) : (acc >> 1);
+                    return true;
+                }
+                acc += (long)d << shift;
+                shift += bits;
+            }
+            return false;
         }
     }
 
@@ -580,6 +674,11 @@ namespace Hpgl.Rendering
         public double FillSpacingUnits = 0;  // 0 => default (1% of the P1-P2 diagonal)
         public double FillAngleDeg = 0;
         public double PenThicknessMm = 0.3;
+        public double[] UserFillGaps;        // UF gap sequence (plot units) for variable-spacing hatch
+
+        // Tick length (TL): positive/negative tick as a fraction of the P1-P2 range (default 0.5%).
+        public double TickPosFrac = 0.005;
+        public double TickNegFrac = 0.005;
 
         public void Reset()
         {
@@ -594,7 +693,27 @@ namespace Hpgl.Rendering
             SymbolChar = -1;
             ChordAngleDeg = 5.0;
             FillType = 1; FillSpacingUnits = 0; FillAngleDeg = 0; PenThicknessMm = 0.3;
+            UserFillGaps = null;
+            TickPosFrac = 0.005; TickNegFrac = 0.005;
             Polygon = null;
+        }
+
+        /// <summary>TL tp[,tn]: tick lengths as a percentage of the P1-P2 range (default 0.5%).</summary>
+        public void SetTickLength(IReadOnlyList<double> p)
+        {
+            if (p.Count == 0) { TickPosFrac = TickNegFrac = 0.005; return; }
+            TickPosFrac = p[0] / 100.0;
+            TickNegFrac = p.Count >= 2 ? p[1] / 100.0 : p[0] / 100.0;
+        }
+
+        /// <summary>UF gap1[,gap2…]: custom hatch gap sequence (current units) used by fill; UF; clears it.</summary>
+        public void SetUserFill(IReadOnlyList<double> p)
+        {
+            if (p.Count == 0) { UserFillGaps = null; return; }
+            double s = Math.Max(ScaleX, ScaleY);
+            var gaps = new List<double>();
+            foreach (var g in p) if (g > 0) gaps.Add(g * s);
+            UserFillGaps = gaps.Count > 0 ? gaps.ToArray() : null;
         }
 
         /// <summary>Diagonal of the P1-P2 (IP) frame in plot units - the basis for default hatch spacing.</summary>
