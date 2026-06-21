@@ -35,10 +35,12 @@ namespace HpglViewer
             new HpglRenderOptions { Width = 1280, Height = 960, Background = HpglBackground.White };
         private string _currentPath;
         private readonly string _hp2xxExe;
+        private string _referencePath;   // when set, the right pane shows this image instead of running hp2xx
 
-        public MainForm(string initialPath)
+        public MainForm(string initialPath, string referencePath = null)
         {
-            Text = "HpglViewer - ours vs hp2xx";
+            _referencePath = referencePath;
+            Text = "HpglViewer - comparison";
             Width = 1500;
             Height = 820;
             StartPosition = FormStartPosition.CenterScreen;
@@ -53,8 +55,9 @@ namespace HpglViewer
             };
 
             split.Panel1.Controls.Add(BuildPane(out _ours, out _oursTitle, "Hpgl.Rendering (ours)"));
-            split.Panel2.Controls.Add(BuildPane(out _reference, out _refTitle,
-                _hp2xxExe != null ? "hp2xx (reference)" : "hp2xx (not found - File > Open reference image…)"));
+            string rightTitle = _referencePath != null ? "reference: " + Path.GetFileName(_referencePath)
+                : _hp2xxExe != null ? "hp2xx (reference)" : "hp2xx (not found - File > Open reference image…)";
+            split.Panel2.Controls.Add(BuildPane(out _reference, out _refTitle, rightTitle));
 
             var status = new StatusStrip();
             _status = new ToolStripStatusLabel("Ready");
@@ -163,8 +166,8 @@ namespace HpglViewer
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    SetImage(_reference, LoadImageUnlocked(dlg.FileName));
-                    _refTitle.Text = "reference: " + Path.GetFileName(dlg.FileName);
+                    _referencePath = dlg.FileName;   // pin it - takes precedence over hp2xx
+                    LoadReferenceImage();
                 }
             }
         }
@@ -188,8 +191,25 @@ namespace HpglViewer
                 _status.Text = "Our render failed: " + ex.Message;
             }
 
-            // Right: hp2xx, if available.
-            RenderReferenceWithHp2xx(path);
+            // Right: a pinned reference image if set, otherwise hp2xx run live.
+            if (_referencePath != null) LoadReferenceImage();
+            else RenderReferenceWithHp2xx(path);
+        }
+
+        private void LoadReferenceImage()
+        {
+            try
+            {
+                SetImage(_reference, _referencePath != null && File.Exists(_referencePath)
+                    ? LoadImageUnlocked(_referencePath) : null);
+                _refTitle.Text = _referencePath != null
+                    ? "reference: " + Path.GetFileName(_referencePath) : "(no reference)";
+            }
+            catch (Exception ex)
+            {
+                SetImage(_reference, null);
+                _refTitle.Text = "reference load failed: " + ex.Message;
+            }
         }
 
         private void RenderReferenceWithHp2xx(string path)

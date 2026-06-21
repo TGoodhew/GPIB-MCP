@@ -38,9 +38,11 @@ namespace HpglViewer
                 return 0;
             }
 
+            string referencePath = GetOption(args, "--reference"); // pin a right-pane image (instead of hp2xx)
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm(path));
+            Application.Run(new MainForm(path, referencePath));
             return 0;
         }
 
