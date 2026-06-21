@@ -104,6 +104,7 @@ memory (`PG`/`AF`/`AH`/`RP`/`WD`/`GM`/`KY`). A *faithful interactive emulator* (
 
 `UC` user-defined characters and `DL` downloadable glyphs; the 7550A slot/encoding model
 (`DS`/`IV`/`CM`, 7/8-bit + ISO, linked Roman8/Katakana8 sets) and non-ASCII international
-sets; buffered labels (`BL`/`PB`/`OL`); and PCL raster. A cross-platform backend
-(ImageSharp/SkiaSharp) to drop the `System.Drawing`/net472 coupling is also tracked as
-future work (#9).
+sets; buffered labels (`BL`/`PB`/`OL`); and PCL raster. The alternate/international character
+sets, plus a full glyph-shape and metrics audit of the built-in font, are tracked under the
+typography deep-dive (#31). A cross-platform backend (ImageSharp/SkiaSharp) to drop the
+`System.Drawing`/net472 coupling is also tracked as future work (#9).
