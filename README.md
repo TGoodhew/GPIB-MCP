@@ -266,10 +266,10 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | Tool | Required args | Optional args | Purpose |
 |------|---------------|---------------|---------|
 | `visa_list_resources` | — | `filter` | Discover connected VISA resources |
-| `visa_query` | `resource`, `command` | `timeout_ms` | Write a command and read the response (e.g. `*IDN?`) |
+| `visa_query` | `resource`, `command` | `timeout_ms`, `read_bytes` | Write a command and read the response (e.g. `*IDN?`) |
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
-| `visa_read` | `resource` | `timeout_ms` | Read a pending response |
-| `visa_identify` | `resource` | — | Convenience `*IDN?` query |
+| `visa_read` | `resource` | `timeout_ms`, `read_bytes` | Read a pending response |
+| `visa_identify` | `resource` | `read_bytes` | Convenience `*IDN?` query |
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
 | `visa_list_open` | — | — | List sessions this server holds open |
 | `visa_close` | `resource` | — | Close a held-open session |
@@ -281,7 +281,8 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
-| `instrument_identify` | `resource` | — | Query identity and match against the database |
+| `instrument_identify` | `resource` | `read_bytes` | Query identity and match against the database |
+| `set_termination` | — (`model` or `resource`) | `read_terminator`, `write_terminator`, `max_read_bytes`, `confirm` | Set a model's read/write terminators and an optional bounded read for free-running instruments (persists on `confirm=true`) |
 | `assign_instrument` | `resource`, `model` | `confirm`, `verify` | Record that a model sits at a resource (persists on `confirm=true`) |
 | `list_assignments` | — | — | List recorded resource→model assignments |
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
@@ -293,10 +294,35 @@ Argument notes:
 
 - `resource` — a VISA resource string such as `GPIB0::5::INSTR`,
   `TCPIP0::192.168.1.50::INSTR`, `USB0::0x0699::0x0408::C012345::INSTR`, or `ASRL1::INSTR`.
-- `command` — sent verbatim; a newline terminator is appended if you omit one.
+- `command` — sent verbatim; the assigned model's write terminator (default newline) is appended if you omit one.
 - `timeout_ms` — I/O timeout in milliseconds (default `5000`).
+- `read_bytes` — optional bounded read: read at most this many bytes instead of reading to the
+  terminator/EOI. Leave it unset for normal reads; use it only to stop a **free-running** instrument
+  (one that streams output continuously) from timing out — see
+  [Free-running instruments and read termination](#free-running-instruments-and-read-termination).
 - `board` — GPIB controller index (default `0`).
 - `secondary_address` — `0` means "no secondary address" (the default).
+
+### Free-running instruments and read termination
+
+Each model's database record carries a `termination` block (`{ "write": "\n", "read": "\n" }`),
+and the server applies it automatically to every query/read once the resource is assigned a model
+(`assign_instrument`): writes use the model's write terminator, and reads stop on the model's read
+terminator. An unassigned resource falls back to VISA's default (read until EOI).
+
+Some instruments run **free**, streaming readings continuously and never asserting a normal
+end-of-response. A plain read then blocks until the timeout. Two complementary levers fix this:
+
+1. **Read terminator** — the primary lever. If the instrument delimits each reading with a known
+   character, set it with `set_termination` so reads return at that delimiter.
+2. **Bounded read (`max_read_bytes` / `read_bytes`)** — the backstop for instruments with no usable
+   terminator. The read returns as soon as that many bytes have arrived (and keeps whatever partial
+   data was received if the instrument falls silent first). Use it per-call via the `read_bytes`
+   argument, or persist a per-model default with `set_termination max_read_bytes=…` so identity and
+   queries for that instrument are always bounded.
+
+`set_termination` proposes the change first and only writes (a minimal user-database override) when
+called again with `confirm=true`, like the other database writers.
 
 ### Typical workflow
 
@@ -664,6 +690,7 @@ src/GpibMcp/
   Instruments/
     IInstrumentManager.cs          instrument-layer abstraction (enables testing)
     VisaInstrumentManager.cs       NI-VISA session manager (primary path)
+    IoSpec.cs                      per-call I/O behaviour (terminators + bounded read)
     Gpib488Helper.cs               NI-488.2 native GPIB helper
     CommandText.cs                 shared command-termination + log helpers
     CommandHistory.cs              bounded per-resource command/response trace
@@ -675,8 +702,9 @@ src/GpibMcp/
     ScreenCapture.cs               HP-GL plotter-emulation capture handshake
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
+    InstrumentIo.cs                resolves a model's IoSpec (terminators + bounded read)
     InstrumentTools.cs             VISA / NI-488.2 + serial-poll / wait-SRQ tools
-    DatabaseTools.cs               command-database + assignment tools
+    DatabaseTools.cs               command-database + assignment + set_termination tools
     CaptureTools.cs                screen-capture + wait-complete tools
 src/Hpgl.Rendering/                standalone HP-GL/2 -> Bitmap/PNG/SVG renderer (no GPIB deps)
   HpglParser.cs / HpglRenderer.cs  parse + render pipeline (auto-fit, fills, arcs, labels)

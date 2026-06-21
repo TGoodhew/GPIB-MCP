@@ -86,18 +86,28 @@ namespace GpibMcp.Instruments
         }
 
         /// <summary>Writes a command and reads the instrument's response (e.g. SCPI "*IDN?").</summary>
-        public string Query(string resource, string command, int timeoutMs)
+        public string Query(string resource, string command, int timeoutMs) =>
+            Query(resource, command, new IoSpec(timeoutMs));
+
+        /// <summary>
+        /// Writes a command and reads the response honouring the per-instrument <see cref="IoSpec"/>:
+        /// the write terminator, the read termination character, and an optional bounded read for
+        /// free-running instruments that never assert a normal end-of-response (issue #35).
+        /// </summary>
+        public string Query(string resource, string command, IoSpec io)
         {
+            io = io ?? new IoSpec();
             lock (_gate)
             {
-                string payload = CommandText.EnsureTerminated(command);
+                string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
                 try
                 {
-                    var session = Open(resource, timeoutMs);
+                    var session = Open(resource, io.TimeoutMs);
+                    ApplyReadTermination(session, io);
                     Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
                     _history.Record(resource, CommandDirection.Sent, payload);
                     session.RawIO.Write(payload);
-                    string response = session.RawIO.ReadString();
+                    string response = ReadResponse(session, io);
                     _history.Record(resource, CommandDirection.Received, response);
                     Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
                     return response;
@@ -110,14 +120,19 @@ namespace GpibMcp.Instruments
         }
 
         /// <summary>Writes a command with no expected response.</summary>
-        public void Write(string resource, string command, int timeoutMs)
+        public void Write(string resource, string command, int timeoutMs) =>
+            Write(resource, command, new IoSpec(timeoutMs));
+
+        /// <summary>Writes a command (no response) honouring the per-instrument write terminator.</summary>
+        public void Write(string resource, string command, IoSpec io)
         {
+            io = io ?? new IoSpec();
             lock (_gate)
             {
-                string payload = CommandText.EnsureTerminated(command);
+                string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
                 try
                 {
-                    var session = Open(resource, timeoutMs);
+                    var session = Open(resource, io.TimeoutMs);
                     Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload));
                     _history.Record(resource, CommandDirection.Sent, payload);
                     session.RawIO.Write(payload);
@@ -130,14 +145,20 @@ namespace GpibMcp.Instruments
         }
 
         /// <summary>Reads a pending response from a previously written command.</summary>
-        public string Read(string resource, int timeoutMs)
+        public string Read(string resource, int timeoutMs) =>
+            Read(resource, new IoSpec(timeoutMs));
+
+        /// <summary>Reads a pending response honouring the per-instrument read termination / bounded read.</summary>
+        public string Read(string resource, IoSpec io)
         {
+            io = io ?? new IoSpec();
             lock (_gate)
             {
                 try
                 {
-                    var session = Open(resource, timeoutMs);
-                    string response = session.RawIO.ReadString();
+                    var session = Open(resource, io.TimeoutMs);
+                    ApplyReadTermination(session, io);
+                    string response = ReadResponse(session, io);
                     _history.Record(resource, CommandDirection.Received, response);
                     Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
                     return response;
@@ -147,6 +168,53 @@ namespace GpibMcp.Instruments
                     throw Fail(GpibOperation.Read, resource, null, ex);
                 }
             }
+        }
+
+        /// <summary>1:1 byte-to-char encoding (Latin-1) for decoding a bounded byte read losslessly.</summary>
+        private static readonly System.Text.Encoding Latin1 = System.Text.Encoding.GetEncoding("ISO-8859-1");
+
+        /// <summary>
+        /// Configures the session's read termination from the <see cref="IoSpec"/>: when a read
+        /// terminator is given, stop reads on that character; otherwise disable the termination
+        /// character so reads end on EOI (the historical default for unconfigured instruments).
+        /// Applied per call - all I/O is serialized under <c>_gate</c> - so cached sessions never
+        /// leak one call's termination into the next.
+        /// </summary>
+        private static void ApplyReadTermination(MessageBasedSession session, IoSpec io)
+        {
+            if (io != null && io.ReadTermChar.HasValue)
+            {
+                session.TerminationCharacter = (byte)io.ReadTermChar.Value;
+                session.TerminationCharacterEnabled = true;
+            }
+            else
+            {
+                session.TerminationCharacterEnabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Reads the response: a bounded byte read when <see cref="IoSpec.MaxReadBytes"/> is set
+        /// (returns as soon as that many bytes arrive, and keeps the partial data if the instrument
+        /// falls silent before then - never throwing on the timeout), otherwise an ordinary
+        /// terminator/EOI-bounded string read.
+        /// </summary>
+        private static string ReadResponse(MessageBasedSession session, IoSpec io)
+        {
+            if (io != null && io.MaxReadBytes.HasValue && io.MaxReadBytes.Value > 0)
+            {
+                try
+                {
+                    return Latin1.GetString(session.RawIO.Read(io.MaxReadBytes.Value));
+                }
+                catch (IOTimeoutException ex)
+                {
+                    // Free-running instrument that didn't fill the buffer before the timeout: keep
+                    // whatever it had already sent (NI-VISA exposes it on the exception).
+                    return Latin1.GetString(ex.ActualData ?? Array.Empty<byte>());
+                }
+            }
+            return session.RawIO.ReadString();
         }
 
         /// <summary>Sends the IEEE 488.2 device clear to reset the instrument's I/O state.</summary>

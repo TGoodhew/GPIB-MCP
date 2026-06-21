@@ -137,12 +137,17 @@ namespace GpibMcp.Tools
             registry.Add(new McpTool(
                 "instrument_identify",
                 "Query an instrument's identity (tries the assigned model's ID command, then *IDN?, ID?) " +
-                "and match the response against the database. NOTE: this sends a command to the instrument.",
+                "and match the response against the database. NOTE: this sends a command to the instrument. " +
+                "Pass read_bytes if a free-running instrument makes the identity read time out.",
                 Schema(
-                    Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'.")),
+                    Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'."),
+                    Prop("read_bytes", "integer", "Optional: read at most this many bytes (e.g. 512) so a free-running " +
+                        "instrument's identity read returns promptly instead of timing out.")),
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
+                    int readBytes = Int(args, "read_bytes", 0);
+                    var io = InstrumentIo.Resolve(db, assignments, resource, VisaTimeoutMs, readBytes);
                     var attempts = new List<string>();
                     InstrumentDefinition assignedDef;
                     string assigned = assignments.Get(resource);
@@ -159,7 +164,7 @@ namespace GpibMcp.Tools
                     {
                         try
                         {
-                            response = visa.Query(resource, cmd, VisaTimeoutMs);
+                            response = visa.Query(resource, cmd, io);
                             used = cmd;
                             if (!string.IsNullOrWhiteSpace(response)) break;
                         }
@@ -349,6 +354,146 @@ namespace GpibMcp.Tools
                     return "Refreshed '" + canonical + "' to the bundled definition. Old user copy backed up to " +
                            backup + ". Restart the server to fully reload.";
                 }));
+
+            // ---- Set per-model I/O termination + bounded read (persist on confirm) ----
+            registry.Add(new McpTool(
+                "set_termination",
+                "Configure how this server terminates writes to / reads from a MODEL, and an optional bounded " +
+                "read length (max_read_bytes) for FREE-RUNNING instruments that stream output continuously and " +
+                "never assert a normal end-of-response - so identity/queries return promptly instead of timing " +
+                "out. Target the model by name, or by resource (its assigned model is used). These settings then " +
+                "apply automatically to visa_query/visa_read/identify for that instrument. Persists to the user " +
+                "database; does NOT write unless confirm=true.",
+                Schema(
+                    Prop("model", "string", "Model name or alias to configure. Provide either model or resource."),
+                    Prop("resource", "string", "VISA resource whose assigned model to configure. Provide either model or resource."),
+                    Prop("read_terminator", "string", "Read terminator: 'LF', 'CR', 'CRLF', 'none', or a literal like '\\n'. Omit to leave unchanged."),
+                    Prop("write_terminator", "string", "Write terminator: 'LF', 'CR', 'CRLF', 'none', or a literal. Omit to leave unchanged."),
+                    Prop("max_read_bytes", "integer", "Bounded read length for a free-running instrument (e.g. 512); 0 clears it. Omit to leave unchanged."),
+                    Prop("confirm", "boolean", "Set true to actually persist (default false = propose only).")),
+                args => SetTermination(db, assignments, args)));
+        }
+
+        // ------------------------------------------------------------------------
+        // set_termination - configure per-model terminators + bounded read (#35).
+        // Mirrors the confirm-to-save pattern of the other DB writers: proposes on the first call,
+        // and on confirm=true writes a minimal user-DB override (model + termination + maxReadBytes)
+        // that merges over the bundled blocks on load, then makes it effective immediately.
+        // ------------------------------------------------------------------------
+        private static string SetTermination(InstrumentDatabase db, AssignmentStore assignments, JObject args)
+        {
+            string model = Str(args, "model", null);
+            string resource = Str(args, "resource", null);
+            if (string.IsNullOrEmpty(model) && string.IsNullOrEmpty(resource))
+                return "Provide either 'model' or 'resource'.";
+            if (string.IsNullOrEmpty(model))
+            {
+                model = assignments.Get(resource);
+                if (string.IsNullOrEmpty(model))
+                    return "No model is assigned to " + resource +
+                           ". Assign one with assign_instrument, or pass 'model' directly.";
+            }
+
+            InstrumentDefinition def;
+            if (!db.TryGet(model, out def))
+                return "Unknown model '" + model + "'. See instrument_list_models, or add it with instrument_db_save.";
+
+            string read = def.Termination != null ? def.Termination.Read : null;
+            string write = def.Termination != null ? def.Termination.Write : null;
+            int? maxBytes = def.MaxReadBytes;
+
+            bool changed = false;
+            if (IsSupplied(args, "read_terminator"))
+            {
+                string parsed, err;
+                if (!TryParseTerminator(Str(args, "read_terminator", null), out parsed, out err)) return err;
+                read = parsed; changed = true;
+            }
+            if (IsSupplied(args, "write_terminator"))
+            {
+                string parsed, err;
+                if (!TryParseTerminator(Str(args, "write_terminator", null), out parsed, out err)) return err;
+                write = parsed; changed = true;
+            }
+            if (IsSupplied(args, "max_read_bytes"))
+            {
+                int n = Int(args, "max_read_bytes", 0);
+                if (n < 0) return "max_read_bytes must be >= 0 (0 clears it).";
+                maxBytes = n > 0 ? (int?)n : null; changed = true;
+            }
+            if (!changed)
+                return "Nothing to change. Pass read_terminator, write_terminator, and/or max_read_bytes.";
+
+            string dir = InstrumentPaths.UserDatabaseDir();
+            string file = Path.Combine(dir, SanitizeFileName(model) + ".json");
+            bool exists = File.Exists(file);
+
+            string summary =
+                "  read terminator:  " + DescribeTerminator(read) + "\n" +
+                "  write terminator: " + DescribeTerminator(write) + "\n" +
+                "  max read bytes:   " + (maxBytes.HasValue ? maxBytes.Value.ToString()
+                                                            : "(unset - read to terminator/EOI)");
+
+            if (!Bool(args, "confirm", false))
+                return "PROPOSED I/O settings for '" + def.Model + "' (would " + (exists ? "update" : "create") +
+                       " " + file + "):\n" + summary +
+                       "\n\nASSISTANT: Confirm with the user, then call set_termination again with confirm=true to persist.";
+
+            try
+            {
+                Directory.CreateDirectory(dir);
+                JObject userJson = exists ? JObject.Parse(File.ReadAllText(file)) : new JObject();
+                if (userJson["model"] == null) userJson["model"] = def.Model;
+                var term = new JObject();
+                if (read != null) term["read"] = read;
+                if (write != null) term["write"] = write;
+                if (term.HasValues) userJson["termination"] = term;
+                if (maxBytes.HasValue) userJson["maxReadBytes"] = maxBytes.Value;
+                else userJson.Remove("maxReadBytes");
+                File.WriteAllText(file, userJson.ToString(Formatting.Indented));
+            }
+            catch (Exception ex) { return "Failed to save I/O settings for '" + def.Model + "': " + ex.Message; }
+
+            // Effective for this session immediately.
+            if (read != null || write != null)
+                def.Termination = new TerminationSpec { Read = read, Write = write };
+            def.MaxReadBytes = maxBytes;
+            db.Upsert(def);
+
+            return "Saved I/O settings for '" + def.Model + "' to " + file + ":\n" + summary;
+        }
+
+        private static bool IsSupplied(JObject args, string key)
+        {
+            var t = args[key];
+            return t != null && t.Type != JTokenType.Null;
+        }
+
+        /// <summary>Renders a terminator for display: null = unchanged/none, "" = none, else the escaped literal.</summary>
+        private static string DescribeTerminator(string term)
+        {
+            if (term == null) return "(none)";
+            if (term.Length == 0) return "none";
+            return "\"" + term.Replace("\r", "\\r").Replace("\n", "\\n") + "\"";
+        }
+
+        /// <summary>
+        /// Parses a terminator argument: the mnemonics LF/CR/CRLF/NONE (case-insensitive), or a literal
+        /// string (e.g. a real newline passed through JSON). "none"/empty yields "" (no terminator).
+        /// </summary>
+        private static bool TryParseTerminator(string raw, out string value, out string error)
+        {
+            value = null; error = null;
+            if (raw == null) { error = "terminator value missing"; return false; }
+            switch (raw.Trim().ToUpperInvariant())
+            {
+                case "": case "NONE": value = ""; return true;
+                case "LF": case "\\N": value = "\n"; return true;
+                case "CR": case "\\R": value = "\r"; return true;
+                case "CRLF": case "CR/LF": case "CR LF": case "\\R\\N": value = "\r\n"; return true;
+            }
+            value = raw; // literal terminator as given
+            return true;
         }
 
         // ------------------------------------------------------------------------
@@ -365,7 +510,8 @@ namespace GpibMcp.Tools
 
             try
             {
-                string resp = (visa.Query(resource, def.Identity.Command, VisaTimeoutMs) ?? string.Empty).Trim();
+                var io = InstrumentIo.FromDefinition(def, VisaTimeoutMs);
+                string resp = (visa.Query(resource, def.Identity.Command, io) ?? string.Empty).Trim();
                 bool matched = string.IsNullOrEmpty(def.Identity.MatchRegex) ||
                                Regex.IsMatch(resp, def.Identity.MatchRegex, RegexOptions.IgnoreCase);
                 ok = matched;

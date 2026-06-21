@@ -57,17 +57,25 @@ namespace GpibMcp.Tools
             registry.Add(new McpTool(
                 "visa_query",
                 "Send a command to a VISA instrument and return its response. " +
-                "Use for SCPI queries ending in '?', e.g. '*IDN?' or 'MEAS:VOLT:DC?'.",
+                "Use for SCPI queries ending in '?', e.g. '*IDN?' or 'MEAS:VOLT:DC?'. " +
+                "Uses the assigned model's read/write terminators automatically. If a FREE-RUNNING " +
+                "instrument (one that streams output continuously) makes a query time out, pass " +
+                "read_bytes to cap the read so it returns promptly.",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::5::INSTR'."),
                     Required("command", "string", "Command/query to send. A newline terminator is added if absent."),
-                    Prop("timeout_ms", "integer", "I/O timeout in milliseconds (default 5000).")),
+                    Prop("timeout_ms", "integer", "I/O timeout in milliseconds (default 5000)."),
+                    Prop("read_bytes", "integer", "Optional: read at most this many bytes instead of reading to the " +
+                        "terminator/EOI. Leave unset for normal reads; use it only to stop a free-running instrument " +
+                        "from timing out (e.g. 512 for an identity read).")),
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
                     string command = ReqStr(args, "command");
                     int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
-                    return Clean(visa.Query(resource, command, timeout));
+                    int readBytes = Int(args, "read_bytes", 0);
+                    var io = InstrumentIo.Resolve(db, assignments, resource, timeout, readBytes);
+                    return Clean(visa.Query(resource, command, io));
                 }));
 
             // ---- VISA: write-only ------------------------------------------------
@@ -90,27 +98,38 @@ namespace GpibMcp.Tools
             // ---- VISA: read pending ---------------------------------------------
             registry.Add(new McpTool(
                 "visa_read",
-                "Read a pending response from a VISA instrument that was previously written to.",
+                "Read a pending response from a VISA instrument that was previously written to. " +
+                "Uses the assigned model's read terminator automatically; pass read_bytes to cap the " +
+                "read for a free-running instrument that would otherwise time out.",
                 Schema(
                     Required("resource", "string", "VISA resource string."),
-                    Prop("timeout_ms", "integer", "I/O timeout in milliseconds (default 5000).")),
+                    Prop("timeout_ms", "integer", "I/O timeout in milliseconds (default 5000)."),
+                    Prop("read_bytes", "integer", "Optional: read at most this many bytes instead of reading to the " +
+                        "terminator/EOI. Use only to stop a free-running instrument from timing out.")),
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
                     int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
-                    return Clean(visa.Read(resource, timeout));
+                    int readBytes = Int(args, "read_bytes", 0);
+                    var io = InstrumentIo.Resolve(db, assignments, resource, timeout, readBytes);
+                    return Clean(visa.Read(resource, io));
                 }));
 
             // ---- VISA: identify (convenience) -----------------------------------
             registry.Add(new McpTool(
                 "visa_identify",
-                "Convenience helper: query '*IDN?' and return the instrument identification string.",
+                "Convenience helper: query '*IDN?' and return the instrument identification string. " +
+                "Pass read_bytes if a free-running instrument makes the identity read time out.",
                 Schema(
-                    Required("resource", "string", "VISA resource string.")),
+                    Required("resource", "string", "VISA resource string."),
+                    Prop("read_bytes", "integer", "Optional: read at most this many bytes (e.g. 512) so a free-running " +
+                        "instrument's identity read returns promptly instead of timing out.")),
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
-                    return Clean(visa.Query(resource, "*IDN?", VisaInstrumentManager.DefaultTimeoutMs));
+                    int readBytes = Int(args, "read_bytes", 0);
+                    var io = InstrumentIo.Resolve(db, assignments, resource, VisaInstrumentManager.DefaultTimeoutMs, readBytes);
+                    return Clean(visa.Query(resource, "*IDN?", io));
                 }));
 
             // ---- VISA: device clear ---------------------------------------------

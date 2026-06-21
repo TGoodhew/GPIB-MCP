@@ -22,13 +22,20 @@ namespace GpibMcp.Tests
         /// <summary>Optional error injected by tests; when set, <see cref="Query"/> throws it.</summary>
         public Exception QueryError;
 
+        /// <summary>The <see cref="IoSpec"/> passed to the most recent Query/Read/Write (null if the timeout overload was used).</summary>
+        public IoSpec LastIo;
+
         private readonly CommandHistory _history = new CommandHistory();
         private GpibOperationException _lastError;
 
         public IList<string> ListResources(string filter) => new List<string>(ResourceList);
 
-        public string Query(string resource, string command, int timeoutMs)
+        public string Query(string resource, string command, int timeoutMs) =>
+            Query(resource, command, new IoSpec(timeoutMs));
+
+        public string Query(string resource, string command, IoSpec io)
         {
+            LastIo = io;
             if (QueryError != null)
             {
                 if (QueryError is GpibOperationException gex) RecordError(gex);
@@ -41,14 +48,22 @@ namespace GpibMcp.Tests
             return response;
         }
 
-        public void Write(string resource, string command, int timeoutMs)
+        public void Write(string resource, string command, int timeoutMs) =>
+            Write(resource, command, new IoSpec(timeoutMs));
+
+        public void Write(string resource, string command, IoSpec io)
         {
+            LastIo = io;
             Writes.Add(resource + "|" + command);
             _history.Record(resource, CommandDirection.Sent, command ?? string.Empty);
         }
 
-        public string Read(string resource, int timeoutMs)
+        public string Read(string resource, int timeoutMs) =>
+            Read(resource, new IoSpec(timeoutMs));
+
+        public string Read(string resource, IoSpec io)
         {
+            LastIo = io;
             Reads.Add(resource);
             string response = "READ:" + resource;
             _history.Record(resource, CommandDirection.Received, response);
