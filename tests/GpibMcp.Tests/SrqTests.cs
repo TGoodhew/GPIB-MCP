@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
@@ -171,6 +173,7 @@ namespace GpibMcp.Tests
             Assert.False(output.IsError);                     // a prompt, not an error
             Assert.Contains("has no statusModel", output.AsText());
             Assert.Contains("instrument_db_save", output.AsText());
+            Assert.Contains("status_model", output.AsText());  // #18: also offers the one-step define-and-persist path
         }
 
         [Fact]
@@ -211,6 +214,99 @@ namespace GpibMcp.Tests
             var output = tool.Invoke(WaitArgs());
             Assert.True(output.IsError);
             Assert.Contains("signalled an ERROR", output.AsText());
+        }
+
+        // ---- #18: define-and-persist a statusModel from the tool call ------------
+
+        // A complete 8560 statusModel block, as the assistant would supply it (camelCase, like the bundled JSON).
+        private static JObject StatusModelJson() => new JObject
+        {
+            ["srqSupported"] = true,
+            ["serialPoll"] = new JObject { ["clearsRqs"] = true },
+            ["enableMask"] = new JObject { ["setCommand"] = "RQS {mask}", ["clearCommand"] = "RQS 0" },
+            ["errorBit"] = "error",
+            ["bits"] = new JObject
+            {
+                ["trigger"] = 4, ["message"] = 8, ["endOfSweep"] = 16,
+                ["commandComplete"] = 32, ["error"] = 64, ["rqs"] = 128
+            },
+            ["operations"] = new JObject
+            {
+                ["sweepComplete"] = new JObject { ["arm"] = "SNGLS;TS;", ["expectBit"] = "endOfSweep", ["restore"] = "CONTS;" }
+            }
+        };
+
+        [Fact]
+        public void WaitComplete_StatusModel_NotConfirmed_ProposesWithoutPersisting()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "gpib_sm_" + Path.GetRandomFileName());
+            string prevEnv = Environment.GetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB");
+            try
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", tempDir);
+
+                var def = new InstrumentDefinition { Model = "8563E", Commands = new List<InstrumentCommand>() };
+                var db = InstrumentDatabase.FromDefinitions(new[] { def });
+                var store = AssignmentStore.InMemory();
+                store.Set("GPIB0::18::INSTR", "8563E");
+                InstrumentTools.BuildRegistry(new FakeInstrumentManager { StatusByteValue = 0x10 }, db, store)
+                    .TryGet("instrument_wait_complete", out var tool);
+
+                var args = WaitArgs();
+                args["status_model"] = StatusModelJson();   // confirm omitted => propose only
+                var output = tool.Invoke(args);
+
+                Assert.False(output.IsError);
+                Assert.Contains("PROPOSED statusModel", output.AsText());
+                Assert.False(Directory.Exists(tempDir) && Directory.GetFiles(tempDir).Length > 0); // nothing written
+                Assert.Null(def.StatusModel);                                                      // not applied
+            }
+            finally { Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", prevEnv); CleanDir(tempDir); }
+        }
+
+        [Fact]
+        public void WaitComplete_StatusModel_Confirmed_PersistsThenWaits()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "gpib_sm_" + Path.GetRandomFileName());
+            string prevEnv = Environment.GetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB");
+            try
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", tempDir);
+
+                var def = new InstrumentDefinition { Model = "8563E", Commands = new List<InstrumentCommand>() };
+                var db = InstrumentDatabase.FromDefinitions(new[] { def });
+                var store = AssignmentStore.InMemory();
+                store.Set("GPIB0::18::INSTR", "8563E");
+                var visa = new FakeInstrumentManager { StatusByteValue = 0x10 }; // endOfSweep set -> completes
+                InstrumentTools.BuildRegistry(visa, db, store).TryGet("instrument_wait_complete", out var tool);
+
+                var args = WaitArgs();
+                args["status_model"] = StatusModelJson();
+                args["confirm"] = true;
+                var output = tool.Invoke(args);
+
+                // Persisted...
+                Assert.False(output.IsError);
+                Assert.Contains("Saved statusModel", output.AsText());
+                string file = Path.Combine(tempDir, "8563E.json");
+                Assert.True(File.Exists(file));
+                string json = File.ReadAllText(file);
+                Assert.Contains("statusModel", json);
+                Assert.Contains("endOfSweep", json);
+                // ...made effective in the live DB...
+                Assert.True(db.TryGet("8563E", out var updated));
+                Assert.NotNull(updated.StatusModel);
+                Assert.True(updated.StatusModel.Operations.ContainsKey("sweepComplete"));
+                // ...and the wait then ran to completion against the new definition.
+                Assert.Contains("Completed", output.AsText());
+                Assert.Contains("GPIB0::18::INSTR|SNGLS;TS;", visa.Writes); // operation armed
+            }
+            finally { Environment.SetEnvironmentVariable("GPIB_MCP_INSTRUMENT_DB", prevEnv); CleanDir(tempDir); }
+        }
+
+        private static void CleanDir(string dir)
+        {
+            try { if (Directory.Exists(dir)) Directory.Delete(dir, true); } catch { /* best effort */ }
         }
     }
 }

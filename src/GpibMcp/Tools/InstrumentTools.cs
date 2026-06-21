@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Srq.Completion;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using static GpibMcp.Tools.ToolArgs;
 
 namespace GpibMcp.Tools
@@ -249,15 +252,24 @@ namespace GpibMcp.Tools
                 "Wait for an instrument operation to ACTUALLY complete via SRQ, driven by the model's " +
                 "statusModel - no fixed-timeout guessing. Resolves the model from the resource's " +
                 "assignment, arms the operation's SRQ mask, waits for SRQ, serial-polls to confirm the " +
-                "expected status bit, and clears the mask. Refuses if the model declares no SRQ support; " +
-                "asks for the definitions if the statusModel/operation is missing (it never guesses).",
+                "expected status bit, and clears the mask. Refuses if the model declares no SRQ support. " +
+                "If the statusModel/operation is missing it asks for the definitions (never guesses); " +
+                "supply them via status_model to define-and-persist in one step (proposes first, writes " +
+                "on confirm=true, then proceeds with the wait).",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'."),
                     Required("operation", "string", "Operation name from the model's statusModel.operations (e.g. 'sweepComplete')."),
-                    Prop("timeout_ms", "integer", "Backstop timeout in ms (default 30000) - a safety net, NOT the completion signal.")),
+                    Prop("timeout_ms", "integer", "Backstop timeout in ms (default 30000) - a safety net, NOT the completion signal."),
+                    Prop("status_model", "object", "Optional statusModel block to define/extend for this model when it is " +
+                        "missing or incomplete (merged over any existing one): { srqSupported, bits:{name:weight}, " +
+                        "enableMask:{setCommand,clearCommand}, errorBit, requestServiceBit, serialPoll:{clearsRqs}, " +
+                        "operations:{<name>:{arm,expectBit,restore}} }. Proposed first; persisted to the model's user " +
+                        "DB record only with confirm=true, after which the wait proceeds."),
+                    Prop("confirm", "boolean", "Set true to persist the supplied status_model before waiting (default false = propose only).")),
                 (Func<JObject, ToolOutput>)(args =>
                     WaitComplete(db, assignments, visa,
-                                 ReqStr(args, "resource"), ReqStr(args, "operation"), Int(args, "timeout_ms", 30000)))));
+                                 ReqStr(args, "resource"), ReqStr(args, "operation"), Int(args, "timeout_ms", 30000),
+                                 args["status_model"] as JObject, Bool(args, "confirm", false)))));
 
             // ---- NI-488.2: direct GPIB query ------------------------------------
             registry.Add(new McpTool(
@@ -312,7 +324,8 @@ namespace GpibMcp.Tools
         // ---------------------------------------------------------------------
 
         private static ToolOutput WaitComplete(InstrumentDatabase db, AssignmentStore assignments,
-                                               IInstrumentManager visa, string resource, string operation, int timeoutMs)
+                                               IInstrumentManager visa, string resource, string operation, int timeoutMs,
+                                               JObject statusModelPatch, bool confirm)
         {
             string model = assignments.Get(resource);
             if (string.IsNullOrEmpty(model))
@@ -322,6 +335,15 @@ namespace GpibMcp.Tools
             InstrumentDefinition def;
             if (!db.TryGet(model, out def))
                 return Err("Unknown model '" + model + "' assigned to " + resource + ".");
+
+            // #18: optional inline statusModel definition (prompt-and-persist). Proposes on the first
+            // call; on confirm=true it persists to the model's user-DB record, then falls through to wait.
+            string savedNote = null;
+            if (statusModelPatch != null)
+            {
+                ToolOutput proposalOrError = DefineStatusModel(db, def, model, operation, statusModelPatch, confirm, out savedNote);
+                if (proposalOrError != null) return proposalOrError;  // unconfirmed proposal, or a validation/save error
+            }
 
             var channel = new VisaStatusChannel(visa, resource);
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -334,17 +356,93 @@ namespace GpibMcp.Tools
             catch (GpibOperationException gex) { return Err(gex.Detail); }
             catch (Exception ex) { return Err("Wait failed for " + resource + ": " + ex.Message); }
 
+            string prefix = savedNote != null ? savedNote + "\n" : "";
             switch (result.Outcome)
             {
                 case CompletionOutcome.Completed:
-                    return Txt("[" + resource + "] " + result.Message);
+                    return Txt(prefix + "[" + resource + "] " + result.Message);
                 case CompletionOutcome.InstrumentError:
                 case CompletionOutcome.TimedOut:
-                    return Err("[" + resource + "] " + result.Message);
+                    return Err(prefix + "[" + resource + "] " + result.Message);
                 case CompletionOutcome.Refused:
+                    return Err(result.Message);
+                case CompletionOutcome.NeedsDefinition:
                 default:
-                    return result.Outcome == CompletionOutcome.Refused ? Err(result.Message) : Txt(result.Message);
+                    return Txt(result.Message + DefineHint(operation));
             }
+        }
+
+        /// <summary>Tool affordance appended to a NeedsDefinition prompt: the one-step define-and-persist path.</summary>
+        private static string DefineHint(string operation) =>
+            "\n\nOne-step option: call instrument_wait_complete again with operation='" + operation + "' and " +
+            "status_model set to that block. It proposes the save first; on confirm=true it persists the " +
+            "statusModel to the model's user-DB record and then waits - no separate save step needed.";
+
+        // ---------------------------------------------------------------------
+        // #18: define-and-persist a statusModel supplied to the tool. Merges the block over any existing
+        // statusModel (camelCase, matching the bundled JSON so keys align and the file stays consistent),
+        // validates it, and on confirm writes a minimal user-DB override (model + statusModel) and makes it
+        // effective immediately. Returns a ToolOutput to send back (an unconfirmed proposal, or an error),
+        // or null once persisted - in which case the caller proceeds to the wait with the merged definition.
+        // ---------------------------------------------------------------------
+        private static readonly JsonSerializerSettings CamelStatusSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
+        private static ToolOutput DefineStatusModel(InstrumentDatabase db, InstrumentDefinition def, string model,
+                                                    string operation, JObject patch, bool confirm, out string savedNote)
+        {
+            savedNote = null;
+
+            JObject current = def.StatusModel != null
+                ? JObject.FromObject(def.StatusModel, JsonSerializer.Create(CamelStatusSettings))
+                : new JObject();
+            var merged = (JObject)current.DeepClone();
+            merged.Merge(patch, new JsonMergeSettings
+            {
+                MergeArrayHandling = MergeArrayHandling.Replace,
+                MergeNullValueHandling = MergeNullValueHandling.Ignore
+            });
+
+            StatusModel parsed;
+            try { parsed = merged.ToObject<StatusModel>(); }
+            catch (Exception ex) { return Err("Invalid status_model for '" + model + "': " + ex.Message); }
+            if (parsed == null) return Err("status_model for '" + model + "' did not parse to a statusModel.");
+
+            string dir = InstrumentPaths.UserDatabaseDir();
+            string file = Path.Combine(dir, SanitizeModelFileName(model) + ".json");
+            bool exists = File.Exists(file);
+
+            if (!confirm)
+                return Txt("PROPOSED statusModel for '" + model + "' (would " + (exists ? "update" : "create") +
+                           " " + file + "):\n\n" + merged.ToString(Formatting.Indented) +
+                           "\n\nASSISTANT: confirm with the user, then call instrument_wait_complete again with the " +
+                           "same status_model and confirm=true to persist it and wait for '" + operation + "'.");
+
+            try
+            {
+                Directory.CreateDirectory(dir);
+                JObject userJson = exists ? JObject.Parse(File.ReadAllText(file)) : new JObject();
+                if (userJson["model"] == null) userJson["model"] = model;   // minimal override; bundled blocks merge on load
+                userJson["statusModel"] = merged;
+                File.WriteAllText(file, userJson.ToString(Formatting.Indented));
+            }
+            catch (Exception ex) { return Err("Failed to save statusModel for '" + model + "': " + ex.Message); }
+
+            def.StatusModel = parsed;   // effective for this call and subsequent ones
+            db.Upsert(def);
+            savedNote = "Saved statusModel for '" + model + "' to " + file + ".";
+            return null;                // persisted - caller proceeds to the wait
+        }
+
+        private static string SanitizeModelFileName(string name)
+        {
+            var sb = new StringBuilder(name.Length);
+            foreach (char c in name)
+                sb.Append(Array.IndexOf(Path.GetInvalidFileNameChars(), c) >= 0 ? '_' : c);
+            return sb.ToString();
         }
 
         private static ToolOutput Err(string message) => ToolOutput.Text(message).AsError();
