@@ -277,7 +277,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_last_error` | — | `resource` | Return the exact, verbatim details (codes + text) of the most recent GPIB/VISA failure |
 | `visa_serial_poll` | `resource` | — | Serial-poll the instrument; return the status byte (decimal + hex) and the named bits set |
 | `visa_wait_srq` | `resource` | `timeout_ms` | Block until the instrument asserts SRQ, or the backstop timeout expires |
-| `instrument_wait_complete` | `resource`, `operation` | `timeout_ms` | Wait for an operation to truly complete via SRQ (data-driven; no fixed-timeout guess) |
+| `instrument_wait_complete` | `resource`, `operation` | `timeout_ms`, `status_model`, `confirm` | Wait for an operation to truly complete via SRQ (data-driven; no fixed-timeout guess). If the model's `statusModel` is missing, pass `status_model` to define-and-persist it (proposes first; writes on `confirm=true`, then waits) |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
@@ -490,8 +490,12 @@ clear the cause before a separate poll reads it; `visa_wait_srq` remains availab
 primitive.) Three explicit states, no silent guessing:
 
 - model declares `srqSupported: false` → the tool **refuses** (no timed fallback);
-- `statusModel`/operation missing → it **asks** you for the definitions (save them with
-  `instrument_db_save`), rather than guessing;
+- `statusModel`/operation missing → it **asks** you for the definitions, rather than guessing.
+  Supply them back as `instrument_wait_complete`'s `status_model` argument to **define-and-persist
+  in one step**: the tool proposes the save first, writes it to the model's user-DB record on
+  `confirm=true` (merged over any existing `statusModel`), and then proceeds with the wait — the
+  same confirm-to-save shape as `assign_instrument`. (Editing the model via `instrument_db_save`
+  works too.)
 - complete → it runs the SRQ flow above.
 
 The 8563E ships with `sweepComplete` and `sweepAndPeak` operations; the lower-level
