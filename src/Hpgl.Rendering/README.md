@@ -83,12 +83,13 @@ approximation, so label text will not match a real plotter (or another renderer)
 glyph-for-glyph.
 
 The font is **fixed-pitch (monospaced)**, like a real HP plotter: every glyph advances by
-the same cell. The cell metrics are tuned to the KE5FX reference rendering the same 8563E
-capture (#29): the per-character pitch is `~1.25 ×` the HP-GL character width (`SI`/`SR`)
-and the glyph ink fills `~0.73` of that pitch, leaving a small uniform inter-character gap.
-This keeps long fields (e.g. `460.000kHz`) aligned with KE5FX. (Earlier revisions mis-set
-this: first the character width was treated as the whole cell — text too narrow and
-cramped; then the pitch was `1.5 ×` — text too wide, so fields drifted out of alignment.)
+the same cell. The per-character pitch is `~1.375 ×` the HP-GL character width (`SI`/`SR`) —
+the cell ratio of HP's built-in stick font. This isn't a magic constant: HP instruments lay
+their annotations on a character grid (each field placed with an absolute `PA` at an integer
+number of cells), and that grid step is exactly `1.375 ×` the `SI`/`SR` width — so matching
+it makes the renderer honour the grid the *stream* defines, and columns in adjacent rows line
+up (e.g. `CENTER` over `*RBW` puts `R` under `C`, `B` under `E`). The ratio is dimensionless
+and applies to any size/instrument; only the source HP-GL drives it (#29/#30).
 
 ### Parsed and ignored (not a renderer's job)
 

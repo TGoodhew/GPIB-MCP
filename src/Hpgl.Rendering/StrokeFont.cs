@@ -33,11 +33,13 @@ namespace Hpgl.Rendering
         public const int Cap = 6;
 
         /// <summary>Grid units that map to one HP-GL character width (SI/SR). The 4-unit-wide
-        /// glyph ink fills 4/Em (~0.73) of the character width, matching KE5FX glyph weight.</summary>
-        public const double Em = 4.4;
+        /// glyph ink fills 4/Em (= 1.0) of the character width.</summary>
+        public const double Em = 4.0;
 
-        /// <summary>Cell advance in grid units; the fixed monospaced pitch is Advance/Em (~1.25x)
-        /// the character width, leaving a small uniform inter-character gap (matched to KE5FX).</summary>
+        /// <summary>Cell advance in grid units. The fixed monospaced pitch is Advance/Em (~1.375x)
+        /// the character width, matching the character-cell grid HP instruments lay annotations on
+        /// (e.g. the 8563E places every field on a 1.375x-char-width grid, so columns in adjacent
+        /// rows align - "CENTER" over "*RBW" puts R under C, B under E). See #29/#30.</summary>
         public const double Advance = 5.5;
 
         /// <summary>Returns the glyph as a list of pen-down polylines (grid units), or null if undrawn.</summary>
@@ -66,7 +68,7 @@ namespace Hpgl.Rendering
 
             // ---- uppercase ----
             ['A'] = new[] { new[] { 0,0, 2,6, 4,0 }, new[] { 1,2, 3,2 } },
-            ['B'] = new[] { new[] { 0,0, 0,6 }, new[] { 0,6, 3,6, 3,3, 0,3 }, new[] { 0,3, 4,3, 4,0, 0,0 } },
+            ['B'] = new[] { new[] { 0,0, 0,6 }, new[] { 0,6, 3,6, 4,5, 4,4, 3,3, 0,3 }, new[] { 0,3, 3,3, 4,2, 4,1, 3,0, 0,0 } },
             ['C'] = new[] { new[] { 4,5, 3,6, 1,6, 0,5, 0,1, 1,0, 3,0, 4,1 } },
             ['D'] = new[] { new[] { 0,0, 0,6 }, new[] { 0,6, 2,6, 4,4, 4,2, 2,0, 0,0 } },
             ['E'] = new[] { new[] { 4,6, 0,6, 0,0, 4,0 }, new[] { 0,3, 3,3 } },

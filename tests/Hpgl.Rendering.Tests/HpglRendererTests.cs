@@ -496,13 +496,14 @@ namespace Hpgl.Rendering.Tests
         [Fact]
         public void Label_CellPitch_IsMonospacedAndMatchesKe5fx()
         {
-            // HP-GL character cells are fixed-pitch: every glyph advances by the same cell width.
-            // The pitch is tuned to the KE5FX 7470 emulator (#29): per-character cell advance is
-            // ~1.25x the character width, and 'M' (which fills the glyph ink em, grid x 0..4) is
-            // ~0.91x the character width - so pitch / 'M'-width = StrokeFont.Advance/4 ~= 1.375.
-            // An earlier 1.5x rendered text too wide so long fields drifted out of alignment.
+            // HP-GL character cells are fixed-pitch: every glyph advances by the same cell. The
+            // pitch reproduces the character-cell grid HP instruments place annotations on (#30):
+            // the per-character advance is ~1.375x the character width (Advance/Em = 5.5/4.0). 'M'
+            // fills the glyph ink (grid x 0..4 = one character width), so pitch / 'M'-width =
+            // Advance/4 ~= 1.375. Earlier 1.5x/1.25x put characters off the grid so cross-row
+            // columns (e.g. "CENTER" over "*RBW") no longer lined up.
             // Both labels share one render (identical auto-fit transform): a single 'M' (top band)
-            // measures the glyph em width; ten 'M's (bottom band) measure nine pitches + one em,
+            // measures the glyph width; ten 'M's (bottom band) measure nine pitches + one width,
             // so pitch = (w10 - w1) / 9.
             var opt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
             using (var bmp = HpglRenderer.RenderToBitmap(
