@@ -34,9 +34,11 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
 - [Usage](#usage)
   - [Tool reference](#tool-reference)
   - [Typical workflow](#typical-workflow)
+  - [Error reporting](#error-reporting)
   - [Discovery and bus extenders (HP 37204A)](#discovery-and-bus-extenders-hp-37204a)
   - [Instrument command database](#instrument-command-database)
   - [Screen capture (HP-GL plotter emulation)](#screen-capture-hp-gl-plotter-emulation)
+  - [Waiting for operations to complete (SRQ)](#waiting-for-operations-to-complete-srq)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [Why x86?](#why-x86)
@@ -57,6 +59,13 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   without needing a VISA resource alias.
 - **User-extensible instrument command database** — tell Claude which model sits at an
   address and it looks up the command reference, confirms identity, and drives it.
+- **Screen capture via HP-GL plotter emulation** — grab an instrument's actual screen
+  (graticule, trace, markers, annotation) and show it inline in the chat as an SVG, with a
+  PNG saved to disk. Rendering is a standalone, reusable [`Hpgl.Rendering`](src/Hpgl.Rendering/)
+  library.
+- **SRQ-based operation completion** — wait for an operation to *truly* finish via the bus
+  service-request event (data-driven from the model's `statusModel`), instead of guessing with
+  a fixed timeout.
 - **Single, self-contained executable** — no external MCP SDK dependency; protocol
   handling is implemented directly so it runs cleanly on .NET Framework.
 
@@ -171,7 +180,8 @@ $exe = "src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe"
 ```
 
 Expected: two JSON lines — an `initialize` result advertising `serverInfo`, followed by
-a `tools/list` result listing the nine tools. If you get those, the build is good.
+a `tools/list` result listing the available tools (see the [Tool reference](#tool-reference)).
+If you get those, the build is good.
 
 **c. Exercise real hardware** (optional, requires connected instruments) — list resources
 and read an instrument's identity:
@@ -640,16 +650,30 @@ src/GpibMcp/
     VisaInstrumentManager.cs       NI-VISA session manager (primary path)
     Gpib488Helper.cs               NI-488.2 native GPIB helper
     CommandText.cs                 shared command-termination + log helpers
+    CommandHistory.cs              bounded per-resource command/response trace
+    VisaErrorInfo.cs               VISA status decoding for friendly/exact errors
     InstrumentDefinition.cs        instrument command-reference data model
     InstrumentDatabase.cs          loads/indexes model definitions
     AssignmentStore.cs             persistent resource->model assignments
     InstrumentPaths.cs             DB/bindings paths + install-time prepopulation
+    ScreenCapture.cs               HP-GL plotter-emulation capture handshake
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
-    InstrumentTools.cs             VISA / NI-488.2 tool definitions
+    InstrumentTools.cs             VISA / NI-488.2 + serial-poll / wait-SRQ tools
     DatabaseTools.cs               command-database + assignment tools
-data/instruments/*.json            bundled instrument command database
-tests/GpibMcp.Tests/               xUnit tests (protocol, tools, db, helpers, logging)
+    CaptureTools.cs                screen-capture + wait-complete tools
+src/Hpgl.Rendering/                standalone HP-GL/2 -> Bitmap/PNG/SVG renderer (no GPIB deps)
+  HpglParser.cs / HpglRenderer.cs  parse + render pipeline (auto-fit, fills, arcs, labels)
+  StrokeFont.cs                    built-in monospaced single-stroke vector font
+src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
+  CompletionWaiter.cs              SRQ-edge / direct-bit waiter
+  StatusModel.cs / IStatusChannel.cs  data model + transport abstraction
+data/instruments/*.json            bundled instrument command database (55 models)
+tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
+tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
+tools/SrqHwHarness/                run the real waiter against live hardware over NI-VISA
+tests/GpibMcp.Tests/               xUnit tests (protocol, tools, db, capture, SRQ, helpers)
+tests/Hpgl.Rendering.Tests/        xUnit tests (renderer geometry, fonts, golden regression)
 ```
 
 ## Troubleshooting
@@ -665,10 +689,12 @@ tests/GpibMcp.Tests/               xUnit tests (protocol, tools, db, helpers, lo
 
 ## Extending
 
-Ideas for follow-on work:
+Ideas for follow-on work (see the [issue tracker](https://github.com/TGoodhew/GPIB-MCP/issues)):
 
-- Binary block reads (`visa_read_bytes`) for waveform/screenshot transfers.
-- Service-request (SRQ) / status-byte polling.
+- Binary block reads (`visa_read_bytes`) for waveform transfers.
+- A GPIB transport abstraction to enable non-NI backends (Prologix / AR488) (#22).
+- A cross-platform raster backend for `Hpgl.Rendering` (drop the `System.Drawing`/net472
+  coupling) (#9), and SCPI-native screen dump where available (#10).
 - Instrument-specific helper tools (e.g. measurement presets).
 - A configurable default line terminator.
 

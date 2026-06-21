@@ -33,13 +33,13 @@ namespace Hpgl.Rendering
 
     /// <summary>
     /// Tokenizes an HP-GL/2 stream into a flat list of <see cref="HpglInstruction"/>.
-    /// Handles the special LB (label, read until terminator) and DT (define
-    /// terminator) instructions; everything else is mnemonic + numeric parameters.
+    /// Handles the instructions whose payload is not comma-separated numbers - LB (label, read to
+    /// terminator), SM (symbol char), PE (encoded-polyline payload to ';'), DT (define terminator) -
+    /// and skips ESC device-control sequences; everything else is mnemonic + numeric parameters.
     /// </summary>
     internal static class HpglParser
     {
         private const char Etx = '\u0003'; // default LB terminator (ETX)
-
         public static List<HpglInstruction> Parse(string source)
         {
             var result = new List<HpglInstruction>();
@@ -50,6 +50,17 @@ namespace Hpgl.Rendering
 
             while (i < n)
             {
+                // Device-control escape sequences (ESC . <cmd> [params] [:]) are plotter-handshake, not
+                // geometry - skip them so their bytes are never mistaken for HP-GL mnemonics/params.
+                if (source[i] == '')
+                {
+                    i++;
+                    if (i < n && source[i] == '.') i++;
+                    if (i < n) i++;                                   // the command char
+                    while (i < n && source[i] != ':' && source[i] != '' && source[i] != ';') i++;
+                    if (i < n && (source[i] == ':' || source[i] == ';')) i++;
+                    continue;
+                }
                 if (!char.IsLetter(source[i])) { i++; continue; }
                 if (i + 1 >= n) break;
 
@@ -65,6 +76,34 @@ namespace Hpgl.Rendering
                     while (i < n && source[i] != terminator) sb.Append(source[i++]);
                     if (i < n) i++; // consume terminator
                     result.Add(new HpglInstruction("LB", null, sb.ToString()));
+                    continue;
+                }
+
+                if (mnemonic == "PE")
+                {
+                    // HP-GL/2 encoded polyline: the payload is base-64-ish chars (incl. letters) up to
+                    // the ';' terminator - capture it raw; the renderer decodes it.
+                    var sb = new StringBuilder();
+                    while (i < n && source[i] != ';') sb.Append(source[i++]);
+                    if (i < n) i++; // consume ';'
+                    result.Add(new HpglInstruction("PE", null, sb.ToString()));
+                    continue;
+                }
+
+                if (mnemonic == "SM")
+                {
+                    // SM <char>; sets the symbol plotted at each point; SM; turns it off.
+                    // The character immediately follows SM and may be any printable (incl. a letter).
+                    if (i < n && source[i] != ';')
+                    {
+                        char sym = source[i++];
+                        result.Add(new HpglInstruction("SM", null, sym.ToString()));
+                    }
+                    else
+                    {
+                        result.Add(new HpglInstruction("SM", null)); // symbol mode off
+                    }
+                    if (i < n && source[i] == ';') i++;
                     continue;
                 }
 
