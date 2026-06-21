@@ -6,6 +6,10 @@
   "source": "8663A_OC.pdf",
   "aliases": ["8663A", "HP8663A"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8663A can talk (interface functions include T6), but only to return the RQS mask value, the Status-key message, learn-mode setup strings and the IEEE-488 Status Byte. There is no identify (IDN-style) query and no command that returns a model string."
+  },
   "commands": [
     {
       "name": "frequency",

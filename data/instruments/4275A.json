@@ -6,6 +6,10 @@
   "source": "4275A-OM.pdf",
   "aliases": ["4275A", "HP4275A", "HP 4275A", "4275"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 4275A program-code set (Table 3-11) contains no model-identification query and no SCPI '*IDN?'. It can talk (interface functions SH1, AH1, T5, L4, SR1, RL1, DC1, DT1) but only returns measurement data and, via the 'K' code, a key-state (settings) readback - not a model/identity string."
+  },
   "commands": [
     {
       "name": "display_a_function",

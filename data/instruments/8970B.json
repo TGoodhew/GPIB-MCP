@@ -6,6 +6,10 @@
   "source": "8970B-OM.pdf",
   "aliases": ["8970B", "HP8970B", "8970"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8970B program-code set (Table 3-8) has no instrument-ID query and no SCPI '*IDN?'. SD ('Displays Current Software Date') only shows the software date on the front-panel display, not over the bus. (The 'Outputs instrument identification' HEWLETT-PACKARD,8971B/C,0,YYWW response in the manual belongs to the separately addressed 8971B/C test set, not the 8970B.)"
+  },
   "commands": [
     {
       "name": "frequency",

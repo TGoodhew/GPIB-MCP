@@ -6,6 +6,10 @@
   "source": "5342A.pdf",
   "aliases": ["5342A", "HP5342A", "Agilent 5342A"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 5342A (HP-IB Option 011) program-code set contains no identification query and no SCPI '*IDN?'. When addressed to talk it returns only the measured frequency/amplitude data, so there is no remote way to read back a model string."
+  },
   "commands": [
     {
       "name": "frequency_mode_auto",

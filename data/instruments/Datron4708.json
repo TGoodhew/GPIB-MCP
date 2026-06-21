@@ -6,6 +6,10 @@
   "source": "Datron 4708 Operator Manual.pdf",
   "aliases": ["4708", "Datron 4708", "Wavetek 4708"],
   "termination": { "write": "=", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 4708 predates IEEE 488.2 and has no '*IDN?' or other command that returns a fixed model-identification string. The nearest features are V3 (returns the internal firmware part number and issue, e.g. '890077 - n', not a model name) and the I-code 'Aide Memoire' (a user-stored 16-character designator recalled with X8) - neither is a reliable instrument-identity query."
+  },
   "commands": [
     {
       "name": "function",

@@ -6,6 +6,10 @@
   "source": "8672A.pdf",
   "aliases": ["8672A", "HP8672A"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8672A is primarily listen-only; when addressed to talk (interface function T6) it returns only a single status byte (serial-poll response). It cannot return measurement data and has no identify query, so there is no remote way to read back a model string."
+  },
   "commands": [
     {
       "name": "frequency",

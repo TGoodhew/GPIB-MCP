@@ -6,6 +6,10 @@
   "source": "8673B User.pdf",
   "aliases": ["8673B", "HP8673B"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8673B can talk (interface function T5) - it can send a Require Service message, a Status Byte, a Status Bit, and parameter read-backs via the OA (Output Active) suffix - but there is no identify (IDN-style) query and no command that returns a model string."
+  },
   "commands": [
     {
       "name": "frequency",
