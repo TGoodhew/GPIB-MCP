@@ -291,10 +291,10 @@ namespace HpglViewer
             string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string[] guesses =
             {
-                @"C:\cygwin64\bin\hp2xx.exe",     // Cygwin build (reliable on modern Windows)
+                @"C:\cygwin64\bin\hp2xx.exe",                          // Cygwin (system root)
+                Path.Combine(home, "cygwin64", "bin", "hp2xx.exe"),   // Cygwin (user-mode root)
                 @"C:\cygwin\bin\hp2xx.exe",
                 @"C:\msys64\usr\bin\hp2xx.exe",
-                Path.Combine(home, "source", "hpgl-compare", "hp2xx", "bin", "hp2xx.exe"),
             };
             foreach (var g in guesses)
                 if (File.Exists(g)) return g;
