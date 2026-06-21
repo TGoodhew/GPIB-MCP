@@ -34,6 +34,9 @@ namespace GpibMcp.Tools
                     Prop("background", "string", "'black' (default) or 'white'."),
                     Prop("return_hpgl", "boolean", "Also return the raw HP-GL/2 source text (default false)."),
                     Prop("inline_svg", "boolean", "Return an SVG to display inline as an artifact (default true). Set false to fall back to image-block + saved-file only."),
+                    Prop("fidelity", "string", "Inline-SVG label fidelity: 'high' = exact HP single-stroke plotter font " +
+                        "(faithful, larger/slower to display); 'low' = simple text labels (renders noticeably faster). " +
+                        "If the user has stated a preference, pass it on EVERY capture. Omit only until they've chosen."),
                     Prop("save_dir", "string", "Folder to save the PNG into (e.g. 'C:\\\\Users\\\\me\\\\Pictures\\\\captures'). Defaults to the user's Pictures folder. Use this for 'capture the screen and store it in <folder>'."),
                     Prop("save_path", "string", "Full path (including filename) to save the PNG to. Overrides save_dir."),
                     Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000).")),
@@ -92,11 +95,17 @@ namespace GpibMcp.Tools
                     byte[] hpglBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);
                     bool inlineSvg = Bool(args, "inline_svg", true);
 
+                    // Inline-SVG label fidelity: 'low' = compact <text> labels (fast); 'high' = exact stroke
+                    // font (faithful). Until the user has chosen, render high and prompt them to pick.
+                    string fidelity = (Str(args, "fidelity", null) ?? "").Trim().ToLowerInvariant();
+                    bool fidelityChosen = fidelity == "low" || fidelity == "high";
+                    renderOptions.SvgTextLabels = fidelity == "low";
+
                     byte[] png;
                     string svg = null;
                     try
                     {
-                        png = HpglRenderer.RenderToPng(hpglBytes, renderOptions);
+                        png = HpglRenderer.RenderToPng(hpglBytes, renderOptions); // PNG always uses the exact stroke font
                         if (inlineSvg) svg = HpglRenderer.RenderToSvg(hpglBytes, renderOptions);
                     }
                     catch (Exception ex)
@@ -109,20 +118,25 @@ namespace GpibMcp.Tools
 
                     string meta = def.Model + " screen - " + capture.ByteCount + " bytes HP-GL, " +
                                   capture.Completion + ", " + capture.ElapsedMs + " ms";
+                    if (fidelityChosen) meta += "  |  " + fidelity + " fidelity";
                     if (savedTo != null) meta += "  |  saved to: " + savedTo;
 
                     var output = new ToolOutput();
                     if (inlineSvg && svg != null)
                     {
-                        // Claude Desktop won't paint a tool-result image block inline, but it WILL render
-                        // an SVG artifact. Hand the model the SVG and tell it to display it inline.
+                        // Claude Desktop renders artifacts inline, not tool-result image blocks. Lead with an
+                        // unmistakable directive: the user can ONLY see this via an artifact, and the image
+                        // block below is visible to the model alone - so "seeing" it is not "showing" it.
+                        // Tell the model to PASTE THE SVG VERBATIM (copying is fast/exact; redrawing stalls).
                         output.AddText(
-                            meta + "\n\n" +
-                            "To show this capture inline in the chat, create an image/svg+xml artifact " +
-                            "from the SVG below (render it - do not just describe it). " +
-                            "The same image was also saved" +
-                            (savedTo != null ? " to " + savedTo : "") + ".\n\n" + svg);
-                        output.AddImage(png, "image/png"); // also provide the raster for vision / future clients
+                            "ACTION REQUIRED - show this capture to the user now. They CANNOT see it unless you " +
+                            "create an artifact; the image block in this result is visible only to you, not in their " +
+                            "chat, so describing or summarising the screen does NOT show it to them. Create an artifact " +
+                            "of type `image/svg+xml` and paste the SVG below into it VERBATIM (copy it exactly - do not " +
+                            "redraw, regenerate, simplify, or describe it). Do this before saying anything else.\n\n" +
+                            meta + "\n\n" + svg);
+                        output.AddImage(png, "image/png"); // also the raster, for vision / clients that render image blocks
+                        if (!fidelityChosen) output.AddText(FidelityPrompt());
                     }
                     else
                     {
@@ -135,6 +149,19 @@ namespace GpibMcp.Tools
         }
 
         private static ToolOutput Error(string message) => ToolOutput.Text(message).AsError();
+
+        /// <summary>Appended to a capture when the user hasn't chosen a fidelity yet: asks them to pick.</summary>
+        private static string FidelityPrompt() =>
+            "\n---\n" +
+            "ASSISTANT: a screen-capture fidelity hasn't been chosen yet (this one used HIGH fidelity). After " +
+            "showing the capture, ask the user which they'd like to use FROM NOW ON, and then remember it:\n" +
+            "  - HIGH - the exact HP plotter stick-font: most faithful to the real 7475/7440/7550 look, but a " +
+            "larger SVG so it takes a bit longer to render inline.\n" +
+            "  - LOW  - simple text labels: renders noticeably faster (the trace and graticule are identical; only " +
+            "the label font differs).\n" +
+            "Once they choose, pass fidelity=\"low\" or fidelity=\"high\" on EVERY capture from then on (don't ask " +
+            "again). Tell the user they can switch any time by saying e.g. \"use low-fidelity captures\" or " +
+            "\"use high-fidelity captures\".";
 
         /// <summary>
         /// Saves the PNG to disk (best effort) and returns the path, or null on failure.

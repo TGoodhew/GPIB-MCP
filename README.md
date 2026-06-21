@@ -287,7 +287,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 | `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen (HP-GL plotter emulation); returns an SVG to show inline + saves a PNG to Pictures |
+| `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen (HP-GL plotter emulation); returns an SVG to show inline + saves a PNG to Pictures |
 
 Argument notes:
 
@@ -463,15 +463,23 @@ compact **SVG**.
 Claude Desktop does **not** render MCP tool-result *image* blocks inline in the conversation — a
 [known client limitation](https://github.com/anthropics/claude-ai-mcp/issues/238) (the image is
 visible to the model and, at best, buried inside the expandable tool-call block). It **does**,
-however, render **SVG artifacts** inline. So the tool returns the capture as an SVG and asks Claude
-to display it as an `image/svg+xml` artifact — which appears inline with the rest of the chat. The
-spec-correct PNG image block is still included (for the model's vision and for clients that do render
-it), and the PNG is always saved to disk regardless.
+however, render **artifacts** inline. So the tool returns the capture as an SVG and asks Claude to
+paste it verbatim into an `image/svg+xml` artifact — which appears inline. The spec-correct PNG image
+block is still included (for the model's vision and for clients that do render it), and the PNG is
+always saved to disk regardless.
 
-- `inline_svg=true` (default) returns the SVG + the instruction to render it as an artifact.
+The SVG is built to be small so the model re-emits it as an artifact quickly (#23): strokes are
+coalesced into one `<path>` per pen colour and a long trace is sub-pixel-simplified — a real 8563E
+capture drops from ~21 KB to ~7 KB with no visible change. The root is a pure `viewBox` (no fixed
+size) so the artifact scales to fit its panel instead of clipping.
+
+- **`fidelity`** picks the inline label rendering: **`high`** = the exact HP single-stroke plotter
+  font (most faithful to a real 7475/7440/7550; ~7 KB); **`low`** = simple text labels (~4 KB, renders
+  noticeably faster — only the label font differs, the trace/graticule are identical). The PNG is
+  always the exact stroke font. On the first capture the tool asks the user which they prefer and
+  Claude then passes their choice on every capture; say *"use low-fidelity captures"* to switch.
 - `inline_svg=false` falls back to the image-block + saved-file behaviour only.
-- The vector SVG is small (a real 8563E capture is ~9 KB), so it reproduces reliably as an artifact.
-  You can preview the exact look by opening [`Test/test.svg`](Test/test.svg) in a browser.
+- Preview the look by opening [`Test/test.svg`](Test/test.svg) in a browser.
 
 > The capture/render technique is derived from the HP7470A Plotter Emulator (`7470.cpp`) by
 > John Miles, KE5FX — <http://www.ke5fx.com/>.

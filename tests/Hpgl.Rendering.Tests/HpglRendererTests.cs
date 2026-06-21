@@ -115,9 +115,9 @@ namespace Hpgl.Rendering.Tests
 
             Assert.StartsWith("<svg", svg);
             Assert.EndsWith("</svg>", svg);
-            Assert.Contains("width=\"800\"", svg);
-            Assert.Contains("viewBox=\"0 0 800 600\"", svg);
-            Assert.Contains("<polyline", svg);          // border/trace vectors + label strokes
+            Assert.Contains("viewBox=\"0 0 800 600\"", svg);     // responsive: viewBox only, no fixed svg size
+            Assert.DoesNotContain("<svg xmlns=\"http://www.w3.org/2000/svg\" width=", svg); // svg tag carries no intrinsic px size
+            Assert.Contains("<path", svg);          // border/trace vectors + label strokes
 
             // Labels are drawn as vector strokes (a single-stroke font), not <text>, so the same
             // plot without the label produces strictly fewer polylines.
@@ -136,14 +136,14 @@ namespace Hpgl.Rendering.Tests
             // The five-segment border is one connected pen-down run => a single polyline.
             string hpgl = "IN;SP1;PU0,0;PD10000,0;PD10000,7000;PD0,7000;PD0,0;SP0;";
             string svg = HpglRenderer.RenderToSvg(hpgl);
-            int polylines = svg.Split(new[] { "<polyline" }, System.StringSplitOptions.None).Length - 1;
+            int polylines = svg.Count(c => c == 'M');
             Assert.Equal(1, polylines);
         }
 
         // ---- arcs, circles, rectangles (issue #8 §3.3/§3.4) ------------------
 
         private static int Polylines(string svg) =>
-            svg.Split(new[] { "<polyline" }, System.StringSplitOptions.None).Length - 1;
+            svg.Count(c => c == 'M');
 
         // Each "x,y" vertex carries exactly one comma, and nothing else in the SVG does.
         private static int Vertices(string svg) => svg.Count(c => c == ',');
@@ -178,7 +178,7 @@ namespace Hpgl.Rendering.Tests
         {
             // Quarter circle: start (7000,5000), centre (5000,5000), +90°, then continue drawing.
             string svg = HpglRenderer.RenderToSvg("IN;SP1;PA7000,5000;AA5000,5000,90;");
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
             Assert.InRange(Vertices(svg), 15, 25); // 90/5° = 18 chords -> ~19 vertices
         }
 
@@ -204,7 +204,7 @@ namespace Hpgl.Rendering.Tests
         public void LineType_DashedVector_EmitsStrokeDashArray()
         {
             string svg = HpglRenderer.RenderToSvg("IN;SP1;LT2;PU0,0;PD10000,0;");
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
             Assert.Contains("stroke-dasharray=", svg);
         }
 
@@ -212,7 +212,7 @@ namespace Hpgl.Rendering.Tests
         public void LineType_Solid_HasNoDashArray()
         {
             string svg = HpglRenderer.RenderToSvg("IN;SP1;PU0,0;PD10000,0;");
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
             Assert.DoesNotContain("stroke-dasharray", svg);
         }
 
@@ -305,7 +305,7 @@ namespace Hpgl.Rendering.Tests
         {
             // PM0..PM2 only records; with no EP/FP nothing is emitted.
             string svg = HpglRenderer.RenderToSvg(Triangle);
-            Assert.DoesNotContain("<polyline", svg);
+            Assert.DoesNotContain("<path", svg);
             Assert.DoesNotContain("<polygon", svg);
         }
 
@@ -320,7 +320,7 @@ namespace Hpgl.Rendering.Tests
         public void Polygon_EP_StrokesBufferedOutline()
         {
             string svg = HpglRenderer.RenderToSvg(Triangle + "EP;");
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
             Assert.DoesNotContain("<polygon", svg);
         }
 
@@ -443,7 +443,7 @@ namespace Hpgl.Rendering.Tests
         {
             string pe = PeEncode((4000, 0), (-2000, 3000));
             string svg = HpglRenderer.RenderToSvg("IN;SP1;PA5000,1000;" + pe);
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
             Assert.Equal(3, Vertices(svg));
         }
 
@@ -456,8 +456,8 @@ namespace Hpgl.Rendering.Tests
             // ESC device-control sequence are interleaved with a real vector - none should break it.
             string hpgl = "IN;SP1;OS;OE;OA;OI;VS10;DC;.(;PU0,0;PD9000,0;.);PG;";
             string svg = HpglRenderer.RenderToSvg(hpgl);
-            Assert.Contains("<polyline", svg);     // the PD vector survived
-            int polylines = svg.Split(new[] { "<polyline" }, System.StringSplitOptions.None).Length - 1;
+            Assert.Contains("<path", svg);     // the PD vector survived
+            int polylines = svg.Count(c => c == 'M');
             Assert.Equal(1, polylines);            // and nothing spurious was drawn
         }
 
@@ -475,7 +475,7 @@ namespace Hpgl.Rendering.Tests
         {
             string svg = HpglRenderer.RenderToSvg("", new HpglRenderOptions { Width = 100, Height = 80 });
             Assert.Contains("<rect", svg);             // background fill only
-            Assert.DoesNotContain("<polyline", svg);
+            Assert.DoesNotContain("<path", svg);
         }
 
         // ---- label / text subsystem (issue #8 §3.6) ------------------------
@@ -485,12 +485,27 @@ namespace Hpgl.Rendering.Tests
         [Fact]
         public void Label_IsDrawnAsVectorStrokes_NotSystemText()
         {
-            // Labels render through the built-in single-stroke font, so they are <polyline> strokes
+            // Labels render through the built-in single-stroke font, so they are <path> strokes
             // and never <text>. "AB" has multiple strokes.
             string svg = HpglRenderer.RenderToSvg("IN;SP1;PU100,100;LBAB" + Etx + ";");
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
             Assert.DoesNotContain("<text", svg);
             Assert.True(Polylines(svg) >= 3, "two letters should yield several strokes; got " + Polylines(svg));
+        }
+
+        [Fact]
+        public void RenderToSvg_LowFidelity_EmitsTextLabelsAndIsSmaller()
+        {
+            // SvgTextLabels (low fidelity, #23): a horizontal label becomes one compact <text> element
+            // instead of dozens of stroke subpaths - smaller/faster to display inline.
+            const string hpgl = "IN;SP1;PA1000,1000;LBCENTER 460.000kHz" + ";";
+            string hi = HpglRenderer.RenderToSvg(hpgl, new HpglRenderOptions { Width = 800, Height = 600 });
+            string lo = HpglRenderer.RenderToSvg(hpgl, new HpglRenderOptions { Width = 800, Height = 600, SvgTextLabels = true });
+
+            Assert.DoesNotContain("<text", hi);              // high fidelity: stroked glyphs
+            Assert.Contains("<text", lo);                    // low fidelity: a <text> element
+            Assert.Contains("CENTER 460.000kHz", lo);        // with the label content
+            Assert.True(lo.Length < hi.Length, "text labels should be smaller; hi=" + hi.Length + " lo=" + lo.Length);
         }
 
         [Fact]
@@ -550,7 +565,7 @@ namespace Hpgl.Rendering.Tests
         public void Label_MultiLine_CrLf_RendersWithoutThrowing()
         {
             string svg = HpglRenderer.RenderToSvg("IN;SP1;PU100,100;LBAA\r\nBB" + Etx + ";");
-            Assert.Contains("<polyline", svg);
+            Assert.Contains("<path", svg);
         }
 
         [Fact]

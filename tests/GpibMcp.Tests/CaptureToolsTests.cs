@@ -204,5 +204,33 @@ namespace GpibMcp.Tests
             Assert.False(output.IsError);
             Assert.Contains("GPIB0::18::INSTR|CONTS;", visa.Writes); // resumed continuous sweep
         }
+
+        [Fact]
+        public void Capture_NoFidelityChosen_PromptsToPick_AndUsesHigh()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+
+            Assert.False(output.IsError);
+            string text = output.AsText();
+            Assert.Contains("fidelity", text.ToLowerInvariant());     // prompts the user to choose
+            Assert.Contains("use low-fidelity captures", text);       // tells them how to switch
+            Assert.DoesNotContain("<text", text);                     // default HIGH -> stroked labels, no <text>
+        }
+
+        [Fact]
+        public void Capture_LowFidelity_UsesTextLabels_NoPrompt()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["fidelity"] = "low" });
+
+            Assert.False(output.IsError);
+            string text = output.AsText();
+            Assert.Contains("<text", text);                           // low fidelity -> <text> labels in the SVG
+            Assert.Contains("low fidelity", text);                    // noted in the meta line
+            Assert.DoesNotContain("hasn't been chosen", text);        // no choose-prompt once a mode is set
+        }
     }
 }

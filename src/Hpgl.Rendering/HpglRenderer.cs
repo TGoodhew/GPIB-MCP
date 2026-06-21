@@ -89,10 +89,13 @@ namespace Hpgl.Rendering
             Execute(instructions, measure);
 
             var sb = new StringBuilder();
-            sb.Append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").Append(options.Width)
-              .Append("\" height=\"").Append(options.Height)
-              .Append("\" viewBox=\"0 0 ").Append(options.Width).Append(' ').Append(options.Height)
-              .Append("\">\n");
+            // Pure responsive root: a viewBox (the coordinate system) + preserveAspectRatio, and NO fixed
+            // pixel width/height and NO CSS. The SVG has no intrinsic size, so a viewer scales the whole
+            // viewBox to fit its container (e.g. an artifact panel) - there is no declared "1024" for it to
+            // resize/clip to at the end. (Avoid width="100%" with no height: that collapses to zero height.)
+            sb.Append("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ")
+              .Append(options.Width).Append(' ').Append(options.Height)
+              .Append("\">\n");   // preserveAspectRatio defaults to "xMidYMid meet" - scale-to-fit, centered
             sb.Append("<rect width=\"").Append(options.Width).Append("\" height=\"").Append(options.Height)
               .Append("\" fill=\"").Append(SvgSink.ToHex(options.ResolveBackground())).Append("\"/>\n");
 
@@ -217,6 +220,10 @@ namespace Hpgl.Rendering
             ax = cx; ay = cy; ux = -cy; uy = cx;
         }
 
+        // CR/LF and shift-out/shift-in: a label containing any of these isn't a plain single-line run,
+        // so the low-fidelity <text> path declines it and the stroke font handles it instead.
+        private static readonly char[] LabelControlChars = { '\r', '\n', '', '' };
+
         /// <summary>LB: draws a string from the current position, advancing the carry-over cursor.</summary>
         private static void DrawLabel(PlotterState s, string text, IPlotSink sink)
         {
@@ -227,6 +234,19 @@ namespace Hpgl.Rendering
             double ox = s.X, oy = s.Y, cursorX = 0, lineY = 0;
             double adv = s.AdvanceXUnits, lineStep = s.LineAdvanceUnits;
             bool activeAlt = s.ActiveAlternate;
+
+            // Low-fidelity SVG: render the whole label as one <text> element instead of dozens of font
+            // strokes - far smaller/faster to display inline (#23). Only for a plain horizontal, single-
+            // line label (no symbol mode, clip, shift-set, or embedded CR/LF); anything else falls through
+            // to the exact single-stroke font below. SVG-only; the raster path always uses the stroke font.
+            if (sink.TextLabels && !s.HasClip && s.SymbolChar < 0
+                && Math.Abs(ay) < 1e-6 && ax > 0.999 && text.IndexOfAny(LabelControlChars) < 0)
+            {
+                sink.DrawText(ox, oy, text, s.CharHeightUnits, s.Pen);
+                double w = text.Length * adv;
+                s.X = ox + w * ax; s.Y = oy + w * ay;
+                return;
+            }
 
             foreach (char ch in text)
             {
@@ -900,6 +920,10 @@ namespace Hpgl.Rendering
         void SetLineType(int lineType);
         /// <summary>Solid-fills a closed polygon (plot-unit vertices) - used for FT type 1/2 fills.</summary>
         void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen);
+        /// <summary>True if this sink renders labels as &lt;text&gt; (low-fidelity) rather than stroking them.</summary>
+        bool TextLabels { get; }
+        /// <summary>Draws a horizontal label as text at its baseline origin (only called when TextLabels).</summary>
+        void DrawText(double ox, double oy, string text, double capUnits, int pen);
     }
 
     /// <summary>
@@ -916,6 +940,9 @@ namespace Hpgl.Rendering
         public ClipSink(IPlotSink inner, PlotterState s) { _inner = inner; _s = s; }
 
         public void SetLineType(int lineType) => _inner.SetLineType(lineType);
+        public bool TextLabels => _inner.TextLabels;
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen)
+            => _inner.DrawText(ox, oy, text, capUnits, pen);   // text is only emitted when no clip is active
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
@@ -1090,6 +1117,8 @@ namespace Hpgl.Rendering
 
         public void SetLineType(int lineType) { }
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen) { }
+        public bool TextLabels => false;
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen) { }
     }
 
     internal sealed class MeasureSink : IPlotSink
@@ -1104,6 +1133,8 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { /* line style does not affect extent */ }
+        public bool TextLabels => false;   // measure pass strokes labels so their extent is included in auto-fit
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen) { }
 
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
         {
@@ -1166,6 +1197,8 @@ namespace Hpgl.Rendering
         }
 
         public void SetLineType(int lineType) { _lineType = lineType; }
+        public bool TextLabels => false;   // raster always uses the exact single-stroke font
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen) { }
 
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
@@ -1204,10 +1237,12 @@ namespace Hpgl.Rendering
     }
 
     /// <summary>
-    /// Emits SVG elements for the fitted plot. Consecutive pen-down segments that share a pen
-    /// and join end-to-end are coalesced into one &lt;polyline&gt; so a dense trace stays small.
-    /// Coordinates are rounded to whole pixels - sub-pixel precision is invisible at screen sizes
-    /// and would only bloat the document.
+    /// Emits SVG for the fitted plot, optimised so the model can re-emit it as an artifact quickly
+    /// (issue #23): ALL strokes that share a pen + line type are batched into ONE &lt;path&gt; element
+    /// (disjoint runs as "M" subpaths) so the per-element wrapper - over half the document otherwise -
+    /// is not repeated per stroke. Long runs (e.g. a spectrum trace) are Ramer-Douglas-Peucker-
+    /// simplified at a sub-pixel tolerance; short runs (font glyphs, graticule, circles, arcs) are kept
+    /// byte-exact. Coordinates are whole pixels. None of this touches the raster (PNG) path.
     /// </summary>
     internal sealed class SvgSink : IPlotSink
     {
@@ -1215,21 +1250,50 @@ namespace Hpgl.Rendering
         private readonly PlotTransform _t;
         private readonly HpglRenderOptions _opt;
 
-        private readonly StringBuilder _points = new StringBuilder();
+        private readonly StringBuilder _pathData = new StringBuilder();   // coalesced subpaths for the current pen group
+        private readonly List<int> _runX = new List<int>();              // the current connected run, accumulated for RDP
+        private readonly List<int> _runY = new List<int>();
         private readonly double _diag;
+        private readonly double _simplifyPx;
         private int _pen = int.MinValue;
         private int _lineType = HpglLineTypes.Solid;
         private int _runLineType = HpglLineTypes.Solid;
         private int _lastX, _lastY;
         private bool _open;
 
+        // Only runs longer than this are RDP-simplified, so a spectrum trace shrinks while font glyphs,
+        // graticule, circles and arcs stay byte-exact (and their structural tests are unaffected).
+        private const int SimplifyMinPoints = 100;
+
         public SvgSink(StringBuilder sb, PlotTransform t, HpglRenderOptions opt)
         {
             _sb = sb; _t = t; _opt = opt;
             _diag = Math.Sqrt((double)opt.Width * opt.Width + (double)opt.Height * opt.Height);
+            _simplifyPx = opt.SvgSimplifyTolerancePx;
         }
 
         public void SetLineType(int lineType) { _lineType = lineType; }
+
+        /// <summary>Low-fidelity label mode: emit labels as &lt;text&gt; instead of single-stroke font.</summary>
+        public bool TextLabels => _opt.SvgTextLabels;
+
+        /// <summary>Emits a horizontal label as one &lt;text&gt; element (monospace) at its baseline origin.</summary>
+        public void DrawText(double ox, double oy, string text, double capUnits, int pen)
+        {
+            Flush();   // close any pending stroke path so the text paints over the geometry
+            int px = R(_t.MapX(ox)), py = R(_t.MapY(oy));
+            // SVG font-size is the em (cap height is ~0.7 of it), so the cap-height value alone renders
+            // too small; scale it up so the text reads at roughly the intended label size.
+            int size = (int)Math.Max(12.0, capUnits * _t.Scale * 2.0);
+            _sb.Append("<text x=\"").Append(px).Append("\" y=\"").Append(py)
+               .Append("\" fill=\"").Append(ToHex(_opt.ResolvePen(pen)))
+               .Append("\" font-family=\"monospace\" font-size=\"").Append(size).Append("px\">")
+               .Append(Escape(text)).Append("</text>\n");
+        }
+
+        private static string Escape(string s) =>
+            s.IndexOfAny(new[] { '&', '<', '>' }) < 0 ? s
+                : s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 
         public void FillPolygon(IReadOnlyList<double> xs, IReadOnlyList<double> ys, int pen)
         {
@@ -1249,27 +1313,52 @@ namespace Hpgl.Rendering
             int ax = R(_t.MapX(x1)), ay = R(_t.MapY(y1));
             int bx = R(_t.MapX(x2)), by = R(_t.MapY(y2));
 
-            // Coalesce only when pen, line type, and join point all match.
-            if (_open && pen == _pen && _lineType == _runLineType && ax == _lastX && ay == _lastY)
+            if (_open && pen == _pen && _lineType == _runLineType)
             {
-                _points.Append(' ').Append(bx).Append(',').Append(by);
+                if (ax == _lastX && ay == _lastY) { _runX.Add(bx); _runY.Add(by); } // continue the connected run
+                else { EndRun(); StartRun(ax, ay, bx, by); }                         // disjoint subpath, same pen group
             }
             else
             {
-                Flush();
-                _pen = pen;
-                _runLineType = _lineType;
-                _points.Append(ax).Append(',').Append(ay).Append(' ').Append(bx).Append(',').Append(by);
-                _open = true;
+                Flush();                                                             // pen/line-type change -> new <path>
+                _pen = pen; _runLineType = _lineType; _open = true;
+                StartRun(ax, ay, bx, by);
             }
             _lastX = bx; _lastY = by;
         }
 
-        /// <summary>Writes the pending polyline (if any) and resets the batch.</summary>
+        private void StartRun(int ax, int ay, int bx, int by)
+        {
+            _runX.Clear(); _runY.Clear();
+            _runX.Add(ax); _runY.Add(ay);
+            _runX.Add(bx); _runY.Add(by);
+        }
+
+        /// <summary>Finalises the current run (RDP-simplifying long ones) as an "M..." subpath in the path data.</summary>
+        private void EndRun()
+        {
+            int n = _runX.Count;
+            if (n < 2) { _runX.Clear(); _runY.Clear(); return; }
+
+            int[] keep = (_simplifyPx > 0 && n > SimplifyMinPoints) ? Rdp(_runX, _runY, _simplifyPx) : null;
+            int count = keep != null ? keep.Length : n;
+
+            _pathData.Append('M');
+            for (int i = 0; i < count; i++)
+            {
+                int j = keep != null ? keep[i] : i;
+                if (i > 0) _pathData.Append(' ');
+                _pathData.Append(_runX[j]).Append(',').Append(_runY[j]);
+            }
+            _runX.Clear(); _runY.Clear();
+        }
+
+        /// <summary>Writes the pending &lt;path&gt; (all batched strokes of one pen/line type) and resets.</summary>
         public void Flush()
         {
             if (!_open) return;
-            _sb.Append("<polyline fill=\"none\" stroke=\"").Append(ToHex(_opt.ResolvePen(_pen)))
+            EndRun();
+            _sb.Append("<path fill=\"none\" stroke=\"").Append(ToHex(_opt.ResolvePen(_pen)))
                .Append("\" stroke-width=\"1\"");
             float[] dash = HpglLineTypes.DashArray(_runLineType, _diag);
             if (dash != null)
@@ -1282,9 +1371,45 @@ namespace Hpgl.Rendering
                 }
                 _sb.Append('"');
             }
-            _sb.Append(" points=\"").Append(_points).Append("\"/>\n");
-            _points.Clear();
+            _sb.Append(" d=\"").Append(_pathData).Append("\"/>\n");
+            _pathData.Clear();
             _open = false;
+        }
+
+        /// <summary>Iterative Ramer-Douglas-Peucker; returns the indices of kept points (endpoints always kept).</summary>
+        private static int[] Rdp(List<int> xs, List<int> ys, double eps)
+        {
+            int n = xs.Count;
+            var keep = new bool[n];
+            keep[0] = true; keep[n - 1] = true;
+            var stack = new Stack<int[]>();
+            stack.Push(new[] { 0, n - 1 });
+            while (stack.Count > 0)
+            {
+                int[] seg = stack.Pop();
+                int first = seg[0], last = seg[1];
+                if (last <= first + 1) continue;
+                double ax = xs[first], ay = ys[first], bx = xs[last], by = ys[last];
+                double dx = bx - ax, dy = by - ay;
+                double len = Math.Sqrt(dx * dx + dy * dy);
+                double dmax = -1; int idx = -1;
+                for (int i = first + 1; i < last; i++)
+                {
+                    double d = len == 0
+                        ? Math.Sqrt((xs[i] - ax) * (xs[i] - ax) + (ys[i] - ay) * (ys[i] - ay))
+                        : Math.Abs(dy * xs[i] - dx * ys[i] + bx * ay - by * ax) / len;
+                    if (d > dmax) { dmax = d; idx = i; }
+                }
+                if (dmax > eps && idx > first)
+                {
+                    keep[idx] = true;
+                    stack.Push(new[] { first, idx });
+                    stack.Push(new[] { idx, last });
+                }
+            }
+            var result = new List<int>(n);
+            for (int i = 0; i < n; i++) if (keep[i]) result.Add(i);
+            return result.ToArray();
         }
 
         private static int R(float v) => (int)Math.Round(v);
