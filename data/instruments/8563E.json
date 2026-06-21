@@ -14,7 +14,8 @@
   "capture": {
     "method": "hpgl",
     "plotCommand": "PLOT 550,279,9750,7479;",
-    "preRoll": "SNGLS;TS;"
+    "preRoll": "SNGLS;TS;",
+    "postRoll": "CONTS;"
   },
   "statusModel": {
     "srqSupported": true,

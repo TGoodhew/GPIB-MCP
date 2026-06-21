@@ -175,5 +175,34 @@ namespace GpibMcp.Tests
             Assert.True(output.IsError);
             Assert.Contains("No complete plot", output.AsText());
         }
+
+        [Fact]
+        public void Capture_PostRoll_IsSentAfterCapture()
+        {
+            // The pre-roll puts the analyzer in single-sweep (SNGLS;TS;); the post-roll resumes
+            // continuous sweep (CONTS;) so the capture doesn't leave the display frozen.
+            var def = new InstrumentDefinition
+            {
+                Model = "8563E",
+                Capture = new CaptureProfile
+                {
+                    Method = "hpgl",
+                    PlotCommand = "PLOT 550,279,9750,7479;",
+                    PreRoll = "SNGLS;TS;",
+                    PostRoll = "CONTS;"
+                },
+                Commands = new List<InstrumentCommand>()
+            };
+            var visa = new FakeInstrumentManager();
+            var db = InstrumentDatabase.FromDefinitions(new[] { def });
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::18::INSTR", "8563E");
+            InstrumentTools.BuildRegistry(visa, db, store).TryGet("instrument_capture_screen", out var tool);
+
+            var output = tool.Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+
+            Assert.False(output.IsError);
+            Assert.Contains("GPIB0::18::INSTR|CONTS;", visa.Writes); // resumed continuous sweep
+        }
     }
 }

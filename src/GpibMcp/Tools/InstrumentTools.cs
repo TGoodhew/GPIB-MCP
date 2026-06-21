@@ -116,7 +116,10 @@ namespace GpibMcp.Tools
             // ---- VISA: device clear ---------------------------------------------
             registry.Add(new McpTool(
                 "visa_clear",
-                "Send an IEEE 488.2 device clear to reset the instrument's I/O state.",
+                "Send an IEEE 488.2 device clear to reset the instrument's I/O state (clears the GPIB " +
+                "input/output buffers). CAUTION: on some instruments - notably HP 8560-series spectrum " +
+                "analyzers - a device clear ALSO executes a full instrument PRESET, wiping the current " +
+                "settings (center freq, span, ref level). Don't device-clear those unless you intend to reset them.",
                 Schema(
                     Required("resource", "string", "VISA resource string.")),
                 args =>

@@ -270,7 +270,7 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
 | `visa_read` | `resource` | `timeout_ms` | Read a pending response |
 | `visa_identify` | `resource` | — | Convenience `*IDN?` query |
-| `visa_clear` | `resource` | — | IEEE 488.2 device clear |
+| `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
 | `visa_list_open` | — | — | List sessions this server holds open |
 | `visa_close` | `resource` | — | Close a held-open session |
 | `visa_command_history` | `resource` | `max` | Show the recent command chain sent to / received from an instrument |
@@ -448,7 +448,11 @@ compact **SVG**.
 
 - The model is taken from the resource's [assignment](#instrument-command-database), or pass `model=`.
 - Only models with a `capture` profile in the database are supported (the 8563E ships with one;
-  add others as data — `{ "method": "hpgl", "plotCommand": "...", "preRoll": "..." }`).
+  add others as data — `{ "method": "hpgl", "plotCommand": "...", "preRoll": "...", "postRoll": "..." }`).
+- **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
+  HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
+  capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`
+  (`CONTS;`) resumes continuous sweeping, so the display isn't left frozen.
 - `return_hpgl=true` also returns the raw HP-GL/2 source; `background`, `width`, `height` tune the image.
 - Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
   (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
