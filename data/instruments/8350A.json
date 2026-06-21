@@ -1,15 +1,20 @@
 {
-  "model": "8350B",
+  "model": "8350A",
   "manufacturer": "HP",
   "category": "Sweep Oscillator",
-  "description": "HP 8350B Sweep Oscillator mainframe used with 835xx (83500-series) RF plug-ins. Legacy HP-IB (IEEE-488) instrument using a two-letter mnemonic program-code language (NOT SCPI). Program codes may be upper or lower case; the instrument ignores spaces, plus signs, and unexpected/invalid characters. Numeric entries are not executed until a units terminator (scale suffix) is supplied: frequency GZ/MZ/KZ/HZ (GHz/MHz/kHz/Hz), time SC/MS (seconds/msec), and power dBm/dB. Most parameters that carry a numeric value are read back with the Output Interrogated Parameter function: send 'OP' immediately followed by the function's prefix (e.g. 'OPFA' reads the start frequency); the reply is a 14-character ASCII value of the form +d.dddddE+dd terminated by CR/LF. Output Active Parameter (OA) returns whichever parameter is currently active. Power level, ALC mode and RF on/off control require an 83500-series plug-in and are device dependent on the plug-in installed; HP 86200-series plug-ins cannot be power-programmed via the 8350B. Source: HP 8350B Operating and Service Manual, Table 3-7 HP-IB Program Codes and the per-block Remote Function Procedure tables.",
-  "source": "8350B-OSM.pdf",
-  "aliases": ["8350B", "HP8350B", "HP 8350B"],
-  "termination": { "write": "\n", "read": "\n" },
+  "description": "HP 8350A Sweep Oscillator mainframe (the earlier predecessor of the 8350B) used with 835xx (83500-series) RF plug-ins. Legacy HP-IB (IEEE-488) instrument using a two-letter mnemonic program-code language (NOT SCPI). Program codes may be upper or lower case; the instrument ignores spaces, plus signs, negative signs (except when valid) and unexpected/invalid characters. Numeric entries are not executed until a units terminator (scale suffix) is supplied: frequency GZ/MZ/KZ/HZ (GHz/MHz/kHz/Hz), time SC/MS (seconds/msec), and power dBm/dB. Most parameters that carry a numeric value are read back with the Output Interrogated Parameter function: send 'OP' immediately followed by the function's prefix (e.g. 'OPFA' reads the start frequency); the reply is a 14-character ASCII value of the form +d.dddddE+dd terminated by CR/LF. Output Active Parameter (OA) returns whichever parameter is currently active. Power level, ALC mode and RF on/off control require an 83500-series plug-in and are device dependent on the plug-in installed. Confirmed differences from the later 8350B: the 8350A has NO identity/software-revision query (no OI), no Output Harmonic Number (OH), and no frequency display multiplier/offset (SHFA/SHFB); its Output Status returns only 2 bytes (one extended status byte) with no CS/RE/R2 status commands; and its Output Mode String is 25 bytes. The 8350A also supports 83522/83525-plug-in crystal markers (C1-C4) which are plug-in-dependent functions. Source: HP 8350A Operating and Service Manual, Table 3-7 HP-IB Program Codes and the HP-IB Only Functions tables.",
+  "source": "8350A-OSM.pdf",
+  "aliases": [
+    "8350A",
+    "HP8350A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
-    "command": "OI",
-    "matchRegex": "8350",
-    "description": "Output Software Revision Number / Output Identity. Returns 'O8350B REV X,Y' (mainframe rev X, plug-in rev Y), e.g. 'O8350B REV 1,5', terminated by CR/LF. The 8350B has no SCPI '*IDN?' or '?'-style query; OI is the closest identity query."
+    "supported": false,
+    "description": "The HP 8350A has no identity or software-revision query. Unlike the later 8350B (which added the OI Output Software Revision / Output Identity command returning 'O8350B REV X,Y'), the 8350A program-code set contains no OI, no SCPI '*IDN?', and no '?'-style identification query."
   },
   "commands": [
     {
@@ -18,7 +23,9 @@
       "category": "System",
       "description": "Instrument Preset. Returns the sweep oscillator to its known preset state (START/STOP mode over the plug-in range, markers off, etc.). SAVE registers are left unchanged.",
       "set": "IP",
-      "examples": ["IP"]
+      "examples": [
+        "IP"
+      ]
     },
     {
       "name": "start_frequency",
@@ -28,9 +35,21 @@
       "set": "FA <value> <suffix>",
       "query": "OPFA",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent (values up to +/-2% out of range are accepted)" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent (values up to +/-2% out of range are accepted)"
+        }
       ],
-      "examples": ["FA 2 GZ", "OUTPUT 719;\"OPFA\""]
+      "examples": [
+        "FA 2 GZ",
+        "OUTPUT 719;\"OPFA\""
+      ]
     },
     {
       "name": "stop_frequency",
@@ -40,9 +59,21 @@
       "set": "FB <value> <suffix>",
       "query": "OPFB",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["FB 8 GZ", "OUTPUT 719;\"OPFB\""]
+      "examples": [
+        "FB 8 GZ",
+        "OUTPUT 719;\"OPFB\""
+      ]
     },
     {
       "name": "cw_frequency",
@@ -52,9 +83,21 @@
       "set": "CW <value> <suffix>",
       "query": "OPCW",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["CW 5 GZ", "OUTPUT 719;\"OPCW\""]
+      "examples": [
+        "CW 5 GZ",
+        "OUTPUT 719;\"OPCW\""
+      ]
     },
     {
       "name": "swept_cw",
@@ -62,7 +105,9 @@
       "category": "Frequency",
       "description": "Swept CW mode ([SHIFT][CW]). Holds a CW frequency while the SWEEP OUT produces a 0 to 10 V ramp, giving a flat horizontal display trace.",
       "set": "SHCW",
-      "examples": ["SHCW"]
+      "examples": [
+        "SHCW"
+      ]
     },
     {
       "name": "center_frequency",
@@ -72,9 +117,21 @@
       "set": "CF <value> <suffix>",
       "query": "OPCF",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["CF 4 GZ", "OUTPUT 719;\"OPCF\""]
+      "examples": [
+        "CF 4 GZ",
+        "OUTPUT 719;\"OPCF\""
+      ]
     },
     {
       "name": "delta_frequency",
@@ -84,9 +141,21 @@
       "set": "DF <value> <suffix>",
       "query": "OPDF",
       "parameters": [
-        { "name": "span", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "span",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["DF 500 MZ", "OUTPUT 719;\"OPDF\""]
+      "examples": [
+        "DF 500 MZ",
+        "OUTPUT 719;\"OPDF\""
+      ]
     },
     {
       "name": "coarse_cw_resolution",
@@ -94,7 +163,9 @@
       "category": "Frequency",
       "description": "Selects coarse CW control-knob resolution ([SHIFT][CF]), 0.0015% of band.",
       "set": "SHCF",
-      "examples": ["SHCF"]
+      "examples": [
+        "SHCF"
+      ]
     },
     {
       "name": "fine_cw_resolution",
@@ -102,7 +173,9 @@
       "category": "Frequency",
       "description": "Selects fine CW control-knob resolution ([SHIFT][dF]), 0.00038% of band.",
       "set": "SHDF",
-      "examples": ["SHDF"]
+      "examples": [
+        "SHDF"
+      ]
     },
     {
       "name": "frequency_vernier",
@@ -112,9 +185,21 @@
       "set": "VR <value> <suffix>",
       "query": "OPVR",
       "parameters": [
-        { "name": "vernier", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "+/-0.05% of band" }
+        {
+          "name": "vernier",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "+/-0.05% of band"
+        }
       ],
-      "examples": ["VR 0 MZ", "OUTPUT 719;\"OPVR\""]
+      "examples": [
+        "VR 0 MZ",
+        "OUTPUT 719;\"OPVR\""
+      ]
     },
     {
       "name": "frequency_offset",
@@ -124,27 +209,21 @@
       "set": "SHVR <value> <suffix>",
       "query": "OPSHVR",
       "parameters": [
-        { "name": "offset", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Up to full plug-in range" }
+        {
+          "name": "offset",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Up to full plug-in range"
+        }
       ],
-      "examples": ["SHVR 10 MZ", "OUTPUT 719;\"OPSHVR\""]
-    },
-    {
-      "name": "frequency_display_multiplier",
-      "mnemonic": "SHFA",
-      "category": "Frequency",
-      "description": "Frequency display multiplier ([SHIFT][START]). Scales the displayed frequency value (display only; defaults to 1 after Instrument Preset).",
-      "set": "SHFA <value> <suffix>",
-      "query": "OPSHFA",
-      "examples": ["SHFA 2 GZ", "OUTPUT 719;\"OPSHFA\""]
-    },
-    {
-      "name": "frequency_display_offset",
-      "mnemonic": "SHFB",
-      "category": "Frequency",
-      "description": "Frequency display offset ([SHIFT][STOP]). Offsets the displayed frequency value (display only; defaults to 0 after Instrument Preset).",
-      "set": "SHFB <value> <suffix>",
-      "query": "OPSHFB",
-      "examples": ["SHFB 100 MZ", "OUTPUT 719;\"OPSHFB\""]
+      "examples": [
+        "SHVR 10 MZ",
+        "OUTPUT 719;\"OPSHVR\""
+      ]
     },
     {
       "name": "marker_1",
@@ -154,9 +233,21 @@
       "set": "M1 <value> <suffix>",
       "query": "OPM1",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["M1 3 GZ", "OUTPUT 719;\"OPM1\""]
+      "examples": [
+        "M1 3 GZ",
+        "OUTPUT 719;\"OPM1\""
+      ]
     },
     {
       "name": "marker_2",
@@ -166,9 +257,21 @@
       "set": "M2 <value> <suffix>",
       "query": "OPM2",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["M2 5 GZ", "OUTPUT 719;\"OPM2\""]
+      "examples": [
+        "M2 5 GZ",
+        "OUTPUT 719;\"OPM2\""
+      ]
     },
     {
       "name": "marker_3",
@@ -178,9 +281,21 @@
       "set": "M3 <value> <suffix>",
       "query": "OPM3",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["M3 6 GZ", "OUTPUT 719;\"OPM3\""]
+      "examples": [
+        "M3 6 GZ",
+        "OUTPUT 719;\"OPM3\""
+      ]
     },
     {
       "name": "marker_4",
@@ -190,9 +305,21 @@
       "set": "M4 <value> <suffix>",
       "query": "OPM4",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["M4 7 GZ", "OUTPUT 719;\"OPM4\""]
+      "examples": [
+        "M4 7 GZ",
+        "OUTPUT 719;\"OPM4\""
+      ]
     },
     {
       "name": "marker_5",
@@ -202,9 +329,21 @@
       "set": "M5 <value> <suffix>",
       "query": "OPM5",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["M5 8 GZ", "OUTPUT 719;\"OPM5\""]
+      "examples": [
+        "M5 8 GZ",
+        "OUTPUT 719;\"OPM5\""
+      ]
     },
     {
       "name": "marker_off",
@@ -212,7 +351,10 @@
       "category": "Markers",
       "description": "Turns off the active marker. Sent as a suffix after selecting a marker (M1..M5). The character after M may be the letter O or the digit 0.",
       "set": "MO",
-      "examples": ["M1MO", "M3MO"]
+      "examples": [
+        "M1MO",
+        "M3MO"
+      ]
     },
     {
       "name": "all_markers_off",
@@ -220,7 +362,9 @@
       "category": "Markers",
       "description": "Turns off all frequency markers ([SHIFT][OFF]).",
       "set": "SHMO",
-      "examples": ["SHMO"]
+      "examples": [
+        "SHMO"
+      ]
     },
     {
       "name": "marker_delta",
@@ -229,7 +373,10 @@
       "description": "Marker delta ([SHIFT][M1]). Displays the frequency difference between the active marker and the previously active marker. Read the difference with OPSHM1.",
       "set": "SHM1",
       "query": "OPSHM1",
-      "examples": ["SHM1", "OUTPUT 719;\"OPSHM1\""]
+      "examples": [
+        "SHM1",
+        "OUTPUT 719;\"OPSHM1\""
+      ]
     },
     {
       "name": "marker_to_center_frequency",
@@ -237,7 +384,9 @@
       "category": "Markers",
       "description": "Marker to Center Frequency. Sets the center frequency to the active marker's frequency, keeping span where possible.",
       "set": "MC",
-      "examples": ["MC"]
+      "examples": [
+        "MC"
+      ]
     },
     {
       "name": "marker_sweep",
@@ -246,9 +395,15 @@
       "description": "Marker sweep on/off. MP1 reassigns markers 1 and 2 to Start and Stop frequencies (M1/M2 sweep on); MP0 turns marker sweep off. Trailing digit selects on (1) or off (0).",
       "set": "MP<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["MP1", "MP0"]
+      "examples": [
+        "MP1",
+        "MP0"
+      ]
     },
     {
       "name": "permanent_marker_sweep",
@@ -256,7 +411,9 @@
       "category": "Markers",
       "description": "Permanent marker sweep ([SHIFT][MKR SWEEP]). Makes the values of markers 1 and 2 the permanent START/STOP frequency values. (Also documented as SHSP in Table 3-7.)",
       "set": "SHMP",
-      "examples": ["SHMP"]
+      "examples": [
+        "SHMP"
+      ]
     },
     {
       "name": "counter_interface_enable",
@@ -264,7 +421,9 @@
       "category": "Markers",
       "description": "Counter interface enable ([SHIFT][M2]). Enables swept-frequency counting end points (used with FA, FB, or M1..M5).",
       "set": "SHM2",
-      "examples": ["SHM2"]
+      "examples": [
+        "SHM2"
+      ]
     },
     {
       "name": "counter_interface_disable",
@@ -272,7 +431,9 @@
       "category": "Markers",
       "description": "Counter interface disable ([SHIFT][M3]). Disables swept counting.",
       "set": "SHM3",
-      "examples": ["SHM3"]
+      "examples": [
+        "SHM3"
+      ]
     },
     {
       "name": "power_level",
@@ -282,9 +443,18 @@
       "set": "PL <value> dBm",
       "query": "OPPL",
       "parameters": [
-        { "name": "power", "units": ["dBm"], "range": "Plug-in dependent" }
+        {
+          "name": "power",
+          "units": [
+            "dBm"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["PL 0 dBm", "OUTPUT 719;\"OPPL\""]
+      "examples": [
+        "PL 0 dBm",
+        "OUTPUT 719;\"OPPL\""
+      ]
     },
     {
       "name": "power_sweep",
@@ -294,9 +464,19 @@
       "set": "PS <value> dB",
       "query": "OPPS",
       "parameters": [
-        { "name": "sweep", "units": ["dB"], "range": "Plug-in dependent" }
+        {
+          "name": "sweep",
+          "units": [
+            "dB"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["PS 10 dB", "PS1", "OUTPUT 719;\"OPPS\""]
+      "examples": [
+        "PS 10 dB",
+        "PS1",
+        "OUTPUT 719;\"OPPS\""
+      ]
     },
     {
       "name": "power_slope",
@@ -306,9 +486,19 @@
       "set": "SL <value> dB",
       "query": "OPSL",
       "parameters": [
-        { "name": "slope", "units": ["dB"], "range": "Plug-in dependent" }
+        {
+          "name": "slope",
+          "units": [
+            "dB"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["SL 1 dB", "SL1", "OUTPUT 719;\"OPSL\""]
+      "examples": [
+        "SL 1 dB",
+        "SL1",
+        "OUTPUT 719;\"OPSL\""
+      ]
     },
     {
       "name": "rf_power",
@@ -317,9 +507,15 @@
       "description": "RF power output on/off. RF1 turns RF on, RF0 turns RF off. Requires 83500-series plug-in.",
       "set": "RF<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["RF1", "RF0"]
+      "examples": [
+        "RF1",
+        "RF0"
+      ]
     },
     {
       "name": "internal_leveling",
@@ -327,7 +523,9 @@
       "category": "ALC",
       "description": "Selects internal ALC leveling mode (the power-on/preset default ALC mode).",
       "set": "A1",
-      "examples": ["A1"]
+      "examples": [
+        "A1"
+      ]
     },
     {
       "name": "external_crystal_leveling",
@@ -335,7 +533,9 @@
       "category": "ALC",
       "description": "Selects external crystal-detector ALC leveling mode.",
       "set": "A2",
-      "examples": ["A2"]
+      "examples": [
+        "A2"
+      ]
     },
     {
       "name": "external_power_meter_leveling",
@@ -343,7 +543,9 @@
       "category": "ALC",
       "description": "Selects external power-meter ALC leveling mode.",
       "set": "A3",
-      "examples": ["A3"]
+      "examples": [
+        "A3"
+      ]
     },
     {
       "name": "external_sweep",
@@ -351,7 +553,9 @@
       "category": "Sweep",
       "description": "External sweep mode. The plug-in oscillator is tuned by a 0 to 10 V ramp applied to the SWP INPUT BNC.",
       "set": "SX",
-      "examples": ["SX"]
+      "examples": [
+        "SX"
+      ]
     },
     {
       "name": "manual_sweep",
@@ -361,9 +565,21 @@
       "set": "SM <value> <suffix>",
       "query": "OPSM",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["SM 4 GZ", "OUTPUT 719;\"OPSM\""]
+      "examples": [
+        "SM 4 GZ",
+        "OUTPUT 719;\"OPSM\""
+      ]
     },
     {
       "name": "sweep_time",
@@ -373,9 +589,20 @@
       "set": "ST <value> <suffix>",
       "query": "OPST",
       "parameters": [
-        { "name": "time", "units": ["SC", "MS"], "range": "0.01 to 100 seconds" }
+        {
+          "name": "time",
+          "units": [
+            "SC",
+            "MS"
+          ],
+          "range": "0.01 to 100 seconds"
+        }
       ],
-      "examples": ["ST 10 SC", "ST 100 MS", "OUTPUT 719;\"OPST\""]
+      "examples": [
+        "ST 10 SC",
+        "ST 100 MS",
+        "OUTPUT 719;\"OPST\""
+      ]
     },
     {
       "name": "single_sweep",
@@ -383,7 +610,9 @@
       "category": "Sweep",
       "description": "Single sweep. Selects/triggers single-sweep mode; initial engagement aborts any sweep in progress (equivalent to trigger T4).",
       "set": "SG",
-      "examples": ["SG"]
+      "examples": [
+        "SG"
+      ]
     },
     {
       "name": "trigger_internal",
@@ -391,7 +620,9 @@
       "category": "Sweep",
       "description": "Internal sweep trigger (free run / auto). Sweep trigger controls apply only in TIME sweep mode.",
       "set": "T1",
-      "examples": ["T1"]
+      "examples": [
+        "T1"
+      ]
     },
     {
       "name": "trigger_line",
@@ -399,7 +630,9 @@
       "category": "Sweep",
       "description": "Line sweep trigger (triggered by the power-line frequency).",
       "set": "T2",
-      "examples": ["T2"]
+      "examples": [
+        "T2"
+      ]
     },
     {
       "name": "trigger_external",
@@ -407,7 +640,9 @@
       "category": "Sweep",
       "description": "External sweep trigger. A >2 V trigger (20 V max), wider than 0.5 us at <1 MHz rep rate, applied to the rear auxiliary connector pin 9.",
       "set": "T3",
-      "examples": ["T3"]
+      "examples": [
+        "T3"
+      ]
     },
     {
       "name": "trigger_single",
@@ -415,7 +650,9 @@
       "category": "Sweep",
       "description": "Single sweep trigger. Selects/triggers single sweep (same effect as SG / Take Sweep).",
       "set": "T4",
-      "examples": ["T4"]
+      "examples": [
+        "T4"
+      ]
     },
     {
       "name": "reset_sweep",
@@ -423,7 +660,9 @@
       "category": "Sweep",
       "description": "Reset sweep. Aborts the present single sweep and resets it so it can be triggered again. Valid only in single-sweep trigger mode.",
       "set": "RS",
-      "examples": ["RS"]
+      "examples": [
+        "RS"
+      ]
     },
     {
       "name": "take_sweep",
@@ -431,7 +670,9 @@
       "category": "Sweep",
       "description": "Take sweep. Triggers a single sweep. Valid only in single-sweep trigger mode.",
       "set": "TS",
-      "examples": ["TS"]
+      "examples": [
+        "TS"
+      ]
     },
     {
       "name": "frequency_step_size",
@@ -440,9 +681,20 @@
       "description": "Frequency step size, used by the step up/down keys for START, STOP, CF, CW, MARKER and MANUAL SWEEP. Follow with a frequency suffix. Not displayed.",
       "set": "SF <value> <suffix>",
       "parameters": [
-        { "name": "step", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        {
+          "name": "step",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["SF 250 MZ"]
+      "examples": [
+        "SF 250 MZ"
+      ]
     },
     {
       "name": "power_step_size",
@@ -452,9 +704,19 @@
       "set": "SP <value> dBm",
       "query": "OPSP",
       "parameters": [
-        { "name": "step", "units": ["dBm", "dB"], "range": "Plug-in dependent" }
+        {
+          "name": "step",
+          "units": [
+            "dBm",
+            "dB"
+          ],
+          "range": "Plug-in dependent"
+        }
       ],
-      "examples": ["SP 1 dBm", "OUTPUT 719;\"OPSP\""]
+      "examples": [
+        "SP 1 dBm",
+        "OUTPUT 719;\"OPSP\""
+      ]
     },
     {
       "name": "step_up",
@@ -462,7 +724,9 @@
       "category": "Step",
       "description": "Step up / increment the active function by the current step size.",
       "set": "UP",
-      "examples": ["UP"]
+      "examples": [
+        "UP"
+      ]
     },
     {
       "name": "step_down",
@@ -470,7 +734,9 @@
       "category": "Step",
       "description": "Step down / decrement the active function by the current step size. (Front panel code DN; the program-code table also lists 'ON' as the OCR rendering of this code.)",
       "set": "DN",
-      "examples": ["DN"]
+      "examples": [
+        "DN"
+      ]
     },
     {
       "name": "backspace",
@@ -478,7 +744,9 @@
       "category": "Step",
       "description": "Backspace. Removes the last entered digit before a units terminator is supplied.",
       "set": "BK",
-      "examples": ["BK"]
+      "examples": [
+        "BK"
+      ]
     },
     {
       "name": "default_step_size",
@@ -486,7 +754,9 @@
       "category": "Step",
       "description": "Reset step sizes to default values ([SHIFT][STEP SIZE]).",
       "set": "SHSS",
-      "examples": ["SHSS"]
+      "examples": [
+        "SHSS"
+      ]
     },
     {
       "name": "amplitude_marker",
@@ -495,9 +765,15 @@
       "description": "Amplitude markers on/off. AK1 puts mainframe frequency markers into RF amplitude dips; AK0 returns them to Z-axis intensity dots.",
       "set": "AK<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["AK1", "AK0"]
+      "examples": [
+        "AK1",
+        "AK0"
+      ]
     },
     {
       "name": "display_blanking",
@@ -506,9 +782,15 @@
       "description": "Display (CRT) blanking on/off via Z-axis control during retrace. DP1 on, DP0 off.",
       "set": "DP<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["DP1", "DP0"]
+      "examples": [
+        "DP1",
+        "DP0"
+      ]
     },
     {
       "name": "rf_blanking",
@@ -517,9 +799,15 @@
       "description": "RF blanking on/off. Turns off RF power during the retrace sweep. RP1 on, RP0 off.",
       "set": "RP<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["RP1", "RP0"]
+      "examples": [
+        "RP1",
+        "RP0"
+      ]
     },
     {
       "name": "square_wave_modulation",
@@ -528,9 +816,15 @@
       "description": "Internal square-wave amplitude modulation on/off. MD1 on, MD0 off. Standard square-wave frequency 27.775 kHz (internally jumper-selectable to 1 kHz).",
       "set": "MD<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["MD1", "MD0"]
+      "examples": [
+        "MD1",
+        "MD0"
+      ]
     },
     {
       "name": "save_register",
@@ -539,9 +833,15 @@
       "description": "Save current settings into a storage register (1 to 9). Fails with Error 30 if the save lock is engaged.",
       "set": "SV<n>",
       "parameters": [
-        { "name": "register", "range": "1 to 9" }
+        {
+          "name": "register",
+          "range": "1 to 9"
+        }
       ],
-      "examples": ["SV1", "SV9"]
+      "examples": [
+        "SV1",
+        "SV9"
+      ]
     },
     {
       "name": "recall_register",
@@ -550,9 +850,15 @@
       "description": "Recall settings from a storage register (1 to 9). Unused registers contain Instrument Preset settings.",
       "set": "RC<n>",
       "parameters": [
-        { "name": "register", "range": "1 to 9" }
+        {
+          "name": "register",
+          "range": "1 to 9"
+        }
       ],
-      "examples": ["RC1", "RC9"]
+      "examples": [
+        "RC1",
+        "RC9"
+      ]
     },
     {
       "name": "memory_lock",
@@ -560,7 +866,9 @@
       "category": "Storage",
       "description": "Save register lock / enable save protection ([SHIFT][SAVE]). Write-protects all registers.",
       "set": "SHSV",
-      "examples": ["SHSV"]
+      "examples": [
+        "SHSV"
+      ]
     },
     {
       "name": "memory_unlock",
@@ -568,7 +876,9 @@
       "category": "Storage",
       "description": "Save register unlock / disable save protection ([SHIFT][RECALL]).",
       "set": "SHRC",
-      "examples": ["SHRC"]
+      "examples": [
+        "SHRC"
+      ]
     },
     {
       "name": "alternate_sweep",
@@ -577,9 +887,14 @@
       "description": "Alternate sweep on. Alternates between the current state and a selected stored register (1 to 9) on successive sweeps.",
       "set": "AU<n>",
       "parameters": [
-        { "name": "register", "range": "1 to 9" }
+        {
+          "name": "register",
+          "range": "1 to 9"
+        }
       ],
-      "examples": ["AU2"]
+      "examples": [
+        "AU2"
+      ]
     },
     {
       "name": "alternate_sweep_off",
@@ -587,7 +902,9 @@
       "category": "Storage",
       "description": "Alternate sweep off. (Table 3-7 also lists alternate sweep on/off as the ALmn form.)",
       "set": "ALO",
-      "examples": ["ALO"]
+      "examples": [
+        "ALO"
+      ]
     },
     {
       "name": "cw_filter",
@@ -596,9 +913,15 @@
       "description": "CW filter in/out (83500-series plug-in). FI1 inserts the CW filter, FI0 removes it.",
       "set": "FI<m>",
       "parameters": [
-        { "name": "state", "range": "0 = out, 1 = in" }
+        {
+          "name": "state",
+          "range": "0 = out, 1 = in"
+        }
       ],
-      "examples": ["FI1", "FI0"]
+      "examples": [
+        "FI1",
+        "FI0"
+      ]
     },
     {
       "name": "fm_sensitivity_20mhz",
@@ -606,7 +929,9 @@
       "category": "Modulation",
       "description": "External FM input sensitivity -20 MHz/volt (83500-series plug-in). Reset to the internal switch position at power-on / Instrument Preset.",
       "set": "F1",
-      "examples": ["F1"]
+      "examples": [
+        "F1"
+      ]
     },
     {
       "name": "fm_sensitivity_6mhz",
@@ -614,7 +939,9 @@
       "category": "Modulation",
       "description": "External FM input sensitivity -6 MHz/volt (83500-series plug-in). Reset to the internal switch position at power-on / Instrument Preset.",
       "set": "F2",
-      "examples": ["F2"]
+      "examples": [
+        "F2"
+      ]
     },
     {
       "name": "display_update",
@@ -623,9 +950,15 @@
       "description": "Display update on/off. DU1 (default) updates the numeric displays on each numeric programming; DU0 blanks the displays to speed up stepped CW programming.",
       "set": "DU<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["DU1", "DU0"]
+      "examples": [
+        "DU1",
+        "DU0"
+      ]
     },
     {
       "name": "network_analyzer_trigger",
@@ -633,18 +966,27 @@
       "category": "System",
       "description": "Network analyzer trigger (HP 8410B/C). Generates an external trigger pulse so the 8410B/C re-phase-locks on the present RF signal; the only function valid while the input micro learn string is in effect.",
       "set": "NT",
-      "examples": ["NT"]
+      "examples": [
+        "NT"
+      ]
     },
     {
       "name": "output_interrogated_parameter",
       "mnemonic": "OP",
       "category": "Output",
-      "description": "Output Interrogated Parameter. Send 'OP' immediately followed by a function prefix to read that parameter's present numeric value as a 14-character ASCII string (+d.dddddE+dd, CR/LF). Valid prefixes: FA, CW, CF, DF, FB, M1, M2, M3, M4, M5, VR, SHVR, SHM1, SS, ST, SM, PL, PS, SL, SP, SHFA, SHFB.",
+      "description": "Output Interrogated Parameter. Send 'OP' immediately followed by a function prefix to read that parameter's present numeric value as a 14-character ASCII string (+d.dddddE+dd, CR/LF). On the 8350A the valid prefixes are: FA, CW, CF, DF, FB, VR, SHVR, M1, M2, M3, M4, M5, SHM1, SF, SM, ST, PL, PS, SL, SP.",
       "query": "OP<prefix>",
       "parameters": [
-        { "name": "prefix", "range": "FA, CW, CF, DF, FB, M1-M5, VR, SHVR, SHM1, SS, ST, SM, PL, PS, SL, SP, SHFA, SHFB" }
+        {
+          "name": "prefix",
+          "range": "FA, CW, CF, DF, FB, VR, SHVR, M1-M5, SHM1, SF, SM, ST, PL, PS, SL, SP"
+        }
       ],
-      "examples": ["OPFA", "OPCW", "OPST"]
+      "examples": [
+        "OPFA",
+        "OPCW",
+        "OPST"
+      ]
     },
     {
       "name": "output_active_parameter",
@@ -652,23 +994,9 @@
       "category": "Output",
       "description": "Output Active Parameter. Returns the numeric value of the currently active parameter (enabled for step/data-entry modification) as +d.dddddE+dd, CR/LF.",
       "query": "OA",
-      "examples": ["OA"]
-    },
-    {
-      "name": "output_harmonic_number",
-      "mnemonic": "OH",
-      "category": "Output",
-      "description": "Output Harmonic Number. Returns the ratio of RF OUTPUT frequency to AUX OUTPUT frequency as 'dd' (CR/LF); zero in the heterodyne-band condition.",
-      "query": "OH",
-      "examples": ["OH"]
-    },
-    {
-      "name": "output_software_revision",
-      "mnemonic": "OI",
-      "category": "Output",
-      "description": "Output Software Revision Number (Output Identity). Returns 'O8350B REV X,Y' (mainframe rev X, plug-in rev Y), CR/LF terminated, e.g. 'O8350B REV 1,5'.",
-      "query": "OI",
-      "examples": ["OI"]
+      "examples": [
+        "OA"
+      ]
     },
     {
       "name": "output_learn_string",
@@ -676,7 +1004,9 @@
       "category": "Output",
       "description": "Output Learn String. Returns a 90-byte binary string fully describing the present instrument/plug-in state (excludes storage registers), terminated with EOI. Restore with IL.",
       "query": "OL",
-      "examples": ["OL"]
+      "examples": [
+        "OL"
+      ]
     },
     {
       "name": "input_learn_string",
@@ -684,7 +1014,9 @@
       "category": "Output",
       "description": "Input Learn String. Send 'IL' followed by the 90-byte binary learn string previously read with OL to restore that instrument state.",
       "set": "IL <90 bytes>",
-      "examples": ["IL"]
+      "examples": [
+        "IL"
+      ]
     },
     {
       "name": "output_micro_learn_string",
@@ -692,7 +1024,9 @@
       "category": "Output",
       "description": "Output Micro Learn String. Returns an 8-byte binary string describing the present CW frequency, vernier, sweep output voltage and power level, terminated with EOI. Requires CW mode with plug-in CW filter off.",
       "query": "OX",
-      "examples": ["OX"]
+      "examples": [
+        "OX"
+      ]
     },
     {
       "name": "input_micro_learn_string",
@@ -700,64 +1034,45 @@
       "category": "Output",
       "description": "Input Micro Learn String. Send 'IX' followed by the 8-byte micro learn string for rapid CW programming. Exit this binary entry mode only with the MO code, then restore displays with CW, ST, PL.",
       "set": "IX <8 bytes>",
-      "examples": ["IX"]
+      "examples": [
+        "IX"
+      ]
     },
     {
       "name": "output_mode_string",
       "mnemonic": "OM",
       "category": "Output",
-      "description": "Output Mode String. Returns an 8-byte (unpacked) binary string listing all presently active functions (no numeric values), terminated with EOI.",
+      "description": "Output Mode String. Returns a 25-byte binary string describing all of the present mode/function settings (no numeric values), terminated with EOI.",
       "query": "OM",
-      "examples": ["OM"]
+      "examples": [
+        "OM"
+      ]
     },
     {
       "name": "output_status",
       "mnemonic": "OS",
       "category": "Status",
-      "description": "Output Status Bytes. Returns 3 sequential 8-bit status bytes (byte 1 = serial-poll status byte; bytes 2-3 = extended status), terminated with EOI. Cleared by serial poll, device clear, CS, or Instrument Preset.",
+      "description": "Output Status Bytes. The 8350A returns 2 sequential 8-bit status bytes (byte 1 = serial-poll status byte; byte 2 = the single extended status byte), terminated with EOI. Cleared by serial poll, device clear, or Instrument Preset. (The 8350A has no CS clear command; the 8350B added a second extended status byte plus CS/RE/R2.)",
       "query": "OS",
-      "examples": ["OS"]
-    },
-    {
-      "name": "clear_status",
-      "mnemonic": "CS",
-      "category": "Status",
-      "description": "Clear Status Bytes. Clears all three status bytes, including the extended status bytes.",
-      "set": "CS",
-      "examples": ["CS"]
+      "examples": [
+        "OS"
+      ]
     },
     {
       "name": "request_status_byte_mask",
       "mnemonic": "RM",
       "category": "Status",
-      "description": "Request Status Byte Mask. Send 'RM' followed by one mask byte (decimal 0 to 255) selecting which status-byte (#1) conditions generate SRQ. Default at power-on is 0; not affected by Instrument Preset.",
+      "description": "Request Status Byte Mask. Send 'RM' followed by one mask byte (decimal 0 to 255) selecting which status-byte (#1) conditions generate SRQ. The mask value is reset only when another value is programmed and is not affected by Instrument Preset.",
       "set": "RM <byte>",
       "parameters": [
-        { "name": "mask", "range": "0 to 255" }
+        {
+          "name": "mask",
+          "range": "0 to 255"
+        }
       ],
-      "examples": ["RM"]
-    },
-    {
-      "name": "request_extended_status_byte_mask",
-      "mnemonic": "RE",
-      "category": "Status",
-      "description": "Request Extended Status Byte Mask. Send 'RE' followed by one mask byte for the first extended status byte (#2). Default mask 255.",
-      "set": "RE <byte>",
-      "parameters": [
-        { "name": "mask", "range": "0 to 255" }
-      ],
-      "examples": ["RE"]
-    },
-    {
-      "name": "request_second_extended_status_byte_mask",
-      "mnemonic": "R2",
-      "category": "Status",
-      "description": "Request Second Extended Status Byte Mask. Send 'R2' followed by one mask byte for the second extended status byte (#3). Default mask 255.",
-      "set": "R2 <byte>",
-      "parameters": [
-        { "name": "mask", "range": "0 to 255" }
-      ],
-      "examples": ["R2"]
+      "examples": [
+        "RM"
+      ]
     }
   ]
 }

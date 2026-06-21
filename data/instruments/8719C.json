@@ -1,11 +1,12 @@
 {
-  "model": "8720C",
+  "model": "8719C",
   "manufacturer": "HP",
   "category": "Vector Network Analyzer",
-  "description": "HP 8720C microwave vector network analyzer, 50 MHz to 20 GHz, HP-IB. Uses the HP 8753/8720-series mnemonic command language (not pure SCPI). Commands documented in this reference are shared across the HP 8719C, 8720C, and 8722A/C analyzers and are largely compatible with the HP 8753.",
+  "description": "HP 8719C microwave vector network analyzer, 50 MHz to 13.5 GHz, HP-IB. Uses the HP 8753/8720-series mnemonic command language (not pure SCPI). Commands documented in this reference are shared across the HP 8719C, 8720C, and 8722A/C analyzers and are largely compatible with the HP 8753.",
   "source": "872XC_PG_REF.pdf",
   "aliases": [
-    "8720C"
+    "8719C",
+    "HP8719C"
   ],
   "termination": {
     "write": "\n",
@@ -13,7 +14,7 @@
   },
   "identity": {
     "command": "OUTPIDEN",
-    "matchRegex": "8720",
+    "matchRegex": "8719",
     "description": "Outputs the identification string \"HEWLETT PACKARD, 87aam,0,X.XX\" where aam is the rest of the model number and X.XX is the firmware revision. Also accessible via IDN? and *IDN?."
   },
   "commands": [

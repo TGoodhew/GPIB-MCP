@@ -1,13 +1,12 @@
 {
-  "model": "8340B",
+  "model": "8341B",
   "manufacturer": "HP",
   "category": "Synthesized Sweeper",
-  "description": "HP 8340B (0.01-26.5 GHz) and HP 8341B (0.01-20 GHz) Synthesized Sweepers. Legacy HP-IB (IEEE-488) instruments using a two-letter mnemonic program-code language (NOT SCPI). The mnemonics correspond one-to-one with the front-panel keys (see Table 3-1, Index by Mode and Function, in the Operating Information manual). Numeric entries are completed with a units/scale terminator: frequency GZ/MZ/KZ/HZ (GHz/MHz/kHz/Hz), time SC/MS (sec/msec), and power DM/DB (dBm/dB). A leading 'SH' prefix on a mnemonic is the [SHIFT] (blue) shifted function of the corresponding key. Interrogated parameters are read back with the OP (Output Interrogated Parameter) command followed by the parameter's prefix (e.g. OPCW reads the CW frequency); other OUTPUT mnemonics (OA, OB, OC, OD, OF, OI, OK, OR, OL, OM, OS) return status or learn data.",
-  "source": "HP 8340B, 41B Operating.pdf",
+  "description": "HP 8341B (0.01-20 GHz) Synthesized Sweeper. Lower-frequency companion to the HP 8340B (0.01-26.5 GHz); the two share the same operating manual and the identical two-letter mnemonic program-code language (NOT SCPI). The only functional difference is the maximum RF output frequency: the 8341B covers 10 MHz to 20.00 GHz versus the 8340B 10 MHz to 26.5 GHz. The mnemonics correspond one-to-one with the front-panel keys (see Table 3-1, Index by Mode and Function, in the Operating Information manual). Numeric entries are completed with a units/scale terminator: frequency GZ/MZ/KZ/HZ (GHz/MHz/kHz/Hz), time SC/MS (sec/msec), and power DM/DB (dBm/dB). A leading SH prefix on a mnemonic is the [SHIFT] (blue) shifted function of the corresponding key. Interrogated parameters are read back with the OP (Output Interrogated Parameter) command followed by the parameter's prefix (e.g. OPCW reads the CW frequency); other OUTPUT mnemonics (OA, OB, OC, OD, OF, OI, OK, OR, OL, OM, OS) return status or learn data.",
+  "source": "8340B-8341B_CM.pdf",
   "aliases": [
-    "8340B",
-    "HP8340B",
-    "HP 8340B"
+    "8341B",
+    "HP8341B"
   ],
   "termination": {
     "write": "\n",
@@ -15,8 +14,8 @@
   },
   "identity": {
     "command": "OI",
-    "matchRegex": "8340",
-    "description": "Output Firmware ID. Returns the instrument firmware/identity string. The 8340B/41B has no SCPI '*IDN?'; OI is the closest identity query (Output Firmware ID, Table 3-1 HP-IB Functions)."
+    "matchRegex": "8341",
+    "description": "Output Firmware ID. Returns the instrument firmware/identity string. The 8341B has no SCPI '*IDN?'; OI is the closest identity query (Output Firmware ID, Table 3-1 HP-IB Functions)."
   },
   "commands": [
     {

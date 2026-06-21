@@ -1,15 +1,21 @@
 {
-  "model": "8757D",
+  "model": "8757C",
   "manufacturer": "HP",
   "category": "Scalar Network Analyzer",
-  "description": "HP 8757D Scalar Network Analyzer (also 8757C/8757E) for magnitude-only transmission and reflection measurements using external detectors (inputs A, B, C, R) on four independent measurement channels. Legacy HP-IB (IEEE 488-1978 / IEC-625) instrument; the interface does NOT support IEEE 488.2, so there is no '*IDN?'. The instrument is compatible with HP 8757A/C/E programming codes and is programmed with a two-letter mnemonic code language. Codes carrying a numeric value use a single-character variable convention: 'd' = variable-length numeric value, 'm' = 0 for off / 1 for on, 'n' = decimal integer 1 to 9, 'q' = a unique value, 's' = an ASCII or binary string. Numeric values returned by output commands may be transferred as ASCII characters or as 16-bit integers (most significant byte first); a single point or an entire 401-point (or 101/201/801/1601-point) trace may be transferred. Most parameters that carry a numeric value are read back with the Output Interrogated Parameter command 'OP' followed by the function prefix (e.g. 'OPRL' reads the reference level). HP-IB service interrupts (SRQs) are generated on front-panel key pressed, self-test error, sweep/plot/print operation complete, limit test fail, and illegal command. Footnote-restricted codes: superscript 1 = HP 8757D only; 2 = HP 8757D Option 001 only; 3 = HP 8757E firmware revision 3.1 or above; 4 = requires HP 8340/8341/8360 synthesized sweeper with the 8757 system interface connected and active; 5 = limit-line functions valid only for channels 1 or 2. Source: Table 2, 'Alphabetical Listing of HP 8757D/E Programming Codes', in the HP 8757D User's Guide / HP-IB Quick Reference Guide (08757-90130).",
+  "description": "HP 8757C Scalar Network Analyzer for magnitude-only transmission and reflection measurements using external detectors (inputs A, B, R; input C with the four-input option) on independent measurement channels. Legacy HP-IB (IEEE 488-1978 / IEC-625) instrument; the interface does NOT support IEEE 488.2, so there is no '*IDN?'. The 8757C shares essentially the same two-letter mnemonic HP-IB command set as the 8757D/8757E and is compatible with HP 8757A/C/E programming codes (per the HP 8757D Operating Manual, 'compatible with all appropriate HP 8757A/C/E programming codes'). The 8757C is the colour-display predecessor of the 8757D; some later codes flagged 'HP 8757D only' (e.g. extra display-colour, disk and 801/1601-point options) or 'HP 8757E revision 3.1 or above' may not be available on a given 8757C. Codes carrying a numeric value use a single-character variable convention: 'd' = variable-length numeric value, 'm' = 0 for off / 1 for on, 'n' = decimal integer 1 to 9, 'q' = a unique value, 's' = an ASCII or binary string. Most parameters that carry a numeric value are read back with the Output Interrogated Parameter command 'OP' followed by the function prefix (e.g. 'OPRL' reads the reference level). Command set derived from the HP 8757D programming codes (Table 2, HP 8757D/E programming codes); see the shared 8757A/C/E command compatibility note.",
   "source": "8757D Operating.pdf",
-  "aliases": ["8757D", "HP8757D", "HP 8757D"],
-  "termination": { "write": "\n", "read": "\n" },
+  "aliases": [
+    "8757C",
+    "HP8757C"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
     "command": "OI",
     "matchRegex": "8757",
-    "description": "Output identity. Returns the instrument model/identity string. The 8757D has no IEEE 488.2 '*IDN?' query; OI is the documented identity-output command."
+    "description": "Output identity. Returns the instrument model/identity string. The 8757C has no IEEE 488.2 '*IDN?' query; OI is the documented identity-output command."
   },
   "commands": [
     {
@@ -18,7 +24,10 @@
       "category": "System",
       "description": "Instrument preset. Returns the analyzer to its known preset state. Allow at least 20 seconds after preset for internal diagnostics to complete.",
       "set": "IP",
-      "examples": ["IP", "OUTPUT 716;\"IP\""]
+      "examples": [
+        "IP",
+        "OUTPUT 716;\"IP\""
+      ]
     },
     {
       "name": "channel_off",
@@ -26,7 +35,9 @@
       "category": "Channel/Display",
       "description": "Channel off. Turns the addressed/active measurement channel off.",
       "set": "C0",
-      "examples": ["C0"]
+      "examples": [
+        "C0"
+      ]
     },
     {
       "name": "channel_1",
@@ -34,7 +45,9 @@
       "category": "Channel/Display",
       "description": "Channel 1 on / make active.",
       "set": "C1",
-      "examples": ["C1"]
+      "examples": [
+        "C1"
+      ]
     },
     {
       "name": "channel_2",
@@ -42,7 +55,9 @@
       "category": "Channel/Display",
       "description": "Channel 2 on / make active.",
       "set": "C2",
-      "examples": ["C2"]
+      "examples": [
+        "C2"
+      ]
     },
     {
       "name": "channel_3",
@@ -50,7 +65,9 @@
       "category": "Channel/Display",
       "description": "Channel 3 on / make active. HP 8757D only.",
       "set": "C3",
-      "examples": ["C3"]
+      "examples": [
+        "C3"
+      ]
     },
     {
       "name": "channel_4",
@@ -58,7 +75,9 @@
       "category": "Channel/Display",
       "description": "Channel 4 on / make active. HP 8757D only.",
       "set": "C4",
-      "examples": ["C4"]
+      "examples": [
+        "C4"
+      ]
     },
     {
       "name": "measure_input_a",
@@ -66,7 +85,9 @@
       "category": "Measurement/Input",
       "description": "Input A absolute power measurement.",
       "set": "IA",
-      "examples": ["IA"]
+      "examples": [
+        "IA"
+      ]
     },
     {
       "name": "measure_input_b",
@@ -74,7 +95,9 @@
       "category": "Measurement/Input",
       "description": "Input B absolute power measurement.",
       "set": "IB",
-      "examples": ["IB"]
+      "examples": [
+        "IB"
+      ]
     },
     {
       "name": "measure_input_c",
@@ -82,7 +105,9 @@
       "category": "Measurement/Input",
       "description": "Input C absolute power measurement. HP 8757D Option 001 only.",
       "set": "IC",
-      "examples": ["IC"]
+      "examples": [
+        "IC"
+      ]
     },
     {
       "name": "measure_input_r",
@@ -90,7 +115,9 @@
       "category": "Measurement/Input",
       "description": "Input R absolute power measurement.",
       "set": "IR",
-      "examples": ["IR"]
+      "examples": [
+        "IR"
+      ]
     },
     {
       "name": "measure_aux_voltage",
@@ -98,7 +125,9 @@
       "category": "Measurement/Input",
       "description": "External ADC input (AUX) voltage measurement (rear-panel ADC IN).",
       "set": "IX",
-      "examples": ["IX"]
+      "examples": [
+        "IX"
+      ]
     },
     {
       "name": "ratio_a_over_b",
@@ -106,7 +135,9 @@
       "category": "Measurement/Input",
       "description": "A/B ratio measurement.",
       "set": "AB",
-      "examples": ["AB"]
+      "examples": [
+        "AB"
+      ]
     },
     {
       "name": "ratio_a_over_c",
@@ -114,7 +145,9 @@
       "category": "Measurement/Input",
       "description": "A/C ratio measurement. HP 8757D Option 001 only.",
       "set": "AC",
-      "examples": ["AC"]
+      "examples": [
+        "AC"
+      ]
     },
     {
       "name": "ratio_a_over_r",
@@ -122,7 +155,9 @@
       "category": "Measurement/Input",
       "description": "A/R ratio measurement.",
       "set": "AR",
-      "examples": ["AR"]
+      "examples": [
+        "AR"
+      ]
     },
     {
       "name": "ratio_b_over_a",
@@ -130,7 +165,9 @@
       "category": "Measurement/Input",
       "description": "B/A ratio measurement.",
       "set": "BA",
-      "examples": ["BA"]
+      "examples": [
+        "BA"
+      ]
     },
     {
       "name": "ratio_b_over_c",
@@ -138,7 +175,9 @@
       "category": "Measurement/Input",
       "description": "B/C ratio measurement. HP 8757D Option 001 only.",
       "set": "BC",
-      "examples": ["BC"]
+      "examples": [
+        "BC"
+      ]
     },
     {
       "name": "ratio_b_over_r",
@@ -146,7 +185,9 @@
       "category": "Measurement/Input",
       "description": "B/R ratio measurement.",
       "set": "BR",
-      "examples": ["BR"]
+      "examples": [
+        "BR"
+      ]
     },
     {
       "name": "ratio_c_over_a",
@@ -154,7 +195,9 @@
       "category": "Measurement/Input",
       "description": "C/A ratio measurement. HP 8757D Option 001 only.",
       "set": "CA",
-      "examples": ["CA"]
+      "examples": [
+        "CA"
+      ]
     },
     {
       "name": "ratio_c_over_b",
@@ -162,7 +205,9 @@
       "category": "Measurement/Input",
       "description": "C/B ratio measurement. HP 8757D Option 001 only.",
       "set": "CB",
-      "examples": ["CB"]
+      "examples": [
+        "CB"
+      ]
     },
     {
       "name": "ratio_c_over_r",
@@ -170,7 +215,9 @@
       "category": "Measurement/Input",
       "description": "C/R ratio measurement. HP 8757D Option 001 only.",
       "set": "CR",
-      "examples": ["CR"]
+      "examples": [
+        "CR"
+      ]
     },
     {
       "name": "ratio_r_over_a",
@@ -178,7 +225,9 @@
       "category": "Measurement/Input",
       "description": "R/A ratio measurement.",
       "set": "R1",
-      "examples": ["R1"]
+      "examples": [
+        "R1"
+      ]
     },
     {
       "name": "ratio_r_over_b",
@@ -186,7 +235,9 @@
       "category": "Measurement/Input",
       "description": "R/B ratio measurement.",
       "set": "R2",
-      "examples": ["R2"]
+      "examples": [
+        "R2"
+      ]
     },
     {
       "name": "ratio_r_over_c",
@@ -194,7 +245,9 @@
       "category": "Measurement/Input",
       "description": "R/C ratio measurement. HP 8757D Option 001 only.",
       "set": "R3",
-      "examples": ["R3"]
+      "examples": [
+        "R3"
+      ]
     },
     {
       "name": "display_measurement",
@@ -202,7 +255,9 @@
       "category": "Channel/Display",
       "description": "Display measurement data on the active channel.",
       "set": "ME",
-      "examples": ["ME"]
+      "examples": [
+        "ME"
+      ]
     },
     {
       "name": "display_memory",
@@ -210,7 +265,9 @@
       "category": "Channel/Display",
       "description": "Display memory (trace memory) data.",
       "set": "MY",
-      "examples": ["MY"]
+      "examples": [
+        "MY"
+      ]
     },
     {
       "name": "display_normalized",
@@ -218,7 +275,9 @@
       "category": "Channel/Display",
       "description": "Display normalized data (measurement minus memory). Same as M-.",
       "set": "MN",
-      "examples": ["MN"]
+      "examples": [
+        "MN"
+      ]
     },
     {
       "name": "display_normalized_alt",
@@ -226,7 +285,9 @@
       "category": "Channel/Display",
       "description": "Display normalized data (measurement minus memory). Alternate code for MN.",
       "set": "M-",
-      "examples": ["M-"]
+      "examples": [
+        "M-"
+      ]
     },
     {
       "name": "display_hold",
@@ -235,9 +296,15 @@
       "description": "Display hold on/off of the active channel trace.",
       "set": "DH<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["DH1", "DH0"]
+      "examples": [
+        "DH1",
+        "DH0"
+      ]
     },
     {
       "name": "display_format_log",
@@ -245,7 +312,9 @@
       "category": "Scale/Reference",
       "description": "Display trace data in log magnitude format.",
       "set": "DS0",
-      "examples": ["DS0"]
+      "examples": [
+        "DS0"
+      ]
     },
     {
       "name": "display_format_swr",
@@ -253,7 +322,9 @@
       "category": "Scale/Reference",
       "description": "Display trace data in standing wave ratio (SWR) format.",
       "set": "DS1",
-      "examples": ["DS1"]
+      "examples": [
+        "DS1"
+      ]
     },
     {
       "name": "reference_level",
@@ -263,9 +334,15 @@
       "set": "RL<d>",
       "query": "OPRL",
       "parameters": [
-        { "name": "level", "range": "Variable length numeric" }
+        {
+          "name": "level",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["RL-5", "OPRL"]
+      "examples": [
+        "RL-5",
+        "OPRL"
+      ]
     },
     {
       "name": "reference_level_step_size",
@@ -275,9 +352,15 @@
       "set": "ST<d>",
       "query": "OPST",
       "parameters": [
-        { "name": "step", "range": "Variable length numeric" }
+        {
+          "name": "step",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["ST1", "OPST"]
+      "examples": [
+        "ST1",
+        "OPST"
+      ]
     },
     {
       "name": "reference_position",
@@ -287,9 +370,15 @@
       "set": "RP<q>",
       "query": "OPRP",
       "parameters": [
-        { "name": "division", "range": "Vertical division number" }
+        {
+          "name": "division",
+          "range": "Vertical division number"
+        }
       ],
-      "examples": ["RP4", "OPRP"]
+      "examples": [
+        "RP4",
+        "OPRP"
+      ]
     },
     {
       "name": "scale_per_division",
@@ -299,9 +388,18 @@
       "set": "SD<d>",
       "query": "OPSD",
       "parameters": [
-        { "name": "scale", "units": ["dB/div"], "range": "Variable length numeric" }
+        {
+          "name": "scale",
+          "units": [
+            "dB/div"
+          ],
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["SD5", "OPSD"]
+      "examples": [
+        "SD5",
+        "OPSD"
+      ]
     },
     {
       "name": "autoscale",
@@ -309,7 +407,9 @@
       "category": "Scale/Reference",
       "description": "Autoscale the active channel trace.",
       "set": "AS",
-      "examples": ["AS"]
+      "examples": [
+        "AS"
+      ]
     },
     {
       "name": "smoothing",
@@ -319,9 +419,18 @@
       "set": "SO<d>",
       "query": "OPSO",
       "parameters": [
-        { "name": "aperture", "units": ["% of span"], "range": "Variable length numeric" }
+        {
+          "name": "aperture",
+          "units": [
+            "% of span"
+          ],
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["SO5", "OPSO"]
+      "examples": [
+        "SO5",
+        "OPSO"
+      ]
     },
     {
       "name": "averaging_off",
@@ -329,7 +438,9 @@
       "category": "Averaging",
       "description": "Averaging off.",
       "set": "A0",
-      "examples": ["A0"]
+      "examples": [
+        "A0"
+      ]
     },
     {
       "name": "averaging_on_factor",
@@ -338,9 +449,14 @@
       "description": "Averaging on, with averaging factor d.",
       "set": "AF<d>",
       "parameters": [
-        { "name": "factor", "range": "Variable length numeric" }
+        {
+          "name": "factor",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["AF8"]
+      "examples": [
+        "AF8"
+      ]
     },
     {
       "name": "restart_averaging",
@@ -348,7 +464,9 @@
       "category": "Averaging",
       "description": "Restart averaging.",
       "set": "RS",
-      "examples": ["RS"]
+      "examples": [
+        "RS"
+      ]
     },
     {
       "name": "adaptive_normalization",
@@ -357,9 +475,15 @@
       "description": "Adaptive normalization on/off.",
       "set": "AN<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["AN1", "AN0"]
+      "examples": [
+        "AN1",
+        "AN0"
+      ]
     },
     {
       "name": "store_measurement_to_memory",
@@ -367,7 +491,9 @@
       "category": "Cal/Normalize",
       "description": "Store measurement into trace memory.",
       "set": "SM",
-      "examples": ["SM"]
+      "examples": [
+        "SM"
+      ]
     },
     {
       "name": "store_normalized_to_memory",
@@ -375,7 +501,9 @@
       "category": "Cal/Normalize",
       "description": "Store normalized data (measurement minus memory) into memory.",
       "set": "SN",
-      "examples": ["SN"]
+      "examples": [
+        "SN"
+      ]
     },
     {
       "name": "write_channel_memory",
@@ -384,9 +512,14 @@
       "description": "Write to channel memory, s is the data string.",
       "set": "WM<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["WM..."]
+      "examples": [
+        "WM..."
+      ]
     },
     {
       "name": "system_configuration",
@@ -394,7 +527,9 @@
       "category": "Cal/Normalize",
       "description": "Perform system configuration of detectors and channels.",
       "set": "CL",
-      "examples": ["CL"]
+      "examples": [
+        "CL"
+      ]
     },
     {
       "name": "auto_system_cal",
@@ -403,9 +538,15 @@
       "description": "Auto system calibration on/off.",
       "set": "CT<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["CT1", "CT0"]
+      "examples": [
+        "CT1",
+        "CT0"
+      ]
     },
     {
       "name": "temperature_compensation",
@@ -414,9 +555,15 @@
       "description": "Continuous temperature compensation on/off.",
       "set": "TC<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["TC1", "TC0"]
+      "examples": [
+        "TC1",
+        "TC0"
+      ]
     },
     {
       "name": "autozero_once",
@@ -424,7 +571,9 @@
       "category": "Cal/Normalize",
       "description": "Autozero the DC detectors once.",
       "set": "AZ2",
-      "examples": ["AZ2"]
+      "examples": [
+        "AZ2"
+      ]
     },
     {
       "name": "autozero_repeat",
@@ -433,9 +582,15 @@
       "description": "Autozero repeat on/off of the DC detectors.",
       "set": "AZ<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["AZ1", "AZ0"]
+      "examples": [
+        "AZ1",
+        "AZ0"
+      ]
     },
     {
       "name": "manual_cal_dc_detectors",
@@ -443,7 +598,9 @@
       "category": "Cal/Normalize",
       "description": "Manual calibration of DC detectors.",
       "set": "MZ",
-      "examples": ["MZ"]
+      "examples": [
+        "MZ"
+      ]
     },
     {
       "name": "detection_mode_dc",
@@ -451,7 +608,9 @@
       "category": "Cal/Normalize",
       "description": "All inputs set to DC detection.",
       "set": "DM0",
-      "examples": ["DM0"]
+      "examples": [
+        "DM0"
+      ]
     },
     {
       "name": "detection_mode_ac",
@@ -459,7 +618,9 @@
       "category": "Cal/Normalize",
       "description": "All inputs set to AC detection.",
       "set": "DM1",
-      "examples": ["DM1"]
+      "examples": [
+        "DM1"
+      ]
     },
     {
       "name": "detector_a_offset",
@@ -469,9 +630,15 @@
       "set": "DA<d>",
       "query": "OPDA",
       "parameters": [
-        { "name": "offset", "range": "Variable length numeric" }
+        {
+          "name": "offset",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["DA0", "OPDA"]
+      "examples": [
+        "DA0",
+        "OPDA"
+      ]
     },
     {
       "name": "detector_b_offset",
@@ -481,9 +648,15 @@
       "set": "DB<d>",
       "query": "OPDB",
       "parameters": [
-        { "name": "offset", "range": "Variable length numeric" }
+        {
+          "name": "offset",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["DB0", "OPDB"]
+      "examples": [
+        "DB0",
+        "OPDB"
+      ]
     },
     {
       "name": "detector_c_offset",
@@ -493,9 +666,15 @@
       "set": "DC<d>",
       "query": "OPDC",
       "parameters": [
-        { "name": "offset", "range": "Variable length numeric" }
+        {
+          "name": "offset",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["DC0", "OPDC"]
+      "examples": [
+        "DC0",
+        "OPDC"
+      ]
     },
     {
       "name": "detector_r_offset",
@@ -505,9 +684,15 @@
       "set": "DR<d>",
       "query": "OPDR",
       "parameters": [
-        { "name": "offset", "range": "Variable length numeric" }
+        {
+          "name": "offset",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["DR0", "OPDR"]
+      "examples": [
+        "DR0",
+        "OPDR"
+      ]
     },
     {
       "name": "measure_detector_a_offset",
@@ -515,7 +700,9 @@
       "category": "Cal/Normalize",
       "description": "Measure detector A amplitude offset.",
       "set": "DOA<d>",
-      "examples": ["DOA"]
+      "examples": [
+        "DOA"
+      ]
     },
     {
       "name": "measure_detector_b_offset",
@@ -523,7 +710,9 @@
       "category": "Cal/Normalize",
       "description": "Measure detector B amplitude offset.",
       "set": "DOB<d>",
-      "examples": ["DOB"]
+      "examples": [
+        "DOB"
+      ]
     },
     {
       "name": "measure_detector_c_offset",
@@ -531,7 +720,9 @@
       "category": "Cal/Normalize",
       "description": "Measure detector C amplitude offset. HP 8757D Option 001 only.",
       "set": "DOC<d>",
-      "examples": ["DOC"]
+      "examples": [
+        "DOC"
+      ]
     },
     {
       "name": "measure_detector_r_offset",
@@ -539,7 +730,9 @@
       "category": "Cal/Normalize",
       "description": "Measure detector R amplitude offset.",
       "set": "DOR<d>",
-      "examples": ["DOR"]
+      "examples": [
+        "DOR"
+      ]
     },
     {
       "name": "enter_measured_offset",
@@ -547,7 +740,9 @@
       "category": "Cal/Normalize",
       "description": "Enter measured detector amplitude offset.",
       "set": "EO",
-      "examples": ["EO"]
+      "examples": [
+        "EO"
+      ]
     },
     {
       "name": "power_cal_detector_a",
@@ -555,7 +750,9 @@
       "category": "Cal/Normalize",
       "description": "Execute a detector A power calibration.",
       "set": "PWRA",
-      "examples": ["PWRA"]
+      "examples": [
+        "PWRA"
+      ]
     },
     {
       "name": "power_cal_detector_b",
@@ -563,7 +760,9 @@
       "category": "Cal/Normalize",
       "description": "Execute a detector B power calibration.",
       "set": "PWRB",
-      "examples": ["PWRB"]
+      "examples": [
+        "PWRB"
+      ]
     },
     {
       "name": "power_cal_detector_c",
@@ -571,7 +770,9 @@
       "category": "Cal/Normalize",
       "description": "Execute a detector C power calibration. HP 8757D Option 001 only.",
       "set": "PWRC",
-      "examples": ["PWRC"]
+      "examples": [
+        "PWRC"
+      ]
     },
     {
       "name": "power_cal_detector_r",
@@ -579,7 +780,9 @@
       "category": "Cal/Normalize",
       "description": "Execute a detector R power calibration.",
       "set": "PWRR",
-      "examples": ["PWRR"]
+      "examples": [
+        "PWRR"
+      ]
     },
     {
       "name": "ext_detector_cal_a",
@@ -588,9 +791,14 @@
       "description": "External detector cal value for detector A, s is the cal data string.",
       "set": "XA<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["XA..."]
+      "examples": [
+        "XA..."
+      ]
     },
     {
       "name": "ext_detector_cal_b",
@@ -599,9 +807,14 @@
       "description": "External detector cal value for detector B, s is the cal data string.",
       "set": "XB<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["XB..."]
+      "examples": [
+        "XB..."
+      ]
     },
     {
       "name": "ext_detector_cal_c",
@@ -610,9 +823,14 @@
       "description": "External detector cal value for detector C, s is the cal data string. HP 8757D Option 001 only.",
       "set": "XC<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["XC..."]
+      "examples": [
+        "XC..."
+      ]
     },
     {
       "name": "ext_detector_cal_r",
@@ -621,9 +839,14 @@
       "description": "External detector cal value for detector R, s is the cal data string.",
       "set": "XR<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["XR..."]
+      "examples": [
+        "XR..."
+      ]
     },
     {
       "name": "cursor_on_off",
@@ -632,9 +855,15 @@
       "description": "Cursor (marker) on/off.",
       "set": "CU<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["CU1", "CU0"]
+      "examples": [
+        "CU1",
+        "CU0"
+      ]
     },
     {
       "name": "cursor_delta_on_off",
@@ -643,9 +872,15 @@
       "description": "Cursor delta on/off.",
       "set": "CD<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["CD1", "CD0"]
+      "examples": [
+        "CD1",
+        "CD0"
+      ]
     },
     {
       "name": "set_cursor_position",
@@ -654,9 +889,14 @@
       "description": "Set cursor to horizontal position d.",
       "set": "SC<d>",
       "parameters": [
-        { "name": "position", "range": "Variable length numeric (horizontal position)" }
+        {
+          "name": "position",
+          "range": "Variable length numeric (horizontal position)"
+        }
       ],
-      "examples": ["SC200"]
+      "examples": [
+        "SC200"
+      ]
     },
     {
       "name": "cursor_to_maximum",
@@ -664,7 +904,9 @@
       "category": "Markers",
       "description": "Cursor to trace maximum.",
       "set": "CX",
-      "examples": ["CX"]
+      "examples": [
+        "CX"
+      ]
     },
     {
       "name": "cursor_to_minimum",
@@ -672,7 +914,9 @@
       "category": "Markers",
       "description": "Cursor to trace minimum.",
       "set": "CN",
-      "examples": ["CN"]
+      "examples": [
+        "CN"
+      ]
     },
     {
       "name": "cursor_to_reference",
@@ -680,7 +924,9 @@
       "category": "Markers",
       "description": "Marker (cursor) to reference line.",
       "set": "MR",
-      "examples": ["MR"]
+      "examples": [
+        "MR"
+      ]
     },
     {
       "name": "cursor_search_left",
@@ -688,7 +934,9 @@
       "category": "Markers",
       "description": "Cursor search left. HP 8757D only.",
       "set": "SL",
-      "examples": ["SL"]
+      "examples": [
+        "SL"
+      ]
     },
     {
       "name": "cursor_search_right",
@@ -696,7 +944,9 @@
       "category": "Markers",
       "description": "Cursor search right. HP 8757D only.",
       "set": "SR",
-      "examples": ["SR"]
+      "examples": [
+        "SR"
+      ]
     },
     {
       "name": "cursor_search_value",
@@ -706,9 +956,15 @@
       "set": "SS<d>",
       "query": "OPSS",
       "parameters": [
-        { "name": "value", "range": "Variable length numeric" }
+        {
+          "name": "value",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["SS-3", "OPSS"]
+      "examples": [
+        "SS-3",
+        "OPSS"
+      ]
     },
     {
       "name": "search_bandwidth_display",
@@ -717,7 +973,10 @@
       "description": "Display the search bandwidth on the CRT. HP 8757D only.",
       "set": "BW",
       "query": "OPBW",
-      "examples": ["BW", "OPBW"]
+      "examples": [
+        "BW",
+        "OPBW"
+      ]
     },
     {
       "name": "swept_mode",
@@ -725,7 +984,9 @@
       "category": "Sweep",
       "description": "Swept mode; normal swept operation.",
       "set": "SW1",
-      "examples": ["SW1"]
+      "examples": [
+        "SW1"
+      ]
     },
     {
       "name": "non_swept_mode",
@@ -733,7 +994,9 @@
       "category": "Sweep",
       "description": "Non-swept mode; non-swept operation.",
       "set": "SW0",
-      "examples": ["SW0"]
+      "examples": [
+        "SW0"
+      ]
     },
     {
       "name": "sweep_hold_mode",
@@ -741,7 +1004,9 @@
       "category": "Sweep",
       "description": "Sweep hold mode; non-swept mode with HP-IB bus hold off until completion of the TS (take sweep) command.",
       "set": "SW2",
-      "examples": ["SW2"]
+      "examples": [
+        "SW2"
+      ]
     },
     {
       "name": "take_sweeps",
@@ -750,9 +1015,15 @@
       "description": "Take d sweeps, then hold display.",
       "set": "TS<d>",
       "parameters": [
-        { "name": "count", "range": "Variable length numeric (number of sweeps)" }
+        {
+          "name": "count",
+          "range": "Variable length numeric (number of sweeps)"
+        }
       ],
-      "examples": ["TS1", "TS4"]
+      "examples": [
+        "TS1",
+        "TS4"
+      ]
     },
     {
       "name": "manual_sweep_mode",
@@ -761,9 +1032,15 @@
       "description": "Manual sweep mode on/off.",
       "set": "MS<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["MS1", "MS0"]
+      "examples": [
+        "MS1",
+        "MS0"
+      ]
     },
     {
       "name": "step_sweep_mode",
@@ -772,9 +1049,15 @@
       "description": "Step sweep on/off. Requires HP 8340/8341/8360 synthesized sweeper with the 8757 system interface connected and active.",
       "set": "FS<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["FS1", "FS0"]
+      "examples": [
+        "FS1",
+        "FS0"
+      ]
     },
     {
       "name": "non_standard_sweep_mode",
@@ -783,9 +1066,15 @@
       "description": "Non-standard sweep mode on/off.",
       "set": "NS<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["NS1", "NS0"]
+      "examples": [
+        "NS1",
+        "NS0"
+      ]
     },
     {
       "name": "cw_mode",
@@ -795,9 +1084,16 @@
       "set": "CW<m>",
       "query": "OV",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["CW1", "CW0", "OV"]
+      "examples": [
+        "CW1",
+        "CW0",
+        "OV"
+      ]
     },
     {
       "name": "output_cw_value",
@@ -805,7 +1101,9 @@
       "category": "Sweep",
       "description": "Output CW value.",
       "query": "OV",
-      "examples": ["OV"]
+      "examples": [
+        "OV"
+      ]
     },
     {
       "name": "number_of_points",
@@ -815,9 +1113,15 @@
       "set": "SP<d>",
       "query": "OPSP",
       "parameters": [
-        { "name": "points", "range": "101, 201, 401, 801, 1601" }
+        {
+          "name": "points",
+          "range": "101, 201, 401, 801, 1601"
+        }
       ],
-      "examples": ["SP401", "OPSP"]
+      "examples": [
+        "SP401",
+        "OPSP"
+      ]
     },
     {
       "name": "detector_a_freq_label_on_off",
@@ -826,9 +1130,15 @@
       "description": "Detector A frequency on/off.",
       "set": "FTA<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["FTA1", "FTA0"]
+      "examples": [
+        "FTA1",
+        "FTA0"
+      ]
     },
     {
       "name": "detector_b_freq_label_on_off",
@@ -837,9 +1147,15 @@
       "description": "Detector B frequency on/off.",
       "set": "FTB<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["FTB1", "FTB0"]
+      "examples": [
+        "FTB1",
+        "FTB0"
+      ]
     },
     {
       "name": "detector_c_freq_label_on_off",
@@ -848,9 +1164,15 @@
       "description": "Detector C frequency on/off.",
       "set": "FTC<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["FTC1", "FTC0"]
+      "examples": [
+        "FTC1",
+        "FTC0"
+      ]
     },
     {
       "name": "detector_r_freq_label_on_off",
@@ -859,9 +1181,15 @@
       "description": "Detector R frequency on/off.",
       "set": "FTR<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["FTR1", "FTR0"]
+      "examples": [
+        "FTR1",
+        "FTR0"
+      ]
     },
     {
       "name": "detector_a_start_frequency",
@@ -870,9 +1198,14 @@
       "description": "Enter start frequency for detector A, s is the frequency value.",
       "set": "DTSTRA<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTRA2GHZ"]
+      "examples": [
+        "DTSTRA2GHZ"
+      ]
     },
     {
       "name": "detector_a_stop_frequency",
@@ -881,9 +1214,14 @@
       "description": "Enter stop frequency for detector A, s is the frequency value.",
       "set": "DTSTPA<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTPA18GHZ"]
+      "examples": [
+        "DTSTPA18GHZ"
+      ]
     },
     {
       "name": "detector_b_start_frequency",
@@ -892,9 +1230,14 @@
       "description": "Enter start frequency for detector B, s is the frequency value.",
       "set": "DTSTRB<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTRB2GHZ"]
+      "examples": [
+        "DTSTRB2GHZ"
+      ]
     },
     {
       "name": "detector_b_stop_frequency",
@@ -903,9 +1246,14 @@
       "description": "Enter stop frequency for detector B, s is the frequency value.",
       "set": "DTSTPB<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTPB18GHZ"]
+      "examples": [
+        "DTSTPB18GHZ"
+      ]
     },
     {
       "name": "detector_c_start_frequency",
@@ -914,9 +1262,14 @@
       "description": "Enter start frequency for detector C, s is the frequency value. HP 8757D Option 001 only.",
       "set": "DTSTRC<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTRC2GHZ"]
+      "examples": [
+        "DTSTRC2GHZ"
+      ]
     },
     {
       "name": "detector_c_stop_frequency",
@@ -925,9 +1278,14 @@
       "description": "Enter stop frequency for detector C, s is the frequency value. HP 8757D Option 001 only.",
       "set": "DTSTPC<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTPC18GHZ"]
+      "examples": [
+        "DTSTPC18GHZ"
+      ]
     },
     {
       "name": "detector_r_start_frequency",
@@ -936,9 +1294,14 @@
       "description": "Enter start frequency for detector R, s is the frequency value.",
       "set": "DTSTRR<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTRR2GHZ"]
+      "examples": [
+        "DTSTRR2GHZ"
+      ]
     },
     {
       "name": "detector_r_stop_frequency",
@@ -947,9 +1310,14 @@
       "description": "Enter stop frequency for detector R, s is the frequency value.",
       "set": "DTSTPR<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["DTSTPR18GHZ"]
+      "examples": [
+        "DTSTPR18GHZ"
+      ]
     },
     {
       "name": "start_frequency_label",
@@ -958,9 +1326,14 @@
       "description": "Start frequency label, s is the displayed start frequency annotation.",
       "set": "FA<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["FA2GHZ"]
+      "examples": [
+        "FA2GHZ"
+      ]
     },
     {
       "name": "stop_frequency_label",
@@ -969,9 +1342,14 @@
       "description": "Stop frequency label, s is the displayed stop frequency annotation.",
       "set": "FB<s>",
       "parameters": [
-        { "name": "frequency", "range": "ASCII or binary string" }
+        {
+          "name": "frequency",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["FB18GHZ"]
+      "examples": [
+        "FB18GHZ"
+      ]
     },
     {
       "name": "limit_test_on_off",
@@ -980,9 +1358,15 @@
       "description": "Limit line test on/off. Limit line functions valid only for channels 1 or 2; HP 8757D only.",
       "set": "LT<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["LT1", "LT0"]
+      "examples": [
+        "LT1",
+        "LT0"
+      ]
     },
     {
       "name": "erase_limit_lines",
@@ -990,7 +1374,9 @@
       "category": "Limit Lines",
       "description": "Erase limit lines for the active channel. Channels 1 or 2 only; HP 8757D only.",
       "set": "LE",
-      "examples": ["LE"]
+      "examples": [
+        "LE"
+      ]
     },
     {
       "name": "limit_flat_line",
@@ -999,9 +1385,14 @@
       "description": "Enter limit test flat line data, s is the limit data string. Channels 1 or 2 only; HP 8757D only.",
       "set": "LF<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["LF..."]
+      "examples": [
+        "LF..."
+      ]
     },
     {
       "name": "limit_point_data",
@@ -1010,9 +1401,14 @@
       "description": "Enter limit test point data, s is the limit data string. Channels 1 or 2 only; HP 8757D only.",
       "set": "LP<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["LP..."]
+      "examples": [
+        "LP..."
+      ]
     },
     {
       "name": "limit_sloped_line",
@@ -1021,9 +1417,14 @@
       "description": "Enter limit test sloped line data, s is the limit data string. Channels 1 or 2 only; HP 8757D only.",
       "set": "LS<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["LS..."]
+      "examples": [
+        "LS..."
+      ]
     },
     {
       "name": "store_lower_limit_line",
@@ -1031,7 +1432,9 @@
       "category": "Limit Lines",
       "description": "Store lower limit line into memory. Channels 1 or 2 only; HP 8757D only.",
       "set": "LL",
-      "examples": ["LL"]
+      "examples": [
+        "LL"
+      ]
     },
     {
       "name": "store_upper_limit_line",
@@ -1039,7 +1442,9 @@
       "category": "Limit Lines",
       "description": "Store upper limit line into memory. Channels 1 or 2 only; HP 8757D only.",
       "set": "LU",
-      "examples": ["LU"]
+      "examples": [
+        "LU"
+      ]
     },
     {
       "name": "modulation_on_off",
@@ -1048,9 +1453,15 @@
       "description": "Internal modulation (modulator drive) on/off.",
       "set": "MD<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["MD1", "MD0"]
+      "examples": [
+        "MD1",
+        "MD0"
+      ]
     },
     {
       "name": "system_interface_control",
@@ -1059,9 +1470,15 @@
       "description": "System interface control on/off (8757 system interface bus).",
       "set": "PB<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["PB1", "PB0"]
+      "examples": [
+        "PB1",
+        "PB0"
+      ]
     },
     {
       "name": "passthrough_address",
@@ -1070,9 +1487,14 @@
       "description": "Passthrough address set to d (HP-IB address used for passthru mode).",
       "set": "PT<d>",
       "parameters": [
-        { "name": "address", "range": "HP-IB address" }
+        {
+          "name": "address",
+          "range": "HP-IB address"
+        }
       ],
-      "examples": ["PT19"]
+      "examples": [
+        "PT19"
+      ]
     },
     {
       "name": "control_output_1",
@@ -1081,9 +1503,15 @@
       "description": "Control output #1 on/off (rear-panel TTL open-collector control line).",
       "set": "OT1<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["OT11", "OT10"]
+      "examples": [
+        "OT11",
+        "OT10"
+      ]
     },
     {
       "name": "control_output_2",
@@ -1092,9 +1520,15 @@
       "description": "Control output #2 on/off (rear-panel TTL open-collector control line).",
       "set": "OT2<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["OT21", "OT20"]
+      "examples": [
+        "OT21",
+        "OT20"
+      ]
     },
     {
       "name": "step_up",
@@ -1102,7 +1536,9 @@
       "category": "System",
       "description": "Step up (increment) the active function value.",
       "set": "UP",
-      "examples": ["UP"]
+      "examples": [
+        "UP"
+      ]
     },
     {
       "name": "step_down",
@@ -1110,7 +1546,9 @@
       "category": "System",
       "description": "Step down (decrement) the active function value.",
       "set": "DN",
-      "examples": ["DN"]
+      "examples": [
+        "DN"
+      ]
     },
     {
       "name": "save_register",
@@ -1119,9 +1557,14 @@
       "description": "Save instrument state into register n.",
       "set": "SV<n>",
       "parameters": [
-        { "name": "register", "range": "n = 1 to 9" }
+        {
+          "name": "register",
+          "range": "n = 1 to 9"
+        }
       ],
-      "examples": ["SV1"]
+      "examples": [
+        "SV1"
+      ]
     },
     {
       "name": "recall_register",
@@ -1130,9 +1573,14 @@
       "description": "Recall instrument state from register n.",
       "set": "RC<n>",
       "parameters": [
-        { "name": "register", "range": "n = 1 to 9" }
+        {
+          "name": "register",
+          "range": "n = 1 to 9"
+        }
       ],
-      "examples": ["RC1"]
+      "examples": [
+        "RC1"
+      ]
     },
     {
       "name": "erase_save_recall_registers",
@@ -1140,7 +1588,9 @@
       "category": "Save/Recall",
       "description": "Erase all save/recall registers.",
       "set": "ER0",
-      "examples": ["ER0"]
+      "examples": [
+        "ER0"
+      ]
     },
     {
       "name": "input_learn_string",
@@ -1149,9 +1599,14 @@
       "description": "Input learn string. s is the learn string previously read with OL, restoring a complete instrument state.",
       "set": "IL<s>",
       "parameters": [
-        { "name": "data", "range": "ASCII or binary string" }
+        {
+          "name": "data",
+          "range": "ASCII or binary string"
+        }
       ],
-      "examples": ["IL..."]
+      "examples": [
+        "IL..."
+      ]
     },
     {
       "name": "output_learn_string",
@@ -1159,7 +1614,9 @@
       "category": "Status/Output",
       "description": "Output learn string (complete instrument state). Restore later with IL.",
       "query": "OL",
-      "examples": ["OL"]
+      "examples": [
+        "OL"
+      ]
     },
     {
       "name": "output_identity",
@@ -1167,7 +1624,9 @@
       "category": "Status/Output",
       "description": "Output identity. Returns the instrument identity string.",
       "query": "OI",
-      "examples": ["OI"]
+      "examples": [
+        "OI"
+      ]
     },
     {
       "name": "output_trace_data",
@@ -1175,7 +1634,9 @@
       "category": "Status/Output",
       "description": "Output trace data for the active channel. Data may be ASCII or 16-bit integers (MSB first) depending on the selected format (see FD codes).",
       "query": "OD",
-      "examples": ["OD"]
+      "examples": [
+        "OD"
+      ]
     },
     {
       "name": "output_memory_data",
@@ -1183,7 +1644,9 @@
       "category": "Status/Output",
       "description": "Output memory (trace memory) data.",
       "query": "OM",
-      "examples": ["OM"]
+      "examples": [
+        "OM"
+      ]
     },
     {
       "name": "output_normalized_data",
@@ -1191,7 +1654,9 @@
       "category": "Status/Output",
       "description": "Output normalized (measurement minus memory) data.",
       "query": "ON",
-      "examples": ["ON"]
+      "examples": [
+        "ON"
+      ]
     },
     {
       "name": "output_cursor_value",
@@ -1199,7 +1664,9 @@
       "category": "Status/Output",
       "description": "Output cursor (marker) value.",
       "query": "OC",
-      "examples": ["OC"]
+      "examples": [
+        "OC"
+      ]
     },
     {
       "name": "output_keycode",
@@ -1207,7 +1674,9 @@
       "category": "Status/Output",
       "description": "Output keycode of the last front-panel key (or softkey) pressed.",
       "query": "OK",
-      "examples": ["OK"]
+      "examples": [
+        "OK"
+      ]
     },
     {
       "name": "output_status_byte",
@@ -1215,7 +1684,9 @@
       "category": "Status/Output",
       "description": "Output status bytes (status byte and extended status byte). The status byte reports HP-IB syntax error, operation (sweep/plot/print) complete, softkey pressed, change in extended status byte, numeric entry completed, and front-panel key pressed; the extended status byte reports detector uncal, front-panel preset/power-on, limit test failed, action requested, knob activity, operation not possible, and self-test failure.",
       "query": "OS",
-      "examples": ["OS"]
+      "examples": [
+        "OS"
+      ]
     },
     {
       "name": "clear_status_bytes",
@@ -1223,7 +1694,9 @@
       "category": "Status/Output",
       "description": "Clear status bytes.",
       "set": "CS",
-      "examples": ["CS"]
+      "examples": [
+        "CS"
+      ]
     },
     {
       "name": "service_request_mask",
@@ -1232,9 +1705,14 @@
       "description": "Service request (SRQ) mask set to d. Enables which conditions generate an HP-IB service interrupt.",
       "set": "RM<d>",
       "parameters": [
-        { "name": "mask", "range": "Variable length numeric (bit mask)" }
+        {
+          "name": "mask",
+          "range": "Variable length numeric (bit mask)"
+        }
       ],
-      "examples": ["RM2"]
+      "examples": [
+        "RM2"
+      ]
     },
     {
       "name": "output_error_status_ch1",
@@ -1242,7 +1720,9 @@
       "category": "Status/Output",
       "description": "Output error status of display channel 1.",
       "query": "OE1",
-      "examples": ["OE1"]
+      "examples": [
+        "OE1"
+      ]
     },
     {
       "name": "output_error_status_ch2",
@@ -1250,7 +1730,9 @@
       "category": "Status/Output",
       "description": "Output error status of display channel 2.",
       "query": "OE2",
-      "examples": ["OE2"]
+      "examples": [
+        "OE2"
+      ]
     },
     {
       "name": "output_detector_offset",
@@ -1258,7 +1740,9 @@
       "category": "Status/Output",
       "description": "Output measured detector amplitude offset.",
       "query": "OPDO",
-      "examples": ["OPDO"]
+      "examples": [
+        "OPDO"
+      ]
     },
     {
       "name": "output_interrogated_parameter",
@@ -1267,9 +1751,16 @@
       "description": "Output interrogated parameter value. Send OP immediately followed by the two-letter function prefix x to read that parameter back. Valid prefixes: BW, DA, DB, DC, DR, RL, RP, SD, SL, SO, SP, SR, SS, ST.",
       "query": "OP<x>",
       "parameters": [
-        { "name": "parameter", "range": "BW, DA, DB, DC, DR, RL, RP, SD, SL, SO, SP, SR, SS, ST" }
+        {
+          "name": "parameter",
+          "range": "BW, DA, DB, DC, DR, RL, RP, SD, SL, SO, SP, SR, SS, ST"
+        }
       ],
-      "examples": ["OPRL", "OPSP", "OPSD"]
+      "examples": [
+        "OPRL",
+        "OPSP",
+        "OPSD"
+      ]
     },
     {
       "name": "format_data_ascii",
@@ -1277,7 +1768,9 @@
       "category": "Status/Output",
       "description": "Format output data as ASCII.",
       "set": "FD0",
-      "examples": ["FD0"]
+      "examples": [
+        "FD0"
+      ]
     },
     {
       "name": "format_data_binary",
@@ -1285,7 +1778,9 @@
       "category": "Status/Output",
       "description": "Format output data as binary (HP BASIC compatible, 16-bit integers MSB first).",
       "set": "FD1",
-      "examples": ["FD1"]
+      "examples": [
+        "FD1"
+      ]
     },
     {
       "name": "format_data_extended_ascii",
@@ -1293,7 +1788,9 @@
       "category": "Status/Output",
       "description": "Format output data as extended ASCII.",
       "set": "FD2",
-      "examples": ["FD2"]
+      "examples": [
+        "FD2"
+      ]
     },
     {
       "name": "format_data_binary_pc",
@@ -1301,7 +1798,9 @@
       "category": "Status/Output",
       "description": "Format output data as binary (PC compatible).",
       "set": "FD3",
-      "examples": ["FD3"]
+      "examples": [
+        "FD3"
+      ]
     },
     {
       "name": "format_data_extended_binary_hp",
@@ -1309,7 +1808,9 @@
       "category": "Status/Output",
       "description": "Format output data as extended binary (HP BASIC compatible).",
       "set": "FD4",
-      "examples": ["FD4"]
+      "examples": [
+        "FD4"
+      ]
     },
     {
       "name": "format_data_extended_binary_pc",
@@ -1317,7 +1818,9 @@
       "category": "Status/Output",
       "description": "Format output data as extended binary (PC compatible).",
       "set": "FD5",
-      "examples": ["FD5"]
+      "examples": [
+        "FD5"
+      ]
     },
     {
       "name": "cursor_format_log",
@@ -1325,7 +1828,9 @@
       "category": "Markers",
       "description": "Logarithmic (dB) cursor format. HP 8757D Option 001 only.",
       "set": "FR0",
-      "examples": ["FR0"]
+      "examples": [
+        "FR0"
+      ]
     },
     {
       "name": "cursor_format_swr",
@@ -1333,7 +1838,9 @@
       "category": "Markers",
       "description": "SWR cursor format. HP 8757D Option 001 only.",
       "set": "FR1",
-      "examples": ["FR1"]
+      "examples": [
+        "FR1"
+      ]
     },
     {
       "name": "title_string",
@@ -1342,9 +1849,14 @@
       "description": "Write title; s is an ASCII string of up to 50 characters.",
       "set": "WT<s>",
       "parameters": [
-        { "name": "title", "range": "ASCII string, up to 50 characters" }
+        {
+          "name": "title",
+          "range": "ASCII string, up to 50 characters"
+        }
       ],
-      "examples": ["WTMy Title"]
+      "examples": [
+        "WTMy Title"
+      ]
     },
     {
       "name": "write_softkey_label",
@@ -1353,9 +1865,14 @@
       "description": "Write softkey label; s is the label string.",
       "set": "WK<s>",
       "parameters": [
-        { "name": "label", "range": "ASCII string" }
+        {
+          "name": "label",
+          "range": "ASCII string"
+        }
       ],
-      "examples": ["WKCal #1"]
+      "examples": [
+        "WKCal #1"
+      ]
     },
     {
       "name": "select_softkey",
@@ -1364,9 +1881,15 @@
       "description": "Select softkey q (q = 1 to 8).",
       "set": "SK<q>",
       "parameters": [
-        { "name": "softkey", "range": "q = 1 to 8" }
+        {
+          "name": "softkey",
+          "range": "q = 1 to 8"
+        }
       ],
-      "examples": ["SK1", "SK8"]
+      "examples": [
+        "SK1",
+        "SK8"
+      ]
     },
     {
       "name": "menu_measurement",
@@ -1374,7 +1897,9 @@
       "category": "Display Graphics",
       "description": "Display the measurement menu.",
       "set": "MU0",
-      "examples": ["MU0"]
+      "examples": [
+        "MU0"
+      ]
     },
     {
       "name": "menu_display",
@@ -1382,7 +1907,9 @@
       "category": "Display Graphics",
       "description": "Display the display menu.",
       "set": "MU1",
-      "examples": ["MU1"]
+      "examples": [
+        "MU1"
+      ]
     },
     {
       "name": "menu_scale",
@@ -1390,7 +1917,9 @@
       "category": "Display Graphics",
       "description": "Display the scale menu.",
       "set": "MU2",
-      "examples": ["MU2"]
+      "examples": [
+        "MU2"
+      ]
     },
     {
       "name": "menu_reference",
@@ -1398,7 +1927,9 @@
       "category": "Display Graphics",
       "description": "Display the reference menu.",
       "set": "MU3",
-      "examples": ["MU3"]
+      "examples": [
+        "MU3"
+      ]
     },
     {
       "name": "menu_cursor",
@@ -1406,7 +1937,9 @@
       "category": "Display Graphics",
       "description": "Display the cursor menu.",
       "set": "MU4",
-      "examples": ["MU4"]
+      "examples": [
+        "MU4"
+      ]
     },
     {
       "name": "menu_average",
@@ -1414,7 +1947,9 @@
       "category": "Display Graphics",
       "description": "Display the average menu.",
       "set": "MU5",
-      "examples": ["MU5"]
+      "examples": [
+        "MU5"
+      ]
     },
     {
       "name": "menu_calibration",
@@ -1422,7 +1957,9 @@
       "category": "Display Graphics",
       "description": "Display the calibration menu.",
       "set": "MU6",
-      "examples": ["MU6"]
+      "examples": [
+        "MU6"
+      ]
     },
     {
       "name": "menu_special",
@@ -1430,7 +1967,9 @@
       "category": "Display Graphics",
       "description": "Display the special menu.",
       "set": "MU7",
-      "examples": ["MU7"]
+      "examples": [
+        "MU7"
+      ]
     },
     {
       "name": "menu_system",
@@ -1438,7 +1977,9 @@
       "category": "Display Graphics",
       "description": "Display the system menu.",
       "set": "MU8",
-      "examples": ["MU8"]
+      "examples": [
+        "MU8"
+      ]
     },
     {
       "name": "channel_menu",
@@ -1446,7 +1987,9 @@
       "category": "Display Graphics",
       "description": "Display the channel menu (main menu).",
       "set": "MM",
-      "examples": ["MM"]
+      "examples": [
+        "MM"
+      ]
     },
     {
       "name": "restore_crt_normal",
@@ -1454,7 +1997,9 @@
       "category": "Display Graphics",
       "description": "Restore CRT to normal (un-blanked) mode.",
       "set": "BL0",
-      "examples": ["BL0"]
+      "examples": [
+        "BL0"
+      ]
     },
     {
       "name": "blank_frequency_labels",
@@ -1462,7 +2007,9 @@
       "category": "Display Graphics",
       "description": "Blank frequency labels (secure frequency mode; frequency labels cannot be restored).",
       "set": "BL1",
-      "examples": ["BL1"]
+      "examples": [
+        "BL1"
+      ]
     },
     {
       "name": "blank_all_labels",
@@ -1470,7 +2017,9 @@
       "category": "Display Graphics",
       "description": "Blank all labels.",
       "set": "BL2",
-      "examples": ["BL2"]
+      "examples": [
+        "BL2"
+      ]
     },
     {
       "name": "blank_active_trace",
@@ -1478,7 +2027,9 @@
       "category": "Display Graphics",
       "description": "Blank active channel trace.",
       "set": "BL3",
-      "examples": ["BL3"]
+      "examples": [
+        "BL3"
+      ]
     },
     {
       "name": "blank_softkey_labels",
@@ -1486,7 +2037,9 @@
       "category": "Display Graphics",
       "description": "Blank softkey labels.",
       "set": "BL4",
-      "examples": ["BL4"]
+      "examples": [
+        "BL4"
+      ]
     },
     {
       "name": "blank_all_except_graphics",
@@ -1494,7 +2047,9 @@
       "category": "Display Graphics",
       "description": "Blank all (except user CRT graphics).",
       "set": "BL5",
-      "examples": ["BL5"]
+      "examples": [
+        "BL5"
+      ]
     },
     {
       "name": "blank_title",
@@ -1502,7 +2057,9 @@
       "category": "Display Graphics",
       "description": "Blank title.",
       "set": "BL6",
-      "examples": ["BL6"]
+      "examples": [
+        "BL6"
+      ]
     },
     {
       "name": "blank_mode_labels",
@@ -1510,7 +2067,9 @@
       "category": "Display Graphics",
       "description": "Blank mode labels.",
       "set": "BL7",
-      "examples": ["BL7"]
+      "examples": [
+        "BL7"
+      ]
     },
     {
       "name": "blank_active_entry",
@@ -1518,7 +2077,9 @@
       "category": "Display Graphics",
       "description": "Blank the active entry area.",
       "set": "BL8",
-      "examples": ["BL8"]
+      "examples": [
+        "BL8"
+      ]
     },
     {
       "name": "blank_limit_lines",
@@ -1526,7 +2087,9 @@
       "category": "Display Graphics",
       "description": "Blank the limit lines.",
       "set": "BL9",
-      "examples": ["BL9"]
+      "examples": [
+        "BL9"
+      ]
     },
     {
       "name": "blank_all_except_graphics_softkeys",
@@ -1534,7 +2097,9 @@
       "category": "Display Graphics",
       "description": "Blank all (except user CRT graphics and softkeys).",
       "set": "BLA",
-      "examples": ["BLA"]
+      "examples": [
+        "BLA"
+      ]
     },
     {
       "name": "overall_brightness",
@@ -1543,9 +2108,14 @@
       "description": "Overall display brightness set to d.",
       "set": "BN<d>",
       "parameters": [
-        { "name": "brightness", "range": "Variable length numeric" }
+        {
+          "name": "brightness",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["BN5"]
+      "examples": [
+        "BN5"
+      ]
     },
     {
       "name": "monochrome_display",
@@ -1553,7 +2123,9 @@
       "category": "Display Graphics",
       "description": "Monochrome display. HP 8757D only.",
       "set": "MOC",
-      "examples": ["MOC"]
+      "examples": [
+        "MOC"
+      ]
     },
     {
       "name": "set_default_colors",
@@ -1561,7 +2133,9 @@
       "category": "Display Graphics",
       "description": "Set default colors. HP 8757D only.",
       "set": "DEC",
-      "examples": ["DEC"]
+      "examples": [
+        "DEC"
+      ]
     },
     {
       "name": "set_channel_1_color",
@@ -1569,7 +2143,9 @@
       "category": "Display Graphics",
       "description": "Set channel 1 trace color. HP 8757D only.",
       "set": "CC1",
-      "examples": ["CC1"]
+      "examples": [
+        "CC1"
+      ]
     },
     {
       "name": "set_channel_2_color",
@@ -1577,7 +2153,9 @@
       "category": "Display Graphics",
       "description": "Set channel 2 trace color. HP 8757D only.",
       "set": "CC2",
-      "examples": ["CC2"]
+      "examples": [
+        "CC2"
+      ]
     },
     {
       "name": "set_channel_3_color",
@@ -1585,7 +2163,9 @@
       "category": "Display Graphics",
       "description": "Set channel 3 trace color. HP 8757D only.",
       "set": "CC3",
-      "examples": ["CC3"]
+      "examples": [
+        "CC3"
+      ]
     },
     {
       "name": "set_channel_4_color",
@@ -1593,7 +2173,9 @@
       "category": "Display Graphics",
       "description": "Set channel 4 trace color. HP 8757D only.",
       "set": "CC4",
-      "examples": ["CC4"]
+      "examples": [
+        "CC4"
+      ]
     },
     {
       "name": "set_labels_color",
@@ -1601,7 +2183,9 @@
       "category": "Display Graphics",
       "description": "Set labels color. HP 8757D only.",
       "set": "CGL",
-      "examples": ["CGL"]
+      "examples": [
+        "CGL"
+      ]
     },
     {
       "name": "set_background_color",
@@ -1609,7 +2193,9 @@
       "category": "Display Graphics",
       "description": "Set background color. HP 8757D only.",
       "set": "CGN",
-      "examples": ["CGN"]
+      "examples": [
+        "CGN"
+      ]
     },
     {
       "name": "set_grid_color",
@@ -1617,7 +2203,9 @@
       "category": "Display Graphics",
       "description": "Set grid color. HP 8757D only.",
       "set": "CGR",
-      "examples": ["CGR"]
+      "examples": [
+        "CGR"
+      ]
     },
     {
       "name": "set_warning_label_color",
@@ -1625,7 +2213,9 @@
       "category": "Display Graphics",
       "description": "Set warning label color. HP 8757D only.",
       "set": "CGW",
-      "examples": ["CGW"]
+      "examples": [
+        "CGW"
+      ]
     },
     {
       "name": "color_adjust_one_color",
@@ -1634,9 +2224,14 @@
       "description": "Color (hue) adjust, one color, value d. HP 8757D only.",
       "set": "COC<d>",
       "parameters": [
-        { "name": "value", "range": "Variable length numeric" }
+        {
+          "name": "value",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["COC1"]
+      "examples": [
+        "COC1"
+      ]
     },
     {
       "name": "brightness_adjust_one_color",
@@ -1645,9 +2240,14 @@
       "description": "Brightness adjust, one color, value d. HP 8757D only.",
       "set": "COB<d>",
       "parameters": [
-        { "name": "value", "range": "Variable length numeric" }
+        {
+          "name": "value",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["COB1"]
+      "examples": [
+        "COB1"
+      ]
     },
     {
       "name": "tint_adjust_one_color",
@@ -1656,9 +2256,14 @@
       "description": "Tint adjust, one color, value d. HP 8757D only.",
       "set": "COT<d>",
       "parameters": [
-        { "name": "value", "range": "Variable length numeric" }
+        {
+          "name": "value",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["COT1"]
+      "examples": [
+        "COT1"
+      ]
     },
     {
       "name": "color_list_black",
@@ -1666,7 +2271,9 @@
       "category": "Display Graphics",
       "description": "Color list, black. HP 8757D only.",
       "set": "CLB",
-      "examples": ["CLB"]
+      "examples": [
+        "CLB"
+      ]
     },
     {
       "name": "color_list_green",
@@ -1674,7 +2281,9 @@
       "category": "Display Graphics",
       "description": "Color list, green. HP 8757D only.",
       "set": "CLG",
-      "examples": ["CLG"]
+      "examples": [
+        "CLG"
+      ]
     },
     {
       "name": "color_list_blue",
@@ -1682,7 +2291,9 @@
       "category": "Display Graphics",
       "description": "Color list, blue. HP 8757D only.",
       "set": "CLL",
-      "examples": ["CLL"]
+      "examples": [
+        "CLL"
+      ]
     },
     {
       "name": "color_list_red",
@@ -1690,7 +2301,9 @@
       "category": "Display Graphics",
       "description": "Color list, red. HP 8757D only.",
       "set": "CLR",
-      "examples": ["CLR"]
+      "examples": [
+        "CLR"
+      ]
     },
     {
       "name": "color_list_salmon",
@@ -1698,7 +2311,9 @@
       "category": "Display Graphics",
       "description": "Color list, salmon. HP 8757D only.",
       "set": "CLS",
-      "examples": ["CLS"]
+      "examples": [
+        "CLS"
+      ]
     },
     {
       "name": "color_list_white",
@@ -1706,7 +2321,9 @@
       "category": "Display Graphics",
       "description": "Color list, white. HP 8757D only.",
       "set": "CLW",
-      "examples": ["CLW"]
+      "examples": [
+        "CLW"
+      ]
     },
     {
       "name": "color_list_yellow",
@@ -1714,7 +2331,9 @@
       "category": "Display Graphics",
       "description": "Color list, yellow. HP 8757D only.",
       "set": "CLY",
-      "examples": ["CLY"]
+      "examples": [
+        "CLY"
+      ]
     },
     {
       "name": "plotter_buffer",
@@ -1723,9 +2342,15 @@
       "description": "Plotter buffer on/off. HP 8757D Option 001 only.",
       "set": "BF<m>",
       "parameters": [
-        { "name": "state", "range": "0 = off, 1 = on" }
+        {
+          "name": "state",
+          "range": "0 = off, 1 = on"
+        }
       ],
-      "examples": ["BF1", "BF0"]
+      "examples": [
+        "BF1",
+        "BF0"
+      ]
     },
     {
       "name": "plot_channel_1",
@@ -1733,7 +2358,9 @@
       "category": "Plot/Print",
       "description": "Plot channel 1 trace on external plotter.",
       "set": "P1",
-      "examples": ["P1"]
+      "examples": [
+        "P1"
+      ]
     },
     {
       "name": "plot_channel_2",
@@ -1741,7 +2368,9 @@
       "category": "Plot/Print",
       "description": "Plot channel 2 trace on external plotter.",
       "set": "P2",
-      "examples": ["P2"]
+      "examples": [
+        "P2"
+      ]
     },
     {
       "name": "plot_channel_3",
@@ -1749,7 +2378,9 @@
       "category": "Plot/Print",
       "description": "Plot channel 3 trace on external plotter.",
       "set": "P3",
-      "examples": ["P3"]
+      "examples": [
+        "P3"
+      ]
     },
     {
       "name": "plot_channel_4",
@@ -1757,7 +2388,9 @@
       "category": "Plot/Print",
       "description": "Plot channel 4 trace on external plotter.",
       "set": "P4",
-      "examples": ["P4"]
+      "examples": [
+        "P4"
+      ]
     },
     {
       "name": "plot_all",
@@ -1765,7 +2398,9 @@
       "category": "Plot/Print",
       "description": "Plot all on external plotter.",
       "set": "PA",
-      "examples": ["PA"]
+      "examples": [
+        "PA"
+      ]
     },
     {
       "name": "plot_labels",
@@ -1773,7 +2408,9 @@
       "category": "Plot/Print",
       "description": "Plot labels on external plotter.",
       "set": "PC",
-      "examples": ["PC"]
+      "examples": [
+        "PC"
+      ]
     },
     {
       "name": "plot_custom",
@@ -1781,7 +2418,9 @@
       "category": "Plot/Print",
       "description": "Plot custom plot (as specified by SU).",
       "set": "PD",
-      "examples": ["PD"]
+      "examples": [
+        "PD"
+      ]
     },
     {
       "name": "plot_grid",
@@ -1789,7 +2428,9 @@
       "category": "Plot/Print",
       "description": "Plot grid on external plotter.",
       "set": "PG",
-      "examples": ["PG"]
+      "examples": [
+        "PG"
+      ]
     },
     {
       "name": "specify_custom_plot",
@@ -1798,9 +2439,14 @@
       "description": "Specify custom plot according to d.",
       "set": "SU<d>",
       "parameters": [
-        { "name": "spec", "range": "Variable length numeric" }
+        {
+          "name": "spec",
+          "range": "Variable length numeric"
+        }
       ],
-      "examples": ["SU1"]
+      "examples": [
+        "SU1"
+      ]
     },
     {
       "name": "print_all_mono",
@@ -1808,7 +2454,9 @@
       "category": "Plot/Print",
       "description": "Print all to monochrome printer, except softkeys and CRT graphics.",
       "set": "PR1",
-      "examples": ["PR1"]
+      "examples": [
+        "PR1"
+      ]
     },
     {
       "name": "print_tabular_display_mono",
@@ -1816,7 +2464,9 @@
       "category": "Plot/Print",
       "description": "Print tabular display data in monochrome.",
       "set": "PR2",
-      "examples": ["PR2"]
+      "examples": [
+        "PR2"
+      ]
     },
     {
       "name": "print_tabular_cursor",
@@ -1824,7 +2474,9 @@
       "category": "Plot/Print",
       "description": "Print tabular marker/cursor data to external printer.",
       "set": "PR3",
-      "examples": ["PR3"]
+      "examples": [
+        "PR3"
+      ]
     },
     {
       "name": "print_all_color",
@@ -1832,7 +2484,9 @@
       "category": "Plot/Print",
       "description": "Print all to color printer, except softkeys and CRT graphics. HP 8757D only.",
       "set": "PR4",
-      "examples": ["PR4"]
+      "examples": [
+        "PR4"
+      ]
     },
     {
       "name": "initialize_disk",
@@ -1840,7 +2494,9 @@
       "category": "Disk",
       "description": "Initialize disk format. HP 8757D only.",
       "set": "IND",
-      "examples": ["IND"]
+      "examples": [
+        "IND"
+      ]
     },
     {
       "name": "delete_file",
@@ -1848,7 +2504,9 @@
       "category": "Disk",
       "description": "Delete file from disk. HP 8757D only.",
       "set": "DLF",
-      "examples": ["DLF"]
+      "examples": [
+        "DLF"
+      ]
     },
     {
       "name": "disk_hpib_address",
@@ -1857,9 +2515,14 @@
       "description": "Set disk HP-IB address to d. HP 8757D only.",
       "set": "DIA<d>",
       "parameters": [
-        { "name": "address", "range": "HP-IB address" }
+        {
+          "name": "address",
+          "range": "HP-IB address"
+        }
       ],
-      "examples": ["DIA0"]
+      "examples": [
+        "DIA0"
+      ]
     },
     {
       "name": "disk_unit_number",
@@ -1868,9 +2531,14 @@
       "description": "Set disk unit number to d. HP 8757D only.",
       "set": "DIU<d>",
       "parameters": [
-        { "name": "unit", "range": "Disk unit number" }
+        {
+          "name": "unit",
+          "range": "Disk unit number"
+        }
       ],
-      "examples": ["DIU0"]
+      "examples": [
+        "DIU0"
+      ]
     },
     {
       "name": "disk_volume_number",
@@ -1879,9 +2547,14 @@
       "description": "Set disk volume number to d. HP 8757D only.",
       "set": "DIV<d>",
       "parameters": [
-        { "name": "volume", "range": "Disk volume number" }
+        {
+          "name": "volume",
+          "range": "Disk volume number"
+        }
       ],
-      "examples": ["DIV0"]
+      "examples": [
+        "DIV0"
+      ]
     },
     {
       "name": "set_disk_format_ascii",
@@ -1889,7 +2562,9 @@
       "category": "Disk",
       "description": "Set disk format to ASCII. HP 8757D only.",
       "set": "DFA",
-      "examples": ["DFA"]
+      "examples": [
+        "DFA"
+      ]
     },
     {
       "name": "set_disk_format_binary",
@@ -1897,7 +2572,9 @@
       "category": "Disk",
       "description": "Set disk format to binary. HP 8757D only.",
       "set": "DFB",
-      "examples": ["DFB"]
+      "examples": [
+        "DFB"
+      ]
     },
     {
       "name": "set_disk_format_extended_binary",
@@ -1905,7 +2582,9 @@
       "category": "Disk",
       "description": "Set disk format to extended binary. HP 8757D only.",
       "set": "DFE",
-      "examples": ["DFE"]
+      "examples": [
+        "DFE"
+      ]
     },
     {
       "name": "title_for_file",
@@ -1914,9 +2593,14 @@
       "description": "Title for file; s is the file name string. HP 8757D only.",
       "set": "TIF<s>",
       "parameters": [
-        { "name": "filename", "range": "ASCII string" }
+        {
+          "name": "filename",
+          "range": "ASCII string"
+        }
       ],
-      "examples": ["TIFDATA1"]
+      "examples": [
+        "TIFDATA1"
+      ]
     },
     {
       "name": "store_all_info_to_disk",
@@ -1924,7 +2608,9 @@
       "category": "Disk",
       "description": "Store all instrument information to disk in file. HP 8757D only.",
       "set": "SFA",
-      "examples": ["SFA"]
+      "examples": [
+        "SFA"
+      ]
     },
     {
       "name": "store_crt_graphics_to_disk",
@@ -1932,7 +2618,9 @@
       "category": "Disk",
       "description": "Store CRT graphics to disk in file. HP 8757D only.",
       "set": "SFC",
-      "examples": ["SFC"]
+      "examples": [
+        "SFC"
+      ]
     },
     {
       "name": "store_data_trace_to_disk",
@@ -1940,7 +2628,9 @@
       "category": "Disk",
       "description": "Store data trace to disk in file. HP 8757D only.",
       "set": "SFD",
-      "examples": ["SFD"]
+      "examples": [
+        "SFD"
+      ]
     },
     {
       "name": "store_instrument_state_to_disk",
@@ -1948,7 +2638,9 @@
       "category": "Disk",
       "description": "Store instrument state to disk in file. HP 8757D only.",
       "set": "SFI",
-      "examples": ["SFI"]
+      "examples": [
+        "SFI"
+      ]
     },
     {
       "name": "store_memory_trace_to_disk",
@@ -1956,7 +2648,9 @@
       "category": "Disk",
       "description": "Store memory trace to disk in file. HP 8757D only.",
       "set": "SFM",
-      "examples": ["SFM"]
+      "examples": [
+        "SFM"
+      ]
     },
     {
       "name": "store_normalized_trace_to_disk",
@@ -1964,7 +2658,9 @@
       "category": "Disk",
       "description": "Store normalized trace to disk in file. HP 8757D only.",
       "set": "SFN",
-      "examples": ["SFN"]
+      "examples": [
+        "SFN"
+      ]
     },
     {
       "name": "load_instrument_info_from_disk",
@@ -1972,7 +2668,9 @@
       "category": "Disk",
       "description": "Load instrument information file from disk. HP 8757D only.",
       "set": "LFA",
-      "examples": ["LFA"]
+      "examples": [
+        "LFA"
+      ]
     },
     {
       "name": "load_crt_graphics_from_disk",
@@ -1980,7 +2678,9 @@
       "category": "Disk",
       "description": "Load CRT graphics file from disk. HP 8757D only.",
       "set": "LFC",
-      "examples": ["LFC"]
+      "examples": [
+        "LFC"
+      ]
     },
     {
       "name": "load_data_trace_from_disk",
@@ -1988,7 +2688,9 @@
       "category": "Disk",
       "description": "Load data trace file from disk. HP 8757D only.",
       "set": "LFD",
-      "examples": ["LFD"]
+      "examples": [
+        "LFD"
+      ]
     },
     {
       "name": "load_measurement_from_disk",
@@ -1996,7 +2698,9 @@
       "category": "Disk",
       "description": "Load measurement file from disk. HP 8757D only.",
       "set": "LFF",
-      "examples": ["LFF"]
+      "examples": [
+        "LFF"
+      ]
     },
     {
       "name": "load_instrument_info_hold_from_disk",
@@ -2004,7 +2708,9 @@
       "category": "Disk",
       "description": "Load instrument information file from disk and place instrument in hold mode. HP 8757D only.",
       "set": "LFH",
-      "examples": ["LFH"]
+      "examples": [
+        "LFH"
+      ]
     },
     {
       "name": "load_instrument_state_from_disk",
@@ -2012,7 +2718,9 @@
       "category": "Disk",
       "description": "Load instrument state file from disk. HP 8757D only.",
       "set": "LFI",
-      "examples": ["LFI"]
+      "examples": [
+        "LFI"
+      ]
     },
     {
       "name": "load_memory_trace_from_disk",
@@ -2020,7 +2728,9 @@
       "category": "Disk",
       "description": "Load memory trace file from disk. HP 8757D only.",
       "set": "LFM",
-      "examples": ["LFM"]
+      "examples": [
+        "LFM"
+      ]
     },
     {
       "name": "load_display_trace_from_disk",
@@ -2028,7 +2738,9 @@
       "category": "Disk",
       "description": "Load display trace file from disk. HP 8757D only.",
       "set": "LFN",
-      "examples": ["LFN"]
+      "examples": [
+        "LFN"
+      ]
     }
   ]
 }

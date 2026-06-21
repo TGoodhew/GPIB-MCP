@@ -1,12 +1,12 @@
 {
-  "model": "8901B",
+  "model": "8901A",
   "manufacturer": "HP",
   "category": "Modulation Analyzer",
-  "description": "HP 8901B Modulation Analyzer (RF frequency, AM/FM/PM modulation, audio, and RF power; 150 kHz to 1300 MHz). Legacy HP-IB (IEEE-488) instrument that uses two-character alphameric program codes (e.g. M1 = AM, M5 = FREQ), NOT SCPI. Codes are either two alpha characters or an alpha character plus a number (e.g. M3, S5, 27.3SP). Lower-case alpha characters are treated as upper case; commas and spaces between codes are ignored. Special functions are entered as the special-function number followed by the suffix SP (e.g. 7.4SP). Three syntax forms exist: a two-character code/suffix alone, a number plus suffix (e.g. 100 MZ), or a prefix special function plus number plus suffix (e.g. 27.3SP 100 MZ). Numeric data is a signed mantissa of up to eight digits with one decimal point and an optional one/two digit signed exponent. Measurement results are read back as an implicit-point exponential constant in fundamental units (Hz, watts, radians, dB, %) terminated by CR LF. Factory HP-IB address is decimal 14.",
-  "source": "8901B User.pdf",
+  "description": "HP 8901A Modulation Analyzer (RF frequency, AM/FM/PM modulation, audio, and RF power; 150 kHz to 1300 MHz). Original A-series predecessor of the 8901B; shares the same two-character HP-IB program-code set. The later 8901B added optional 1 Hz frequency-counter resolution (7.4SP), which the 8901A does not provide (8901A counter resolution is 10 Hz with 7.1SP or 1000 Hz with 7.2SP). Legacy HP-IB (IEEE-488) instrument that uses two-character alphameric program codes (e.g. M1 = AM, M5 = FREQ), NOT SCPI. Codes are either two alpha characters or an alpha character plus a number (e.g. M3, S5, 27.3SP). Lower-case alpha characters are treated as upper case; commas and spaces between codes are ignored. Special functions are entered as the special-function number followed by the suffix SP (e.g. 7.1SP). Three syntax forms exist: a two-character code/suffix alone, a number plus suffix (e.g. 100 MZ), or a prefix special function plus number plus suffix (e.g. 27.3SP 100 MZ). Numeric data is a signed mantissa of up to eight digits with one decimal point and an optional one/two digit signed exponent. Measurement results are read back as an implicit-point exponential constant in fundamental units (Hz, watts, radians, dB, %) terminated by CR LF. Factory HP-IB address is decimal 14.",
+  "source": "8901A-OM.pdf",
   "aliases": [
-    "8901B",
-    "HP8901B"
+    "8901A",
+    "HP8901A"
   ],
   "termination": {
     "write": "\n",
@@ -14,7 +14,7 @@
   },
   "identity": {
     "command": "ID",
-    "description": "HP-IB Identify (ID). Sent as a query: after ID the instrument is addressed to talk and outputs a numeric code identifying the instrument type, distinguishing an HP 8901B from an HP 8902A. No text model string, so no matchRegex."
+    "description": "HP-IB Identify (ID). Sent as a query: after ID the instrument is addressed to talk and outputs a numeric code identifying the instrument type, distinguishing an HP 8901A from an HP 8902A. No text model string, so no matchRegex."
   },
   "commands": [
     {
@@ -667,7 +667,7 @@
         }
       ],
       "examples": [
-        "7.4SP",
+        "7.1SP",
         "27.3SP 100 MZ"
       ]
     },
@@ -817,7 +817,7 @@
       "name": "identify",
       "mnemonic": "ID",
       "category": "Status",
-      "description": "HP-IB Identify. Distinguishes an HP 8901B from an HP 8902A. Read the instrument after sending ID to obtain the identifying value.",
+      "description": "HP-IB Identify. Distinguishes an HP 8901A from an HP 8902A. Read the instrument after sending ID to obtain the identifying value.",
       "set": "ID",
       "query": "ID (then read)",
       "examples": [
@@ -1145,7 +1145,7 @@
       "name": "sf_resolution_10hz",
       "mnemonic": "7.1SP",
       "category": "Special Function",
-      "description": "Select 10 Hz frequency counter resolution.",
+      "description": "Select 10 Hz frequency counter resolution (for input frequencies below 1 GHz).",
       "set": "7.1SP",
       "examples": [
         "7.1SP"
@@ -1153,22 +1153,12 @@
     },
     {
       "name": "sf_resolution_1khz",
-      "mnemonic": "7.3SP",
+      "mnemonic": "7.2SP",
       "category": "Special Function",
-      "description": "Select 1000 Hz frequency counter resolution.",
-      "set": "7.3SP",
+      "description": "Select 1000 Hz frequency counter resolution. (On the 8901A this is 7.2SP; the 8901B's optional 1 Hz resolution at 7.4SP is not available on the 8901A.)",
+      "set": "7.2SP",
       "examples": [
-        "7.3SP"
-      ]
-    },
-    {
-      "name": "sf_resolution_1hz",
-      "mnemonic": "7.4SP",
-      "category": "Special Function",
-      "description": "Select 1 Hz frequency counter resolution (not available on all instruments; returns Error 23 if unequipped).",
-      "set": "7.4SP",
-      "examples": [
-        "7.4SP"
+        "7.2SP"
       ]
     }
   ]
