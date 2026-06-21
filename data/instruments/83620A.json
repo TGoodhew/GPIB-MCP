@@ -4,7 +4,7 @@
   "category": "Synthesized Sweeper",
   "description": "HP 83620A Synthesized Sweeper (10 MHz to 20 GHz), part of the HP 8360 series. Programmable over HP-IB (GPIB/IEEE-488) using the SCPI language (the default; CIIL and 8340-Compatible languages are also selectable via SYSTem:LANGuage). Commands follow the SCPI tree shown in Table S-1 'HP 8360 SCPI COMMAND SUMMARY'. Most settings are accessed under the default SOURce subsystem, so the leading ':SOURce' is optional/implied (e.g. ':FREQuency:CW' == ':SOURce:FREQuency:CW'). Numeric values accept an optional units suffix (HZ/KHZ/MHZ/GHZ for frequency, S/MS/US for time, DB/DBM/PCT for level/depth) and most accept MAXimum, MINimum, and where noted UP/DOWN. Boolean parameters accept ON|OFF|1|0. Querying replaces the set value with '?'. After *RST the instrument returns to the predefined state listed under *RST in the command summary. *IDN? returns 'HEWLETT-PACKARD,model,serial number,DD MMM YY'. Command set is common to the 8360 family (83620A/B, 83640A/B, 83650A/B, etc.).",
   "source": "83620A User.pdf",
-  "aliases": ["83620A", "83620B", "83640A", "8360"],
+  "aliases": ["83620A", "8360"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",

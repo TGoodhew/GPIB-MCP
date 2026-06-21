@@ -151,6 +151,17 @@ namespace GpibMcp.Tools
                     var attempts = new List<string>();
                     InstrumentDefinition assignedDef;
                     string assigned = assignments.Get(resource);
+                    // If the assigned model is documented as having no identification query, say so
+                    // rather than blindly trying *IDN?/ID? (which would just time out / confuse).
+                    if (assigned != null && db.TryGet(assigned, out assignedDef) &&
+                        assignedDef.Identity != null && assignedDef.Identity.Supported == false)
+                    {
+                        return resource + " is assigned " + assignedDef.Model + ", which has no remote " +
+                               "identification query - its identity cannot be read or verified over the bus. " +
+                               (string.IsNullOrEmpty(assignedDef.Identity.Description) ? "" :
+                                "(" + assignedDef.Identity.Description + ") ") +
+                               "Trust the assignment, or confirm the instrument another way.";
+                    }
                     if (assigned != null && db.TryGet(assigned, out assignedDef) &&
                         assignedDef.Identity != null && !string.IsNullOrEmpty(assignedDef.Identity.Command))
                     {
@@ -505,6 +516,9 @@ namespace GpibMcp.Tools
         {
             ok = true;
             if (!verify) return "Verification skipped.";
+            if (def.Identity != null && def.Identity.Supported == false)
+                return def.Model + " has no remote identification query, so identity cannot be verified " +
+                       "(assigning unverified).";
             if (def.Identity == null || string.IsNullOrEmpty(def.Identity.Command))
                 return "No identity command defined for " + def.Model + "; cannot verify automatically.";
 

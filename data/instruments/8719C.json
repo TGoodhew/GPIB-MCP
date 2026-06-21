@@ -1,0 +1,5152 @@
+{
+  "model": "8719C",
+  "manufacturer": "HP",
+  "category": "Vector Network Analyzer",
+  "description": "HP 8719C microwave vector network analyzer, 50 MHz to 13.5 GHz, HP-IB. Uses the HP 8753/8720-series mnemonic command language (not pure SCPI). Commands documented in this reference are shared across the HP 8719C, 8720C, and 8722A/C analyzers and are largely compatible with the HP 8753.",
+  "source": "872XC_PG_REF.pdf",
+  "aliases": [
+    "8719C",
+    "HP8719C"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "OUTPIDEN",
+    "matchRegex": "8719",
+    "description": "Outputs the identification string \"HEWLETT PACKARD, 87aam,0,X.XX\" where aam is the rest of the model number and X.XX is the firmware revision. Also accessible via IDN? and *IDN?."
+  },
+  "commands": [
+    {
+      "name": "address_controller",
+      "mnemonic": "ADDRCONT",
+      "category": "System",
+      "description": "Sets the HP-IB address the analyzer uses to communicate with an external controller (also accepts PCB). Must match the system controller interface for pass-control.",
+      "set": "ADDRCONT <value>",
+      "query": "ADDRCONT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 30",
+          "default": "21"
+        }
+      ],
+      "examples": [
+        "ADDRCONT 21",
+        "ADDRCONT?"
+      ]
+    },
+    {
+      "name": "address_disk",
+      "mnemonic": "ADDRDISC",
+      "category": "System",
+      "description": "Sets the HP-IB address the analyzer uses to communicate with an external disk drive.",
+      "set": "ADDRDISC <value>",
+      "query": "ADDRDISC?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 30",
+          "default": "0"
+        }
+      ],
+      "examples": [
+        "ADDRDISC 0"
+      ]
+    },
+    {
+      "name": "address_plotter",
+      "mnemonic": "ADDRPLOT",
+      "category": "System",
+      "description": "Sets the HP-IB address the analyzer uses to communicate with a plotter.",
+      "set": "ADDRPLOT <value>",
+      "query": "ADDRPLOT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 30",
+          "default": "5"
+        }
+      ],
+      "examples": [
+        "ADDRPLOT 5"
+      ]
+    },
+    {
+      "name": "address_power_meter",
+      "mnemonic": "ADDRPOWM",
+      "category": "System",
+      "description": "Sets the HP-IB address the analyzer uses to communicate with a compatible power meter.",
+      "set": "ADDRPOWM <value>",
+      "query": "ADDRPOWM?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 30",
+          "default": "13"
+        }
+      ],
+      "examples": [
+        "ADDRPOWM 13"
+      ]
+    },
+    {
+      "name": "address_printer",
+      "mnemonic": "ADDRPRIN",
+      "category": "System",
+      "description": "Sets the HP-IB address the analyzer uses to communicate with the printer.",
+      "set": "ADDRPRIN <value>",
+      "query": "ADDRPRIN?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 30",
+          "default": "1"
+        }
+      ],
+      "examples": [
+        "ADDRPRIN 1"
+      ]
+    },
+    {
+      "name": "alc",
+      "mnemonic": "ALC",
+      "category": "System",
+      "description": "Controls the automatic leveling control (ALC) of the test port power.",
+      "set": "ALC{ON|OFF}",
+      "query": "ALC?",
+      "examples": [
+        "ALCON",
+        "ALCOFF",
+        "ALC?"
+      ]
+    },
+    {
+      "name": "debug_mode",
+      "mnemonic": "DEBU",
+      "category": "System",
+      "description": "Turns the HP-IB command debug mode on or off; when on, commands scroll across the top of the display.",
+      "set": "DEBU{ON|OFF}",
+      "examples": [
+        "DEBUON",
+        "DEBUOFF"
+      ]
+    },
+    {
+      "name": "talker_listener",
+      "mnemonic": "TALKLIST",
+      "category": "System",
+      "description": "Puts the analyzer in talker/listener HP-IB mode.",
+      "set": "TALKLIST",
+      "examples": [
+        "TALKLIST"
+      ]
+    },
+    {
+      "name": "use_pass_control",
+      "mnemonic": "USEPASC",
+      "category": "System",
+      "description": "Puts the analyzer in use-pass-control HP-IB mode.",
+      "set": "USEPASC",
+      "examples": [
+        "USEPASC"
+      ]
+    },
+    {
+      "name": "disk_unit_number",
+      "mnemonic": "DISCUNIT",
+      "category": "System",
+      "description": "Specifies the disk unit number in a multiple-drive disk for store/load (e.g. 0 = left drive, 1 = right drive).",
+      "set": "DISCUNIT <unit_number>",
+      "parameters": [
+        {
+          "name": "unit_number"
+        }
+      ],
+      "examples": [
+        "DISCUNIT 0"
+      ]
+    },
+    {
+      "name": "disk_volume_number",
+      "mnemonic": "DISCVOLU",
+      "category": "System",
+      "description": "Specifies the volume number in a disk drive that allows multiple volumes for store/load.",
+      "set": "DISCVOLU <volume_number>",
+      "parameters": [
+        {
+          "name": "volume_number"
+        }
+      ],
+      "examples": [
+        "DISCVOLU 0"
+      ]
+    },
+    {
+      "name": "noop",
+      "mnemonic": "NOOP",
+      "category": "System",
+      "description": "The \"no operation\" command.",
+      "set": "NOOP",
+      "examples": [
+        "NOOP"
+      ]
+    },
+    {
+      "name": "execute_test",
+      "mnemonic": "EXET",
+      "category": "System",
+      "description": "Executes the selected service test.",
+      "set": "EXET",
+      "examples": [
+        "EXET"
+      ]
+    },
+    {
+      "name": "firmware_revision",
+      "mnemonic": "SOFR",
+      "category": "System",
+      "description": "Displays the firmware revision in the active entry area.",
+      "set": "SOFR",
+      "query": "SOFR?",
+      "examples": [
+        "SOFR?"
+      ]
+    },
+    {
+      "name": "instrument_mode_na",
+      "mnemonic": "INSMNETA",
+      "category": "System",
+      "description": "Selects instrument mode as a network analyzer.",
+      "set": "INSMNETA",
+      "query": "INSMNETA?",
+      "examples": [
+        "INSMNETA"
+      ]
+    },
+    {
+      "name": "instrument_mode_tuned_receiver",
+      "mnemonic": "INSMTUNR",
+      "category": "System",
+      "description": "Selects instrument mode as a tuned receiver.",
+      "set": "INSMTUNR",
+      "query": "INSMTUNR?",
+      "examples": [
+        "INSMTUNR"
+      ]
+    },
+    {
+      "name": "test_set_id",
+      "mnemonic": "TESS",
+      "category": "System",
+      "description": "Outputs the test set identifier: 1 for an S-parameter test set, 0 for none.",
+      "query": "TESS?",
+      "examples": [
+        "TESS?"
+      ]
+    },
+    {
+      "name": "continuous_switching",
+      "mnemonic": "CSWI",
+      "category": "System",
+      "description": "Enables or disables continuous switching of the test set transfer switch.",
+      "set": "CSWI{ON|OFF}",
+      "query": "CSWI?",
+      "examples": [
+        "CSWION",
+        "CSWIOFF"
+      ]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "OUTPIDEN",
+      "category": "Output/Query",
+      "description": "Outputs the identification string, \"HEWLETT PACKARD, 87aam,0,X.XX\", where aam is the rest of the model number and X.XX is the firmware revision. Equivalent to IDN? and *IDN?.",
+      "query": "OUTPIDEN",
+      "examples": [
+        "OUTPIDEN"
+      ]
+    },
+    {
+      "name": "center",
+      "mnemonic": "CENT",
+      "category": "Stimulus",
+      "description": "Sets the center stimulus value (units depend on sweep domain: frequency, time, or power).",
+      "set": "CENT <value>[suffix]",
+      "query": "CENT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "Frequency/time/power suffix"
+        }
+      ],
+      "examples": [
+        "CENT 10GHZ",
+        "CENT?"
+      ]
+    },
+    {
+      "name": "span",
+      "mnemonic": "SPAN",
+      "category": "Stimulus",
+      "description": "Sets the stimulus span. If a list-frequency segment is being edited, sets the segment span.",
+      "set": "SPAN <value>[suffix]",
+      "query": "SPAN?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "SPAN 2GHZ",
+        "SPAN?"
+      ]
+    },
+    {
+      "name": "start",
+      "mnemonic": "STAR",
+      "category": "Stimulus",
+      "description": "Defines the start stimulus value. If a list-frequency segment is being edited, sets the segment start.",
+      "set": "STAR <value>[suffix]",
+      "query": "STAR?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "STAR 50MHZ",
+        "STAR?"
+      ]
+    },
+    {
+      "name": "stop",
+      "mnemonic": "STOP",
+      "category": "Stimulus",
+      "description": "Defines the stop stimulus value. If a list-frequency segment is being edited, sets the segment stop.",
+      "set": "STOP <value>[suffix]",
+      "query": "STOP?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "STOP 20GHZ",
+        "STOP?"
+      ]
+    },
+    {
+      "name": "cw_frequency",
+      "mnemonic": "CWFREQ",
+      "category": "Stimulus",
+      "description": "Sets the frequency for CW frequency mode and power sweep. When editing a list segment, sets the segment center frequency with span 0 Hz.",
+      "set": "CWFREQ <value>[suffix]",
+      "query": "CWFREQ?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Within analyzer range/resolution"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "CWFREQ 10GHZ",
+        "CWFREQ?"
+      ]
+    },
+    {
+      "name": "number_of_points",
+      "mnemonic": "POIN",
+      "category": "Stimulus",
+      "description": "Sets the number of data points per sweep.",
+      "set": "POIN <value>",
+      "query": "POIN?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "3, 11, 21, 51, 101, 201, 401, 801, 1601 (linear/log/power/CW); list-dependent for list sweeps"
+        }
+      ],
+      "examples": [
+        "POIN 201",
+        "POIN?"
+      ]
+    },
+    {
+      "name": "power_level",
+      "mnemonic": "POWE",
+      "category": "Stimulus",
+      "description": "Sets the source output level within the current power range (see PRAN).",
+      "set": "POWE <value>",
+      "query": "POWE?",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "dBm"
+          ]
+        }
+      ],
+      "examples": [
+        "POWE -10",
+        "POWE?"
+      ]
+    },
+    {
+      "name": "power_range",
+      "mnemonic": "PRAN",
+      "category": "Stimulus",
+      "description": "Selects a specific power range (01-12) for test port power. See Specifications for the level selectable with POWE.",
+      "set": "PRAN{01-12}",
+      "examples": [
+        "PRAN01",
+        "PRAN12"
+      ]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "SWET",
+      "category": "Stimulus",
+      "description": "Sets the sweep time manually.",
+      "set": "SWET <value>[suffix]",
+      "query": "SWET?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "2 ms to 86400",
+          "units": [
+            "s"
+          ]
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "SWET 100MS",
+        "SWET?"
+      ]
+    },
+    {
+      "name": "sweep_time_auto",
+      "mnemonic": "SWEA",
+      "category": "Stimulus",
+      "description": "Selects automatic sweep time (fastest possible for the given frequency range, points, and IF bandwidth).",
+      "set": "SWEA",
+      "examples": [
+        "SWEA"
+      ]
+    },
+    {
+      "name": "step_size",
+      "mnemonic": "STPSIZE",
+      "category": "Stimulus",
+      "description": "When editing a list-frequency segment, sets the step size.",
+      "set": "STPSIZE <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "STPSIZE 1MHZ"
+      ]
+    },
+    {
+      "name": "linear_frequency",
+      "mnemonic": "LINFREQ",
+      "category": "Sweep",
+      "description": "Activates a linear frequency sweep.",
+      "set": "LINFREQ",
+      "query": "LINFREQ?",
+      "examples": [
+        "LINFREQ"
+      ]
+    },
+    {
+      "name": "log_frequency",
+      "mnemonic": "LOGFREQ",
+      "category": "Sweep",
+      "description": "Activates a log frequency sweep.",
+      "set": "LOGFREQ",
+      "query": "LOGFREQ?",
+      "examples": [
+        "LOGFREQ"
+      ]
+    },
+    {
+      "name": "list_frequency",
+      "mnemonic": "LISFREQ",
+      "category": "Sweep",
+      "description": "Activates the frequency list sweep mode.",
+      "set": "LISFREQ",
+      "query": "LISFREQ?",
+      "examples": [
+        "LISFREQ"
+      ]
+    },
+    {
+      "name": "power_sweep",
+      "mnemonic": "POWS",
+      "category": "Sweep",
+      "description": "Activates power sweep mode.",
+      "set": "POWS",
+      "query": "POWS?",
+      "examples": [
+        "POWS"
+      ]
+    },
+    {
+      "name": "cw_time",
+      "mnemonic": "CWTIME",
+      "category": "Sweep",
+      "description": "Selects the CW time sweep type.",
+      "set": "CWTIME",
+      "examples": [
+        "CWTIME"
+      ]
+    },
+    {
+      "name": "step_sweep",
+      "mnemonic": "STEPSWP",
+      "category": "Sweep",
+      "description": "When on, forces a stepped sweep on every point (rather than a swept sweep).",
+      "set": "STEPSWP{ON|OFF}",
+      "query": "STEPSWP?",
+      "examples": [
+        "STEPSWPON",
+        "STEPSWPOFF"
+      ]
+    },
+    {
+      "name": "all_segments_sweep",
+      "mnemonic": "ASEG",
+      "category": "Sweep",
+      "description": "Selects measurement of all list-frequency segments in LIST FREQ mode.",
+      "set": "ASEG",
+      "examples": [
+        "ASEG"
+      ]
+    },
+    {
+      "name": "single_segment_sweep",
+      "mnemonic": "SSEG",
+      "category": "Sweep",
+      "description": "Selects measurement of a specific list-frequency segment number in LIST FREQ mode.",
+      "set": "SSEG <segment_number>",
+      "parameters": [
+        {
+          "name": "segment_number"
+        }
+      ],
+      "examples": [
+        "SSEG 1"
+      ]
+    },
+    {
+      "name": "coupled_channels",
+      "mnemonic": "COUC",
+      "category": "Sweep",
+      "description": "Sets channel coupling of stimulus values on or off.",
+      "set": "COUC{ON|OFF}",
+      "query": "COUC?",
+      "examples": [
+        "COUCON",
+        "COUCOFF"
+      ]
+    },
+    {
+      "name": "continuous",
+      "mnemonic": "CONT",
+      "category": "Trigger",
+      "description": "Continuous trigger.",
+      "set": "CONT",
+      "query": "CONT?",
+      "examples": [
+        "CONT"
+      ]
+    },
+    {
+      "name": "free_run",
+      "mnemonic": "FRER",
+      "category": "Trigger",
+      "description": "Continuous trigger (free run).",
+      "set": "FRER",
+      "query": "FRER?",
+      "examples": [
+        "FRER"
+      ]
+    },
+    {
+      "name": "single",
+      "mnemonic": "SING",
+      "category": "Trigger",
+      "description": "Makes a single measurement sweep, then enters hold mode.",
+      "set": "SING",
+      "examples": [
+        "SING"
+      ]
+    },
+    {
+      "name": "hold",
+      "mnemonic": "HOLD",
+      "category": "Trigger",
+      "description": "Sets the trigger mode to hold the current measurement.",
+      "set": "HOLD",
+      "query": "HOLD?",
+      "examples": [
+        "HOLD"
+      ]
+    },
+    {
+      "name": "number_of_groups",
+      "mnemonic": "NUMG",
+      "category": "Trigger",
+      "description": "Triggers a user-specified number of sweeps, then returns to hold mode.",
+      "set": "NUMG <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "1 to 999"
+        }
+      ],
+      "examples": [
+        "NUMG 5"
+      ]
+    },
+    {
+      "name": "ext_trigger_off",
+      "mnemonic": "EXTTOFF",
+      "category": "Trigger",
+      "description": "Internal trigger mode on, external trigger off.",
+      "set": "EXTTOFF",
+      "query": "EXTTOFF?",
+      "examples": [
+        "EXTTOFF"
+      ]
+    },
+    {
+      "name": "ext_trigger_on_sweep",
+      "mnemonic": "EXTTON",
+      "category": "Trigger",
+      "description": "Enables external measurement trigger on sweep; one sweep per trigger.",
+      "set": "EXTTON",
+      "query": "EXTTON?",
+      "examples": [
+        "EXTTON"
+      ]
+    },
+    {
+      "name": "ext_trigger_on_point",
+      "mnemonic": "EXTTPOIN",
+      "category": "Trigger",
+      "description": "Enables external measurement trigger on point; one point per trigger.",
+      "set": "EXTTPOIN",
+      "query": "EXTTPOIN?",
+      "examples": [
+        "EXTTPOIN"
+      ]
+    },
+    {
+      "name": "manual_trigger_point",
+      "mnemonic": "MANTRIG",
+      "category": "Trigger",
+      "description": "Triggers a measurement at one point (manual trigger on point).",
+      "set": "MANTRIG",
+      "query": "MANTRIG?",
+      "examples": [
+        "MANTRIG"
+      ]
+    },
+    {
+      "name": "hpib_trigger",
+      "mnemonic": "TRIG",
+      "category": "Trigger",
+      "description": "HP-IB trigger; puts the analyzer into hold.",
+      "set": "TRIG",
+      "examples": [
+        "TRIG"
+      ]
+    },
+    {
+      "name": "measure_restart",
+      "mnemonic": "REST",
+      "category": "Trigger",
+      "description": "Aborts the sweep in progress and restarts the measurement.",
+      "set": "REST",
+      "examples": [
+        "REST"
+      ]
+    },
+    {
+      "name": "wait_sweep",
+      "mnemonic": "WAIT",
+      "category": "Trigger",
+      "description": "Waits for a clean (complete) sweep.",
+      "set": "WAIT",
+      "examples": [
+        "WAIT"
+      ]
+    },
+    {
+      "name": "meas_s11",
+      "mnemonic": "S11",
+      "category": "Measurement",
+      "description": "Selects measurement of S11 (reflection, forward).",
+      "set": "S11",
+      "query": "S11?",
+      "examples": [
+        "S11"
+      ]
+    },
+    {
+      "name": "meas_s12",
+      "mnemonic": "S12",
+      "category": "Measurement",
+      "description": "Selects measurement of S12 (transmission, reverse).",
+      "set": "S12",
+      "query": "S12?",
+      "examples": [
+        "S12"
+      ]
+    },
+    {
+      "name": "meas_s21",
+      "mnemonic": "S21",
+      "category": "Measurement",
+      "description": "Selects measurement of S21 (transmission, forward).",
+      "set": "S21",
+      "query": "S21?",
+      "examples": [
+        "S21"
+      ]
+    },
+    {
+      "name": "meas_s22",
+      "mnemonic": "S22",
+      "category": "Measurement",
+      "description": "Selects measurement of S22 (reflection, reverse).",
+      "set": "S22",
+      "query": "S22?",
+      "examples": [
+        "S22"
+      ]
+    },
+    {
+      "name": "meas_input_a",
+      "mnemonic": "MEASA",
+      "category": "Measurement",
+      "description": "Measures the absolute power amplitude at input A.",
+      "set": "MEASA",
+      "query": "MEASA?",
+      "examples": [
+        "MEASA"
+      ]
+    },
+    {
+      "name": "meas_input_b",
+      "mnemonic": "MEASB",
+      "category": "Measurement",
+      "description": "Measures the absolute power amplitude at input B.",
+      "set": "MEASB",
+      "query": "MEASB?",
+      "examples": [
+        "MEASB"
+      ]
+    },
+    {
+      "name": "meas_input_r",
+      "mnemonic": "MEASR",
+      "category": "Measurement",
+      "description": "Measures the absolute power amplitude at input R.",
+      "set": "MEASR",
+      "query": "MEASR?",
+      "examples": [
+        "MEASR"
+      ]
+    },
+    {
+      "name": "aux_input",
+      "mnemonic": "ANAI",
+      "category": "Measurement",
+      "description": "Measures and displays the data at the auxiliary input.",
+      "set": "ANAI",
+      "examples": [
+        "ANAI"
+      ]
+    },
+    {
+      "name": "channel_1",
+      "mnemonic": "CHAN1",
+      "category": "Measurement",
+      "description": "Selects channel 1 as the active measurement channel.",
+      "set": "CHAN1",
+      "query": "CHAN1?",
+      "examples": [
+        "CHAN1"
+      ]
+    },
+    {
+      "name": "channel_2",
+      "mnemonic": "CHAN2",
+      "category": "Measurement",
+      "description": "Selects channel 2 as the active measurement channel.",
+      "set": "CHAN2",
+      "query": "CHAN2?",
+      "examples": [
+        "CHAN2"
+      ]
+    },
+    {
+      "name": "alternate_ab",
+      "mnemonic": "ALTAB",
+      "category": "Measurement",
+      "description": "Alternates measurement of the A and B samplers between sweeps when both are required.",
+      "set": "ALTAB",
+      "examples": [
+        "ALTAB"
+      ]
+    },
+    {
+      "name": "chop_ab",
+      "mnemonic": "CHOPAB",
+      "category": "Measurement",
+      "description": "Simultaneously measures both A and B samplers in a single sweep when both are required.",
+      "set": "CHOPAB",
+      "examples": [
+        "CHOPAB"
+      ]
+    },
+    {
+      "name": "convert_off",
+      "mnemonic": "CONVOFF",
+      "category": "Conversion",
+      "description": "Turns off all parameter conversion operations.",
+      "set": "CONVOFF",
+      "query": "CONVOFF?",
+      "examples": [
+        "CONVOFF"
+      ]
+    },
+    {
+      "name": "convert_inverse_s",
+      "mnemonic": "CONV1DS",
+      "category": "Conversion",
+      "description": "Converts data into inverse S-parameter (1/S) values.",
+      "set": "CONV1DS",
+      "query": "CONV1DS?",
+      "examples": [
+        "CONV1DS"
+      ]
+    },
+    {
+      "name": "convert_y_refl",
+      "mnemonic": "CONVYREF",
+      "category": "Conversion",
+      "description": "Converts reflection data to equivalent admittance (Y) values.",
+      "set": "CONVYREF",
+      "query": "CONVYREF?",
+      "examples": [
+        "CONVYREF"
+      ]
+    },
+    {
+      "name": "convert_y_trans",
+      "mnemonic": "CONVYTRA",
+      "category": "Conversion",
+      "description": "Converts transmission data to equivalent admittance (Y) values.",
+      "set": "CONVYTRA",
+      "query": "CONVYTRA?",
+      "examples": [
+        "CONVYTRA"
+      ]
+    },
+    {
+      "name": "convert_z_refl",
+      "mnemonic": "CONVZREF",
+      "category": "Conversion",
+      "description": "Converts reflection data to equivalent impedance (Z) values.",
+      "set": "CONVZREF",
+      "query": "CONVZREF?",
+      "examples": [
+        "CONVZREF"
+      ]
+    },
+    {
+      "name": "convert_z_trans",
+      "mnemonic": "CONVZTRA",
+      "category": "Conversion",
+      "description": "Converts transmission data to equivalent impedance (Z) values.",
+      "set": "CONVZTRA",
+      "query": "CONVZTRA?",
+      "examples": [
+        "CONVZTRA"
+      ]
+    },
+    {
+      "name": "format_log_mag",
+      "mnemonic": "LOGM",
+      "category": "Format",
+      "description": "Displays log magnitude format.",
+      "set": "LOGM",
+      "query": "LOGM?",
+      "examples": [
+        "LOGM"
+      ]
+    },
+    {
+      "name": "format_lin_mag",
+      "mnemonic": "LINM",
+      "category": "Format",
+      "description": "Displays linear magnitude format.",
+      "set": "LINM",
+      "query": "LINM?",
+      "examples": [
+        "LINM"
+      ]
+    },
+    {
+      "name": "format_phase",
+      "mnemonic": "PHAS",
+      "category": "Format",
+      "description": "Displays Cartesian phase format (degrees).",
+      "set": "PHAS",
+      "query": "PHAS?",
+      "examples": [
+        "PHAS"
+      ]
+    },
+    {
+      "name": "format_delay",
+      "mnemonic": "DELA",
+      "category": "Format",
+      "description": "Selects the group delay format for the current measurement.",
+      "set": "DELA",
+      "query": "DELA?",
+      "examples": [
+        "DELA"
+      ]
+    },
+    {
+      "name": "format_smith",
+      "mnemonic": "SMIC",
+      "category": "Format",
+      "description": "Displays a Smith chart format.",
+      "set": "SMIC",
+      "query": "SMIC?",
+      "examples": [
+        "SMIC"
+      ]
+    },
+    {
+      "name": "format_polar",
+      "mnemonic": "POLA",
+      "category": "Format",
+      "description": "Displays polar format.",
+      "set": "POLA",
+      "query": "POLA?",
+      "examples": [
+        "POLA"
+      ]
+    },
+    {
+      "name": "format_real",
+      "mnemonic": "REAL",
+      "category": "Format",
+      "description": "Displays the real part of the data in Cartesian format.",
+      "set": "REAL",
+      "query": "REAL?",
+      "examples": [
+        "REAL"
+      ]
+    },
+    {
+      "name": "format_swr",
+      "mnemonic": "SWR",
+      "category": "Format",
+      "description": "Selects SWR display for the active channel.",
+      "set": "SWR",
+      "query": "SWR?",
+      "examples": [
+        "SWR"
+      ]
+    },
+    {
+      "name": "scale_per_div",
+      "mnemonic": "SCAL",
+      "category": "Scale",
+      "description": "Sets the response value scale per division of the graticule.",
+      "set": "SCAL <value>[suffix]",
+      "query": "SCAL?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "SCAL 10",
+        "SCAL?"
+      ]
+    },
+    {
+      "name": "auto_scale",
+      "mnemonic": "AUTO",
+      "category": "Scale",
+      "description": "Automatically selects the scale/div to fit the trace to the display.",
+      "set": "AUTO",
+      "examples": [
+        "AUTO"
+      ]
+    },
+    {
+      "name": "reference_position",
+      "mnemonic": "REFP",
+      "category": "Scale",
+      "description": "Sets the position of the reference line on the graticule (Cartesian formats).",
+      "set": "REFP <value>",
+      "query": "REFP?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 10",
+          "units": [
+            "Div"
+          ]
+        }
+      ],
+      "examples": [
+        "REFP 5",
+        "REFP?"
+      ]
+    },
+    {
+      "name": "reference_value",
+      "mnemonic": "REFV",
+      "category": "Scale",
+      "description": "Changes the value of the reference line, moving the trace correspondingly.",
+      "set": "REFV <value>[suffix]",
+      "query": "REFV?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "REFV 0",
+        "REFV?"
+      ]
+    },
+    {
+      "name": "electrical_delay",
+      "mnemonic": "ELED",
+      "category": "Scale",
+      "description": "Sets the electrical delay.",
+      "set": "ELED <value>[suffix]",
+      "query": "ELED?",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ],
+          "range": "Depends on frequency resolution"
+        }
+      ],
+      "examples": [
+        "ELED 1NS",
+        "ELED?"
+      ]
+    },
+    {
+      "name": "phase_offset",
+      "mnemonic": "PHAO",
+      "category": "Scale",
+      "description": "Adds or subtracts a phase offset.",
+      "set": "PHAO <value>",
+      "query": "PHAO?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "-360 to +360",
+          "units": [
+            "deg"
+          ]
+        }
+      ],
+      "examples": [
+        "PHAO 90",
+        "PHAO?"
+      ]
+    },
+    {
+      "name": "coaxial_delay",
+      "mnemonic": "COAD",
+      "category": "Scale",
+      "description": "Selects electrical delay calculation based on a coaxial transmission line.",
+      "set": "COAD",
+      "examples": [
+        "COAD"
+      ]
+    },
+    {
+      "name": "waveguide_delay",
+      "mnemonic": "WAVD",
+      "category": "Scale",
+      "description": "Selects electrical delay calculation based on a waveguide transmission line; value is the waveguide cutoff frequency.",
+      "set": "WAVD <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "Hz"
+          ]
+        }
+      ],
+      "examples": [
+        "WAVD 7GHZ"
+      ]
+    },
+    {
+      "name": "velocity_factor",
+      "mnemonic": "VELOFACT",
+      "category": "Scale",
+      "description": "Sets the velocity factor used to calculate equivalent electrical length.",
+      "set": "VELOFACT <value>",
+      "query": "VELOFACT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 10"
+        }
+      ],
+      "examples": [
+        "VELOFACT 0.66",
+        "VELOFACT?"
+      ]
+    },
+    {
+      "name": "averaging",
+      "mnemonic": "AVERO",
+      "category": "Averaging",
+      "description": "Sets the averaging function on or off for the active channel.",
+      "set": "AVERO{ON|OFF}",
+      "query": "AVERO?",
+      "examples": [
+        "AVEROON",
+        "AVEROOFF",
+        "AVERO?"
+      ]
+    },
+    {
+      "name": "averaging_factor",
+      "mnemonic": "AVERFACT",
+      "category": "Averaging",
+      "description": "Sets the averaging factor.",
+      "set": "AVERFACT <value>",
+      "query": "AVERFACT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "1 to 999"
+        }
+      ],
+      "examples": [
+        "AVERFACT 16",
+        "AVERFACT?"
+      ]
+    },
+    {
+      "name": "averaging_restart",
+      "mnemonic": "AVERREST",
+      "category": "Averaging",
+      "description": "Resets and restarts averaging.",
+      "set": "AVERREST",
+      "examples": [
+        "AVERREST"
+      ]
+    },
+    {
+      "name": "if_bandwidth",
+      "mnemonic": "IFBW",
+      "category": "Averaging",
+      "description": "Sets the IF bandwidth value.",
+      "set": "IFBW <value>[suffix]",
+      "query": "IFBW?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "10, 30, 100, 300, 1000, or 3000 Hz"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "IFBW 1000",
+        "IFBW?"
+      ]
+    },
+    {
+      "name": "smoothing",
+      "mnemonic": "SMOOO",
+      "category": "Averaging",
+      "description": "Sets the smoothing function on or off.",
+      "set": "SMOOO{ON|OFF}",
+      "query": "SMOOO?",
+      "examples": [
+        "SMOOOON",
+        "SMOOOOFF"
+      ]
+    },
+    {
+      "name": "smoothing_aperture",
+      "mnemonic": "SMOOAPER",
+      "category": "Averaging",
+      "description": "Sets the smoothing aperture as a percent of the span.",
+      "set": "SMOOAPER <value>",
+      "query": "SMOOAPER?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0.05 to 20",
+          "units": [
+            "%"
+          ]
+        }
+      ],
+      "examples": [
+        "SMOOAPER 5",
+        "SMOOAPER?"
+      ]
+    },
+    {
+      "name": "data_to_memory",
+      "mnemonic": "DATI",
+      "category": "Display",
+      "description": "Stores the active channel data to trace memory.",
+      "set": "DATI",
+      "examples": [
+        "DATI"
+      ]
+    },
+    {
+      "name": "display_data",
+      "mnemonic": "DISPDATA",
+      "category": "Display",
+      "description": "Displays a trace of the measured data.",
+      "set": "DISPDATA",
+      "query": "DISPDATA?",
+      "examples": [
+        "DISPDATA"
+      ]
+    },
+    {
+      "name": "display_memory",
+      "mnemonic": "DISPMEMO",
+      "category": "Display",
+      "description": "Displays the trace of the memory data.",
+      "set": "DISPMEMO",
+      "query": "DISPMEMO?",
+      "examples": [
+        "DISPMEMO"
+      ]
+    },
+    {
+      "name": "display_data_and_memory",
+      "mnemonic": "DISPDATM",
+      "category": "Display",
+      "description": "Displays both the measured data and memory data traces.",
+      "set": "DISPDATM",
+      "query": "DISPDATM?",
+      "examples": [
+        "DISPDATM"
+      ]
+    },
+    {
+      "name": "display_data_div_memory",
+      "mnemonic": "DISPDDM",
+      "category": "Trace Math",
+      "description": "Displays the trace of measured data divided by memory data (data/mem). Also DIVI.",
+      "set": "DISPDDM",
+      "query": "DISPDDM?",
+      "examples": [
+        "DISPDDM"
+      ]
+    },
+    {
+      "name": "display_data_minus_memory",
+      "mnemonic": "DISPDMM",
+      "category": "Trace Math",
+      "description": "Displays the trace of measured data minus memory data (data-mem). Also MINU.",
+      "set": "DISPDMM",
+      "query": "DISPDMM?",
+      "examples": [
+        "DISPDMM"
+      ]
+    },
+    {
+      "name": "dual_channel",
+      "mnemonic": "DUAC",
+      "category": "Display",
+      "description": "Selects dual channel display on or off.",
+      "set": "DUAC{ON|OFF}",
+      "query": "DUAC?",
+      "examples": [
+        "DUACON",
+        "DUACOFF"
+      ]
+    },
+    {
+      "name": "split_display",
+      "mnemonic": "SPLD",
+      "category": "Display",
+      "description": "Selects split display: full-screen single graticule (OFF) or two half-screen graticules (ON).",
+      "set": "SPLD{ON|OFF}",
+      "query": "SPLD?",
+      "examples": [
+        "SPLDON",
+        "SPLDOFF"
+      ]
+    },
+    {
+      "name": "intensity",
+      "mnemonic": "INTE",
+      "category": "Display",
+      "description": "Sets the display intensity as a percent of the brightest setting.",
+      "set": "INTE <value>",
+      "query": "INTE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 100",
+          "units": [
+            "%"
+          ]
+        }
+      ],
+      "examples": [
+        "INTE 80",
+        "INTE?"
+      ]
+    },
+    {
+      "name": "background_intensity",
+      "mnemonic": "BACI",
+      "category": "Display",
+      "description": "Sets the background intensity as a percent of the white level.",
+      "set": "BACI <value>",
+      "query": "BACI?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 100",
+          "units": [
+            "%"
+          ]
+        }
+      ],
+      "examples": [
+        "BACI 0"
+      ]
+    },
+    {
+      "name": "frequency_blank",
+      "mnemonic": "FREO",
+      "category": "Display",
+      "description": "Erases the frequency annotation on the display (preset turns it on).",
+      "set": "FREO",
+      "examples": [
+        "FREO"
+      ]
+    },
+    {
+      "name": "beep_done",
+      "mnemonic": "BEEPDONE",
+      "category": "Display",
+      "description": "Sets the operation-complete beeper on or off.",
+      "set": "BEEPDONE{ON|OFF}",
+      "query": "BEEPDONE?",
+      "examples": [
+        "BEEPDONEON",
+        "BEEPDONEOFF"
+      ]
+    },
+    {
+      "name": "beep_warn",
+      "mnemonic": "BEEPWARN",
+      "category": "Display",
+      "description": "Sets the warning beeper on or off.",
+      "set": "BEEPWARN{ON|OFF}",
+      "query": "BEEPWARN?",
+      "examples": [
+        "BEEPWARNON",
+        "BEEPWARNOFF"
+      ]
+    },
+    {
+      "name": "beep_fail",
+      "mnemonic": "BEEPFAIL",
+      "category": "Display",
+      "description": "Sets the limit-fail beeper on or off.",
+      "set": "BEEPFAIL{ON|OFF}",
+      "query": "BEEPFAIL?",
+      "examples": [
+        "BEEPFAILON",
+        "BEEPFAILOFF"
+      ]
+    },
+    {
+      "name": "title",
+      "mnemonic": "TITL",
+      "category": "Display",
+      "description": "Sends a string to the title area of the display.",
+      "set": "TITL <string>",
+      "query": "TITL?",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 53 characters"
+        }
+      ],
+      "examples": [
+        "TITL \"DUT 1\"",
+        "TITL?"
+      ]
+    },
+    {
+      "name": "active_entry_off",
+      "mnemonic": "ENTO",
+      "category": "Display",
+      "description": "Turns off the active entry area.",
+      "set": "ENTO",
+      "examples": [
+        "ENTO"
+      ]
+    },
+    {
+      "name": "entry_up",
+      "mnemonic": "UP",
+      "category": "Display",
+      "description": "Increments the value in the active entry area (up-arrow key).",
+      "set": "UP",
+      "examples": [
+        "UP"
+      ]
+    },
+    {
+      "name": "entry_down",
+      "mnemonic": "DOWN",
+      "category": "Display",
+      "description": "Decrements the value in the active entry area (down-arrow key).",
+      "set": "DOWN",
+      "examples": [
+        "DOWN"
+      ]
+    },
+    {
+      "name": "key_code",
+      "mnemonic": "KEY",
+      "category": "Display",
+      "description": "Inputs the key code for a front-panel hardkey or softkey (equivalent to pressing the key). See key code table.",
+      "set": "KEY <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 49"
+        }
+      ],
+      "examples": [
+        "KEY 0"
+      ]
+    },
+    {
+      "name": "color_select",
+      "mnemonic": "COLO",
+      "category": "Display",
+      "description": "Specifies the display element whose color is to be changed (channel data/memory/limit, graticule, text, warning); used with CBRI/COLOR/TINT.",
+      "set": "COLO{CH1D|CH1M|CH2D|CH2M|GRAT|TEXT|WARN}",
+      "examples": [
+        "COLOCH1D"
+      ]
+    },
+    {
+      "name": "color_saturation",
+      "mnemonic": "COLOR",
+      "category": "Display",
+      "description": "Specifies the saturation percent of the selected display element.",
+      "set": "COLOR <value>",
+      "query": "COLOR?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 100",
+          "units": [
+            "%"
+          ]
+        }
+      ],
+      "examples": [
+        "COLOR 100"
+      ]
+    },
+    {
+      "name": "color_brightness",
+      "mnemonic": "CBRI",
+      "category": "Display",
+      "description": "Sets the color brightness (in percent) of the selected display element.",
+      "set": "CBRI <value>",
+      "query": "CBRI?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 100",
+          "units": [
+            "%"
+          ]
+        }
+      ],
+      "examples": [
+        "CBRI 100"
+      ]
+    },
+    {
+      "name": "color_tint",
+      "mnemonic": "TINT",
+      "category": "Display",
+      "description": "Adjusts the hue of the selected display element.",
+      "set": "TINT <value>",
+      "query": "TINT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 100"
+        }
+      ],
+      "examples": [
+        "TINT 50"
+      ]
+    },
+    {
+      "name": "default_colors",
+      "mnemonic": "DEFC",
+      "category": "Display",
+      "description": "Returns all traces, lines, and text to the default colors.",
+      "set": "DEFC",
+      "examples": [
+        "DEFC"
+      ]
+    },
+    {
+      "name": "reset_color",
+      "mnemonic": "RSCO",
+      "category": "Display",
+      "description": "Resets the modified colors to the default colors.",
+      "set": "RSCO",
+      "examples": [
+        "RSCO"
+      ]
+    },
+    {
+      "name": "recall_colors",
+      "mnemonic": "RECO",
+      "category": "Display",
+      "description": "Recalls the previously saved color set.",
+      "set": "RECO",
+      "examples": [
+        "RECO"
+      ]
+    },
+    {
+      "name": "save_colors",
+      "mnemonic": "SVCO",
+      "category": "Display",
+      "description": "Saves the modified color set.",
+      "set": "SVCO",
+      "examples": [
+        "SVCO"
+      ]
+    },
+    {
+      "name": "marker",
+      "mnemonic": "MARK",
+      "category": "Marker",
+      "description": "Selects the active marker and moves it to the specified stimulus value (markers 1-5).",
+      "set": "MARK{1-5} <value>[suffix]",
+      "query": "MARK{1-5}?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "MARK1 10GHZ",
+        "MARK1?"
+      ]
+    },
+    {
+      "name": "markers_all_off",
+      "mnemonic": "MARKOFF",
+      "category": "Marker",
+      "description": "Turns off all markers and the delta reference marker.",
+      "set": "MARKOFF",
+      "query": "MARKOFF?",
+      "examples": [
+        "MARKOFF"
+      ]
+    },
+    {
+      "name": "marker_continuous",
+      "mnemonic": "MARKCONT",
+      "category": "Marker",
+      "description": "Interpolates between measured points so markers can be placed anywhere on the trace.",
+      "set": "MARKCONT",
+      "query": "MARKCONT?",
+      "examples": [
+        "MARKCONT"
+      ]
+    },
+    {
+      "name": "marker_discrete",
+      "mnemonic": "MARKDISC",
+      "category": "Marker",
+      "description": "Places markers only on measured trace points.",
+      "set": "MARKDISC",
+      "query": "MARKDISC?",
+      "examples": [
+        "MARKDISC"
+      ]
+    },
+    {
+      "name": "marker_coupled",
+      "mnemonic": "MARKCOUP",
+      "category": "Marker",
+      "description": "Couples the marker stimulus values for the two display channels.",
+      "set": "MARKCOUP",
+      "query": "MARKCOUP?",
+      "examples": [
+        "MARKCOUP"
+      ]
+    },
+    {
+      "name": "marker_uncoupled",
+      "mnemonic": "MARKUNCO",
+      "category": "Marker",
+      "description": "Allows marker stimulus values to be controlled independently per channel.",
+      "set": "MARKUNCO",
+      "query": "MARKUNCO?",
+      "examples": [
+        "MARKUNCO"
+      ]
+    },
+    {
+      "name": "delta_marker_off",
+      "mnemonic": "DELO",
+      "category": "Marker",
+      "description": "Sets the delta marker mode off.",
+      "set": "DELO",
+      "query": "DELO?",
+      "examples": [
+        "DELO"
+      ]
+    },
+    {
+      "name": "delta_reference_marker",
+      "mnemonic": "DELR",
+      "category": "Marker",
+      "description": "Sets the indicated marker (1-5) as the delta reference.",
+      "set": "DELR{1-5}",
+      "query": "DELR{1-5}?",
+      "examples": [
+        "DELR1",
+        "DELR1?"
+      ]
+    },
+    {
+      "name": "delta_reference_fixed_marker",
+      "mnemonic": "DELRFIXM",
+      "category": "Marker",
+      "description": "Sets the user-specified fixed marker as the delta reference.",
+      "set": "DELRFIXM",
+      "query": "DELRFIXM?",
+      "examples": [
+        "DELRFIXM"
+      ]
+    },
+    {
+      "name": "marker_zero",
+      "mnemonic": "MARKZERO",
+      "category": "Marker",
+      "description": "Puts a fixed reference marker at the active marker position and zeroes its stimulus and response.",
+      "set": "MARKZERO",
+      "examples": [
+        "MARKZERO"
+      ]
+    },
+    {
+      "name": "fixed_marker_stimulus",
+      "mnemonic": "MARKFSTI",
+      "category": "Marker",
+      "description": "Sets the fixed marker stimulus value offset.",
+      "set": "MARKFSTI <value>[suffix]",
+      "query": "MARKFSTI?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "MARKFSTI 1GHZ"
+      ]
+    },
+    {
+      "name": "fixed_marker_value",
+      "mnemonic": "MARKFVAL",
+      "category": "Marker",
+      "description": "Sets the fixed marker position value offset.",
+      "set": "MARKFVAL <value>[suffix]",
+      "query": "MARKFVAL?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "MARKFVAL 0"
+      ]
+    },
+    {
+      "name": "fixed_marker_aux_value",
+      "mnemonic": "MARKFAUV",
+      "category": "Marker",
+      "description": "Sets the fixed marker auxiliary value offset.",
+      "set": "MARKFAUV <value>[suffix]",
+      "query": "MARKFAUV?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "MARKFAUV 0"
+      ]
+    },
+    {
+      "name": "marker_to_center",
+      "mnemonic": "MARKCENT",
+      "category": "Marker",
+      "description": "Changes the stimulus center value to the active marker value.",
+      "set": "MARKCENT",
+      "examples": [
+        "MARKCENT"
+      ]
+    },
+    {
+      "name": "marker_to_span",
+      "mnemonic": "MARKSPAN",
+      "category": "Marker",
+      "description": "Changes the stimulus start/stop to the active marker and the delta reference marker.",
+      "set": "MARKSPAN",
+      "examples": [
+        "MARKSPAN"
+      ]
+    },
+    {
+      "name": "marker_to_start_stop",
+      "mnemonic": "MARKSTAR",
+      "category": "Marker",
+      "description": "Changes the stimulus start (MARKSTAR) or stop (MARKSTOP) value to the active marker value.",
+      "set": "MARK{STAR|STOP}",
+      "examples": [
+        "MARKSTAR",
+        "MARKSTOP"
+      ]
+    },
+    {
+      "name": "marker_to_reference",
+      "mnemonic": "MARKREF",
+      "category": "Marker",
+      "description": "Changes the reference value to the active marker's response value without changing reference position.",
+      "set": "MARKREF",
+      "examples": [
+        "MARKREF"
+      ]
+    },
+    {
+      "name": "marker_to_delay",
+      "mnemonic": "MARKDELA",
+      "category": "Marker",
+      "description": "Sets electrical length so group delay is zero at the marker stimulus.",
+      "set": "MARKDELA",
+      "examples": [
+        "MARKDELA"
+      ]
+    },
+    {
+      "name": "marker_to_stimulus",
+      "mnemonic": "MARKSTIM",
+      "category": "Marker",
+      "description": "While editing a limit segment, sets the stimulus value to the active marker value.",
+      "set": "MARKSTIM",
+      "examples": [
+        "MARKSTIM"
+      ]
+    },
+    {
+      "name": "marker_to_middle",
+      "mnemonic": "MARKMIDD",
+      "category": "Marker",
+      "description": "Sets the middle value for the delta limit using the active marker value.",
+      "set": "MARKMIDD",
+      "examples": [
+        "MARKMIDD"
+      ]
+    },
+    {
+      "name": "marker_to_bucket",
+      "mnemonic": "MARKBUCK",
+      "category": "Marker",
+      "description": "Moves the active marker to the specified data point (bucket) number.",
+      "set": "MARKBUCK <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to number_of_points - 1"
+        }
+      ],
+      "examples": [
+        "MARKBUCK 0"
+      ]
+    },
+    {
+      "name": "display_markers",
+      "mnemonic": "DISM",
+      "category": "Marker",
+      "description": "Enables or disables display of all individually turned-on markers below the active marker area.",
+      "set": "DISM{ON|OFF}",
+      "query": "DISM?",
+      "examples": [
+        "DISMON",
+        "DISMOFF"
+      ]
+    },
+    {
+      "name": "search_max",
+      "mnemonic": "SEAMAX",
+      "category": "Marker Search",
+      "description": "Moves the active marker to the maximum point on the trace. Also MARKMAXI.",
+      "set": "SEAMAX",
+      "query": "SEAMAX?",
+      "examples": [
+        "SEAMAX"
+      ]
+    },
+    {
+      "name": "search_min",
+      "mnemonic": "SEAMIN",
+      "category": "Marker Search",
+      "description": "Moves the active marker to the minimum point on the trace. Also MARKMINI.",
+      "set": "SEAMIN",
+      "query": "SEAMIN?",
+      "examples": [
+        "SEAMIN"
+      ]
+    },
+    {
+      "name": "search_left",
+      "mnemonic": "SEAL",
+      "category": "Marker Search",
+      "description": "Searches the trace left of the marker for the next occurrence of the target value.",
+      "set": "SEAL",
+      "examples": [
+        "SEAL"
+      ]
+    },
+    {
+      "name": "search_off",
+      "mnemonic": "SEAOFF",
+      "category": "Marker Search",
+      "description": "Turns off the search function.",
+      "set": "SEAOFF",
+      "query": "SEAOFF?",
+      "examples": [
+        "SEAOFF"
+      ]
+    },
+    {
+      "name": "search_target",
+      "mnemonic": "SEATARG",
+      "category": "Marker Search",
+      "description": "Places the active marker at a specified target value on the trace.",
+      "set": "SEATARG <value>[suffix]",
+      "query": "SEATARG?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "SEATARG -3"
+      ]
+    },
+    {
+      "name": "search_tracking",
+      "mnemonic": "TRACK",
+      "category": "Marker Search",
+      "description": "Tracks the search at the specified target value with each new sweep.",
+      "set": "TRACK{ON|OFF}",
+      "query": "TRACK?",
+      "examples": [
+        "TRACKON",
+        "TRACKOFF"
+      ]
+    },
+    {
+      "name": "bandwidth_search",
+      "mnemonic": "WIDT",
+      "category": "Marker Search",
+      "description": "Turns the bandwidth search feature on or off.",
+      "set": "WIDT{ON|OFF}",
+      "query": "WIDT?",
+      "examples": [
+        "WIDTON",
+        "WIDTOFF"
+      ]
+    },
+    {
+      "name": "bandwidth_width_value",
+      "mnemonic": "WIDV",
+      "category": "Marker Search",
+      "description": "Sets the amplitude value defining the start/stop points of a bandwidth search.",
+      "set": "WIDV <value>[suffix]",
+      "query": "WIDV?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "WIDV -3"
+      ]
+    },
+    {
+      "name": "marker_statistics",
+      "mnemonic": "MEASTAT",
+      "category": "Marker",
+      "description": "Calculates and displays (ON) the mean, standard deviation, and peak-to-peak values, or hides them (OFF).",
+      "set": "MEASTAT{ON|OFF}",
+      "query": "MEASTAT?",
+      "examples": [
+        "MEASTATON",
+        "MEASTATOFF"
+      ]
+    },
+    {
+      "name": "polar_marker_lin",
+      "mnemonic": "POLMLIN",
+      "category": "Marker",
+      "description": "Displays the linear magnitude and phase of the active polar marker.",
+      "set": "POLMLIN",
+      "query": "POLMLIN?",
+      "examples": [
+        "POLMLIN"
+      ]
+    },
+    {
+      "name": "polar_marker_log",
+      "mnemonic": "POLMLOG",
+      "category": "Marker",
+      "description": "Displays the log magnitude and phase of the active polar marker.",
+      "set": "POLMLOG",
+      "query": "POLMLOG?",
+      "examples": [
+        "POLMLOG"
+      ]
+    },
+    {
+      "name": "polar_marker_real_imag",
+      "mnemonic": "POLMRI",
+      "category": "Marker",
+      "description": "Displays a real/imaginary pair of the active polar marker.",
+      "set": "POLMRI",
+      "query": "POLMRI?",
+      "examples": [
+        "POLMRI"
+      ]
+    },
+    {
+      "name": "smith_marker_lin",
+      "mnemonic": "SMIMLIN",
+      "category": "Marker",
+      "description": "Displays the linear magnitude and phase of the active marker on a Smith chart.",
+      "set": "SMIMLIN",
+      "query": "SMIMLIN?",
+      "examples": [
+        "SMIMLIN"
+      ]
+    },
+    {
+      "name": "smith_marker_log",
+      "mnemonic": "SMIMLOG",
+      "category": "Marker",
+      "description": "Displays the log magnitude and phase of the active marker on a Smith chart.",
+      "set": "SMIMLOG",
+      "query": "SMIMLOG?",
+      "examples": [
+        "SMIMLOG"
+      ]
+    },
+    {
+      "name": "smith_marker_real_imag",
+      "mnemonic": "SMIMRI",
+      "category": "Marker",
+      "description": "Displays the active marker as a real/imaginary pair on a Smith chart.",
+      "set": "SMIMRI",
+      "query": "SMIMRI?",
+      "examples": [
+        "SMIMRI"
+      ]
+    },
+    {
+      "name": "smith_marker_r_jx",
+      "mnemonic": "SMIMRX",
+      "category": "Marker",
+      "description": "Displays the complex impedance (R+jX) of the active marker on a Smith chart.",
+      "set": "SMIMRX",
+      "query": "SMIMRX?",
+      "examples": [
+        "SMIMRX"
+      ]
+    },
+    {
+      "name": "smith_marker_g_jb",
+      "mnemonic": "SMIMGB",
+      "category": "Marker",
+      "description": "Displays the complex admittance (G+jB) of the active marker on a Smith chart.",
+      "set": "SMIMGB",
+      "query": "SMIMGB?",
+      "examples": [
+        "SMIMGB"
+      ]
+    },
+    {
+      "name": "correction",
+      "mnemonic": "CORR",
+      "category": "Calibration",
+      "description": "Sets the error-correction function on or off.",
+      "set": "CORR{ON|OFF}",
+      "query": "CORR?",
+      "examples": [
+        "CORRON",
+        "CORROFF"
+      ]
+    },
+    {
+      "name": "cal_menu",
+      "mnemonic": "CAL1",
+      "category": "Calibration",
+      "description": "Prepares for calibration (HP 8510 compatibility).",
+      "set": "CAL1",
+      "examples": [
+        "CAL1"
+      ]
+    },
+    {
+      "name": "cal_response",
+      "mnemonic": "CALIRESP",
+      "category": "Calibration",
+      "description": "Selects the response measurement calibration.",
+      "set": "CALIRESP",
+      "query": "CALIRESP?",
+      "examples": [
+        "CALIRESP"
+      ]
+    },
+    {
+      "name": "cal_response_isolation",
+      "mnemonic": "CALIRAI",
+      "category": "Calibration",
+      "description": "Selects the response and isolation measurement calibration.",
+      "set": "CALIRAI",
+      "query": "CALIRAI?",
+      "examples": [
+        "CALIRAI"
+      ]
+    },
+    {
+      "name": "cal_s11_1port",
+      "mnemonic": "CALIS111",
+      "category": "Calibration",
+      "description": "Selects the 1-port measurement calibration at port 1 (S11).",
+      "set": "CALIS111",
+      "query": "CALIS111?",
+      "examples": [
+        "CALIS111"
+      ]
+    },
+    {
+      "name": "cal_s22_1port",
+      "mnemonic": "CALIS221",
+      "category": "Calibration",
+      "description": "Selects the 1-port measurement calibration at port 2 (S22).",
+      "set": "CALIS221",
+      "query": "CALIS221?",
+      "examples": [
+        "CALIS221"
+      ]
+    },
+    {
+      "name": "cal_full_2port",
+      "mnemonic": "CALIFUL2",
+      "category": "Calibration",
+      "description": "Selects the full 2-port measurement calibration.",
+      "set": "CALIFUL2",
+      "query": "CALIFUL2?",
+      "examples": [
+        "CALIFUL2"
+      ]
+    },
+    {
+      "name": "cal_trl_2port",
+      "mnemonic": "CALITRL2",
+      "category": "Calibration",
+      "description": "Selects the TRL*/LRM* 2-port measurement calibration.",
+      "set": "CALITRL2",
+      "query": "CALITRL2?",
+      "examples": [
+        "CALITRL2"
+      ]
+    },
+    {
+      "name": "cal_kit_7mm",
+      "mnemonic": "CALK7MM",
+      "category": "Calibration",
+      "description": "Selects the 7 mm calibration kit.",
+      "set": "CALK7MM",
+      "query": "CALK7MM?",
+      "examples": [
+        "CALK7MM"
+      ]
+    },
+    {
+      "name": "cal_kit_35mm",
+      "mnemonic": "CALK35MM",
+      "category": "Calibration",
+      "description": "Selects the 3.5 mm calibration kit.",
+      "set": "CALK35MM",
+      "query": "CALK35MM?",
+      "examples": [
+        "CALK35MM"
+      ]
+    },
+    {
+      "name": "cal_kit_n50",
+      "mnemonic": "CALKN50",
+      "category": "Calibration",
+      "description": "Selects the 50 ohm type-N calibration kit.",
+      "set": "CALKN50",
+      "query": "CALKN50?",
+      "examples": [
+        "CALKN50"
+      ]
+    },
+    {
+      "name": "cal_kit_trl",
+      "mnemonic": "CALKTRLK",
+      "category": "Calibration",
+      "description": "Selects the TRL* calibration kit.",
+      "set": "CALKTRLK",
+      "query": "CALKTRLK?",
+      "examples": [
+        "CALKTRLK"
+      ]
+    },
+    {
+      "name": "cal_kit_user",
+      "mnemonic": "CALKUSED",
+      "category": "Calibration",
+      "description": "Selects the user-defined calibration kit.",
+      "set": "CALKUSED",
+      "query": "CALKUSED?",
+      "examples": [
+        "CALKUSED"
+      ]
+    },
+    {
+      "name": "save_user_kit",
+      "mnemonic": "SAVEUSEK",
+      "category": "Calibration",
+      "description": "Stores the currently active calibration kit into user-kit memory.",
+      "set": "SAVEUSEK",
+      "examples": [
+        "SAVEUSEK"
+      ]
+    },
+    {
+      "name": "resume_cal",
+      "mnemonic": "RESC",
+      "category": "Calibration",
+      "description": "Resumes the last measurement calibration sequence.",
+      "set": "RESC",
+      "examples": [
+        "RESC"
+      ]
+    },
+    {
+      "name": "response_done",
+      "mnemonic": "RESPDONE",
+      "category": "Calibration",
+      "description": "Completes the response calibration.",
+      "set": "RESPDONE",
+      "examples": [
+        "RESPDONE"
+      ]
+    },
+    {
+      "name": "response_isolation_done",
+      "mnemonic": "RAID",
+      "category": "Calibration",
+      "description": "Completes the response and isolation calibration.",
+      "set": "RAID",
+      "examples": [
+        "RAID"
+      ]
+    },
+    {
+      "name": "rai_isolation",
+      "mnemonic": "RAIISOL",
+      "category": "Calibration",
+      "description": "Selects the isolation class for the response and isolation calibration.",
+      "set": "RAIISOL",
+      "examples": [
+        "RAIISOL"
+      ]
+    },
+    {
+      "name": "rai_response",
+      "mnemonic": "RAIRESP",
+      "category": "Calibration",
+      "description": "Selects the response class for the response and isolation calibration.",
+      "set": "RAIRESP",
+      "examples": [
+        "RAIRESP"
+      ]
+    },
+    {
+      "name": "isolation",
+      "mnemonic": "ISOL",
+      "category": "Calibration",
+      "description": "Begins the isolation part of the 2-port calibration.",
+      "set": "ISOL",
+      "examples": [
+        "ISOL"
+      ]
+    },
+    {
+      "name": "isolation_done",
+      "mnemonic": "ISOD",
+      "category": "Calibration",
+      "description": "Completes the isolation part of the 2-port calibration.",
+      "set": "ISOD",
+      "examples": [
+        "ISOD"
+      ]
+    },
+    {
+      "name": "omit_isolation",
+      "mnemonic": "OMII",
+      "category": "Calibration",
+      "description": "Omits the isolation correction of a 2-port calibration.",
+      "set": "OMII",
+      "examples": [
+        "OMII"
+      ]
+    },
+    {
+      "name": "reflection",
+      "mnemonic": "REFL",
+      "category": "Calibration",
+      "description": "Begins the reflection part of the full 2-port calibration.",
+      "set": "REFL",
+      "examples": [
+        "REFL"
+      ]
+    },
+    {
+      "name": "reflection_done",
+      "mnemonic": "REFD",
+      "category": "Calibration",
+      "description": "Completes the reflection part of the full 2-port calibration.",
+      "set": "REFD",
+      "examples": [
+        "REFD"
+      ]
+    },
+    {
+      "name": "transmission",
+      "mnemonic": "TRAN",
+      "category": "Calibration",
+      "description": "Begins the transmission part of the full 2-port calibration.",
+      "set": "TRAN",
+      "examples": [
+        "TRAN"
+      ]
+    },
+    {
+      "name": "transmission_done",
+      "mnemonic": "TRAD",
+      "category": "Calibration",
+      "description": "Completes the transmission part of the full 2-port calibration.",
+      "set": "TRAD",
+      "examples": [
+        "TRAD"
+      ]
+    },
+    {
+      "name": "forward_isolation",
+      "mnemonic": "FWDI",
+      "category": "Calibration",
+      "description": "Selects forward isolation class for the calibration.",
+      "set": "FWDI",
+      "examples": [
+        "FWDI"
+      ]
+    },
+    {
+      "name": "forward_match",
+      "mnemonic": "FWDM",
+      "category": "Calibration",
+      "description": "Selects forward match class for the calibration.",
+      "set": "FWDM",
+      "examples": [
+        "FWDM"
+      ]
+    },
+    {
+      "name": "forward_transmission",
+      "mnemonic": "FWDT",
+      "category": "Calibration",
+      "description": "Selects forward transmission class for the calibration.",
+      "set": "FWDT",
+      "examples": [
+        "FWDT"
+      ]
+    },
+    {
+      "name": "reverse_isolation",
+      "mnemonic": "REVI",
+      "category": "Calibration",
+      "description": "Selects reverse isolation class for the calibration.",
+      "set": "REVI",
+      "examples": [
+        "REVI"
+      ]
+    },
+    {
+      "name": "reverse_match",
+      "mnemonic": "REVM",
+      "category": "Calibration",
+      "description": "Selects reverse match class for the calibration.",
+      "set": "REVM",
+      "examples": [
+        "REVM"
+      ]
+    },
+    {
+      "name": "reverse_transmission",
+      "mnemonic": "REVT",
+      "category": "Calibration",
+      "description": "Selects reverse transmission class for the calibration.",
+      "set": "REVT",
+      "examples": [
+        "REVT"
+      ]
+    },
+    {
+      "name": "save_1port",
+      "mnemonic": "SAV1",
+      "category": "Calibration",
+      "description": "Computes and saves the 1-port calibration results.",
+      "set": "SAV1",
+      "examples": [
+        "SAV1"
+      ]
+    },
+    {
+      "name": "save_2port",
+      "mnemonic": "SAV2",
+      "category": "Calibration",
+      "description": "Computes and saves the full 2-port calibration results.",
+      "set": "SAV2",
+      "examples": [
+        "SAV2"
+      ]
+    },
+    {
+      "name": "save_trl",
+      "mnemonic": "SAVT",
+      "category": "Calibration",
+      "description": "Computes and saves the TRL*/LRM* 2-port calibration results.",
+      "set": "SAVT",
+      "examples": [
+        "SAVT"
+      ]
+    },
+    {
+      "name": "recompute_cal",
+      "mnemonic": "SAVC",
+      "category": "Calibration",
+      "description": "Re-draws a trace using the current error coefficient arrays.",
+      "set": "SAVC",
+      "examples": [
+        "SAVC"
+      ]
+    },
+    {
+      "name": "receiver_cal",
+      "mnemonic": "REIC",
+      "category": "Calibration",
+      "description": "Begins the receiver calibration.",
+      "set": "REIC",
+      "examples": [
+        "REIC"
+      ]
+    },
+    {
+      "name": "take_receiver_cal_sweep",
+      "mnemonic": "TAKRS",
+      "category": "Calibration",
+      "description": "Takes a receiver calibration sweep.",
+      "set": "TAKRS",
+      "examples": [
+        "TAKRS"
+      ]
+    },
+    {
+      "name": "freq_subset_cal",
+      "mnemonic": "FRES",
+      "category": "Calibration",
+      "description": "Selects frequency-subset calibration on or off.",
+      "set": "FRES{ON|OFF}",
+      "query": "FRES?",
+      "examples": [
+        "FRESON",
+        "FRESOFF"
+      ]
+    },
+    {
+      "name": "set_z0",
+      "mnemonic": "SETZ",
+      "category": "Calibration",
+      "description": "Sets the characteristic impedance used in Smith-chart and conversion calculations.",
+      "set": "SETZ <value>",
+      "query": "SETZ?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0.001 to 1000",
+          "units": [
+            "ohm"
+          ]
+        }
+      ],
+      "examples": [
+        "SETZ 50",
+        "SETZ?"
+      ]
+    },
+    {
+      "name": "port_extensions",
+      "mnemonic": "PORE",
+      "category": "Calibration",
+      "description": "Sets the reference plane (port) extension mode on or off.",
+      "set": "PORE{ON|OFF}",
+      "query": "PORE?",
+      "examples": [
+        "POREON",
+        "POREOFF"
+      ]
+    },
+    {
+      "name": "port_extension_1",
+      "mnemonic": "PORT1",
+      "category": "Calibration",
+      "description": "Sets the reference-plane extension for measurement of S11, S21, and S12.",
+      "set": "PORT1 <value>",
+      "query": "PORT1?",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "PORT1 100PS"
+      ]
+    },
+    {
+      "name": "port_extension_2",
+      "mnemonic": "PORT2",
+      "category": "Calibration",
+      "description": "Sets the reference-plane extension for measurement of S22, S12, and S21.",
+      "set": "PORT2 <value>",
+      "query": "PORT2?",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "PORT2 100PS"
+      ]
+    },
+    {
+      "name": "cal_power",
+      "mnemonic": "CALPOW",
+      "category": "Calibration",
+      "description": "Sets the power level to be controlled by a power meter calibration.",
+      "set": "CALPOW <value>",
+      "query": "CALPOW?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "-20 to +20",
+          "units": [
+            "dBm"
+          ]
+        }
+      ],
+      "examples": [
+        "CALPOW 0"
+      ]
+    },
+    {
+      "name": "power_meter_cal",
+      "mnemonic": "PWMC",
+      "category": "Calibration",
+      "description": "Turns power meter calibration on or off.",
+      "set": "PWMC{ON|OFF}",
+      "query": "PWMC?",
+      "examples": [
+        "PWMCON",
+        "PWMCOFF"
+      ]
+    },
+    {
+      "name": "begin_power_meter_cal",
+      "mnemonic": "PWMCAL",
+      "category": "Calibration",
+      "description": "Begins the power meter calibration.",
+      "set": "PWMCAL",
+      "examples": [
+        "PWMCAL"
+      ]
+    },
+    {
+      "name": "power_meter_readings",
+      "mnemonic": "NUMR",
+      "category": "Calibration",
+      "description": "Sets the number of power meter readings per point during a power meter calibration.",
+      "set": "NUMR <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "1 to 100"
+        }
+      ],
+      "examples": [
+        "NUMR 1"
+      ]
+    },
+    {
+      "name": "cal_z_line",
+      "mnemonic": "CALZLINE",
+      "category": "Calibration",
+      "description": "When defining a TRL-type cal kit, sets the LINE standard as the impedance reference.",
+      "set": "CALZLINE",
+      "examples": [
+        "CALZLINE"
+      ]
+    },
+    {
+      "name": "cal_z_system",
+      "mnemonic": "CALZSYST",
+      "category": "Calibration",
+      "description": "When defining a TRL-type cal kit, sets the SYSTEM Z0 value as the impedance reference.",
+      "set": "CALZSYST",
+      "query": "CALZSYST?",
+      "examples": [
+        "CALZSYST"
+      ]
+    },
+    {
+      "name": "set_reference_reflect",
+      "mnemonic": "SETRREFL",
+      "category": "Calibration",
+      "description": "When defining a TRL-type cal kit, sets the REFLECT class to establish the measurement reference plane.",
+      "set": "SETRREFL",
+      "query": "SETRREFL?",
+      "examples": [
+        "SETRREFL"
+      ]
+    },
+    {
+      "name": "set_reference_thru",
+      "mnemonic": "SETRTHRU",
+      "category": "Calibration",
+      "description": "When defining a TRL-type cal kit, sets the THRU class to establish the measurement reference plane.",
+      "set": "SETRTHRU",
+      "query": "SETRTHRU?",
+      "examples": [
+        "SETRTHRU"
+      ]
+    },
+    {
+      "name": "trl_line_match_1",
+      "mnemonic": "TRLL1",
+      "category": "Calibration",
+      "description": "Measures the port 1 LINE/MATCH class of the TRL*/LRM* 2-port calibration.",
+      "set": "TRLL1",
+      "examples": [
+        "TRLL1"
+      ]
+    },
+    {
+      "name": "trl_line_match_2",
+      "mnemonic": "TRLL2",
+      "category": "Calibration",
+      "description": "Measures the port 2 LINE/MATCH class of the TRL*/LRM* 2-port calibration.",
+      "set": "TRLL2",
+      "examples": [
+        "TRLL2"
+      ]
+    },
+    {
+      "name": "trl_reflect_1",
+      "mnemonic": "TRLR1",
+      "category": "Calibration",
+      "description": "Measures the S11 REFLECT class of the TRL*/LRM* 2-port calibration.",
+      "set": "TRLR1",
+      "examples": [
+        "TRLR1"
+      ]
+    },
+    {
+      "name": "trl_reflect_2",
+      "mnemonic": "TRLR2",
+      "category": "Calibration",
+      "description": "Measures the S22 REFLECT class of the TRL*/LRM* 2-port calibration.",
+      "set": "TRLR2",
+      "examples": [
+        "TRLR2"
+      ]
+    },
+    {
+      "name": "trl_thru",
+      "mnemonic": "TRLT",
+      "category": "Calibration",
+      "description": "Measures the THRU class of the TRL*/LRM* 2-port calibration.",
+      "set": "TRLT",
+      "examples": [
+        "TRLT"
+      ]
+    },
+    {
+      "name": "sliding_load",
+      "mnemonic": "SLIL",
+      "category": "Calibration",
+      "description": "Specifies a standard as a sliding load during a cal-kit standard definition.",
+      "set": "SLIL",
+      "examples": [
+        "SLIL"
+      ]
+    },
+    {
+      "name": "sliding_load_set",
+      "mnemonic": "SLIS",
+      "category": "Calibration",
+      "description": "Indicates the sliding load is set and ready to measure.",
+      "set": "SLIS",
+      "examples": [
+        "SLIS"
+      ]
+    },
+    {
+      "name": "sliding_load_done",
+      "mnemonic": "SLID",
+      "category": "Calibration",
+      "description": "Indicates the sliding load measurement is done.",
+      "set": "SLID",
+      "examples": [
+        "SLID"
+      ]
+    },
+    {
+      "name": "measure_standard",
+      "mnemonic": "STAN",
+      "category": "Calibration",
+      "description": "Measures the calibration standard A-G in the current standard class.",
+      "set": "STAN{A-G}",
+      "examples": [
+        "STANA",
+        "STANB"
+      ]
+    },
+    {
+      "name": "class_done",
+      "mnemonic": "DONE",
+      "category": "Calibration",
+      "description": "Completes the measurement of the selected standard class for a calibration type.",
+      "set": "DONE",
+      "examples": [
+        "DONE"
+      ]
+    },
+    {
+      "name": "modify_cal_kit",
+      "mnemonic": "MODI1",
+      "category": "Cal Kit",
+      "description": "Begins the modify-calibration-kit sequence.",
+      "set": "MODI1",
+      "examples": [
+        "MODI1"
+      ]
+    },
+    {
+      "name": "kit_done",
+      "mnemonic": "KITD",
+      "category": "Cal Kit",
+      "description": "Ends the calibration-kit modification process.",
+      "set": "KITD",
+      "examples": [
+        "KITD"
+      ]
+    },
+    {
+      "name": "define_standard",
+      "mnemonic": "DEFS",
+      "category": "Cal Kit",
+      "description": "Defines the number of the calibration standard to be modified.",
+      "set": "DEFS <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "1 to 8"
+        }
+      ],
+      "examples": [
+        "DEFS 1"
+      ]
+    },
+    {
+      "name": "standard_done",
+      "mnemonic": "STDD",
+      "category": "Cal Kit",
+      "description": "Completes the current standard definition.",
+      "set": "STDD",
+      "examples": [
+        "STDD"
+      ]
+    },
+    {
+      "name": "std_type_open",
+      "mnemonic": "STDTOPEN",
+      "category": "Cal Kit",
+      "description": "Defines the standard type as an OPEN.",
+      "set": "STDTOPEN",
+      "query": "STDTOPEN?",
+      "examples": [
+        "STDTOPEN"
+      ]
+    },
+    {
+      "name": "std_type_short",
+      "mnemonic": "STDTSHOR",
+      "category": "Cal Kit",
+      "description": "Defines the standard type as a SHORT.",
+      "set": "STDTSHOR",
+      "query": "STDTSHOR?",
+      "examples": [
+        "STDTSHOR"
+      ]
+    },
+    {
+      "name": "std_type_load",
+      "mnemonic": "STDTLOAD",
+      "category": "Cal Kit",
+      "description": "Defines the standard type as a LOAD (termination).",
+      "set": "STDTLOAD",
+      "query": "STDTLOAD?",
+      "examples": [
+        "STDTLOAD"
+      ]
+    },
+    {
+      "name": "std_type_delay_thru",
+      "mnemonic": "STDTDELA",
+      "category": "Cal Kit",
+      "description": "Defines the standard type as a transmission line (delay/thru) of specified length.",
+      "set": "STDTDELA",
+      "query": "STDTDELA?",
+      "examples": [
+        "STDTDELA"
+      ]
+    },
+    {
+      "name": "std_type_arbitrary",
+      "mnemonic": "STDTARBI",
+      "category": "Cal Kit",
+      "description": "Defines the standard type as an arbitrary impedance load.",
+      "set": "STDTARBI",
+      "query": "STDTARBI?",
+      "examples": [
+        "STDTARBI"
+      ]
+    },
+    {
+      "name": "terminal_impedance",
+      "mnemonic": "TERI",
+      "category": "Cal Kit",
+      "description": "Specifies the (arbitrary) impedance of the standard.",
+      "set": "TERI <value>[ohm]",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 10000",
+          "units": [
+            "ohm"
+          ]
+        }
+      ],
+      "examples": [
+        "TERI 50"
+      ]
+    },
+    {
+      "name": "fixed_load",
+      "mnemonic": "FIXE",
+      "category": "Cal Kit",
+      "description": "Specifies a load standard as fixed (rather than sliding or offset) when defining the standard.",
+      "set": "FIXE",
+      "examples": [
+        "FIXE"
+      ]
+    },
+    {
+      "name": "offset_load",
+      "mnemonic": "OFLD",
+      "category": "Cal Kit",
+      "description": "Specifies a standard as an offset load during a standard definition.",
+      "set": "OFLD",
+      "examples": [
+        "OFLD"
+      ]
+    },
+    {
+      "name": "offset_delay",
+      "mnemonic": "OFSD",
+      "category": "Cal Kit",
+      "description": "Specifies the one-way electrical delay from the reference plane to the standard.",
+      "set": "OFSD <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "-10 to 10",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "OFSD 0"
+      ]
+    },
+    {
+      "name": "offset_loss",
+      "mnemonic": "OFSL",
+      "category": "Cal Kit",
+      "description": "Specifies loss (skin effect) along a one-way length of transmission-line offset for a standard.",
+      "set": "OFSL <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 1.0E16",
+          "units": [
+            "ohm/s"
+          ]
+        }
+      ],
+      "examples": [
+        "OFSL 0"
+      ]
+    },
+    {
+      "name": "offset_z0",
+      "mnemonic": "OFSZ",
+      "category": "Cal Kit",
+      "description": "Specifies the characteristic impedance of a standard offset.",
+      "set": "OFSZ <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0.001 to 1000",
+          "units": [
+            "ohm"
+          ]
+        }
+      ],
+      "examples": [
+        "OFSZ 50"
+      ]
+    },
+    {
+      "name": "max_frequency",
+      "mnemonic": "MAXF",
+      "category": "Cal Kit",
+      "description": "Sets the maximum valid frequency of a standard being defined.",
+      "set": "MAXF <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Analyzer frequency range"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "MAXF 20GHZ"
+      ]
+    },
+    {
+      "name": "min_frequency",
+      "mnemonic": "MINF",
+      "category": "Cal Kit",
+      "description": "Sets the minimum valid frequency of a standard being defined.",
+      "set": "MINF <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Analyzer frequency range"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "MINF 50MHZ"
+      ]
+    },
+    {
+      "name": "coax_offset",
+      "mnemonic": "COAX",
+      "category": "Cal Kit",
+      "description": "Selects coaxial offsets (see WAVE) while defining a standard.",
+      "set": "COAX",
+      "examples": [
+        "COAX"
+      ]
+    },
+    {
+      "name": "waveguide_offset",
+      "mnemonic": "WAVE",
+      "category": "Cal Kit",
+      "description": "Selects waveguide offsets (see COAX) while defining a standard.",
+      "set": "WAVE",
+      "examples": [
+        "WAVE"
+      ]
+    },
+    {
+      "name": "capacitance_c0",
+      "mnemonic": "C0",
+      "category": "Cal Kit",
+      "description": "Enters the constant term (C0) of the open-circuit capacitance model.",
+      "set": "C0 <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 1000",
+          "units": [
+            "x10^-15 F"
+          ]
+        }
+      ],
+      "examples": [
+        "C0 0"
+      ]
+    },
+    {
+      "name": "capacitance_c1",
+      "mnemonic": "C1",
+      "category": "Cal Kit",
+      "description": "Enters the C1 term of the open-circuit capacitance model.",
+      "set": "C1 <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 1000",
+          "units": [
+            "x10^-27 F/Hz"
+          ]
+        }
+      ],
+      "examples": [
+        "C1 0"
+      ]
+    },
+    {
+      "name": "capacitance_c2",
+      "mnemonic": "C2",
+      "category": "Cal Kit",
+      "description": "Enters the C2 term of the open-circuit capacitance model.",
+      "set": "C2 <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 1000",
+          "units": [
+            "x10^-36 F/Hz^2"
+          ]
+        }
+      ],
+      "examples": [
+        "C2 0"
+      ]
+    },
+    {
+      "name": "capacitance_c3",
+      "mnemonic": "C3",
+      "category": "Cal Kit",
+      "description": "Enters the C3 term of the open-circuit capacitance model.",
+      "set": "C3 <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 1000",
+          "units": [
+            "x10^-45 F/Hz^3"
+          ]
+        }
+      ],
+      "examples": [
+        "C3 0"
+      ]
+    },
+    {
+      "name": "class_done_specified",
+      "mnemonic": "CLAD",
+      "category": "Cal Kit",
+      "description": "Completes specifying the class.",
+      "set": "CLAD",
+      "examples": [
+        "CLAD"
+      ]
+    },
+    {
+      "name": "label_kit",
+      "mnemonic": "LABK",
+      "category": "Cal Kit",
+      "description": "Defines the calibration-kit label.",
+      "set": "LABK <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABK \"MYKIT\""
+      ]
+    },
+    {
+      "name": "label_standard",
+      "mnemonic": "LABS",
+      "category": "Cal Kit",
+      "description": "Defines the calibration-standard label.",
+      "set": "LABS <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABS \"OPEN\""
+      ]
+    },
+    {
+      "name": "class_s11",
+      "mnemonic": "CLASS11",
+      "category": "Cal Kit",
+      "description": "Selects the port 1 (S11) one-port standard class A/B/C (built-in 3.5mm kit).",
+      "set": "CLASS11{A|B|C}",
+      "examples": [
+        "CLASS11A"
+      ]
+    },
+    {
+      "name": "class_s22",
+      "mnemonic": "CLASS22",
+      "category": "Cal Kit",
+      "description": "Selects the port 2 (S22) one-port standard class A/B/C (built-in 3.5mm kit).",
+      "set": "CLASS22{A|B|C}",
+      "examples": [
+        "CLASS22A"
+      ]
+    },
+    {
+      "name": "specify_fwd_match",
+      "mnemonic": "SPECFWDM",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the forward match (THRU) class.",
+      "set": "SPECFWDM <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECFWDM 1"
+      ]
+    },
+    {
+      "name": "specify_fwd_trans",
+      "mnemonic": "SPECFWDT",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the forward transmission (THRU) class.",
+      "set": "SPECFWDT <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECFWDT 1"
+      ]
+    },
+    {
+      "name": "specify_rev_match",
+      "mnemonic": "SPECREVM",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the reverse match (THRU) class.",
+      "set": "SPECREVM <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECREVM 1"
+      ]
+    },
+    {
+      "name": "specify_rev_trans",
+      "mnemonic": "SPECREVT",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the reverse transmission (THRU) class.",
+      "set": "SPECREVT <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECREVT 1"
+      ]
+    },
+    {
+      "name": "specify_resp_isol",
+      "mnemonic": "SPECRESI",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the response and isolation class.",
+      "set": "SPECRESI <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECRESI 1"
+      ]
+    },
+    {
+      "name": "specify_response",
+      "mnemonic": "SPECRESP",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the response calibration class.",
+      "set": "SPECRESP <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECRESP 1"
+      ]
+    },
+    {
+      "name": "specify_s11a",
+      "mnemonic": "SPECS11A",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the S11A class.",
+      "set": "SPECS11A <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECS11A 1"
+      ]
+    },
+    {
+      "name": "specify_s11b",
+      "mnemonic": "SPECS11B",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the S11B class.",
+      "set": "SPECS11B <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECS11B 1"
+      ]
+    },
+    {
+      "name": "specify_s11c",
+      "mnemonic": "SPECS11C",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the S11C class.",
+      "set": "SPECS11C <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECS11C 1"
+      ]
+    },
+    {
+      "name": "specify_s22a",
+      "mnemonic": "SPECS22A",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the S22A class.",
+      "set": "SPECS22A <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECS22A 1"
+      ]
+    },
+    {
+      "name": "specify_s22b",
+      "mnemonic": "SPECS22B",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the S22B class.",
+      "set": "SPECS22B <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECS22B 1"
+      ]
+    },
+    {
+      "name": "specify_s22c",
+      "mnemonic": "SPECS22C",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the S22C class.",
+      "set": "SPECS22C <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECS22C 1"
+      ]
+    },
+    {
+      "name": "specify_trl_line",
+      "mnemonic": "SPECTRLL",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the TRL* LINE/MATCH class.",
+      "set": "SPECTRLL <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECTRLL 1"
+      ]
+    },
+    {
+      "name": "specify_trl_reflect",
+      "mnemonic": "SPECTRLR",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the TRL* REFLECT class.",
+      "set": "SPECTRLR <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECTRLR 1"
+      ]
+    },
+    {
+      "name": "specify_trl_thru",
+      "mnemonic": "SPECTRLT",
+      "category": "Cal Kit",
+      "description": "Enters the standard numbers for the TRL* THRU class.",
+      "set": "SPECTRLT <A>[,<B>...]",
+      "parameters": [
+        {
+          "name": "standards",
+          "range": "1 to 8 each, up to 7"
+        }
+      ],
+      "examples": [
+        "SPECTRLT 1"
+      ]
+    },
+    {
+      "name": "label_class_fwd",
+      "mnemonic": "LABEFWD",
+      "category": "Cal Kit",
+      "description": "Defines the label for the forward match (M) or forward transmission (T) class.",
+      "set": "LABEFWD{M|T} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABEFWDM \"FWD MATCH\""
+      ]
+    },
+    {
+      "name": "label_class_rev",
+      "mnemonic": "LABEREV",
+      "category": "Cal Kit",
+      "description": "Defines the label for the reverse match (M) or reverse transmission (T) class.",
+      "set": "LABEREV{M|T} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABEREVM \"REV MATCH\""
+      ]
+    },
+    {
+      "name": "label_class_resp",
+      "mnemonic": "LABERES",
+      "category": "Cal Kit",
+      "description": "Defines the label for the response and isolation (I) or response (P) class.",
+      "set": "LABERES{I|P} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABERESP \"RESPONSE\""
+      ]
+    },
+    {
+      "name": "label_class_s11",
+      "mnemonic": "LABES11",
+      "category": "Cal Kit",
+      "description": "Defines the label for the S11A/S11B/S11C class.",
+      "set": "LABES11{A|B|C} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABES11A \"OPEN\""
+      ]
+    },
+    {
+      "name": "label_class_s22",
+      "mnemonic": "LABES22",
+      "category": "Cal Kit",
+      "description": "Defines the label for the S22A/S22B/S22C class.",
+      "set": "LABES22{A|B|C} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABES22A \"OPEN\""
+      ]
+    },
+    {
+      "name": "label_class_trl",
+      "mnemonic": "LABETRL",
+      "category": "Cal Kit",
+      "description": "Defines the label for the TRL LINE (L), REFLECT (R), or THRU (T) class.",
+      "set": "LABETRL{L|R|T} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 10 characters"
+        }
+      ],
+      "examples": [
+        "LABETRLL \"LINE\""
+      ]
+    },
+    {
+      "name": "transform",
+      "mnemonic": "TIMDTRAN",
+      "category": "Time Domain",
+      "description": "Turns the time domain transform on or off (Option 010).",
+      "set": "TIMDTRAN{ON|OFF}",
+      "examples": [
+        "TIMDTRANON",
+        "TIMDTRANOFF"
+      ]
+    },
+    {
+      "name": "bandpass_mode",
+      "mnemonic": "BANDPASS",
+      "category": "Time Domain",
+      "description": "Selects bandpass mode for time domain transforms (Option 010).",
+      "set": "BANDPASS",
+      "query": "BANDPASS?",
+      "examples": [
+        "BANDPASS"
+      ]
+    },
+    {
+      "name": "lowpass_impulse",
+      "mnemonic": "LOWPIMPU",
+      "category": "Time Domain",
+      "description": "Selects low pass impulse transform (Option 010).",
+      "set": "LOWPIMPU",
+      "query": "LOWPIMPU?",
+      "examples": [
+        "LOWPIMPU"
+      ]
+    },
+    {
+      "name": "lowpass_step",
+      "mnemonic": "LOWPSTEP",
+      "category": "Time Domain",
+      "description": "Selects low pass step transform (Option 010).",
+      "set": "LOWPSTEP",
+      "query": "LOWPSTEP?",
+      "examples": [
+        "LOWPSTEP"
+      ]
+    },
+    {
+      "name": "set_freq_lowpass",
+      "mnemonic": "SETF",
+      "category": "Time Domain",
+      "description": "Sets the frequency range to harmonically related points required for Low Pass mode (Option 010).",
+      "set": "SETF",
+      "examples": [
+        "SETF"
+      ]
+    },
+    {
+      "name": "demodulation",
+      "mnemonic": "DEMO",
+      "category": "Time Domain",
+      "description": "Selects transform demodulation: amplitude, phase, or off (CW time transform; Option 010).",
+      "set": "DEMO{AMPL|PHAS|OFF}",
+      "query": "DEMO?",
+      "examples": [
+        "DEMOAMPL",
+        "DEMOOFF"
+      ]
+    },
+    {
+      "name": "gate",
+      "mnemonic": "GATEO",
+      "category": "Time Domain",
+      "description": "Turns the time domain gate on or off (Option 010).",
+      "set": "GATEO{ON|OFF}",
+      "query": "GATEO?",
+      "examples": [
+        "GATEOON",
+        "GATEOOFF"
+      ]
+    },
+    {
+      "name": "gate_center",
+      "mnemonic": "GATECENT",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate center time (Option 010).",
+      "set": "GATECENT <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "GATECENT 1NS"
+      ]
+    },
+    {
+      "name": "gate_span",
+      "mnemonic": "GATESPAN",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate span time (Option 010).",
+      "set": "GATESPAN <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "GATESPAN 2NS"
+      ]
+    },
+    {
+      "name": "gate_start",
+      "mnemonic": "GATESTAR",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate start time (Option 010).",
+      "set": "GATESTAR <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "GATESTAR 0"
+      ]
+    },
+    {
+      "name": "gate_stop",
+      "mnemonic": "GATESTOP",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate stop time (Option 010).",
+      "set": "GATESTOP <value>[suffix]",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "s"
+          ]
+        }
+      ],
+      "examples": [
+        "GATESTOP 2NS"
+      ]
+    },
+    {
+      "name": "gate_shape_maximum",
+      "mnemonic": "GATSMAXI",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate shape to maximum (Option 010).",
+      "set": "GATSMAXI",
+      "query": "GATSMAXI?",
+      "examples": [
+        "GATSMAXI"
+      ]
+    },
+    {
+      "name": "gate_shape_wide",
+      "mnemonic": "GATSWIDE",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate shape to wide (Option 010).",
+      "set": "GATSWIDE",
+      "query": "GATSWIDE?",
+      "examples": [
+        "GATSWIDE"
+      ]
+    },
+    {
+      "name": "gate_shape_normal",
+      "mnemonic": "GATSNORM",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate shape to normal (Option 010).",
+      "set": "GATSNORM",
+      "query": "GATSNORM?",
+      "examples": [
+        "GATSNORM"
+      ]
+    },
+    {
+      "name": "gate_shape_minimum",
+      "mnemonic": "GATSMINI",
+      "category": "Time Domain",
+      "description": "Sets the time domain gate shape to minimum (Option 010).",
+      "set": "GATSMINI",
+      "query": "GATSMINI?",
+      "examples": [
+        "GATSMINI"
+      ]
+    },
+    {
+      "name": "window_maximum",
+      "mnemonic": "WINDMAXI",
+      "category": "Time Domain",
+      "description": "Sets the time domain window shape to maximum (Option 010).",
+      "set": "WINDMAXI",
+      "query": "WINDMAXI?",
+      "examples": [
+        "WINDMAXI"
+      ]
+    },
+    {
+      "name": "window_normal",
+      "mnemonic": "WINDNORM",
+      "category": "Time Domain",
+      "description": "Sets the time domain window shape to normal (Option 010).",
+      "set": "WINDNORM",
+      "query": "WINDNORM?",
+      "examples": [
+        "WINDNORM"
+      ]
+    },
+    {
+      "name": "window_minimum",
+      "mnemonic": "WINDMINI",
+      "category": "Time Domain",
+      "description": "Sets the time domain window shape to minimum (Option 010).",
+      "set": "WINDMINI",
+      "query": "WINDMINI?",
+      "examples": [
+        "WINDMINI"
+      ]
+    },
+    {
+      "name": "window_value",
+      "mnemonic": "WIND",
+      "category": "Time Domain",
+      "description": "Sets the time domain window shape pulse-width value (Option 010).",
+      "set": "WIND <value>",
+      "query": "WIND?",
+      "parameters": [
+        {
+          "name": "value"
+        }
+      ],
+      "examples": [
+        "WIND 1"
+      ]
+    },
+    {
+      "name": "window_use_memory",
+      "mnemonic": "WINDUSEM",
+      "category": "Time Domain",
+      "description": "Uses the current trace memory as the time domain window shape (Option 010).",
+      "set": "WINDUSEM{ON|OFF}",
+      "query": "WINDUSEM?",
+      "examples": [
+        "WINDUSEMON",
+        "WINDUSEMOFF"
+      ]
+    },
+    {
+      "name": "limit_test",
+      "mnemonic": "LIMITEST",
+      "category": "Limits",
+      "description": "Sets limit testing on or off.",
+      "set": "LIMITEST{ON|OFF}",
+      "query": "LIMITEST?",
+      "examples": [
+        "LIMITESTON",
+        "LIMITESTOFF"
+      ]
+    },
+    {
+      "name": "limit_line",
+      "mnemonic": "LIMILINE",
+      "category": "Limits",
+      "description": "Sets limit lines on or off.",
+      "set": "LIMILINE{ON|OFF}",
+      "query": "LIMILINE?",
+      "examples": [
+        "LIMILINEON",
+        "LIMILINEOFF"
+      ]
+    },
+    {
+      "name": "edit_limit_line",
+      "mnemonic": "EDITLIML",
+      "category": "Limits",
+      "description": "Begins editing the limit line table.",
+      "set": "EDITLIML",
+      "examples": [
+        "EDITLIML"
+      ]
+    },
+    {
+      "name": "limit_edit_done",
+      "mnemonic": "LIMEDONE",
+      "category": "Limits",
+      "description": "Completes editing the limit table.",
+      "set": "LIMEDONE",
+      "examples": [
+        "LIMEDONE"
+      ]
+    },
+    {
+      "name": "limit_stimulus",
+      "mnemonic": "LIMS",
+      "category": "Limits",
+      "description": "Sets the starting stimulus value of a limit-testing segment.",
+      "set": "LIMS <value>[suffix]",
+      "query": "LIMS?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIMS 1GHZ"
+      ]
+    },
+    {
+      "name": "limit_upper",
+      "mnemonic": "LIMU",
+      "category": "Limits",
+      "description": "Sets the upper limit value for a limit-testing segment.",
+      "set": "LIMU <value>[suffix]",
+      "query": "LIMU?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIMU 3"
+      ]
+    },
+    {
+      "name": "limit_lower",
+      "mnemonic": "LIML",
+      "category": "Limits",
+      "description": "Sets the lower limit value for a limit-testing segment.",
+      "set": "LIML <value>[suffix]",
+      "query": "LIML?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIML -3"
+      ]
+    },
+    {
+      "name": "limit_delta",
+      "mnemonic": "LIMD",
+      "category": "Limits",
+      "description": "Sets the limits delta value from the specified middle value.",
+      "set": "LIMD <value>[suffix]",
+      "query": "LIMD?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIMD 1"
+      ]
+    },
+    {
+      "name": "limit_middle",
+      "mnemonic": "LIMM",
+      "category": "Limits",
+      "description": "Sets the middle value of delta limits.",
+      "set": "LIMM <value>[suffix]",
+      "query": "LIMM?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIMM 0"
+      ]
+    },
+    {
+      "name": "limit_type",
+      "mnemonic": "LIMT",
+      "category": "Limits",
+      "description": "Specifies the limit type as flat line (FL), sloping line (SL), or single point (SP).",
+      "set": "LIMT{FL|SL|SP}",
+      "query": "LIMT?",
+      "examples": [
+        "LIMTFL",
+        "LIMTSL"
+      ]
+    },
+    {
+      "name": "limit_amplitude_offset",
+      "mnemonic": "LIMIAMPO",
+      "category": "Limits",
+      "description": "Sets an amplitude offset value for limit testing.",
+      "set": "LIMIAMPO <value>[suffix]",
+      "query": "LIMIAMPO?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Format dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIMIAMPO 0"
+      ]
+    },
+    {
+      "name": "limit_stimulus_offset",
+      "mnemonic": "LIMISTIO",
+      "category": "Limits",
+      "description": "Sets a stimulus offset value for limit testing.",
+      "set": "LIMISTIO <value>[suffix]",
+      "query": "LIMISTIO?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Domain dependent"
+        },
+        {
+          "name": "suffix",
+          "range": "suffix"
+        }
+      ],
+      "examples": [
+        "LIMISTIO 0"
+      ]
+    },
+    {
+      "name": "marker_to_amplitude_offset",
+      "mnemonic": "LIMIMAOF",
+      "category": "Limits",
+      "description": "Sets the active marker value as the amplitude offset for limit testing.",
+      "set": "LIMIMAOF",
+      "examples": [
+        "LIMIMAOF"
+      ]
+    },
+    {
+      "name": "edit_list",
+      "mnemonic": "EDITLIST",
+      "category": "List",
+      "description": "Begins editing the frequency list.",
+      "set": "EDITLIST",
+      "examples": [
+        "EDITLIST"
+      ]
+    },
+    {
+      "name": "edit_done",
+      "mnemonic": "EDITDONE",
+      "category": "List",
+      "description": "Completes editing the frequency list, limit table, or power-meter sensor cal-factor table.",
+      "set": "EDITDONE",
+      "examples": [
+        "EDITDONE"
+      ]
+    },
+    {
+      "name": "clear_list",
+      "mnemonic": "CLEL",
+      "category": "List",
+      "description": "Clears the current frequency list.",
+      "set": "CLEL",
+      "examples": [
+        "CLEL"
+      ]
+    },
+    {
+      "name": "segment_add",
+      "mnemonic": "SADD",
+      "category": "List",
+      "description": "Adds a new segment to the list frequency, limit line, or power sensor table.",
+      "set": "SADD",
+      "examples": [
+        "SADD"
+      ]
+    },
+    {
+      "name": "segment_delete",
+      "mnemonic": "SDEL",
+      "category": "List",
+      "description": "Deletes a segment from the list frequency, limit line, or power sensor table.",
+      "set": "SDEL",
+      "examples": [
+        "SDEL"
+      ]
+    },
+    {
+      "name": "segment_done",
+      "mnemonic": "SDON",
+      "category": "List",
+      "description": "Completes editing a segment of the list frequency, limit line, or power sensor table.",
+      "set": "SDON",
+      "examples": [
+        "SDON"
+      ]
+    },
+    {
+      "name": "segment_edit",
+      "mnemonic": "SEDI",
+      "category": "List",
+      "description": "Selects a segment of the list frequency, limit line, or power sensor table to be modified.",
+      "set": "SEDI <value>",
+      "query": "SEDI?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Depends on table type"
+        }
+      ],
+      "examples": [
+        "SEDI 1"
+      ]
+    },
+    {
+      "name": "save_register",
+      "mnemonic": "SAVE",
+      "category": "Save/Recall",
+      "description": "Saves the current instrument state in internal register 1-5.",
+      "set": "SAVE{1-5}",
+      "examples": [
+        "SAVE1"
+      ]
+    },
+    {
+      "name": "recall_register",
+      "mnemonic": "RECA",
+      "category": "Save/Recall",
+      "description": "Recalls internal register 1-5 (RECA5 recalls the USER PRESET).",
+      "set": "RECA{1-5}",
+      "examples": [
+        "RECA1"
+      ]
+    },
+    {
+      "name": "clear_register",
+      "mnemonic": "CLEA",
+      "category": "Save/Recall",
+      "description": "Clears save/recall register 1-5.",
+      "set": "CLEA{1-5}",
+      "examples": [
+        "CLEA1"
+      ]
+    },
+    {
+      "name": "clear_all_registers",
+      "mnemonic": "CLEARALL",
+      "category": "Save/Recall",
+      "description": "Clears all five save/recall registers.",
+      "set": "CLEARALL",
+      "examples": [
+        "CLEARALL"
+      ]
+    },
+    {
+      "name": "title_register",
+      "mnemonic": "TITR",
+      "category": "Save/Recall",
+      "description": "Titles internal register 1-5 (used with SAVE and RECALL).",
+      "set": "TITR{1-5} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 8 alphanumeric chars, first alphabetic"
+        }
+      ],
+      "examples": [
+        "TITR1 \"STATE1\""
+      ]
+    },
+    {
+      "name": "title_file",
+      "mnemonic": "TITF",
+      "category": "Save/Recall",
+      "description": "Titles the disk file at position 1-5 for subsequent disk access (used with LOAD/STORE/PURG).",
+      "set": "TITF{1-5} <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 8 alphanumeric chars, first alphabetic"
+        }
+      ],
+      "examples": [
+        "TITF1 \"DATA1\""
+      ]
+    },
+    {
+      "name": "store_to_disk",
+      "mnemonic": "STOR",
+      "category": "Save/Recall",
+      "description": "Stores the file at position 1-5 to disk (requires pass control).",
+      "set": "STOR{1-5}",
+      "examples": [
+        "STOR1"
+      ]
+    },
+    {
+      "name": "load_from_disk",
+      "mnemonic": "LOAD",
+      "category": "Save/Recall",
+      "description": "Loads the file at position 1-5 from disk (requires pass control).",
+      "set": "LOAD{1-5}",
+      "examples": [
+        "LOAD1"
+      ]
+    },
+    {
+      "name": "purge_file",
+      "mnemonic": "PURG",
+      "category": "Save/Recall",
+      "description": "Removes the file at position 1-5 from disk (requires pass control).",
+      "set": "PURG{1-5}",
+      "examples": [
+        "PURG1"
+      ]
+    },
+    {
+      "name": "read_file_titles",
+      "mnemonic": "REFT",
+      "category": "Save/Recall",
+      "description": "Reads file titles from disk (requires pass control).",
+      "set": "REFT",
+      "examples": [
+        "REFT"
+      ]
+    },
+    {
+      "name": "copy_from_file_titles",
+      "mnemonic": "COPYFRFT",
+      "category": "Save/Recall",
+      "description": "Copies disk file titles into the register titles.",
+      "set": "COPYFRFT",
+      "examples": [
+        "COPYFRFT"
+      ]
+    },
+    {
+      "name": "copy_from_reg_titles",
+      "mnemonic": "COPYFRRT",
+      "category": "Save/Recall",
+      "description": "Copies register titles into the disk file titles.",
+      "set": "COPYFRRT",
+      "examples": [
+        "COPYFRRT"
+      ]
+    },
+    {
+      "name": "initialize_disk",
+      "mnemonic": "INID",
+      "category": "Save/Recall",
+      "description": "Initializes the disk (LIF format).",
+      "set": "INID",
+      "examples": [
+        "INID"
+      ]
+    },
+    {
+      "name": "store_binary",
+      "mnemonic": "SAVUBINA",
+      "category": "Save/Recall",
+      "description": "Stores appropriate files to disk as binary files.",
+      "set": "SAVUBINA",
+      "examples": [
+        "SAVUBINA"
+      ]
+    },
+    {
+      "name": "store_ascii",
+      "mnemonic": "SAVUASCI",
+      "category": "Save/Recall",
+      "description": "Stores appropriate files to disk as ASCII (CITIfile) files.",
+      "set": "SAVUASCI",
+      "examples": [
+        "SAVUASCI"
+      ]
+    },
+    {
+      "name": "store_data_array",
+      "mnemonic": "EXTMDATA",
+      "category": "Save/Recall",
+      "description": "Enables/disables storage of error-corrected data when a file is stored to disk.",
+      "set": "EXTMDATA{ON|OFF}",
+      "examples": [
+        "EXTMDATAON",
+        "EXTMDATAOFF"
+      ]
+    },
+    {
+      "name": "store_raw_array",
+      "mnemonic": "EXTMRAW",
+      "category": "Save/Recall",
+      "description": "Enables/disables storage of raw data array(s) when a file is stored to disk.",
+      "set": "EXTMRAW{ON|OFF}",
+      "examples": [
+        "EXTMRAWON",
+        "EXTMRAWOFF"
+      ]
+    },
+    {
+      "name": "store_format_array",
+      "mnemonic": "EXTMFORM",
+      "category": "Save/Recall",
+      "description": "Enables/disables storage of formatted data when a file is stored to disk.",
+      "set": "EXTMFORM{ON|OFF}",
+      "examples": [
+        "EXTMFORMON",
+        "EXTMFORMOFF"
+      ]
+    },
+    {
+      "name": "store_graphics",
+      "mnemonic": "EXTMGRAP",
+      "category": "Save/Recall",
+      "description": "Enables/disables storage of user graphics when a file is stored to disk.",
+      "set": "EXTMGRAP{ON|OFF}",
+      "examples": [
+        "EXTMGRAPON",
+        "EXTMGRAPOFF"
+      ]
+    },
+    {
+      "name": "print_all",
+      "mnemonic": "PRINALL",
+      "category": "Copy",
+      "description": "Copies the measurement display to the printer.",
+      "set": "PRINALL",
+      "examples": [
+        "PRINALL"
+      ]
+    },
+    {
+      "name": "print_color",
+      "mnemonic": "PRIC",
+      "category": "Copy",
+      "description": "Selects color printing.",
+      "set": "PRIC",
+      "query": "PRIC?",
+      "examples": [
+        "PRIC"
+      ]
+    },
+    {
+      "name": "print_standard",
+      "mnemonic": "PRIS",
+      "category": "Copy",
+      "description": "Sets the print command to the default selection.",
+      "set": "PRIS",
+      "query": "PRIS?",
+      "examples": [
+        "PRIS"
+      ]
+    },
+    {
+      "name": "plot",
+      "mnemonic": "PLOT",
+      "category": "Copy",
+      "description": "Plots the display to a graphics plotter.",
+      "set": "PLOT",
+      "examples": [
+        "PLOT"
+      ]
+    },
+    {
+      "name": "plot_speed",
+      "mnemonic": "PLOS",
+      "category": "Copy",
+      "description": "Sets the plotting speed to fast or slow.",
+      "set": "PLOS{FAST|SLOW}",
+      "examples": [
+        "PLOSFAST",
+        "PLOSSLOW"
+      ]
+    },
+    {
+      "name": "full_page",
+      "mnemonic": "FULP",
+      "category": "Copy",
+      "description": "Selects the full-page plot.",
+      "set": "FULP",
+      "query": "FULP?",
+      "examples": [
+        "FULP"
+      ]
+    },
+    {
+      "name": "scale_plot",
+      "mnemonic": "SCAP",
+      "category": "Copy",
+      "description": "Selects normal full-size plot scale (FULL) or graticule expanded to P1/P2 (GRAT).",
+      "set": "SCAP{FULL|GRAT}",
+      "examples": [
+        "SCAPFULL",
+        "SCAPGRAT"
+      ]
+    },
+    {
+      "name": "quadrant_left_upper",
+      "mnemonic": "LEFU",
+      "category": "Copy",
+      "description": "Sets the plot quadrant to left upper.",
+      "set": "LEFU",
+      "query": "LEFU?",
+      "examples": [
+        "LEFU"
+      ]
+    },
+    {
+      "name": "quadrant_left_lower",
+      "mnemonic": "LEFL",
+      "category": "Copy",
+      "description": "Sets the plot quadrant to left lower.",
+      "set": "LEFL",
+      "query": "LEFL?",
+      "examples": [
+        "LEFL"
+      ]
+    },
+    {
+      "name": "quadrant_right_upper",
+      "mnemonic": "RIGU",
+      "category": "Copy",
+      "description": "Sets the plot quadrant to right upper.",
+      "set": "RIGU",
+      "query": "RIGU?",
+      "examples": [
+        "RIGU"
+      ]
+    },
+    {
+      "name": "quadrant_right_lower",
+      "mnemonic": "RIGL",
+      "category": "Copy",
+      "description": "Sets the plot quadrant to right lower.",
+      "set": "RIGL",
+      "query": "RIGL?",
+      "examples": [
+        "RIGL"
+      ]
+    },
+    {
+      "name": "define_plot_select",
+      "mnemonic": "P_DATA",
+      "category": "Copy",
+      "description": "Selects whether data, memory, graticule, marker(s), and/or text are plotted with PLOT.",
+      "set": "P{DATA|MEM|GRAT|MKR|TEXT}{ON|OFF}",
+      "query": "P{DATA|MEM|GRAT|MKR|TEXT}?",
+      "examples": [
+        "PDATAON",
+        "PMEMOFF"
+      ]
+    },
+    {
+      "name": "plot_pen",
+      "mnemonic": "PENN",
+      "category": "Copy",
+      "description": "Selects the pen number for data, memory, graticule, marker(s), or text when plotting.",
+      "set": "PENN{DATA|MEMO|GRAT|MARK|TEXT} <value>",
+      "query": "PENN{DATA|MEMO|GRAT|MARK|TEXT}?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 10"
+        }
+      ],
+      "examples": [
+        "PENNDATA 2"
+      ]
+    },
+    {
+      "name": "line_type",
+      "mnemonic": "LINT",
+      "category": "Copy",
+      "description": "Selects the line type of a trace (data or memory) for plotting.",
+      "set": "LINT{DATA|MEMO} <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 10"
+        }
+      ],
+      "examples": [
+        "LINTDATA 0"
+      ]
+    },
+    {
+      "name": "plot_grat",
+      "mnemonic": "PGRAT",
+      "category": "Copy",
+      "description": "Selects plotting of the graticule on or off.",
+      "set": "PGRAT{ON|OFF}",
+      "examples": [
+        "PGRATON",
+        "PGRATOFF"
+      ]
+    },
+    {
+      "name": "softkey_labels",
+      "mnemonic": "PSOFT",
+      "category": "Copy",
+      "description": "Selects the plot/print softkey-labels option on or off (applies to OUTPPLOT/OUTPPRIN).",
+      "set": "PSOFT{ON|OFF}",
+      "examples": [
+        "PSOFTON",
+        "PSOFTOFF"
+      ]
+    },
+    {
+      "name": "default_plot_setup",
+      "mnemonic": "DFLT",
+      "category": "Copy",
+      "description": "Returns the plotting parameters to the default values.",
+      "set": "DFLT",
+      "examples": [
+        "DFLT"
+      ]
+    },
+    {
+      "name": "operating_parameters",
+      "mnemonic": "OPEP",
+      "category": "Copy",
+      "description": "Lists the key parameters for both channels on the display.",
+      "set": "OPEP",
+      "examples": [
+        "OPEP"
+      ]
+    },
+    {
+      "name": "list_values",
+      "mnemonic": "LISV",
+      "category": "Copy",
+      "description": "Displays a tabular listing of all stimulus values and their current measured values.",
+      "set": "LISV",
+      "examples": [
+        "LISV"
+      ]
+    },
+    {
+      "name": "next_page",
+      "mnemonic": "NEXP",
+      "category": "Copy",
+      "description": "Displays the next page of a tabular listing on the display.",
+      "set": "NEXP",
+      "examples": [
+        "NEXP"
+      ]
+    },
+    {
+      "name": "restore_display",
+      "mnemonic": "RESD",
+      "category": "Copy",
+      "description": "Turns off a tabular listing (OPEP/LISV) and restores the measurement display.",
+      "set": "RESD",
+      "examples": [
+        "RESD"
+      ]
+    },
+    {
+      "name": "menu_on",
+      "mnemonic": "MENUON",
+      "category": "Display",
+      "description": "Enables display of a particular menu (must precede MENU{...}).",
+      "set": "MENUON",
+      "examples": [
+        "MENUON"
+      ]
+    },
+    {
+      "name": "menu_off",
+      "mnemonic": "MENUOFF",
+      "category": "Display",
+      "description": "Turns off the display of the current menu.",
+      "set": "MENUOFF",
+      "examples": [
+        "MENUOFF"
+      ]
+    },
+    {
+      "name": "menu_select",
+      "mnemonic": "MENU",
+      "category": "Display",
+      "description": "Displays the top-level menu for the specified hardkey (must be preceded by MENUON).",
+      "set": "MENU{AVG|CAL|COPY|DISP|FORM|MARK|MEAS|MRKF|RECA|SAVE|SCAL|STIM|SYST}",
+      "examples": [
+        "MENUSTIM"
+      ]
+    },
+    {
+      "name": "input_data",
+      "mnemonic": "INPUDATA",
+      "category": "Data Input",
+      "description": "Inputs error-corrected data; the analyzer stops sweeping and displays the data.",
+      "set": "INPUDATA <data>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Complex (real, imaginary)"
+        }
+      ],
+      "examples": [
+        "INPUDATA <block>"
+      ]
+    },
+    {
+      "name": "input_formatted",
+      "mnemonic": "INPUFORM",
+      "category": "Data Input",
+      "description": "Inputs formatted data; the analyzer stops sweeping and displays the data.",
+      "set": "INPUFORM <data>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Complex (real, imaginary)"
+        }
+      ],
+      "examples": [
+        "INPUFORM <block>"
+      ]
+    },
+    {
+      "name": "input_raw",
+      "mnemonic": "INPURAW",
+      "category": "Data Input",
+      "description": "Inputs raw data (arrays 1-4); the analyzer stops sweeping and displays the data.",
+      "set": "INPURAW{1-4} <data>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Complex (real, imaginary)"
+        }
+      ],
+      "examples": [
+        "INPURAW1 <block>"
+      ]
+    },
+    {
+      "name": "input_cal_coeff",
+      "mnemonic": "INPUCALC",
+      "category": "Data Input",
+      "description": "Stores a measurement calibration error-coefficient set (01-12) into instrument memory (see Chapter 5).",
+      "set": "INPUCALC{01-12} <data>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Complex (real, imaginary)"
+        }
+      ],
+      "examples": [
+        "INPUCALC01 <block>"
+      ]
+    },
+    {
+      "name": "input_cal_kit",
+      "mnemonic": "INPUCALK",
+      "category": "Data Input",
+      "description": "Inputs a calibration-kit definition into the USER CAL KIT (FORM1, 714 bytes); save with SAVEUSEK.",
+      "set": "INPUCALK <data>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Block data (FORM1, 714 bytes)"
+        }
+      ],
+      "examples": [
+        "INPUCALK <block>"
+      ]
+    },
+    {
+      "name": "input_learn_string",
+      "mnemonic": "INPULEAS",
+      "category": "Data Input",
+      "description": "Inputs a learn string previously obtained with OUTPLEAS (also LRN).",
+      "set": "INPULEAS <data>",
+      "parameters": [
+        {
+          "name": "value"
+        }
+      ],
+      "examples": [
+        "INPULEAS <block>"
+      ]
+    },
+    {
+      "name": "input_pm_cal",
+      "mnemonic": "INPUPMCAL",
+      "category": "Data Input",
+      "description": "Inputs a power meter calibration array (1 or 2) previously obtained with OUTPPMCAL.",
+      "set": "INPUPMCAL{1|2} <data>",
+      "parameters": [
+        {
+          "name": "value"
+        }
+      ],
+      "examples": [
+        "INPUPMCAL1 <block>"
+      ]
+    },
+    {
+      "name": "output_active",
+      "mnemonic": "OUTPACTI",
+      "category": "Output/Query",
+      "description": "Outputs the active entry function value (or the last active function if the entry area is off).",
+      "query": "OUTPACTI",
+      "examples": [
+        "OUTPACTI"
+      ]
+    },
+    {
+      "name": "output_aperture",
+      "mnemonic": "OUTPAPER",
+      "category": "Output/Query",
+      "description": "Outputs the smoothing aperture in stimulus units rather than as a percentage.",
+      "query": "OUTPAPER",
+      "examples": [
+        "OUTPAPER"
+      ]
+    },
+    {
+      "name": "output_cal_coeff",
+      "mnemonic": "OUTPCALC",
+      "category": "Output/Query",
+      "description": "Outputs the active calibration set array (01-12) of the active channel (real, imaginary).",
+      "query": "OUTPCALC{01-12}",
+      "examples": [
+        "OUTPCALC01"
+      ]
+    },
+    {
+      "name": "output_cal_kit",
+      "mnemonic": "OUTPCALK",
+      "category": "Output/Query",
+      "description": "Outputs the active calibration kit (FORM1, 714 bytes of binary data).",
+      "query": "OUTPCALK",
+      "examples": [
+        "OUTPCALK"
+      ]
+    },
+    {
+      "name": "output_data",
+      "mnemonic": "OUTPDATA",
+      "category": "Output/Query",
+      "description": "Outputs the error-corrected data (real, imaginary).",
+      "query": "OUTPDATA",
+      "examples": [
+        "OUTPDATA"
+      ]
+    },
+    {
+      "name": "output_formatted",
+      "mnemonic": "OUTPFORM",
+      "category": "Output/Query",
+      "description": "Outputs the formatted trace data (format depends on the current display format).",
+      "query": "OUTPFORM",
+      "examples": [
+        "OUTPFORM"
+      ]
+    },
+    {
+      "name": "output_memory",
+      "mnemonic": "OUTPMEMO",
+      "category": "Output/Query",
+      "description": "Outputs the memory data from the active channel (real, imaginary).",
+      "query": "OUTPMEMO",
+      "examples": [
+        "OUTPMEMO"
+      ]
+    },
+    {
+      "name": "output_raw",
+      "mnemonic": "OUTPRAW",
+      "category": "Output/Query",
+      "description": "Outputs the uncorrected (raw) data arrays 1-4 for the active channel (real, imaginary).",
+      "query": "OUTPRAW{1-4}",
+      "examples": [
+        "OUTPRAW1"
+      ]
+    },
+    {
+      "name": "output_marker",
+      "mnemonic": "OUTPMARK",
+      "category": "Output/Query",
+      "description": "Outputs the active marker values (marker value, aux value, stimulus).",
+      "query": "OUTPMARK",
+      "examples": [
+        "OUTPMARK"
+      ]
+    },
+    {
+      "name": "output_marker_stats",
+      "mnemonic": "OUTPMSTA",
+      "category": "Output/Query",
+      "description": "Outputs the marker statistics (mean, standard deviation, peak-to-peak).",
+      "query": "OUTPMSTA",
+      "examples": [
+        "OUTPMSTA"
+      ]
+    },
+    {
+      "name": "output_bandwidth",
+      "mnemonic": "OUTPMWID",
+      "category": "Output/Query",
+      "description": "Outputs the results of the bandwidth search (bandwidth, center, Q).",
+      "query": "OUTPMWID",
+      "examples": [
+        "OUTPMWID"
+      ]
+    },
+    {
+      "name": "output_title",
+      "mnemonic": "OUTPTITL",
+      "category": "Output/Query",
+      "description": "Outputs the display title for the active channel (less than 54 characters).",
+      "query": "OUTPTITL",
+      "examples": [
+        "OUTPTITL"
+      ]
+    },
+    {
+      "name": "output_key",
+      "mnemonic": "OUTPKEY",
+      "category": "Output/Query",
+      "description": "Outputs the key code of the last key pressed (63 = invalid key, -1 = knob turn).",
+      "query": "OUTPKEY",
+      "examples": [
+        "OUTPKEY"
+      ]
+    },
+    {
+      "name": "output_learn_string",
+      "mnemonic": "OUTPLEAS",
+      "category": "Output/Query",
+      "description": "Outputs the learn string containing the current instrument state.",
+      "query": "OUTPLEAS",
+      "examples": [
+        "OUTPLEAS"
+      ]
+    },
+    {
+      "name": "output_error",
+      "mnemonic": "OUTPERRO",
+      "category": "Output/Query",
+      "description": "Outputs the next error message from the error queue (error number, string).",
+      "query": "OUTPERRO",
+      "examples": [
+        "OUTPERRO"
+      ]
+    },
+    {
+      "name": "output_plot_string",
+      "mnemonic": "OUTPPLOT",
+      "category": "Output/Query",
+      "description": "Outputs the plot string (may go to a plotter or be read by the computer).",
+      "query": "OUTPPLOT",
+      "examples": [
+        "OUTPPLOT"
+      ]
+    },
+    {
+      "name": "output_print_string",
+      "mnemonic": "OUTPPRIN",
+      "category": "Output/Query",
+      "description": "Outputs the print string (may go to a printer or be read by the computer).",
+      "query": "OUTPPRIN",
+      "examples": [
+        "OUTPPRIN"
+      ]
+    },
+    {
+      "name": "output_pm_cal",
+      "mnemonic": "OUTPPMCAL",
+      "category": "Output/Query",
+      "description": "Outputs a power meter calibration array (1 or 2).",
+      "query": "OUTPPMCAL{1|2}",
+      "examples": [
+        "OUTPPMCAL1"
+      ]
+    },
+    {
+      "name": "output_limit_pass_fail",
+      "mnemonic": "OUTPLIML",
+      "category": "Output/Query",
+      "description": "Outputs the limit-test result for each point (stimulus, result, upper, lower; always Form 4 ASCII).",
+      "query": "OUTPLIML",
+      "examples": [
+        "OUTPLIML"
+      ]
+    },
+    {
+      "name": "output_limit_fail",
+      "mnemonic": "OUTPLIMF",
+      "category": "Output/Query",
+      "description": "Outputs the limit-test results only for failed points (stimulus, result, upper, lower; Form 4).",
+      "query": "OUTPLIMF",
+      "examples": [
+        "OUTPLIMF"
+      ]
+    },
+    {
+      "name": "output_limit_marker",
+      "mnemonic": "OUTPLIMM",
+      "category": "Output/Query",
+      "description": "Outputs the limit-test result for the marker position (stimulus, result, upper, lower).",
+      "query": "OUTPLIMM",
+      "examples": [
+        "OUTPLIMM"
+      ]
+    },
+    {
+      "name": "output_key_or_knob",
+      "mnemonic": "KOR",
+      "category": "Output/Query",
+      "description": "Outputs a two-byte key code or knob count (positive = key code, negative = encoded knob count).",
+      "query": "KOR?",
+      "examples": [
+        "KOR?"
+      ]
+    },
+    {
+      "name": "format_internal",
+      "mnemonic": "FORM1",
+      "category": "Data Format",
+      "description": "Sets data transfer format to the analyzer's internal binary format.",
+      "set": "FORM1",
+      "examples": [
+        "FORM1"
+      ]
+    },
+    {
+      "name": "format_ieee_32",
+      "mnemonic": "FORM2",
+      "category": "Data Format",
+      "description": "Sets data transfer format to IEEE 32-bit floating point.",
+      "set": "FORM2",
+      "examples": [
+        "FORM2"
+      ]
+    },
+    {
+      "name": "format_ieee_64",
+      "mnemonic": "FORM3",
+      "category": "Data Format",
+      "description": "Sets data transfer format to IEEE 64-bit floating point.",
+      "set": "FORM3",
+      "examples": [
+        "FORM3"
+      ]
+    },
+    {
+      "name": "format_ascii",
+      "mnemonic": "FORM4",
+      "category": "Data Format",
+      "description": "Sets data transfer format to ASCII.",
+      "set": "FORM4",
+      "examples": [
+        "FORM4"
+      ]
+    },
+    {
+      "name": "format_ieee_32_lsb",
+      "mnemonic": "FORM5",
+      "category": "Data Format",
+      "description": "Sets data transfer format to IEEE 32-bit floating point with least-significant byte first (PC-DOS compatible).",
+      "set": "FORM5",
+      "examples": [
+        "FORM5"
+      ]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "CLES",
+      "category": "Status",
+      "description": "Clears the status byte, the event status register, and event status register B.",
+      "set": "CLES",
+      "examples": [
+        "CLES"
+      ]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "ESE",
+      "category": "Status",
+      "description": "Enables specific bits of the event status register.",
+      "set": "ESE <value>",
+      "query": "ESE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 32767"
+        }
+      ],
+      "examples": [
+        "ESE 32",
+        "ESE?"
+      ]
+    },
+    {
+      "name": "event_status_register",
+      "mnemonic": "ESR",
+      "category": "Status",
+      "description": "Returns the event status register value.",
+      "query": "ESR?",
+      "examples": [
+        "ESR?"
+      ]
+    },
+    {
+      "name": "event_status_enable_b",
+      "mnemonic": "ESNB",
+      "category": "Status",
+      "description": "Enables specific bits of event status register B.",
+      "set": "ESNB <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 32767"
+        }
+      ],
+      "examples": [
+        "ESNB 0"
+      ]
+    },
+    {
+      "name": "event_status_register_b",
+      "mnemonic": "ESB",
+      "category": "Status",
+      "description": "Returns the event status register B value.",
+      "query": "ESB?",
+      "examples": [
+        "ESB?"
+      ]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "SRE",
+      "category": "Status",
+      "description": "Service request enable; the value masks which status-byte bits generate an SRQ.",
+      "set": "SRE <value>",
+      "parameters": [
+        {
+          "name": "value"
+        }
+      ],
+      "examples": [
+        "SRE 32"
+      ]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "STB",
+      "category": "Status",
+      "description": "Reads the status byte.",
+      "query": "STB?",
+      "examples": [
+        "STB?"
+      ]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "OPC",
+      "category": "Status",
+      "description": "Reports completion of the next command by setting bit 0 in the event status register (or replying to OPC?).",
+      "set": "OPC",
+      "query": "OPC?",
+      "examples": [
+        "OPC;SING",
+        "OPC?"
+      ]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "TST",
+      "category": "Status",
+      "description": "Executes an internal self-test and returns the result (0 = pass, 1 = fail).",
+      "query": "TST?",
+      "examples": [
+        "TST?"
+      ]
+    },
+    {
+      "name": "preset",
+      "mnemonic": "PRES",
+      "category": "System",
+      "description": "Sets the analyzer to the factory preset condition. Equivalent to *RST.",
+      "set": "PRES",
+      "examples": [
+        "PRES"
+      ]
+    },
+    {
+      "name": "common_clear_status",
+      "mnemonic": "*CLS",
+      "category": "IEEE 488.2",
+      "description": "Clears the status byte, the event status register, and event status register B.",
+      "set": "*CLS",
+      "examples": [
+        "*CLS"
+      ]
+    },
+    {
+      "name": "common_event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "IEEE 488.2",
+      "description": "Enables specific bits of the standard event status register.",
+      "set": "*ESE <value>",
+      "query": "*ESE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 32767"
+        }
+      ],
+      "examples": [
+        "*ESE 32",
+        "*ESE?"
+      ]
+    },
+    {
+      "name": "common_event_status_register",
+      "mnemonic": "*ESR",
+      "category": "IEEE 488.2",
+      "description": "Returns the contents of the standard event status register.",
+      "query": "*ESR?",
+      "examples": [
+        "*ESR?"
+      ]
+    },
+    {
+      "name": "common_identify",
+      "mnemonic": "*IDN",
+      "category": "IEEE 488.2",
+      "description": "Outputs the identification string \"HEWLETT PACKARD, 87aam,0,X.XX\" (model and firmware revision).",
+      "query": "*IDN?",
+      "examples": [
+        "*IDN?"
+      ]
+    },
+    {
+      "name": "common_operation_complete",
+      "mnemonic": "*OPC",
+      "category": "IEEE 488.2",
+      "description": "Sets bit 0 (operation complete) in the event status register when all pending operations complete; *OPC? outputs 1 on completion.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": [
+        "*OPC",
+        "*OPC?"
+      ]
+    },
+    {
+      "name": "common_pass_control_back",
+      "mnemonic": "*PCB",
+      "category": "IEEE 488.2",
+      "description": "Sets the HP-IB address the analyzer uses to communicate with an external controller.",
+      "set": "*PCB <value>",
+      "query": "*PCB?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 30",
+          "default": "21"
+        }
+      ],
+      "examples": [
+        "*PCB 21"
+      ]
+    },
+    {
+      "name": "common_reset",
+      "mnemonic": "*RST",
+      "category": "IEEE 488.2",
+      "description": "Sets the analyzer to the factory preset condition.",
+      "set": "*RST",
+      "examples": [
+        "*RST"
+      ]
+    },
+    {
+      "name": "common_service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "IEEE 488.2",
+      "description": "Service request enable; the value masks which status-byte bits generate an SRQ.",
+      "set": "*SRE <value>",
+      "parameters": [
+        {
+          "name": "value"
+        }
+      ],
+      "examples": [
+        "*SRE 32"
+      ]
+    },
+    {
+      "name": "common_status_byte",
+      "mnemonic": "*STB",
+      "category": "IEEE 488.2",
+      "description": "Reads the status byte.",
+      "query": "*STB?",
+      "examples": [
+        "*STB?"
+      ]
+    },
+    {
+      "name": "common_self_test",
+      "mnemonic": "*TST",
+      "category": "IEEE 488.2",
+      "description": "Executes an internal self-test and returns the result (0 = pass, 1 = fail).",
+      "query": "*TST?",
+      "examples": [
+        "*TST?"
+      ]
+    }
+  ]
+}

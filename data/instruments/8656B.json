@@ -6,6 +6,10 @@
   "source": "8656B-OM.pdf",
   "aliases": ["8656B", "HP8656B"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8656B is strictly listen-only (HP-IB interface functions include T0 = no talker capability). It cannot talk, has no query forms and no status byte, so there is no remote identification query."
+  },
   "commands": [
     {
       "name": "frequency",

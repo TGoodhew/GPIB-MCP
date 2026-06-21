@@ -1,0 +1,1518 @@
+{
+  "model": "8341B",
+  "manufacturer": "HP",
+  "category": "Synthesized Sweeper",
+  "description": "HP 8341B (0.01-20 GHz) Synthesized Sweeper. Lower-frequency companion to the HP 8340B (0.01-26.5 GHz); the two share the same operating manual and the identical two-letter mnemonic program-code language (NOT SCPI). The only functional difference is the maximum RF output frequency: the 8341B covers 10 MHz to 20.00 GHz versus the 8340B 10 MHz to 26.5 GHz. The mnemonics correspond one-to-one with the front-panel keys (see Table 3-1, Index by Mode and Function, in the Operating Information manual). Numeric entries are completed with a units/scale terminator: frequency GZ/MZ/KZ/HZ (GHz/MHz/kHz/Hz), time SC/MS (sec/msec), and power DM/DB (dBm/dB). A leading SH prefix on a mnemonic is the [SHIFT] (blue) shifted function of the corresponding key. Interrogated parameters are read back with the OP (Output Interrogated Parameter) command followed by the parameter's prefix (e.g. OPCW reads the CW frequency); other OUTPUT mnemonics (OA, OB, OC, OD, OF, OI, OK, OR, OL, OM, OS) return status or learn data.",
+  "source": "8340B-8341B_CM.pdf",
+  "aliases": [
+    "8341B",
+    "HP8341B"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "OI",
+    "matchRegex": "8341",
+    "description": "Output Firmware ID. Returns the instrument firmware/identity string. The 8341B has no SCPI '*IDN?'; OI is the closest identity query (Output Firmware ID, Table 3-1 HP-IB Functions)."
+  },
+  "commands": [
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Frequency",
+      "description": "Set the START frequency of the START/STOP swept range. Complete the value with a frequency units terminator. [START FREQ] key.",
+      "set": "FA <value> <units>",
+      "query": "OPFA",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "0.01 to 26.5 GHz (8340B); 0.01 to 20 GHz (8341B)"
+        }
+      ],
+      "examples": [
+        "FA 2 GZ",
+        "OPFA"
+      ]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Frequency",
+      "description": "Set the STOP frequency of the START/STOP swept range. Complete the value with a frequency units terminator. [STOP FREQ] key.",
+      "set": "FB <value> <units>",
+      "query": "OPFB",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "0.01 to 26.5 GHz (8340B); 0.01 to 20 GHz (8341B)"
+        }
+      ],
+      "examples": [
+        "FB 18 GZ",
+        "OPFB"
+      ]
+    },
+    {
+      "name": "center_frequency",
+      "mnemonic": "CF",
+      "category": "Frequency",
+      "description": "Set the CENTER frequency (selects the CF/dF center-frequency / sweep-width mode). Complete the value with a frequency units terminator. [CF] key.",
+      "set": "CF <value> <units>",
+      "query": "OPCF",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "10.00005 MHz to 26.49999995 GHz (center frequency)"
+        }
+      ],
+      "examples": [
+        "CF 10 GZ",
+        "OPCF"
+      ]
+    },
+    {
+      "name": "sweep_width",
+      "mnemonic": "DF",
+      "category": "Frequency",
+      "description": "Set the sweep width (delta-F / dF) about the center frequency in the CF/dF mode. Complete the value with a frequency units terminator. [dF] key.",
+      "set": "DF <value> <units>",
+      "query": "OPDF",
+      "parameters": [
+        {
+          "name": "sweep_width",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "100 Hz to 26.49 GHz"
+        }
+      ],
+      "examples": [
+        "DF 500 MZ",
+        "OPDF"
+      ]
+    },
+    {
+      "name": "zoom",
+      "mnemonic": "SHST",
+      "category": "Frequency",
+      "description": "ZOOM. Shifted function of [SWEEP TIME] ([SHIFT] [SWEEP TIME]); zooms the swept span about the center frequency.",
+      "set": "SHST",
+      "examples": [
+        "SHST"
+      ]
+    },
+    {
+      "name": "cw_frequency",
+      "mnemonic": "CW",
+      "category": "Frequency",
+      "description": "Set the CW (continuous-wave) frequency and select CW mode. Complete the value with a frequency units terminator. [CW] key.",
+      "set": "CW <value> <units>",
+      "query": "OPCW",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "0.01 to 26.5 GHz (8340B); 0.01 to 20 GHz (8341B)"
+        }
+      ],
+      "examples": [
+        "CW 5 GZ",
+        "OPCW"
+      ]
+    },
+    {
+      "name": "cw_resolution",
+      "mnemonic": "SHCW",
+      "category": "Frequency",
+      "description": "CW RESOLUTION. Shifted function of [CW] ([SHIFT] [CW]); sets the CW frequency entry resolution.",
+      "set": "SHCW",
+      "examples": [
+        "SHCW"
+      ]
+    },
+    {
+      "name": "fast_phaselock",
+      "mnemonic": "FP",
+      "category": "Frequency",
+      "description": "Fast Phaselock Select: enables fast phase-lock mode for reduced switching time.",
+      "set": "FP",
+      "examples": [
+        "FP"
+      ]
+    },
+    {
+      "name": "marker_1",
+      "mnemonic": "M1",
+      "category": "Markers",
+      "description": "Turn on and set Frequency Marker 1. Enter a frequency value with units to position the marker. Append M0 (M1M0) to turn marker 1 off. [M1] key.",
+      "set": "M1 <value> <units>",
+      "query": "OPM1",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Within the sweep range"
+        }
+      ],
+      "examples": [
+        "M1 10 GZ",
+        "M1M0"
+      ]
+    },
+    {
+      "name": "marker_2",
+      "mnemonic": "M2",
+      "category": "Markers",
+      "description": "Turn on and set Frequency Marker 2. Enter a frequency value with units. Append M0 (M2M0) to turn marker 2 off. [M2] key.",
+      "set": "M2 <value> <units>",
+      "query": "OPM2",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Within the sweep range"
+        }
+      ],
+      "examples": [
+        "M2 12 GZ",
+        "M2M0"
+      ]
+    },
+    {
+      "name": "marker_3",
+      "mnemonic": "M3",
+      "category": "Markers",
+      "description": "Turn on and set Frequency Marker 3. Append M0 (M3M0) to turn off. [M3] key.",
+      "set": "M3 <value> <units>",
+      "query": "OPM3",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Within the sweep range"
+        }
+      ],
+      "examples": [
+        "M3 14 GZ",
+        "M3M0"
+      ]
+    },
+    {
+      "name": "marker_4",
+      "mnemonic": "M4",
+      "category": "Markers",
+      "description": "Turn on and set Frequency Marker 4. Append M0 (M4M0) to turn off. [M4] key.",
+      "set": "M4 <value> <units>",
+      "query": "OPM4",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Within the sweep range"
+        }
+      ],
+      "examples": [
+        "M4 16 GZ",
+        "M4M0"
+      ]
+    },
+    {
+      "name": "marker_5",
+      "mnemonic": "M5",
+      "category": "Markers",
+      "description": "Turn on and set Frequency Marker 5. Append M0 (M5M0) to turn off. [M5] key.",
+      "set": "M5 <value> <units>",
+      "query": "OPM5",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Within the sweep range"
+        }
+      ],
+      "examples": [
+        "M5 18 GZ",
+        "M5M0"
+      ]
+    },
+    {
+      "name": "all_markers_off",
+      "mnemonic": "SHMO",
+      "category": "Markers",
+      "description": "Turn off ALL markers. Shifted function ([SHIFT] [OFF]).",
+      "set": "SHMO",
+      "examples": [
+        "SHMO"
+      ]
+    },
+    {
+      "name": "marker_delta_on",
+      "mnemonic": "MD1",
+      "category": "Markers",
+      "description": "Turn on and set Marker Delta (MKR D) mode using markers 'm' and 'n'. [MKR D] key.",
+      "set": "MD1",
+      "examples": [
+        "MD1"
+      ]
+    },
+    {
+      "name": "marker_delta_off",
+      "mnemonic": "MD0",
+      "category": "Markers",
+      "description": "Turn off Marker Delta (MKR D OFF) mode.",
+      "set": "MD0",
+      "examples": [
+        "MD0"
+      ]
+    },
+    {
+      "name": "marker_to_center_frequency",
+      "mnemonic": "MC",
+      "category": "Markers",
+      "description": "Set the active marker to the center frequency (MKR -> CF). [MKR -> CF] key.",
+      "set": "MC",
+      "examples": [
+        "MC"
+      ]
+    },
+    {
+      "name": "marker_sweep_on",
+      "mnemonic": "MP1",
+      "category": "Markers",
+      "description": "Marker 1-2 sweep ON: sweep between marker 1 and marker 2. [MKR SWEEP] key.",
+      "set": "MP1",
+      "examples": [
+        "MP1"
+      ]
+    },
+    {
+      "name": "marker_sweep_off",
+      "mnemonic": "MP0",
+      "category": "Markers",
+      "description": "Marker 1-2 sweep OFF.",
+      "set": "MP0",
+      "examples": [
+        "MP0"
+      ]
+    },
+    {
+      "name": "markers_to_start_stop",
+      "mnemonic": "SHMP",
+      "category": "Markers",
+      "description": "Marker 1 -> START, Marker 2 -> STOP. Sets start frequency to marker 1 and stop frequency to marker 2. Shifted function ([SHIFT] [MKR SWEEP]).",
+      "set": "SHMP",
+      "examples": [
+        "SHMP"
+      ]
+    },
+    {
+      "name": "amplitude_marker_on",
+      "mnemonic": "AK1",
+      "category": "Markers",
+      "description": "Amplitude (frequency) marker ON: produces an amplitude blip at marker frequencies. [AMTD MKR] key.",
+      "set": "AK1",
+      "examples": [
+        "AK1"
+      ]
+    },
+    {
+      "name": "amplitude_marker_off",
+      "mnemonic": "AK0",
+      "category": "Markers",
+      "description": "Amplitude (frequency) marker OFF.",
+      "set": "AK0",
+      "examples": [
+        "AK0"
+      ]
+    },
+    {
+      "name": "sweep_continuous",
+      "mnemonic": "S1",
+      "category": "Sweep",
+      "description": "Continuous sweep mode. [CONT] key.",
+      "set": "S1",
+      "examples": [
+        "S1"
+      ]
+    },
+    {
+      "name": "sweep_single",
+      "mnemonic": "S2",
+      "category": "Sweep",
+      "description": "Single sweep. Arms/triggers a single sweep (SG is an equivalent code). [SINGLE] key.",
+      "set": "S2",
+      "examples": [
+        "S2",
+        "SG"
+      ]
+    },
+    {
+      "name": "sweep_manual",
+      "mnemonic": "S3",
+      "category": "Sweep",
+      "description": "Manual frequency sweep mode; frequency is controlled manually (SM is an equivalent code). [MANUAL] key.",
+      "set": "S3",
+      "examples": [
+        "S3",
+        "SM"
+      ]
+    },
+    {
+      "name": "trigger_free_run",
+      "mnemonic": "T1",
+      "category": "Sweep",
+      "description": "Sweep trigger = FREE RUN. [FREE RUN] key.",
+      "set": "T1",
+      "examples": [
+        "T1"
+      ]
+    },
+    {
+      "name": "trigger_line",
+      "mnemonic": "T2",
+      "category": "Sweep",
+      "description": "Sweep trigger = LINE. [LINE] key.",
+      "set": "T2",
+      "examples": [
+        "T2"
+      ]
+    },
+    {
+      "name": "trigger_external",
+      "mnemonic": "T3",
+      "category": "Sweep",
+      "description": "Sweep trigger = EXTERNAL. [EXT] key.",
+      "set": "T3",
+      "examples": [
+        "T3"
+      ]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "ST",
+      "category": "Sweep",
+      "description": "Set the sweep time. Complete the value with a time units terminator (SC = seconds, MS = milliseconds). [SWEEP TIME] key.",
+      "set": "ST <value> <units>",
+      "query": "OPST",
+      "parameters": [
+        {
+          "name": "time",
+          "units": [
+            "SC",
+            "MS"
+          ],
+          "range": "10 ms to 100 s (typical)"
+        }
+      ],
+      "examples": [
+        "ST 100 MS",
+        "OPST"
+      ]
+    },
+    {
+      "name": "rf_on_dwell",
+      "mnemonic": "SHMZ17HZ",
+      "category": "Sweep",
+      "description": "RF on Dwell: increases dwell time by 100 microseconds per count entered for the value, up to 12.8 ms. Front-panel sequence [SHIFT] [MHz] [1] [7] [Hz] (or [SHIFT] [kHz] [n] [Hz] where n is the value). At Instrument Preset the pre-sweep / pre-CW step delay returns to 400 microseconds.",
+      "set": "SHMZ17HZ",
+      "examples": [
+        "SHMZ17HZ"
+      ]
+    },
+    {
+      "name": "stepped_sweep",
+      "mnemonic": "SN",
+      "category": "Sweep",
+      "description": "Stepped Sweep: select the stepped (synthesized) sweep mode.",
+      "set": "SN",
+      "examples": [
+        "SN"
+      ]
+    },
+    {
+      "name": "increment_frequency",
+      "mnemonic": "IF",
+      "category": "Sweep",
+      "description": "Increment Frequency: advance to the next frequency step in stepped sweep.",
+      "set": "IF",
+      "examples": [
+        "IF"
+      ]
+    },
+    {
+      "name": "reset_sweep",
+      "mnemonic": "RS",
+      "category": "Sweep",
+      "description": "Reset Sweep: reset the sweep to its start.",
+      "set": "RS",
+      "examples": [
+        "RS"
+      ]
+    },
+    {
+      "name": "take_sweep",
+      "mnemonic": "TS",
+      "category": "Sweep",
+      "description": "Take Sweep: trigger/execute a sweep.",
+      "set": "TS",
+      "examples": [
+        "TS"
+      ]
+    },
+    {
+      "name": "time_limit",
+      "mnemonic": "TL",
+      "category": "Sweep",
+      "description": "Time Limit: set the sweep time-limit control.",
+      "set": "TL",
+      "examples": [
+        "TL"
+      ]
+    },
+    {
+      "name": "instrument_preset",
+      "mnemonic": "IP",
+      "category": "System",
+      "description": "Instrument Preset. Returns the instrument to its known preset state. [INSTR PRESET] key.",
+      "set": "IP",
+      "examples": [
+        "IP"
+      ]
+    },
+    {
+      "name": "alternate_sweep_on",
+      "mnemonic": "AL1",
+      "category": "System",
+      "description": "Alternate Sweep mode ON. [ALT] key.",
+      "set": "AL1",
+      "examples": [
+        "AL1"
+      ]
+    },
+    {
+      "name": "alternate_sweep_off",
+      "mnemonic": "AL0",
+      "category": "System",
+      "description": "Alternate Sweep mode OFF.",
+      "set": "AL0",
+      "examples": [
+        "AL0"
+      ]
+    },
+    {
+      "name": "select_foreground",
+      "mnemonic": "AS0",
+      "category": "System",
+      "description": "Alternate State Selection: select foreground state.",
+      "set": "AS0",
+      "examples": [
+        "AS0"
+      ]
+    },
+    {
+      "name": "select_background",
+      "mnemonic": "AS1",
+      "category": "System",
+      "description": "Alternate State Selection: select background state.",
+      "set": "AS1",
+      "examples": [
+        "AS1"
+      ]
+    },
+    {
+      "name": "save_state",
+      "mnemonic": "SV",
+      "category": "System",
+      "description": "Save the current instrument state to a register. [SAVE] key. Follow with the register number.",
+      "set": "SV <n>",
+      "parameters": [
+        {
+          "name": "register",
+          "range": "Save/Recall register number"
+        }
+      ],
+      "examples": [
+        "SV 1"
+      ]
+    },
+    {
+      "name": "recall_state",
+      "mnemonic": "RC",
+      "category": "System",
+      "description": "Recall an instrument state from a register. [RECALL] key. Follow with the register number.",
+      "set": "RC <n>",
+      "parameters": [
+        {
+          "name": "register",
+          "range": "Save/Recall register number"
+        }
+      ],
+      "examples": [
+        "RC 1"
+      ]
+    },
+    {
+      "name": "lock_registers",
+      "mnemonic": "SHSV",
+      "category": "System",
+      "description": "Lock Save/Recall registers. Shifted function of [SAVE] ([SHIFT] [SAVE]).",
+      "set": "SHSV",
+      "examples": [
+        "SHSV"
+      ]
+    },
+    {
+      "name": "unlock_registers",
+      "mnemonic": "SHRC",
+      "category": "System",
+      "description": "Unlock Save/Recall registers. Shifted function of [RECALL] ([SHIFT] [RECALL]).",
+      "set": "SHRC",
+      "examples": [
+        "SHRC"
+      ]
+    },
+    {
+      "name": "security_memory_erase",
+      "mnemonic": "SHMZ18HZ",
+      "category": "System",
+      "description": "Security Memory Erase: erase RAM and set all variables and Save/Recall registers to Instrument Preset conditions; working calibration constants are overwritten by the protected cal constants. Front-panel key sequence [SHIFT] [MHz] [1] [8] [Hz] (or [SHIFT] [kHz] [0] [Hz]).",
+      "set": "SHMZ18HZ",
+      "examples": [
+        "SHMZ18HZ",
+        "SHKZ0HZ"
+      ]
+    },
+    {
+      "name": "am_on",
+      "mnemonic": "AM1",
+      "category": "Modulation",
+      "description": "Amplitude Modulation ON. [AM] key.",
+      "set": "AM1",
+      "examples": [
+        "AM1"
+      ]
+    },
+    {
+      "name": "am_off",
+      "mnemonic": "AM0",
+      "category": "Modulation",
+      "description": "Amplitude Modulation OFF.",
+      "set": "AM0",
+      "examples": [
+        "AM0"
+      ]
+    },
+    {
+      "name": "pulse_mod_slow_rise_on",
+      "mnemonic": "SHPM",
+      "category": "Modulation",
+      "description": "Slow Rise Time Pulse Modulation ON. Shifted function ([SHIFT] [PULSE]).",
+      "set": "SHPM",
+      "examples": [
+        "SHPM"
+      ]
+    },
+    {
+      "name": "pulse_mod_on",
+      "mnemonic": "PM1",
+      "category": "Modulation",
+      "description": "Normal Pulse Modulation ON. [PULSE] key.",
+      "set": "PM1",
+      "examples": [
+        "PM1"
+      ]
+    },
+    {
+      "name": "pulse_mod_off",
+      "mnemonic": "PM0",
+      "category": "Modulation",
+      "description": "Pulse Modulation OFF.",
+      "set": "PM0",
+      "examples": [
+        "PM0"
+      ]
+    },
+    {
+      "name": "fm_on",
+      "mnemonic": "FM1",
+      "category": "Modulation",
+      "description": "Frequency Modulation ON. [FM] key. (Code given as 'FM 1' in Table 3-1.)",
+      "set": "FM1",
+      "examples": [
+        "FM1"
+      ]
+    },
+    {
+      "name": "fm_off",
+      "mnemonic": "FM0",
+      "category": "Modulation",
+      "description": "Frequency Modulation OFF. (Code given as 'FM 0' in Table 3-1.)",
+      "set": "FM0",
+      "examples": [
+        "FM0"
+      ]
+    },
+    {
+      "name": "fm_sensitivity_1mhz",
+      "mnemonic": "FM1MZ",
+      "category": "Modulation",
+      "description": "Set FM sensitivity to 1 MHz/Volt. Entered as [FM] [1] [MHz]; code 'FM 1 Mz'.",
+      "set": "FM 1 MZ",
+      "examples": [
+        "FM 1 MZ"
+      ]
+    },
+    {
+      "name": "fm_sensitivity_10mhz",
+      "mnemonic": "FM10MZ",
+      "category": "Modulation",
+      "description": "Set FM sensitivity to 10 MHz/Volt. Entered as [FM] [10] [MHz]; code 'FM 10 Mz'.",
+      "set": "FM 10 MZ",
+      "examples": [
+        "FM 10 MZ"
+      ]
+    },
+    {
+      "name": "power_level",
+      "mnemonic": "PL",
+      "category": "Power",
+      "description": "Set the output power level. Complete the value with a power units terminator (DM = dBm, DB = dB). [POWER LEVEL] key.",
+      "set": "PL <value> <units>",
+      "query": "OPPL",
+      "parameters": [
+        {
+          "name": "power",
+          "units": [
+            "DM",
+            "DB"
+          ],
+          "range": "Instrument/option dependent leveled output power"
+        }
+      ],
+      "examples": [
+        "PL 0 DM",
+        "OPPL"
+      ]
+    },
+    {
+      "name": "power_sweep_on",
+      "mnemonic": "PS1",
+      "category": "Power",
+      "description": "Power Sweep mode ON. [PWR SWP] key.",
+      "set": "PS1",
+      "examples": [
+        "PS1"
+      ]
+    },
+    {
+      "name": "power_sweep_off",
+      "mnemonic": "PS0",
+      "category": "Power",
+      "description": "Power Sweep mode OFF.",
+      "set": "PS0",
+      "examples": [
+        "PS0"
+      ]
+    },
+    {
+      "name": "power_slope_on",
+      "mnemonic": "SL1",
+      "category": "Power",
+      "description": "Power Slope mode ON (compensates power vs. frequency). [SLOPE] key.",
+      "set": "SL1",
+      "examples": [
+        "SL1"
+      ]
+    },
+    {
+      "name": "power_slope_off",
+      "mnemonic": "SL0",
+      "category": "Power",
+      "description": "Power Slope mode OFF.",
+      "set": "SL0",
+      "examples": [
+        "SL0"
+      ]
+    },
+    {
+      "name": "rf_on",
+      "mnemonic": "RF1",
+      "category": "Power",
+      "description": "RF output ON. [RF] key.",
+      "set": "RF1",
+      "examples": [
+        "RF1"
+      ]
+    },
+    {
+      "name": "rf_off",
+      "mnemonic": "RF0",
+      "category": "Power",
+      "description": "RF output OFF.",
+      "set": "RF0",
+      "examples": [
+        "RF0"
+      ]
+    },
+    {
+      "name": "peak_on",
+      "mnemonic": "RP1",
+      "category": "Power",
+      "description": "Peak output power ON (CW mode or manual sweep): peaks the YIG-tuned filter/output. [PEAK] key.",
+      "set": "RP1",
+      "examples": [
+        "RP1"
+      ]
+    },
+    {
+      "name": "peak_off",
+      "mnemonic": "RP0",
+      "category": "Power",
+      "description": "Peak output power OFF.",
+      "set": "RP0",
+      "examples": [
+        "RP0"
+      ]
+    },
+    {
+      "name": "fast_peaking",
+      "mnemonic": "SHAK",
+      "category": "Power",
+      "description": "Instantaneous (fast) peaking. Shifted function of [AMTD MKR] ([SHIFT] [AMTD MKR]).",
+      "set": "SHAK",
+      "examples": [
+        "SHAK"
+      ]
+    },
+    {
+      "name": "auto_tracking_calibration",
+      "mnemonic": "SHRP",
+      "category": "Power",
+      "description": "Auto Tracking Calibration. Shifted function of [PEAK] ([SHIFT] [PEAK]).",
+      "set": "SHRP",
+      "examples": [
+        "SHRP"
+      ]
+    },
+    {
+      "name": "leveling_internal",
+      "mnemonic": "A1",
+      "category": "Power",
+      "description": "Internal leveling mode. [INT] key.",
+      "set": "A1",
+      "examples": [
+        "A1"
+      ]
+    },
+    {
+      "name": "leveling_external_crystal",
+      "mnemonic": "A2",
+      "category": "Power",
+      "description": "External crystal detector leveling mode. [XTAL] key.",
+      "set": "A2",
+      "examples": [
+        "A2"
+      ]
+    },
+    {
+      "name": "leveling_external_power_meter",
+      "mnemonic": "A3",
+      "category": "Power",
+      "description": "External power meter leveling mode. [METER] key.",
+      "set": "A3",
+      "examples": [
+        "A3"
+      ]
+    },
+    {
+      "name": "disable_alc_modulator_drive",
+      "mnemonic": "SHA3",
+      "category": "Power",
+      "description": "Disable ALC to control modulator drive directly. Shifted function of [METER] ([SHIFT] [METER]).",
+      "set": "SHA3",
+      "examples": [
+        "SHA3"
+      ]
+    },
+    {
+      "name": "external_source_module_leveling",
+      "mnemonic": "SHA2",
+      "category": "Power",
+      "description": "Enable external source module leveling mode. Shifted function of [XTAL] ([SHIFT] [XTAL]).",
+      "set": "SHA2",
+      "examples": [
+        "SHA2"
+      ]
+    },
+    {
+      "name": "search_power_level",
+      "mnemonic": "SHRF",
+      "category": "Power",
+      "description": "Disable ALC and search for desired power level. Shifted function of [INT] ([SHIFT] [INT]); SHAI is an equivalent code.",
+      "set": "SHRF",
+      "examples": [
+        "SHRF",
+        "SHAI"
+      ]
+    },
+    {
+      "name": "decouple_alc_attenuator",
+      "mnemonic": "SHPS",
+      "category": "Power",
+      "description": "Decouple ALC and attenuator (control each independently). Shifted function of [PWR SWP] ([SHIFT] [PWR SWP]).",
+      "set": "SHPS",
+      "examples": [
+        "SHPS"
+      ]
+    },
+    {
+      "name": "control_step_attenuator",
+      "mnemonic": "SHSL",
+      "category": "Power",
+      "description": "Control the step attenuator independently. Shifted function of [SLOPE] ([SHIFT] [SLOPE]); AT is an equivalent code for independent attenuator control.",
+      "set": "SHSL",
+      "examples": [
+        "SHSL",
+        "AT"
+      ]
+    },
+    {
+      "name": "independent_attenuator_control",
+      "mnemonic": "AT",
+      "category": "Power",
+      "description": "Independent Control of Attenuator: control the step attenuator independently of the ALC.",
+      "set": "AT",
+      "examples": [
+        "AT"
+      ]
+    },
+    {
+      "name": "frequency_step_size",
+      "mnemonic": "SF",
+      "category": "Step",
+      "description": "Set the frequency step size used by the step (up/down) keys. Shifted function form SHCF also accepted ([SHIFT] [CF]). Complete the value with a frequency units terminator.",
+      "set": "SF <value> <units>",
+      "query": "OPSF",
+      "parameters": [
+        {
+          "name": "step_size",
+          "units": [
+            "GZ",
+            "MZ",
+            "KZ",
+            "HZ"
+          ],
+          "range": "Frequency step increment"
+        }
+      ],
+      "examples": [
+        "SF 100 MZ",
+        "SHCF"
+      ]
+    },
+    {
+      "name": "power_step_size",
+      "mnemonic": "SP",
+      "category": "Step",
+      "description": "Set the power step size used by the step (up/down) keys. Shifted function form SHPL also accepted ([SHIFT] [POWER LEVEL]). Complete the value with a power units terminator.",
+      "set": "SP <value> <units>",
+      "query": "OPSP",
+      "parameters": [
+        {
+          "name": "step_size",
+          "units": [
+            "DB",
+            "DM"
+          ],
+          "range": "Power step increment"
+        }
+      ],
+      "examples": [
+        "SP 1 DB",
+        "SHPL"
+      ]
+    },
+    {
+      "name": "step_up",
+      "mnemonic": "UP",
+      "category": "Step",
+      "description": "Increment the active parameter by one step size (STEP UP).",
+      "set": "UP",
+      "examples": [
+        "UP"
+      ]
+    },
+    {
+      "name": "step_down",
+      "mnemonic": "DN",
+      "category": "Step",
+      "description": "Decrement the active parameter by one step size (STEP DOWN).",
+      "set": "DN",
+      "examples": [
+        "DN"
+      ]
+    },
+    {
+      "name": "auto_coupled_mode",
+      "mnemonic": "AU",
+      "category": "Display",
+      "description": "Fixed function to coupled mode: set the active parameter to coupled (auto) mode. [Hz/AUTO] key.",
+      "set": "AU",
+      "examples": [
+        "AU"
+      ]
+    },
+    {
+      "name": "entry_off",
+      "mnemonic": "EF",
+      "category": "Display",
+      "description": "Disable the active function (ENTRY OFF); deactivates the currently active entry parameter. [ENTRY OFF] key.",
+      "set": "EF",
+      "examples": [
+        "EF"
+      ]
+    },
+    {
+      "name": "display_offset",
+      "mnemonic": "SHFB",
+      "category": "Display",
+      "description": "OFFSET FACTOR / display offset. Shifted function of [STOP FREQ] ([SHIFT] [STOP FREQ]).",
+      "set": "SHFB",
+      "examples": [
+        "SHFB"
+      ]
+    },
+    {
+      "name": "display_update_enable",
+      "mnemonic": "DU1",
+      "category": "Display",
+      "description": "Re-enable display update. Shifted-key equivalent is [SHIFT] [LINE].",
+      "set": "DU1",
+      "examples": [
+        "DU1"
+      ]
+    },
+    {
+      "name": "display_update_disable",
+      "mnemonic": "DU0",
+      "category": "Display",
+      "description": "Disable display update.",
+      "set": "DU0",
+      "examples": [
+        "DU0"
+      ]
+    },
+    {
+      "name": "xy_recorder_pen_lift_enable",
+      "mnemonic": "SHT21",
+      "category": "Display",
+      "description": "X-Y recorder interface: enable pen lift at bandcrossings.",
+      "set": "SHT21",
+      "examples": [
+        "SHT21"
+      ]
+    },
+    {
+      "name": "xy_recorder_pen_lift_disable",
+      "mnemonic": "SHT20",
+      "category": "Display",
+      "description": "X-Y recorder interface: disable pen lift at bandcrossings.",
+      "set": "SHT20",
+      "examples": [
+        "SHT20"
+      ]
+    },
+    {
+      "name": "retain_multiplication_off",
+      "mnemonic": "SHFA",
+      "category": "Display",
+      "description": "Frequency display scale: retain multiplication factor at off / on instrument preset. Shifted function of [START FREQ] ([SHIFT] [START FREQ]).",
+      "set": "SHFA",
+      "examples": [
+        "SHFA"
+      ]
+    },
+    {
+      "name": "retain_multiplication_on",
+      "mnemonic": "SHAL",
+      "category": "Display",
+      "description": "Frequency display scale: retain multiplication factor on at instrument preset. Shifted function of [ALT] ([SHIFT] [ALT]).",
+      "set": "SHAL",
+      "examples": [
+        "SHAL"
+      ]
+    },
+    {
+      "name": "disable_multiplication_preset",
+      "mnemonic": "SHIP",
+      "category": "Display",
+      "description": "Frequency display scale: disable multiplication factor (preset to 1). Shifted function of [INSTR PRESET] ([SHIFT] [INSTR PRESET]).",
+      "set": "SHIP",
+      "examples": [
+        "SHIP"
+      ]
+    },
+    {
+      "name": "display_mn_loop",
+      "mnemonic": "SHM1",
+      "category": "Diagnostic",
+      "description": "Display M, N, M/N freq. and 20/30 loop frequencies. Shifted function ([SHIFT] [M1]).",
+      "set": "SHM1",
+      "examples": [
+        "SHM1"
+      ]
+    },
+    {
+      "name": "display_band_yo_loop",
+      "mnemonic": "SHM2",
+      "category": "Diagnostic",
+      "description": "Display band number and Y.O. (YIG oscillator) loop frequency. Shifted function ([SHIFT] [M2]).",
+      "set": "SHM2",
+      "examples": [
+        "SHM2"
+      ]
+    },
+    {
+      "name": "display_vco",
+      "mnemonic": "SHM3",
+      "category": "Diagnostic",
+      "description": "Display VCO1 and VCO2 frequencies. Shifted function ([SHIFT] [M3]).",
+      "set": "SHM3",
+      "examples": [
+        "SHM3"
+      ]
+    },
+    {
+      "name": "diagnostic_tests",
+      "mnemonic": "SHM4",
+      "category": "Diagnostic",
+      "description": "Diagnostic Tests / Results display. Shifted function ([SHIFT] [M4]).",
+      "set": "SHM4",
+      "examples": [
+        "SHM4"
+      ]
+    },
+    {
+      "name": "front_panel_display_test",
+      "mnemonic": "SHT1",
+      "category": "Diagnostic",
+      "description": "Front Panel Display Test. Shifted function ([SHIFT] [FREE RUN]). Press [INSTR PRESET] or cycle power to exit.",
+      "set": "SHT1",
+      "examples": [
+        "SHT1"
+      ]
+    },
+    {
+      "name": "display_unlock",
+      "mnemonic": "SHT3",
+      "category": "Diagnostic",
+      "description": "Display Unlock indicators. Shifted function ([SHIFT] [EXT]).",
+      "set": "SHT3",
+      "examples": [
+        "SHT3"
+      ]
+    },
+    {
+      "name": "display_fault_indicators",
+      "mnemonic": "SHS3",
+      "category": "Diagnostic",
+      "description": "Display Fault Indicators. Shifted function ([SHIFT] [MANUAL]).",
+      "set": "SHS3",
+      "examples": [
+        "SHS3"
+      ]
+    },
+    {
+      "name": "disable_band_cross",
+      "mnemonic": "SHMZ23HZ",
+      "category": "Diagnostic",
+      "description": "Disable band cross. Front-panel sequence [SHIFT] [MHz] [2] [3] [Hz] (or [SHIFT] [kHz] [0] [Hz]).",
+      "set": "SHMZ23HZ",
+      "examples": [
+        "SHMZ23HZ",
+        "SHKZ0HZ"
+      ]
+    },
+    {
+      "name": "reenable_band_cross",
+      "mnemonic": "SHMZ24HZ",
+      "category": "Diagnostic",
+      "description": "Re-enable band cross. Front-panel sequence [SHIFT] [MHz] [2] [4] [Hz] (or [SHIFT] [kHz] [0] [Hz]).",
+      "set": "SHMZ24HZ",
+      "examples": [
+        "SHMZ24HZ",
+        "SHKZ0HZ"
+      ]
+    },
+    {
+      "name": "manual_band_cross",
+      "mnemonic": "SHMZ22HZ",
+      "category": "Diagnostic",
+      "description": "Cause a manual band cross. Front-panel sequence [SHIFT] [MHz] [2] [2] [Hz] (or [SHIFT] [kHz] [0] [Hz]).",
+      "set": "SHMZ22HZ",
+      "examples": [
+        "SHMZ22HZ",
+        "SHKZ0HZ"
+      ]
+    },
+    {
+      "name": "diagnostics_off",
+      "mnemonic": "SHM5",
+      "category": "Diagnostic",
+      "description": "Turn off diagnostic display. Shifted function ([SHIFT] [M5]). (Does not deactivate the Front Panel Display Test.)",
+      "set": "SHM5",
+      "examples": [
+        "SHM5"
+      ]
+    },
+    {
+      "name": "select_channel",
+      "mnemonic": "SHGZ",
+      "category": "Diagnostic",
+      "description": "Read/Write to internal circuits: SELECT CHANNEL. Shifted function ([SHIFT] [GHz/dB(m)]).",
+      "set": "SHGZ",
+      "examples": [
+        "SHGZ"
+      ]
+    },
+    {
+      "name": "select_subchannel",
+      "mnemonic": "SHMZ",
+      "category": "Diagnostic",
+      "description": "Read/Write to internal circuits: SELECT SUBCHANNEL. Shifted function ([SHIFT] [MHz/sec]).",
+      "set": "SHMZ",
+      "examples": [
+        "SHMZ"
+      ]
+    },
+    {
+      "name": "write_data",
+      "mnemonic": "SHKZ",
+      "category": "Diagnostic",
+      "description": "Read/Write to internal circuits: WRITE DATA. Shifted function ([SHIFT] [kHz/msec]).",
+      "set": "SHKZ",
+      "examples": [
+        "SHKZ"
+      ]
+    },
+    {
+      "name": "read_data",
+      "mnemonic": "SHHZ",
+      "category": "Diagnostic",
+      "description": "Read/Write to internal circuits: READ DATA. Shifted function ([SHIFT] [Hz/AUTO]).",
+      "set": "SHHZ",
+      "examples": [
+        "SHHZ"
+      ]
+    },
+    {
+      "name": "clear_status_bytes",
+      "mnemonic": "CS",
+      "category": "Status",
+      "description": "Clear both status bytes.",
+      "set": "CS",
+      "examples": [
+        "CS"
+      ]
+    },
+    {
+      "name": "output_status_bytes",
+      "mnemonic": "OS",
+      "category": "Status",
+      "description": "Output both status bytes.",
+      "set": "OS",
+      "query": "OS",
+      "examples": [
+        "OS"
+      ]
+    },
+    {
+      "name": "mask_status_byte_1",
+      "mnemonic": "RM",
+      "category": "Status",
+      "description": "Mask status byte 1 (request/service-request mask). Follow with the mask value.",
+      "set": "RM <value>",
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "Status byte 1 mask value"
+        }
+      ],
+      "examples": [
+        "RM 0"
+      ]
+    },
+    {
+      "name": "mask_status_byte_2",
+      "mnemonic": "RE",
+      "category": "Status",
+      "description": "Mask status byte 2 (extended status mask). Follow with the mask value.",
+      "set": "RE <value>",
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "Status byte 2 mask value"
+        }
+      ],
+      "examples": [
+        "RE 0"
+      ]
+    },
+    {
+      "name": "output_learn_string",
+      "mnemonic": "OL",
+      "category": "Output",
+      "description": "Output Learn String: outputs the binary learn string representing the complete instrument state.",
+      "set": "OL",
+      "query": "OL",
+      "examples": [
+        "OL"
+      ]
+    },
+    {
+      "name": "input_learn_string",
+      "mnemonic": "IL",
+      "category": "Output",
+      "description": "Input Learn String: restore a previously read learn string to set the complete instrument state.",
+      "set": "IL <learn_string>",
+      "examples": [
+        "IL"
+      ]
+    },
+    {
+      "name": "output_mode_string",
+      "mnemonic": "OM",
+      "category": "Output",
+      "description": "Output Mode String: outputs a string describing the current operating modes.",
+      "set": "OM",
+      "query": "OM",
+      "examples": [
+        "OM"
+      ]
+    },
+    {
+      "name": "output_active_value",
+      "mnemonic": "OA",
+      "category": "Output",
+      "description": "Output Active Value: returns the value of the currently active parameter.",
+      "set": "OA",
+      "query": "OA",
+      "examples": [
+        "OA"
+      ]
+    },
+    {
+      "name": "output_next_bandcross_frequency",
+      "mnemonic": "OB",
+      "category": "Output",
+      "description": "Output Next Bandcross Frequency.",
+      "set": "OB",
+      "query": "OB",
+      "examples": [
+        "OB"
+      ]
+    },
+    {
+      "name": "output_coupled_parameters",
+      "mnemonic": "OC",
+      "category": "Output",
+      "description": "Output Coupled Parameters.",
+      "set": "OC",
+      "query": "OC",
+      "examples": [
+        "OC"
+      ]
+    },
+    {
+      "name": "output_diagnostics",
+      "mnemonic": "OD",
+      "category": "Output",
+      "description": "Output Diagnostics data.",
+      "set": "OD",
+      "query": "OD",
+      "examples": [
+        "OD"
+      ]
+    },
+    {
+      "name": "output_faults",
+      "mnemonic": "OF",
+      "category": "Output",
+      "description": "Output Faults.",
+      "set": "OF",
+      "query": "OF",
+      "examples": [
+        "OF"
+      ]
+    },
+    {
+      "name": "output_firmware_id",
+      "mnemonic": "OI",
+      "category": "Output",
+      "description": "Output Firmware ID: returns the instrument firmware identification string.",
+      "set": "OI",
+      "query": "OI",
+      "examples": [
+        "OI"
+      ]
+    },
+    {
+      "name": "output_last_lock_frequency",
+      "mnemonic": "OK",
+      "category": "Output",
+      "description": "Output Last Lock Frequency.",
+      "set": "OK",
+      "query": "OK",
+      "examples": [
+        "OK"
+      ]
+    },
+    {
+      "name": "output_interrogated_parameter",
+      "mnemonic": "OP",
+      "category": "Output",
+      "description": "Output Interrogated Parameter: send OP immediately followed by a parameter prefix to read that parameter's current value (e.g. OPCW reads the CW frequency, OPFA reads the start frequency, OPPL reads the power level).",
+      "set": "OP<prefix>",
+      "query": "OP<prefix>",
+      "examples": [
+        "OPCW",
+        "OPFA",
+        "OPPL"
+      ]
+    },
+    {
+      "name": "output_power_level",
+      "mnemonic": "OR",
+      "category": "Output",
+      "description": "Output Power Level: returns the current power level setting.",
+      "set": "OR",
+      "query": "OR",
+      "examples": [
+        "OR"
+      ]
+    },
+    {
+      "name": "network_analyzer_configure",
+      "mnemonic": "NA",
+      "category": "HP-IB",
+      "description": "Network Analyzer configure: configures the sweeper for use with a network analyzer.",
+      "set": "NA",
+      "examples": [
+        "NA"
+      ]
+    },
+    {
+      "name": "advance_to_next_bandcrossing",
+      "mnemonic": "BC",
+      "category": "HP-IB",
+      "description": "Advance to next bandcrossing.",
+      "set": "BC",
+      "examples": [
+        "BC"
+      ]
+    },
+    {
+      "name": "keyboard_release",
+      "mnemonic": "KR",
+      "category": "HP-IB",
+      "description": "Keyboard Release: returns front-panel keyboard control to the local operator.",
+      "set": "KR",
+      "examples": [
+        "KR"
+      ]
+    },
+    {
+      "name": "swap_channels",
+      "mnemonic": "SW",
+      "category": "HP-IB",
+      "description": "Swap Channels (foreground/background alternate sweep channels).",
+      "set": "SW",
+      "examples": [
+        "SW"
+      ]
+    },
+    {
+      "name": "enable_front_panel_knob",
+      "mnemonic": "EK",
+      "category": "HP-IB",
+      "description": "Enable HP 8340B/41B front-panel knob.",
+      "set": "EK",
+      "examples": [
+        "EK"
+      ]
+    },
+    {
+      "name": "enable_remote_knob",
+      "mnemonic": "RB",
+      "category": "HP-IB",
+      "description": "Enable remote knob (rotary input via HP-IB).",
+      "set": "RB",
+      "examples": [
+        "RB"
+      ]
+    },
+    {
+      "name": "test_hpib_data_transmission",
+      "mnemonic": "TI",
+      "category": "HP-IB",
+      "description": "HP-IB Test: test HP-IB data transmission.",
+      "set": "TI",
+      "examples": [
+        "TI"
+      ]
+    }
+  ]
+}

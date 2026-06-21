@@ -4,7 +4,7 @@
   "category": "Synthesized CW Generator",
   "description": "HP/Agilent 83712B Synthesized CW Generator. Part of the 8371x family of synthesized continuous-wave signal generators. The 83712A/12B cover 10 MHz (0.01 GHz) to 20 GHz; the 83711A/11B cover 1 GHz to 20 GHz. Standard frequency resolution is 1 kHz (1 Hz with Option 1E8). Controlled over GPIB (HP-IB) using SCPI; an HP 8673 compatible language mode is also selectable. This definition is drawn from the User's Guide, which documents the SCPI commands as 'Equivalent SCPI Command' entries for each front-panel key and special function plus the PRESET-conditions table; the full command reference lives in the separate Programming Guide (83711-90132). This instrument has no internal AM/FM/pulse modulation and no bus trigger capability (DT0, 'no trigger capability'), so no AM/FM/PULM/TRIGger/INITiate subsystems are documented here.",
   "source": "83712B User.pdf",
-  "aliases": ["83712B", "83711B", "83712A", "83711A", "8371x"],
+  "aliases": ["83712B", "8371x"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",

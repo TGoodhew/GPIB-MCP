@@ -9,6 +9,10 @@
     "write": "\n",
     "read": "\n"
   },
+  "identity": {
+    "supported": false,
+    "description": "The 436A has no *IDN? or SCPI support and no identification query. When addressed to talk it outputs only the fixed 14-character measurement data string (status + range + mode + value + exponent + CR/LF); the Message Reference Table documents no command that returns a model string."
+  },
   "commands": [
     {
       "name": "rangeLeastSensitive",

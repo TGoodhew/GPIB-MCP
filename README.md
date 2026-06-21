@@ -387,11 +387,13 @@ The server ships with a **user-extensible database of instrument command referen
 you can tell Claude *"an 8563E is at GPIB 18"* and it can look up what that instrument
 understands, confirm its identity, and drive it — instead of you supplying raw commands.
 
-It comes prepopulated with **56 instrument models / ~6,400 documented commands** (HP/Agilent,
-Keithley, Tektronix, Rigol, Rohde & Schwarz, Datron) — see the
+It comes prepopulated with **165 instrument models** (HP/Agilent, Keithley, Tektronix, Rigol,
+Rohde & Schwarz, Datron), each carrying its full documented command set — see the
 [catalog](data/instruments/README.md). Each model is one JSON file describing its identity
 query, command mnemonics, parameters, units, and examples (see
-[`data/instruments/`](data/instruments/)).
+[`data/instruments/`](data/instruments/)). Sibling models that share a manual's command set
+(e.g. the 5350A/5351A/5352A, or the Rigol DP800 line) each get their own definition so they
+can be assigned and identified individually.
 
 **Ask what's known:**
 > *"Please tell me what GPIB instruments you know about."* → `instrument_list_models`
@@ -444,6 +446,10 @@ Keep the database honest:
 - **Verify identity automatically.** `assign_instrument` sends the model's identity query and
   checks the response; if it *doesn't* match, it tells Claude so before anything is saved —
   surfacing a wrong model/address or a bad `matchRegex`.
+- **Instruments with no identity query.** Many legacy HP-IB units (e.g. the listen-only 8657B)
+  cannot report what they are. Mark these with `"identity": { "supported": false, "description":
+  "…" }`. The server then reports identity as unavailable and **skips verification with a clear
+  note** instead of guessing or timing out, rather than leaving the block silently absent.
 - **Override, don't edit the bundled file.** A `<model>.json` in your **user** directory
   overrides the bundled one of the same name. Fix a wrong command, add a missing one, or
   correct an identity pattern there (or via `instrument_db_save`) and your version wins —
@@ -712,7 +718,8 @@ src/Hpgl.Rendering/                standalone HP-GL/2 -> Bitmap/PNG/SVG renderer
 src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
   CompletionWaiter.cs              SRQ-edge / direct-bit waiter
   StatusModel.cs / IStatusChannel.cs  data model + transport abstraction
-data/instruments/*.json            bundled instrument command database (56 models)
+data/instruments/*.json            bundled instrument command database (165 models)
+  README.md                        auto-generated catalog (tools/gen_instrument_catalog.py)
 tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
 tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
 tools/SrqHwHarness/                run the real waiter against live hardware over NI-VISA

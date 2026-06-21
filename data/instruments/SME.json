@@ -4,7 +4,7 @@
   "category": "Signal Generator",
   "description": "Rohde & Schwarz SME family synthesized RF signal generator (SME02 5 kHz to 1.5 GHz, SME03/SME03E to 2.2/3 GHz, SME06 to 6 GHz). SCPI-controlled over the IEC/IEEE bus (GPIB) and RS-232. Provides CW/fixed and sweep/list frequency and level operation, automatic level control (ALC) and user level correction, analog modulation (AM, FM, PhiM, pulse modulation and an internal pulse generator), and option-dependent LF generators. This definition covers the core SCPI control surface: common * commands, ABORt, CALibration, DIAGnostic, DISPlay, FORMat, MEMory, OUTPut/OUTPut2, SOURce FREQuency/POWer/AM/FM/PM/PULM/PULSe/CORRection/PHASe/ROSCillator/SWEep, the SOURce0|2 LF generator subsystems, STATus, SYSTem, TEST, TRIGger and UNIT. Option-specific complex/aviation modulation subsystems (DM, ERMes, FLEX, POCSag, REFLex25, ILS, VOR, MBEacon, STEReo) are documented in the manual but only summarized here.",
   "source": "sme_14e.pdf",
-  "aliases": ["SME", "SME02", "SME03", "SME03E", "SME06"],
+  "aliases": ["SME"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",

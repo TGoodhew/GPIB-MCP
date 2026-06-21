@@ -4,8 +4,12 @@
   "category": "Spectrum Analyzer",
   "description": "HP 3585A Spectrum Analyzer, 20 Hz to 40.1 MHz. Legacy HP-IB (IEEE-488) instrument programmed with a two-character ASCII mnemonic code set (NOT SCPI). Numeric entries (frequency, level, etc.) are not executed until a units/scale terminator (delimiter) is sent: frequency HZ/KZ/MZ (Hz/kHz/MHz), amplitude DM/DV (dBm/dBV) or DB (dB), level voltage V/MV/UV (volts/millivolts/microvolts), time SC (seconds). The codes UP and DN step the active function up/down by its step size. There is no '*IDN?' or '?'-style identity query; instrument state and identity-type information are obtained through the binary Dump (D1-D9) and Learn (LO/LI) modes. Output (dump) functions require a trigger (T4/T5/T6) except modes D8 and D9. After power-up or Instrument Preset the analyzer is in dump mode D1 with no trigger. Source: HP 3585A Operating Manual, Section III Part 2 (Remote Operation): Table 3-2-6 Summary of Programming Mnemonics/Delimiters/Times, Table 3-2-7 Programming Codes, Table 3-2-10 Summary of Programming Mnemonics, and the HP-IB Instruction Definitions (paragraphs 3-2-37 onward).",
   "source": "3585A-OM.pdf",
-  "aliases": ["3585A", "3585B", "HP3585A", "HP 3585A"],
+  "aliases": ["3585A", "HP3585A", "HP 3585A"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "No '*IDN?' or '?'-style identity query. The 3585A is a legacy HP-IB instrument with no model-identification query; instrument state/identity-type information is obtained via the binary Dump (D1-D9) and Learn (LO/LI) modes."
+  },
   "commands": [
     {
       "name": "instrument_preset",

@@ -6,6 +6,10 @@
   "source": "11713A.pdf",
   "aliases": ["11713A", "HP11713A"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 11713A is a listen-only attenuator/switch driver. It has no talk capability (it cannot output data, respond to serial poll, or be triggered) and the program-code set contains no identification query, so there is no remote way to read back a model string."
+  },
   "commands": [
     {
       "name": "channel_on",

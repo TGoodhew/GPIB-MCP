@@ -5,11 +5,7 @@
   "description": "HP 8720C microwave vector network analyzer, 50 MHz to 20 GHz, HP-IB. Uses the HP 8753/8720-series mnemonic command language (not pure SCPI). Commands documented in this reference are shared across the HP 8719C, 8720C, and 8722A/C analyzers and are largely compatible with the HP 8753.",
   "source": "872XC_PG_REF.pdf",
   "aliases": [
-    "8720C",
-    "8719C",
-    "8722C",
-    "8722A",
-    "8753"
+    "8720C"
   ],
   "termination": {
     "write": "\n",
@@ -409,7 +405,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["dBm"]
+          "units": [
+            "dBm"
+          ]
         }
       ],
       "examples": [
@@ -439,7 +437,9 @@
         {
           "name": "value",
           "range": "2 ms to 86400",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         },
         {
           "name": "suffix",
@@ -1042,7 +1042,9 @@
         {
           "name": "value",
           "range": "0 to 10",
-          "units": ["Div"]
+          "units": [
+            "Div"
+          ]
         }
       ],
       "examples": [
@@ -1082,7 +1084,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"],
+          "units": [
+            "s"
+          ],
           "range": "Depends on frequency resolution"
         }
       ],
@@ -1102,7 +1106,9 @@
         {
           "name": "value",
           "range": "-360 to +360",
-          "units": ["deg"]
+          "units": [
+            "deg"
+          ]
         }
       ],
       "examples": [
@@ -1129,7 +1135,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["Hz"]
+          "units": [
+            "Hz"
+          ]
         }
       ],
       "examples": [
@@ -1240,7 +1248,9 @@
         {
           "name": "value",
           "range": "0.05 to 20",
-          "units": ["%"]
+          "units": [
+            "%"
+          ]
         }
       ],
       "examples": [
@@ -1348,7 +1358,9 @@
         {
           "name": "value",
           "range": "0 to 100",
-          "units": ["%"]
+          "units": [
+            "%"
+          ]
         }
       ],
       "examples": [
@@ -1367,7 +1379,9 @@
         {
           "name": "value",
           "range": "0 to 100",
-          "units": ["%"]
+          "units": [
+            "%"
+          ]
         }
       ],
       "examples": [
@@ -1505,7 +1519,9 @@
         {
           "name": "value",
           "range": "0 to 100",
-          "units": ["%"]
+          "units": [
+            "%"
+          ]
         }
       ],
       "examples": [
@@ -1523,7 +1539,9 @@
         {
           "name": "value",
           "range": "0 to 100",
-          "units": ["%"]
+          "units": [
+            "%"
+          ]
         }
       ],
       "examples": [
@@ -2495,7 +2513,9 @@
         {
           "name": "value",
           "range": "0.001 to 1000",
-          "units": ["ohm"]
+          "units": [
+            "ohm"
+          ]
         }
       ],
       "examples": [
@@ -2525,7 +2545,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [
@@ -2542,7 +2564,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [
@@ -2560,7 +2584,9 @@
         {
           "name": "value",
           "range": "-20 to +20",
-          "units": ["dBm"]
+          "units": [
+            "dBm"
+          ]
         }
       ],
       "examples": [
@@ -2860,7 +2886,9 @@
         {
           "name": "value",
           "range": "0 to 10000",
-          "units": ["ohm"]
+          "units": [
+            "ohm"
+          ]
         }
       ],
       "examples": [
@@ -2897,7 +2925,9 @@
         {
           "name": "value",
           "range": "-10 to 10",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [
@@ -2914,7 +2944,9 @@
         {
           "name": "value",
           "range": "0 to 1.0E16",
-          "units": ["ohm/s"]
+          "units": [
+            "ohm/s"
+          ]
         }
       ],
       "examples": [
@@ -2931,7 +2963,9 @@
         {
           "name": "value",
           "range": "0.001 to 1000",
-          "units": ["ohm"]
+          "units": [
+            "ohm"
+          ]
         }
       ],
       "examples": [
@@ -3008,7 +3042,9 @@
         {
           "name": "value",
           "range": "0 to 1000",
-          "units": ["x10^-15 F"]
+          "units": [
+            "x10^-15 F"
+          ]
         }
       ],
       "examples": [
@@ -3025,7 +3061,9 @@
         {
           "name": "value",
           "range": "0 to 1000",
-          "units": ["x10^-27 F/Hz"]
+          "units": [
+            "x10^-27 F/Hz"
+          ]
         }
       ],
       "examples": [
@@ -3042,7 +3080,9 @@
         {
           "name": "value",
           "range": "0 to 1000",
-          "units": ["x10^-36 F/Hz^2"]
+          "units": [
+            "x10^-36 F/Hz^2"
+          ]
         }
       ],
       "examples": [
@@ -3059,7 +3099,9 @@
         {
           "name": "value",
           "range": "0 to 1000",
-          "units": ["x10^-45 F/Hz^3"]
+          "units": [
+            "x10^-45 F/Hz^3"
+          ]
         }
       ],
       "examples": [
@@ -3551,7 +3593,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [
@@ -3567,7 +3611,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [
@@ -3583,7 +3629,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [
@@ -3599,7 +3647,9 @@
       "parameters": [
         {
           "name": "value",
-          "units": ["s"]
+          "units": [
+            "s"
+          ]
         }
       ],
       "examples": [

@@ -2,13 +2,14 @@
   "model": "DM3058",
   "manufacturer": "Rigol",
   "category": "Digital Multimeter",
-  "description": "Rigol DM3058 / DM3058E 5.5-digit bench digital multimeter with SCPI remote control over USB, GPIB, RS-232 and LAN (GPIB and LAN are only available on the DM3058). This definition covers the native RIGOL command set (IEEE 488 common commands, STATus, SYSTem, and the :CALCulate / :FUNCtion / :FUNCtion2 / :LXI / :MEASure / :RATE / :SYSTem / :TRIGger / :UTILity subsystems). The instrument also accepts compatible Agilent and Fluke command languages, which are not enumerated here.",
+  "description": "Rigol DM3058 5.5-digit bench digital multimeter with SCPI remote control over USB, GPIB, RS-232 and LAN (the reduced-interface DM3058E sibling has its own definition and lacks GPIB and LAN). This definition covers the native RIGOL command set (IEEE 488 common commands, STATus, SYSTem, and the :CALCulate / :FUNCtion / :FUNCtion2 / :LXI / :MEASure / :RATE / :SYSTem / :TRIGger / :UTILity subsystems). The instrument also accepts compatible Agilent and Fluke command languages, which are not enumerated here.",
   "source": "DM3058_Programming Guide.pdf",
-  "aliases": ["DM3058", "DM3058E"],
+  "aliases": ["DM3058"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
     "matchRegex": "DM3058",
+    "supported": true,
     "description": "Standard SCPI identification query. Returns an instrument ID string of at least 35 characters."
   },
   "commands": [

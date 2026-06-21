@@ -6,6 +6,10 @@
   "source": "3335A_OM.pdf",
   "aliases": ["3335A", "HP3335A", "HP 3335A"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 3335A is listen-only (HP-IB interface functions include T0 = no talker capability and SR0 = no service request). It cannot output any data over the bus, so there is no remote identification query."
+  },
   "commands": [
     {
       "name": "frequency",

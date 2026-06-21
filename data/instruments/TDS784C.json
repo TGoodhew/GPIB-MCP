@@ -2,16 +2,10 @@
   "model": "TDS784C",
   "manufacturer": "Tektronix",
   "category": "Oscilloscope",
-  "description": "Tektronix TDS784C digital oscilloscope (TDS500C/600C/700C family) - 1 GHz, 4 GS/s real-time digitizing oscilloscope. Programmed using Tektronix codes and formats and IEEE 488.2 (SCPI-like) over GPIB. Mnemonics use Tektronix short-form abbreviation convention (uppercase = required, lowercase = optional). <x> denotes a numeric suffix (e.g. channel number); <wfm> denotes a waveform reference such as CH1, MATH1 or REF1.",
+  "description": "Tektronix TDS784C digitizing oscilloscope (TDS700C series of the TDS500C/600B/700C family) - 1 GHz bandwidth, 4 channels, 4 GS/s maximum real-time sample rate. Shares the TDS784C programmer command set (Tektronix codes and formats, IEEE 488.2 / SCPI-like over GPIB). Mnemonics use Tektronix short-form abbreviation convention (uppercase = required, lowercase = optional). <x> denotes a numeric suffix (e.g. channel number); <wfm> denotes a waveform reference such as CH1, MATH1 or REF1.",
   "source": "TDS784C Programmer.pdf",
   "aliases": [
-    "TDS784C",
-    "TDS544C",
-    "TDS684C",
-    "TDS744C",
-    "TDS500C",
-    "TDS600C",
-    "TDS700C"
+    "TDS784C"
   ],
   "termination": {
     "write": "\n",
@@ -19,8 +13,9 @@
   },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "TDS\\s?[0-9]{3}C|TEKTRONIX",
-    "description": "Standard IEEE 488.2 identification query. Returns a string such as 'TEKTRONIX,TDS 784C,<serial>,<firmware>' identifying the manufacturer, model, serial number and firmware version."
+    "matchRegex": "TDS784C",
+    "supported": true,
+    "description": "Tektronix *IDN? returns 'TEKTRONIX,TDS784C,...'. Matched on 'TDS784C'."
   },
   "commands": [
     {

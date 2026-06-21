@@ -4,12 +4,13 @@
   "category": "Signal Generator",
   "description": "Agilent E4436B ESG-DP digital signal generator (250 kHz to 3 GHz), part of the ESG-D/ESG-DP family. SCPI over GPIB. IMPORTANT: The only SCPI command reference available in the local manual library is the Options UN8/202 programming guide (E4436B UN8.pdf), which documents the digital/IQ modulation [:SOURce]:RADio subsystem plus a few common commands. The base-instrument analog subsystems (FREQuency, POWer, OUTPut, AM, FM, PM, SWEep/LIST, ROSCillator, UNIT, DISPlay, SYSTem, STATus) live in the separate ESG-D/DP SCPI Programming Guide, which is NOT present in the manual library; those commands are therefore NOT included here to avoid inventing undocumented syntax. The E4436B User.pdf is a front-panel/softkey operation reference and contains no SCPI command tables. Throughout the RADio subsystem the programming guide uses the placeholder <format> to mean any one of the supported digital formats: CUSTom, GSM, EDGE, PDC, PHS, DECT, TETRa, NADC.",
   "source": "E4436B User.pdf",
-  "aliases": ["E4436B", "E4432B", "E4433B", "E4435B", "ESG-D", "ESG-DP"],
+  "aliases": ["E4436B"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "E443[0-9]B",
-    "description": "Standard IEEE 488.2 identification query. Returns manufacturer, model, serial number and firmware revision."
+    "matchRegex": "E4436B",
+    "supported": true,
+    "description": "Standard IEEE 488.2 identification query. Returns manufacturer, model (E4436B), serial number and firmware revision."
   },
   "commands": [
     {

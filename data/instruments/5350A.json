@@ -4,12 +4,12 @@
   "category": "Frequency Counter",
   "description": "HP 5350A Microwave Frequency Counter (500 MHz to 20 GHz on INPUT 1, plus a low-frequency INPUT 2). Legacy HP-IB (IEEE-488) instrument, NOT SCPI. The same manual covers the 5351A (to 26.5 GHz) and 5352A (to 40 GHz). Commands are word-based ASCII headers (full English words up to 8 characters, abbreviated where longer), optionally followed by one or two data fields. Queries end in a question mark. Commands accept upper or lower case (all converted to upper case) and parity bits are ignored. A data separator (preferred <comma>, or a <space>) is REQUIRED between a header and its data and between data fields; a command separator (semicolon) is REQUIRED between commands; the END (EOI) separator is sent only with the last byte. Spaces are allowed between headers and data but NOT within a header or within a number. Numeric data may be integer (nr1), real (nr2) or floating point (nr3); integer-only commands round non-integer data. All frequencies are entered in Hertz. Frequency measurements are returned in 24-character scientific notation (e.g. ' 1.9412530789E+10' + CR LF) when the counter is addressed to talk; overflow / unacquired signal returns 1E+38.",
   "source": "5350A-51A-32A-OM.pdf",
-  "aliases": ["5350A", "5352A", "HP5350A"],
+  "aliases": ["5350A", "HP5350A"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
-    "query": "ID?",
-    "response": "Returns a 7-character string with the model number in the form '53xxa', where 'xx' is the numeric portion and 'a' the alpha portion of the model (e.g. '5350a' for the HP 5350A).",
-    "example": "5350a"
+    "command": "ID?",
+    "matchRegex": "5350",
+    "description": "Send Identity (ID?). Returns a 7-character string with the model number in the form '53xxa'; for this instrument '5350a'. Matched case-insensitively on '5350'."
   },
   "commands": [
     {

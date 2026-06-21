@@ -4,11 +4,16 @@
   "category": "DC Power Supply",
   "description": "Agilent (Keysight/HP) E3633A and E3634A single-output programmable DC power supplies. SCPI command set over GPIB and RS-232, supporting dual-range output setting (APPLy and low-level SOURce commands), voltage/current measurement, overvoltage (OVP) and overcurrent (OCP) protection, triggered output levels, front-panel display control, state storage, calibration and status reporting. E3633A: 8V/20A or 20V/10A ranges; E3634A: 25V/7A or 50V/4A ranges.",
   "source": "E3633A User Guide.pdf",
-  "aliases": ["E3633A", "E3634A"],
-  "termination": { "write": "\n", "read": "\n" },
+  "aliases": [
+    "E3633A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "E363[34]A",
+    "matchRegex": "E3633A",
     "description": "Reads the power supply identification string. Returns four comma-separated fields: manufacturer, model number, a field always '0', and a revision code with three numbers (main processor, I/O processor, front-panel processor). For example: HEWLETT-PACKARD,E3633A,0,X.X-X.X-X.X"
   },
   "commands": [
@@ -20,10 +25,25 @@
       "set": "APPLy {<voltage>|DEF|MIN|MAX}[,{<current>|DEF|MIN|MAX}]",
       "query": "APPLy?",
       "parameters": [
-        { "name": "voltage", "units": ["V"], "range": "0 to 8.24 (8V range) or 0 to 20.60 (20V range) for E3633A; 0 to 25.75 (25V range) or 0 to 51.5 (50V range) for E3634A; or DEF|MIN|MAX" },
-        { "name": "current", "units": ["A"], "range": "0 to 20.60 (8V range) or 0 to 10.30 (20V range) for E3633A; 0 to 7.21 (25V range) or 0 to 4.12 (50V range) for E3634A; or DEF|MIN|MAX" }
+        {
+          "name": "voltage",
+          "units": [
+            "V"
+          ],
+          "range": "0 to 8.24 (8V range) or 0 to 20.60 (20V range) for E3633A; 0 to 25.75 (25V range) or 0 to 51.5 (50V range) for E3634A; or DEF|MIN|MAX"
+        },
+        {
+          "name": "current",
+          "units": [
+            "A"
+          ],
+          "range": "0 to 20.60 (8V range) or 0 to 10.30 (20V range) for E3633A; 0 to 7.21 (25V range) or 0 to 4.12 (50V range) for E3634A; or DEF|MIN|MAX"
+        }
       ],
-      "examples": ["APPLy 3.5,1.5", "APPLy?"]
+      "examples": [
+        "APPLy 3.5,1.5",
+        "APPLy?"
+      ]
     },
     {
       "name": "set_current",
@@ -33,9 +53,19 @@
       "set": "CURRent {<current>|MIN|MAX|UP|DOWN}",
       "query": "CURRent? [MIN|MAX]",
       "parameters": [
-        { "name": "current", "units": ["A"], "range": "0 to range maximum (e.g. 20.60 A E3633A 8V range); or MIN|MAX|UP|DOWN" }
+        {
+          "name": "current",
+          "units": [
+            "A"
+          ],
+          "range": "0 to range maximum (e.g. 20.60 A E3633A 8V range); or MIN|MAX|UP|DOWN"
+        }
       ],
-      "examples": ["CURR 1.5", "CURR UP", "CURR? MAX"]
+      "examples": [
+        "CURR 1.5",
+        "CURR UP",
+        "CURR? MAX"
+      ]
     },
     {
       "name": "current_step",
@@ -45,9 +75,18 @@
       "set": "CURRent:STEP {<numeric value>|DEFault}",
       "query": "CURRent:STEP? {DEFault}",
       "parameters": [
-        { "name": "step", "units": ["A"], "range": "numeric value or DEFault (min resolution ~0.32 mA E3633A, ~0.13 mA E3634A)" }
+        {
+          "name": "step",
+          "units": [
+            "A"
+          ],
+          "range": "numeric value or DEFault (min resolution ~0.32 mA E3633A, ~0.13 mA E3634A)"
+        }
       ],
-      "examples": ["CURR:STEP 0.01", "CURR:STEP? DEF"]
+      "examples": [
+        "CURR:STEP 0.01",
+        "CURR:STEP? DEF"
+      ]
     },
     {
       "name": "current_triggered",
@@ -57,9 +96,18 @@
       "set": "CURRent:TRIGgered {<current>|MIN|MAX}",
       "query": "CURRent:TRIGgered? [MIN|MAX]",
       "parameters": [
-        { "name": "current", "units": ["A"], "range": "0 to range maximum; or MIN|MAX" }
+        {
+          "name": "current",
+          "units": [
+            "A"
+          ],
+          "range": "0 to range maximum; or MIN|MAX"
+        }
       ],
-      "examples": ["CURR:TRIG 1.0", "CURR:TRIG? MAX"]
+      "examples": [
+        "CURR:TRIG 1.0",
+        "CURR:TRIG? MAX"
+      ]
     },
     {
       "name": "current_protection",
@@ -69,9 +117,18 @@
       "set": "CURRent:PROTection {<current>|MIN|MAX}",
       "query": "CURRent:PROTection? {MIN|MAX}",
       "parameters": [
-        { "name": "current", "units": ["A"], "range": "programmable OCP trip level; or MIN|MAX" }
+        {
+          "name": "current",
+          "units": [
+            "A"
+          ],
+          "range": "programmable OCP trip level; or MIN|MAX"
+        }
       ],
-      "examples": ["CURR:PROT 22.0", "CURR:PROT? MAX"]
+      "examples": [
+        "CURR:PROT 22.0",
+        "CURR:PROT? MAX"
+      ]
     },
     {
       "name": "current_protection_state",
@@ -81,9 +138,15 @@
       "set": "CURRent:PROTection:STATe {0|1|OFF|ON}",
       "query": "CURRent:PROTection:STATe?",
       "parameters": [
-        { "name": "state", "range": "0|1|OFF|ON" }
+        {
+          "name": "state",
+          "range": "0|1|OFF|ON"
+        }
       ],
-      "examples": ["CURR:PROT:STAT ON", "CURR:PROT:STAT?"]
+      "examples": [
+        "CURR:PROT:STAT ON",
+        "CURR:PROT:STAT?"
+      ]
     },
     {
       "name": "current_protection_tripped",
@@ -91,7 +154,9 @@
       "category": "Protection",
       "description": "Query whether the overcurrent protection circuit is tripped. Returns '1' if tripped and not cleared, '0' if not tripped.",
       "query": "CURRent:PROTection:TRIPped?",
-      "examples": ["CURR:PROT:TRIP?"]
+      "examples": [
+        "CURR:PROT:TRIP?"
+      ]
     },
     {
       "name": "current_protection_clear",
@@ -99,7 +164,9 @@
       "category": "Protection",
       "description": "Clear the tripped overcurrent protection circuit. The OCP trip level remains unchanged. Before sending, lower the output current below the OCP trip point or raise the OCP trip level above the output setting; any external overcurrent condition must be removed first.",
       "set": "CURRent:PROTection:CLEar",
-      "examples": ["CURR:PROT:CLE"]
+      "examples": [
+        "CURR:PROT:CLE"
+      ]
     },
     {
       "name": "set_voltage",
@@ -109,9 +176,19 @@
       "set": "VOLTage {<voltage>|MIN|MAX|UP|DOWN}",
       "query": "VOLTage? [MIN|MAX]",
       "parameters": [
-        { "name": "voltage", "units": ["V"], "range": "0 to range maximum (e.g. 8.24 V E3633A 8V range); or MIN|MAX|UP|DOWN" }
+        {
+          "name": "voltage",
+          "units": [
+            "V"
+          ],
+          "range": "0 to range maximum (e.g. 8.24 V E3633A 8V range); or MIN|MAX|UP|DOWN"
+        }
       ],
-      "examples": ["VOLT 5.0", "VOLT UP", "VOLT? MAX"]
+      "examples": [
+        "VOLT 5.0",
+        "VOLT UP",
+        "VOLT? MAX"
+      ]
     },
     {
       "name": "voltage_step",
@@ -121,9 +198,18 @@
       "set": "VOLTage:STEP {<numeric value>|DEFault}",
       "query": "VOLTage:STEP? {DEFault}",
       "parameters": [
-        { "name": "step", "units": ["V"], "range": "numeric value or DEFault (min resolution ~0.36 mV E3633A, ~0.95 mV E3634A)" }
+        {
+          "name": "step",
+          "units": [
+            "V"
+          ],
+          "range": "numeric value or DEFault (min resolution ~0.36 mV E3633A, ~0.95 mV E3634A)"
+        }
       ],
-      "examples": ["VOLT:STEP 0.01", "VOLT:STEP? DEF"]
+      "examples": [
+        "VOLT:STEP 0.01",
+        "VOLT:STEP? DEF"
+      ]
     },
     {
       "name": "voltage_triggered",
@@ -133,9 +219,18 @@
       "set": "VOLTage:TRIGgered {<voltage>|MIN|MAX}",
       "query": "VOLTage:TRIGgered? [MIN|MAX]",
       "parameters": [
-        { "name": "voltage", "units": ["V"], "range": "0 to range maximum; or MIN|MAX" }
+        {
+          "name": "voltage",
+          "units": [
+            "V"
+          ],
+          "range": "0 to range maximum; or MIN|MAX"
+        }
       ],
-      "examples": ["VOLT:TRIG 3.0", "VOLT:TRIG? MAX"]
+      "examples": [
+        "VOLT:TRIG 3.0",
+        "VOLT:TRIG? MAX"
+      ]
     },
     {
       "name": "voltage_protection",
@@ -145,9 +240,18 @@
       "set": "VOLTage:PROTection {<voltage>|MIN|MAX}",
       "query": "VOLTage:PROTection? {MIN|MAX}",
       "parameters": [
-        { "name": "voltage", "units": ["V"], "range": "programmable OVP trip level; or MIN|MAX" }
+        {
+          "name": "voltage",
+          "units": [
+            "V"
+          ],
+          "range": "programmable OVP trip level; or MIN|MAX"
+        }
       ],
-      "examples": ["VOLT:PROT 22.0", "VOLT:PROT? MAX"]
+      "examples": [
+        "VOLT:PROT 22.0",
+        "VOLT:PROT? MAX"
+      ]
     },
     {
       "name": "voltage_protection_state",
@@ -157,9 +261,15 @@
       "set": "VOLTage:PROTection:STATe {0|1|OFF|ON}",
       "query": "VOLTage:PROTection:STATe?",
       "parameters": [
-        { "name": "state", "range": "0|1|OFF|ON" }
+        {
+          "name": "state",
+          "range": "0|1|OFF|ON"
+        }
       ],
-      "examples": ["VOLT:PROT:STAT ON", "VOLT:PROT:STAT?"]
+      "examples": [
+        "VOLT:PROT:STAT ON",
+        "VOLT:PROT:STAT?"
+      ]
     },
     {
       "name": "voltage_protection_tripped",
@@ -167,7 +277,9 @@
       "category": "Protection",
       "description": "Query whether the overvoltage protection circuit is tripped. Returns '1' if tripped and not cleared, '0' if not tripped.",
       "query": "VOLTage:PROTection:TRIPped?",
-      "examples": ["VOLT:PROT:TRIP?"]
+      "examples": [
+        "VOLT:PROT:TRIP?"
+      ]
     },
     {
       "name": "voltage_protection_clear",
@@ -175,7 +287,9 @@
       "category": "Protection",
       "description": "Clear the tripped overvoltage protection circuit. The OVP trip level remains unchanged. Before sending, lower the output voltage below the OVP trip point or raise the OVP trip level above the output setting; any external overvoltage condition must be removed first.",
       "set": "VOLTage:PROTection:CLEar",
-      "examples": ["VOLT:PROT:CLE"]
+      "examples": [
+        "VOLT:PROT:CLE"
+      ]
     },
     {
       "name": "voltage_range",
@@ -185,9 +299,15 @@
       "set": "VOLTage:RANGe {P8V|P20V|P25V|P50V|LOW|HIGH}",
       "query": "VOLTage:RANGe?",
       "parameters": [
-        { "name": "range", "range": "E3633A: P8V|P20V|LOW|HIGH; E3634A: P25V|P50V|LOW|HIGH" }
+        {
+          "name": "range",
+          "range": "E3633A: P8V|P20V|LOW|HIGH; E3634A: P25V|P50V|LOW|HIGH"
+        }
       ],
-      "examples": ["VOLT:RANG P20V", "VOLT:RANG?"]
+      "examples": [
+        "VOLT:RANG P20V",
+        "VOLT:RANG?"
+      ]
     },
     {
       "name": "measure_current",
@@ -195,7 +315,9 @@
       "category": "Measurement",
       "description": "Query the current measured across the current sense resistor inside the power supply.",
       "query": "MEASure:CURRent[:DC]?",
-      "examples": ["MEAS:CURR?"]
+      "examples": [
+        "MEAS:CURR?"
+      ]
     },
     {
       "name": "measure_voltage",
@@ -203,7 +325,10 @@
       "category": "Measurement",
       "description": "Query the voltage measured at the sense terminals of the power supply.",
       "query": "MEASure[:VOLTage][:DC]?",
-      "examples": ["MEAS:VOLT?", "MEAS?"]
+      "examples": [
+        "MEAS:VOLT?",
+        "MEAS?"
+      ]
     },
     {
       "name": "initiate",
@@ -211,7 +336,9 @@
       "category": "Triggering",
       "description": "Initiate the trigger system. Completes one full trigger cycle when the trigger source is immediate, or initiates the trigger subsystem when the trigger source is bus.",
       "set": "INITiate[:IMMediate]",
-      "examples": ["INIT"]
+      "examples": [
+        "INIT"
+      ]
     },
     {
       "name": "trigger_delay",
@@ -221,9 +348,18 @@
       "set": "TRIGger:DELay {<seconds>|MIN|MAX}",
       "query": "TRIGger:DELay?",
       "parameters": [
-        { "name": "seconds", "units": ["s"], "range": "0 to 3600 (MIN = 0, MAX = 3600)" }
+        {
+          "name": "seconds",
+          "units": [
+            "s"
+          ],
+          "range": "0 to 3600 (MIN = 0, MAX = 3600)"
+        }
       ],
-      "examples": ["TRIG:DEL 5", "TRIG:DEL?"]
+      "examples": [
+        "TRIG:DEL 5",
+        "TRIG:DEL?"
+      ]
     },
     {
       "name": "trigger_source",
@@ -233,9 +369,15 @@
       "set": "TRIGger:SOURce {BUS|IMMediate}",
       "query": "TRIGger:SOURce?",
       "parameters": [
-        { "name": "source", "range": "BUS|IMMediate" }
+        {
+          "name": "source",
+          "range": "BUS|IMMediate"
+        }
       ],
-      "examples": ["TRIG:SOUR BUS", "TRIG:SOUR?"]
+      "examples": [
+        "TRIG:SOUR BUS",
+        "TRIG:SOUR?"
+      ]
     },
     {
       "name": "trigger",
@@ -243,7 +385,9 @@
       "category": "Triggering",
       "description": "Generate a trigger to the trigger subsystem when bus triggering is selected (TRIG:SOUR BUS). Has the same effect as the IEEE-488 Group Execute Trigger (GET). For RS-232 operation, send SYST:REM first.",
       "set": "*TRG",
-      "examples": ["*TRG"]
+      "examples": [
+        "*TRG"
+      ]
     },
     {
       "name": "display_state",
@@ -253,9 +397,15 @@
       "set": "DISPlay[:WINDow][:STATe] {OFF|ON}",
       "query": "DISPlay[:WINDow][:STATe]?",
       "parameters": [
-        { "name": "state", "range": "OFF|ON" }
+        {
+          "name": "state",
+          "range": "OFF|ON"
+        }
       ],
-      "examples": ["DISP OFF", "DISP?"]
+      "examples": [
+        "DISP OFF",
+        "DISP?"
+      ]
     },
     {
       "name": "display_text",
@@ -265,9 +415,15 @@
       "set": "DISPlay[:WINDow]:TEXT[:DATA] <quoted string>",
       "query": "DISPlay[:WINDow]:TEXT[:DATA]?",
       "parameters": [
-        { "name": "string", "range": "quoted string, up to 12 displayed characters" }
+        {
+          "name": "string",
+          "range": "quoted string, up to 12 displayed characters"
+        }
       ],
-      "examples": ["DISP:TEXT \"TESTING\"", "DISP:TEXT?"]
+      "examples": [
+        "DISP:TEXT \"TESTING\"",
+        "DISP:TEXT?"
+      ]
     },
     {
       "name": "display_text_clear",
@@ -275,7 +431,9 @@
       "category": "System",
       "description": "Clear the message displayed on the front panel.",
       "set": "DISPlay[:WINDow]:TEXT:CLEar",
-      "examples": ["DISP:TEXT:CLE"]
+      "examples": [
+        "DISP:TEXT:CLE"
+      ]
     },
     {
       "name": "output_state",
@@ -285,9 +443,15 @@
       "set": "OUTPut[:STATe] {OFF|ON}",
       "query": "OUTPut[:STATe]?",
       "parameters": [
-        { "name": "state", "range": "OFF|ON" }
+        {
+          "name": "state",
+          "range": "OFF|ON"
+        }
       ],
-      "examples": ["OUTP ON", "OUTP?"]
+      "examples": [
+        "OUTP ON",
+        "OUTP?"
+      ]
     },
     {
       "name": "output_relay",
@@ -297,9 +461,15 @@
       "set": "OUTPut:RELay[:STATe] {OFF|ON}",
       "query": "OUTPut:RELay[:STATe]?",
       "parameters": [
-        { "name": "state", "range": "OFF|ON" }
+        {
+          "name": "state",
+          "range": "OFF|ON"
+        }
       ],
-      "examples": ["OUTP:REL ON", "OUTP:REL?"]
+      "examples": [
+        "OUTP:REL ON",
+        "OUTP:REL?"
+      ]
     },
     {
       "name": "system_beep",
@@ -307,7 +477,9 @@
       "category": "System",
       "description": "Issue a single beep immediately.",
       "set": "SYSTem:BEEPer[:IMMediate]",
-      "examples": ["SYST:BEEP"]
+      "examples": [
+        "SYST:BEEP"
+      ]
     },
     {
       "name": "system_error",
@@ -315,7 +487,9 @@
       "category": "System",
       "description": "Query the power supply's error queue. Up to 20 errors are stored and retrieved in FIFO order. Each error is returned as a number and quoted message string. If no errors have occurred, returns +0,\"No error\". If more than 20 errors occur, the most recent is replaced with -350,\"Queue overflow\". The queue is cleared at power-off or by *CLS.",
       "query": "SYSTem:ERRor?",
-      "examples": ["SYST:ERR?"]
+      "examples": [
+        "SYST:ERR?"
+      ]
     },
     {
       "name": "system_version",
@@ -323,7 +497,9 @@
       "category": "System",
       "description": "Query the SCPI version implemented. Returns a string of the form YYYY.V (year and version number for that year, e.g. 1996.0).",
       "query": "SYSTem:VERSion?",
-      "examples": ["SYST:VERS?"]
+      "examples": [
+        "SYST:VERS?"
+      ]
     },
     {
       "name": "system_local",
@@ -331,7 +507,9 @@
       "category": "System",
       "description": "Place the power supply in local mode during RS-232 operation. All front-panel keys are fully functional.",
       "set": "SYSTem:LOCal",
-      "examples": ["SYST:LOC"]
+      "examples": [
+        "SYST:LOC"
+      ]
     },
     {
       "name": "system_remote",
@@ -339,7 +517,9 @@
       "category": "System",
       "description": "Place the power supply in remote mode for RS-232 operation. All front-panel keys except Local are disabled. Send this before transferring data over RS-232.",
       "set": "SYSTem:REMote",
-      "examples": ["SYST:REM"]
+      "examples": [
+        "SYST:REM"
+      ]
     },
     {
       "name": "system_rwlock",
@@ -347,7 +527,9 @@
       "category": "System",
       "description": "Place the power supply in remote mode for RS-232 operation with all front-panel keys disabled, including the Local key. Same as SYST:REM but locks out Local.",
       "set": "SYSTem:RWLock",
-      "examples": ["SYST:RWL"]
+      "examples": [
+        "SYST:RWL"
+      ]
     },
     {
       "name": "cal_count",
@@ -355,7 +537,9 @@
       "category": "Calibration",
       "description": "Query the number of times the power supply has been calibrated. The value increments by one per calibration point, so a complete calibration increases the count by 5.",
       "query": "CALibration:COUNt?",
-      "examples": ["CAL:COUN?"]
+      "examples": [
+        "CAL:COUN?"
+      ]
     },
     {
       "name": "cal_current_data",
@@ -364,9 +548,17 @@
       "description": "Enter a current value read from an external meter (calibration must be unsecured and output ON). Select the calibration level first (CAL:CURR:LEV MIN, then MID, then MAX); three successive values must be entered, after which new constants are stored in non-volatile memory.",
       "set": "CALibration:CURRent[:DATA] <numeric value>",
       "parameters": [
-        { "name": "value", "units": ["A"], "range": "current value measured by external meter" }
+        {
+          "name": "value",
+          "units": [
+            "A"
+          ],
+          "range": "current value measured by external meter"
+        }
       ],
-      "examples": ["CAL:CURR 1.0"]
+      "examples": [
+        "CAL:CURR 1.0"
+      ]
     },
     {
       "name": "cal_current_level",
@@ -375,9 +567,14 @@
       "description": "Set the power supply to a current calibration point to be entered with CAL:CURR (calibration unsecured, output ON). Three points must be entered, with the low-end point (MIN) selected and entered first.",
       "set": "CALibration:CURRent:LEVel {MINimum|MIDdle|MAXimum}",
       "parameters": [
-        { "name": "level", "range": "MINimum|MIDdle|MAXimum" }
+        {
+          "name": "level",
+          "range": "MINimum|MIDdle|MAXimum"
+        }
       ],
-      "examples": ["CAL:CURR:LEV MIN"]
+      "examples": [
+        "CAL:CURR:LEV MIN"
+      ]
     },
     {
       "name": "cal_current_protection",
@@ -385,7 +582,9 @@
       "category": "Calibration",
       "description": "Calibrate the overcurrent protection circuit (takes about 10 seconds). Calibration must be unsecured and the output shorted; current calibration must precede this command. The new overcurrent constant is stored in non-volatile memory.",
       "set": "CALibration:CURRent:PROTection",
-      "examples": ["CAL:CURR:PROT"]
+      "examples": [
+        "CAL:CURR:PROT"
+      ]
     },
     {
       "name": "cal_dac_error",
@@ -393,7 +592,9 @@
       "category": "Calibration",
       "description": "Correct the differential nonlinearity error of the internal DAC without an external meter. Must be sent before calibrating the voltage; takes about 30 seconds.",
       "set": "CALibration:DAC:ERRor",
-      "examples": ["CAL:DAC:ERR"]
+      "examples": [
+        "CAL:DAC:ERR"
+      ]
     },
     {
       "name": "cal_secure_code",
@@ -402,9 +603,14 @@
       "description": "Enter a new calibration security code. First unsecure with the old code, then enter the new code. The code may contain up to 12 characters and the first character must be a letter.",
       "set": "CALibration:SECure:CODE <new code>",
       "parameters": [
-        { "name": "code", "range": "up to 12 characters, first must be a letter" }
+        {
+          "name": "code",
+          "range": "up to 12 characters, first must be a letter"
+        }
       ],
-      "examples": ["CAL:SEC:CODE NEWCODE"]
+      "examples": [
+        "CAL:SEC:CODE NEWCODE"
+      ]
     },
     {
       "name": "cal_secure_state",
@@ -414,10 +620,19 @@
       "set": "CALibration:SECure:STATe {OFF|ON},<code>",
       "query": "CALibration:SECure:STATe?",
       "parameters": [
-        { "name": "state", "range": "OFF|ON" },
-        { "name": "code", "range": "calibration security code, up to 12 characters" }
+        {
+          "name": "state",
+          "range": "OFF|ON"
+        },
+        {
+          "name": "code",
+          "range": "calibration security code, up to 12 characters"
+        }
       ],
-      "examples": ["CAL:SEC:STAT OFF,MYCODE", "CAL:SEC:STAT?"]
+      "examples": [
+        "CAL:SEC:STAT OFF,MYCODE",
+        "CAL:SEC:STAT?"
+      ]
     },
     {
       "name": "cal_string",
@@ -427,9 +642,15 @@
       "set": "CALibration:STRing <quoted string>",
       "query": "CALibration:STRing?",
       "parameters": [
-        { "name": "string", "range": "quoted string, up to 40 characters" }
+        {
+          "name": "string",
+          "range": "quoted string, up to 40 characters"
+        }
       ],
-      "examples": ["CAL:STR \"CAL 2026-06-19\"", "CAL:STR?"]
+      "examples": [
+        "CAL:STR \"CAL 2026-06-19\"",
+        "CAL:STR?"
+      ]
     },
     {
       "name": "cal_voltage_data",
@@ -438,9 +659,17 @@
       "description": "Enter a voltage value read from an external meter (calibration must be unsecured and output ON). Select the calibration level first (CAL:VOLT:LEV MIN, then MID, then MAX); three successive values must be entered, after which new constants are stored in non-volatile memory.",
       "set": "CALibration:VOLTage[:DATA] <numeric value>",
       "parameters": [
-        { "name": "value", "units": ["V"], "range": "voltage value measured by external meter" }
+        {
+          "name": "value",
+          "units": [
+            "V"
+          ],
+          "range": "voltage value measured by external meter"
+        }
       ],
-      "examples": ["CAL:VOLT 5.0"]
+      "examples": [
+        "CAL:VOLT 5.0"
+      ]
     },
     {
       "name": "cal_voltage_level",
@@ -449,9 +678,14 @@
       "description": "Set the power supply to a voltage calibration point to be entered with CAL:VOLT (calibration unsecured, output ON). Three points must be entered, with the low-end point (MIN) selected and entered first.",
       "set": "CALibration:VOLTage:LEVel {MINimum|MIDdle|MAXimum}",
       "parameters": [
-        { "name": "level", "range": "MINimum|MIDdle|MAXimum" }
+        {
+          "name": "level",
+          "range": "MINimum|MIDdle|MAXimum"
+        }
       ],
-      "examples": ["CAL:VOLT:LEV MIN"]
+      "examples": [
+        "CAL:VOLT:LEV MIN"
+      ]
     },
     {
       "name": "cal_voltage_protection",
@@ -459,7 +693,9 @@
       "category": "Calibration",
       "description": "Calibrate the overvoltage protection circuit (takes about 10 seconds). Calibration must be unsecured and the output opened; voltage calibration must precede this command. The new overvoltage constant is stored in non-volatile memory.",
       "set": "CALibration:VOLTage:PROTection",
-      "examples": ["CAL:VOLT:PROT"]
+      "examples": [
+        "CAL:VOLT:PROT"
+      ]
     },
     {
       "name": "status_questionable_condition",
@@ -467,7 +703,9 @@
       "category": "Status",
       "description": "Query the Questionable Status condition register, which reports voltage/current regulation, overtemperature, and OVP/OCP trip conditions. Returns a decimal value equal to the binary-weighted sum of the set bits.",
       "query": "STATus:QUEStionable:CONDition?",
-      "examples": ["STAT:QUES:COND?"]
+      "examples": [
+        "STAT:QUES:COND?"
+      ]
     },
     {
       "name": "status_questionable_event",
@@ -475,7 +713,9 @@
       "category": "Status",
       "description": "Query the Questionable Status event register. Bit 0 = constant current mode, bit 1 = constant voltage mode, bit 4 = overtemperature (fan fault), bit 9 = overvoltage protection tripped, bit 10 = overcurrent protection tripped. Returns the binary-weighted sum of set bits and clears the register.",
       "query": "STATus:QUEStionable[:EVENt]?",
-      "examples": ["STAT:QUES?"]
+      "examples": [
+        "STAT:QUES?"
+      ]
     },
     {
       "name": "status_questionable_enable",
@@ -485,9 +725,15 @@
       "set": "STATus:QUEStionable:ENABle <enable value>",
       "query": "STATus:QUEStionable:ENABle?",
       "parameters": [
-        { "name": "enable_value", "range": "0 to 65535 (decimal bit weights)" }
+        {
+          "name": "enable_value",
+          "range": "0 to 65535 (decimal bit weights)"
+        }
       ],
-      "examples": ["STAT:QUES:ENAB 512", "STAT:QUES:ENAB?"]
+      "examples": [
+        "STAT:QUES:ENAB 512",
+        "STAT:QUES:ENAB?"
+      ]
     },
     {
       "name": "identify",
@@ -495,7 +741,9 @@
       "category": "Common",
       "description": "Read the power supply identification string: manufacturer, model number, a field always '0', and a three-part revision code. Example: HEWLETT-PACKARD,E3633A,0,X.X-X.X-X.X",
       "query": "*IDN?",
-      "examples": ["*IDN?"]
+      "examples": [
+        "*IDN?"
+      ]
     },
     {
       "name": "reset",
@@ -503,7 +751,9 @@
       "category": "Common",
       "description": "Reset the power supply to its power-on state (output OFF; voltage 0 V; current to default; OVP/OCP ON; trigger source BUS; delay 0; low voltage range selected). Does not clear the error queue.",
       "set": "*RST",
-      "examples": ["*RST"]
+      "examples": [
+        "*RST"
+      ]
     },
     {
       "name": "self_test",
@@ -511,7 +761,9 @@
       "category": "Common",
       "description": "Perform a complete self-test. Returns '0' if the self-test passes or '1' (or any non-zero value) if it fails; a failure also generates an error message with additional information.",
       "query": "*TST?",
-      "examples": ["*TST?"]
+      "examples": [
+        "*TST?"
+      ]
     },
     {
       "name": "save_state",
@@ -520,9 +772,14 @@
       "description": "Store the present state of the power supply to one of three non-volatile memory locations (1, 2 or 3). Remembers CURR, CURR:STEP, CURR:TRIG, CURR:PROT, CURR:PROT:STAT, DISP, OUTP, OUTP:REL, TRIG:DEL, TRIG:SOUR, VOLT, VOLT:STEP, VOLT:TRIG, VOLT:PROT, VOLT:PROT:STAT and VOLT:RANG.",
       "set": "*SAV {1|2|3}",
       "parameters": [
-        { "name": "location", "range": "1|2|3" }
+        {
+          "name": "location",
+          "range": "1|2|3"
+        }
       ],
-      "examples": ["*SAV 1"]
+      "examples": [
+        "*SAV 1"
+      ]
     },
     {
       "name": "recall_state",
@@ -531,9 +788,14 @@
       "description": "Recall a previously stored state from one of three non-volatile memory locations (1, 2 or 3). Use the same location used previously to store the state.",
       "set": "*RCL {1|2|3}",
       "parameters": [
-        { "name": "location", "range": "1|2|3" }
+        {
+          "name": "location",
+          "range": "1|2|3"
+        }
       ],
-      "examples": ["*RCL 1"]
+      "examples": [
+        "*RCL 1"
+      ]
     },
     {
       "name": "clear_status",
@@ -541,7 +803,9 @@
       "category": "Common",
       "description": "Clear the event registers in all register groups and the error queue.",
       "set": "*CLS",
-      "examples": ["*CLS"]
+      "examples": [
+        "*CLS"
+      ]
     },
     {
       "name": "event_status_enable",
@@ -551,9 +815,15 @@
       "set": "*ESE <enable value>",
       "query": "*ESE?",
       "parameters": [
-        { "name": "enable_value", "range": "0 to 255 (decimal bit weights)" }
+        {
+          "name": "enable_value",
+          "range": "0 to 255 (decimal bit weights)"
+        }
       ],
-      "examples": ["*ESE 16", "*ESE?"]
+      "examples": [
+        "*ESE 16",
+        "*ESE?"
+      ]
     },
     {
       "name": "event_status_register",
@@ -561,7 +831,9 @@
       "category": "Common",
       "description": "Query the Standard Event register and clear it. Returns the binary-weighted sum of set bits (bit 0 OPC, 2 QYE, 3 DDE, 4 EXE, 5 CME, 7 PON).",
       "query": "*ESR?",
-      "examples": ["*ESR?"]
+      "examples": [
+        "*ESR?"
+      ]
     },
     {
       "name": "operation_complete",
@@ -570,7 +842,10 @@
       "description": "Set the OPC bit (bit 0) in the Standard Event register when all pending operations complete. The query form returns '1' to the output buffer when the operation is complete.",
       "set": "*OPC",
       "query": "*OPC?",
-      "examples": ["*OPC", "*OPC?"]
+      "examples": [
+        "*OPC",
+        "*OPC?"
+      ]
     },
     {
       "name": "power_on_status_clear",
@@ -580,9 +855,15 @@
       "set": "*PSC {0|1}",
       "query": "*PSC?",
       "parameters": [
-        { "name": "state", "range": "0|1" }
+        {
+          "name": "state",
+          "range": "0|1"
+        }
       ],
-      "examples": ["*PSC 1", "*PSC?"]
+      "examples": [
+        "*PSC 1",
+        "*PSC?"
+      ]
     },
     {
       "name": "service_request_enable",
@@ -592,9 +873,15 @@
       "set": "*SRE <enable value>",
       "query": "*SRE?",
       "parameters": [
-        { "name": "enable_value", "range": "0 to 255 (decimal bit weights)" }
+        {
+          "name": "enable_value",
+          "range": "0 to 255 (decimal bit weights)"
+        }
       ],
-      "examples": ["*SRE 32", "*SRE?"]
+      "examples": [
+        "*SRE 32",
+        "*SRE?"
+      ]
     },
     {
       "name": "status_byte",
@@ -602,7 +889,9 @@
       "category": "Common",
       "description": "Query the Status Byte summary register. Returns the binary-weighted sum of set bits (bit 3 QUES, 4 MAV, 5 ESB, 6 RQS). The register is not latched.",
       "query": "*STB?",
-      "examples": ["*STB?"]
+      "examples": [
+        "*STB?"
+      ]
     },
     {
       "name": "wait",
@@ -610,7 +899,9 @@
       "category": "Common",
       "description": "Wait for all pending operations to complete before executing any additional commands. Useful for synchronization with bus triggering.",
       "set": "*WAI",
-      "examples": ["*WAI"]
+      "examples": [
+        "*WAI"
+      ]
     }
   ]
 }

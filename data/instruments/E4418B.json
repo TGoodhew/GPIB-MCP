@@ -4,7 +4,7 @@
   "category": "RF Power Meter",
   "description": "HP/Agilent E4418B EPM-series single-channel RF power meter, programmable via SCPI over GPIB (and RS-232/RS-422). The shared programming guide also covers the dual-channel E4419B; channel/window selection uses [1|2] suffixes. Supports Agilent E-Series and 8480-series sensors with sensor calibration-factor tables, averaging, limits, math, and recorder/TTL outputs.",
   "source": "E4418B Programming.pdf",
-  "aliases": ["E4418B", "E4418A", "E4419B"],
+  "aliases": ["E4418B"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",

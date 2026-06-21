@@ -4,12 +4,18 @@
   "category": "Signal Generator",
   "description": "HP 8664A synthesized signal generator (0.1 MHz to 3 GHz). Programmed over HP-IB (IEEE-488.2) using HP-SL (Hewlett-Packard System Language), an SCPI-like hierarchical command language. Commands have a short form (uppercase letters) and long form (uppercase + lowercase); case is ignored. Keywords within a statement are separated by colons, statements by semicolons. Command messages must be terminated by a linefeed (ASCII 10) or EOI. Optional keywords appear in [square brackets]; a leading [:LEVel], [:DEPTh], etc. may be omitted. ON|OFF and 1|0 are interchangeable for switch parameters; queries return 1 or 0. MINimum/MAXimum/UP/DOWN may be used as parameters. Most settings have set and query (?) forms. Same command set as the 8665A and 8665B (to 4.2/6 GHz). Pulse modulation requires Option 008.",
   "source": "8664A.pdf",
-  "aliases": ["8664A", "HP8664A", "8665A", "8665B"],
-  "termination": { "write": "\n", "read": "\n" },
+  "aliases": [
+    "8664A",
+    "HP8664A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
-    "query": "*IDN?",
+    "command": "*IDN?",
     "matchRegex": "8664A",
-    "description": "*IDN? returns four comma-separated fields: HEWLETT-PACKARD, model number (e.g. 8664A), serial number in HP format (or 0 if unknown), and firmware revision. Example: HEWLETT-PACKARD,8664A,2833A00873,REV 1.0.0"
+    "description": "*IDN? returns four comma-separated fields: HEWLETT-PACKARD, model (e.g. 8664A), serial number, firmware revision. Example: 'HEWLETT-PACKARD,8664A,2833A00873,REV 1.0.0'. Matched on '8664A'."
   },
   "commands": [
     {
@@ -18,7 +24,9 @@
       "category": "System",
       "description": "Identification query. Returns four comma-separated fields: 'HEWLETT-PACKARD', model number, serial number (HP format or 0 if unknown), firmware revision.",
       "query": "*IDN?",
-      "examples": ["*IDN?"]
+      "examples": [
+        "*IDN?"
+      ]
     },
     {
       "name": "reset",
@@ -26,7 +34,9 @@
       "category": "System",
       "description": "Reset command. Performs an instrument preset, setting all operating parameters to their known *RST states. Does not affect status reporting, error/message queues, or the 50 storage registers. Must be sent on its own line.",
       "set": "*RST",
-      "examples": ["*RST"]
+      "examples": [
+        "*RST"
+      ]
     },
     {
       "name": "clear_status",
@@ -34,7 +44,9 @@
       "category": "Status",
       "description": "Clear status command. Clears the Status Byte and associated status data structures (Standard Event Status Register, all event registers) and clears the output and error queues.",
       "set": "*CLS",
-      "examples": ["*CLS"]
+      "examples": [
+        "*CLS"
+      ]
     },
     {
       "name": "event_status_enable",
@@ -44,9 +56,15 @@
       "set": "*ESE <nrf>",
       "query": "*ESE?",
       "parameters": [
-        { "name": "mask", "range": "0 to 255 (decimal or non-decimal #B/#Q/#H program data)" }
+        {
+          "name": "mask",
+          "range": "0 to 255 (decimal or non-decimal #B/#Q/#H program data)"
+        }
       ],
-      "examples": ["*ESE 32", "*ESE?"]
+      "examples": [
+        "*ESE 32",
+        "*ESE?"
+      ]
     },
     {
       "name": "event_status_register",
@@ -54,7 +72,9 @@
       "category": "Status",
       "description": "Queries the Standard Event Status Register.",
       "query": "*ESR?",
-      "examples": ["*ESR?"]
+      "examples": [
+        "*ESR?"
+      ]
     },
     {
       "name": "service_request_enable",
@@ -64,9 +84,15 @@
       "set": "*SRE <nrf>",
       "query": "*SRE?",
       "parameters": [
-        { "name": "mask", "range": "0 to 255 (decimal or non-decimal #B/#Q/#H program data)" }
+        {
+          "name": "mask",
+          "range": "0 to 255 (decimal or non-decimal #B/#Q/#H program data)"
+        }
       ],
-      "examples": ["*SRE 32", "*SRE?"]
+      "examples": [
+        "*SRE 32",
+        "*SRE?"
+      ]
     },
     {
       "name": "status_byte",
@@ -74,7 +100,9 @@
       "category": "Status",
       "description": "Read Status Byte query. Returns the HP-IB Status Byte.",
       "query": "*STB?",
-      "examples": ["*STB?"]
+      "examples": [
+        "*STB?"
+      ]
     },
     {
       "name": "operation_complete",
@@ -83,7 +111,10 @@
       "description": "Operation complete command. Sets the OPC bit in the Standard Event Status Register when a sweep or learn operation is complete.",
       "set": "*OPC",
       "query": "*OPC?",
-      "examples": ["*OPC", "*OPC?"]
+      "examples": [
+        "*OPC",
+        "*OPC?"
+      ]
     },
     {
       "name": "wait",
@@ -91,7 +122,9 @@
       "category": "System",
       "description": "Wait-to-continue command. Prevents further input/output processing until all commands in the message containing *WAI have completed.",
       "set": "*WAI",
-      "examples": ["*WAI"]
+      "examples": [
+        "*WAI"
+      ]
     },
     {
       "name": "self_calibration",
@@ -99,7 +132,9 @@
       "category": "Calibration",
       "description": "Self-calibration query. Performs an internal self-calibration and returns an integer error code (0 = no failures). Equivalent to Special Function 171 / CALibration[:ALL]?.",
       "query": "*CAL?",
-      "examples": ["*CAL?"]
+      "examples": [
+        "*CAL?"
+      ]
     },
     {
       "name": "self_test",
@@ -107,7 +142,9 @@
       "category": "Diagnostic",
       "description": "Self-test query. Performs internal instrument-level diagnostics and returns an integer error code (0 = no failures). Equivalent to Special Function 170.",
       "query": "*TST?",
-      "examples": ["*TST?"]
+      "examples": [
+        "*TST?"
+      ]
     },
     {
       "name": "options",
@@ -115,7 +152,9 @@
       "category": "System",
       "description": "Option query. Returns mnemonics of reportable installed options separated by commas, or 0 if none. E.g. GAAS PULSE = Option 008 (pulse modulation); COMM_DISCR = Option 004 (low noise mode).",
       "query": "*OPT?",
-      "examples": ["*OPT?"]
+      "examples": [
+        "*OPT?"
+      ]
     },
     {
       "name": "save_state",
@@ -124,9 +163,14 @@
       "description": "Saves the instrument state in the specified storage register. 50 registers available: registers 0-9 store all front-panel settings, registers 10-49 store only frequency and amplitude.",
       "set": "*SAV <nrf>",
       "parameters": [
-        { "name": "register", "range": "0 to 49" }
+        {
+          "name": "register",
+          "range": "0 to 49"
+        }
       ],
-      "examples": ["*SAV 1"]
+      "examples": [
+        "*SAV 1"
+      ]
     },
     {
       "name": "recall_state",
@@ -135,9 +179,14 @@
       "description": "Recalls the instrument state stored in the specified register. Registers 0-9 hold all front-panel settings, 10-49 hold only frequency and amplitude.",
       "set": "*RCL <nrf>",
       "parameters": [
-        { "name": "register", "range": "0 to 49" }
+        {
+          "name": "register",
+          "range": "0 to 49"
+        }
       ],
-      "examples": ["*RCL 1"]
+      "examples": [
+        "*RCL 1"
+      ]
     },
     {
       "name": "frequency_cw",
@@ -147,9 +196,22 @@
       "set": "FREQ <value> <freq unit>",
       "query": "FREQ? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0.1 MHz to 3000 MHz (8664A); UP|DOWN|MIN|MAX accepted; default unit Hz" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "0.1 MHz to 3000 MHz (8664A); UP|DOWN|MIN|MAX accepted; default unit Hz"
+        }
       ],
-      "examples": ["FREQ 1.5 GHZ", "FREQ:CW 250 MHZ", "FREQ? MAX"]
+      "examples": [
+        "FREQ 1.5 GHZ",
+        "FREQ:CW 250 MHZ",
+        "FREQ? MAX"
+      ]
     },
     {
       "name": "frequency_step",
@@ -159,9 +221,21 @@
       "set": "FREQ:STEP <value> <freq unit>",
       "query": "FREQ:STEP? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:STEP 1 MHZ", "FREQ:STEP:INCR 100 KHZ"]
+      "examples": [
+        "FREQ:STEP 1 MHZ",
+        "FREQ:STEP:INCR 100 KHZ"
+      ]
     },
     {
       "name": "frequency_start",
@@ -171,9 +245,20 @@
       "set": "FREQ:STAR <value> <freq unit>",
       "query": "FREQ:STAR? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:STAR 100 MHZ"]
+      "examples": [
+        "FREQ:STAR 100 MHZ"
+      ]
     },
     {
       "name": "frequency_stop",
@@ -183,9 +268,20 @@
       "set": "FREQ:STOP <value> <freq unit>",
       "query": "FREQ:STOP? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:STOP 2 GHZ"]
+      "examples": [
+        "FREQ:STOP 2 GHZ"
+      ]
     },
     {
       "name": "frequency_center",
@@ -195,9 +291,20 @@
       "set": "FREQ:CENT <value> <freq unit>",
       "query": "FREQ:CENT? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:CENT 1 GHZ"]
+      "examples": [
+        "FREQ:CENT 1 GHZ"
+      ]
     },
     {
       "name": "frequency_span",
@@ -207,9 +314,20 @@
       "set": "FREQ:SPAN <value> <freq unit>",
       "query": "FREQ:SPAN? [MIN|MAX]",
       "parameters": [
-        { "name": "span", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "span",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:SPAN 100 MHZ"]
+      "examples": [
+        "FREQ:SPAN 100 MHZ"
+      ]
     },
     {
       "name": "frequency_manual",
@@ -219,9 +337,20 @@
       "set": "FREQ:MAN <value> <freq unit>",
       "query": "FREQ:MAN? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:MAN 500 MHZ"]
+      "examples": [
+        "FREQ:MAN 500 MHZ"
+      ]
     },
     {
       "name": "frequency_offset",
@@ -231,9 +360,20 @@
       "set": "FREQ:OFFS <value> <freq unit>",
       "query": "FREQ:OFFS? [MIN|MAX]",
       "parameters": [
-        { "name": "offset", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "MIN|MAX accepted" }
+        {
+          "name": "offset",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:OFFS 10 MHZ"]
+      "examples": [
+        "FREQ:OFFS 10 MHZ"
+      ]
     },
     {
       "name": "frequency_multiplier",
@@ -243,9 +383,14 @@
       "set": "FREQ:MULT <value>",
       "query": "FREQ:MULT? [MIN|MAX]",
       "parameters": [
-        { "name": "multiplier", "range": "integer or 1/integer (1/2, 1/3, ...); MIN|MAX accepted" }
+        {
+          "name": "multiplier",
+          "range": "integer or 1/integer (1/2, 1/3, ...); MIN|MAX accepted"
+        }
       ],
-      "examples": ["FREQ:MULT 2"]
+      "examples": [
+        "FREQ:MULT 2"
+      ]
     },
     {
       "name": "frequency_synthesis",
@@ -255,9 +400,14 @@
       "set": "FREQ:SYNT <nrf>",
       "query": "FREQ:SYNT?",
       "parameters": [
-        { "name": "mode", "range": "hardware-dependent numeric synthesis mode" }
+        {
+          "name": "mode",
+          "range": "hardware-dependent numeric synthesis mode"
+        }
       ],
-      "examples": ["FREQ:SYNT?"]
+      "examples": [
+        "FREQ:SYNT?"
+      ]
     },
     {
       "name": "frequency_synthesis_auto",
@@ -267,9 +417,14 @@
       "set": "FREQ:SYNT:AUTO ON|OFF|1|0",
       "query": "FREQ:SYNT:AUTO?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["FREQ:SYNT:AUTO ON"]
+      "examples": [
+        "FREQ:SYNT:AUTO ON"
+      ]
     },
     {
       "name": "frequency_mode",
@@ -279,9 +434,15 @@
       "set": "FREQ:MODE CW|SWEep",
       "query": "FREQ:MODE?",
       "parameters": [
-        { "name": "mode", "range": "CW | SWEep" }
+        {
+          "name": "mode",
+          "range": "CW | SWEep"
+        }
       ],
-      "examples": ["FREQ:MODE SWE", "FREQ:MODE CW"]
+      "examples": [
+        "FREQ:MODE SWE",
+        "FREQ:MODE CW"
+      ]
     },
     {
       "name": "frequency_instantaneous",
@@ -289,7 +450,9 @@
       "category": "Frequency",
       "description": "Returns the instantaneous RF output frequency during DIGitized FM. Equivalent to Special Function 121.",
       "query": "FREQ:INST?",
-      "examples": ["FREQ:INST?"]
+      "examples": [
+        "FREQ:INST?"
+      ]
     },
     {
       "name": "amplitude_level",
@@ -299,9 +462,24 @@
       "set": "AMPL <value> <ampl unit>",
       "query": "AMPL? [MIN|MAX]",
       "parameters": [
-        { "name": "amplitude", "units": ["DBM", "DBMW", "DBUV", "V", "MV", "UV"], "range": "UP|DOWN|MIN|MAX accepted; default unit is AMPLitude:UNIT" }
+        {
+          "name": "amplitude",
+          "units": [
+            "DBM",
+            "DBMW",
+            "DBUV",
+            "V",
+            "MV",
+            "UV"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default unit is AMPLitude:UNIT"
+        }
       ],
-      "examples": ["AMPL -10 DBM", "POW -10 DBM", "AMPL? MAX"]
+      "examples": [
+        "AMPL -10 DBM",
+        "POW -10 DBM",
+        "AMPL? MAX"
+      ]
     },
     {
       "name": "amplitude_step",
@@ -311,9 +489,21 @@
       "set": "AMPL:STEP <value> <ampl step unit>",
       "query": "AMPL:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["DB", "V", "MV", "UV"], "range": "MIN|MAX accepted; default dB" }
+        {
+          "name": "step",
+          "units": [
+            "DB",
+            "V",
+            "MV",
+            "UV"
+          ],
+          "range": "MIN|MAX accepted; default dB"
+        }
       ],
-      "examples": ["AMPL:STEP 1 DB", "AMPL:STEP:INCR 0.5 V"]
+      "examples": [
+        "AMPL:STEP 1 DB",
+        "AMPL:STEP:INCR 0.5 V"
+      ]
     },
     {
       "name": "amplitude_step_unit",
@@ -323,9 +513,14 @@
       "set": "AMPL:STEP:UNIT V|dB",
       "query": "AMPL:STEP:UNIT?",
       "parameters": [
-        { "name": "unit", "range": "V | dB" }
+        {
+          "name": "unit",
+          "range": "V | dB"
+        }
       ],
-      "examples": ["AMPL:STEP:UNIT dB"]
+      "examples": [
+        "AMPL:STEP:UNIT dB"
+      ]
     },
     {
       "name": "amplitude_state",
@@ -335,9 +530,15 @@
       "set": "AMPL:STAT ON|OFF|1|0",
       "query": "AMPL:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["AMPL:STAT ON", "AMPL:STAT OFF"]
+      "examples": [
+        "AMPL:STAT ON",
+        "AMPL:STAT OFF"
+      ]
     },
     {
       "name": "amplitude_unit",
@@ -347,9 +548,20 @@
       "set": "AMPL:UNIT <ampl unit>",
       "query": "AMPL:UNIT?",
       "parameters": [
-        { "name": "unit", "units": ["DBM", "DBMW", "V", "DBUV"], "range": "must be specified" }
+        {
+          "name": "unit",
+          "units": [
+            "DBM",
+            "DBMW",
+            "V",
+            "DBUV"
+          ],
+          "range": "must be specified"
+        }
       ],
-      "examples": ["AMPL:UNIT DBM"]
+      "examples": [
+        "AMPL:UNIT DBM"
+      ]
     },
     {
       "name": "amplitude_upper_limit",
@@ -359,9 +571,22 @@
       "set": "AMPL:ULIM <value> <ampl unit>",
       "query": "AMPL:ULIM? [MIN|MAX]",
       "parameters": [
-        { "name": "limit", "units": ["DBM", "DBMW", "DBUV", "V", "MV", "UV"], "range": "MIN|MAX accepted" }
+        {
+          "name": "limit",
+          "units": [
+            "DBM",
+            "DBMW",
+            "DBUV",
+            "V",
+            "MV",
+            "UV"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["AMPL:ULIM 10 DBM"]
+      "examples": [
+        "AMPL:ULIM 10 DBM"
+      ]
     },
     {
       "name": "amplitude_attenuation",
@@ -371,9 +596,17 @@
       "set": "AMPL:ATT <value> dB",
       "query": "AMPL:ATT? [MIN|MAX]",
       "parameters": [
-        { "name": "attenuation", "units": ["dB"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "attenuation",
+          "units": [
+            "dB"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["AMPL:ATT 10 dB"]
+      "examples": [
+        "AMPL:ATT 10 dB"
+      ]
     },
     {
       "name": "amplitude_attenuation_auto",
@@ -383,9 +616,14 @@
       "set": "AMPL:ATT:AUTO ON|OFF|1|0",
       "query": "AMPL:ATT:AUTO?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["AMPL:ATT:AUTO ON"]
+      "examples": [
+        "AMPL:ATT:AUTO ON"
+      ]
     },
     {
       "name": "amplitude_gain",
@@ -395,9 +633,17 @@
       "set": "AMPL:GAIN <value> dB",
       "query": "AMPL:GAIN? [MIN|MAX]",
       "parameters": [
-        { "name": "gain", "units": ["dB"], "range": "MIN|MAX accepted" }
+        {
+          "name": "gain",
+          "units": [
+            "dB"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["AMPL:GAIN 3 dB"]
+      "examples": [
+        "AMPL:GAIN 3 dB"
+      ]
     },
     {
       "name": "amplitude_alc_bandwidth_auto",
@@ -407,9 +653,14 @@
       "set": "AMPL:ALC:BAND:AUTO ON|OFF|1|0",
       "query": "AMPL:ALC:BAND:AUTO?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["AMPL:ALC:BAND:AUTO ON"]
+      "examples": [
+        "AMPL:ALC:BAND:AUTO ON"
+      ]
     },
     {
       "name": "amplitude_alc_muting",
@@ -418,9 +669,14 @@
       "description": "ALC muting (Special Function 105).",
       "set": "AMPL:ALC:MUT ON|OFF|1|0",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["AMPL:ALC:MUT ON"]
+      "examples": [
+        "AMPL:ALC:MUT ON"
+      ]
     },
     {
       "name": "calibration_all",
@@ -428,7 +684,9 @@
       "category": "Calibration",
       "description": "Performs an instrument self-calibration and returns an error code (0 = no failures). Alias to *CAL?.",
       "query": "CAL?",
-      "examples": ["CAL?"]
+      "examples": [
+        "CAL?"
+      ]
     },
     {
       "name": "calibration_amplitude_state",
@@ -438,9 +696,14 @@
       "set": "CAL:AMPL:STAT ON|OFF|1|0",
       "query": "CAL:AMPL:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["CAL:AMPL:STAT ON"]
+      "examples": [
+        "CAL:AMPL:STAT ON"
+      ]
     },
     {
       "name": "am_depth",
@@ -450,9 +713,20 @@
       "set": "AM <value> <AM term>",
       "query": "AM? [MIN|MAX]",
       "parameters": [
-        { "name": "depth", "units": ["PCT", "%"], "range": "UP|DOWN|MIN|MAX accepted; default unit %" }
+        {
+          "name": "depth",
+          "units": [
+            "PCT",
+            "%"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default unit %"
+        }
       ],
-      "examples": ["AM 30 PCT", "AM:DEPT 50", "AM? MAX"]
+      "examples": [
+        "AM 30 PCT",
+        "AM:DEPT 50",
+        "AM? MAX"
+      ]
     },
     {
       "name": "am_depth_step",
@@ -462,9 +736,18 @@
       "set": "AM:STEP <value> <AM term>",
       "query": "AM:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["PCT", "%"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "PCT",
+            "%"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["AM:STEP 5"]
+      "examples": [
+        "AM:STEP 5"
+      ]
     },
     {
       "name": "am_state",
@@ -474,9 +757,14 @@
       "set": "AM:STAT ON|OFF|1|0",
       "query": "AM:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["AM:STAT ON"]
+      "examples": [
+        "AM:STAT ON"
+      ]
     },
     {
       "name": "am_source",
@@ -486,9 +774,15 @@
       "set": "AM:SOUR INTernal|EXTernal",
       "query": "AM:SOUR?",
       "parameters": [
-        { "name": "source", "range": "INTernal | EXTernal" }
+        {
+          "name": "source",
+          "range": "INTernal | EXTernal"
+        }
       ],
-      "examples": ["AM:SOUR INT", "AM:SOUR EXT"]
+      "examples": [
+        "AM:SOUR INT",
+        "AM:SOUR EXT"
+      ]
     },
     {
       "name": "am_coupling",
@@ -498,9 +792,15 @@
       "set": "AM:COUP AC|DC|GROund|GND",
       "query": "AM:COUP?",
       "parameters": [
-        { "name": "coupling", "range": "AC | DC | GROund | GND" }
+        {
+          "name": "coupling",
+          "range": "AC | DC | GROund | GND"
+        }
       ],
-      "examples": ["AM:COUP DC", "AM:COUP AC"]
+      "examples": [
+        "AM:COUP DC",
+        "AM:COUP AC"
+      ]
     },
     {
       "name": "fm_deviation",
@@ -510,9 +810,21 @@
       "set": "FM <value> <freq term>",
       "query": "FM? [MIN|MAX]",
       "parameters": [
-        { "name": "deviation", "units": ["HZ", "KHZ", "MHZ"], "range": "UP|DOWN|MIN|MAX accepted; default Hz" }
+        {
+          "name": "deviation",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default Hz"
+        }
       ],
-      "examples": ["FM 10 KHZ", "FM:DEV 5 KHZ", "FM? MAX"]
+      "examples": [
+        "FM 10 KHZ",
+        "FM:DEV 5 KHZ",
+        "FM? MAX"
+      ]
     },
     {
       "name": "fm_deviation_step",
@@ -522,9 +834,19 @@
       "set": "FM:STEP <value> <freq term>",
       "query": "FM:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["HZ", "KHZ", "MHZ"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["FM:STEP 1 KHZ"]
+      "examples": [
+        "FM:STEP 1 KHZ"
+      ]
     },
     {
       "name": "fm_state",
@@ -534,9 +856,14 @@
       "set": "FM:STAT ON|OFF|1|0",
       "query": "FM:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["FM:STAT ON"]
+      "examples": [
+        "FM:STAT ON"
+      ]
     },
     {
       "name": "fm_source",
@@ -546,9 +873,15 @@
       "set": "FM:SOUR INTernal|EXTernal|INTernal,EXTernal",
       "query": "FM:SOUR?",
       "parameters": [
-        { "name": "source", "range": "INTernal | EXTernal | INTernal,EXTernal" }
+        {
+          "name": "source",
+          "range": "INTernal | EXTernal | INTernal,EXTernal"
+        }
       ],
-      "examples": ["FM:SOUR EXT", "FM:SOUR INT,EXT"]
+      "examples": [
+        "FM:SOUR EXT",
+        "FM:SOUR INT,EXT"
+      ]
     },
     {
       "name": "fm_coupling",
@@ -558,9 +891,14 @@
       "set": "FM:COUP AC|DC|GROund|GND",
       "query": "FM:COUP?",
       "parameters": [
-        { "name": "coupling", "range": "AC | DC | GROund | GND" }
+        {
+          "name": "coupling",
+          "range": "AC | DC | GROund | GND"
+        }
       ],
-      "examples": ["FM:COUP DC"]
+      "examples": [
+        "FM:COUP DC"
+      ]
     },
     {
       "name": "fm_mode",
@@ -570,9 +908,15 @@
       "set": "FM:MODE LINear|DIGitized",
       "query": "FM:MODE?",
       "parameters": [
-        { "name": "mode", "range": "LINear | DIGitized" }
+        {
+          "name": "mode",
+          "range": "LINear | DIGitized"
+        }
       ],
-      "examples": ["FM:MODE LIN", "FM:MODE DIG"]
+      "examples": [
+        "FM:MODE LIN",
+        "FM:MODE DIG"
+      ]
     },
     {
       "name": "fm_delay",
@@ -582,9 +926,14 @@
       "set": "FM:DEL ON|OFF|1|0",
       "query": "FM:DEL?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["FM:DEL ON"]
+      "examples": [
+        "FM:DEL ON"
+      ]
     },
     {
       "name": "fm_impedance",
@@ -592,7 +941,9 @@
       "category": "FM",
       "description": "Returns the FM input impedance value (600 ohms).",
       "query": "FM:IMP?",
-      "examples": ["FM:IMP?"]
+      "examples": [
+        "FM:IMP?"
+      ]
     },
     {
       "name": "pm_deviation",
@@ -602,9 +953,19 @@
       "set": "PM <value> <angle term>",
       "query": "PM? [MIN|MAX]",
       "parameters": [
-        { "name": "deviation", "units": ["DEG", "RAD"], "range": "UP|DOWN|MIN|MAX accepted; default radians" }
+        {
+          "name": "deviation",
+          "units": [
+            "DEG",
+            "RAD"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default radians"
+        }
       ],
-      "examples": ["PM 5 RAD", "PM 90 DEG"]
+      "examples": [
+        "PM 5 RAD",
+        "PM 90 DEG"
+      ]
     },
     {
       "name": "pm_state",
@@ -614,9 +975,14 @@
       "set": "PM:STAT ON|OFF|1|0",
       "query": "PM:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["PM:STAT ON"]
+      "examples": [
+        "PM:STAT ON"
+      ]
     },
     {
       "name": "pm_source",
@@ -626,9 +992,14 @@
       "set": "PM:SOUR INTernal|EXTernal|INTernal,EXTernal",
       "query": "PM:SOUR?",
       "parameters": [
-        { "name": "source", "range": "INTernal | EXTernal | INTernal,EXTernal" }
+        {
+          "name": "source",
+          "range": "INTernal | EXTernal | INTernal,EXTernal"
+        }
       ],
-      "examples": ["PM:SOUR INT"]
+      "examples": [
+        "PM:SOUR INT"
+      ]
     },
     {
       "name": "pm_coupling",
@@ -638,9 +1009,14 @@
       "set": "PM:COUP AC|DC|GROund|GND",
       "query": "PM:COUP?",
       "parameters": [
-        { "name": "coupling", "range": "AC | DC | GROund | GND" }
+        {
+          "name": "coupling",
+          "range": "AC | DC | GROund | GND"
+        }
       ],
-      "examples": ["PM:COUP DC"]
+      "examples": [
+        "PM:COUP DC"
+      ]
     },
     {
       "name": "pulse_state",
@@ -650,9 +1026,15 @@
       "set": "PULS ON|OFF|1|0",
       "query": "PULS?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["PULS ON", "PULS:STAT OFF"]
+      "examples": [
+        "PULS ON",
+        "PULS:STAT OFF"
+      ]
     },
     {
       "name": "pulse_source",
@@ -662,9 +1044,14 @@
       "set": "PULS:SOUR INTernal|EXTernal",
       "query": "PULS:SOUR?",
       "parameters": [
-        { "name": "source", "range": "INTernal | EXTernal" }
+        {
+          "name": "source",
+          "range": "INTernal | EXTernal"
+        }
       ],
-      "examples": ["PULS:SOUR INT"]
+      "examples": [
+        "PULS:SOUR INT"
+      ]
     },
     {
       "name": "pulse_impedance",
@@ -674,9 +1061,19 @@
       "set": "PULS:IMP <value> <ohms term>",
       "query": "PULS:IMP? [MIN|MAX]",
       "parameters": [
-        { "name": "impedance", "units": ["OHM", "KOHM", "MOHM"], "range": "MIN|MAX accepted; default OHM" }
+        {
+          "name": "impedance",
+          "units": [
+            "OHM",
+            "KOHM",
+            "MOHM"
+          ],
+          "range": "MIN|MAX accepted; default OHM"
+        }
       ],
-      "examples": ["PULS:IMP 50 OHM"]
+      "examples": [
+        "PULS:IMP 50 OHM"
+      ]
     },
     {
       "name": "pulse_conditioning",
@@ -686,9 +1083,14 @@
       "set": "PULS:COND ON|OFF|1|0",
       "query": "PULS:COND?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["PULS:COND ON"]
+      "examples": [
+        "PULS:COND ON"
+      ]
     },
     {
       "name": "pulse_delay",
@@ -698,9 +1100,20 @@
       "set": "PULS:DEL <value> <time term>",
       "query": "PULS:DEL? [MIN|MAX]",
       "parameters": [
-        { "name": "delay", "units": ["S", "MS", "US", "NS"], "range": "UP|DOWN|MIN|MAX accepted; default seconds" }
+        {
+          "name": "delay",
+          "units": [
+            "S",
+            "MS",
+            "US",
+            "NS"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default seconds"
+        }
       ],
-      "examples": ["PULS:DEL 1 US"]
+      "examples": [
+        "PULS:DEL 1 US"
+      ]
     },
     {
       "name": "pulse_delay_step",
@@ -710,9 +1123,20 @@
       "set": "PULS:DEL:STEP <value> <time term>",
       "query": "PULS:DEL:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["S", "MS", "US", "NS"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "S",
+            "MS",
+            "US",
+            "NS"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["PULS:DEL:STEP 1 US"]
+      "examples": [
+        "PULS:DEL:STEP 1 US"
+      ]
     },
     {
       "name": "pulse_width",
@@ -722,9 +1146,20 @@
       "set": "PULS:WIDT <value> <time term>",
       "query": "PULS:WIDT? [MIN|MAX]",
       "parameters": [
-        { "name": "width", "units": ["S", "MS", "US", "NS"], "range": "UP|DOWN|MIN|MAX accepted; default seconds" }
+        {
+          "name": "width",
+          "units": [
+            "S",
+            "MS",
+            "US",
+            "NS"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default seconds"
+        }
       ],
-      "examples": ["PULS:WIDT 10 US"]
+      "examples": [
+        "PULS:WIDT 10 US"
+      ]
     },
     {
       "name": "pulse_width_step",
@@ -734,9 +1169,20 @@
       "set": "PULS:WIDT:STEP <value> <time term>",
       "query": "PULS:WIDT:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["S", "MS", "US", "NS"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "S",
+            "MS",
+            "US",
+            "NS"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["PULS:WIDT:STEP 1 US"]
+      "examples": [
+        "PULS:WIDT:STEP 1 US"
+      ]
     },
     {
       "name": "pulse_slope",
@@ -746,9 +1192,14 @@
       "set": "PULS:SLOP POSitive|NEGative|BOTH",
       "query": "PULS:SLOP?",
       "parameters": [
-        { "name": "slope", "range": "POSitive | NEGative | BOTH" }
+        {
+          "name": "slope",
+          "range": "POSitive | NEGative | BOTH"
+        }
       ],
-      "examples": ["PULS:SLOP POS"]
+      "examples": [
+        "PULS:SLOP POS"
+      ]
     },
     {
       "name": "pulse_frequency",
@@ -758,9 +1209,19 @@
       "set": "PULS:FREQ <value> <freq term>",
       "query": "PULS:FREQ? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["PULS:FREQ 1 KHZ"]
+      "examples": [
+        "PULS:FREQ 1 KHZ"
+      ]
     },
     {
       "name": "lfsource_frequency",
@@ -770,9 +1231,20 @@
       "set": "LFS <value> <freq term>",
       "query": "LFS? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "UP|DOWN|MIN|MAX accepted; default Hz" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default Hz"
+        }
       ],
-      "examples": ["LFS 1 KHZ", "LFS:FREQ 400 HZ"]
+      "examples": [
+        "LFS 1 KHZ",
+        "LFS:FREQ 400 HZ"
+      ]
     },
     {
       "name": "lfsource_frequency_step",
@@ -782,9 +1254,19 @@
       "set": "LFS:STEP <value> <freq term>",
       "query": "LFS:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["HZ", "KHZ", "MHZ"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["LFS:STEP 100 HZ"]
+      "examples": [
+        "LFS:STEP 100 HZ"
+      ]
     },
     {
       "name": "lfsource_state",
@@ -794,9 +1276,14 @@
       "set": "LFS:STAT ON|OFF|1|0",
       "query": "LFS:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["LFS:STAT ON"]
+      "examples": [
+        "LFS:STAT ON"
+      ]
     },
     {
       "name": "lfsource_waveform",
@@ -806,9 +1293,15 @@
       "set": "LFS:WAV SINe|SQUare|TRIangle|SAWTooth|WGNoise",
       "query": "LFS:WAV?",
       "parameters": [
-        { "name": "waveform", "range": "SINe | SQUare | TRIangle | SAWTooth | WGNoise (White Gaussian Noise)" }
+        {
+          "name": "waveform",
+          "range": "SINe | SQUare | TRIangle | SAWTooth | WGNoise (White Gaussian Noise)"
+        }
       ],
-      "examples": ["LFS:WAV SIN", "LFS:WAV SQU"]
+      "examples": [
+        "LFS:WAV SIN",
+        "LFS:WAV SQU"
+      ]
     },
     {
       "name": "lfsource_level",
@@ -818,9 +1311,20 @@
       "set": "LFS:LEV <value> <lin ampl term>",
       "query": "LFS:LEV? [MIN|MAX]",
       "parameters": [
-        { "name": "level", "units": ["V", "MV", "UV"], "range": "UP|DOWN|MIN|MAX accepted; default V" }
+        {
+          "name": "level",
+          "units": [
+            "V",
+            "MV",
+            "UV"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default V"
+        }
       ],
-      "examples": ["LFS:LEV 1 V", "LFS:LEV 100 MV"]
+      "examples": [
+        "LFS:LEV 1 V",
+        "LFS:LEV 100 MV"
+      ]
     },
     {
       "name": "lfsource_level_step",
@@ -830,9 +1334,19 @@
       "set": "LFS:LEV:STEP <value> <lin ampl term>",
       "query": "LFS:LEV:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["V", "MV", "UV"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "V",
+            "MV",
+            "UV"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["LFS:LEV:STEP 0.1 V"]
+      "examples": [
+        "LFS:LEV:STEP 0.1 V"
+      ]
     },
     {
       "name": "lfsource_trigger",
@@ -840,7 +1354,9 @@
       "category": "LF Source",
       "description": "Causes a one-shot trigger of the LF source if its SOURce is EXTernal (Special Function 132 with 131 on).",
       "set": "LFS:TRIG",
-      "examples": ["LFS:TRIG"]
+      "examples": [
+        "LFS:TRIG"
+      ]
     },
     {
       "name": "lfsource_trigger_source",
@@ -850,9 +1366,14 @@
       "set": "LFS:SOUR EXTernal|CONTinuous",
       "query": "LFS:SOUR?",
       "parameters": [
-        { "name": "mode", "range": "EXTernal | CONTinuous" }
+        {
+          "name": "mode",
+          "range": "EXTernal | CONTinuous"
+        }
       ],
-      "examples": ["LFS:SOUR CONT"]
+      "examples": [
+        "LFS:SOUR CONT"
+      ]
     },
     {
       "name": "lfsource_frequency2",
@@ -862,9 +1383,19 @@
       "set": "LFS:FREQ2 <value> <freq term>",
       "query": "LFS:FREQ2? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["LFS:FREQ2 400 HZ"]
+      "examples": [
+        "LFS:FREQ2 400 HZ"
+      ]
     },
     {
       "name": "lfsource_waveform2",
@@ -874,9 +1405,14 @@
       "set": "LFS:WAV2 SINe|SQUare|TRIangle|SAWTooth|WGNoise",
       "query": "LFS:WAV2?",
       "parameters": [
-        { "name": "waveform", "range": "SINe | SQUare | TRIangle | SAWTooth | WGNoise" }
+        {
+          "name": "waveform",
+          "range": "SINe | SQUare | TRIangle | SAWTooth | WGNoise"
+        }
       ],
-      "examples": ["LFS:WAV2 SIN"]
+      "examples": [
+        "LFS:WAV2 SIN"
+      ]
     },
     {
       "name": "lfsource_state2",
@@ -886,9 +1422,14 @@
       "set": "LFS:STAT2 ON|OFF|1|0",
       "query": "LFS:STAT2?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["LFS:STAT2 ON"]
+      "examples": [
+        "LFS:STAT2 ON"
+      ]
     },
     {
       "name": "lfsource_level2",
@@ -898,9 +1439,19 @@
       "set": "LFS:LEV2 <value> <lin ampl term>",
       "query": "LFS:LEV2? [MIN|MAX]",
       "parameters": [
-        { "name": "level", "units": ["V", "MV", "UV"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "level",
+          "units": [
+            "V",
+            "MV",
+            "UV"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["LFS:LEV2 100 MV"]
+      "examples": [
+        "LFS:LEV2 100 MV"
+      ]
     },
     {
       "name": "lfsource_phase2",
@@ -910,9 +1461,18 @@
       "set": "LFS:PHAS2 <value> <angle term>",
       "query": "LFS:PHAS2? [MIN|MAX]",
       "parameters": [
-        { "name": "phase", "units": ["DEG", "RAD"], "range": "UP|DOWN|MIN|MAX accepted; default radians" }
+        {
+          "name": "phase",
+          "units": [
+            "DEG",
+            "RAD"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default radians"
+        }
       ],
-      "examples": ["LFS:PHAS2 90 DEG"]
+      "examples": [
+        "LFS:PHAS2 90 DEG"
+      ]
     },
     {
       "name": "marker_frequency",
@@ -922,9 +1482,21 @@
       "set": "MARK <value> <freq term>",
       "query": "MARK? [MIN|MAX]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KHZ",
+            "MHZ",
+            "GHZ"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["MARK 500 MHZ", "MARK2:FREQ 1 GHZ"]
+      "examples": [
+        "MARK 500 MHZ",
+        "MARK2:FREQ 1 GHZ"
+      ]
     },
     {
       "name": "marker_state",
@@ -934,9 +1506,15 @@
       "set": "MARK:STAT ON|OFF|1|0",
       "query": "MARK:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["MARK:STAT ON", "MARK3:STAT OFF"]
+      "examples": [
+        "MARK:STAT ON",
+        "MARK3:STAT OFF"
+      ]
     },
     {
       "name": "marker_all_off",
@@ -944,7 +1522,9 @@
       "category": "Marker",
       "description": "Turns off all markers (the *RST condition). Accepted on any specific marker but always turns off all markers. Cannot be queried.",
       "set": "MARK:AOFF",
-      "examples": ["MARK:AOFF"]
+      "examples": [
+        "MARK:AOFF"
+      ]
     },
     {
       "name": "phase_adjust",
@@ -954,9 +1534,19 @@
       "set": "PHAS <value> <angle term>",
       "query": "PHAS? [MIN|MAX]",
       "parameters": [
-        { "name": "phase", "units": ["DEG", "RAD"], "range": "UP|DOWN|MIN|MAX accepted; default radians" }
+        {
+          "name": "phase",
+          "units": [
+            "DEG",
+            "RAD"
+          ],
+          "range": "UP|DOWN|MIN|MAX accepted; default radians"
+        }
       ],
-      "examples": ["PHAS 90 DEG", "PHAS 1.57 RAD"]
+      "examples": [
+        "PHAS 90 DEG",
+        "PHAS 1.57 RAD"
+      ]
     },
     {
       "name": "phase_step",
@@ -966,9 +1556,18 @@
       "set": "PHAS:STEP <value> <angle term>",
       "query": "PHAS:STEP:INCR? [MIN|MAX]",
       "parameters": [
-        { "name": "step", "units": ["DEG", "RAD"], "range": "MIN|MAX accepted" }
+        {
+          "name": "step",
+          "units": [
+            "DEG",
+            "RAD"
+          ],
+          "range": "MIN|MAX accepted"
+        }
       ],
-      "examples": ["PHAS:STEP 1 DEG"]
+      "examples": [
+        "PHAS:STEP 1 DEG"
+      ]
     },
     {
       "name": "phase_reference",
@@ -976,7 +1575,9 @@
       "category": "Phase",
       "description": "Resets the PHASe value to 0 without changing the actual phase. Subsequent phase references are relative to this point.",
       "set": "PHAS:REF",
-      "examples": ["PHAS:REF"]
+      "examples": [
+        "PHAS:REF"
+      ]
     },
     {
       "name": "reference_oscillator_calibration",
@@ -986,9 +1587,14 @@
       "set": "ROSC:CAL <value>",
       "query": "ROSC:CAL? [MIN|MAX]",
       "parameters": [
-        { "name": "value", "range": "0 to 255; UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "value",
+          "range": "0 to 255; UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["ROSC:CAL 128"]
+      "examples": [
+        "ROSC:CAL 128"
+      ]
     },
     {
       "name": "reference_oscillator_source",
@@ -996,7 +1602,9 @@
       "category": "Reference",
       "description": "Queries the current reference source (INT or EXT) (Special Function 161).",
       "query": "ROSC:SOUR?",
-      "examples": ["ROSC:SOUR?"]
+      "examples": [
+        "ROSC:SOUR?"
+      ]
     },
     {
       "name": "reference_oscillator_auto",
@@ -1006,9 +1614,14 @@
       "set": "ROSC:AUTO ON|OFF|1|0",
       "query": "ROSC:AUTO?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["ROSC:AUTO ON"]
+      "examples": [
+        "ROSC:AUTO ON"
+      ]
     },
     {
       "name": "sequence_register",
@@ -1018,9 +1631,15 @@
       "set": "SEQ:REG <register list>",
       "query": "SEQ:REG?",
       "parameters": [
-        { "name": "register_list", "range": "comma-separated register numbers 0-9 (max 10)" }
+        {
+          "name": "register_list",
+          "range": "comma-separated register numbers 0-9 (max 10)"
+        }
       ],
-      "examples": ["SEQ:REG 0,1,2,3", "SEQ:REG"]
+      "examples": [
+        "SEQ:REG 0,1,2,3",
+        "SEQ:REG"
+      ]
     },
     {
       "name": "sequence_immediate",
@@ -1028,7 +1647,10 @@
       "category": "Sequence",
       "description": "Sequences to the next register in the register list.",
       "set": "SEQ",
-      "examples": ["SEQ", "SEQ:IMM"]
+      "examples": [
+        "SEQ",
+        "SEQ:IMM"
+      ]
     },
     {
       "name": "sequence_state",
@@ -1038,9 +1660,14 @@
       "set": "SEQ:STAT ON|OFF|1|0",
       "query": "SEQ:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["SEQ:STAT ON"]
+      "examples": [
+        "SEQ:STAT ON"
+      ]
     },
     {
       "name": "sweep_time",
@@ -1050,9 +1677,21 @@
       "set": "SWE:TIME <value> <time term>",
       "query": "SWE:TIME? [MIN|MAX]",
       "parameters": [
-        { "name": "time", "units": ["S", "MS", "US", "NS"], "range": "1-2-5 sequence; UP|DOWN|MIN|MAX accepted" }
+        {
+          "name": "time",
+          "units": [
+            "S",
+            "MS",
+            "US",
+            "NS"
+          ],
+          "range": "1-2-5 sequence; UP|DOWN|MIN|MAX accepted"
+        }
       ],
-      "examples": ["SWE:TIME 1 S", "SWE:TIME 100 MS"]
+      "examples": [
+        "SWE:TIME 1 S",
+        "SWE:TIME 100 MS"
+      ]
     },
     {
       "name": "sweep_mode",
@@ -1062,9 +1701,14 @@
       "set": "SWE:MODE AUTO|MANual",
       "query": "SWE:MODE?",
       "parameters": [
-        { "name": "mode", "range": "AUTO | MANual" }
+        {
+          "name": "mode",
+          "range": "AUTO | MANual"
+        }
       ],
-      "examples": ["SWE:MODE AUTO"]
+      "examples": [
+        "SWE:MODE AUTO"
+      ]
     },
     {
       "name": "sweep_spacing",
@@ -1074,9 +1718,15 @@
       "set": "SWE:SPAC LINear|LOGarithmic",
       "query": "SWE:SPAC?",
       "parameters": [
-        { "name": "spacing", "range": "LINear | LOGarithmic" }
+        {
+          "name": "spacing",
+          "range": "LINear | LOGarithmic"
+        }
       ],
-      "examples": ["SWE:SPAC LIN", "SWE:SPAC LOG"]
+      "examples": [
+        "SWE:SPAC LIN",
+        "SWE:SPAC LOG"
+      ]
     },
     {
       "name": "sweep_generation",
@@ -1086,9 +1736,14 @@
       "set": "SWE:GEN STEPped|ANALog",
       "query": "SWE:GEN?",
       "parameters": [
-        { "name": "generation", "range": "STEPped | ANALog" }
+        {
+          "name": "generation",
+          "range": "STEPped | ANALog"
+        }
       ],
-      "examples": ["SWE:GEN STEP"]
+      "examples": [
+        "SWE:GEN STEP"
+      ]
     },
     {
       "name": "take_sweep",
@@ -1096,7 +1751,9 @@
       "category": "Sweep",
       "description": "Stops any sweep and takes a single sweep. Equivalent to INIT:ABORt; SWE:MODE AUTO; FREQ:MODE SWEep; INIT:MODE SINgle; INIT:IMMediate.",
       "set": "TSW",
-      "examples": ["TSW"]
+      "examples": [
+        "TSW"
+      ]
     },
     {
       "name": "initialize_immediate",
@@ -1104,7 +1761,10 @@
       "category": "Sweep",
       "description": "Sets INITialize:STATe to RUN and starts a single or continuous sweep. If a sweep is already in progress, it is aborted and restarted.",
       "set": "INIT",
-      "examples": ["INIT", "INIT:IMM"]
+      "examples": [
+        "INIT",
+        "INIT:IMM"
+      ]
     },
     {
       "name": "initialize_abort",
@@ -1112,7 +1772,9 @@
       "category": "Sweep",
       "description": "Aborts any current sweep and sets INITialize:STATe to PAUSe.",
       "set": "INIT:ABOR",
-      "examples": ["INIT:ABOR"]
+      "examples": [
+        "INIT:ABOR"
+      ]
     },
     {
       "name": "initialize_state",
@@ -1120,7 +1782,9 @@
       "category": "Sweep",
       "description": "Returns PAUSe or RUN, indicating whether the instrument is sweeping or idle (meaningful only when FREQ:MODE is SWEep). *RST value is PAUSe.",
       "query": "INIT:STAT?",
-      "examples": ["INIT:STAT?"]
+      "examples": [
+        "INIT:STAT?"
+      ]
     },
     {
       "name": "initialize_mode",
@@ -1130,9 +1794,14 @@
       "set": "INIT:MODE CONTinuous|SINGle",
       "query": "INIT:MODE?",
       "parameters": [
-        { "name": "mode", "range": "CONTinuous | SINGle" }
+        {
+          "name": "mode",
+          "range": "CONTinuous | SINGle"
+        }
       ],
-      "examples": ["INIT:MODE SING"]
+      "examples": [
+        "INIT:MODE SING"
+      ]
     },
     {
       "name": "modulation_state",
@@ -1142,9 +1811,15 @@
       "set": "MOD:STAT ON|OFF|1|0",
       "query": "MOD:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["MOD:STAT ON", "MOD:STAT OFF"]
+      "examples": [
+        "MOD:STAT ON",
+        "MOD:STAT OFF"
+      ]
     },
     {
       "name": "display_state",
@@ -1154,9 +1829,14 @@
       "set": "DISP:STAT ON|OFF|1|0",
       "query": "DISP:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["DISP:STAT ON"]
+      "examples": [
+        "DISP:STAT ON"
+      ]
     },
     {
       "name": "display_annotation_all",
@@ -1166,9 +1846,14 @@
       "set": "DISP:ANN ON|OFF|1|0",
       "query": "DISP:ANN?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["DISP:ANN ON"]
+      "examples": [
+        "DISP:ANN ON"
+      ]
     },
     {
       "name": "display_annotation_frequency",
@@ -1178,9 +1863,14 @@
       "set": "DISP:ANN:FREQ ON|OFF|1|0",
       "query": "DISP:ANN:FREQ?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["DISP:ANN:FREQ OFF"]
+      "examples": [
+        "DISP:ANN:FREQ OFF"
+      ]
     },
     {
       "name": "display_annotation_modulation",
@@ -1190,9 +1880,14 @@
       "set": "DISP:ANN:MOD ON|OFF|1|0",
       "query": "DISP:ANN:MOD?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["DISP:ANN:MOD OFF"]
+      "examples": [
+        "DISP:ANN:MOD OFF"
+      ]
     },
     {
       "name": "display_annotation_amplitude",
@@ -1202,9 +1897,14 @@
       "set": "DISP:ANN:AMPL ON|OFF|1|0",
       "query": "DISP:ANN:AMPL?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["DISP:ANN:AMPL OFF"]
+      "examples": [
+        "DISP:ANN:AMPL OFF"
+      ]
     },
     {
       "name": "display_annotation_lfsource",
@@ -1214,9 +1914,14 @@
       "set": "DISP:ANN:LFS ON|OFF|1|0",
       "query": "DISP:ANN:LFS?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["DISP:ANN:LFS OFF"]
+      "examples": [
+        "DISP:ANN:LFS OFF"
+      ]
     },
     {
       "name": "display_radix",
@@ -1226,9 +1931,14 @@
       "set": "DISP:RAD US|EURopean",
       "query": "DISP:RAD?",
       "parameters": [
-        { "name": "radix", "range": "US | EURopean" }
+        {
+          "name": "radix",
+          "range": "US | EURopean"
+        }
       ],
-      "examples": ["DISP:RAD US"]
+      "examples": [
+        "DISP:RAD US"
+      ]
     },
     {
       "name": "system_error",
@@ -1237,9 +1947,15 @@
       "description": "Reads an error from the system error queue (returns 0 if empty). NUMeric returns the error number only; STRing returns number and a quoted message. See manual Appendix D for the full error list.",
       "query": "SYST:ERR? [NUMeric|STRing]",
       "parameters": [
-        { "name": "format", "range": "NUMeric | STRing (default NUMeric)" }
+        {
+          "name": "format",
+          "range": "NUMeric | STRing (default NUMeric)"
+        }
       ],
-      "examples": ["SYST:ERR?", "SYST:ERR? STRING"]
+      "examples": [
+        "SYST:ERR?",
+        "SYST:ERR? STRING"
+      ]
     },
     {
       "name": "system_state_clear",
@@ -1247,7 +1963,9 @@
       "category": "System",
       "description": "Clears all save/recall registers.",
       "set": "SYST:STAT:CALL",
-      "examples": ["SYST:STAT:CALL"]
+      "examples": [
+        "SYST:STAT:CALL"
+      ]
     },
     {
       "name": "system_security",
@@ -1257,9 +1975,14 @@
       "set": "SYST:SEC ON|OFF|1|0",
       "query": "SYST:SEC?",
       "parameters": [
-        { "name": "state", "range": "ON|OFF|1|0" }
+        {
+          "name": "state",
+          "range": "ON|OFF|1|0"
+        }
       ],
-      "examples": ["SYST:SEC OFF"]
+      "examples": [
+        "SYST:SEC OFF"
+      ]
     },
     {
       "name": "status_device_event",
@@ -1267,7 +1990,9 @@
       "category": "Status",
       "description": "Queries the Device Dependent Event Status Register.",
       "query": "STAT:EVEN?",
-      "examples": ["STAT:EVEN?"]
+      "examples": [
+        "STAT:EVEN?"
+      ]
     },
     {
       "name": "status_device_condition",
@@ -1275,7 +2000,9 @@
       "category": "Status",
       "description": "Queries the Device Dependent Condition Status Register.",
       "query": "STAT:COND?",
-      "examples": ["STAT:COND?"]
+      "examples": [
+        "STAT:COND?"
+      ]
     },
     {
       "name": "status_device_enable",
@@ -1285,9 +2012,15 @@
       "set": "STAT:ENAB <nrf>",
       "query": "STAT:ENAB?",
       "parameters": [
-        { "name": "mask", "range": "0 to 65535 (decimal or #B/#Q/#H program data)" }
+        {
+          "name": "mask",
+          "range": "0 to 65535 (decimal or #B/#Q/#H program data)"
+        }
       ],
-      "examples": ["STAT:ENAB 255", "STAT:ENAB?"]
+      "examples": [
+        "STAT:ENAB 255",
+        "STAT:ENAB?"
+      ]
     },
     {
       "name": "status_questionable_event",
@@ -1295,7 +2028,9 @@
       "category": "Status",
       "description": "Queries the HP-SL Signal Integrity Event Status Register.",
       "query": "STAT:DQU:EVEN?",
-      "examples": ["STAT:DQU:EVEN?"]
+      "examples": [
+        "STAT:DQU:EVEN?"
+      ]
     },
     {
       "name": "status_questionable_condition",
@@ -1303,7 +2038,9 @@
       "category": "Status",
       "description": "Queries the HP-SL Signal Integrity Condition Status Register.",
       "query": "STAT:DQU:COND?",
-      "examples": ["STAT:DQU:COND?"]
+      "examples": [
+        "STAT:DQU:COND?"
+      ]
     },
     {
       "name": "status_questionable_enable",
@@ -1313,9 +2050,14 @@
       "set": "STAT:DQU:ENAB <nrf>",
       "query": "STAT:DQU:ENAB?",
       "parameters": [
-        { "name": "mask", "range": "0 to 65535 (decimal or #B/#Q/#H program data)" }
+        {
+          "name": "mask",
+          "range": "0 to 65535 (decimal or #B/#Q/#H program data)"
+        }
       ],
-      "examples": ["STAT:DQU:ENAB 255"]
+      "examples": [
+        "STAT:DQU:ENAB 255"
+      ]
     },
     {
       "name": "power_meter",
@@ -1323,7 +2065,10 @@
       "category": "Power Meter",
       "description": "Queries the internal power meter (Special Function 182). The power meter connector is inside the instrument under the top cover.",
       "query": "PMET?",
-      "examples": ["PMET?", "PMET:POW?"]
+      "examples": [
+        "PMET?",
+        "PMET:POW?"
+      ]
     },
     {
       "name": "voltmeter_voltage",
@@ -1331,7 +2076,10 @@
       "category": "Voltmeter",
       "description": "Measures the voltage at the rear-panel VM IN (voltmeter input) connector using the internal voltmeter.",
       "query": "VMET?",
-      "examples": ["VMET?", "VMET:VOLT?"]
+      "examples": [
+        "VMET?",
+        "VMET:VOLT?"
+      ]
     },
     {
       "name": "voltmeter_mode",
@@ -1341,9 +2089,15 @@
       "set": "VMET:MODE AC|DC",
       "query": "VMET:MODE?",
       "parameters": [
-        { "name": "mode", "range": "AC | DC" }
+        {
+          "name": "mode",
+          "range": "AC | DC"
+        }
       ],
-      "examples": ["VMET:MODE DC", "VMET:MODE AC"]
+      "examples": [
+        "VMET:MODE DC",
+        "VMET:MODE AC"
+      ]
     }
   ]
 }

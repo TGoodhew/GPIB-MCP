@@ -4,9 +4,9 @@
   "category": "Frequency Counter",
   "description": "HP/Agilent 53131A 225 MHz universal frequency counter (3-channel optional). Programmed via SCPI 1992.0 over GPIB/RS-232. Command set is shared with the 53132A.",
   "source": "53131A Programming Guide.pdf",
-  "aliases": ["53131A", "HP53131A", "Agilent 53131A", "53132A"],
+  "aliases": ["53131A", "HP53131A", "Agilent 53131A"],
   "termination": { "write": "\n", "read": "\n" },
-  "identity": { "command": "*IDN?", "matchRegex": "5313[12]A", "description": "Standard SCPI identification query." },
+  "identity": { "command": "*IDN?", "matchRegex": "53131A", "description": "Standard SCPI identification query." },
   "commands": [
     {
       "name": "calibration_query",

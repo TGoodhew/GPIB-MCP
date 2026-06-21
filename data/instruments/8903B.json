@@ -4,8 +4,12 @@
   "category": "Audio Analyzer",
   "description": "HP 8903B Audio Analyzer (20 Hz to 100 kHz) combining a low-distortion audio source with a signal analyzer. Performs AC level, DC level, distortion, distortion level, SINAD, signal-to-noise ratio, and frequency-count measurements. Legacy HP-IB (IEEE-488) instrument controlled by an alphameric program-code language, NOT SCPI. Each code is typically equivalent to a front-panel keystroke; codes are concatenated into one program string in the order [Automatic Operation][Source Frequency][Source Amplitude][Measurement][Filters][Special Functions][Log/Lin][Ratio][Start Frequency][Stop Frequency][Plot Limit][Sweep][Trigger] (e.g. AUFR440HZAP1VLM3L1LGT3). Numeric data uses a signed mantissa of up to five digits with an optional decimal point and an optional one- or two-digit signed exponent (the exponent is introduced by EN, e.g. 1EN3). Lower-case alpha characters are treated as upper case. Special Functions are entered as a number followed by SP (the SPCL key), e.g. 47.1SP. Filter, Low-Pass, Ratio, and Sweep groups do not toggle in remote mode; each has a dedicated 'all off' code (H0, L0, R0, W0). The instrument outputs measurement data when commanded with RR/RL (or 20.0SP/20.1SP) in the fixed format +-DDDDDE+-NN followed by CR LF, always in fundamental units (Hz, %, dB, or V). It supports a one-byte status-byte serial poll but has no identify query (predates *IDN?). Powers up at 1 kHz source frequency, 0 V amplitude, 600 ohm output impedance, and Service Request Condition 22.2 (HP-IB error).",
   "source": "8903b.pdf",
-  "aliases": ["8903B", "HP8903B", "8903A", "8903E"],
+  "aliases": ["8903B", "HP8903B"],
   "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "No identify query. The HP 8903-series Audio Analyzers predate *IDN? and provide no HP-IB model-identification command; only a one-byte status-byte serial poll is available. Identify the instrument by its HP-IB address."
+  },
   "commands": [
     {
       "name": "automatic_operation",

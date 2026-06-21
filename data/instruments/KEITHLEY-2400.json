@@ -4,11 +4,11 @@
   "category": "SourceMeter (SMU)",
   "description": "Keithley Model 2400 Series SourceMeter (Source Measure Unit): a combined precision voltage/current source and measurement instrument able to source and measure voltage, current and resistance, with programmable compliance (current/voltage limits), selectable measurement ranges, NPLC integration, digital filtering, 2- and 4-wire (remote) sensing, fixed/sweep/list/source-memory sourcing, a buffer (data store), limit/math (CALCulate) testing and digital I/O. The series covers the 2400, 2401, 2410, 2420, 2425, 2430 (with Pulse Mode) and 2440. Programmed using SCPI over GPIB (IEEE-488) or RS-232.",
   "source": "2400S-900-01_K-Sep2011_User.pdf",
-  "aliases": ["2400", "Keithley 2400", "Model 2400", "2401", "2410", "2420", "2425", "2430", "2440"],
+  "aliases": ["2400", "Keithley 2400", "Model 2400"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "MODEL 24[0-9]{2}|2400",
+    "matchRegex": "MODEL 2400|2400",
     "description": "IEEE-488.2 identification query. Returns 'KEITHLEY INSTRUMENTS INC., MODEL nnnn, xxxxxxx, yyyyy/zzzzz' where nnnn is the model number (e.g. 2400), xxxxxxx the serial number and yyyyy/zzzzz the firmware revision levels."
   },
   "commands": [

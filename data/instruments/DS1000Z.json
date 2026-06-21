@@ -5,11 +5,7 @@
   "description": "Rigol MSO1000Z/DS1000Z series digital oscilloscope (DS1054Z, DS1074Z/DS1104Z Plus, MSO1074Z/MSO1104Z). Controlled by SCPI commands over USB or LAN. Some subsystems (LA/digital, [:SOURce] signal source, decoder/trigger protocol options) apply only to MSO models or models with the corresponding option.",
   "source": "DS1000Z_Programming Guide_EN.pdf",
   "aliases": [
-    "DS1000Z",
-    "DS1054Z",
-    "DS1074Z",
-    "DS1104Z",
-    "MSO1000Z"
+    "DS1000Z"
   ],
   "termination": {
     "write": "\n",

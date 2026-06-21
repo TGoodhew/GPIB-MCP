@@ -4,7 +4,7 @@
   "category": "Switch / Control Unit",
   "description": "Agilent 3499A/B/C Switch/Control System mainframe. High-density/high-speed switching and digital I/O for plug-in modules (MUX, GP relay, matrix, DIO, multifunction, RF/microwave/optical). Programmable via SCPI over GPIB, LAN, or RS-232. 3499A has slots 0-5, 3499B has slots 0-2, 3499C has slots 0-9 (slot 0 is the control board/built-in DIO). Operates in SCPI mode or HP 3488A emulation mode.",
   "source": "3499A User & Programming.pdf",
-  "aliases": ["3499A", "3499B", "3499C"],
+  "aliases": ["3499A"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
