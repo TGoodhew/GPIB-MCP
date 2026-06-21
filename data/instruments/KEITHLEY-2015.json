@@ -2,14 +2,14 @@
   "model": "2015",
   "manufacturer": "Keithley",
   "category": "Multimeter / Audio Analyzer",
-  "description": "Keithley Model 2015/2015-P (and 2016) THD Multimeter: a 6.5-digit audio-analysis DMM that measures DC/AC voltage and current, 2- and 4-wire resistance, frequency, period, temperature, continuity and diodes, plus audio distortion functions (THD, THD+N, SINAD). The 2015-P adds an FFT analyzer with peak/marker and frequency-list functions and a built-in sine-wave source. Programmed using SCPI over GPIB (IEEE-488) or RS-232.",
+  "description": "Keithley Model 2015/2015-P THD Multimeter: a 6.5-digit audio-analysis DMM that measures DC/AC voltage and current, 2- and 4-wire resistance, frequency, period, temperature, continuity and diodes, plus audio distortion functions (THD, THD+N, SINAD). The 2015-P adds an FFT analyzer with peak/marker and frequency-list functions and a built-in sine-wave source. The closely related Model 2016 shares this SCPI command set but has roughly twice the sine-wave source output. Programmed using SCPI over GPIB (IEEE-488) or RS-232.",
   "source": "kei2015-man.pdf",
-  "aliases": ["2015", "Keithley 2015", "Model 2015", "2015-P", "2015P", "2016"],
+  "aliases": ["2015", "Keithley 2015", "Model 2015", "2015-P", "2015P"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "MODEL 201[56]|2015",
-    "description": "IEEE-488.2 identification query. Returns the instrument identification string including the model number, used to identify the Model 2015/2016 over the bus."
+    "matchRegex": "MODEL 2015|2015",
+    "description": "IEEE-488.2 identification query. Returns the instrument identification string including the model number, used to identify the Model 2015 over the bus."
   },
   "commands": [
     {

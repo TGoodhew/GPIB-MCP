@@ -4,7 +4,7 @@
   "category": "DC Power Supply",
   "description": "Rigol DP800 series programmable linear DC power supply (DP831/DP832/DP821/DP811 and A variants). SCPI command set over USB, LAN, RS-232 and GPIB, supporting single and multi-channel output, OVP/OCP/OTP protection, measurement, timer/delay output and tracking.",
   "source": "DP800Programming.pdf",
-  "aliases": ["DP800", "DP831", "DP831A", "DP832", "DP832A", "DP821", "DP821A", "DP811", "DP811A", "DP822", "DP822A", "DP813", "DP813A"],
+  "aliases": ["DP800"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",

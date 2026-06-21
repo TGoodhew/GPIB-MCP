@@ -1,0 +1,2721 @@
+{
+  "model": "2401",
+  "manufacturer": "Keithley",
+  "category": "SourceMeter (SMU)",
+  "description": "Keithley Model 2401 SourceMeter (Source Measure Unit): a combined precision voltage/current source and measurement instrument. SMU ratings: max source 21 V (20 V range) and 1.05 A (1 A range), max power 22 W. Like the Model 2400 but without the 200 V range (max 20 V) and convection cooled (no fan). Sources/measures voltage, current and resistance with programmable compliance, 2- and 4-wire sensing, fixed/sweep/list/source-memory sourcing, buffer, math/limit (CALCulate) testing and digital I/O. Programmed using SCPI over GPIB (IEEE-488) or RS-232.",
+  "source": "2400S-900-01_K-Sep2011_User.pdf",
+  "aliases": [
+    "2401",
+    "Keithley 2401",
+    "Model 2401"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "2401",
+    "supported": true,
+    "description": "Keithley *IDN? returns 'KEITHLEY INSTRUMENTS INC.,MODEL 2401,...'. Matched on '2401'."
+  },
+  "commands": [
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Identification query. Returns the manufacturer, model number, serial number and firmware revision levels of the unit.",
+      "query": "*IDN?",
+      "examples": [
+        "*IDN?"
+      ]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Reset. Returns the SourceMeter to the *RST (GPIB) default conditions, cancels all pending commands and cancels any pending *OPC/*OPC? response.",
+      "set": "*RST",
+      "examples": [
+        "*RST"
+      ]
+    },
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear status. Clears all event registers and the Error Queue.",
+      "set": "*CLS",
+      "examples": [
+        "*CLS"
+      ]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Program the Standard Event Status Enable Register. Accepts decimal (NRf) or non-decimal (#H, #Q, #B) formats. *ESE 0 clears the register.",
+      "set": "*ESE <NRf>",
+      "query": "*ESE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 255 (bit mask)"
+        }
+      ],
+      "examples": [
+        "*ESE 36",
+        "*ESE?"
+      ]
+    },
+    {
+      "name": "event_status_read",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Read and clear the Standard Event Status Register.",
+      "query": "*ESR?",
+      "examples": [
+        "*ESR?"
+      ]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Program the Service Request Enable Register. *SRE 0 clears the register. Accepts NDN (#H, #Q, #B) or NRf format.",
+      "set": "*SRE <NRf>",
+      "query": "*SRE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 255 (bit mask)"
+        }
+      ],
+      "examples": [
+        "*SRE 4",
+        "*SRE?"
+      ]
+    },
+    {
+      "name": "status_byte",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Read the Status Byte Register (does not clear it).",
+      "query": "*STB?",
+      "examples": [
+        "*STB?"
+      ]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Operation complete. Sets the OPC bit in the Standard Event Register after all pending command operations are complete. Typically sent after :INITiate.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": [
+        "*OPC",
+        "*OPC?"
+      ]
+    },
+    {
+      "name": "wait_to_continue",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Wait-to-continue. Suspends execution of subsequent commands until all previous overlapped commands are finished (effectively a no-op on the SourceMeter).",
+      "set": "*WAI",
+      "examples": [
+        "*WAI"
+      ]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Send a bus trigger to the SourceMeter (equivalent to a GPIB group execute trigger, GET). The unit reacts if BUS is the programmed arm control source.",
+      "set": "*TRG",
+      "examples": [
+        "*TRG"
+      ]
+    },
+    {
+      "name": "self_test",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Self-test query. Performs a checksum test on ROM and returns the coded result: 0 (pass) or 1 (fail).",
+      "query": "*TST?",
+      "examples": [
+        "*TST?"
+      ]
+    },
+    {
+      "name": "options_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Options query. Returns the presence or absence of installed options, e.g. '0' for none or 'CONTACT CHECK' if the contact-check option is present.",
+      "query": "*OPT?",
+      "examples": [
+        "*OPT?"
+      ]
+    },
+    {
+      "name": "save_setup",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Save the present instrument setup configuration in one of five memory locations for later recall.",
+      "set": "*SAV <NRf>",
+      "parameters": [
+        {
+          "name": "location",
+          "range": "0 to 4"
+        }
+      ],
+      "examples": [
+        "*SAV 0"
+      ]
+    },
+    {
+      "name": "recall_setup",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recall a previously saved instrument setup configuration from memory.",
+      "set": "*RCL <NRf>",
+      "parameters": [
+        {
+          "name": "location",
+          "range": "0 to 4"
+        }
+      ],
+      "examples": [
+        "*RCL 0"
+      ]
+    },
+    {
+      "name": "configure_function",
+      "mnemonic": ":CONFigure:<function>",
+      "category": "Measurement",
+      "description": "Configure the SourceMeter for measurements on the specified function. Defaults related controls to *RST values, sets the trigger model to immediate/single, disables math and buffer, enables autozero and turns the source output ON. Query returns the active function(s).",
+      "set": ":CONFigure:<function>",
+      "query": ":CONFigure?",
+      "parameters": [
+        {
+          "name": "function",
+          "range": "CURRent[:DC] | VOLTage[:DC] | RESistance"
+        }
+      ],
+      "examples": [
+        ":CONF:VOLT",
+        ":CONF?"
+      ]
+    },
+    {
+      "name": "fetch",
+      "mnemonic": ":FETCh?",
+      "category": "Measurement",
+      "description": "Request the latest post-processed readings from the sample buffer without triggering a new measurement or changing setup. Returned elements depend on :FORMat:ELEMents. Automatically asserted by :READ? and :MEASure?.",
+      "query": ":FETCh?",
+      "examples": [
+        ":FETC?"
+      ]
+    },
+    {
+      "name": "sense_data_latest",
+      "mnemonic": "[:SENSe[1]]:DATA[:LATest]?",
+      "category": "Measurement",
+      "description": "Works like :FETCh? but returns only the single most recent reading.",
+      "query": ":SENSe:DATA:LATest?",
+      "examples": [
+        ":SENS:DATA:LAT?",
+        ":DATA?"
+      ]
+    },
+    {
+      "name": "read",
+      "mnemonic": ":READ?",
+      "category": "Measurement",
+      "description": "Trigger and acquire readings. Executes an :INITiate followed by a :FETCh?. The number of readings depends on the configured arm/trigger counts. The output must be on (or auto output-off enabled) to perform a :READ?.",
+      "query": ":READ?",
+      "examples": [
+        ":READ?"
+      ]
+    },
+    {
+      "name": "measure",
+      "mnemonic": ":MEASure[:<function>]?",
+      "category": "Measurement",
+      "description": "One-shot measurement. Performs a :CONFigure:<function> followed by a :READ? to acquire a single reading. If no function is specified, measures on the presently selected function. The source turns on for the measurement.",
+      "query": ":MEASure:<function>?",
+      "parameters": [
+        {
+          "name": "function",
+          "range": "CURRent[:DC] | VOLTage[:DC] | RESistance"
+        }
+      ],
+      "examples": [
+        ":MEAS:VOLT?",
+        ":MEAS:CURR?",
+        ":MEAS?"
+      ]
+    },
+    {
+      "name": "initiate",
+      "mnemonic": ":INITiate[:IMMediate]",
+      "category": "Trigger",
+      "description": "Initiate one or more source-measure cycles by taking the instrument out of the idle state.",
+      "set": ":INITiate",
+      "examples": [
+        ":INIT",
+        ":INIT:IMM"
+      ]
+    },
+    {
+      "name": "abort",
+      "mnemonic": ":ABORt",
+      "category": "Trigger",
+      "description": "Reset the trigger system and return the instrument to the idle state.",
+      "set": ":ABORt",
+      "examples": [
+        ":ABOR"
+      ]
+    },
+    {
+      "name": "output_state",
+      "mnemonic": ":OUTPut[1]:STATe",
+      "category": "Output",
+      "description": "Turn the source output on or off. Default OFF. Beware of hazardous voltage on the output terminals when on.",
+      "set": ":OUTPut:STATe <b>",
+      "query": ":OUTPut:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":OUTP ON",
+        ":OUTP:STAT?"
+      ]
+    },
+    {
+      "name": "output_enable",
+      "mnemonic": ":OUTPut:ENABle[:STATe]",
+      "category": "Output",
+      "description": "Enable or disable the rear-panel output-enable interlock. Default OFF.",
+      "set": ":OUTPut:ENABle:STATe <b>",
+      "query": ":OUTPut:ENABle:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":OUTP:ENAB ON"
+      ]
+    },
+    {
+      "name": "output_enable_tripped",
+      "mnemonic": ":OUTPut:ENABle:TRIPped?",
+      "category": "Output",
+      "description": "Query whether the output enable has tripped: 1 (not tripped) or 0 (tripped).",
+      "query": ":OUTPut:ENABle:TRIPped?",
+      "examples": [
+        ":OUTP:ENAB:TRIP?"
+      ]
+    },
+    {
+      "name": "output_off_mode",
+      "mnemonic": ":OUTPut:SMODe",
+      "category": "Output",
+      "description": "Select the output-off mode (the state of the output terminals when off). Default NORMal (GUARd on the Model 2410).",
+      "set": ":OUTPut:SMODe <name>",
+      "query": ":OUTPut:SMODe?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "HIMPedance | NORMal | ZERO | GUARd"
+        }
+      ],
+      "examples": [
+        ":OUTP:SMOD HIMP"
+      ]
+    },
+    {
+      "name": "route_terminals",
+      "mnemonic": ":ROUTe:TERMinals",
+      "category": "Route",
+      "description": "Select the front or rear input/output terminals. Default FRONt.",
+      "set": ":ROUTe:TERMinals <name>",
+      "query": ":ROUTe:TERMinals?",
+      "parameters": [
+        {
+          "name": "terminals",
+          "range": "FRONt | REAR"
+        }
+      ],
+      "examples": [
+        ":ROUT:TERM REAR",
+        ":ROUT:TERM?"
+      ]
+    },
+    {
+      "name": "source_function_mode",
+      "mnemonic": "[:SOURce[1]]:FUNCtion[:MODE]",
+      "category": "Source",
+      "description": "Select the source function/mode. Default VOLTage. MEMory selects source-memory sweep operation.",
+      "set": ":SOURce:FUNCtion:MODE <name>",
+      "query": ":SOURce:FUNCtion:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "VOLTage | CURRent | MEMory"
+        }
+      ],
+      "examples": [
+        ":SOUR:FUNC VOLT",
+        ":SOUR:FUNC?"
+      ]
+    },
+    {
+      "name": "source_function_shape",
+      "mnemonic": "[:SOURce[1]]:FUNCtion:SHAPe",
+      "category": "Source",
+      "description": "Model 2430 only: select the output mode, DC or PULSe. Default DC.",
+      "set": ":SOURce:FUNCtion:SHAPe <name>",
+      "query": ":SOURce:FUNCtion:SHAPe?",
+      "parameters": [
+        {
+          "name": "shape",
+          "range": "DC | PULSe"
+        }
+      ],
+      "examples": [
+        ":SOUR:FUNC:SHAP DC"
+      ]
+    },
+    {
+      "name": "source_delay",
+      "mnemonic": "[:SOURce[1]]:DELay",
+      "category": "Source",
+      "description": "Specify the source settling (delay) time in seconds. Default 0.",
+      "set": ":SOURce:DELay <n>",
+      "query": ":SOURce:DELay?",
+      "parameters": [
+        {
+          "name": "delay",
+          "units": [
+            "s"
+          ],
+          "range": "0 to 9999.999"
+        }
+      ],
+      "examples": [
+        ":SOUR:DEL 0.1",
+        ":SOUR:DEL?"
+      ]
+    },
+    {
+      "name": "source_delay_auto",
+      "mnemonic": "[:SOURce[1]]:DELay:AUTO",
+      "category": "Source",
+      "description": "Enable or disable the auto source settling-time delay. Default ON.",
+      "set": ":SOURce:DELay:AUTO <b>",
+      "query": ":SOURce:DELay:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SOUR:DEL:AUTO ON"
+      ]
+    },
+    {
+      "name": "source_clear_immediate",
+      "mnemonic": "[:SOURce[1]]:CLEar[:IMMediate]",
+      "category": "Source",
+      "description": "Turn the selected source off immediately.",
+      "set": ":SOURce:CLEar:IMMediate",
+      "examples": [
+        ":SOUR:CLE"
+      ]
+    },
+    {
+      "name": "source_clear_auto",
+      "mnemonic": "[:SOURce[1]]:CLEar:AUTO",
+      "category": "Source",
+      "description": "Enable or disable auto output-off (auto clear) for the source, so the output turns on at the start of each source-delay-measure cycle and off after each measurement. Default OFF.",
+      "set": ":SOURce:CLEar:AUTO <b>",
+      "query": ":SOURce:CLEar:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SOUR:CLE:AUTO ON"
+      ]
+    },
+    {
+      "name": "source_clear_auto_mode",
+      "mnemonic": "[:SOURce[1]]:CLEar:AUTO:MODE",
+      "category": "Source",
+      "description": "Specify the auto-clear mode: ALWays (clear after every measurement) or TCOunt (after the trigger count is reached). Default ALWays.",
+      "set": ":SOURce:CLEar:AUTO:MODE <name>",
+      "query": ":SOURce:CLEar:AUTO:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "ALWays | TCOunt"
+        }
+      ],
+      "examples": [
+        ":SOUR:CLE:AUTO:MODE ALW"
+      ]
+    },
+    {
+      "name": "source_current_mode",
+      "mnemonic": "[:SOURce[1]]:CURRent:MODE",
+      "category": "Source",
+      "description": "Select the current-source mode. Default FIXed.",
+      "set": ":SOURce:CURRent:MODE <name>",
+      "query": ":SOURce:CURRent:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "FIXed | SWEep | LIST"
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:MODE FIX"
+      ]
+    },
+    {
+      "name": "source_current_range",
+      "mnemonic": "[:SOURce[1]]:CURRent:RANGe",
+      "category": "Source",
+      "description": "Select the fixed current-source range. Accepts a value (range selected to cover it), or UP/DOWN.",
+      "set": ":SOURce:CURRent:RANGe <n>|UP|DOWN",
+      "query": ":SOURce:CURRent:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "units": [
+            "A"
+          ],
+          "range": "model-dependent (e.g. 1.05e-4 default); UP | DOWN"
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:RANG 1e-3",
+        ":SOUR:CURR:RANG?"
+      ]
+    },
+    {
+      "name": "source_current_range_auto",
+      "mnemonic": "[:SOURce[1]]:CURRent:RANGe:AUTO",
+      "category": "Source",
+      "description": "Enable or disable current-source autoranging. Default ON.",
+      "set": ":SOURce:CURRent:RANGe:AUTO <b>",
+      "query": ":SOURce:CURRent:RANGe:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:RANG:AUTO ON"
+      ]
+    },
+    {
+      "name": "source_current_level",
+      "mnemonic": "[:SOURce[1]]:CURRent[:LEVel][:IMMediate][:AMPLitude]",
+      "category": "Source",
+      "description": "Set the immediate current-source output level in amps. Default 0.",
+      "set": ":SOURce:CURRent:LEVel <n>",
+      "query": ":SOURce:CURRent:LEVel?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "A"
+          ],
+          "range": "within selected/source range"
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:LEV 0.01",
+        ":SOUR:CURR?"
+      ]
+    },
+    {
+      "name": "source_current_level_triggered",
+      "mnemonic": "[:SOURce[1]]:CURRent[:LEVel]:TRIGgered[:AMPLitude]",
+      "category": "Source",
+      "description": "Set the current-source level applied when triggered. Default 0.",
+      "set": ":SOURce:CURRent:LEVel:TRIGgered <n>",
+      "query": ":SOURce:CURRent:LEVel:TRIGgered?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "A"
+          ],
+          "range": "within source range"
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:TRIG 0.01"
+      ]
+    },
+    {
+      "name": "source_current_start",
+      "mnemonic": "[:SOURce[1]]:CURRent:STARt",
+      "category": "Source",
+      "description": "Specify the start level for a current sweep. Default 0.",
+      "set": ":SOURce:CURRent:STARt <n>",
+      "query": ":SOURce:CURRent:STARt?",
+      "parameters": [
+        {
+          "name": "start",
+          "units": [
+            "A"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:STAR 0"
+      ]
+    },
+    {
+      "name": "source_current_stop",
+      "mnemonic": "[:SOURce[1]]:CURRent:STOP",
+      "category": "Source",
+      "description": "Specify the stop level for a current sweep. Default 0.",
+      "set": ":SOURce:CURRent:STOP <n>",
+      "query": ":SOURce:CURRent:STOP?",
+      "parameters": [
+        {
+          "name": "stop",
+          "units": [
+            "A"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:STOP 0.01"
+      ]
+    },
+    {
+      "name": "source_current_step",
+      "mnemonic": "[:SOURce[1]]:CURRent:STEP",
+      "category": "Source",
+      "description": "Specify the step value for a current sweep. Default 0.",
+      "set": ":SOURce:CURRent:STEP <n>",
+      "query": ":SOURce:CURRent:STEP?",
+      "parameters": [
+        {
+          "name": "step",
+          "units": [
+            "A"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:STEP 0.001"
+      ]
+    },
+    {
+      "name": "source_current_center",
+      "mnemonic": "[:SOURce[1]]:CURRent:CENTer",
+      "category": "Source",
+      "description": "Specify the center point for a current sweep. Default 0.",
+      "set": ":SOURce:CURRent:CENTer <n>",
+      "query": ":SOURce:CURRent:CENTer?",
+      "parameters": [
+        {
+          "name": "center",
+          "units": [
+            "A"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:CENT 0"
+      ]
+    },
+    {
+      "name": "source_current_span",
+      "mnemonic": "[:SOURce[1]]:CURRent:SPAN",
+      "category": "Source",
+      "description": "Specify the span for a current sweep. Default 0.",
+      "set": ":SOURce:CURRent:SPAN <n>",
+      "query": ":SOURce:CURRent:SPAN?",
+      "parameters": [
+        {
+          "name": "span",
+          "units": [
+            "A"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:CURR:SPAN 0.01"
+      ]
+    },
+    {
+      "name": "source_voltage_mode",
+      "mnemonic": "[:SOURce[1]]:VOLTage:MODE",
+      "category": "Source",
+      "description": "Select the voltage-source mode. Default FIXed.",
+      "set": ":SOURce:VOLTage:MODE <name>",
+      "query": ":SOURce:VOLTage:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "FIXed | SWEep | LIST"
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:MODE FIX"
+      ]
+    },
+    {
+      "name": "source_voltage_range",
+      "mnemonic": "[:SOURce[1]]:VOLTage:RANGe",
+      "category": "Source",
+      "description": "Select the fixed voltage-source range. Accepts a value, or UP/DOWN. Default 21.",
+      "set": ":SOURce:VOLTage:RANGe <n>|UP|DOWN",
+      "query": ":SOURce:VOLTage:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "units": [
+            "V"
+          ],
+          "range": "model-dependent (e.g. 21 default); UP | DOWN"
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:RANG 20",
+        ":SOUR:VOLT:RANG?"
+      ]
+    },
+    {
+      "name": "source_voltage_range_auto",
+      "mnemonic": "[:SOURce[1]]:VOLTage:RANGe:AUTO",
+      "category": "Source",
+      "description": "Enable or disable voltage-source autoranging. Default ON.",
+      "set": ":SOURce:VOLTage:RANGe:AUTO <b>",
+      "query": ":SOURce:VOLTage:RANGe:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:RANG:AUTO ON"
+      ]
+    },
+    {
+      "name": "source_voltage_level",
+      "mnemonic": "[:SOURce[1]]:VOLTage[:LEVel][:IMMediate][:AMPLitude]",
+      "category": "Source",
+      "description": "Set the immediate voltage-source output level in volts. Default 0.",
+      "set": ":SOURce:VOLTage:LEVel <n>",
+      "query": ":SOURce:VOLTage:LEVel?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "V"
+          ],
+          "range": "within selected/source range"
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:LEV 1.0",
+        ":SOUR:VOLT?"
+      ]
+    },
+    {
+      "name": "source_voltage_level_triggered",
+      "mnemonic": "[:SOURce[1]]:VOLTage[:LEVel]:TRIGgered[:AMPLitude]",
+      "category": "Source",
+      "description": "Set the voltage-source level applied when triggered. Default 0.",
+      "set": ":SOURce:VOLTage:LEVel:TRIGgered <n>",
+      "query": ":SOURce:VOLTage:LEVel:TRIGgered?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "V"
+          ],
+          "range": "within source range"
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:TRIG 5"
+      ]
+    },
+    {
+      "name": "source_voltage_protection",
+      "mnemonic": "[:SOURce[1]]:VOLTage:PROTection[:LEVel]",
+      "category": "Source",
+      "description": "Specify the V-source over-voltage protection limit. :SYSTem:PRESet default 40, *RST default NONE.",
+      "set": ":SOURce:VOLTage:PROTection <NRf>",
+      "query": ":SOURce:VOLTage:PROTection?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "V"
+          ],
+          "range": "instrument-dependent (e.g. 20, 40, 60, 80, 100, 120, 160, NONE)"
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:PROT 40"
+      ]
+    },
+    {
+      "name": "source_voltage_protection_tripped",
+      "mnemonic": "[:SOURce[1]]:VOLTage:PROTection:TRIPped?",
+      "category": "Source",
+      "description": "Query whether the V-source protection limit has been reached: 1 (yes) or 0 (no).",
+      "query": ":SOURce:VOLTage:PROTection:TRIPped?",
+      "examples": [
+        ":SOUR:VOLT:PROT:TRIP?"
+      ]
+    },
+    {
+      "name": "source_voltage_start",
+      "mnemonic": "[:SOURce[1]]:VOLTage:STARt",
+      "category": "Source",
+      "description": "Specify the start level for a voltage sweep. Default 0.",
+      "set": ":SOURce:VOLTage:STARt <n>",
+      "query": ":SOURce:VOLTage:STARt?",
+      "parameters": [
+        {
+          "name": "start",
+          "units": [
+            "V"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:STAR 0"
+      ]
+    },
+    {
+      "name": "source_voltage_stop",
+      "mnemonic": "[:SOURce[1]]:VOLTage:STOP",
+      "category": "Source",
+      "description": "Specify the stop level for a voltage sweep. Default 0.",
+      "set": ":SOURce:VOLTage:STOP <n>",
+      "query": ":SOURce:VOLTage:STOP?",
+      "parameters": [
+        {
+          "name": "stop",
+          "units": [
+            "V"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:STOP 10"
+      ]
+    },
+    {
+      "name": "source_voltage_step",
+      "mnemonic": "[:SOURce[1]]:VOLTage:STEP",
+      "category": "Source",
+      "description": "Specify the step value for a voltage sweep. Default 0.",
+      "set": ":SOURce:VOLTage:STEP <n>",
+      "query": ":SOURce:VOLTage:STEP?",
+      "parameters": [
+        {
+          "name": "step",
+          "units": [
+            "V"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:STEP 0.1"
+      ]
+    },
+    {
+      "name": "source_voltage_center",
+      "mnemonic": "[:SOURce[1]]:VOLTage:CENTer",
+      "category": "Source",
+      "description": "Specify the center point for a voltage sweep. Default 0.",
+      "set": ":SOURce:VOLTage:CENTer <n>",
+      "query": ":SOURce:VOLTage:CENTer?",
+      "parameters": [
+        {
+          "name": "center",
+          "units": [
+            "V"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:CENT 5"
+      ]
+    },
+    {
+      "name": "source_voltage_span",
+      "mnemonic": "[:SOURce[1]]:VOLTage:SPAN",
+      "category": "Source",
+      "description": "Specify the span for a voltage sweep. Default 0.",
+      "set": ":SOURce:VOLTage:SPAN <n>",
+      "query": ":SOURce:VOLTage:SPAN?",
+      "parameters": [
+        {
+          "name": "span",
+          "units": [
+            "V"
+          ]
+        }
+      ],
+      "examples": [
+        ":SOUR:VOLT:SPAN 10"
+      ]
+    },
+    {
+      "name": "source_soak",
+      "mnemonic": "[:SOURce[1]]:SOAK",
+      "category": "Source",
+      "description": "Set the soak (settling) time at the first sweep point. Default 0.",
+      "set": ":SOURce:SOAK <NRf>",
+      "query": ":SOURce:SOAK?",
+      "parameters": [
+        {
+          "name": "time",
+          "units": [
+            "s"
+          ],
+          "range": "0.00000 to 9999.999"
+        }
+      ],
+      "examples": [
+        ":SOUR:SOAK 0.1"
+      ]
+    },
+    {
+      "name": "source_sweep_spacing",
+      "mnemonic": "[:SOURce[1]]:SWEep:SPACing",
+      "category": "Source",
+      "description": "Select the sweep spacing (point distribution). Default LINear.",
+      "set": ":SOURce:SWEep:SPACing <name>",
+      "query": ":SOURce:SWEep:SPACing?",
+      "parameters": [
+        {
+          "name": "spacing",
+          "range": "LINear | LOGarithmic"
+        }
+      ],
+      "examples": [
+        ":SOUR:SWE:SPAC LIN"
+      ]
+    },
+    {
+      "name": "source_sweep_points",
+      "mnemonic": "[:SOURce[1]]:SWEep:POINts",
+      "category": "Source",
+      "description": "Specify the number of points in a sweep. Default 2500.",
+      "set": ":SOURce:SWEep:POINts <n>",
+      "query": ":SOURce:SWEep:POINts?",
+      "parameters": [
+        {
+          "name": "points",
+          "range": "2 to 2500"
+        }
+      ],
+      "examples": [
+        ":SOUR:SWE:POIN 11"
+      ]
+    },
+    {
+      "name": "source_sweep_direction",
+      "mnemonic": "[:SOURce[1]]:SWEep:DIRection",
+      "category": "Source",
+      "description": "Set the sweep direction: UP (start to stop) or DOWN (stop to start). Default UP.",
+      "set": ":SOURce:SWEep:DIRection <name>",
+      "query": ":SOURce:SWEep:DIRection?",
+      "parameters": [
+        {
+          "name": "direction",
+          "range": "UP | DOWN"
+        }
+      ],
+      "examples": [
+        ":SOUR:SWE:DIR UP"
+      ]
+    },
+    {
+      "name": "source_sweep_ranging",
+      "mnemonic": "[:SOURce[1]]:SWEep:RANGing",
+      "category": "Source",
+      "description": "Select the source ranging mode used during a sweep. Default BEST.",
+      "set": ":SOURce:SWEep:RANGing <name>",
+      "query": ":SOURce:SWEep:RANGing?",
+      "parameters": [
+        {
+          "name": "ranging",
+          "range": "BEST | AUTO | FIXed"
+        }
+      ],
+      "examples": [
+        ":SOUR:SWE:RANG BEST"
+      ]
+    },
+    {
+      "name": "source_sweep_cabort",
+      "mnemonic": "[:SOURce[1]]:SWEep:CABort",
+      "category": "Source",
+      "description": "Set the abort-on-compliance behaviour for a sweep. Default NEVer.",
+      "set": ":SOURce:SWEep:CABort <name>",
+      "query": ":SOURce:SWEep:CABort?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "NEVer | EARLy | LATE"
+        }
+      ],
+      "examples": [
+        ":SOUR:SWE:CAB NEV"
+      ]
+    },
+    {
+      "name": "source_list_current",
+      "mnemonic": "[:SOURce[1]]:LIST:CURRent",
+      "category": "Source",
+      "description": "Create a list of current-source values for LIST source mode (comma-separated). Query returns the list.",
+      "set": ":SOURce:LIST:CURRent <NRf>{,<NRf>}",
+      "query": ":SOURce:LIST:CURRent?",
+      "parameters": [
+        {
+          "name": "values",
+          "units": [
+            "A"
+          ],
+          "range": "comma-separated list"
+        }
+      ],
+      "examples": [
+        ":SOUR:LIST:CURR 1e-3,2e-3,3e-3"
+      ]
+    },
+    {
+      "name": "source_list_current_append",
+      "mnemonic": "[:SOURce[1]]:LIST:CURRent:APPend",
+      "category": "Source",
+      "description": "Append current-source values to the end of the existing current list.",
+      "set": ":SOURce:LIST:CURRent:APPend <NRf>{,<NRf>}",
+      "parameters": [
+        {
+          "name": "values",
+          "units": [
+            "A"
+          ],
+          "range": "comma-separated list"
+        }
+      ],
+      "examples": [
+        ":SOUR:LIST:CURR:APP 4e-3,5e-3"
+      ]
+    },
+    {
+      "name": "source_list_current_points",
+      "mnemonic": "[:SOURce[1]]:LIST:CURRent:POINts?",
+      "category": "Source",
+      "description": "Query the number of current-source values in the list.",
+      "query": ":SOURce:LIST:CURRent:POINts?",
+      "examples": [
+        ":SOUR:LIST:CURR:POIN?"
+      ]
+    },
+    {
+      "name": "source_list_voltage",
+      "mnemonic": "[:SOURce[1]]:LIST:VOLTage",
+      "category": "Source",
+      "description": "Create a list of voltage-source values for LIST source mode (comma-separated). Query returns the list.",
+      "set": ":SOURce:LIST:VOLTage <NRf>{,<NRf>}",
+      "query": ":SOURce:LIST:VOLTage?",
+      "parameters": [
+        {
+          "name": "values",
+          "units": [
+            "V"
+          ],
+          "range": "comma-separated list"
+        }
+      ],
+      "examples": [
+        ":SOUR:LIST:VOLT 1,2,3,4"
+      ]
+    },
+    {
+      "name": "source_list_voltage_append",
+      "mnemonic": "[:SOURce[1]]:LIST:VOLTage:APPend",
+      "category": "Source",
+      "description": "Append voltage-source values to the end of the existing voltage list.",
+      "set": ":SOURce:LIST:VOLTage:APPend <NRf>{,<NRf>}",
+      "parameters": [
+        {
+          "name": "values",
+          "units": [
+            "V"
+          ],
+          "range": "comma-separated list"
+        }
+      ],
+      "examples": [
+        ":SOUR:LIST:VOLT:APP 5,6"
+      ]
+    },
+    {
+      "name": "source_list_voltage_points",
+      "mnemonic": "[:SOURce[1]]:LIST:VOLTage:POINts?",
+      "category": "Source",
+      "description": "Query the number of voltage-source values in the list.",
+      "query": ":SOURce:LIST:VOLTage:POINts?",
+      "examples": [
+        ":SOUR:LIST:VOLT:POIN?"
+      ]
+    },
+    {
+      "name": "source_memory_save",
+      "mnemonic": "[:SOURce[1]]:MEMory:SAVE",
+      "category": "Source",
+      "description": "Save the present source-measure settings at a source-memory location.",
+      "set": ":SOURce:MEMory:SAVE <n>",
+      "parameters": [
+        {
+          "name": "location",
+          "range": "1 to 100"
+        }
+      ],
+      "examples": [
+        ":SOUR:MEM:SAVE 1"
+      ]
+    },
+    {
+      "name": "source_memory_recall",
+      "mnemonic": "[:SOURce[1]]:MEMory:RECall",
+      "category": "Source",
+      "description": "Recall source-measure settings from a source-memory location.",
+      "set": ":SOURce:MEMory:RECall <n>",
+      "parameters": [
+        {
+          "name": "location",
+          "range": "1 to 100"
+        }
+      ],
+      "examples": [
+        ":SOUR:MEM:REC 1"
+      ]
+    },
+    {
+      "name": "source_memory_points",
+      "mnemonic": "[:SOURce[1]]:MEMory:POINts",
+      "category": "Source",
+      "description": "Specify the number of points in a source-memory sweep.",
+      "set": ":SOURce:MEMory:POINts <n>",
+      "query": ":SOURce:MEMory:POINts?",
+      "parameters": [
+        {
+          "name": "points",
+          "range": "1 to 100"
+        }
+      ],
+      "examples": [
+        ":SOUR:MEM:POIN 5"
+      ]
+    },
+    {
+      "name": "source_memory_start",
+      "mnemonic": "[:SOURce[1]]:MEMory:STARt",
+      "category": "Source",
+      "description": "Specify the start location for a source-memory sweep. Default 1.",
+      "set": ":SOURce:MEMory:STARt <NRf>",
+      "query": ":SOURce:MEMory:STARt?",
+      "parameters": [
+        {
+          "name": "location",
+          "range": "1 to 100"
+        }
+      ],
+      "examples": [
+        ":SOUR:MEM:STAR 1"
+      ]
+    },
+    {
+      "name": "source_pulse_width",
+      "mnemonic": "[:SOURce[1]]:PULSe:WIDTh",
+      "category": "Source",
+      "description": "Model 2430 only: set the pulse width for Pulse Mode.",
+      "set": ":SOURce:PULSe:WIDTh <n>",
+      "query": ":SOURce:PULSe:WIDTh?",
+      "parameters": [
+        {
+          "name": "width",
+          "units": [
+            "s"
+          ],
+          "range": "0.00015 to 0.005"
+        }
+      ],
+      "examples": [
+        ":SOUR:PULS:WIDT 0.001"
+      ]
+    },
+    {
+      "name": "source_pulse_delay",
+      "mnemonic": "[:SOURce[1]]:PULSe:DELay",
+      "category": "Source",
+      "description": "Model 2430 only: set the pulse delay for Pulse Mode.",
+      "set": ":SOURce:PULSe:DELay <n>",
+      "query": ":SOURce:PULSe:DELay?",
+      "parameters": [
+        {
+          "name": "delay",
+          "units": [
+            "s"
+          ],
+          "range": "0 to 9999.999"
+        }
+      ],
+      "examples": [
+        ":SOUR:PULS:DEL 0.01"
+      ]
+    },
+    {
+      "name": "source2_ttl_level",
+      "mnemonic": ":SOURce2:TTL[:LEVel][:DEFault]",
+      "category": "Source",
+      "description": "Specify the digital I/O output pattern on the rear-panel Digital I/O port. Bit range set by :SOURce2:BSIZe; format set by :FORMat:SOURce2.",
+      "set": ":SOURce2:TTL <NRf>",
+      "query": ":SOURce2:TTL?",
+      "parameters": [
+        {
+          "name": "pattern",
+          "range": "0 to 7 (3-bit) or 0 to 15 (4-bit)"
+        }
+      ],
+      "examples": [
+        ":SOUR2:TTL 15"
+      ]
+    },
+    {
+      "name": "source2_bsize",
+      "mnemonic": ":SOURce2:BSIZe",
+      "category": "Source",
+      "description": "Set the Digital I/O bit size. Default 4 (16 with the 2499-DIGIO 16-bit option).",
+      "set": ":SOURce2:BSIZe <n>",
+      "query": ":SOURce2:BSIZe?",
+      "parameters": [
+        {
+          "name": "size",
+          "range": "3 | 4 (or 16 with option)"
+        }
+      ],
+      "examples": [
+        ":SOUR2:BSIZ 4"
+      ]
+    },
+    {
+      "name": "sense_function_on",
+      "mnemonic": "[:SENSe[1]]:FUNCtion[:ON]",
+      "category": "Sense",
+      "description": "Specify (enable) one or more measurement functions. Functions are quoted strings.",
+      "set": ":SENSe:FUNCtion <function list>",
+      "query": ":SENSe:FUNCtion:ON?",
+      "parameters": [
+        {
+          "name": "functions",
+          "range": "\"VOLTage[:DC]\" | \"CURRent[:DC]\" | \"RESistance\""
+        }
+      ],
+      "examples": [
+        ":SENS:FUNC \"VOLT\"",
+        ":SENS:FUNC \"CURR:DC\""
+      ]
+    },
+    {
+      "name": "sense_function_off",
+      "mnemonic": "[:SENSe[1]]:FUNCtion:OFF",
+      "category": "Sense",
+      "description": "Specify (disable) one or more measurement functions.",
+      "set": ":SENSe:FUNCtion:OFF <function list>",
+      "query": ":SENSe:FUNCtion:OFF?",
+      "parameters": [
+        {
+          "name": "functions",
+          "range": "\"VOLTage[:DC]\" | \"CURRent[:DC]\" | \"RESistance\""
+        }
+      ],
+      "examples": [
+        ":SENS:FUNC:OFF \"RES\""
+      ]
+    },
+    {
+      "name": "sense_function_all",
+      "mnemonic": "[:SENSe[1]]:FUNCtion[:ON]:ALL",
+      "category": "Sense",
+      "description": "Enable all measurement functions (when concurrent enabled) or enable the ohms function (when concurrent disabled).",
+      "set": ":SENSe:FUNCtion:ON:ALL",
+      "examples": [
+        ":SENS:FUNC:ALL"
+      ]
+    },
+    {
+      "name": "sense_function_concurrent",
+      "mnemonic": "[:SENSe[1]]:FUNCtion:CONCurrent",
+      "category": "Sense",
+      "description": "Enable or disable the ability to measure more than one function simultaneously. When disabled, the volts function is enabled. Default ON.",
+      "set": ":SENSe:FUNCtion:CONCurrent <b>",
+      "query": ":SENSe:FUNCtion:CONCurrent?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SENS:FUNC:CONC ON"
+      ]
+    },
+    {
+      "name": "sense_function_state",
+      "mnemonic": "[:SENSe[1]]:FUNCtion:STATe?",
+      "category": "Sense",
+      "description": "Query the state of a specified measurement function: 1 (on) or 0 (off).",
+      "query": ":SENSe:FUNCtion:STATe? <name>",
+      "parameters": [
+        {
+          "name": "function",
+          "range": "\"VOLTage\" | \"CURRent\" | \"RESistance\""
+        }
+      ],
+      "examples": [
+        ":SENS:FUNC:STAT? \"VOLT\""
+      ]
+    },
+    {
+      "name": "sense_current_range",
+      "mnemonic": "[:SENSe[1]]:CURRent[:DC]:RANGe[:UPPer]",
+      "category": "Sense",
+      "description": "Select the current measurement range by specifying the expected current reading, or UP/DOWN. Default 1.05e-4.",
+      "set": ":SENSe:CURRent:RANGe <n>|UP|DOWN",
+      "query": ":SENSe:CURRent:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "units": [
+            "A"
+          ],
+          "range": "model-dependent; UP | DOWN"
+        }
+      ],
+      "examples": [
+        ":SENS:CURR:RANG 1e-3",
+        ":SENS:CURR:RANG?"
+      ]
+    },
+    {
+      "name": "sense_current_range_auto",
+      "mnemonic": "[:SENSe[1]]:CURRent[:DC]:RANGe:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable current measurement autoranging. Default ON.",
+      "set": ":SENSe:CURRent:RANGe:AUTO <b>",
+      "query": ":SENSe:CURRent:RANGe:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SENS:CURR:RANG:AUTO ON"
+      ]
+    },
+    {
+      "name": "sense_current_nplc",
+      "mnemonic": "[:SENSe[1]]:CURRent[:DC]:NPLCycles",
+      "category": "Sense",
+      "description": "Specify the current measurement integration rate in number of power line cycles (NPLC). Default 1.0.",
+      "set": ":SENSe:CURRent:NPLCycles <n>",
+      "query": ":SENSe:CURRent:NPLCycles?",
+      "parameters": [
+        {
+          "name": "nplc",
+          "units": [
+            "PLC"
+          ],
+          "range": "0.01 to 10"
+        }
+      ],
+      "examples": [
+        ":SENS:CURR:NPLC 1",
+        ":SENS:CURR:NPLC 0.1"
+      ]
+    },
+    {
+      "name": "sense_current_protection",
+      "mnemonic": "[:SENSe[1]]:CURRent[:DC]:PROTection[:LEVel]",
+      "category": "Sense",
+      "description": "Set the current compliance (limit) for the voltage source. Default 1.05e-4.",
+      "set": ":SENSe:CURRent:PROTection <n>",
+      "query": ":SENSe:CURRent:PROTection?",
+      "parameters": [
+        {
+          "name": "compliance",
+          "units": [
+            "A"
+          ],
+          "range": "model-dependent"
+        }
+      ],
+      "examples": [
+        ":SENS:CURR:PROT 0.01",
+        ":SENS:CURR:PROT?"
+      ]
+    },
+    {
+      "name": "sense_current_protection_tripped",
+      "mnemonic": "[:SENSe[1]]:CURRent[:DC]:PROTection:TRIPped?",
+      "category": "Sense",
+      "description": "Query whether the source is in current compliance: 1 (yes) or 0 (no).",
+      "query": ":SENSe:CURRent:PROTection:TRIPped?",
+      "examples": [
+        ":SENS:CURR:PROT:TRIP?"
+      ]
+    },
+    {
+      "name": "sense_voltage_range",
+      "mnemonic": "[:SENSe[1]]:VOLTage[:DC]:RANGe[:UPPer]",
+      "category": "Sense",
+      "description": "Select the voltage measurement range by specifying the expected voltage reading, or UP/DOWN. Default 21.",
+      "set": ":SENSe:VOLTage:RANGe <n>|UP|DOWN",
+      "query": ":SENSe:VOLTage:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "units": [
+            "V"
+          ],
+          "range": "model-dependent; UP | DOWN"
+        }
+      ],
+      "examples": [
+        ":SENS:VOLT:RANG 20",
+        ":SENS:VOLT:RANG?"
+      ]
+    },
+    {
+      "name": "sense_voltage_range_auto",
+      "mnemonic": "[:SENSe[1]]:VOLTage[:DC]:RANGe:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable voltage measurement autoranging. Default ON.",
+      "set": ":SENSe:VOLTage:RANGe:AUTO <b>",
+      "query": ":SENSe:VOLTage:RANGe:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SENS:VOLT:RANG:AUTO ON"
+      ]
+    },
+    {
+      "name": "sense_voltage_nplc",
+      "mnemonic": "[:SENSe[1]]:VOLTage[:DC]:NPLCycles",
+      "category": "Sense",
+      "description": "Specify the voltage measurement integration rate in number of power line cycles (NPLC). Default 1.0.",
+      "set": ":SENSe:VOLTage:NPLCycles <n>",
+      "query": ":SENSe:VOLTage:NPLCycles?",
+      "parameters": [
+        {
+          "name": "nplc",
+          "units": [
+            "PLC"
+          ],
+          "range": "0.01 to 10"
+        }
+      ],
+      "examples": [
+        ":SENS:VOLT:NPLC 1"
+      ]
+    },
+    {
+      "name": "sense_voltage_protection",
+      "mnemonic": "[:SENSe[1]]:VOLTage[:DC]:PROTection[:LEVel]",
+      "category": "Sense",
+      "description": "Set the voltage compliance (limit) for the current source. Default 21.",
+      "set": ":SENSe:VOLTage:PROTection <n>",
+      "query": ":SENSe:VOLTage:PROTection?",
+      "parameters": [
+        {
+          "name": "compliance",
+          "units": [
+            "V"
+          ],
+          "range": "model-dependent"
+        }
+      ],
+      "examples": [
+        ":SENS:VOLT:PROT 10",
+        ":SENS:VOLT:PROT?"
+      ]
+    },
+    {
+      "name": "sense_voltage_protection_tripped",
+      "mnemonic": "[:SENSe[1]]:VOLTage[:DC]:PROTection:TRIPped?",
+      "category": "Sense",
+      "description": "Query whether the source is in voltage compliance: 1 (yes) or 0 (no).",
+      "query": ":SENSe:VOLTage:PROTection:TRIPped?",
+      "examples": [
+        ":SENS:VOLT:PROT:TRIP?"
+      ]
+    },
+    {
+      "name": "sense_resistance_mode",
+      "mnemonic": "[:SENSe[1]]:RESistance:MODE",
+      "category": "Sense",
+      "description": "Select the ohms (resistance) measurement mode. Default AUTO.",
+      "set": ":SENSe:RESistance:MODE <name>",
+      "query": ":SENSe:RESistance:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "MANual | AUTO"
+        }
+      ],
+      "examples": [
+        ":SENS:RES:MODE AUTO"
+      ]
+    },
+    {
+      "name": "sense_resistance_range",
+      "mnemonic": "[:SENSe[1]]:RESistance:RANGe[:UPPer]",
+      "category": "Sense",
+      "description": "Select the resistance measurement range by specifying the expected reading, or UP/DOWN. Default 2.1e5.",
+      "set": ":SENSe:RESistance:RANGe <n>|UP|DOWN",
+      "query": ":SENSe:RESistance:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "units": [
+            "ohm"
+          ],
+          "range": "model-dependent; UP | DOWN"
+        }
+      ],
+      "examples": [
+        ":SENS:RES:RANG 1e3"
+      ]
+    },
+    {
+      "name": "sense_resistance_range_auto",
+      "mnemonic": "[:SENSe[1]]:RESistance:RANGe:AUTO",
+      "category": "Sense",
+      "description": "Enable or disable resistance measurement autoranging. Default ON.",
+      "set": ":SENSe:RESistance:RANGe:AUTO <b>",
+      "query": ":SENSe:RESistance:RANGe:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SENS:RES:RANG:AUTO ON"
+      ]
+    },
+    {
+      "name": "sense_resistance_ocompensated",
+      "mnemonic": "[:SENSe[1]]:RESistance:OCOMpensated",
+      "category": "Sense",
+      "description": "Enable or disable offset-compensated ohms. Default OFF.",
+      "set": ":SENSe:RESistance:OCOMpensated <b>",
+      "query": ":SENSe:RESistance:OCOMpensated?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SENS:RES:OCOM ON"
+      ]
+    },
+    {
+      "name": "sense_resistance_nplc",
+      "mnemonic": "[:SENSe[1]]:RESistance:NPLCycles",
+      "category": "Sense",
+      "description": "Specify the resistance measurement integration rate in number of power line cycles (NPLC). Default 1.0.",
+      "set": ":SENSe:RESistance:NPLCycles <n>",
+      "query": ":SENSe:RESistance:NPLCycles?",
+      "parameters": [
+        {
+          "name": "nplc",
+          "units": [
+            "PLC"
+          ],
+          "range": "0.01 to 10"
+        }
+      ],
+      "examples": [
+        ":SENS:RES:NPLC 1"
+      ]
+    },
+    {
+      "name": "sense_average_state",
+      "mnemonic": "[:SENSe[1]]:AVERage[:STATe]",
+      "category": "Sense",
+      "description": "Enable or disable the digital averaging filter. Default OFF.",
+      "set": ":SENSe:AVERage:STATe <b>",
+      "query": ":SENSe:AVERage:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SENS:AVER ON"
+      ]
+    },
+    {
+      "name": "sense_average_tcontrol",
+      "mnemonic": "[:SENSe[1]]:AVERage:TCONtrol",
+      "category": "Sense",
+      "description": "Specify the digital filter type. Default REPeat.",
+      "set": ":SENSe:AVERage:TCONtrol <name>",
+      "query": ":SENSe:AVERage:TCONtrol?",
+      "parameters": [
+        {
+          "name": "type",
+          "range": "MOVing | REPeat"
+        }
+      ],
+      "examples": [
+        ":SENS:AVER:TCON REP"
+      ]
+    },
+    {
+      "name": "sense_average_count",
+      "mnemonic": "[:SENSe[1]]:AVERage:COUNt",
+      "category": "Sense",
+      "description": "Specify the digital filter count. Default 10.",
+      "set": ":SENSe:AVERage:COUNt <n>",
+      "query": ":SENSe:AVERage:COUNt?",
+      "parameters": [
+        {
+          "name": "count",
+          "range": "1 to 100"
+        }
+      ],
+      "examples": [
+        ":SENS:AVER:COUN 10"
+      ]
+    },
+    {
+      "name": "format_data",
+      "mnemonic": ":FORMat[:DATA]",
+      "category": "Format",
+      "description": "Specify the data format for readings sent over the bus. Default ASCii.",
+      "set": ":FORMat:DATA <type>[,<length>]",
+      "query": ":FORMat:DATA?",
+      "parameters": [
+        {
+          "name": "type",
+          "range": "ASCii | REAL,32 | SREal"
+        }
+      ],
+      "examples": [
+        ":FORM:DATA ASC",
+        ":FORM:DATA REAL,32"
+      ]
+    },
+    {
+      "name": "format_elements",
+      "mnemonic": ":FORMat:ELEMents[:SENSe[1]]",
+      "category": "Format",
+      "description": "Specify which data elements are returned by FETCh?/READ?/MEASure?. Default all elements.",
+      "set": ":FORMat:ELEMents <item list>",
+      "query": ":FORMat:ELEMents?",
+      "parameters": [
+        {
+          "name": "elements",
+          "range": "VOLTage, CURRent, RESistance, TIME, STATus"
+        }
+      ],
+      "examples": [
+        ":FORM:ELEM VOLT,CURR",
+        ":FORM:ELEM?"
+      ]
+    },
+    {
+      "name": "format_elements_calculate",
+      "mnemonic": ":FORMat:ELEMents:CALCulate",
+      "category": "Format",
+      "description": "Specify which CALC data elements are returned. Default CALC.",
+      "set": ":FORMat:ELEMents:CALCulate <item list>",
+      "query": ":FORMat:ELEMents:CALCulate?",
+      "parameters": [
+        {
+          "name": "elements",
+          "range": "CALC, TIME, STATus"
+        }
+      ],
+      "examples": [
+        ":FORM:ELEM:CALC CALC,TIME"
+      ]
+    },
+    {
+      "name": "format_border",
+      "mnemonic": ":FORMat:BORDer",
+      "category": "Format",
+      "description": "Specify the byte order for binary data. *RST default NORMal; :SYSTem:PRESet default SWAPped.",
+      "set": ":FORMat:BORDer <name>",
+      "query": ":FORMat:BORDer?",
+      "parameters": [
+        {
+          "name": "order",
+          "range": "NORMal | SWAPped"
+        }
+      ],
+      "examples": [
+        ":FORM:BORD NORM"
+      ]
+    },
+    {
+      "name": "format_sregister",
+      "mnemonic": ":FORMat:SREGister",
+      "category": "Format",
+      "description": "Select the data format used when reading status event registers. Default ASCii.",
+      "set": ":FORMat:SREGister <name>",
+      "query": ":FORMat:SREGister?",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "ASCii | HEXadecimal | OCTal | BINary"
+        }
+      ],
+      "examples": [
+        ":FORM:SREG HEX"
+      ]
+    },
+    {
+      "name": "format_source2",
+      "mnemonic": ":FORMat:SOURce2",
+      "category": "Format",
+      "description": "Specify the data format used for SOURce2 (digital I/O) values. Default ASCii.",
+      "set": ":FORMat:SOURce2 <name>",
+      "query": ":FORMat:SOURce2?",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "ASCii | HEXadecimal | OCTal | BINary"
+        }
+      ],
+      "examples": [
+        ":FORM:SOUR2 ASC"
+      ]
+    },
+    {
+      "name": "calc1_format",
+      "mnemonic": ":CALCulate[1]:FORMat",
+      "category": "Calculate",
+      "description": "Select the CALC1 math format (math expression applied to readings).",
+      "set": ":CALCulate1:FORMat <name>",
+      "query": ":CALCulate1:FORMat?",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "MXB | RECiprocal | etc. (math function)"
+        }
+      ],
+      "examples": [
+        ":CALC:FORM MXB"
+      ]
+    },
+    {
+      "name": "calc1_state",
+      "mnemonic": ":CALCulate[1]:STATe",
+      "category": "Calculate",
+      "description": "Enable or disable the CALC1 math calculation.",
+      "set": ":CALCulate1:STATe <b>",
+      "query": ":CALCulate1:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":CALC:STAT ON"
+      ]
+    },
+    {
+      "name": "calc1_data",
+      "mnemonic": ":CALCulate[1]:DATA?",
+      "category": "Calculate",
+      "description": "Read the CALC1 math result.",
+      "query": ":CALCulate1:DATA?",
+      "examples": [
+        ":CALC:DATA?"
+      ]
+    },
+    {
+      "name": "calc2_limit_state",
+      "mnemonic": ":CALCulate2:LIMit<n>:STATe",
+      "category": "Calculate",
+      "description": "Enable or disable a CALC2 limit test (LIMit1 through LIMit12). Default OFF.",
+      "set": ":CALCulate2:LIMit<n>:STATe <b>",
+      "query": ":CALCulate2:LIMit<n>:STATe?",
+      "parameters": [
+        {
+          "name": "limit",
+          "range": "1 to 12 (limit number in mnemonic)"
+        },
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":CALC2:LIM:STAT ON",
+        ":CALC2:LIM5:STAT ON"
+      ]
+    },
+    {
+      "name": "calc2_limit_fail",
+      "mnemonic": ":CALCulate2:LIMit<n>:FAIL?",
+      "category": "Calculate",
+      "description": "Return the result of a CALC2 limit test (LIMit1 through LIMit12): 0 (pass) or 1 (fail).",
+      "query": ":CALCulate2:LIMit<n>:FAIL?",
+      "parameters": [
+        {
+          "name": "limit",
+          "range": "1 to 12 (limit number in mnemonic)"
+        }
+      ],
+      "examples": [
+        ":CALC2:LIM:FAIL?",
+        ":CALC2:LIM10:FAIL?"
+      ]
+    },
+    {
+      "name": "calc2_limit_upper",
+      "mnemonic": ":CALCulate2:LIMit<n>:UPPer[:DATA]",
+      "category": "Calculate",
+      "description": "Specify the upper limit value for a CALC2 limit test (LIMit2, LIMit3, LIMit5..12). Default 1.",
+      "set": ":CALCulate2:LIMit<n>:UPPer <n>",
+      "query": ":CALCulate2:LIMit<n>:UPPer?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "-9.999999e20 to 9.999999e20"
+        }
+      ],
+      "examples": [
+        ":CALC2:LIM2:UPP 10"
+      ]
+    },
+    {
+      "name": "calc2_limit_lower",
+      "mnemonic": ":CALCulate2:LIMit<n>:LOWer[:DATA]",
+      "category": "Calculate",
+      "description": "Specify the lower limit value for a CALC2 limit test (LIMit2, LIMit3, LIMit5..12). Default -1.",
+      "set": ":CALCulate2:LIMit<n>:LOWer <n>",
+      "query": ":CALCulate2:LIMit<n>:LOWer?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "-9.999999e20 to 9.999999e20"
+        }
+      ],
+      "examples": [
+        ":CALC2:LIM2:LOW -10"
+      ]
+    },
+    {
+      "name": "calc2_limit1_compliance_fail",
+      "mnemonic": ":CALCulate2:LIMit[1]:COMPliance:FAIL",
+      "category": "Calculate",
+      "description": "Specify the LIMit1 compliance-test fail condition: IN or OUT of compliance. Default IN.",
+      "set": ":CALCulate2:LIMit:COMPliance:FAIL <name>",
+      "query": ":CALCulate2:LIMit:COMPliance:FAIL?",
+      "parameters": [
+        {
+          "name": "condition",
+          "range": "IN | OUT"
+        }
+      ],
+      "examples": [
+        ":CALC2:LIM:COMP:FAIL IN"
+      ]
+    },
+    {
+      "name": "calc2_clear_immediate",
+      "mnemonic": ":CALCulate2:CLEar[:IMMediate]",
+      "category": "Calculate",
+      "description": "Clear the latest limit test result and reset the Digital I/O port to the :SOURce2:TTL settings.",
+      "set": ":CALCulate2:CLEar:IMMediate",
+      "examples": [
+        ":CALC2:CLE"
+      ]
+    },
+    {
+      "name": "calc2_clear_auto",
+      "mnemonic": ":CALCulate2:CLEar:AUTO",
+      "category": "Calculate",
+      "description": "Enable or disable automatic clearing of limit test results when :INITiate is sent. Default ON.",
+      "set": ":CALCulate2:CLEar:AUTO <b>",
+      "query": ":CALCulate2:CLEar:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":CALC2:CLE:AUTO ON"
+      ]
+    },
+    {
+      "name": "calc2_climits_mode",
+      "mnemonic": ":CALCulate2:CLIMits:MODE",
+      "category": "Calculate",
+      "description": "Set how composite-limit results control the Digital I/O lines. Default GRADing.",
+      "set": ":CALCulate2:CLIMits:MODE <name>",
+      "query": ":CALCulate2:CLIMits:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "GRADing | SORTing"
+        }
+      ],
+      "examples": [
+        ":CALC2:CLIM:MODE GRAD"
+      ]
+    },
+    {
+      "name": "calc2_climits_bcontrol",
+      "mnemonic": ":CALCulate2:CLIMits:BCONtrol",
+      "category": "Calculate",
+      "description": "Specify when binning info is sent to the handler: IMMediate (after each limit test) or END (after a sweep, list, or memory sequence). Default IMMediate.",
+      "set": ":CALCulate2:CLIMits:BCONtrol <name>",
+      "query": ":CALCulate2:CLIMits:BCONtrol?",
+      "parameters": [
+        {
+          "name": "control",
+          "range": "IMMediate | END"
+        }
+      ],
+      "examples": [
+        ":CALC2:CLIM:BCON IMM"
+      ]
+    },
+    {
+      "name": "calc3_format",
+      "mnemonic": ":CALCulate3:FORMat",
+      "category": "Calculate",
+      "description": "Specify the CALC3 statistical math format computed over the buffer. Default MEAN.",
+      "set": ":CALCulate3:FORMat <name>",
+      "query": ":CALCulate3:FORMat?",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "MEAN | SDEViation | MAXimum | MINimum | PKPK"
+        }
+      ],
+      "examples": [
+        ":CALC3:FORM MEAN"
+      ]
+    },
+    {
+      "name": "calc3_data",
+      "mnemonic": ":CALCulate3:DATA?",
+      "category": "Calculate",
+      "description": "Read the CALC3 statistical math result.",
+      "query": ":CALCulate3:DATA?",
+      "examples": [
+        ":CALC3:DATA?"
+      ]
+    },
+    {
+      "name": "trace_data_read",
+      "mnemonic": ":TRACe:DATA?",
+      "category": "Trace",
+      "description": "Read the contents of the buffer (data store). :TRACe or :DATA may be used as the root command.",
+      "query": ":TRACe:DATA?",
+      "examples": [
+        ":TRAC:DATA?"
+      ]
+    },
+    {
+      "name": "trace_clear",
+      "mnemonic": ":TRACe:CLEar",
+      "category": "Trace",
+      "description": "Clear all readings from the buffer.",
+      "set": ":TRACe:CLEar",
+      "examples": [
+        ":TRAC:CLE"
+      ]
+    },
+    {
+      "name": "trace_free",
+      "mnemonic": ":TRACe:FREE?",
+      "category": "Trace",
+      "description": "Query the number of bytes available and the number of bytes in use in the buffer.",
+      "query": ":TRACe:FREE?",
+      "examples": [
+        ":TRAC:FREE?"
+      ]
+    },
+    {
+      "name": "trace_points",
+      "mnemonic": ":TRACe:POINts",
+      "category": "Trace",
+      "description": "Specify the size of the buffer (number of readings to store).",
+      "set": ":TRACe:POINts <NRf>",
+      "query": ":TRACe:POINts?",
+      "parameters": [
+        {
+          "name": "points",
+          "range": "1 to 2500"
+        }
+      ],
+      "examples": [
+        ":TRAC:POIN 100"
+      ]
+    },
+    {
+      "name": "trace_points_actual",
+      "mnemonic": ":TRACe:POINts:ACTual?",
+      "category": "Trace",
+      "description": "Query the number of readings actually stored in the buffer.",
+      "query": ":TRACe:POINts:ACTual?",
+      "examples": [
+        ":TRAC:POIN:ACT?"
+      ]
+    },
+    {
+      "name": "trace_feed",
+      "mnemonic": ":TRACe:FEED",
+      "category": "Trace",
+      "description": "Select the source of readings stored in the buffer.",
+      "set": ":TRACe:FEED <name>",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "SENSe[1] | CALCulate[1] | CALCulate2"
+        }
+      ],
+      "examples": [
+        ":TRAC:FEED SENS"
+      ]
+    },
+    {
+      "name": "trace_feed_control",
+      "mnemonic": ":TRACe:FEED:CONTrol",
+      "category": "Trace",
+      "description": "Specify the buffer control mode: NEVer (storage off) or NEXT (fill buffer once then stop).",
+      "set": ":TRACe:FEED:CONTrol <name>",
+      "query": ":TRACe:FEED:CONTrol?",
+      "parameters": [
+        {
+          "name": "control",
+          "range": "NEVer | NEXT"
+        }
+      ],
+      "examples": [
+        ":TRAC:FEED:CONT NEXT"
+      ]
+    },
+    {
+      "name": "trace_tstamp_format",
+      "mnemonic": ":TRACe:TSTamp:FORMat",
+      "category": "Trace",
+      "description": "Select the buffer timestamp format: ABSolute or DELTa.",
+      "set": ":TRACe:TSTamp:FORMat <name>",
+      "query": ":TRACe:TSTamp:FORMat?",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "ABSolute | DELTa"
+        }
+      ],
+      "examples": [
+        ":TRAC:TST:FORM ABS"
+      ]
+    },
+    {
+      "name": "trigger_count",
+      "mnemonic": ":TRIGger[:SEQuence[1]]:COUNt",
+      "category": "Trigger",
+      "description": "Specify the trigger count (number of measurements in the trigger layer). Default 1.",
+      "set": ":TRIGger:COUNt <n>",
+      "query": ":TRIGger:COUNt?",
+      "parameters": [
+        {
+          "name": "count",
+          "range": "1 to 2500"
+        }
+      ],
+      "examples": [
+        ":TRIG:COUN 10"
+      ]
+    },
+    {
+      "name": "trigger_delay",
+      "mnemonic": ":TRIGger[:SEQuence[1]]:DELay",
+      "category": "Trigger",
+      "description": "Specify the trigger delay in seconds. Default 0.",
+      "set": ":TRIGger:DELay <n>",
+      "query": ":TRIGger:DELay?",
+      "parameters": [
+        {
+          "name": "delay",
+          "units": [
+            "s"
+          ],
+          "range": "0 to 999.9999"
+        }
+      ],
+      "examples": [
+        ":TRIG:DEL 0.1"
+      ]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": ":TRIGger[:SEQuence[1]]:SOURce",
+      "category": "Trigger",
+      "description": "Specify the trigger-layer control source. Default IMMediate.",
+      "set": ":TRIGger:SOURce <name>",
+      "query": ":TRIGger:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "IMMediate | TLINk"
+        }
+      ],
+      "examples": [
+        ":TRIG:SOUR IMM"
+      ]
+    },
+    {
+      "name": "trigger_clear",
+      "mnemonic": ":TRIGger:CLEar",
+      "category": "Trigger",
+      "description": "Clear any pending input triggers immediately.",
+      "set": ":TRIGger:CLEar",
+      "examples": [
+        ":TRIG:CLE"
+      ]
+    },
+    {
+      "name": "arm_count",
+      "mnemonic": ":ARM[:SEQuence[1]][:LAYer[1]]:COUNt",
+      "category": "Trigger",
+      "description": "Specify the arm count (number of arm-layer cycles). Default 1. INFinite returns +9.9e37 when queried.",
+      "set": ":ARM:COUNt <n>",
+      "query": ":ARM:COUNt?",
+      "parameters": [
+        {
+          "name": "count",
+          "range": "1 to 2500 | INFinite"
+        }
+      ],
+      "examples": [
+        ":ARM:COUN 1",
+        ":ARM:COUN INF"
+      ]
+    },
+    {
+      "name": "arm_source",
+      "mnemonic": ":ARM[:SEQuence[1]][:LAYer[1]]:SOURce",
+      "category": "Trigger",
+      "description": "Specify the arm-layer control source. Default IMMediate.",
+      "set": ":ARM:SOURce <name>",
+      "query": ":ARM:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "IMMediate | TIMer | MANual | BUS | TLINk | NSTest | PSTest | BSTest"
+        }
+      ],
+      "examples": [
+        ":ARM:SOUR BUS"
+      ]
+    },
+    {
+      "name": "arm_timer",
+      "mnemonic": ":ARM[:SEQuence[1]][:LAYer[1]]:TIMer",
+      "category": "Trigger",
+      "description": "Set the arm-layer timer interval in seconds (used when arm source is TIMer). Default 0.1.",
+      "set": ":ARM:TIMer <n>",
+      "query": ":ARM:TIMer?",
+      "parameters": [
+        {
+          "name": "interval",
+          "units": [
+            "s"
+          ],
+          "range": "0.001 to 99999.99"
+        }
+      ],
+      "examples": [
+        ":ARM:TIM 0.5"
+      ]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": ":SYSTem:PRESet",
+      "category": "System",
+      "description": "Return the instrument to its :SYSTem:PRESet (bench) default conditions.",
+      "set": ":SYSTem:PRESet",
+      "examples": [
+        ":SYST:PRES"
+      ]
+    },
+    {
+      "name": "system_posetup",
+      "mnemonic": ":SYSTem:POSetup",
+      "category": "System",
+      "description": "Select the power-on setup configuration.",
+      "set": ":SYSTem:POSetup <name>",
+      "query": ":SYSTem:POSetup?",
+      "parameters": [
+        {
+          "name": "setup",
+          "range": "RST | PRESet | SAV0 | SAV1 | SAV2 | SAV3 | SAV4"
+        }
+      ],
+      "examples": [
+        ":SYST:POS RST"
+      ]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": ":SYSTem:VERSion?",
+      "category": "System",
+      "description": "Query the SCPI revision level to which the instrument complies.",
+      "query": ":SYSTem:VERSion?",
+      "examples": [
+        ":SYST:VERS?"
+      ]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": ":SYSTem:ERRor[:NEXT]?",
+      "category": "System",
+      "description": "Return and clear the oldest error/status message (code and message) from the error queue.",
+      "query": ":SYSTem:ERRor?",
+      "examples": [
+        ":SYST:ERR?"
+      ]
+    },
+    {
+      "name": "system_error_all",
+      "mnemonic": ":SYSTem:ERRor:ALL?",
+      "category": "System",
+      "description": "Return and clear all errors (codes and messages) from the error queue.",
+      "query": ":SYSTem:ERRor:ALL?",
+      "examples": [
+        ":SYST:ERR:ALL?"
+      ]
+    },
+    {
+      "name": "system_error_count",
+      "mnemonic": ":SYSTem:ERRor:COUNt?",
+      "category": "System",
+      "description": "Return the number of errors in the error queue.",
+      "query": ":SYSTem:ERRor:COUNt?",
+      "examples": [
+        ":SYST:ERR:COUN?"
+      ]
+    },
+    {
+      "name": "system_clear",
+      "mnemonic": ":SYSTem:CLEar",
+      "category": "System",
+      "description": "Clear all messages from the error queue.",
+      "set": ":SYSTem:CLEar",
+      "examples": [
+        ":SYST:CLE"
+      ]
+    },
+    {
+      "name": "system_rsense",
+      "mnemonic": ":SYSTem:RSENse",
+      "category": "System",
+      "description": "Enable or disable remote (4-wire) sensing. Default OFF (2-wire). ON selects 4-wire sensing.",
+      "set": ":SYSTem:RSENse <b>",
+      "query": ":SYSTem:RSENse?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON (4-wire) | OFF (2-wire) | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SYST:RSEN ON",
+        ":SYST:RSEN?"
+      ]
+    },
+    {
+      "name": "system_azero",
+      "mnemonic": ":SYSTem:AZERo[:STATe]",
+      "category": "System",
+      "description": "Control auto zero. Default ON. ONCE forces an immediate auto-zero update.",
+      "set": ":SYSTem:AZERo:STATe <name>",
+      "query": ":SYSTem:AZERo:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | ONCE"
+        }
+      ],
+      "examples": [
+        ":SYST:AZER ON",
+        ":SYST:AZER ONCE"
+      ]
+    },
+    {
+      "name": "system_guard",
+      "mnemonic": ":SYSTem:GUARd",
+      "category": "System",
+      "description": "Select the guard type. Default CABLe.",
+      "set": ":SYSTem:GUARd <name>",
+      "query": ":SYSTem:GUARd?",
+      "parameters": [
+        {
+          "name": "guard",
+          "range": "OHMS | CABLe"
+        }
+      ],
+      "examples": [
+        ":SYST:GUAR CABL"
+      ]
+    },
+    {
+      "name": "system_lfrequency",
+      "mnemonic": ":SYSTem:LFRequency",
+      "category": "System",
+      "description": "Select the power line frequency in Hz.",
+      "set": ":SYSTem:LFRequency <freq>",
+      "query": ":SYSTem:LFRequency?",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "Hz"
+          ],
+          "range": "50 | 60"
+        }
+      ],
+      "examples": [
+        ":SYST:LFR 60"
+      ]
+    },
+    {
+      "name": "system_lfrequency_auto",
+      "mnemonic": ":SYSTem:LFRequency:AUTO",
+      "category": "System",
+      "description": "Enable or disable automatic line-frequency detection.",
+      "set": ":SYSTem:LFRequency:AUTO <b>",
+      "query": ":SYSTem:LFRequency:AUTO?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SYST:LFR:AUTO ON"
+      ]
+    },
+    {
+      "name": "system_ccheck",
+      "mnemonic": ":SYSTem:CCHeck",
+      "category": "System",
+      "description": "Enable or disable contact check (requires remote sensing enabled, :SYST:RSEN ON). Contact-check option only.",
+      "set": ":SYSTem:CCHeck <b>",
+      "query": ":SYSTem:CCHeck?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SYST:CCH ON"
+      ]
+    },
+    {
+      "name": "system_ccheck_resistance",
+      "mnemonic": ":SYSTem:CCHeck:RESistance",
+      "category": "System",
+      "description": "Specify the resistance threshold for the contact check (default 50 ohm).",
+      "set": ":SYSTem:CCHeck:RESistance <NRf>",
+      "parameters": [
+        {
+          "name": "threshold",
+          "units": [
+            "ohm"
+          ],
+          "range": "2 | 15 | 50 (option-dependent)"
+        }
+      ],
+      "examples": [
+        ":SYST:CCH:RES 50"
+      ]
+    },
+    {
+      "name": "system_beeper_state",
+      "mnemonic": ":SYSTem:BEEPer:STATe",
+      "category": "System",
+      "description": "Enable or disable the beeper. Default ON.",
+      "set": ":SYSTem:BEEPer:STATe <b>",
+      "query": ":SYSTem:BEEPer:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SYST:BEEP:STAT ON"
+      ]
+    },
+    {
+      "name": "system_beeper_immediate",
+      "mnemonic": ":SYSTem:BEEPer[:IMMediate]",
+      "category": "System",
+      "description": "Sound the beeper at a specified frequency for a specified time.",
+      "set": ":SYSTem:BEEPer <freq>,<time>",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "Hz"
+          ],
+          "range": "65 to 2e6"
+        },
+        {
+          "name": "time",
+          "units": [
+            "s"
+          ],
+          "range": "0 to 7.9"
+        }
+      ],
+      "examples": [
+        ":SYST:BEEP 1000,0.5"
+      ]
+    },
+    {
+      "name": "system_key",
+      "mnemonic": ":SYSTem:KEY",
+      "category": "System",
+      "description": "Simulate a front-panel key press. Query returns the last pressed key.",
+      "set": ":SYSTem:KEY <n>",
+      "query": ":SYSTem:KEY?",
+      "parameters": [
+        {
+          "name": "key",
+          "range": "1 to 31"
+        }
+      ],
+      "examples": [
+        ":SYST:KEY 1",
+        ":SYST:KEY?"
+      ]
+    },
+    {
+      "name": "system_rcmode",
+      "mnemonic": ":SYSTem:RCMode",
+      "category": "System",
+      "description": "Set the auto-range-on-compliance mode. Default SINGle.",
+      "set": ":SYSTem:RCMode <name>",
+      "query": ":SYSTem:RCMode?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "SINGle | MULTiple"
+        }
+      ],
+      "examples": [
+        ":SYST:RCM SING"
+      ]
+    },
+    {
+      "name": "system_time",
+      "mnemonic": ":SYSTem:TIME?",
+      "category": "System",
+      "description": "Query the timestamp value.",
+      "query": ":SYSTem:TIME?",
+      "examples": [
+        ":SYST:TIME?"
+      ]
+    },
+    {
+      "name": "system_time_reset",
+      "mnemonic": ":SYSTem:TIME:RESet",
+      "category": "System",
+      "description": "Reset the timestamp to zero seconds.",
+      "set": ":SYSTem:TIME:RESet",
+      "examples": [
+        ":SYST:TIME:RES"
+      ]
+    },
+    {
+      "name": "system_memory_initialize",
+      "mnemonic": ":SYSTem:MEMory:INITialize",
+      "category": "System",
+      "description": "Initialize the battery-backed RAM.",
+      "set": ":SYSTem:MEMory:INITialize",
+      "examples": [
+        ":SYST:MEM:INIT"
+      ]
+    },
+    {
+      "name": "system_local",
+      "mnemonic": ":SYSTem:LOCal",
+      "category": "System",
+      "description": "Take the unit out of remote (RS-232 only).",
+      "set": ":SYSTem:LOCal",
+      "examples": [
+        ":SYST:LOC"
+      ]
+    },
+    {
+      "name": "system_rwlock",
+      "mnemonic": ":SYSTem:RWLock",
+      "category": "System",
+      "description": "Enable or disable local lockout (RS-232 only).",
+      "set": ":SYSTem:RWLock <b>",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":SYST:RWL ON"
+      ]
+    },
+    {
+      "name": "status_preset",
+      "mnemonic": ":STATus:PRESet",
+      "category": "Status",
+      "description": "Return all status registers to their default (preset) states.",
+      "set": ":STATus:PRESet",
+      "examples": [
+        ":STAT:PRES"
+      ]
+    },
+    {
+      "name": "status_measurement_event",
+      "mnemonic": ":STATus:MEASurement[:EVENt]?",
+      "category": "Status",
+      "description": "Read the Measurement Event register.",
+      "query": ":STATus:MEASurement:EVENt?",
+      "examples": [
+        ":STAT:MEAS?"
+      ]
+    },
+    {
+      "name": "status_measurement_enable",
+      "mnemonic": ":STATus:MEASurement:ENABle",
+      "category": "Status",
+      "description": "Program or read the Measurement Event Enable register.",
+      "set": ":STATus:MEASurement:ENABle <NRf>",
+      "query": ":STATus:MEASurement:ENABle?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "bit mask (NRf or #H/#Q/#B)"
+        }
+      ],
+      "examples": [
+        ":STAT:MEAS:ENAB 512"
+      ]
+    },
+    {
+      "name": "status_measurement_condition",
+      "mnemonic": ":STATus:MEASurement:CONDition?",
+      "category": "Status",
+      "description": "Read the Measurement Condition register.",
+      "query": ":STATus:MEASurement:CONDition?",
+      "examples": [
+        ":STAT:MEAS:COND?"
+      ]
+    },
+    {
+      "name": "status_operation_event",
+      "mnemonic": ":STATus:OPERation[:EVENt]?",
+      "category": "Status",
+      "description": "Read the Operation Event register.",
+      "query": ":STATus:OPERation:EVENt?",
+      "examples": [
+        ":STAT:OPER?"
+      ]
+    },
+    {
+      "name": "status_operation_enable",
+      "mnemonic": ":STATus:OPERation:ENABle",
+      "category": "Status",
+      "description": "Program or read the Operation Event Enable register.",
+      "set": ":STATus:OPERation:ENABle <NRf>",
+      "query": ":STATus:OPERation:ENABle?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "bit mask (NRf or #H/#Q/#B)"
+        }
+      ],
+      "examples": [
+        ":STAT:OPER:ENAB 0"
+      ]
+    },
+    {
+      "name": "status_questionable_event",
+      "mnemonic": ":STATus:QUEStionable[:EVENt]?",
+      "category": "Status",
+      "description": "Read the Questionable Event register.",
+      "query": ":STATus:QUEStionable:EVENt?",
+      "examples": [
+        ":STAT:QUES?"
+      ]
+    },
+    {
+      "name": "status_questionable_enable",
+      "mnemonic": ":STATus:QUEStionable:ENABle",
+      "category": "Status",
+      "description": "Program or read the Questionable Event Enable register.",
+      "set": ":STATus:QUEStionable:ENABle <NRf>",
+      "query": ":STATus:QUEStionable:ENABle?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "bit mask (NRf or #H/#Q/#B)"
+        }
+      ],
+      "examples": [
+        ":STAT:QUES:ENAB 0"
+      ]
+    },
+    {
+      "name": "status_queue_next",
+      "mnemonic": ":STATus:QUEue[:NEXT]?",
+      "category": "Status",
+      "description": "Read the most recent error/status message from the status queue.",
+      "query": ":STATus:QUEue:NEXT?",
+      "examples": [
+        ":STAT:QUE?"
+      ]
+    },
+    {
+      "name": "status_queue_clear",
+      "mnemonic": ":STATus:QUEue:CLEar",
+      "category": "Status",
+      "description": "Clear all messages from the status (error) queue.",
+      "set": ":STATus:QUEue:CLEar",
+      "examples": [
+        ":STAT:QUE:CLE"
+      ]
+    },
+    {
+      "name": "display_enable",
+      "mnemonic": ":DISPlay:ENABle",
+      "category": "Display",
+      "description": "Turn the front-panel display on or off (turning it off can increase measurement speed).",
+      "set": ":DISPlay:ENABle <b>",
+      "query": ":DISPlay:ENABle?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":DISP:ENAB OFF"
+      ]
+    },
+    {
+      "name": "display_digits",
+      "mnemonic": ":DISPlay:DIGits",
+      "category": "Display",
+      "description": "Specify the display resolution (number of digits). Default 6.",
+      "set": ":DISPlay:DIGits <n>",
+      "query": ":DISPlay:DIGits?",
+      "parameters": [
+        {
+          "name": "digits",
+          "range": "4 to 7"
+        }
+      ],
+      "examples": [
+        ":DISP:DIG 6"
+      ]
+    },
+    {
+      "name": "display_text_data",
+      "mnemonic": ":DISPlay[:WINDow[1]]:TEXT:DATA",
+      "category": "Display",
+      "description": "Define an ASCII text message for the top display (up to 20 characters). Use WINDow2 for the bottom display (up to 32 characters).",
+      "set": ":DISPlay:WINDow:TEXT:DATA <a>",
+      "query": ":DISPlay:WINDow:TEXT:DATA?",
+      "parameters": [
+        {
+          "name": "message",
+          "range": "string up to 20 chars (top) / 32 chars (bottom)"
+        }
+      ],
+      "examples": [
+        ":DISP:WIND:TEXT:DATA \"TESTING\""
+      ]
+    },
+    {
+      "name": "display_text_state",
+      "mnemonic": ":DISPlay[:WINDow[1]]:TEXT:STATe",
+      "category": "Display",
+      "description": "Enable or disable the user text-message display mode.",
+      "set": ":DISPlay:WINDow:TEXT:STATe <b>",
+      "query": ":DISPlay:WINDow:TEXT:STATe?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "ON | OFF | 1 | 0"
+        }
+      ],
+      "examples": [
+        ":DISP:WIND:TEXT:STAT ON"
+      ]
+    },
+    {
+      "name": "display_cndisplay",
+      "mnemonic": ":DISPlay:CNDisplay",
+      "category": "Display",
+      "description": "Return the display to the normal source-measure display state.",
+      "set": ":DISPlay:CNDisplay",
+      "examples": [
+        ":DISP:CND"
+      ]
+    }
+  ]
+}

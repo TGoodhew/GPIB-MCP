@@ -2,14 +2,15 @@
   "model": "8714ES",
   "manufacturer": "HP/Agilent",
   "category": "Network Analyzer",
-  "description": "HP/Agilent 8714ES/8714ET (and related 8711/8712/8713/8714 B/C/ES/ET) RF network analyzer family. Measures transmission and reflection (S-parameters), power, and (with Option 100) fault location and structural return loss on RF devices such as amplifiers, filters, mixers and cables. Programmed with SCPI over HP-IB (GPIB / IEEE-488). Commands carry an optional [1|2] channel suffix; all commands have command and query forms unless noted as command-only or query-only. Frequency suffixes HZ/KHZ/MHZ/GHZ and time suffixes S/MS/US/NS/PS are accepted; binary parameters accept 1/0 as well as ON/OFF.",
+  "description": "HP/Agilent 8714ES RF network analyzer, 300 kHz to 3 GHz. ES economy vector network analyzer with an internal S-parameter test set: measures full transmission and reflection (S-parameters) on both ports without reconnecting the device, and includes a 60-dB source step attenuator as standard (70 dB of power-level control). It also measures power and, with Option 100, fault location and structural return loss on RF devices such as amplifiers, filters, mixers and cables. The ET versions instead use a transmission/reflection (T/R) test set. Programmed with SCPI over HP-IB (GPIB / IEEE-488). Commands carry an optional [1|2] channel suffix; all commands have command and query forms unless noted as command-only or query-only. Frequency suffixes HZ/KHZ/MHZ/GHZ and time suffixes S/MS/US/NS/PS are accepted; binary parameters accept 1/0 as well as ON/OFF.",
   "source": "8714 Programmers Guide.pdf",
-  "aliases": ["8714ES", "8714ET", "8712ES", "8712ET", "8714", "8711", "8712", "8713", "8714B", "8714C", "8711C", "8712C", "8713C", "8714ES/ET", "HP 8714", "Agilent 8714"],
+  "aliases": ["8714ES"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "871[24]E[ST]",
-    "description": "Standard IEEE 488.2 identification query. Returns the manufacturer, model, serial number and firmware revision of the analyzer. Use SYSTem:VERSion? to query the SCPI version."
+    "matchRegex": "8714ES",
+    "supported": true,
+    "description": "Standard IEEE 488.2 identification query. Returns the manufacturer, model, serial number and firmware revision of the analyzer (form: \"HEWLETT-PACKARD,<model>,<serial number>,<software revision>\"). Use SYSTem:VERSion? to query the SCPI version."
   },
   "commands": [
     {

@@ -4,7 +4,7 @@
   "category": "Function / Arbitrary Waveform Generator",
   "description": "Rigol DG1000Z series dual-channel function/arbitrary waveform generator (DG1022Z/DG1032Z/DG1062Z). Controlled by SCPI commands over USB, LAN or GPIB. Parameter ranges shown are based on the DG1062Z.",
   "source": "DG1000Z Programming Guide.pdf",
-  "aliases": ["DG1000Z", "DG1022Z", "DG1032Z", "DG1062Z"],
+  "aliases": ["DG1000Z"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": { "command": "*IDN?", "matchRegex": "DG10[0-9]{2}Z", "description": "Standard SCPI identification query." },
   "commands": [

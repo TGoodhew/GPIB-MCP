@@ -1,0 +1,4446 @@
+{
+  "model": "54621D",
+  "manufacturer": "Agilent",
+  "category": "Oscilloscope",
+  "description": "Agilent 54621D mixed-signal oscilloscope: 60 MHz bandwidth, 2 analog channels plus 16 digital channels (DIGital/POD subsystems). Member of the 54620-series; programmed via SCPI over GPIB/RS-232. Shares the 5462x/5464x command set.",
+  "source": "54622 Programming.pdf",
+  "aliases": [
+    "54621D"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "54621D",
+    "supported": true,
+    "description": "Returns AGILENT TECHNOLOGIES,54621D,<serial number>,<software revision>. The model field identifies this instrument as the 54621D."
+  },
+  "commands": [
+    {
+      "name": "clear_status",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clears all status and error registers, the status byte, and the error queue.",
+      "set": "*CLS",
+      "examples": [
+        "*CLS"
+      ]
+    },
+    {
+      "name": "define_macro",
+      "mnemonic": "*DMC",
+      "category": "Common",
+      "description": "Defines a macro by assigning a sequence of commands (block data) to a macro label. No query form.",
+      "set": "*DMC <macro label>,<macro definition>",
+      "parameters": [
+        {
+          "name": "macro label",
+          "range": "quoted ASCII string"
+        },
+        {
+          "name": "macro definition",
+          "range": "block data in IEEE 488.2 # format"
+        }
+      ],
+      "examples": [
+        "*DMC 'MYMACRO',#15:RUN;"
+      ]
+    },
+    {
+      "name": "enable_macro",
+      "mnemonic": "*EMC",
+      "category": "Common",
+      "description": "Enables (1) or disables (0) expansion of macros.",
+      "set": "*EMC {{0 | OFF} | {1 | ON}}",
+      "query": "*EMC?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        "*EMC 1",
+        "*EMC?"
+      ]
+    },
+    {
+      "name": "event_status_enable",
+      "mnemonic": "*ESE",
+      "category": "Common",
+      "description": "Sets or queries the Standard Event Status Enable Register mask (bits: PON, URQ, CME, EXE, DDE, QYE, TRG, OPC).",
+      "set": "*ESE <mask>",
+      "query": "*ESE?",
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "0 to 255 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        "*ESE 16",
+        "*ESE?"
+      ]
+    },
+    {
+      "name": "event_status_register_query",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Reads and clears the Standard Event Status Register.",
+      "query": "*ESR?",
+      "parameters": [
+        {
+          "name": "status",
+          "range": "0 to 255 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        "*ESR?"
+      ]
+    },
+    {
+      "name": "get_macro_contents_query",
+      "mnemonic": "*GMC?",
+      "category": "Common",
+      "description": "Returns the definition of the named macro as block data.",
+      "query": "*GMC? <macro label>",
+      "parameters": [
+        {
+          "name": "macro label",
+          "range": "quoted ASCII string; returns block data in IEEE 488.2 # format"
+        }
+      ],
+      "examples": [
+        "*GMC? 'MYMACRO'"
+      ]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Returns the instrument identification: AGILENT TECHNOLOGIES,<model>,<serial number>,<software revision>.",
+      "query": "*IDN?",
+      "examples": [
+        "*IDN?"
+      ]
+    },
+    {
+      "name": "learn_macro_query",
+      "mnemonic": "*LMC?",
+      "category": "Common",
+      "description": "Returns a comma-separated list of all currently defined macro labels.",
+      "query": "*LMC?",
+      "examples": [
+        "*LMC?"
+      ]
+    },
+    {
+      "name": "learn_query",
+      "mnemonic": "*LRN?",
+      "category": "Common",
+      "description": "Returns the current instrument setup as a block of data in IEEE 488.2 # format.",
+      "query": "*LRN?",
+      "examples": [
+        "*LRN?"
+      ]
+    },
+    {
+      "name": "operation_complete",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Sets the OPC bit (set form) and the query places an ASCII 1 in the output queue when all pending device operations are complete.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": [
+        "*OPC",
+        "*OPC?"
+      ]
+    },
+    {
+      "name": "option_query",
+      "mnemonic": "*OPT?",
+      "category": "Common",
+      "description": "Returns installed module/option information in the form n,A.XX.XX.",
+      "query": "*OPT?",
+      "examples": [
+        "*OPT?"
+      ]
+    },
+    {
+      "name": "purge_macros",
+      "mnemonic": "*PMC",
+      "category": "Common",
+      "description": "Purges (deletes) all currently defined macros. No query form.",
+      "set": "*PMC",
+      "examples": [
+        "*PMC"
+      ]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "*RCL",
+      "category": "Common",
+      "description": "Recalls a previously saved instrument setup from the specified register. No query form.",
+      "set": "*RCL <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1 | 2}"
+        }
+      ],
+      "examples": [
+        "*RCL 1"
+      ]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Resets the instrument to its default state. No query form.",
+      "set": "*RST",
+      "examples": [
+        "*RST"
+      ]
+    },
+    {
+      "name": "save",
+      "mnemonic": "*SAV",
+      "category": "Common",
+      "description": "Saves the current instrument setup to the specified register. No query form.",
+      "set": "*SAV <value>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1 | 2}"
+        }
+      ],
+      "examples": [
+        "*SAV 1"
+      ]
+    },
+    {
+      "name": "service_request_enable",
+      "mnemonic": "*SRE",
+      "category": "Common",
+      "description": "Sets or queries the Service Request Enable Register mask (bits: OPER, ESB, MAV, MSG, USR, TRG).",
+      "set": "*SRE <mask>",
+      "query": "*SRE?",
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "0 to 255 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        "*SRE 32",
+        "*SRE?"
+      ]
+    },
+    {
+      "name": "status_byte_query",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Reads the Status Byte register (bits: OPER, RQS/MSS, ESB, MAV, MSG, USR, TRG).",
+      "query": "*STB?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "0 to 255 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        "*STB?"
+      ]
+    },
+    {
+      "name": "trigger",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Triggers the instrument (group execute trigger equivalent). No query form.",
+      "set": "*TRG",
+      "examples": [
+        "*TRG"
+      ]
+    },
+    {
+      "name": "self_test_query",
+      "mnemonic": "*TST?",
+      "category": "Common",
+      "description": "Performs a self-test and returns 0 for pass or a non-zero value for failure.",
+      "query": "*TST?",
+      "parameters": [
+        {
+          "name": "result",
+          "range": "0 or non-zero (integer, NR1)"
+        }
+      ],
+      "examples": [
+        "*TST?"
+      ]
+    },
+    {
+      "name": "wait",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Waits until all pending operations complete before executing further commands. No query form.",
+      "set": "*WAI",
+      "examples": [
+        "*WAI"
+      ]
+    },
+    {
+      "name": "activity_query",
+      "mnemonic": ":ACTivity",
+      "category": "Root",
+      "description": "Returns activity (edges and logical highs/lows) on the channels. Returns <edges>,<levels> as 32-bit integers.",
+      "set": ":ACTivity",
+      "query": ":ACTivity?",
+      "examples": [
+        ":ACTivity?"
+      ]
+    },
+    {
+      "name": "all_event_register_query",
+      "mnemonic": ":AER?",
+      "category": "Root",
+      "description": "Queries the all-event (auto-trigger) register, returning 0 or 1.",
+      "query": ":AER?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":AER?"
+      ]
+    },
+    {
+      "name": "autoscale",
+      "mnemonic": ":AUToscale",
+      "category": "Root",
+      "description": "Automatically configures vertical, horizontal, and trigger settings for the active input signals. No query form.",
+      "set": ":AUToscale",
+      "examples": [
+        ":AUToscale"
+      ]
+    },
+    {
+      "name": "blank",
+      "mnemonic": ":BLANk",
+      "category": "Root",
+      "description": "Turns off (blanks) the display of the specified source. No query form.",
+      "set": ":BLANk <source>",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | POD{1|2} | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":BLANk CHANnel1"
+      ]
+    },
+    {
+      "name": "clear_display",
+      "mnemonic": ":CDISplay",
+      "category": "Root",
+      "description": "Clears the display and resets all associated measurements. No query form.",
+      "set": ":CDISplay",
+      "examples": [
+        ":CDISplay"
+      ]
+    },
+    {
+      "name": "digitize",
+      "mnemonic": ":DIGitize",
+      "category": "Root",
+      "description": "Acquires waveform data for the specified sources into the waveform record. No query form.",
+      "set": ":DIGitize [<source>[,...,<source>]]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | POD1 | POD2 | FUNCtion | MATH} for 546xxD; up to 5 sources; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":DIGitize CHANnel1",
+        ":DIGitize CHANnel1,CHANnel2"
+      ]
+    },
+    {
+      "name": "erase",
+      "mnemonic": ":ERASe",
+      "category": "Root",
+      "description": "Erases the screen / pixel memory. No query form.",
+      "set": ":ERASe",
+      "examples": [
+        ":ERASe"
+      ]
+    },
+    {
+      "name": "merge",
+      "mnemonic": ":MERGe",
+      "category": "Root",
+      "description": "Merges the current display into the specified pixel memory. No query form.",
+      "set": ":MERGe <pixel memory>",
+      "parameters": [
+        {
+          "name": "pixel memory",
+          "range": "{PMEMory{0 | 1 | 2}}"
+        }
+      ],
+      "examples": [
+        ":MERGe PMEMory1"
+      ]
+    },
+    {
+      "name": "operation_status_enable",
+      "mnemonic": ":OPEE",
+      "category": "Root",
+      "description": "Sets or queries the Operation Status Enable register.",
+      "set": ":OPEE <n>",
+      "query": ":OPEE?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "16-bit integer (NR1)"
+        }
+      ],
+      "examples": [
+        ":OPEE 256",
+        ":OPEE?"
+      ]
+    },
+    {
+      "name": "operation_status_query",
+      "mnemonic": ":OPER?",
+      "category": "Root",
+      "description": "Queries the Operation Status Event register.",
+      "query": ":OPER?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "16-bit integer (NR1)"
+        }
+      ],
+      "examples": [
+        ":OPER?"
+      ]
+    },
+    {
+      "name": "overload_enable",
+      "mnemonic": ":OVLenable",
+      "category": "Root",
+      "description": "Sets or queries the overload protection enable register (54640-series only). Bits: External Trigger, Channel 4..1.",
+      "set": ":OVLenable <mask>",
+      "query": ":OVLenable?",
+      "parameters": [
+        {
+          "name": "mask",
+          "range": "8-bit integer (NR1), 54640-series only"
+        }
+      ],
+      "examples": [
+        ":OVLenable 1",
+        ":OVLenable?"
+      ]
+    },
+    {
+      "name": "overload_register_query",
+      "mnemonic": ":OVLRegister?",
+      "category": "Root",
+      "description": "Queries the overload event register (54640-series only).",
+      "query": ":OVLRegister?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer (NR1), 54640-series only"
+        }
+      ],
+      "examples": [
+        ":OVLRegister?"
+      ]
+    },
+    {
+      "name": "print",
+      "mnemonic": ":PRINt",
+      "category": "Root",
+      "description": "Outputs a copy of the screen to a hardcopy/print device. The query form returns formatted print data.",
+      "set": ":PRINt [<parameter>[,<parameter>]]",
+      "query": ":PRINt? [<parameter>[,<parameter>]]",
+      "parameters": [
+        {
+          "name": "parameter",
+          "range": "{HIRes | LORes | TIFF | PCL | BMP | PARallel | DISK | FACTors | NOFactors}; up to 5 times"
+        }
+      ],
+      "examples": [
+        ":PRINt TIFF",
+        ":PRINt? BMP"
+      ]
+    },
+    {
+      "name": "run",
+      "mnemonic": ":RUN",
+      "category": "Root",
+      "description": "Starts repetitive acquisitions. No query form.",
+      "set": ":RUN",
+      "examples": [
+        ":RUN"
+      ]
+    },
+    {
+      "name": "serial_query",
+      "mnemonic": ":SERial?",
+      "category": "Root",
+      "description": "Returns the instrument serial number as an unquoted string.",
+      "query": ":SERial?",
+      "examples": [
+        ":SERial?"
+      ]
+    },
+    {
+      "name": "single",
+      "mnemonic": ":SINGle",
+      "category": "Root",
+      "description": "Acquires a single trigger of data. No query form.",
+      "set": ":SINGle",
+      "examples": [
+        ":SINGle"
+      ]
+    },
+    {
+      "name": "status_query",
+      "mnemonic": ":STATus?",
+      "category": "Root",
+      "description": "Returns whether the specified display source is on (1) or off (0).",
+      "query": ":STATus? <display>",
+      "parameters": [
+        {
+          "name": "display",
+          "range": "{CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":STATus? CHANnel1"
+      ]
+    },
+    {
+      "name": "stop",
+      "mnemonic": ":STOP",
+      "category": "Root",
+      "description": "Stops acquisitions. No query form.",
+      "set": ":STOP",
+      "examples": [
+        ":STOP"
+      ]
+    },
+    {
+      "name": "trigger_event_register_query",
+      "mnemonic": ":TER?",
+      "category": "Root",
+      "description": "Queries the Trigger Event Register, returning 0 or 1.",
+      "query": ":TER?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":TER?"
+      ]
+    },
+    {
+      "name": "view",
+      "mnemonic": ":VIEW",
+      "category": "Root",
+      "description": "Turns on (displays) the specified source. No query form.",
+      "set": ":VIEW <source>",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | PMEMory{0|1|2} | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | PMEMory{0|1|2} | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":VIEW CHANnel1"
+      ]
+    },
+    {
+      "name": "acquire_complete",
+      "mnemonic": ":ACQuire:COMPlete",
+      "category": "ACQuire",
+      "description": "Sets/queries the completion criterion (percent of time buckets that must be full). Value is 100.",
+      "set": ":ACQuire:COMPlete <complete>",
+      "query": ":ACQuire:COMPlete?",
+      "parameters": [
+        {
+          "name": "complete",
+          "units": [
+            "%"
+          ],
+          "range": "100 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        ":ACQuire:COMPlete 100",
+        ":ACQuire:COMPlete?"
+      ]
+    },
+    {
+      "name": "acquire_count",
+      "mnemonic": ":ACQuire:COUNt",
+      "category": "ACQuire",
+      "description": "Sets/queries the number of values averaged in AVERage acquisition mode.",
+      "set": ":ACQuire:COUNt <count>",
+      "query": ":ACQuire:COUNt?",
+      "parameters": [
+        {
+          "name": "count",
+          "range": "1 to 16383 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        ":ACQuire:COUNt 8",
+        ":ACQuire:COUNt?"
+      ]
+    },
+    {
+      "name": "acquire_mode",
+      "mnemonic": ":ACQuire:MODE",
+      "category": "ACQuire",
+      "description": "Sets/queries the acquisition sampling mode: real-time or equivalent-time.",
+      "set": ":ACQuire:MODE <mode>",
+      "query": ":ACQuire:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "{RTIMe | ETIMe}"
+        }
+      ],
+      "examples": [
+        ":ACQuire:MODE RTIMe",
+        ":ACQuire:MODE?"
+      ]
+    },
+    {
+      "name": "acquire_points_query",
+      "mnemonic": ":ACQuire:POINts?",
+      "category": "ACQuire",
+      "description": "Returns the number of data points the hardware acquires (2000).",
+      "query": ":ACQuire:POINts?",
+      "parameters": [
+        {
+          "name": "points",
+          "range": "2000 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        ":ACQuire:POINts?"
+      ]
+    },
+    {
+      "name": "acquire_sample_rate_query",
+      "mnemonic": ":ACQuire:SRATe?",
+      "category": "ACQuire",
+      "description": "Returns the current acquisition sample rate in samples per second.",
+      "query": ":ACQuire:SRATe?",
+      "parameters": [
+        {
+          "name": "sample rate",
+          "units": [
+            "samples/s"
+          ],
+          "range": "NR3 format"
+        }
+      ],
+      "examples": [
+        ":ACQuire:SRATe?"
+      ]
+    },
+    {
+      "name": "acquire_type",
+      "mnemonic": ":ACQuire:TYPE",
+      "category": "ACQuire",
+      "description": "Sets/queries the acquisition type: normal, averaging, or peak detect.",
+      "set": ":ACQuire:TYPE <type>",
+      "query": ":ACQuire:TYPE?",
+      "parameters": [
+        {
+          "name": "type",
+          "range": "{NORMal | AVERage | PEAK}"
+        }
+      ],
+      "examples": [
+        ":ACQuire:TYPE NORMal",
+        ":ACQuire:TYPE?"
+      ]
+    },
+    {
+      "name": "calibrate_date_query",
+      "mnemonic": ":CALibrate:DATE?",
+      "category": "CALibrate",
+      "description": "Returns the calibration date as <day>,<month>,<year>.",
+      "query": ":CALibrate:DATE?",
+      "examples": [
+        ":CALibrate:DATE?"
+      ]
+    },
+    {
+      "name": "calibrate_label",
+      "mnemonic": ":CALibrate:LABel",
+      "category": "CALibrate",
+      "description": "Sets/queries the calibration label string.",
+      "set": ":CALibrate:LABel <string>",
+      "query": ":CALibrate:LABel?",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "quoted ASCII string up to 32 characters"
+        }
+      ],
+      "examples": [
+        ":CALibrate:LABel \"LAB1\"",
+        ":CALibrate:LABel?"
+      ]
+    },
+    {
+      "name": "calibrate_switch_query",
+      "mnemonic": ":CALibrate:SWITch?",
+      "category": "CALibrate",
+      "description": "Returns the state of the calibration protect switch.",
+      "query": ":CALibrate:SWITch?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "{PROTected | UNPRotected}"
+        }
+      ],
+      "examples": [
+        ":CALibrate:SWITch?"
+      ]
+    },
+    {
+      "name": "calibrate_time_query",
+      "mnemonic": ":CALibrate:TIME?",
+      "category": "CALibrate",
+      "description": "Returns the calibration time as <hours>,<minutes>,<seconds>.",
+      "query": ":CALibrate:TIME?",
+      "examples": [
+        ":CALibrate:TIME?"
+      ]
+    },
+    {
+      "name": "channel_bwlimit",
+      "mnemonic": ":CHANnel<n>:BWLimit",
+      "category": "CHANnel",
+      "description": "Turns the bandwidth limit filter on/off for the specified channel.",
+      "set": ":CHANnel<n>:BWLimit {{0 | OFF} | {1 | ON}}",
+      "query": ":CHANnel<n>:BWLimit?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:BWLimit ON",
+        ":CHANnel1:BWLimit?"
+      ]
+    },
+    {
+      "name": "channel_coupling",
+      "mnemonic": ":CHANnel<n>:COUPling",
+      "category": "CHANnel",
+      "description": "Sets/queries the input coupling for the specified channel.",
+      "set": ":CHANnel<n>:COUPling <coupling>",
+      "query": ":CHANnel<n>:COUPling?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "coupling",
+          "range": "{AC | DC | GND} for 54620-series; {AC | DC} for 54640-series"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:COUPling DC",
+        ":CHANnel1:COUPling?"
+      ]
+    },
+    {
+      "name": "channel_display",
+      "mnemonic": ":CHANnel<n>:DISPlay",
+      "category": "CHANnel",
+      "description": "Turns the display of the specified channel on/off.",
+      "set": ":CHANnel<n>:DISPlay {{0 | OFF} | {1 | ON}}",
+      "query": ":CHANnel<n>:DISPlay?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:DISPlay ON",
+        ":CHANnel1:DISPlay?"
+      ]
+    },
+    {
+      "name": "channel_impedance",
+      "mnemonic": ":CHANnel<n>:IMPedance",
+      "category": "CHANnel",
+      "description": "Sets/queries the input impedance for the specified channel.",
+      "set": ":CHANnel<n>:IMPedance <impedance>",
+      "query": ":CHANnel<n>:IMPedance?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "impedance",
+          "range": "{ONEMeg} for 54620-series; {ONEMeg | FIFTy} for 54640-series"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:IMPedance ONEMeg",
+        ":CHANnel1:IMPedance?"
+      ]
+    },
+    {
+      "name": "channel_invert",
+      "mnemonic": ":CHANnel<n>:INVert",
+      "category": "CHANnel",
+      "description": "Inverts the specified channel relative to ground or offset.",
+      "set": ":CHANnel<n>:INVert {{0 | OFF} | {1 | ON}}",
+      "query": ":CHANnel<n>:INVert?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:INVert ON",
+        ":CHANnel1:INVert?"
+      ]
+    },
+    {
+      "name": "channel_label",
+      "mnemonic": ":CHANnel<n>:LABel",
+      "category": "CHANnel",
+      "description": "Sets/queries the label string for the specified channel.",
+      "set": ":CHANnel<n>:LABel <string>",
+      "query": ":CHANnel<n>:LABel?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "string",
+          "range": "up to 6 ASCII characters in quotation marks"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:LABel \"CLK\"",
+        ":CHANnel1:LABel?"
+      ]
+    },
+    {
+      "name": "channel_offset",
+      "mnemonic": ":CHANnel<n>:OFFSet",
+      "category": "CHANnel",
+      "description": "Sets/queries the vertical offset of the specified channel.",
+      "set": ":CHANnel<n>:OFFSet <offset>[suffix]",
+      "query": ":CHANnel<n>:OFFSet?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "offset",
+          "units": [
+            "V"
+          ],
+          "range": "vertical offset value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:OFFSet 0.5V",
+        ":CHANnel1:OFFSet?"
+      ]
+    },
+    {
+      "name": "channel_probe",
+      "mnemonic": ":CHANnel<n>:PROBe",
+      "category": "CHANnel",
+      "description": "Sets/queries the probe attenuation ratio for the specified channel.",
+      "set": ":CHANnel<n>:PROBe <attenuation>",
+      "query": ":CHANnel<n>:PROBe?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "attenuation",
+          "range": "probe attenuation ratio (NR3)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:PROBe 10",
+        ":CHANnel1:PROBe?"
+      ]
+    },
+    {
+      "name": "channel_probe_skew",
+      "mnemonic": ":CHANnel<n>:PROBe:SKEW",
+      "category": "CHANnel",
+      "description": "Sets/queries the channel-to-channel skew adjustment (54640-series only).",
+      "set": ":CHANnel<n>:PROBe:SKEW <skew_value>",
+      "query": ":CHANnel<n>:PROBe:SKEW?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 (NR1), 54640-series only"
+        },
+        {
+          "name": "skew_value",
+          "units": [
+            "s"
+          ],
+          "range": "-100 ns to +100 ns (NR3)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:PROBe:SKEW 10E-9",
+        ":CHANnel1:PROBe:SKEW?"
+      ]
+    },
+    {
+      "name": "channel_protection",
+      "mnemonic": ":CHANnel<n>:PROTection",
+      "category": "CHANnel",
+      "description": "Clears (set form, [:CLEAR]) the input protection trip and queries the protection state (54640-series only).",
+      "set": ":CHANnel<n>:PROTection[:CLEAR]",
+      "query": ":CHANnel<n>:PROTection?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 (NR1), 54640-series only"
+        },
+        {
+          "name": "state",
+          "range": "{NORM | TRIP}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:PROTection:CLEAR",
+        ":CHANnel1:PROTection?"
+      ]
+    },
+    {
+      "name": "channel_range",
+      "mnemonic": ":CHANnel<n>:RANGe",
+      "category": "CHANnel",
+      "description": "Sets/queries the vertical full-scale range of the specified channel.",
+      "set": ":CHANnel<n>:RANGe <range>[suffix]",
+      "query": ":CHANnel<n>:RANGe?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "range",
+          "units": [
+            "V"
+          ],
+          "range": "vertical full-scale range value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:RANGe 8V",
+        ":CHANnel1:RANGe?"
+      ]
+    },
+    {
+      "name": "channel_scale",
+      "mnemonic": ":CHANnel<n>:SCALe",
+      "category": "CHANnel",
+      "description": "Sets/queries the vertical units per division of the specified channel.",
+      "set": ":CHANnel<n>:SCALe <scale>[suffix]",
+      "query": ":CHANnel<n>:SCALe?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "scale",
+          "units": [
+            "V/div"
+          ],
+          "range": "vertical units per division (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:SCALe 1V",
+        ":CHANnel1:SCALe?"
+      ]
+    },
+    {
+      "name": "channel_units",
+      "mnemonic": ":CHANnel<n>:UNITs",
+      "category": "CHANnel",
+      "description": "Sets/queries the vertical measurement units for the specified channel.",
+      "set": ":CHANnel<n>:UNITs <units>",
+      "query": ":CHANnel<n>:UNITs?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 or 1-4 (NR1)"
+        },
+        {
+          "name": "units",
+          "range": "{VOLTs | AMPeres}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:UNITs VOLTs",
+        ":CHANnel1:UNITs?"
+      ]
+    },
+    {
+      "name": "digital_display",
+      "mnemonic": ":DIGital<n>:DISPlay",
+      "category": "DIGital",
+      "description": "Turns the display of the specified digital channel on/off (546xxD only).",
+      "set": ":DIGital<n>:DISPlay {{0 | OFF} | {1 | ON}}",
+      "query": ":DIGital<n>:DISPlay?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "0-15 (NR1)"
+        },
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":DIGital0:DISPlay ON",
+        ":DIGital0:DISPlay?"
+      ]
+    },
+    {
+      "name": "digital_label",
+      "mnemonic": ":DIGital<n>:LABel",
+      "category": "DIGital",
+      "description": "Sets/queries the label string for the specified digital channel (546xxD only).",
+      "set": ":DIGital<n>:LABel <string>",
+      "query": ":DIGital<n>:LABel?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "0-15 (NR1)"
+        },
+        {
+          "name": "string",
+          "range": "up to 6 ASCII characters in quotation marks"
+        }
+      ],
+      "examples": [
+        ":DIGital0:LABel \"D0\"",
+        ":DIGital0:LABel?"
+      ]
+    },
+    {
+      "name": "digital_position",
+      "mnemonic": ":DIGital<n>:POSition",
+      "category": "DIGital",
+      "description": "Sets/queries the on-screen position of the specified digital channel (546xxD only).",
+      "set": ":DIGital<n>:POSition <position>",
+      "query": ":DIGital<n>:POSition?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "0-15 (NR1)"
+        },
+        {
+          "name": "position",
+          "range": "0-7 (large), 0-15 (medium), 0-31 (small)"
+        }
+      ],
+      "examples": [
+        ":DIGital0:POSition 5",
+        ":DIGital0:POSition?"
+      ]
+    },
+    {
+      "name": "digital_threshold",
+      "mnemonic": ":DIGital<n>:THReshold",
+      "category": "DIGital",
+      "description": "Sets/queries the logic threshold for the specified digital channel (546xxD only).",
+      "set": ":DIGital<n>:THReshold <value>[suffix]",
+      "query": ":DIGital<n>:THReshold?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "0-15 (NR1)"
+        },
+        {
+          "name": "value",
+          "units": [
+            "V"
+          ],
+          "range": "{CMOS | ECL | TTL | user value -8.00 to +8.00 (NR3)}"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV | uV}"
+        }
+      ],
+      "examples": [
+        ":DIGital0:THReshold TTL",
+        ":DIGital0:THReshold 1.5V"
+      ]
+    },
+    {
+      "name": "display_clear",
+      "mnemonic": ":DISPlay:CLEar",
+      "category": "DISPlay",
+      "description": "Clears the display. No query form.",
+      "set": ":DISPlay:CLEar",
+      "examples": [
+        ":DISPlay:CLEar"
+      ]
+    },
+    {
+      "name": "display_data",
+      "mnemonic": ":DISPlay:DATA",
+      "category": "DISPlay",
+      "description": "Writes (command) or reads (query) screen image data. Command supports TIFF format / GRATicule area; query supports TIFF or BMP and GRATicule or SCReen area.",
+      "set": ":DISPlay:DATA [format][,][area] <display data>",
+      "query": ":DISPlay:DATA? [format][,][area]",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "{TIFF} (command); {TIFF | BMP} (query)"
+        },
+        {
+          "name": "area",
+          "range": "{GRATicule} (command); {GRATicule | SCReen} (query)"
+        },
+        {
+          "name": "display data",
+          "range": "data in IEEE 488.2 # format"
+        }
+      ],
+      "examples": [
+        ":DISPlay:DATA? BMP,SCReen"
+      ]
+    },
+    {
+      "name": "display_label",
+      "mnemonic": ":DISPlay:LABel",
+      "category": "DISPlay",
+      "description": "Turns the analog/digital channel labels on/off.",
+      "set": ":DISPlay:LABel {{0 | OFF} | {1 | ON}}",
+      "query": ":DISPlay:LABel?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:LABel ON",
+        ":DISPlay:LABel?"
+      ]
+    },
+    {
+      "name": "display_label_list",
+      "mnemonic": ":DISPlay:LABList",
+      "category": "DISPlay",
+      "description": "Sets/queries the label list as a time-ordered list of up to 75 labels (binary block).",
+      "set": ":DISPlay:LABList <binary block>",
+      "query": ":DISPlay:LABList?",
+      "parameters": [
+        {
+          "name": "binary block",
+          "range": "time-ordered list of 75 labels, each max 6 characters followed by a comma"
+        }
+      ],
+      "examples": [
+        ":DISPlay:LABList?"
+      ]
+    },
+    {
+      "name": "display_persistence",
+      "mnemonic": ":DISPlay:PERSistence",
+      "category": "DISPlay",
+      "description": "Sets/queries the waveform persistence.",
+      "set": ":DISPlay:PERSistence <value>",
+      "query": ":DISPlay:PERSistence?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{MINimum | INFinite}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:PERSistence INFinite",
+        ":DISPlay:PERSistence?"
+      ]
+    },
+    {
+      "name": "display_source",
+      "mnemonic": ":DISPlay:SOURce",
+      "category": "DISPlay",
+      "description": "Sets/queries the pixel memory source displayed.",
+      "set": ":DISPlay:SOURce <value>",
+      "query": ":DISPlay:SOURce?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{PMEMory{0 | 1 | 2}}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:SOURce PMEMory1",
+        ":DISPlay:SOURce?"
+      ]
+    },
+    {
+      "name": "display_vectors",
+      "mnemonic": ":DISPlay:VECTors",
+      "category": "DISPlay",
+      "description": "Turns vector (connect-the-dots) display on/off.",
+      "set": ":DISPlay:VECTors {{1 | ON} | {0 | OFF}}",
+      "query": ":DISPlay:VECTors?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{1 | 0}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:VECTors ON",
+        ":DISPlay:VECTors?"
+      ]
+    },
+    {
+      "name": "external_bwlimit",
+      "mnemonic": ":EXTernal:BWLimit",
+      "category": "EXTernal",
+      "description": "Sets/queries the bandwidth limit of the external trigger input.",
+      "set": ":EXTernal:BWLimit <bwlimit>",
+      "query": ":EXTernal:BWLimit?",
+      "parameters": [
+        {
+          "name": "bwlimit",
+          "range": "{0 | OFF}"
+        }
+      ],
+      "examples": [
+        ":EXTernal:BWLimit OFF",
+        ":EXTernal:BWLimit?"
+      ]
+    },
+    {
+      "name": "external_impedance",
+      "mnemonic": ":EXTernal:IMPedance",
+      "category": "EXTernal",
+      "description": "Sets/queries the input impedance of the external trigger input.",
+      "set": ":EXTernal:IMPedance <value>",
+      "query": ":EXTernal:IMPedance?",
+      "parameters": [
+        {
+          "name": "impedance",
+          "range": "{ONEMeg} for 54620-series; {ONEMeg | FIFTy} for 54640-series"
+        }
+      ],
+      "examples": [
+        ":EXTernal:IMPedance ONEMeg",
+        ":EXTernal:IMPedance?"
+      ]
+    },
+    {
+      "name": "external_probe",
+      "mnemonic": ":EXTernal:PROBe",
+      "category": "EXTernal",
+      "description": "Sets/queries the probe attenuation ratio of the external trigger input.",
+      "set": ":EXTernal:PROBe <attenuation>",
+      "query": ":EXTernal:PROBe?",
+      "parameters": [
+        {
+          "name": "attenuation",
+          "range": "probe attenuation ratio (NR3)"
+        }
+      ],
+      "examples": [
+        ":EXTernal:PROBe 10",
+        ":EXTernal:PROBe?"
+      ]
+    },
+    {
+      "name": "external_protection",
+      "mnemonic": ":EXTernal:PROTection",
+      "category": "EXTernal",
+      "description": "Clears (set form, [:CLEAR]) the external input protection trip and queries the protection state.",
+      "set": ":EXTernal:PROTection[:CLEAR]",
+      "query": ":EXTernal:PROTection?",
+      "parameters": [
+        {
+          "name": "state",
+          "range": "{NORM | TRIP}"
+        }
+      ],
+      "examples": [
+        ":EXTernal:PROTection:CLEAR",
+        ":EXTernal:PROTection?"
+      ]
+    },
+    {
+      "name": "external_range",
+      "mnemonic": ":EXTernal:RANGe",
+      "category": "EXTernal",
+      "description": "Sets/queries the vertical full-scale range of the external trigger input.",
+      "set": ":EXTernal:RANGe <range>[<suffix>]",
+      "query": ":EXTernal:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "units": [
+            "V"
+          ],
+          "range": "vertical full-scale range value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV}"
+        }
+      ],
+      "examples": [
+        ":EXTernal:RANGe 8V",
+        ":EXTernal:RANGe?"
+      ]
+    },
+    {
+      "name": "external_units",
+      "mnemonic": ":EXTernal:UNITs",
+      "category": "EXTernal",
+      "description": "Sets/queries the measurement units of the external trigger input.",
+      "set": ":EXTernal:UNITs <units>",
+      "query": ":EXTernal:UNITs?",
+      "parameters": [
+        {
+          "name": "units",
+          "range": "{VOLTs | AMPeres}"
+        }
+      ],
+      "examples": [
+        ":EXTernal:UNITs VOLTs",
+        ":EXTernal:UNITs?"
+      ]
+    },
+    {
+      "name": "function_center",
+      "mnemonic": ":FUNCtion:CENTer",
+      "category": "FUNCtion",
+      "description": "Sets/queries the FFT center frequency.",
+      "set": ":FUNCtion:CENTer <frequency>",
+      "query": ":FUNCtion:CENTer?",
+      "parameters": [
+        {
+          "name": "frequency",
+          "units": [
+            "Hz"
+          ],
+          "range": "0 Hz to 25.00 GHz (NR3)"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:CENTer 1E6",
+        ":FUNCtion:CENTer?"
+      ]
+    },
+    {
+      "name": "function_display",
+      "mnemonic": ":FUNCtion:DISPlay",
+      "category": "FUNCtion",
+      "description": "Turns the math function display on/off.",
+      "set": ":FUNCtion:DISPlay {{0 | OFF} | {1 | ON}}",
+      "query": ":FUNCtion:DISPlay?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:DISPlay ON",
+        ":FUNCtion:DISPlay?"
+      ]
+    },
+    {
+      "name": "function_offset",
+      "mnemonic": ":FUNCtion:OFFSet",
+      "category": "FUNCtion",
+      "description": "Sets/queries the value at center screen for the selected function.",
+      "set": ":FUNCtion:OFFSet <offset>",
+      "query": ":FUNCtion:OFFSet?",
+      "parameters": [
+        {
+          "name": "offset",
+          "range": "value at center screen (NR3); +/-10x current sensitivity"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:OFFSet 0",
+        ":FUNCtion:OFFSet?"
+      ]
+    },
+    {
+      "name": "function_operation",
+      "mnemonic": ":FUNCtion:OPERation",
+      "category": "FUNCtion",
+      "description": "Sets/queries the math operation performed.",
+      "set": ":FUNCtion:OPERation <operation>",
+      "query": ":FUNCtion:OPERation?",
+      "parameters": [
+        {
+          "name": "operation",
+          "range": "{SUBTract | MULTiply | INTegrate | DIFFerentiate | FFT}"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:OPERation FFT",
+        ":FUNCtion:OPERation?"
+      ]
+    },
+    {
+      "name": "function_range",
+      "mnemonic": ":FUNCtion:RANGe",
+      "category": "FUNCtion",
+      "description": "Sets/queries the full-scale vertical axis value of the selected function. Range depends on the operation.",
+      "set": ":FUNCtion:RANGe <range>",
+      "query": ":FUNCtion:RANGe?",
+      "parameters": [
+        {
+          "name": "range",
+          "range": "full-scale vertical value (NR3); ADD/SUBT/MULT 8E-6..800E+3; INTegrate 8E-9..400E+3; DIFFerentiate 80E-3..8.0E12; FFT 8..800 dBV"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:RANGe 8",
+        ":FUNCtion:RANGe?"
+      ]
+    },
+    {
+      "name": "function_reference",
+      "mnemonic": ":FUNCtion:REFerence",
+      "category": "FUNCtion",
+      "description": "Sets/queries the FFT reference level.",
+      "set": ":FUNCtion:REFerence <level>",
+      "query": ":FUNCtion:REFerence?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "dBV"
+          ],
+          "range": "-400.0 dBV to +400.0 dBV (NR3)"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:REFerence 0",
+        ":FUNCtion:REFerence?"
+      ]
+    },
+    {
+      "name": "function_scale",
+      "mnemonic": ":FUNCtion:SCALe",
+      "category": "FUNCtion",
+      "description": "Sets/queries the vertical units per division of the selected function.",
+      "set": ":FUNCtion:SCALe <scale value>[<suffix>]",
+      "query": ":FUNCtion:SCALe?",
+      "parameters": [
+        {
+          "name": "scale value",
+          "range": "integer (NR1)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | dB}"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:SCALe 1V",
+        ":FUNCtion:SCALe?"
+      ]
+    },
+    {
+      "name": "function_source",
+      "mnemonic": ":FUNCtion:SOURce",
+      "category": "FUNCtion",
+      "description": "Sets/queries the input source for the math function.",
+      "set": ":FUNCtion:SOURce <source>",
+      "query": ":FUNCtion:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | ADD | SUBT | MULT}; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:SOURce CHANnel1",
+        ":FUNCtion:SOURce?"
+      ]
+    },
+    {
+      "name": "function_span",
+      "mnemonic": ":FUNCtion:SPAN",
+      "category": "FUNCtion",
+      "description": "Sets/queries the FFT frequency span.",
+      "set": ":FUNCtion:SPAN <span>",
+      "query": ":FUNCtion:SPAN?",
+      "parameters": [
+        {
+          "name": "span",
+          "units": [
+            "Hz"
+          ],
+          "range": "1 Hz to 100 GHz (NR3)"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:SPAN 1E6",
+        ":FUNCtion:SPAN?"
+      ]
+    },
+    {
+      "name": "function_window",
+      "mnemonic": ":FUNCtion:WINDow",
+      "category": "FUNCtion",
+      "description": "Sets/queries the FFT windowing function.",
+      "set": ":FUNCtion:WINDow <window>",
+      "query": ":FUNCtion:WINDow?",
+      "parameters": [
+        {
+          "name": "window",
+          "range": "{RECTangular | HANNing | FLATtop}"
+        }
+      ],
+      "examples": [
+        ":FUNCtion:WINDow HANNing",
+        ":FUNCtion:WINDow?"
+      ]
+    },
+    {
+      "name": "hardcopy_destination",
+      "mnemonic": ":HARDcopy:DESTination",
+      "category": "HARDcopy",
+      "description": "Sets/queries the hardcopy output destination.",
+      "set": ":HARDcopy:DESTination <destination>",
+      "query": ":HARDcopy:DESTination?",
+      "parameters": [
+        {
+          "name": "destination",
+          "range": "{CENTronics | FLOPpy}"
+        }
+      ],
+      "examples": [
+        ":HARDcopy:DESTination CENTronics",
+        ":HARDcopy:DESTination?"
+      ]
+    },
+    {
+      "name": "hardcopy_factors",
+      "mnemonic": ":HARDcopy:FACTors",
+      "category": "HARDcopy",
+      "description": "Turns the printing of instrument settings (factors) on/off.",
+      "set": ":HARDcopy:FACTors {{0 | OFF} | {1 | ON}}",
+      "query": ":HARDcopy:FACTors?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":HARDcopy:FACTors ON",
+        ":HARDcopy:FACTors?"
+      ]
+    },
+    {
+      "name": "hardcopy_form_feed",
+      "mnemonic": ":HARDcopy:FFEed",
+      "category": "HARDcopy",
+      "description": "Turns the form feed at the end of a hardcopy on/off.",
+      "set": ":HARDcopy:FFEed {{0 | OFF} | {1 | ON}}",
+      "query": ":HARDcopy:FFEed?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":HARDcopy:FFEed ON",
+        ":HARDcopy:FFEed?"
+      ]
+    },
+    {
+      "name": "hardcopy_format",
+      "mnemonic": ":HARDcopy:FORMat",
+      "category": "HARDcopy",
+      "description": "Sets/queries the hardcopy device format.",
+      "set": ":HARDcopy:FORMat <device>",
+      "query": ":HARDcopy:FORMat?",
+      "parameters": [
+        {
+          "name": "format",
+          "range": "{TIFF | BMP | CSV | LASerjet | DESKjet | EPSon | SEIKo}"
+        }
+      ],
+      "examples": [
+        ":HARDcopy:FORMat TIFF",
+        ":HARDcopy:FORMat?"
+      ]
+    },
+    {
+      "name": "hardcopy_grayscale",
+      "mnemonic": ":HARDcopy:GRAYscale",
+      "category": "HARDcopy",
+      "description": "Turns grayscale hardcopy output on/off.",
+      "set": ":HARDcopy:GRAYscale {{0 | OFF} | {1 | ON}}",
+      "query": ":HARDcopy:GRAYscale?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":HARDcopy:GRAYscale ON",
+        ":HARDcopy:GRAYscale?"
+      ]
+    },
+    {
+      "name": "marker_mode",
+      "mnemonic": ":MARKer:MODE",
+      "category": "MARKer",
+      "description": "Sets/queries the marker (cursor) mode.",
+      "set": ":MARKer:MODE <mode>",
+      "query": ":MARKer:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "{OFF | MEASure | MANual}"
+        }
+      ],
+      "examples": [
+        ":MARKer:MODE MANual",
+        ":MARKer:MODE?"
+      ]
+    },
+    {
+      "name": "marker_x1_position",
+      "mnemonic": ":MARKer:X1Position",
+      "category": "MARKer",
+      "description": "Sets/queries the X1 cursor position.",
+      "set": ":MARKer:X1Position <position>[suffix]",
+      "query": ":MARKer:X1Position?",
+      "parameters": [
+        {
+          "name": "position",
+          "range": "X1 cursor position value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps | Hz | kHz | MHz}"
+        }
+      ],
+      "examples": [
+        ":MARKer:X1Position 1E-6",
+        ":MARKer:X1Position?"
+      ]
+    },
+    {
+      "name": "marker_x1y1_source",
+      "mnemonic": ":MARKer:X1Y1source",
+      "category": "MARKer",
+      "description": "Sets/queries the source for the X1/Y1 cursors.",
+      "set": ":MARKer:X1Y1source <source>",
+      "query": ":MARKer:X1Y1source?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":MARKer:X1Y1source CHANnel1",
+        ":MARKer:X1Y1source?"
+      ]
+    },
+    {
+      "name": "marker_x2_position",
+      "mnemonic": ":MARKer:X2Position",
+      "category": "MARKer",
+      "description": "Sets/queries the X2 cursor position.",
+      "set": ":MARKer:X2Position <position>[suffix]",
+      "query": ":MARKer:X2Position?",
+      "parameters": [
+        {
+          "name": "position",
+          "range": "X2 cursor position value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps | Hz | kHz | MHz}"
+        }
+      ],
+      "examples": [
+        ":MARKer:X2Position 2E-6",
+        ":MARKer:X2Position?"
+      ]
+    },
+    {
+      "name": "marker_x2y2_source",
+      "mnemonic": ":MARKer:X2Y2source",
+      "category": "MARKer",
+      "description": "Sets/queries the source for the X2/Y2 cursors.",
+      "set": ":MARKer:X2Y2source <source>",
+      "query": ":MARKer:X2Y2source?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":MARKer:X2Y2source CHANnel1",
+        ":MARKer:X2Y2source?"
+      ]
+    },
+    {
+      "name": "marker_x_delta_query",
+      "mnemonic": ":MARKer:XDELta?",
+      "category": "MARKer",
+      "description": "Returns the delta between the X1 and X2 cursors.",
+      "query": ":MARKer:XDELta?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "X cursors delta value (NR3)"
+        }
+      ],
+      "examples": [
+        ":MARKer:XDELta?"
+      ]
+    },
+    {
+      "name": "marker_y1_position",
+      "mnemonic": ":MARKer:Y1Position",
+      "category": "MARKer",
+      "description": "Sets/queries the Y1 cursor position.",
+      "set": ":MARKer:Y1Position <position>[suffix]",
+      "query": ":MARKer:Y1Position?",
+      "parameters": [
+        {
+          "name": "position",
+          "range": "Y1 cursor position value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV | dB}"
+        }
+      ],
+      "examples": [
+        ":MARKer:Y1Position 0.5V",
+        ":MARKer:Y1Position?"
+      ]
+    },
+    {
+      "name": "marker_y2_position",
+      "mnemonic": ":MARKer:Y2Position",
+      "category": "MARKer",
+      "description": "Sets/queries the Y2 cursor position.",
+      "set": ":MARKer:Y2Position <position>[suffix]",
+      "query": ":MARKer:Y2Position?",
+      "parameters": [
+        {
+          "name": "position",
+          "range": "Y2 cursor position value (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV | dB}"
+        }
+      ],
+      "examples": [
+        ":MARKer:Y2Position 1.0V",
+        ":MARKer:Y2Position?"
+      ]
+    },
+    {
+      "name": "marker_y_delta_query",
+      "mnemonic": ":MARKer:YDELta?",
+      "category": "MARKer",
+      "description": "Returns the delta between the Y1 and Y2 cursors.",
+      "query": ":MARKer:YDELta?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "Y cursors delta value (NR3)"
+        }
+      ],
+      "examples": [
+        ":MARKer:YDELta?"
+      ]
+    },
+    {
+      "name": "measure_clear",
+      "mnemonic": ":MEASure:CLEar",
+      "category": "MEASure",
+      "description": "Clears all selected measurements from the display. No query form.",
+      "set": ":MEASure:CLEar",
+      "examples": [
+        ":MEASure:CLEar"
+      ]
+    },
+    {
+      "name": "measure_counter",
+      "mnemonic": ":MEASure:COUNter",
+      "category": "MEASure",
+      "description": "Measures/queries the counter frequency for the specified source.",
+      "set": ":MEASure:COUNter [<source>]",
+      "query": ":MEASure:COUNter? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n>} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "Hz"
+          ],
+          "range": "counter frequency (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:COUNter CHANnel1",
+        ":MEASure:COUNter? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_define",
+      "mnemonic": ":MEASure:DEFine",
+      "category": "MEASure",
+      "description": "Defines measurement parameters for DELay (edge specs) or THResholds.",
+      "set": ":MEASure:DEFine <meas_spec>",
+      "query": ":MEASure:DEFine? {DELay | THResholds}",
+      "parameters": [
+        {
+          "name": "DELay spec",
+          "range": "DELay, <edge_spec1>, <edge_spec2>; edge_spec ::= [<slope>] <occurrence>; <slope> ::= {+ | -}"
+        },
+        {
+          "name": "THResholds spec",
+          "range": "THResholds, {STANdard} | {<threshold mode>,<upper>,<middle>,<lower>}; mode ::= {PERCent | ABSolute}"
+        }
+      ],
+      "examples": [
+        ":MEASure:DEFine THResholds,STANdard",
+        ":MEASure:DEFine? DELay"
+      ]
+    },
+    {
+      "name": "measure_delay",
+      "mnemonic": ":MEASure:DELay",
+      "category": "MEASure",
+      "description": "Measures/queries the delay between two sources.",
+      "set": ":MEASure:DELay [<source1>][,<source2>]",
+      "query": ":MEASure:DELay? [<source1>][,<source2>]",
+      "parameters": [
+        {
+          "name": "source1,2",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "delay time in seconds (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:DELay? CHANnel1,CHANnel2"
+      ]
+    },
+    {
+      "name": "measure_duty_cycle",
+      "mnemonic": ":MEASure:DUTYcycle",
+      "category": "MEASure",
+      "description": "Measures/queries the duty cycle (ratio of positive pulse width to period).",
+      "set": ":MEASure:DUTYcycle [<source>]",
+      "query": ":MEASure:DUTYcycle? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "range": "ratio of positive pulse width to period (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:DUTYcycle? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_fall_time",
+      "mnemonic": ":MEASure:FALLtime",
+      "category": "MEASure",
+      "description": "Measures/queries the fall time of the selected source.",
+      "set": ":MEASure:FALLtime [<source>]",
+      "query": ":MEASure:FALLtime? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "time between lower and upper thresholds (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:FALLtime? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_frequency",
+      "mnemonic": ":MEASure:FREQuency",
+      "category": "MEASure",
+      "description": "Measures/queries the frequency of the selected source.",
+      "set": ":MEASure:FREQuency [<source>]",
+      "query": ":MEASure:FREQuency? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "Hz"
+          ],
+          "range": "frequency (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:FREQuency? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_negative_width",
+      "mnemonic": ":MEASure:NWIDth",
+      "category": "MEASure",
+      "description": "Measures/queries the negative pulse width of the selected source.",
+      "set": ":MEASure:NWIDth [<source>]",
+      "query": ":MEASure:NWIDth? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "negative pulse width (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:NWIDth? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_overshoot",
+      "mnemonic": ":MEASure:OVERshoot",
+      "category": "MEASure",
+      "description": "Measures/queries the overshoot of the selected source as a percent.",
+      "set": ":MEASure:OVERshoot [<source>]",
+      "query": ":MEASure:OVERshoot? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "%"
+          ],
+          "range": "percent overshoot (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:OVERshoot? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_period",
+      "mnemonic": ":MEASure:PERiod",
+      "category": "MEASure",
+      "description": "Measures/queries the period of the selected source.",
+      "set": ":MEASure:PERiod [<source>]",
+      "query": ":MEASure:PERiod? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "waveform period (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:PERiod? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_phase",
+      "mnemonic": ":MEASure:PHASe",
+      "category": "MEASure",
+      "description": "Measures/queries the phase angle between two sources.",
+      "set": ":MEASure:PHASe [<source1>][,<source2>]",
+      "query": ":MEASure:PHASe? [<source1>][,<source2>]",
+      "parameters": [
+        {
+          "name": "source1,2",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "degrees"
+          ],
+          "range": "phase angle (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:PHASe? CHANnel1,CHANnel2"
+      ]
+    },
+    {
+      "name": "measure_preshoot",
+      "mnemonic": ":MEASure:PREShoot",
+      "category": "MEASure",
+      "description": "Measures/queries the preshoot of the selected source as a percent.",
+      "set": ":MEASure:PREShoot [<source>]",
+      "query": ":MEASure:PREShoot? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "%"
+          ],
+          "range": "percent preshoot (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:PREShoot? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_positive_width",
+      "mnemonic": ":MEASure:PWIDth",
+      "category": "MEASure",
+      "description": "Measures/queries the positive pulse width of the selected source.",
+      "set": ":MEASure:PWIDth [<source>]",
+      "query": ":MEASure:PWIDth? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "positive pulse width (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:PWIDth? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_rise_time",
+      "mnemonic": ":MEASure:RISEtime",
+      "category": "MEASure",
+      "description": "Measures/queries the rise time of the selected source.",
+      "set": ":MEASure:RISEtime [<source>]",
+      "query": ":MEASure:RISEtime? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "rise time (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:RISEtime? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_show",
+      "mnemonic": ":MEASure:SHOW",
+      "category": "MEASure",
+      "description": "Enables markers showing where the measurement is being made.",
+      "set": ":MEASure:SHOW {1 | ON}",
+      "query": ":MEASure:SHOW?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{1}"
+        }
+      ],
+      "examples": [
+        ":MEASure:SHOW ON",
+        ":MEASure:SHOW?"
+      ]
+    },
+    {
+      "name": "measure_source",
+      "mnemonic": ":MEASure:SOURce",
+      "category": "MEASure",
+      "description": "Sets/queries the source(s) for subsequent measurements.",
+      "set": ":MEASure:SOURce [<source1>][,<source2>]",
+      "query": ":MEASure:SOURce?",
+      "parameters": [
+        {
+          "name": "source1,2",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "range": "{<source> | NONE}"
+        }
+      ],
+      "examples": [
+        ":MEASure:SOURce CHANnel1",
+        ":MEASure:SOURce?"
+      ]
+    },
+    {
+      "name": "measure_time_edge",
+      "mnemonic": ":MEASure:TEDGe",
+      "category": "MEASure",
+      "description": "Measures/queries the time of a specified edge (transition) relative to the trigger.",
+      "set": ":MEASure:TEDGe <slope><occurrence>[,<source>]",
+      "query": ":MEASure:TEDGe? <slope><occurrence>[,<source>]",
+      "parameters": [
+        {
+          "name": "slope",
+          "range": "direction of the waveform"
+        },
+        {
+          "name": "occurrence",
+          "range": "the transition to be reported"
+        },
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "time of the specified transition (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:TEDGe? +1,CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_time_value_query",
+      "mnemonic": ":MEASure:TVALue?",
+      "category": "MEASure",
+      "description": "Returns the time at which the waveform crosses a specified voltage value.",
+      "query": ":MEASure:TVALue? <value>,[<slope>]<occurrence>[,<source>]",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "V"
+          ],
+          "range": "voltage level the waveform must cross"
+        },
+        {
+          "name": "slope",
+          "range": "direction of the waveform when <value> is crossed"
+        },
+        {
+          "name": "occurrence",
+          "range": "transition reported"
+        },
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "time of specified voltage crossing (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:TVALue? 0.0,+1,CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vamplitude",
+      "mnemonic": ":MEASure:VAMPlitude",
+      "category": "MEASure",
+      "description": "Measures/queries the amplitude (Vtop - Vbase) of the selected source.",
+      "set": ":MEASure:VAMPlitude [<source>]",
+      "query": ":MEASure:VAMPlitude? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "amplitude (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VAMPlitude? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vaverage",
+      "mnemonic": ":MEASure:VAVerage",
+      "category": "MEASure",
+      "description": "Measures/queries the average voltage of the selected source.",
+      "set": ":MEASure:VAVerage [<source>]",
+      "query": ":MEASure:VAVerage? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "calculated average voltage (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VAVerage? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vbase",
+      "mnemonic": ":MEASure:VBASe",
+      "category": "MEASure",
+      "description": "Measures/queries the base voltage of the selected source.",
+      "set": ":MEASure:VBASe [<source>]",
+      "query": ":MEASure:VBASe? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "base_voltage",
+          "units": [
+            "V"
+          ],
+          "range": "voltage at the base of the waveform (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VBASe? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vmax",
+      "mnemonic": ":MEASure:VMAX",
+      "category": "MEASure",
+      "description": "Measures/queries the maximum voltage of the selected source.",
+      "set": ":MEASure:VMAX [<source>]",
+      "query": ":MEASure:VMAX? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "maximum voltage (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VMAX? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vmin",
+      "mnemonic": ":MEASure:VMIN",
+      "category": "MEASure",
+      "description": "Measures/queries the minimum voltage of the selected source.",
+      "set": ":MEASure:VMIN [<source>]",
+      "query": ":MEASure:VMIN? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "minimum voltage (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VMIN? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vpp",
+      "mnemonic": ":MEASure:VPP",
+      "category": "MEASure",
+      "description": "Measures/queries the peak-to-peak voltage of the selected source.",
+      "set": ":MEASure:VPP [<source>]",
+      "query": ":MEASure:VPP? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "peak-to-peak voltage (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VPP? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vrms",
+      "mnemonic": ":MEASure:VRMS",
+      "category": "MEASure",
+      "description": "Measures/queries the DC RMS voltage of the selected source.",
+      "set": ":MEASure:VRMS [<source>]",
+      "query": ":MEASure:VRMS? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "calculated dc RMS voltage (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VRMS? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vtime_query",
+      "mnemonic": ":MEASure:VTIMe?",
+      "category": "MEASure",
+      "description": "Returns the voltage at a specified time from the trigger.",
+      "query": ":MEASure:VTIMe? <vtime>[,<source>]",
+      "parameters": [
+        {
+          "name": "vtime",
+          "units": [
+            "s"
+          ],
+          "range": "displayed time from trigger (NR3)"
+        },
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | FUNCtion | MATH} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "voltage at the specified time (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VTIMe? 1E-6,CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vtop",
+      "mnemonic": ":MEASure:VTOP",
+      "category": "MEASure",
+      "description": "Measures/queries the top voltage of the selected source.",
+      "set": ":MEASure:VTOP [<source>]",
+      "query": ":MEASure:VTOP? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "voltage at the top of the waveform (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VTOP? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_xmax",
+      "mnemonic": ":MEASure:XMAX",
+      "category": "MEASure",
+      "description": "Measures/queries the horizontal value at the waveform maximum.",
+      "set": ":MEASure:XMAX [<source>]",
+      "query": ":MEASure:XMAX? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "range": "horizontal value of the maximum (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:XMAX? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_xmin",
+      "mnemonic": ":MEASure:XMIN",
+      "category": "MEASure",
+      "description": "Measures/queries the horizontal value at the waveform minimum.",
+      "set": ":MEASure:XMIN [<source>]",
+      "query": ":MEASure:XMIN? [<source>]",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | FUNCtion | MATH}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "return_value",
+          "range": "horizontal value of the minimum (NR3)"
+        }
+      ],
+      "examples": [
+        ":MEASure:XMIN? CHANnel1"
+      ]
+    },
+    {
+      "name": "pod_display",
+      "mnemonic": ":POD<n>:DISPlay",
+      "category": "POD",
+      "description": "Turns the display of the specified digital pod on/off (546xxD only).",
+      "set": ":POD<n>:DISPlay {{0 | OFF} | {1 | ON}}",
+      "query": ":POD<n>:DISPlay?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 (NR1)"
+        },
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":POD1:DISPlay ON",
+        ":POD1:DISPlay?"
+      ]
+    },
+    {
+      "name": "pod_threshold",
+      "mnemonic": ":POD<n>:THReshold",
+      "category": "POD",
+      "description": "Sets/queries the logic threshold for the specified digital pod (546xxD only).",
+      "set": ":POD<n>:THReshold <type>[suffix]",
+      "query": ":POD<n>:THReshold?",
+      "parameters": [
+        {
+          "name": "n",
+          "range": "1-2 (NR1)"
+        },
+        {
+          "name": "type",
+          "units": [
+            "V"
+          ],
+          "range": "{CMOS | ECL | TTL | <user defined value> (NR3)}"
+        },
+        {
+          "name": "suffix",
+          "range": "{V | mV | uV}"
+        }
+      ],
+      "examples": [
+        ":POD1:THReshold TTL",
+        ":POD1:THReshold 1.5V"
+      ]
+    },
+    {
+      "name": "system_date",
+      "mnemonic": ":SYSTem:DATE",
+      "category": "SYSTem",
+      "description": "Sets/queries the instrument real-time-clock date.",
+      "set": ":SYSTem:DATE <date>",
+      "query": ":SYSTem:DATE?",
+      "parameters": [
+        {
+          "name": "date",
+          "range": "<year>,<month>,<day>; year ::= 4-digit (NR1); month ::= {1..12 | JANuary..DECember}; day ::= {1..31}"
+        }
+      ],
+      "examples": [
+        ":SYSTem:DATE 2026,6,19",
+        ":SYSTem:DATE?"
+      ]
+    },
+    {
+      "name": "system_display",
+      "mnemonic": ":SYSTem:DSP",
+      "category": "SYSTem",
+      "description": "Writes a quoted string to the instrument display. No query form.",
+      "set": ":SYSTem:DSP <string>",
+      "parameters": [
+        {
+          "name": "string",
+          "range": "up to 254 characters as a quoted ASCII string"
+        }
+      ],
+      "examples": [
+        ":SYSTem:DSP \"Hello\""
+      ]
+    },
+    {
+      "name": "system_error_query",
+      "mnemonic": ":SYSTem:ERRor?",
+      "category": "SYSTem",
+      "description": "Reads and removes the next error from the error queue, returning code and message.",
+      "query": ":SYSTem:ERRor?",
+      "parameters": [
+        {
+          "name": "error",
+          "range": "integer error code"
+        },
+        {
+          "name": "error string",
+          "range": "quoted ASCII string"
+        }
+      ],
+      "examples": [
+        ":SYSTem:ERRor?"
+      ]
+    },
+    {
+      "name": "system_lock",
+      "mnemonic": ":SYSTem:LOCK",
+      "category": "SYSTem",
+      "description": "Locks/unlocks (or queries) the front panel.",
+      "set": ":SYSTem:LOCK <value>",
+      "query": ":SYSTem:LOCK?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ON | OFF}"
+        }
+      ],
+      "examples": [
+        ":SYSTem:LOCK ON",
+        ":SYSTem:LOCK?"
+      ]
+    },
+    {
+      "name": "system_setup",
+      "mnemonic": ":SYSTem:SETup",
+      "category": "SYSTem",
+      "description": "Sets (load) or queries (store) the complete instrument setup as block data.",
+      "set": ":SYSTem:SETup <setup_data>",
+      "query": ":SYSTem:SETup?",
+      "parameters": [
+        {
+          "name": "setup_data",
+          "range": "data in IEEE 488.2 # format"
+        }
+      ],
+      "examples": [
+        ":SYSTem:SETup?"
+      ]
+    },
+    {
+      "name": "system_time",
+      "mnemonic": ":SYSTem:TIME",
+      "category": "SYSTem",
+      "description": "Sets/queries the instrument real-time-clock time.",
+      "set": ":SYSTem:TIME <time>",
+      "query": ":SYSTem:TIME?",
+      "parameters": [
+        {
+          "name": "time",
+          "range": "hours, minutes, seconds (NR1)"
+        }
+      ],
+      "examples": [
+        ":SYSTem:TIME 14,30,0",
+        ":SYSTem:TIME?"
+      ]
+    },
+    {
+      "name": "timebase_mode",
+      "mnemonic": ":TIMebase:MODE",
+      "category": "TIMebase",
+      "description": "Sets/queries the horizontal time base mode.",
+      "set": ":TIMebase:MODE <value>",
+      "query": ":TIMebase:MODE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{MAIN | WINDow | XY | ROLL}"
+        }
+      ],
+      "examples": [
+        ":TIMebase:MODE MAIN",
+        ":TIMebase:MODE?"
+      ]
+    },
+    {
+      "name": "timebase_position",
+      "mnemonic": ":TIMebase:POSition",
+      "category": "TIMebase",
+      "description": "Sets/queries the horizontal position (time from trigger to the display reference point).",
+      "set": ":TIMebase:POSition <pos>",
+      "query": ":TIMebase:POSition?",
+      "parameters": [
+        {
+          "name": "pos",
+          "units": [
+            "s"
+          ],
+          "range": "time from trigger event to display reference point (NR3)"
+        }
+      ],
+      "examples": [
+        ":TIMebase:POSition 0",
+        ":TIMebase:POSition?"
+      ]
+    },
+    {
+      "name": "timebase_range",
+      "mnemonic": ":TIMebase:RANGe",
+      "category": "TIMebase",
+      "description": "Sets/queries the full-scale horizontal time (10 divisions).",
+      "set": ":TIMebase:RANGe <range_value>",
+      "query": ":TIMebase:RANGe?",
+      "parameters": [
+        {
+          "name": "range_value",
+          "units": [
+            "s"
+          ],
+          "range": "50 ns to 500 s (54620-series); 10 ns to 500 s (54640-series) (NR3)"
+        }
+      ],
+      "examples": [
+        ":TIMebase:RANGe 1E-3",
+        ":TIMebase:RANGe?"
+      ]
+    },
+    {
+      "name": "timebase_reference",
+      "mnemonic": ":TIMebase:REFerence",
+      "category": "TIMebase",
+      "description": "Sets/queries the horizontal time reference position on the display.",
+      "set": ":TIMebase:REFerence {LEFT | CENTer | RIGHt}",
+      "query": ":TIMebase:REFerence?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{LEFT | CENTer | RIGHt}"
+        }
+      ],
+      "examples": [
+        ":TIMebase:REFerence CENTer",
+        ":TIMebase:REFerence?"
+      ]
+    },
+    {
+      "name": "timebase_scale",
+      "mnemonic": ":TIMebase:SCALe",
+      "category": "TIMebase",
+      "description": "Sets/queries the horizontal time per division.",
+      "set": ":TIMebase:SCALe <scale_value>",
+      "query": ":TIMebase:SCALe?",
+      "parameters": [
+        {
+          "name": "scale_value",
+          "units": [
+            "s/div"
+          ],
+          "range": "scale value in seconds (NR3)"
+        }
+      ],
+      "examples": [
+        ":TIMebase:SCALe 1E-4",
+        ":TIMebase:SCALe?"
+      ]
+    },
+    {
+      "name": "timebase_window_position",
+      "mnemonic": ":TIMebase:WINDow:POSition",
+      "category": "TIMebase",
+      "description": "Sets/queries the delayed (window) view horizontal position.",
+      "set": ":TIMebase:WINDow:POSition <pos>",
+      "query": ":TIMebase:WINDow:POSition?",
+      "parameters": [
+        {
+          "name": "pos",
+          "units": [
+            "s"
+          ],
+          "range": "time from trigger event to delayed view reference point (NR3)"
+        }
+      ],
+      "examples": [
+        ":TIMebase:WINDow:POSition 0",
+        ":TIMebase:WINDow:POSition?"
+      ]
+    },
+    {
+      "name": "timebase_window_range",
+      "mnemonic": ":TIMebase:WINDow:RANGe",
+      "category": "TIMebase",
+      "description": "Sets/queries the full-scale horizontal time for the delayed window.",
+      "set": ":TIMebase:WINDow:RANGe <range_value>",
+      "query": ":TIMebase:WINDow:RANGe?",
+      "parameters": [
+        {
+          "name": "range_value",
+          "units": [
+            "s"
+          ],
+          "range": "range value in seconds for the delayed window (NR3)"
+        }
+      ],
+      "examples": [
+        ":TIMebase:WINDow:RANGe 1E-4",
+        ":TIMebase:WINDow:RANGe?"
+      ]
+    },
+    {
+      "name": "timebase_window_scale",
+      "mnemonic": ":TIMebase:WINDow:SCALe",
+      "category": "TIMebase",
+      "description": "Sets/queries the time per division for the delayed window.",
+      "set": ":TIMebase:WINDow:SCALe <scale_value>",
+      "query": ":TIMebase:WINDow:SCALe?",
+      "parameters": [
+        {
+          "name": "scale_value",
+          "units": [
+            "s/div"
+          ],
+          "range": "scale value in seconds for the delayed window (NR3)"
+        }
+      ],
+      "examples": [
+        ":TIMebase:WINDow:SCALe 1E-5",
+        ":TIMebase:WINDow:SCALe?"
+      ]
+    },
+    {
+      "name": "trigger_can_acknowledge",
+      "mnemonic": ":TRIGger:CAN:ACKNowledge",
+      "category": "TRIGger",
+      "description": "Sets/queries CAN acknowledge (requires N2758A CAN Trigger module).",
+      "set": ":TRIGger:CAN:ACKNowledge <value>",
+      "query": ":TRIGger:CAN:ACKNowledge?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{{0 | OFF} | {1 | ON}}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:ACKNowledge ON",
+        ":TRIGger:CAN:ACKNowledge?"
+      ]
+    },
+    {
+      "name": "trigger_can_pattern_data",
+      "mnemonic": ":TRIGger:CAN:PATTern:DATA",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN data pattern and mask (requires N2758A CAN Trigger module).",
+      "set": ":TRIGger:CAN:PATTern:DATA <value>,<mask>",
+      "query": ":TRIGger:CAN:PATTern:DATA?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>"
+        },
+        {
+          "name": "mask",
+          "range": "integer or <string>; string ::= \"0xnn..n\" hex, #Hnn..n hex, or #Bnn..n binary"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:PATTern:DATA 255,255"
+      ]
+    },
+    {
+      "name": "trigger_can_pattern_data_length",
+      "mnemonic": ":TRIGger:CAN:PATTern:DATA:LENGth",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN data pattern length in bytes (requires N2758A CAN Trigger module).",
+      "set": ":TRIGger:CAN:PATTern:DATA:LENGth <length>",
+      "query": ":TRIGger:CAN:PATTern:DATA:LENGth?",
+      "parameters": [
+        {
+          "name": "length",
+          "range": "1 to 8 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:PATTern:DATA:LENGth 8"
+      ]
+    },
+    {
+      "name": "trigger_can_pattern_id",
+      "mnemonic": ":TRIGger:CAN:PATTern:ID",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN ID pattern and mask (requires N2758A CAN Trigger module).",
+      "set": ":TRIGger:CAN:PATTern:ID <value>,<mask>",
+      "query": ":TRIGger:CAN:PATTern:ID?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>"
+        },
+        {
+          "name": "mask",
+          "range": "integer or <string>; string ::= \"0xnn..n\" hex, #Hnn..n hex, or #Bnn..n binary"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:PATTern:ID 256,4095"
+      ]
+    },
+    {
+      "name": "trigger_can_pattern_id_mode",
+      "mnemonic": ":TRIGger:CAN:PATTern:ID:MODE",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN ID addressing mode (requires N2758A CAN Trigger module).",
+      "set": ":TRIGger:CAN:PATTern:ID:MODE <value>",
+      "query": ":TRIGger:CAN:PATTern:ID:MODE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{STANdard | EXTended}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:PATTern:ID:MODE STANdard"
+      ]
+    },
+    {
+      "name": "trigger_can_sample_point",
+      "mnemonic": ":TRIGger:CAN:SAMPlepoint",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN sample point percentage (requires N2758A CAN Trigger module).",
+      "set": ":TRIGger:CAN:SAMPlepoint <value>",
+      "query": ":TRIGger:CAN:SAMPlepoint?",
+      "parameters": [
+        {
+          "name": "value",
+          "units": [
+            "%"
+          ],
+          "range": "{60 | 62.5 | 68 | 70 | 75 | 87.5} (NR3)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:SAMPlepoint 75"
+      ]
+    },
+    {
+      "name": "trigger_can_signal_baudrate",
+      "mnemonic": ":TRIGger:CAN:SIGNal:BAUDrate",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN signal baud rate.",
+      "set": ":TRIGger:CAN:SIGNal:BAUDrate <baudrate>",
+      "query": ":TRIGger:CAN:SIGNal:BAUDrate?",
+      "parameters": [
+        {
+          "name": "baudrate",
+          "units": [
+            "bit/s"
+          ],
+          "range": "{10000 | 20000 | 33300 | 50000 | 62500 | 83300 | 100000 | 125000 | 250000 | 500000 | 800000 | 1000000}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:SIGNal:BAUDrate 500000"
+      ]
+    },
+    {
+      "name": "trigger_can_signal_definition",
+      "mnemonic": ":TRIGger:CAN:SIGNal:DEFinition",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN signal definition (which signal line).",
+      "set": ":TRIGger:CAN:SIGNal:DEFinition <value>",
+      "query": ":TRIGger:CAN:SIGNal:DEFinition?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{CANH | CANL | RX | TX | DIFFerential}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:SIGNal:DEFinition CANH"
+      ]
+    },
+    {
+      "name": "trigger_can_source",
+      "mnemonic": ":TRIGger:CAN:SOURce",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN trigger source.",
+      "set": ":TRIGger:CAN:SOURce <source>",
+      "query": ":TRIGger:CAN:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:SOURce CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_can_trigger",
+      "mnemonic": ":TRIGger:CAN:TRIGger",
+      "category": "TRIGger",
+      "description": "Sets/queries the CAN trigger condition.",
+      "set": ":TRIGger:CAN:TRIGger <condition>",
+      "query": ":TRIGger:CAN:TRIGger?",
+      "parameters": [
+        {
+          "name": "condition",
+          "range": "{SOF} without module; {SOF | DATA | ERRor | IDData | IDEither | IDRemote} with N2758A CAN Trigger module"
+        }
+      ],
+      "examples": [
+        ":TRIGger:CAN:TRIGger SOF"
+      ]
+    },
+    {
+      "name": "trigger_duration_greater_than",
+      "mnemonic": ":TRIGger:DURation:GREaterthan",
+      "category": "TRIGger",
+      "description": "Sets/queries the minimum duration for a duration (greater-than) trigger.",
+      "set": ":TRIGger:DURation:GREaterthan <greater than time>[suffix]",
+      "query": ":TRIGger:DURation:GREaterthan?",
+      "parameters": [
+        {
+          "name": "greater than time",
+          "units": [
+            "s"
+          ],
+          "range": "5 ns to 10 s (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:DURation:GREaterthan 100ns"
+      ]
+    },
+    {
+      "name": "trigger_duration_less_than",
+      "mnemonic": ":TRIGger:DURation:LESSthan",
+      "category": "TRIGger",
+      "description": "Sets/queries the maximum duration for a duration (less-than) trigger.",
+      "set": ":TRIGger:DURation:LESSthan <less than time>[suffix]",
+      "query": ":TRIGger:DURation:LESSthan?",
+      "parameters": [
+        {
+          "name": "less than time",
+          "units": [
+            "s"
+          ],
+          "range": "5 ns to 10 s (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:DURation:LESSthan 1us"
+      ]
+    },
+    {
+      "name": "trigger_duration_pattern",
+      "mnemonic": ":TRIGger:DURation:PATTern",
+      "category": "TRIGger",
+      "description": "Sets/queries the channel pattern for a duration trigger.",
+      "set": ":TRIGger:DURation:PATTern <value>,<mask>",
+      "query": ":TRIGger:DURation:PATTern?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>"
+        },
+        {
+          "name": "mask",
+          "range": "integer or <string>; string ::= \"0xnnnnnn\" hex"
+        }
+      ],
+      "examples": [
+        ":TRIGger:DURation:PATTern 15,15"
+      ]
+    },
+    {
+      "name": "trigger_duration_qualifier",
+      "mnemonic": ":TRIGger:DURation:QUALifier",
+      "category": "TRIGger",
+      "description": "Sets/queries the duration trigger qualifier.",
+      "set": ":TRIGger:DURation:QUALifier <qualifier>",
+      "query": ":TRIGger:DURation:QUALifier?",
+      "parameters": [
+        {
+          "name": "qualifier",
+          "range": "{GREaterthan | LESSthan | INRange | OUTRange | TIMeout}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:DURation:QUALifier GREaterthan"
+      ]
+    },
+    {
+      "name": "trigger_duration_range",
+      "mnemonic": ":TRIGger:DURation:RANGe",
+      "category": "TRIGger",
+      "description": "Sets/queries the duration trigger min/max time range.",
+      "set": ":TRIGger:DURation:RANGe <greater than time>[suffix],<less than time>[suffix]",
+      "query": ":TRIGger:DURation:RANGe?",
+      "parameters": [
+        {
+          "name": "greater than time",
+          "units": [
+            "s"
+          ],
+          "range": "min duration 10 ns to 9.99 s (NR3)"
+        },
+        {
+          "name": "less than time",
+          "units": [
+            "s"
+          ],
+          "range": "max duration 15 ns to 10 s (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:DURation:RANGe 100ns,1us"
+      ]
+    },
+    {
+      "name": "trigger_edge_coupling",
+      "mnemonic": ":TRIGger:EDGE:COUPling",
+      "category": "TRIGger",
+      "description": "Sets/queries the edge trigger coupling.",
+      "set": ":TRIGger:[EDGE:]COUPling {AC | DC | LF}",
+      "query": ":TRIGger:COUPling?",
+      "parameters": [
+        {
+          "name": "coupling",
+          "range": "{AC | DC | LF}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:COUPling DC",
+        ":TRIGger:COUPling?"
+      ]
+    },
+    {
+      "name": "trigger_edge_level",
+      "mnemonic": ":TRIGger:EDGE:LEVel",
+      "category": "TRIGger",
+      "description": "Sets/queries the edge trigger level for the specified source.",
+      "set": ":TRIGger:[EDGE:]LEVel <level>[,<source>]",
+      "query": ":TRIGger:[EDGE:]LEVel? [<source>]",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "V"
+          ],
+          "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 8 V"
+        },
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | EXTernal} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:LEVel 1.0,CHANnel1",
+        ":TRIGger:EDGE:LEVel? CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_edge_reject",
+      "mnemonic": ":TRIGger:EDGE:REJect",
+      "category": "TRIGger",
+      "description": "Sets/queries the edge trigger reject filter.",
+      "set": ":TRIGger:[EDGE:]REJect {OFF | LF | HF}",
+      "query": ":TRIGger:REJect?",
+      "parameters": [
+        {
+          "name": "reject",
+          "range": "{OFF | LF | HF}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:REJect LF",
+        ":TRIGger:REJect?"
+      ]
+    },
+    {
+      "name": "trigger_edge_slope",
+      "mnemonic": ":TRIGger:EDGE:SLOPe",
+      "category": "TRIGger",
+      "description": "Sets/queries the edge trigger slope.",
+      "set": ":TRIGger:[EDGE:]SLOPe <polarity>",
+      "query": ":TRIGger:[EDGE:]SLOPe?",
+      "parameters": [
+        {
+          "name": "polarity",
+          "range": "{POSitive | NEGative}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:SLOPe POSitive",
+        ":TRIGger:EDGE:SLOPe?"
+      ]
+    },
+    {
+      "name": "trigger_edge_source",
+      "mnemonic": ":TRIGger:EDGE:SOURce",
+      "category": "TRIGger",
+      "description": "Sets/queries the edge trigger source.",
+      "set": ":TRIGger:[EDGE:]SOURce <source>",
+      "query": ":TRIGger:[EDGE:]SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15 | EXTernal} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:SOURce CHANnel1",
+        ":TRIGger:EDGE:SOURce?"
+      ]
+    },
+    {
+      "name": "trigger_glitch_greater_than",
+      "mnemonic": ":TRIGger:GLITch:GREaterthan",
+      "category": "TRIGger",
+      "description": "Sets/queries the minimum pulse width for a glitch (greater-than) trigger.",
+      "set": ":TRIGger:GLITch:GREaterthan <greater than time>[suffix]",
+      "query": ":TRIGger:GLITch:GREaterthan?",
+      "parameters": [
+        {
+          "name": "greater than time",
+          "units": [
+            "s"
+          ],
+          "range": "5 ns to 10 s (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:GREaterthan 100ns"
+      ]
+    },
+    {
+      "name": "trigger_glitch_less_than",
+      "mnemonic": ":TRIGger:GLITch:LESSthan",
+      "category": "TRIGger",
+      "description": "Sets/queries the maximum pulse width for a glitch (less-than) trigger.",
+      "set": ":TRIGger:GLITch:LESSthan <less than time>[suffix]",
+      "query": ":TRIGger:GLITch:LESSthan?",
+      "parameters": [
+        {
+          "name": "less than time",
+          "units": [
+            "s"
+          ],
+          "range": "5 ns to 10 s (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:LESSthan 1us"
+      ]
+    },
+    {
+      "name": "trigger_glitch_level",
+      "mnemonic": ":TRIGger:GLITch:LEVel",
+      "category": "TRIGger",
+      "description": "Sets/queries the glitch trigger level for the specified source.",
+      "set": ":TRIGger:GLITch:LEVel <level>[<source>]",
+      "query": ":TRIGger:GLITch:LEVel?",
+      "parameters": [
+        {
+          "name": "level",
+          "units": [
+            "V"
+          ],
+          "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 6 V"
+        },
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:LEVel 1.0,CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_glitch_polarity",
+      "mnemonic": ":TRIGger:GLITch:POLarity",
+      "category": "TRIGger",
+      "description": "Sets/queries the glitch trigger polarity.",
+      "set": ":TRIGger:GLITch:POLarity <polarity>",
+      "query": ":TRIGger:GLITch:POLarity?",
+      "parameters": [
+        {
+          "name": "polarity",
+          "range": "{POSitive | NEGative}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:POLarity POSitive"
+      ]
+    },
+    {
+      "name": "trigger_glitch_qualifier",
+      "mnemonic": ":TRIGger:GLITch:QUALifier",
+      "category": "TRIGger",
+      "description": "Sets/queries the glitch trigger qualifier.",
+      "set": ":TRIGger:GLITch:QUALifier <qualifier>",
+      "query": ":TRIGger:GLITch:QUALifier?",
+      "parameters": [
+        {
+          "name": "qualifier",
+          "range": "{GREaterthan | LESSthan | RANGe}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:QUALifier GREaterthan"
+      ]
+    },
+    {
+      "name": "trigger_glitch_range",
+      "mnemonic": ":TRIGger:GLITch:RANGe",
+      "category": "TRIGger",
+      "description": "Sets/queries the glitch trigger pulse width range.",
+      "set": ":TRIGger:GLITch:RANGe <greater than time>[suffix],<less than time>[suffix]",
+      "query": ":TRIGger:GLITch:RANGe?",
+      "parameters": [
+        {
+          "name": "greater than time",
+          "units": [
+            "s"
+          ],
+          "range": "start time 10 ns to 9.99 s (NR3)"
+        },
+        {
+          "name": "less than time",
+          "units": [
+            "s"
+          ],
+          "range": "stop time 15 ns to 10 s (NR3)"
+        },
+        {
+          "name": "suffix",
+          "range": "{s | ms | us | ns | ps}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:RANGe 100ns,1us"
+      ]
+    },
+    {
+      "name": "trigger_glitch_source",
+      "mnemonic": ":TRIGger:GLITch:SOURce",
+      "category": "TRIGger",
+      "description": "Sets/queries the glitch trigger source.",
+      "set": ":TRIGger:GLITch:SOURce <source>",
+      "query": ":TRIGger:GLITch:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:GLITch:SOURce CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_hf_reject",
+      "mnemonic": ":TRIGger:HFReject",
+      "category": "TRIGger",
+      "description": "Turns the high-frequency reject filter on/off.",
+      "set": ":TRIGger:HFReject {{0 | OFF} | {1 | ON}}",
+      "query": ":TRIGger:HFReject?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:HFReject ON",
+        ":TRIGger:HFReject?"
+      ]
+    },
+    {
+      "name": "trigger_holdoff",
+      "mnemonic": ":TRIGger:HOLDoff",
+      "category": "TRIGger",
+      "description": "Sets/queries the trigger holdoff time.",
+      "set": ":TRIGger:HOLDoff <holdoff_time>",
+      "query": ":TRIGger:HOLDoff?",
+      "parameters": [
+        {
+          "name": "holdoff_time",
+          "units": [
+            "s"
+          ],
+          "range": "60 ns to 10 s (NR3)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:HOLDoff 1E-6",
+        ":TRIGger:HOLDoff?"
+      ]
+    },
+    {
+      "name": "trigger_iic_pattern_address",
+      "mnemonic": ":TRIGger:IIC:PATTern:ADDRess",
+      "category": "TRIGger",
+      "description": "Sets/queries the I2C address pattern.",
+      "set": ":TRIGger:IIC:PATTern:ADDRess <value>",
+      "query": ":TRIGger:IIC:PATTern:ADDRess?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>; string ::= \"0xnn\" hex"
+        }
+      ],
+      "examples": [
+        ":TRIGger:IIC:PATTern:ADDRess 80"
+      ]
+    },
+    {
+      "name": "trigger_iic_pattern_data",
+      "mnemonic": ":TRIGger:IIC:PATTern:DATA",
+      "category": "TRIGger",
+      "description": "Sets/queries the I2C data pattern.",
+      "set": ":TRIGger:IIC:PATTern:DATA <value>",
+      "query": ":TRIGger:IIC:PATTern:DATA?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>; string ::= \"0xnn\" hex"
+        }
+      ],
+      "examples": [
+        ":TRIGger:IIC:PATTern:DATA 255"
+      ]
+    },
+    {
+      "name": "trigger_iic_source_clock",
+      "mnemonic": ":TRIGger:IIC:SOURce:CLOCk",
+      "category": "TRIGger",
+      "description": "Sets/queries the I2C clock (SCL) source.",
+      "set": ":TRIGger:IIC:[SOURce:]CLOCk <source>",
+      "query": ":TRIGger:IIC:[SOURce:]CLOCk?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:IIC:SOURce:CLOCk CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_iic_source_data",
+      "mnemonic": ":TRIGger:IIC:SOURce:DATA",
+      "category": "TRIGger",
+      "description": "Sets/queries the I2C data (SDA) source.",
+      "set": ":TRIGger:IIC:[SOURce:]DATA <source>",
+      "query": ":TRIGger:IIC:[SOURce:]DATA?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:IIC:SOURce:DATA CHANnel2"
+      ]
+    },
+    {
+      "name": "trigger_iic_trigger_qualifier",
+      "mnemonic": ":TRIGger:IIC:TRIGger:QUALifier",
+      "category": "TRIGger",
+      "description": "Sets/queries the I2C trigger qualifier (for read/write data comparisons).",
+      "set": ":TRIGger:IIC:TRIGger:QUALifier <value>",
+      "query": ":TRIGger:IIC:TRIGger:QUALifier?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{EQUal | NOTequal | LESSthan | GREaterthan}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:IIC:TRIGger:QUALifier EQUal"
+      ]
+    },
+    {
+      "name": "trigger_iic_trigger_type",
+      "mnemonic": ":TRIGger:IIC:TRIGger:TYPE",
+      "category": "TRIGger",
+      "description": "Sets/queries the I2C trigger type.",
+      "set": ":TRIGger:IIC:TRIGger[:TYPE] <type>",
+      "query": ":TRIGger:IIC:TRIGger[:TYPE]?",
+      "parameters": [
+        {
+          "name": "type",
+          "range": "{STARt | STOP | READ7 | READEeprom | WRITe7 | WRITe10 | NACK | RESTart}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:IIC:TRIGger:TYPE STARt"
+      ]
+    },
+    {
+      "name": "trigger_lin_signal_baudrate",
+      "mnemonic": ":TRIGger:LIN:SIGNal:BAUDrate",
+      "category": "TRIGger",
+      "description": "Sets/queries the LIN signal baud rate.",
+      "set": ":TRIGger:LIN:SIGNal:BAUDrate <baudrate>",
+      "query": ":TRIGger:LIN:SIGNal:BAUDrate?",
+      "parameters": [
+        {
+          "name": "baudrate",
+          "units": [
+            "bit/s"
+          ],
+          "range": "{2400 | 9600 | 19200}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:LIN:SIGNal:BAUDrate 9600"
+      ]
+    },
+    {
+      "name": "trigger_lin_signal_definition",
+      "mnemonic": ":TRIGger:LIN:SIGNal:DEFinition",
+      "category": "TRIGger",
+      "description": "Sets/queries the LIN signal definition.",
+      "set": ":TRIGger:LIN:SIGNal:DEFinition <value>",
+      "query": ":TRIGger:LIN:SIGNal:DEFinition?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{LIN | RX | TX}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:LIN:SIGNal:DEFinition LIN"
+      ]
+    },
+    {
+      "name": "trigger_lin_source",
+      "mnemonic": ":TRIGger:LIN:SOURce",
+      "category": "TRIGger",
+      "description": "Sets/queries the LIN trigger source.",
+      "set": ":TRIGger:LIN:SOURce <source>",
+      "query": ":TRIGger:LIN:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:LIN:SOURce CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_lin_trigger",
+      "mnemonic": ":TRIGger:LIN:TRIGger",
+      "category": "TRIGger",
+      "description": "Sets/queries the LIN trigger condition.",
+      "set": ":TRIGger:LIN:TRIGger <condition>",
+      "query": ":TRIGger:LIN:TRIGger?",
+      "parameters": [
+        {
+          "name": "condition",
+          "range": "{SYNCbreak}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:LIN:TRIGger SYNCbreak"
+      ]
+    },
+    {
+      "name": "trigger_mode",
+      "mnemonic": ":TRIGger:MODE",
+      "category": "TRIGger",
+      "description": "Sets/queries the trigger mode (trigger type).",
+      "set": ":TRIGger:MODE <mode>",
+      "query": ":TRIGger:MODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "{EDGE | GLITch | PATTern | CAN | DURation | IIC | SEQuence | SPI | TV | USB}; query returns NONE if TIMebase:MODE is ROLL or XY"
+        }
+      ],
+      "examples": [
+        ":TRIGger:MODE EDGE",
+        ":TRIGger:MODE?"
+      ]
+    },
+    {
+      "name": "trigger_noise_reject",
+      "mnemonic": ":TRIGger:NREJect",
+      "category": "TRIGger",
+      "description": "Turns the trigger noise reject (hysteresis) on/off.",
+      "set": ":TRIGger:NREJect {{0 | OFF} | {1 | ON}}",
+      "query": ":TRIGger:NREJect?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:NREJect ON",
+        ":TRIGger:NREJect?"
+      ]
+    },
+    {
+      "name": "trigger_pattern",
+      "mnemonic": ":TRIGger:PATTern",
+      "category": "TRIGger",
+      "description": "Sets/queries the channel pattern (and optional edge) for a pattern trigger.",
+      "set": ":TRIGger:PATTern <value>,<mask>[,<edge source>,<edge>]",
+      "query": ":TRIGger:PATTern?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "32-bit integer or <string>; string ::= \"0xnnnnnn\" hex"
+        },
+        {
+          "name": "mask",
+          "range": "32-bit integer or <string>"
+        },
+        {
+          "name": "edge source",
+          "range": "{DIGital0..DIGital15 | CHANnel<n> | NONE}; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "edge",
+          "range": "{POSitive | NEGative}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:PATTern 15,15"
+      ]
+    },
+    {
+      "name": "trigger_sequence_count",
+      "mnemonic": ":TRIGger:SEQuence:COUNt",
+      "category": "TRIGger",
+      "description": "Sets/queries the count value for the sequence (advanced) trigger.",
+      "set": ":TRIGger:SEQuence:COUNt <count>",
+      "query": ":TRIGger:SEQuence:COUNt?",
+      "parameters": [
+        {
+          "name": "count",
+          "range": "integer (NR1)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:COUNt 5"
+      ]
+    },
+    {
+      "name": "trigger_sequence_edge",
+      "mnemonic": ":TRIGger:SEQuence:EDGE",
+      "category": "TRIGger",
+      "description": "Sets/queries the source and slope for edge resource 1 or 2 of the sequence trigger.",
+      "set": ":TRIGger:SEQuence:EDGE{1 | 2} <source>,<slope>",
+      "query": ":TRIGger:SEQuence:EDGE{1 | 2}?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        },
+        {
+          "name": "slope",
+          "range": "{POSitive | NEGative}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:EDGE1 CHANnel1,POSitive"
+      ]
+    },
+    {
+      "name": "trigger_sequence_find",
+      "mnemonic": ":TRIGger:SEQuence:FIND",
+      "category": "TRIGger",
+      "description": "Sets/queries the 'find' stage resource and operator for the sequence trigger.",
+      "set": ":TRIGger:SEQuence:FIND <resource1>[,<operator>[,<resource2>]]",
+      "query": ":TRIGger:SEQuence:FIND?",
+      "parameters": [
+        {
+          "name": "resource1",
+          "range": "{PATTern1 | EDGE1}"
+        },
+        {
+          "name": "operator",
+          "range": "{ENTered | EXITed | AND | NONE}"
+        },
+        {
+          "name": "resource2",
+          "range": "{PATTern1 | EDGE1 | NONE}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:FIND PATTern1,ENTered"
+      ]
+    },
+    {
+      "name": "trigger_sequence_pattern",
+      "mnemonic": ":TRIGger:SEQuence:PATTern",
+      "category": "TRIGger",
+      "description": "Sets/queries the pattern and mask for pattern resource 1 or 2 of the sequence trigger.",
+      "set": ":TRIGger:SEQuence:PATTern{1 | 2} <value>,<mask>",
+      "query": ":TRIGger:SEQuence:PATTern{1 | 2}?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>; string ::= \"0xnnnnnn\" hex"
+        },
+        {
+          "name": "mask",
+          "range": "integer or <string>"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:PATTern1 15,15"
+      ]
+    },
+    {
+      "name": "trigger_sequence_reset",
+      "mnemonic": ":TRIGger:SEQuence:RESet",
+      "category": "TRIGger",
+      "description": "Sets/queries the reset-stage resource and operator for the sequence trigger.",
+      "set": ":TRIGger:SEQuence:RESet <resource1>[,<operator>[,<resource2>]]",
+      "query": ":TRIGger:SEQuence:RESet?",
+      "parameters": [
+        {
+          "name": "resource1",
+          "range": "{PATTern{1|2} | EDGE{1|2} | TIMer | NONE}"
+        },
+        {
+          "name": "operator",
+          "range": "{ENTered | EXITed | AND | NONE}"
+        },
+        {
+          "name": "resource2",
+          "range": "{PATTern{1|2} | EDGE{1|2} | TIMer | NONE}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:RESet TIMer"
+      ]
+    },
+    {
+      "name": "trigger_sequence_timer",
+      "mnemonic": ":TRIGger:SEQuence:TIMer",
+      "category": "TRIGger",
+      "description": "Sets/queries the timer value for the sequence trigger.",
+      "set": ":TRIGger:SEQuence:TIMer <time_value>",
+      "query": ":TRIGger:SEQuence:TIMer?",
+      "parameters": [
+        {
+          "name": "time_value",
+          "units": [
+            "s"
+          ],
+          "range": "100 ns to 10 s (NR3)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:TIMer 1E-3"
+      ]
+    },
+    {
+      "name": "trigger_sequence_trigger",
+      "mnemonic": ":TRIGger:SEQuence:TRIGger",
+      "category": "TRIGger",
+      "description": "Sets/queries the trigger-stage resource and operator for the sequence trigger.",
+      "set": ":TRIGger:SEQuence:TRIGger <resource1>[,<operator>[,<resource2>]]",
+      "query": ":TRIGger:SEQuence:TRIGger?",
+      "parameters": [
+        {
+          "name": "resource1",
+          "range": "{PATTern2 | EDGE2}"
+        },
+        {
+          "name": "operator",
+          "range": "{ENTered | EXITed | AND | COUNt | NONE}"
+        },
+        {
+          "name": "resource2",
+          "range": "{PATTern2 | EDGE2 | NONE}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:TRIGger EDGE2,ENTered"
+      ]
+    },
+    {
+      "name": "trigger_spi_clock_slope",
+      "mnemonic": ":TRIGger:SPI:CLOCk:SLOPe",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI clock slope.",
+      "set": ":TRIGger:SPI:CLOCk:SLOPe <slope>",
+      "query": ":TRIGger:SPI:CLOCk:SLOPe?",
+      "parameters": [
+        {
+          "name": "slope",
+          "range": "{NEGative | POSitive}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:CLOCk:SLOPe POSitive"
+      ]
+    },
+    {
+      "name": "trigger_spi_clock_timeout",
+      "mnemonic": ":TRIGger:SPI:CLOCk:TIMeout",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI clock timeout used for framing.",
+      "set": ":TRIGger:SPI:CLOCk:TIMeout <time_value>",
+      "query": ":TRIGger:SPI:CLOCk:TIMeout?",
+      "parameters": [
+        {
+          "name": "time_value",
+          "units": [
+            "s"
+          ],
+          "range": "time in seconds (NR1)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:CLOCk:TIMeout 1E-6"
+      ]
+    },
+    {
+      "name": "trigger_spi_framing",
+      "mnemonic": ":TRIGger:SPI:FRAMing",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI framing method.",
+      "set": ":TRIGger:SPI:FRAMing <value>",
+      "query": ":TRIGger:SPI:FRAMing?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{CHIPselect | NOTChipselect | TIMeout}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:FRAMing CHIPselect"
+      ]
+    },
+    {
+      "name": "trigger_spi_pattern_data",
+      "mnemonic": ":TRIGger:SPI:PATTern:DATA",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI data pattern and mask.",
+      "set": ":TRIGger:SPI:PATTern:DATA <value>,<mask>",
+      "query": ":TRIGger:SPI:PATTern:DATA?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "integer or <string>; string ::= \"0xnnnnnn\" hex"
+        },
+        {
+          "name": "mask",
+          "range": "integer or <string>"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:PATTern:DATA 255,255"
+      ]
+    },
+    {
+      "name": "trigger_spi_pattern_width",
+      "mnemonic": ":TRIGger:SPI:PATTern:WIDth",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI data pattern width in bits.",
+      "set": ":TRIGger:SPI:PATTern:WIDth <width>",
+      "query": ":TRIGger:SPI:PATTern:WIDth?",
+      "parameters": [
+        {
+          "name": "width",
+          "range": "4 to 32 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:PATTern:WIDth 8"
+      ]
+    },
+    {
+      "name": "trigger_spi_source_clock",
+      "mnemonic": ":TRIGger:SPI:SOURce:CLOCk",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI clock source.",
+      "set": ":TRIGger:SPI:SOURce:CLOCk <source>",
+      "query": ":TRIGger:SPI:SOURce:CLOCk?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:SOURce:CLOCk CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_spi_source_data",
+      "mnemonic": ":TRIGger:SPI:SOURce:DATA",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI data source.",
+      "set": ":TRIGger:SPI:SOURce:DATA <source>",
+      "query": ":TRIGger:SPI:SOURce:DATA?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:SOURce:DATA CHANnel2"
+      ]
+    },
+    {
+      "name": "trigger_spi_source_frame",
+      "mnemonic": ":TRIGger:SPI:SOURce:FRAMe",
+      "category": "TRIGger",
+      "description": "Sets/queries the SPI frame (chip-select) source.",
+      "set": ":TRIGger:SPI:SOURce:FRAMe <source>",
+      "query": ":TRIGger:SPI:SOURce:FRAMe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SPI:SOURce:FRAMe CHANnel3"
+      ]
+    },
+    {
+      "name": "trigger_sweep",
+      "mnemonic": ":TRIGger:SWEep",
+      "category": "TRIGger",
+      "description": "Sets/queries the trigger sweep mode.",
+      "set": ":TRIGger:SWEep <sweep>",
+      "query": ":TRIGger:SWEep?",
+      "parameters": [
+        {
+          "name": "sweep",
+          "range": "{AUTLevel | AUTO | NORMal} for 54620-series; {AUTO | NORMal} for 54640-series"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SWEep AUTO",
+        ":TRIGger:SWEep?"
+      ]
+    },
+    {
+      "name": "trigger_tv_line",
+      "mnemonic": ":TRIGger:TV:LINE",
+      "category": "TRIGger",
+      "description": "Sets/queries the TV trigger line number.",
+      "set": ":TRIGger:TV:LINE <line number>",
+      "query": ":TRIGger:TV:LINE?",
+      "parameters": [
+        {
+          "name": "line number",
+          "range": "integer (NR1)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:TV:LINE 100"
+      ]
+    },
+    {
+      "name": "trigger_tv_mode",
+      "mnemonic": ":TRIGger:TV:MODE",
+      "category": "TRIGger",
+      "description": "Sets/queries the TV trigger mode.",
+      "set": ":TRIGger:TV:MODE <tv mode>",
+      "query": ":TRIGger:TV:MODE?",
+      "parameters": [
+        {
+          "name": "tv mode",
+          "range": "{Field<n> | ALLFields | LINE | ALLLines | LINEField<n> | LINEAlt | LINEVert}; <n> ::= 1-2"
+        }
+      ],
+      "examples": [
+        ":TRIGger:TV:MODE LINE"
+      ]
+    },
+    {
+      "name": "trigger_tv_polarity",
+      "mnemonic": ":TRIGger:TV:POLarity",
+      "category": "TRIGger",
+      "description": "Sets/queries the TV trigger sync polarity.",
+      "set": ":TRIGger:TV:POLarity <polarity>",
+      "query": ":TRIGger:TV:POLarity?",
+      "parameters": [
+        {
+          "name": "polarity",
+          "range": "{POSitive | NEGative}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:TV:POLarity POSitive"
+      ]
+    },
+    {
+      "name": "trigger_tv_source",
+      "mnemonic": ":TRIGger:TV:SOURce",
+      "category": "TRIGger",
+      "description": "Sets/queries the TV trigger source.",
+      "set": ":TRIGger:TV:SOURce <source>",
+      "query": ":TRIGger:TV:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n>}; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:TV:SOURce CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_tv_standard",
+      "mnemonic": ":TRIGger:TV:STANdard",
+      "category": "TRIGger",
+      "description": "Sets/queries the TV trigger video standard.",
+      "set": ":TRIGger:TV:STANdard <standard>",
+      "query": ":TRIGger:TV:STANdard?",
+      "parameters": [
+        {
+          "name": "standard",
+          "range": "{GENeric | NTSc | PAL | PALM | SECam}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:TV:STANdard NTSc"
+      ]
+    },
+    {
+      "name": "trigger_tv_tvmode",
+      "mnemonic": ":TRIGger:TV:TVMODE",
+      "category": "TRIGger",
+      "description": "Sets/queries the TV trigger mode (alternate TVMODE form).",
+      "set": ":TRIGger:TV:TVMODE <mode>",
+      "query": ":TRIGger:TV:TVMODE?",
+      "parameters": [
+        {
+          "name": "mode",
+          "range": "{Field<n> | ALLFields | LINE | ALLLines | LINEField<n> | LINEAlt | LINEVert}; <n> ::= 1-2"
+        }
+      ],
+      "examples": [
+        ":TRIGger:TV:TVMODE LINE"
+      ]
+    },
+    {
+      "name": "trigger_usb_source_dminus",
+      "mnemonic": ":TRIGger:USB:SOURce:DMINus",
+      "category": "TRIGger",
+      "description": "Sets/queries the USB D- source.",
+      "set": ":TRIGger:USB:SOURce:DMINus <source>",
+      "query": ":TRIGger:USB:SOURce:DMINus?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:USB:SOURce:DMINus CHANnel2"
+      ]
+    },
+    {
+      "name": "trigger_usb_source_dplus",
+      "mnemonic": ":TRIGger:USB:SOURce:DPLus",
+      "category": "TRIGger",
+      "description": "Sets/queries the USB D+ source.",
+      "set": ":TRIGger:USB:SOURce:DPLus <source>",
+      "query": ":TRIGger:USB:SOURce:DPLus?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | EXTernal} for 546xxA; {CHANnel<n> | DIGital0..DIGital15} for 546xxD; <n> ::= 1-2 or 1-4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:USB:SOURce:DPLus CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_usb_speed",
+      "mnemonic": ":TRIGger:USB:SPEed",
+      "category": "TRIGger",
+      "description": "Sets/queries the USB bus speed.",
+      "set": ":TRIGger:USB:SPEed <value>",
+      "query": ":TRIGger:USB:SPEed?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{LOW | FULL}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:USB:SPEed FULL"
+      ]
+    },
+    {
+      "name": "trigger_usb_trigger",
+      "mnemonic": ":TRIGger:USB:TRIGger",
+      "category": "TRIGger",
+      "description": "Sets/queries the USB trigger condition.",
+      "set": ":TRIGger:USB:TRIGger <value>",
+      "query": ":TRIGger:USB:TRIGger?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{SOP | EOP | ENTersuspend | EXITsuspend | RESet}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:USB:TRIGger SOP"
+      ]
+    },
+    {
+      "name": "waveform_byte_order",
+      "mnemonic": ":WAVeform:BYTeorder",
+      "category": "WAVeform",
+      "description": "Sets/queries the byte order for WORD-format waveform data transfers.",
+      "set": ":WAVeform:BYTeorder <value>",
+      "query": ":WAVeform:BYTeorder?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{LSBFirst | MSBFirst}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:BYTeorder MSBFirst",
+        ":WAVeform:BYTeorder?"
+      ]
+    },
+    {
+      "name": "waveform_count_query",
+      "mnemonic": ":WAVeform:COUNt?",
+      "category": "WAVeform",
+      "description": "Returns the count of averages or values for the current waveform.",
+      "query": ":WAVeform:COUNt?",
+      "parameters": [
+        {
+          "name": "count",
+          "range": "1 to 16383 (integer, NR1)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:COUNt?"
+      ]
+    },
+    {
+      "name": "waveform_data_query",
+      "mnemonic": ":WAVeform:DATA?",
+      "category": "WAVeform",
+      "description": "Returns the waveform data as an IEEE 488.2 definite-length binary block.",
+      "query": ":WAVeform:DATA?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "range": "<binary block length bytes>,<binary data> (e.g. #800002000<2000 bytes><NL>)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:DATA?"
+      ]
+    },
+    {
+      "name": "waveform_format",
+      "mnemonic": ":WAVeform:FORMat",
+      "category": "WAVeform",
+      "description": "Sets/queries the data transmission format for waveform data.",
+      "set": ":WAVeform:FORMat <value>",
+      "query": ":WAVeform:FORMat?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{WORD | BYTE | ASCII}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:FORMat BYTE",
+        ":WAVeform:FORMat?"
+      ]
+    },
+    {
+      "name": "waveform_points",
+      "mnemonic": ":WAVeform:POINts",
+      "category": "WAVeform",
+      "description": "Sets/queries the number of waveform points returned by :WAVeform:DATA?.",
+      "set": ":WAVeform:POINts <# points>",
+      "query": ":WAVeform:POINts? [MAXimum]",
+      "parameters": [
+        {
+          "name": "# points",
+          "range": "{100 | 250 | 500 | 1000 | 2000 | MAXimum}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:POINts 1000",
+        ":WAVeform:POINts?"
+      ]
+    },
+    {
+      "name": "waveform_preamble_query",
+      "mnemonic": ":WAVeform:PREamble?",
+      "category": "WAVeform",
+      "description": "Returns the waveform preamble: format, type, points, count, and X/Y increment/origin/reference values.",
+      "query": ":WAVeform:PREamble?",
+      "parameters": [
+        {
+          "name": "preamble_block",
+          "range": "<format NR1>,<type NR1>,<points NR1>,<count NR1>,<xincrement NR3>,<xorigin NR3>,<xreference NR1>,<yincrement NR3>,<yorigin NR3>,<yreference NR1>"
+        }
+      ],
+      "examples": [
+        ":WAVeform:PREamble?"
+      ]
+    },
+    {
+      "name": "waveform_source",
+      "mnemonic": ":WAVeform:SOURce",
+      "category": "WAVeform",
+      "description": "Sets/queries the source for waveform data queries.",
+      "set": ":WAVeform:SOURce <source>",
+      "query": ":WAVeform:SOURce?",
+      "parameters": [
+        {
+          "name": "source",
+          "range": "{CHANnel<n> | POD1 | POD2 | FUNCtion | MATH}; <n> ::= 1-2"
+        }
+      ],
+      "examples": [
+        ":WAVeform:SOURce CHANnel1",
+        ":WAVeform:SOURce?"
+      ]
+    },
+    {
+      "name": "waveform_type_query",
+      "mnemonic": ":WAVeform:TYPE?",
+      "category": "WAVeform",
+      "description": "Returns the acquisition mode of the current waveform.",
+      "query": ":WAVeform:TYPE?",
+      "parameters": [
+        {
+          "name": "return_mode",
+          "range": "{NORM | PEAK | AVER}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:TYPE?"
+      ]
+    },
+    {
+      "name": "waveform_unsigned",
+      "mnemonic": ":WAVeform:UNSigned",
+      "category": "WAVeform",
+      "description": "Sets/queries whether waveform data is returned as unsigned (1) or signed (0) values.",
+      "set": ":WAVeform:UNSigned {{0 | OFF} | {1 | ON}}",
+      "query": ":WAVeform:UNSigned?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{0 | 1}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:UNSigned ON",
+        ":WAVeform:UNSigned?"
+      ]
+    },
+    {
+      "name": "waveform_view",
+      "mnemonic": ":WAVeform:VIEW",
+      "category": "WAVeform",
+      "description": "Sets/queries the waveform view returned.",
+      "set": ":WAVeform:VIEW <view>",
+      "query": ":WAVeform:VIEW?",
+      "parameters": [
+        {
+          "name": "view",
+          "range": "{MAIN}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:VIEW MAIN",
+        ":WAVeform:VIEW?"
+      ]
+    },
+    {
+      "name": "waveform_x_increment_query",
+      "mnemonic": ":WAVeform:XINCrement?",
+      "category": "WAVeform",
+      "description": "Returns the x-increment (time between data points) from the current preamble.",
+      "query": ":WAVeform:XINCrement?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "x-increment (NR3)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:XINCrement?"
+      ]
+    },
+    {
+      "name": "waveform_x_origin_query",
+      "mnemonic": ":WAVeform:XORigin?",
+      "category": "WAVeform",
+      "description": "Returns the x-origin (time of the first data point) from the current preamble.",
+      "query": ":WAVeform:XORigin?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "units": [
+            "s"
+          ],
+          "range": "x-origin value (NR3)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:XORigin?"
+      ]
+    },
+    {
+      "name": "waveform_x_reference_query",
+      "mnemonic": ":WAVeform:XREFerence?",
+      "category": "WAVeform",
+      "description": "Returns the x-reference (data point index of x-origin) from the current preamble.",
+      "query": ":WAVeform:XREFerence?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "range": "0 (x-reference value, NR1)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:XREFerence?"
+      ]
+    },
+    {
+      "name": "waveform_y_increment_query",
+      "mnemonic": ":WAVeform:YINCrement?",
+      "category": "WAVeform",
+      "description": "Returns the y-increment (voltage per code level) from the current preamble.",
+      "query": ":WAVeform:YINCrement?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "y-increment value (NR3)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:YINCrement?"
+      ]
+    },
+    {
+      "name": "waveform_y_origin_query",
+      "mnemonic": ":WAVeform:YORigin?",
+      "category": "WAVeform",
+      "description": "Returns the y-origin (voltage at y-reference) from the current preamble.",
+      "query": ":WAVeform:YORigin?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "units": [
+            "V"
+          ],
+          "range": "y-origin value (NR3)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:YORigin?"
+      ]
+    },
+    {
+      "name": "waveform_y_reference_query",
+      "mnemonic": ":WAVeform:YREFerence?",
+      "category": "WAVeform",
+      "description": "Returns the y-reference (code value of y-origin) from the current preamble.",
+      "query": ":WAVeform:YREFerence?",
+      "parameters": [
+        {
+          "name": "return_value",
+          "range": "y-reference value (NR1)"
+        }
+      ],
+      "examples": [
+        ":WAVeform:YREFerence?"
+      ]
+    }
+  ]
+}
