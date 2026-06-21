@@ -1,14 +1,14 @@
 {
-  "model": "3499A",
+  "model": "3499B",
   "manufacturer": "Agilent",
   "category": "Switch / Control Unit",
-  "description": "Agilent 3499A/B/C Switch/Control System mainframe. High-density/high-speed switching and digital I/O for plug-in modules (MUX, GP relay, matrix, DIO, multifunction, RF/microwave/optical). Programmable via SCPI over GPIB, LAN, or RS-232. 3499A has slots 0-5, 3499B has slots 0-2, 3499C has slots 0-9 (slot 0 is the control board/built-in DIO). Operates in SCPI mode or HP 3488A emulation mode.",
+  "description": "Agilent 3499B Switch/Control System mainframe. Two-plug-in-slot, half-rack-width form factor (slots 0-2; slot 0 is the control board/built-in DIO). High-density/high-speed switching and digital I/O for plug-in modules (MUX, GP relay, matrix, DIO, multifunction, RF/microwave/optical). Shares the same SCPI command set as the 3499A/C. Programmable via SCPI over GPIB, LAN, or RS-232. Operates in SCPI mode or HP 3488A emulation mode.",
   "source": "3499A User & Programming.pdf",
-  "aliases": ["3499A"],
+  "aliases": ["3499B", "Agilent 3499B", "HP3499B"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "3499[ABC]",
+    "matchRegex": "3499B",
     "description": "Returns the instrument identification string containing the manufacturer, model number, serial number, and firmware revision."
   },
   "commands": [

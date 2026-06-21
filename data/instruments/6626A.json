@@ -1,12 +1,12 @@
 {
-  "model": "6625A",
+  "model": "6626A",
   "manufacturer": "HP",
   "category": "DC Power Supply",
-  "description": "HP/Agilent 6625A System DC Power Supply, a multiple-output (662xA series) precision linear supply with HP-IB (IEEE-488) control. Each output is individually programmed and metered for voltage, current, voltage/current range, overvoltage protection, and overcurrent protection. The 6625A has 2 outputs: one 25 W output rated 0-7 V/0-0.5 A (low range) or 0-50 V (high range), and one 50 W output rated 0-16 V/0-2 A (low range) or 0-50 V (high range). Commands address an output channel as the first parameter (1-2).",
+  "description": "HP/Agilent 6626A System DC Power Supply, a multiple-output (662xA series) precision linear supply with HP-IB (IEEE-488) control. The 6626A has 4 outputs: two 25 W outputs rated 0-7 V/0-0.5 A (low range) or 0-50 V (high range), and two 50 W outputs rated 0-16 V/0-2 A (low range) or 0-50 V (high range). Each output is individually programmed and metered; commands address an output channel as the first parameter (1-4).",
   "source": "6625A.pdf",
   "aliases": [
-    "6625A",
-    "HP6625A"
+    "6626A",
+    "HP6626A"
   ],
   "termination": {
     "write": "\n",
@@ -14,9 +14,9 @@
   },
   "identity": {
     "command": "ID?",
-    "matchRegex": "6625A",
+    "matchRegex": "6626A",
     "supported": true,
-    "description": "Identification query (ID?). Returns the supply model in the 662xA family (e.g. '6625A'). Matched on '6625A'."
+    "description": "Identification query (ID?). Returns the supply model in the 662xA family. Matched on '6626A'."
   },
   "commands": [
     {

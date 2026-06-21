@@ -1,14 +1,21 @@
 {
-  "model": "83712B",
+  "model": "83711B",
   "manufacturer": "HP/Agilent",
   "category": "Synthesized CW Generator",
-  "description": "HP/Agilent 83712B Synthesized CW Generator. Part of the 8371x family of synthesized continuous-wave signal generators. The 83712A/12B cover 10 MHz (0.01 GHz) to 20 GHz; the 83711A/11B cover 1 GHz to 20 GHz. Standard frequency resolution is 1 kHz (1 Hz with Option 1E8). Controlled over GPIB (HP-IB) using SCPI; an HP 8673 compatible language mode is also selectable. This definition is drawn from the User's Guide, which documents the SCPI commands as 'Equivalent SCPI Command' entries for each front-panel key and special function plus the PRESET-conditions table; the full command reference lives in the separate Programming Guide (83711-90132). This instrument has no internal AM/FM/pulse modulation and no bus trigger capability (DT0, 'no trigger capability'), so no AM/FM/PULM/TRIGger/INITiate subsystems are documented here.",
+  "description": "HP/Agilent 83711B Synthesized CW Generator. Part of the 8371x family of synthesized continuous-wave signal generators that share a common command set; the 83711B covers 1.0 GHz to 20 GHz. The 83711A/11B cover 1 GHz to 20 GHz and the 83712A/12B cover 10 MHz (0.01 GHz) to 20 GHz; within each pair the A and B suffixes are hardware revisions of the same model. Standard frequency resolution is 1 kHz (1 Hz with Option 1E8). Controlled over GPIB (HP-IB) using SCPI; an HP 8673 compatible language mode is also selectable. This definition is drawn from the User's Guide, which documents the SCPI commands as 'Equivalent SCPI Command' entries for each front-panel key and special function plus the PRESET-conditions table; the full command reference lives in the separate Programming Guide (83711-90132). This instrument has no internal AM/FM/pulse modulation and no bus trigger capability (DT0, 'no trigger capability'), so no AM/FM/PULM/TRIGger/INITiate subsystems are documented here.",
   "source": "83712B User.pdf",
-  "aliases": ["83712B", "8371x"],
-  "termination": { "write": "\n", "read": "\n" },
+  "aliases": [
+    "83711B",
+    "HP83711B"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "8371[0-9]",
+    "matchRegex": "83711B",
+    "supported": true,
     "description": "Returns the synthesizer model number, serial number, and firmware revision number (the SCPI equivalent of the front-panel SHOW INFO function)."
   },
   "commands": [
@@ -20,9 +27,18 @@
       "set": "FREQ <freq>",
       "query": "FREQ?",
       "parameters": [
-        { "name": "freq", "units": ["Hz"], "range": "0.01 GHz to 20 GHz (83712A/12B); 1.0 GHz to 20 GHz (83711A/11B). Resolution 1 kHz (1 Hz with Option 1E8)." }
+        {
+          "name": "freq",
+          "units": [
+            "Hz"
+          ],
+          "range": "0.01 GHz to 20 GHz (83712A/12B); 1.0 GHz to 20 GHz (83711A/11B). Resolution 1 kHz (1 Hz with Option 1E8)."
+        }
       ],
-      "examples": ["FREQ 10GHZ", "FREQ 12.5E9"]
+      "examples": [
+        "FREQ 10GHZ",
+        "FREQ 12.5E9"
+      ]
     },
     {
       "name": "set_frequency_multiplier",
@@ -32,9 +48,15 @@
       "set": "FREQ:MULT <multiplier>",
       "query": "FREQ:MULT?",
       "parameters": [
-        { "name": "multiplier", "range": "Multiplier factor (preset 1)" }
+        {
+          "name": "multiplier",
+          "range": "Multiplier factor (preset 1)"
+        }
       ],
-      "examples": ["FREQ:MULT 1", "FREQ:MULT 4"]
+      "examples": [
+        "FREQ:MULT 1",
+        "FREQ:MULT 4"
+      ]
     },
     {
       "name": "set_power_level",
@@ -44,9 +66,18 @@
       "set": "POW <level>",
       "query": "POW?",
       "parameters": [
-        { "name": "level", "units": ["dBm"], "range": "-15 dBm to +30 dBm standard; -120 dBm to +30 dBm with Option 1E1 (-100 dBm to +30 dBm on 83711A/12A)" }
+        {
+          "name": "level",
+          "units": [
+            "dBm"
+          ],
+          "range": "-15 dBm to +30 dBm standard; -120 dBm to +30 dBm with Option 1E1 (-100 dBm to +30 dBm on 83711A/12A)"
+        }
       ],
-      "examples": ["POW -10 DBM", "POW 0DBM"]
+      "examples": [
+        "POW -10 DBM",
+        "POW 0DBM"
+      ]
     },
     {
       "name": "set_power_unit",
@@ -56,9 +87,14 @@
       "set": "POW:UNIT <unit>",
       "query": "POW:UNIT?",
       "parameters": [
-        { "name": "unit", "range": "DBM (and related power units; preset DBM)" }
+        {
+          "name": "unit",
+          "range": "DBM (and related power units; preset DBM)"
+        }
       ],
-      "examples": ["POW:UNIT DBM"]
+      "examples": [
+        "POW:UNIT DBM"
+      ]
     },
     {
       "name": "set_alc_source",
@@ -68,9 +104,15 @@
       "set": "POW:ALC:SOUR <source>",
       "query": "POW:ALC:SOUR?",
       "parameters": [
-        { "name": "source", "range": "INT | DIOD | PMET (preset INT)" }
+        {
+          "name": "source",
+          "range": "INT | DIOD | PMET (preset INT)"
+        }
       ],
-      "examples": ["POW:ALC:SOUR INT", "POW:ALC:SOUR DIOD"]
+      "examples": [
+        "POW:ALC:SOUR INT",
+        "POW:ALC:SOUR DIOD"
+      ]
     },
     {
       "name": "set_alc_pmeter_level",
@@ -80,9 +122,17 @@
       "set": "POW:ALC:PMET <pmeter>",
       "query": "POW:ALC:PMET?",
       "parameters": [
-        { "name": "pmeter", "units": ["dBm"], "range": "External meter reading: -15 dBm to +30 dBm standard; -100 dBm to +30 dBm with Option 1E1 (preset 0 dBm)" }
+        {
+          "name": "pmeter",
+          "units": [
+            "dBm"
+          ],
+          "range": "External meter reading: -15 dBm to +30 dBm standard; -100 dBm to +30 dBm with Option 1E1 (preset 0 dBm)"
+        }
       ],
-      "examples": ["POW:ALC:PMET 0DBM"]
+      "examples": [
+        "POW:ALC:PMET 0DBM"
+      ]
     },
     {
       "name": "set_attenuator_auto",
@@ -92,9 +142,15 @@
       "set": "POW:ATT:AUTO <ON|OFF>",
       "query": "POW:ATT:AUTO?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset ON)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset ON)"
+        }
       ],
-      "examples": ["POW:ATT:AUTO ON", "POW:ATT:AUTO OFF"]
+      "examples": [
+        "POW:ATT:AUTO ON",
+        "POW:ATT:AUTO OFF"
+      ]
     },
     {
       "name": "set_power_protection",
@@ -104,9 +160,14 @@
       "set": "POW:PROT:STAT <ON|OFF>",
       "query": "POW:PROT:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset OFF)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset OFF)"
+        }
       ],
-      "examples": ["POW:PROT:STAT OFF"]
+      "examples": [
+        "POW:PROT:STAT OFF"
+      ]
     },
     {
       "name": "set_output_state",
@@ -116,9 +177,15 @@
       "set": "OUTP:STAT <ON|OFF>",
       "query": "OUTP:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset ON)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset ON)"
+        }
       ],
-      "examples": ["OUTP:STAT ON", "OUTP:STAT OFF"]
+      "examples": [
+        "OUTP:STAT ON",
+        "OUTP:STAT OFF"
+      ]
     },
     {
       "name": "set_output_protection",
@@ -128,9 +195,14 @@
       "set": "OUTP:PROT:STAT <ON|OFF>",
       "query": "OUTP:PROT:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset ON)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset ON)"
+        }
       ],
-      "examples": ["OUTP:PROT:STAT ON"]
+      "examples": [
+        "OUTP:PROT:STAT ON"
+      ]
     },
     {
       "name": "set_correction_state",
@@ -140,9 +212,15 @@
       "set": "CORR:STAT <ON|OFF>",
       "query": "CORR:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset OFF)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset OFF)"
+        }
       ],
-      "examples": ["CORR:STAT ON", "CORR:STAT OFF"]
+      "examples": [
+        "CORR:STAT ON",
+        "CORR:STAT OFF"
+      ]
     },
     {
       "name": "select_correction_table",
@@ -152,9 +230,15 @@
       "set": "CORR:CSET:SEL <FDAT<n>>",
       "query": "CORR:CSET:SEL?",
       "parameters": [
-        { "name": "tableno", "range": "FDAT1 through FDAT4 (level-correction register; preset FDAT1)" }
+        {
+          "name": "tableno",
+          "range": "FDAT1 through FDAT4 (level-correction register; preset FDAT1)"
+        }
       ],
-      "examples": ["CORR:CSET:SEL FDAT1", "CORR:CSET:SEL FDAT2"]
+      "examples": [
+        "CORR:CSET:SEL FDAT1",
+        "CORR:CSET:SEL FDAT2"
+      ]
     },
     {
       "name": "set_correction_table_state",
@@ -164,9 +248,14 @@
       "set": "CORR:CSET:STAT <ON|OFF>",
       "query": "CORR:CSET:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset OFF)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset OFF)"
+        }
       ],
-      "examples": ["CORR:CSET:STAT ON"]
+      "examples": [
+        "CORR:CSET:STAT ON"
+      ]
     },
     {
       "name": "set_display_state",
@@ -176,9 +265,15 @@
       "set": "DISP:STAT <ON|OFF>",
       "query": "DISP:STAT?",
       "parameters": [
-        { "name": "state", "range": "ON | OFF (preset ON)" }
+        {
+          "name": "state",
+          "range": "ON | OFF (preset ON)"
+        }
       ],
-      "examples": ["DISP:STAT ON", "DISP:STAT OFF"]
+      "examples": [
+        "DISP:STAT ON",
+        "DISP:STAT OFF"
+      ]
     },
     {
       "name": "select_memory_table",
@@ -188,9 +283,14 @@
       "set": "MEM:TABL:SEL <FDAT<n>>",
       "query": "MEM:TABL:SEL?",
       "parameters": [
-        { "name": "tableno", "range": "FDAT1 ... (preset FDAT1)" }
+        {
+          "name": "tableno",
+          "range": "FDAT1 ... (preset FDAT1)"
+        }
       ],
-      "examples": ["MEM:TABL:SEL FDAT1"]
+      "examples": [
+        "MEM:TABL:SEL FDAT1"
+      ]
     },
     {
       "name": "initialize_memory",
@@ -198,7 +298,9 @@
       "category": "Memory",
       "description": "Clears (erases) synthesizer RAM memory: all user settings return to the preset state, save/recall registers are erased, and level-correction tables are cleared (the ERASE MEMORY function). Factory calibration data in EEPROM is not affected.",
       "set": "MEM:RAM:INIT",
-      "examples": ["MEM:RAM:INIT"]
+      "examples": [
+        "MEM:RAM:INIT"
+      ]
     },
     {
       "name": "set_gpib_address",
@@ -208,9 +310,14 @@
       "set": "SYST:COMM:GPIB:ADDR <address>",
       "query": "SYST:COMM:GPIB:ADDR?",
       "parameters": [
-        { "name": "address", "range": "0 to 30 (factory default 19)" }
+        {
+          "name": "address",
+          "range": "0 to 30 (factory default 19)"
+        }
       ],
-      "examples": ["SYST:COMM:GPIB:ADDR 19"]
+      "examples": [
+        "SYST:COMM:GPIB:ADDR 19"
+      ]
     },
     {
       "name": "set_pmeter_address",
@@ -220,9 +327,14 @@
       "set": "SYST:COMM:PMET:ADDR <address>",
       "query": "SYST:COMM:PMET:ADDR?",
       "parameters": [
-        { "name": "address", "range": "0 to 30 (factory default 13)" }
+        {
+          "name": "address",
+          "range": "0 to 30 (factory default 13)"
+        }
       ],
-      "examples": ["SYST:COMM:PMET:ADDR 13"]
+      "examples": [
+        "SYST:COMM:PMET:ADDR 13"
+      ]
     },
     {
       "name": "set_language",
@@ -232,9 +344,15 @@
       "set": "SYST:LANG <\"SCPI\"|\"COMP=8673\">",
       "query": "SYST:LANG?",
       "parameters": [
-        { "name": "language", "range": "\"SCPI\" | \"COMP=8673\" (preset/default SCPI)" }
+        {
+          "name": "language",
+          "range": "\"SCPI\" | \"COMP=8673\" (preset/default SCPI)"
+        }
       ],
-      "examples": ["SYST:LANG \"SCPI\"", "SYST:LANG \"COMP=8673\""]
+      "examples": [
+        "SYST:LANG \"SCPI\"",
+        "SYST:LANG \"COMP=8673\""
+      ]
     },
     {
       "name": "press_key",
@@ -243,9 +361,15 @@
       "description": "Emulates a front-panel key press by sending the key's numeric code (e.g. SYST:KEY 8 = LOCAL, SYST:KEY 54 = BACK SPACE, SYST:KEY 50 = SPCL OFF). Used to drive keys that have no direct SCPI equivalent. The key code must be one available on the synthesizer's front panel.",
       "set": "SYST:KEY <keycode>",
       "parameters": [
-        { "name": "keycode", "range": "Front-panel key code (e.g. 8 = LOCAL, 50 = SPCL OFF, 54 = BACK SPACE)" }
+        {
+          "name": "keycode",
+          "range": "Front-panel key code (e.g. 8 = LOCAL, 50 = SPCL OFF, 54 = BACK SPACE)"
+        }
       ],
-      "examples": ["SYST:KEY 8", "SYST:KEY 54"]
+      "examples": [
+        "SYST:KEY 8",
+        "SYST:KEY 54"
+      ]
     },
     {
       "name": "query_error",
@@ -253,7 +377,9 @@
       "category": "System",
       "description": "Reads and removes the oldest entry from the error queue, returning the error number and a short description. Equivalent to reading errors via the front-panel MSG function. The error queue is cleared at preset.",
       "query": "SYST:ERR?",
-      "examples": ["SYST:ERR?"]
+      "examples": [
+        "SYST:ERR?"
+      ]
     },
     {
       "name": "preset",
@@ -261,7 +387,9 @@
       "category": "System",
       "description": "Sets the synthesizer to a known preset state (equivalent to the front-panel PRESET key and to *RST). Sets FREQ:CW = 3 GHz, POW:LEVel = 0 dBm, OUTP:STAT = ON, POW:ALC:SOUR = INT, etc. Does not change the HP-IB address or remote language.",
       "set": "SYST:PRES",
-      "examples": ["SYST:PRES"]
+      "examples": [
+        "SYST:PRES"
+      ]
     },
     {
       "name": "identify",
@@ -269,7 +397,9 @@
       "category": "Common",
       "description": "Returns the synthesizer model number, serial number, and firmware revision number (SCPI equivalent of the SHOW INFO function).",
       "query": "*IDN?",
-      "examples": ["*IDN?"]
+      "examples": [
+        "*IDN?"
+      ]
     },
     {
       "name": "reset",
@@ -277,7 +407,9 @@
       "category": "Common",
       "description": "Sets the synthesizer to its known preset state (equivalent to the front-panel PRESET key and to SYST:PRES).",
       "set": "*RST",
-      "examples": ["*RST"]
+      "examples": [
+        "*RST"
+      ]
     },
     {
       "name": "save_state",
@@ -286,9 +418,15 @@
       "description": "Saves the current instrument state to a save/recall register. All settings affected by PRESET are saved; level-correction tables are not saved. Register range is 0 through 9.",
       "set": "*SAV <register>",
       "parameters": [
-        { "name": "register", "range": "0 to 9" }
+        {
+          "name": "register",
+          "range": "0 to 9"
+        }
       ],
-      "examples": ["*SAV 1", "*SAV 0"]
+      "examples": [
+        "*SAV 1",
+        "*SAV 0"
+      ]
     },
     {
       "name": "recall_state",
@@ -297,9 +435,15 @@
       "description": "Recalls a previously stored instrument state from a save/recall register. If the register was never written, recalling it sets the synthesizer to the preset state. Register range is 0 through 9.",
       "set": "*RCL <register>",
       "parameters": [
-        { "name": "register", "range": "0 to 9" }
+        {
+          "name": "register",
+          "range": "0 to 9"
+        }
       ],
-      "examples": ["*RCL 1", "*RCL 0"]
+      "examples": [
+        "*RCL 1",
+        "*RCL 0"
+      ]
     },
     {
       "name": "self_test",
@@ -307,7 +451,9 @@
       "category": "Common",
       "description": "Runs a functional verification (self test) on the synthesizer and returns the result (the SCPI equivalent of the SELF TEST special function).",
       "query": "*TST?",
-      "examples": ["*TST?"]
+      "examples": [
+        "*TST?"
+      ]
     },
     {
       "name": "query_options",
@@ -315,7 +461,9 @@
       "category": "Common",
       "description": "Returns which options are installed in the synthesizer (e.g. attenuator or ALC-source options). Referenced for checking option availability when a requested ALC source or feature is not present.",
       "query": "*OPT?",
-      "examples": ["*OPT?"]
+      "examples": [
+        "*OPT?"
+      ]
     },
     {
       "name": "learn_string",
@@ -323,7 +471,9 @@
       "category": "Common",
       "description": "Returns the instrument 'learn string' (complete instrument state as block data) which can later be sent back via SYST:SET to restore the state. The *LRN? response is always a fixed length regardless of state, but can change with firmware version.",
       "query": "*LRN?",
-      "examples": ["*LRN?"]
+      "examples": [
+        "*LRN?"
+      ]
     }
   ]
 }

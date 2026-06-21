@@ -1,15 +1,15 @@
 {
-  "model": "3325A",
+  "model": "3325B",
   "manufacturer": "HP",
   "category": "Synthesizer / Function Generator",
-  "description": "HP 3325A synthesizer/function generator (1 uHz to 21 MHz). The earlier model in the 3325 family; the later 3325B added enhanced phase resolution, an external-reference/high-stability option, and improved amplitude/modulation features. The two share the same two-letter HP-IB remote command set, so this definition is documented from the HP 3325B Operating Manual. Note: the ID?/IDN? identify queries were added on the 3325B and may not be supported on early 3325A units.",
-  "source": "HP 3325B Operating Manual (command set shared with the 3325A)",
-  "aliases": ["3325A", "HP3325A", "HP 3325A"],
+  "description": "HP 3325B synthesizer/function generator (1 uHz to 21 MHz). The later model in the 3325 family, adding enhanced phase resolution, an external-reference/high-stability option, improved amplitude and modulation (AM/PM) features, and an enhancements mode (ENH) over the earlier 3325A. The 3325B supports the full HP 3325A two-letter program-code command set plus additional four-letter mnemonics; this definition documents the shared two-letter command set.",
+  "source": "3325B-OM.pdf",
+  "aliases": ["3325B", "HP3325B"],
   "termination": { "write": "\n", "read": "\n" },
   "identity": {
     "command": "ID?",
-    "matchRegex": "3325",
-    "description": "Short model identify (3325B). IDN? returns the long form. May not be supported on early 3325A units."
+    "matchRegex": "3325B",
+    "description": "Short model identify (3325B). IDN? returns the long form."
   },
   "statusModel": {
     "srqSupported": true,

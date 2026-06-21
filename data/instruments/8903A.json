@@ -1,11 +1,17 @@
 {
-  "model": "8903B",
+  "model": "8903A",
   "manufacturer": "HP",
   "category": "Audio Analyzer",
-  "description": "HP 8903B Audio Analyzer (20 Hz to 100 kHz) combining a low-distortion audio source with a signal analyzer. Performs AC level, DC level, distortion, distortion level, SINAD, signal-to-noise ratio, and frequency-count measurements. Legacy HP-IB (IEEE-488) instrument controlled by an alphameric program-code language, NOT SCPI. Each code is typically equivalent to a front-panel keystroke; codes are concatenated into one program string in the order [Automatic Operation][Source Frequency][Source Amplitude][Measurement][Filters][Special Functions][Log/Lin][Ratio][Start Frequency][Stop Frequency][Plot Limit][Sweep][Trigger] (e.g. AUFR440HZAP1VLM3L1LGT3). Numeric data uses a signed mantissa of up to five digits with an optional decimal point and an optional one- or two-digit signed exponent (the exponent is introduced by EN, e.g. 1EN3). Lower-case alpha characters are treated as upper case. Special Functions are entered as a number followed by SP (the SPCL key), e.g. 47.1SP. Filter, Low-Pass, Ratio, and Sweep groups do not toggle in remote mode; each has a dedicated 'all off' code (H0, L0, R0, W0). The instrument outputs measurement data when commanded with RR/RL (or 20.0SP/20.1SP) in the fixed format +-DDDDDE+-NN followed by CR LF, always in fundamental units (Hz, %, dB, or V). It supports a one-byte status-byte serial poll but has no identify query (predates *IDN?). Powers up at 1 kHz source frequency, 0 V amplitude, 600 ohm output impedance, and Service Request Condition 22.2 (HP-IB error).",
+  "description": "HP 8903A Audio Analyzer (20 Hz to 100 kHz) combining a low-distortion audio source with a signal analyzer. This is the original model of the 8903 family. Performs AC level, DC level, distortion, distortion level, SINAD, signal-to-noise ratio, and frequency-count measurements. Legacy HP-IB (IEEE-488) instrument controlled by an alphameric program-code language, NOT SCPI, sharing essentially the same command set as the later 8903B (the 8903B added refinements such as expanded special functions and updated detector options on later serial prefixes, but the core program codes are identical). Each code is typically equivalent to a front-panel keystroke; codes are concatenated into one program string in the order [Automatic Operation][Source Frequency][Source Amplitude][Measurement][Filters][Special Functions][Log/Lin][Ratio][Start Frequency][Stop Frequency][Plot Limit][Sweep][Trigger] (e.g. AUFR440HZAP1VLM3L1LGT3). Numeric data uses a signed mantissa of up to five digits with an optional decimal point and an optional one- or two-digit signed exponent (the exponent is introduced by EN, e.g. 1EN3). Lower-case alpha characters are treated as upper case. Special Functions are entered as a number followed by SP (the SPCL key), e.g. 47.1SP. Filter, Low-Pass, Ratio, and Sweep groups do not toggle in remote mode; each has a dedicated all off code (H0, L0, R0, W0). The instrument outputs measurement data when commanded with RR/RL (or 20.0SP/20.1SP) in the fixed format +-DDDDDE+-NN followed by CR LF, always in fundamental units (Hz, %, dB, or V). It supports a one-byte status-byte serial poll but has no identify query (predates *IDN?). Powers up at 1 kHz source frequency, 0 V amplitude, 600 ohm output impedance, and Service Request Condition 22.2 (HP-IB error).",
   "source": "8903b.pdf",
-  "aliases": ["8903B", "HP8903B"],
-  "termination": { "write": "\n", "read": "\n" },
+  "aliases": [
+    "8903A",
+    "HP8903A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
     "supported": false,
     "description": "No identify query. The HP 8903-series Audio Analyzers predate *IDN? and provide no HP-IB model-identification command; only a one-byte status-byte serial poll is available. Identify the instrument by its HP-IB address."
@@ -19,7 +25,10 @@
       "set": "AU",
       "query": false,
       "parameters": [],
-      "examples": ["AU", "AUFR1KZAP1VLM1"]
+      "examples": [
+        "AU",
+        "AUFR1KZAP1VLM1"
+      ]
     },
     {
       "name": "source_frequency",
@@ -29,9 +38,19 @@
       "set": "FR <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KZ"
+          ],
+          "range": "20 Hz to 100 kHz"
+        }
       ],
-      "examples": ["FR440HZ", "FR20KZ"]
+      "examples": [
+        "FR440HZ",
+        "FR20KZ"
+      ]
     },
     {
       "name": "source_amplitude",
@@ -41,9 +60,21 @@
       "set": "AP <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "amplitude", "units": ["VL", "MV", "DV"], "range": "0.6 mV to 6 V" }
+        {
+          "name": "amplitude",
+          "units": [
+            "VL",
+            "MV",
+            "DV"
+          ],
+          "range": "0.6 mV to 6 V"
+        }
       ],
-      "examples": ["AP1.5VL", "AP600MV", "AP0DV"]
+      "examples": [
+        "AP1.5VL",
+        "AP600MV",
+        "AP0DV"
+      ]
     },
     {
       "name": "amplitude_increment",
@@ -53,9 +84,19 @@
       "set": "AN <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "increment", "units": ["VL", "MV", "DV"] }
+        {
+          "name": "increment",
+          "units": [
+            "VL",
+            "MV",
+            "DV"
+          ]
+        }
       ],
-      "examples": ["AN100MV", "AN1DV"]
+      "examples": [
+        "AN100MV",
+        "AN1DV"
+      ]
     },
     {
       "name": "frequency_increment",
@@ -65,9 +106,18 @@
       "set": "FN <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "increment", "units": ["HZ", "KZ"] }
+        {
+          "name": "increment",
+          "units": [
+            "HZ",
+            "KZ"
+          ]
+        }
       ],
-      "examples": ["FN10HZ", "FN1KZ"]
+      "examples": [
+        "FN10HZ",
+        "FN1KZ"
+      ]
     },
     {
       "name": "step_up",
@@ -77,7 +127,10 @@
       "set": "UP",
       "query": false,
       "parameters": [],
-      "examples": ["UP", "FNUP"]
+      "examples": [
+        "UP",
+        "FNUP"
+      ]
     },
     {
       "name": "step_down",
@@ -87,7 +140,9 @@
       "set": "DN",
       "query": false,
       "parameters": [],
-      "examples": ["DN"]
+      "examples": [
+        "DN"
+      ]
     },
     {
       "name": "output_impedance_600",
@@ -97,7 +152,9 @@
       "set": "47.0SP",
       "query": false,
       "parameters": [],
-      "examples": ["47.0SP"]
+      "examples": [
+        "47.0SP"
+      ]
     },
     {
       "name": "output_impedance_50",
@@ -107,7 +164,9 @@
       "set": "47.1SP",
       "query": false,
       "parameters": [],
-      "examples": ["47.1SP"]
+      "examples": [
+        "47.1SP"
+      ]
     },
     {
       "name": "measure_ac_level",
@@ -117,7 +176,9 @@
       "set": "M1",
       "query": false,
       "parameters": [],
-      "examples": ["M1"]
+      "examples": [
+        "M1"
+      ]
     },
     {
       "name": "measure_sinad",
@@ -127,7 +188,9 @@
       "set": "M2",
       "query": false,
       "parameters": [],
-      "examples": ["M2"]
+      "examples": [
+        "M2"
+      ]
     },
     {
       "name": "measure_distortion",
@@ -137,7 +200,9 @@
       "set": "M3",
       "query": false,
       "parameters": [],
-      "examples": ["M3"]
+      "examples": [
+        "M3"
+      ]
     },
     {
       "name": "measure_dc_level",
@@ -147,7 +212,9 @@
       "set": "S1",
       "query": false,
       "parameters": [],
-      "examples": ["S1"]
+      "examples": [
+        "S1"
+      ]
     },
     {
       "name": "measure_signal_to_noise",
@@ -157,7 +224,9 @@
       "set": "S2",
       "query": false,
       "parameters": [],
-      "examples": ["S2"]
+      "examples": [
+        "S2"
+      ]
     },
     {
       "name": "measure_distortion_level",
@@ -167,7 +236,9 @@
       "set": "S3",
       "query": false,
       "parameters": [],
-      "examples": ["S3"]
+      "examples": [
+        "S3"
+      ]
     },
     {
       "name": "rms_detector",
@@ -177,7 +248,9 @@
       "set": "A0",
       "query": false,
       "parameters": [],
-      "examples": ["A0"]
+      "examples": [
+        "A0"
+      ]
     },
     {
       "name": "avg_detector",
@@ -187,7 +260,9 @@
       "set": "A1",
       "query": false,
       "parameters": [],
-      "examples": ["A1"]
+      "examples": [
+        "A1"
+      ]
     },
     {
       "name": "quasi_peak_detector",
@@ -197,7 +272,9 @@
       "set": "5.7SP",
       "query": false,
       "parameters": [],
-      "examples": ["5.7SP"]
+      "examples": [
+        "5.7SP"
+      ]
     },
     {
       "name": "automatic_notch_tuning",
@@ -207,7 +284,9 @@
       "set": "N0",
       "query": false,
       "parameters": [],
-      "examples": ["N0"]
+      "examples": [
+        "N0"
+      ]
     },
     {
       "name": "notch_hold",
@@ -217,7 +296,9 @@
       "set": "N1",
       "query": false,
       "parameters": [],
-      "examples": ["N1"]
+      "examples": [
+        "N1"
+      ]
     },
     {
       "name": "plugin_filter_left",
@@ -227,7 +308,9 @@
       "set": "H1",
       "query": false,
       "parameters": [],
-      "examples": ["H1"]
+      "examples": [
+        "H1"
+      ]
     },
     {
       "name": "plugin_filter_right",
@@ -237,7 +320,9 @@
       "set": "H2",
       "query": false,
       "parameters": [],
-      "examples": ["H2"]
+      "examples": [
+        "H2"
+      ]
     },
     {
       "name": "plugin_filters_off",
@@ -247,7 +332,9 @@
       "set": "H0",
       "query": false,
       "parameters": [],
-      "examples": ["H0"]
+      "examples": [
+        "H0"
+      ]
     },
     {
       "name": "lp_filter_30khz",
@@ -257,7 +344,9 @@
       "set": "L1",
       "query": false,
       "parameters": [],
-      "examples": ["L1"]
+      "examples": [
+        "L1"
+      ]
     },
     {
       "name": "lp_filter_80khz",
@@ -267,7 +356,9 @@
       "set": "L2",
       "query": false,
       "parameters": [],
-      "examples": ["L2"]
+      "examples": [
+        "L2"
+      ]
     },
     {
       "name": "lp_filters_off",
@@ -277,7 +368,9 @@
       "set": "L0",
       "query": false,
       "parameters": [],
-      "examples": ["L0"]
+      "examples": [
+        "L0"
+      ]
     },
     {
       "name": "ratio_on",
@@ -287,7 +380,9 @@
       "set": "R1",
       "query": false,
       "parameters": [],
-      "examples": ["R1"]
+      "examples": [
+        "R1"
+      ]
     },
     {
       "name": "ratio_off",
@@ -297,7 +392,9 @@
       "set": "R0",
       "query": false,
       "parameters": [],
-      "examples": ["R0"]
+      "examples": [
+        "R0"
+      ]
     },
     {
       "name": "log",
@@ -307,7 +404,9 @@
       "set": "LG",
       "query": false,
       "parameters": [],
-      "examples": ["LG"]
+      "examples": [
+        "LG"
+      ]
     },
     {
       "name": "linear",
@@ -317,7 +416,9 @@
       "set": "LN",
       "query": false,
       "parameters": [],
-      "examples": ["LN"]
+      "examples": [
+        "LN"
+      ]
     },
     {
       "name": "start_frequency",
@@ -327,9 +428,19 @@
       "set": "FA <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KZ"
+          ],
+          "range": "20 Hz to 100 kHz"
+        }
       ],
-      "examples": ["FA20HZ", "FA1KZ"]
+      "examples": [
+        "FA20HZ",
+        "FA1KZ"
+      ]
     },
     {
       "name": "stop_frequency",
@@ -339,9 +450,19 @@
       "set": "FB <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+        {
+          "name": "frequency",
+          "units": [
+            "HZ",
+            "KZ"
+          ],
+          "range": "20 Hz to 100 kHz"
+        }
       ],
-      "examples": ["FB20KZ", "FB100KZ"]
+      "examples": [
+        "FB20KZ",
+        "FB100KZ"
+      ]
     },
     {
       "name": "plot_limit",
@@ -351,9 +472,23 @@
       "set": "PL <value> <unit> <UL|LL>",
       "query": false,
       "parameters": [
-        { "name": "value", "units": ["UL", "LL", "DB", "VL", "MV", "DV"], "range": "depends on selected measurement units" }
+        {
+          "name": "value",
+          "units": [
+            "UL",
+            "LL",
+            "DB",
+            "VL",
+            "MV",
+            "DV"
+          ],
+          "range": "depends on selected measurement units"
+        }
       ],
-      "examples": ["PL0DBUL", "PL-80DBLL"]
+      "examples": [
+        "PL0DBUL",
+        "PL-80DBLL"
+      ]
     },
     {
       "name": "sweep_on",
@@ -363,7 +498,9 @@
       "set": "W1",
       "query": false,
       "parameters": [],
-      "examples": ["W1"]
+      "examples": [
+        "W1"
+      ]
     },
     {
       "name": "sweep_off",
@@ -373,7 +510,9 @@
       "set": "W0",
       "query": false,
       "parameters": [],
-      "examples": ["W0"]
+      "examples": [
+        "W0"
+      ]
     },
     {
       "name": "free_run",
@@ -383,7 +522,9 @@
       "set": "T0",
       "query": false,
       "parameters": [],
-      "examples": ["T0"]
+      "examples": [
+        "T0"
+      ]
     },
     {
       "name": "hold",
@@ -393,7 +534,9 @@
       "set": "T1",
       "query": false,
       "parameters": [],
-      "examples": ["T1"]
+      "examples": [
+        "T1"
+      ]
     },
     {
       "name": "trigger_immediate",
@@ -403,7 +546,9 @@
       "set": "T2",
       "query": false,
       "parameters": [],
-      "examples": ["T2"]
+      "examples": [
+        "T2"
+      ]
     },
     {
       "name": "trigger_with_settling",
@@ -413,7 +558,9 @@
       "set": "T3",
       "query": false,
       "parameters": [],
-      "examples": ["T3"]
+      "examples": [
+        "T3"
+      ]
     },
     {
       "name": "read_right_display",
@@ -423,7 +570,10 @@
       "set": "RR",
       "query": true,
       "parameters": [],
-      "examples": ["RR", "20.0SP"]
+      "examples": [
+        "RR",
+        "20.0SP"
+      ]
     },
     {
       "name": "read_left_display",
@@ -433,7 +583,10 @@
       "set": "RL",
       "query": true,
       "parameters": [],
-      "examples": ["RL", "20.1SP"]
+      "examples": [
+        "RL",
+        "20.1SP"
+      ]
     },
     {
       "name": "rapid_frequency_count",
@@ -443,7 +596,9 @@
       "set": "RF",
       "query": true,
       "parameters": [],
-      "examples": ["RF"]
+      "examples": [
+        "RF"
+      ]
     },
     {
       "name": "rapid_source",
@@ -453,7 +608,9 @@
       "set": "RS",
       "query": false,
       "parameters": [],
-      "examples": ["RS"]
+      "examples": [
+        "RS"
+      ]
     },
     {
       "name": "special_function",
@@ -463,9 +620,15 @@
       "set": "<number>SP",
       "query": false,
       "parameters": [
-        { "name": "function", "range": "documented special-function numbers, e.g. 1.0-1.19, 2.0-2.4, 3.0-3.4, 4.0-4.8, 5.0-5.7, 6.0-6.1, 7.0-7.1, 8.0-8.3, 9.0, 10.0, 11.0-11.1, 12.0-12.9, 13.0-13.1, 14.0-14.1, 16.0-16.1, 17.0-17.9, 19.0/19.NNN, 20.0-20.1, 21.0-21.1, 22.N, 47.0-47.1" }
+        {
+          "name": "function",
+          "range": "documented special-function numbers, e.g. 1.0-1.19, 2.0-2.4, 3.0-3.4, 4.0-4.8, 5.0-5.7, 6.0-6.1, 7.0-7.1, 8.0-8.3, 9.0, 10.0, 11.0-11.1, 12.0-12.9, 13.0-13.1, 14.0-14.1, 16.0-16.1, 17.0-17.9, 19.0/19.NNN, 20.0-20.1, 21.0-21.1, 22.N, 47.0-47.1"
+        }
       ],
-      "examples": ["1.0SP", "9.0SP"]
+      "examples": [
+        "1.0SP",
+        "9.0SP"
+      ]
     },
     {
       "name": "special_function_second_level",
@@ -475,7 +638,9 @@
       "set": "SS",
       "query": false,
       "parameters": [],
-      "examples": ["SS"]
+      "examples": [
+        "SS"
+      ]
     },
     {
       "name": "input_level_range_auto",
@@ -485,7 +650,10 @@
       "set": "1.0SP",
       "query": false,
       "parameters": [],
-      "examples": ["1.0SP", "1.6SP"]
+      "examples": [
+        "1.0SP",
+        "1.6SP"
+      ]
     },
     {
       "name": "input_level_range_dc_auto",
@@ -495,7 +663,10 @@
       "set": "2.0SP",
       "query": false,
       "parameters": [],
-      "examples": ["2.0SP", "2.4SP"]
+      "examples": [
+        "2.0SP",
+        "2.4SP"
+      ]
     },
     {
       "name": "post_notch_gain",
@@ -505,9 +676,15 @@
       "set": "3.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "gain", "range": "3.0 (auto), 3.1 (0 dB), 3.2 (20 dB), 3.3 (40 dB), 3.4 (60 dB)" }
+        {
+          "name": "gain",
+          "range": "3.0 (auto), 3.1 (0 dB), 3.2 (20 dB), 3.3 (40 dB), 3.4 (60 dB)"
+        }
       ],
-      "examples": ["3.0SP", "3.4SP"]
+      "examples": [
+        "3.0SP",
+        "3.4SP"
+      ]
     },
     {
       "name": "hold_decimal_point",
@@ -517,9 +694,15 @@
       "set": "4.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "range", "range": "4.0 (auto) through 4.8" }
+        {
+          "name": "range",
+          "range": "4.0 (auto) through 4.8"
+        }
       ],
-      "examples": ["4.0SP", "4.3SP"]
+      "examples": [
+        "4.0SP",
+        "4.3SP"
+      ]
     },
     {
       "name": "sinad_meter_range",
@@ -529,9 +712,15 @@
       "set": "7.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "range", "range": "7.0 (0 to ~18 dB), 7.1 (0 to ~24 dB)" }
+        {
+          "name": "range",
+          "range": "7.0 (0 to ~18 dB), 7.1 (0 to ~24 dB)"
+        }
       ],
-      "examples": ["7.0SP", "7.1SP"]
+      "examples": [
+        "7.0SP",
+        "7.1SP"
+      ]
     },
     {
       "name": "error_disable",
@@ -541,9 +730,15 @@
       "set": "8.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "mode", "range": "8.0 (all on), 8.1 (analyzer off), 8.2 (source off), 8.3 (both off)" }
+        {
+          "name": "mode",
+          "range": "8.0 (all on), 8.1 (analyzer off), 8.2 (source off), 8.3 (both off)"
+        }
       ],
-      "examples": ["8.0SP", "8.3SP"]
+      "examples": [
+        "8.0SP",
+        "8.3SP"
+      ]
     },
     {
       "name": "hold_settings",
@@ -553,7 +748,9 @@
       "set": "9.0SP",
       "query": false,
       "parameters": [],
-      "examples": ["9.0SP"]
+      "examples": [
+        "9.0SP"
+      ]
     },
     {
       "name": "display_source_settings",
@@ -563,7 +760,9 @@
       "set": "10.0SP",
       "query": false,
       "parameters": [],
-      "examples": ["10.0SP"]
+      "examples": [
+        "10.0SP"
+      ]
     },
     {
       "name": "reenter_ratio",
@@ -573,9 +772,15 @@
       "set": "11.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "mode", "range": "11.0 (re-enter ratio), 11.1 (display reference)" }
+        {
+          "name": "mode",
+          "range": "11.0 (re-enter ratio), 11.1 (display reference)"
+        }
       ],
-      "examples": ["11.0SP", "11.1SP"]
+      "examples": [
+        "11.0SP",
+        "11.1SP"
+      ]
     },
     {
       "name": "signal_to_noise_delay",
@@ -585,9 +790,15 @@
       "set": "12.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "delay", "range": "12.0 (auto), 12.1 (200 ms) through 12.9 (1.8 s)" }
+        {
+          "name": "delay",
+          "range": "12.0 (auto), 12.1 (200 ms) through 12.9 (1.8 s)"
+        }
       ],
-      "examples": ["12.0SP", "12.5SP"]
+      "examples": [
+        "12.0SP",
+        "12.5SP"
+      ]
     },
     {
       "name": "plot_enable",
@@ -597,7 +808,9 @@
       "set": "13.0SP",
       "query": false,
       "parameters": [],
-      "examples": ["13.0SP"]
+      "examples": [
+        "13.0SP"
+      ]
     },
     {
       "name": "plot_disable",
@@ -607,7 +820,9 @@
       "set": "13.1SP",
       "query": false,
       "parameters": [],
-      "examples": ["13.1SP"]
+      "examples": [
+        "13.1SP"
+      ]
     },
     {
       "name": "time_between_measurements",
@@ -617,9 +832,15 @@
       "set": "14.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "mode", "range": "14.0 (minimum), 14.1 (+1 s)" }
+        {
+          "name": "mode",
+          "range": "14.0 (minimum), 14.1 (+1 s)"
+        }
       ],
-      "examples": ["14.0SP", "14.1SP"]
+      "examples": [
+        "14.0SP",
+        "14.1SP"
+      ]
     },
     {
       "name": "sinad_snr_resolution",
@@ -629,9 +850,15 @@
       "set": "16.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "mode", "range": "16.0 (mixed), 16.1 (0.01 dB all)" }
+        {
+          "name": "mode",
+          "range": "16.0 (mixed), 16.1 (0.01 dB all)"
+        }
       ],
-      "examples": ["16.0SP", "16.1SP"]
+      "examples": [
+        "16.0SP",
+        "16.1SP"
+      ]
     },
     {
       "name": "sweep_resolution",
@@ -641,9 +868,15 @@
       "set": "17.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "points_per_decade", "range": "17.1 (1) through 17.9 (500)" }
+        {
+          "name": "points_per_decade",
+          "range": "17.1 (1) through 17.9 (500)"
+        }
       ],
-      "examples": ["17.0SP", "17.9SP"]
+      "examples": [
+        "17.0SP",
+        "17.9SP"
+      ]
     },
     {
       "name": "display_level_watts",
@@ -653,9 +886,18 @@
       "set": "19.<load>SP",
       "query": false,
       "parameters": [
-        { "name": "load", "units": ["ohm"], "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load" }
+        {
+          "name": "load",
+          "units": [
+            "ohm"
+          ],
+          "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load"
+        }
       ],
-      "examples": ["19.0SP", "19.016SP"]
+      "examples": [
+        "19.0SP",
+        "19.016SP"
+      ]
     },
     {
       "name": "hpib_address_display",
@@ -665,9 +907,15 @@
       "set": "21.<n>SP",
       "query": false,
       "parameters": [
-        { "name": "mode", "range": "21.0 (binary), 21.1 (decimal)" }
+        {
+          "name": "mode",
+          "range": "21.0 (binary), 21.1 (decimal)"
+        }
       ],
-      "examples": ["21.0SP", "21.1SP"]
+      "examples": [
+        "21.0SP",
+        "21.1SP"
+      ]
     },
     {
       "name": "service_request_condition",
@@ -677,9 +925,15 @@
       "set": "22.<N>SP",
       "query": false,
       "parameters": [
-        { "name": "mask", "range": "N = 1 (Data Ready) + 2 (HP-IB error) + 4 (Instrument error); e.g. 22.3 = Data Ready + HP-IB error" }
+        {
+          "name": "mask",
+          "range": "N = 1 (Data Ready) + 2 (HP-IB error) + 4 (Instrument error); e.g. 22.3 = Data Ready + HP-IB error"
+        }
       ],
-      "examples": ["22.2SP", "22.3SP"]
+      "examples": [
+        "22.2SP",
+        "22.3SP"
+      ]
     },
     {
       "name": "clear",
@@ -689,7 +943,9 @@
       "set": "CL",
       "query": false,
       "parameters": [],
-      "examples": ["CL"]
+      "examples": [
+        "CL"
+      ]
     }
   ]
 }

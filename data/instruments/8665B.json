@@ -1,12 +1,12 @@
 {
-  "model": "8664A",
+  "model": "8665B",
   "manufacturer": "HP",
   "category": "Signal Generator",
-  "description": "HP 8664A synthesized signal generator (0.1 MHz to 3 GHz). Programmed over HP-IB (IEEE-488.2) using HP-SL (Hewlett-Packard System Language), an SCPI-like hierarchical command language. Commands have a short form (uppercase letters) and long form (uppercase + lowercase); case is ignored. Keywords within a statement are separated by colons, statements by semicolons. Command messages must be terminated by a linefeed (ASCII 10) or EOI. Optional keywords appear in [square brackets]; a leading [:LEVel], [:DEPTh], etc. may be omitted. ON|OFF and 1|0 are interchangeable for switch parameters; queries return 1 or 0. MINimum/MAXimum/UP/DOWN may be used as parameters. Most settings have set and query (?) forms. Same command set as the 8665A and 8665B (to 4.2/6 GHz). Pulse modulation requires Option 008.",
-  "source": "8664A.pdf",
+  "description": "HP 8665B synthesized signal generator (0.1 MHz to 6000 MHz (6 GHz)). Programmed over HP-IB (IEEE-488.2) using HP-SL (Hewlett-Packard System Language), an SCPI-like hierarchical command language. Commands have a short form (uppercase letters) and long form (uppercase + lowercase); case is ignored. Keywords within a statement are separated by colons, statements by semicolons. Command messages must be terminated by a linefeed (ASCII 10) or EOI. Optional keywords appear in [square brackets]; a leading [:LEVel], [:DEPTh], etc. may be omitted. ON|OFF and 1|0 are interchangeable for switch parameters; queries return 1 or 0. MINimum/MAXimum/UP/DOWN may be used as parameters. Most settings have set and query (?) forms. Same HP-SL command set as the 8664A and 8665A/B family (documented together in the 8664A, 8665A/B Operating and Calibration Manual, HP part number 08665-90078). Pulse modulation requires Option 008.",
+  "source": "8664A.pdf (8664A, 8665A/B Operating and Calibration Manual, HP P/N 08665-90078); frequency range from published HP specifications.",
   "aliases": [
-    "8664A",
-    "HP8664A"
+    "8665B",
+    "HP8665B"
   ],
   "termination": {
     "write": "\n",
@@ -14,8 +14,8 @@
   },
   "identity": {
     "command": "*IDN?",
-    "matchRegex": "8664A",
-    "description": "*IDN? returns four comma-separated fields: HEWLETT-PACKARD, model (e.g. 8664A), serial number, firmware revision. Example: 'HEWLETT-PACKARD,8664A,2833A00873,REV 1.0.0'. Matched on '8664A'."
+    "matchRegex": "8665B",
+    "description": "*IDN? returns four comma-separated fields: HEWLETT-PACKARD, model (e.g. 8665B), serial number, firmware revision. Example: 'HEWLETT-PACKARD,8665B,2833A00873,REV 1.0.0'. Matched on '8665B'."
   },
   "commands": [
     {

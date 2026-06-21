@@ -387,7 +387,7 @@ The server ships with a **user-extensible database of instrument command referen
 you can tell Claude *"an 8563E is at GPIB 18"* and it can look up what that instrument
 understands, confirm its identity, and drive it — instead of you supplying raw commands.
 
-It comes prepopulated with **69 instrument models / ~6,400 documented commands** (HP/Agilent,
+It comes prepopulated with **91 instrument models / ~6,400 documented commands** (HP/Agilent,
 Keithley, Tektronix, Rigol, Rohde & Schwarz, Datron) — see the
 [catalog](data/instruments/README.md). Each model is one JSON file describing its identity
 query, command mnemonics, parameters, units, and examples (see
@@ -716,7 +716,7 @@ src/Hpgl.Rendering/                standalone HP-GL/2 -> Bitmap/PNG/SVG renderer
 src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
   CompletionWaiter.cs              SRQ-edge / direct-bit waiter
   StatusModel.cs / IStatusChannel.cs  data model + transport abstraction
-data/instruments/*.json            bundled instrument command database (69 models)
+data/instruments/*.json            bundled instrument command database (91 models)
 tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
 tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
 tools/SrqHwHarness/                run the real waiter against live hardware over NI-VISA
