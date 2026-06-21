@@ -24,11 +24,23 @@ namespace GpibMcp.Instruments
         /// <summary>Writes a command and reads the instrument's response.</summary>
         string Query(string resource, string command, int timeoutMs);
 
+        /// <summary>
+        /// Writes a command and reads the response using the given per-instrument I/O behaviour
+        /// (terminators and an optional bounded read), e.g. for a free-running instrument (issue #35).
+        /// </summary>
+        string Query(string resource, string command, IoSpec io);
+
         /// <summary>Writes a command with no expected response.</summary>
         void Write(string resource, string command, int timeoutMs);
 
+        /// <summary>Writes a command (no response) using the given per-instrument write terminator.</summary>
+        void Write(string resource, string command, IoSpec io);
+
         /// <summary>Reads a pending response from a previously written command.</summary>
         string Read(string resource, int timeoutMs);
+
+        /// <summary>Reads a pending response using the given per-instrument read termination / bounded read.</summary>
+        string Read(string resource, IoSpec io);
 
         /// <summary>Sends an IEEE 488.2 device clear.</summary>
         void Clear(string resource, int timeoutMs);

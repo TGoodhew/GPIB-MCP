@@ -13,14 +13,16 @@ namespace GpibMcp.Instruments
 
         /// <summary>
         /// Returns <paramref name="command"/> guaranteed to end in a single line terminator.
-        /// A null or empty command yields just the terminator.
+        /// A null or empty command yields just the terminator. Pass <paramref name="terminator"/>
+        /// to use a per-instrument write terminator; null/empty falls back to <see cref="LineTerminator"/>.
         /// </summary>
-        public static string EnsureTerminated(string command)
+        public static string EnsureTerminated(string command, string terminator = null)
         {
-            if (string.IsNullOrEmpty(command)) return LineTerminator;
-            return command.EndsWith(LineTerminator, StringComparison.Ordinal)
+            string term = string.IsNullOrEmpty(terminator) ? LineTerminator : terminator;
+            if (string.IsNullOrEmpty(command)) return term;
+            return command.EndsWith(term, StringComparison.Ordinal)
                 ? command
-                : command + LineTerminator;
+                : command + term;
         }
 
         /// <summary>Escapes control characters so raw I/O can be logged on a single readable line.</summary>

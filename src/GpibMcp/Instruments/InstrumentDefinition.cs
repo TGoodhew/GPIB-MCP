@@ -22,6 +22,15 @@ namespace GpibMcp.Instruments
         public List<string> Aliases { get; set; }
 
         [JsonProperty("termination")] public TerminationSpec Termination { get; set; }
+
+        /// <summary>
+        /// Optional default bounded read length (bytes) for this model. Set it for a free-running
+        /// instrument that streams output continuously and never asserts a normal end-of-response,
+        /// so identity/queries read at most this many bytes and return promptly instead of blocking
+        /// to the timeout. Null/0 means an ordinary terminator/EOI-bounded read (issue #35).
+        /// </summary>
+        [JsonProperty("maxReadBytes")] public int? MaxReadBytes { get; set; }
+
         [JsonProperty("identity")] public IdentitySpec Identity { get; set; }
         [JsonProperty("capture")] public CaptureProfile Capture { get; set; }
 
@@ -55,6 +64,14 @@ namespace GpibMcp.Instruments
     {
         [JsonProperty("write")] public string Write { get; set; }
         [JsonProperty("read")] public string Read { get; set; }
+
+        /// <summary>
+        /// The single read-termination character VISA should stop a read on, derived from
+        /// <see cref="Read"/> (its last character - e.g. the LF of a "\r\n" sequence). Returns null
+        /// when no read terminator is configured, in which case VISA's default termination (EOI) is used.
+        /// </summary>
+        public char? ReadTerminatorChar() =>
+            string.IsNullOrEmpty(Read) ? (char?)null : Read[Read.Length - 1];
     }
 
     /// <summary>How to ask an instrument what it is, and how to recognise the answer.</summary>

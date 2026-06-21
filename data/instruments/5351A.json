@@ -1,15 +1,22 @@
 {
-  "model": "5350A",
+  "model": "5351A",
   "manufacturer": "HP",
   "category": "Frequency Counter",
-  "description": "HP 5350A Microwave Frequency Counter (500 MHz to 20 GHz on INPUT 1, plus a low-frequency INPUT 2). Legacy HP-IB (IEEE-488) instrument, NOT SCPI. The same manual covers the 5351A (to 26.5 GHz) and 5352A (to 40 GHz). Commands are word-based ASCII headers (full English words up to 8 characters, abbreviated where longer), optionally followed by one or two data fields. Queries end in a question mark. Commands accept upper or lower case (all converted to upper case) and parity bits are ignored. A data separator (preferred <comma>, or a <space>) is REQUIRED between a header and its data and between data fields; a command separator (semicolon) is REQUIRED between commands; the END (EOI) separator is sent only with the last byte. Spaces are allowed between headers and data but NOT within a header or within a number. Numeric data may be integer (nr1), real (nr2) or floating point (nr3); integer-only commands round non-integer data. All frequencies are entered in Hertz. Frequency measurements are returned in 24-character scientific notation (e.g. ' 1.9412530789E+10' + CR LF) when the counter is addressed to talk; overflow / unacquired signal returns 1E+38.",
+  "description": "HP 5351A Microwave Frequency Counter (500 MHz to 26.5 GHz on INPUT 1, plus a low-frequency INPUT 2 covering 10 Hz to 525 MHz). Legacy HP-IB (IEEE-488) instrument, NOT SCPI. The same operating/programming manual covers the 5350A (to 20 GHz) and 5352A (to 40 GHz); the command set is identical across all three - only the INPUT 1 frequency range and front-panel input connector differ. Commands are word-based ASCII headers (full English words up to 8 characters, abbreviated where longer), optionally followed by one or two data fields. Queries end in a question mark. Commands accept upper or lower case (all converted to upper case) and parity bits are ignored. A data separator (preferred <comma>, or a <space>) is REQUIRED between a header and its data and between data fields; a command separator (semicolon) is REQUIRED between commands; the END (EOI) separator is sent only with the last byte. Spaces are allowed between headers and data but NOT within a header or within a number. Numeric data may be integer (nr1), real (nr2) or floating point (nr3); integer-only commands round non-integer data. All frequencies are entered in Hertz. Frequency measurements are returned in 24-character scientific notation (e.g. ' 2.4500000000E+10' + CR LF) when the counter is addressed to talk; overflow / unacquired signal returns 1E+38.",
   "source": "5350A-51A-32A-OM.pdf",
-  "aliases": ["5350A", "5352A", "HP5350A"],
-  "termination": { "write": "\n", "read": "\n" },
+  "aliases": [
+    "5351A",
+    "HP5351A",
+    "Agilent 5351A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
   "identity": {
-    "query": "ID?",
-    "response": "Returns a 7-character string with the model number in the form '53xxa', where 'xx' is the numeric portion and 'a' the alpha portion of the model (e.g. '5350a' for the HP 5350A).",
-    "example": "5350a"
+    "command": "ID?",
+    "matchRegex": "5351",
+    "description": "Send Identity (ID?). Returns a 7-character string with the model number in the form '53xxa'; for this instrument '5351a'. Matched case-insensitively on '5351'."
   },
   "commands": [
     {
@@ -18,7 +25,10 @@
       "category": "System",
       "description": "Instrument Reset. Same function as the RESET/LOCAL key in local: the current measurement is aborted, errors are cleared, input and output buffers are cleared, any partially entered key sequence or HP-IB command is aborted, and the diagnostics mode (if active) is exited. Because it clears the input buffer it should be sent by itself or as the last command in a string.",
       "set": "RESET",
-      "examples": ["OUTPUT 714;\"RESET\"", "OUTPUT 714;\"OFFSET,ON;AUTO;RESET\""]
+      "examples": [
+        "OUTPUT 714;\"RESET\"",
+        "OUTPUT 714;\"OFFSET,ON;AUTO;RESET\""
+      ]
     },
     {
       "name": "clear",
@@ -26,7 +36,9 @@
       "category": "System",
       "description": "Instrument Clear. Same effect as the HP-IB Device Clear message: the current measurement is aborted, errors are cleared, input and output buffers are cleared, and any partially entered key sequence or HP-IB command is aborted.",
       "set": "CLR",
-      "examples": ["OUTPUT 714;\"CLR\""]
+      "examples": [
+        "OUTPUT 714;\"CLR\""
+      ]
     },
     {
       "name": "initialize",
@@ -34,7 +46,9 @@
       "category": "System",
       "description": "Instrument Initialization. Sets the instrument to the same state as plug-in power-up, except the HP-IB interface is unaffected. Errors and input/output buffers are cleared, DUMP mode is turned off, SLEEP mode is turned off, and keyboard/display lockouts (Diag 98, 99) if active are cleared. INIT is the only command (besides DUMP OFF) that should be sent while DUMP mode is enabled.",
       "set": "INIT",
-      "examples": ["OUTPUT 714;\"INIT\""]
+      "examples": [
+        "OUTPUT 714;\"INIT\""
+      ]
     },
     {
       "name": "auto",
@@ -42,7 +56,9 @@
       "category": "Measurement",
       "description": "Automatic Measurement Mode. Same effect as the AUTO key: selects INPUT 1, Automatic mode. The current measurement cycle is aborted.",
       "set": "AUTO",
-      "examples": ["OUTPUT 714;\"AUTO\""]
+      "examples": [
+        "OUTPUT 714;\"AUTO\""
+      ]
     },
     {
       "name": "manual",
@@ -51,9 +67,18 @@
       "description": "Manual Measurement Mode. Same effect as the MANUAL key: selects INPUT 1, Manual mode. An optional Manual Center Frequency parameter may be specified in Hertz. If no frequency is passed, or if 'LASTF' is passed, the last measurement is used as the Manual Center Frequency. The current measurement cycle is aborted.",
       "set": "MANUAL[,<freq>]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "INPUT 1 range (500 MHz to 20 GHz); or LASTF for last measurement" }
+        {
+          "name": "frequency",
+          "units": [
+            "Hz"
+          ],
+          "range": "INPUT 1 range (500 MHz to 20 GHz); or LASTF for last measurement"
+        }
       ],
-      "examples": ["OUTPUT 714;\"MANUAL,5E08\"", "OUTPUT 714;\"MANUAL,LASTF\""]
+      "examples": [
+        "OUTPUT 714;\"MANUAL,5E08\"",
+        "OUTPUT 714;\"MANUAL,LASTF\""
+      ]
     },
     {
       "name": "lowz",
@@ -61,7 +86,9 @@
       "category": "Measurement",
       "description": "Input 2, 50 ohm Measurement Mode. Same effect as the 50 OHM key: selects INPUT 2 with 50 ohm input impedance. The current measurement cycle is aborted.",
       "set": "LOWZ",
-      "examples": ["OUTPUT 714;\"LOWZ\""]
+      "examples": [
+        "OUTPUT 714;\"LOWZ\""
+      ]
     },
     {
       "name": "highz",
@@ -69,7 +96,9 @@
       "category": "Measurement",
       "description": "Input 2, 1 Mohm Measurement Mode. Same effect as the 1M OHM key: selects INPUT 2 with 1 Mohm input impedance. The current measurement cycle is aborted.",
       "set": "HIGHZ",
-      "examples": ["OUTPUT 714;\"HIGHZ\""]
+      "examples": [
+        "OUTPUT 714;\"HIGHZ\""
+      ]
     },
     {
       "name": "trigger",
@@ -77,7 +106,10 @@
       "category": "Trigger",
       "description": "Trigger. Same effect as the TRIGGER key: starts a new measurement when the sample rate is set to HOLD. If not in HOLD, the current measurement is aborted. 'TRG' is an equivalent alias header. A bus Group Execute Trigger (GET) has the same effect.",
       "set": "TRIGGER",
-      "examples": ["OUTPUT 714;\"TRIGGER\"", "OUTPUT 714;\"TRG\""]
+      "examples": [
+        "OUTPUT 714;\"TRIGGER\"",
+        "OUTPUT 714;\"TRG\""
+      ]
     },
     {
       "name": "trg",
@@ -85,7 +117,9 @@
       "category": "Trigger",
       "description": "Trigger (alias). Identical to the TRIGGER command: starts a new measurement when the sample rate is set to HOLD.",
       "set": "TRG",
-      "examples": ["OUTPUT 714;\"TRG\""]
+      "examples": [
+        "OUTPUT 714;\"TRG\""
+      ]
     },
     {
       "name": "resolution",
@@ -94,9 +128,15 @@
       "description": "Resolution. Sets measurement resolution from 1 Hz through 1 MHz in decade steps, by sending an integer with the RESOL header (non-integer data is rounded). Codes: 0=1 Hz, 1=10 Hz, 2=100 Hz, 3=1 kHz, 4=10 kHz, 5=100 kHz, 6=1 MHz.",
       "set": "RESOL,<num>",
       "parameters": [
-        { "name": "resolution_code", "range": "0=1 Hz, 1=10 Hz, 2=100 Hz, 3=1 kHz, 4=10 kHz, 5=100 kHz, 6=1 MHz" }
+        {
+          "name": "resolution_code",
+          "range": "0=1 Hz, 1=10 Hz, 2=100 Hz, 3=1 kHz, 4=10 kHz, 5=100 kHz, 6=1 MHz"
+        }
       ],
-      "examples": ["OUTPUT 714;\"RESOL,1\"", "OUTPUT 714;\"RESOL,4\""]
+      "examples": [
+        "OUTPUT 714;\"RESOL,1\"",
+        "OUTPUT 714;\"RESOL,4\""
+      ]
     },
     {
       "name": "sample_rate",
@@ -105,9 +145,15 @@
       "description": "Sample Rate. Chooses one of two sample rates. 'FAST' repeats measurements as quickly as possible. 'HOLD' makes the counter wait, starting a new measurement only after a TRIGGER/TRG command or a bus Group Execute Trigger (GET). HOLD is the slowest possible rate and lights the HOLD annunciator.",
       "set": "SAMPLE,<FAST|HOLD>",
       "parameters": [
-        { "name": "rate", "range": "FAST, HOLD" }
+        {
+          "name": "rate",
+          "range": "FAST, HOLD"
+        }
       ],
-      "examples": ["OUTPUT 714;\"SAMPLE,FAST\"", "OUTPUT 714;\"SAMPLE,HOLD\""]
+      "examples": [
+        "OUTPUT 714;\"SAMPLE,FAST\"",
+        "OUTPUT 714;\"SAMPLE,HOLD\""
+      ]
     },
     {
       "name": "fm_rate_tolerance",
@@ -116,9 +162,15 @@
       "description": "FM Rate Tolerance. Sets the FM Rate Tolerance to 'NORMAL' (normal FM rate) or 'LOW' (low FM rate). Applies in AUTO mode (FM NORM / FM LOW annunciators).",
       "set": "FMRATE,<NORMAL|LOW>",
       "parameters": [
-        { "name": "rate", "range": "NORMAL, LOW" }
+        {
+          "name": "rate",
+          "range": "NORMAL, LOW"
+        }
       ],
-      "examples": ["OUTPUT 714;\"FMRATE,NORMAL\"", "OUTPUT 714;\"FMRATE,LOW\""]
+      "examples": [
+        "OUTPUT 714;\"FMRATE,NORMAL\"",
+        "OUTPUT 714;\"FMRATE,LOW\""
+      ]
     },
     {
       "name": "offset",
@@ -127,10 +179,22 @@
       "description": "Offset. Turns the Offset math function on or off and sets the offset frequency, which is added to the measured frequency. Setting an offset frequency without specifying ON or OFF turns Offset ON automatically. The frequency may be positive or negative (Hertz). If 'LASTF' is passed, the last measured frequency, negated, is entered as the offset value.",
       "set": "OFFSET[,<ON|OFF>][,<freq|LASTF>]",
       "parameters": [
-        { "name": "state", "range": "ON, OFF" },
-        { "name": "offset_frequency", "units": ["Hz"], "range": "positive or negative; or LASTF" }
+        {
+          "name": "state",
+          "range": "ON, OFF"
+        },
+        {
+          "name": "offset_frequency",
+          "units": [
+            "Hz"
+          ],
+          "range": "positive or negative; or LASTF"
+        }
       ],
-      "examples": ["OUTPUT 714;\"OFFSET,LASTF,ON\"", "OUTPUT 714;\"OFFSET,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"OFFSET,LASTF,ON\"",
+        "OUTPUT 714;\"OFFSET,OFF\""
+      ]
     },
     {
       "name": "scale",
@@ -139,10 +203,18 @@
       "description": "Scale. Turns the Scale math function on or off and/or sets the scale value, by which the measured frequency is multiplied. Setting the Scale value without specifying ON or OFF automatically turns Scale ON.",
       "set": "SCALE[,<ON|OFF>][,<num>]",
       "parameters": [
-        { "name": "state", "range": "ON, OFF" },
-        { "name": "scale_factor" }
+        {
+          "name": "state",
+          "range": "ON, OFF"
+        },
+        {
+          "name": "scale_factor"
+        }
       ],
-      "examples": ["OUTPUT 714;\"SCALE,2\"", "OUTPUT 714;\"SCALE,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"SCALE,2\"",
+        "OUTPUT 714;\"SCALE,OFF\""
+      ]
     },
     {
       "name": "smooth",
@@ -151,9 +223,15 @@
       "description": "Smooth. Turns the Smooth (averaging) math function on or off; the Smooth algorithm and measurement cycle are restarted. When enabled, unstable digits are masked in the display.",
       "set": "SMOOTH,<ON|OFF>",
       "parameters": [
-        { "name": "state", "range": "ON, OFF" }
+        {
+          "name": "state",
+          "range": "ON, OFF"
+        }
       ],
-      "examples": ["OUTPUT 714;\"SMOOTH,ON\"", "OUTPUT 714;\"SMOOTH,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"SMOOTH,ON\"",
+        "OUTPUT 714;\"SMOOTH,OFF\""
+      ]
     },
     {
       "name": "high_resolution",
@@ -162,9 +240,15 @@
       "description": "High Resolution. Same effect as the HIGH RESOL key: turns the High Resolution function on or off (effective in the 1 Mohm INPUT 2 mode).",
       "set": "HIRESOL,<ON|OFF>",
       "parameters": [
-        { "name": "state", "range": "ON, OFF" }
+        {
+          "name": "state",
+          "range": "ON, OFF"
+        }
       ],
-      "examples": ["OUTPUT 714;\"HIRESOL,ON\"", "OUTPUT 714;\"HIRESOL,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"HIRESOL,ON\"",
+        "OUTPUT 714;\"HIRESOL,OFF\""
+      ]
     },
     {
       "name": "diagnostic",
@@ -173,9 +257,15 @@
       "description": "Diagnostic. Sets up a diagnostic over HP-IB. All diagnostics except Diag 1, 41, 42, 43, 44, and 80 are available over the bus; some return data over the bus (read with DIAG?), others require an oscilloscope or additional equipment. 'DIAG,OFF' exits diagnostics except Diag 97 (exit by power-down only) and Diag 98/99 (exit by power-down or INIT). Diagnostic failures are NOT treated as errors (the Error bit is not set).",
       "set": "DIAG,<num|OFF>",
       "parameters": [
-        { "name": "diagnostic_number", "range": "diagnostic number, or OFF" }
+        {
+          "name": "diagnostic_number",
+          "range": "diagnostic number, or OFF"
+        }
       ],
-      "examples": ["OUTPUT 714;\"DIAG,10\"", "OUTPUT 714;\"DIAG,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"DIAG,10\"",
+        "OUTPUT 714;\"DIAG,OFF\""
+      ]
     },
     {
       "name": "diagnostic_parameter",
@@ -184,9 +274,14 @@
       "description": "Diagnostic Parameter. Supplies a parameter required by Diag 51 (Synthesizer Verification - User-Entered Frequency), sent immediately after the enabling DIAG program message. As many DIAGPARM messages as necessary may be entered.",
       "set": "DIAGPARM,<num>",
       "parameters": [
-        { "name": "parameter" }
+        {
+          "name": "parameter"
+        }
       ],
-      "examples": ["OUTPUT 714;\"DIAG,51\"", "OUTPUT 714;\"DIAGPARM,1E10\""]
+      "examples": [
+        "OUTPUT 714;\"DIAG,51\"",
+        "OUTPUT 714;\"DIAGPARM,1E10\""
+      ]
     },
     {
       "name": "display",
@@ -195,9 +290,15 @@
       "description": "Remote Display. Displays an arbitrary string of up to 24 uppercase letters, numbers, or punctuation on the front panel LCD (string data, delimited by quotes). Embedded spaces, commas, and semicolons are allowed; periods combine with the character to their left and are not counted in the 24-character limit (up to 48 chars accepted, first 24 displayed). Sending a null (empty) string, or INIT, turns the message off; sending a single blank ' ' blanks the display. While active it supersedes all other display content (display concealment, equivalent to Diag 99).",
       "set": "DISPLAY,'<string>'",
       "parameters": [
-        { "name": "string", "range": "up to 24 displayed characters; empty string clears" }
+        {
+          "name": "string",
+          "range": "up to 24 displayed characters; empty string clears"
+        }
       ],
-      "examples": ["OUTPUT 714;\"DISPLAY,'REMOTE MESSAGE'\"", "OUTPUT 714;\"DISPLAY,''\""]
+      "examples": [
+        "OUTPUT 714;\"DISPLAY,'REMOTE MESSAGE'\"",
+        "OUTPUT 714;\"DISPLAY,''\""
+      ]
     },
     {
       "name": "srq_mask",
@@ -206,9 +307,15 @@
       "description": "Service Request Mask. Sets the Service Request mask so an SRQ is generated when an enabled Status Byte condition changes from 0 to 1. The decimal value is the binary sum of enabled bits: 1=Data Ready, 2=Measurement Complete, 4=Error, 8=Overload, 16=Local (bits 32/64/128 are don't-care). Any value 0 to 255; 0 disables all SRQ conditions.",
       "set": "SRQMASK,<num>",
       "parameters": [
-        { "name": "mask", "range": "0 to 255: bit1=Data Ready, bit2=Meas Complete, bit4=Error, bit8=Overload, bit16=Local" }
+        {
+          "name": "mask",
+          "range": "0 to 255: bit1=Data Ready, bit2=Meas Complete, bit4=Error, bit8=Overload, bit16=Local"
+        }
       ],
-      "examples": ["OUTPUT 714;\"SRQMASK,2\"", "OUTPUT 714;\"SRQMASK,13\""]
+      "examples": [
+        "OUTPUT 714;\"SRQMASK,2\"",
+        "OUTPUT 714;\"SRQMASK,13\""
+      ]
     },
     {
       "name": "dump",
@@ -217,9 +324,15 @@
       "description": "Dump Mode. Enables a fast reading mode delivering at least 80 measurements per second at 10 kHz resolution. Returned frequency is a 7-character ASCII string of the form 'GGMMMkk' (with EOI on the last byte); multiply the value by 10 kHz to get Hertz. While DUMP is ON the display shows 'DUMPING---', annunciators and serial-poll status are not updated. Before enabling DUMP the counter MUST be set to MANUAL,<freq> / RESOL,4 / OFFSET,OFF / SCALE,OFF / SMOOTH,OFF / SAMPLE,FAST. When ON, only 'DUMP,OFF' or 'INIT' should be sent.",
       "set": "DUMP,<ON|OFF>",
       "parameters": [
-        { "name": "state", "range": "ON, OFF" }
+        {
+          "name": "state",
+          "range": "ON, OFF"
+        }
       ],
-      "examples": ["OUTPUT 714;\"DUMP,ON\"", "OUTPUT 714;\"DUMP,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"DUMP,ON\"",
+        "OUTPUT 714;\"DUMP,OFF\""
+      ]
     },
     {
       "name": "set",
@@ -228,9 +341,14 @@
       "description": "Instrument Setup (restore). Sets up the instrument from a setup data string previously obtained with the SET? query (a 68-byte hexadecimal-character string representing a 34-byte RAM block). Used with SET? to save and restore configurations; measurement results are not saved.",
       "set": "SET,<setup-string>",
       "parameters": [
-        { "name": "setup_string", "range": "68 hexadecimal ASCII characters from SET?" }
+        {
+          "name": "setup_string",
+          "range": "68 hexadecimal ASCII characters from SET?"
+        }
       ],
-      "examples": ["OUTPUT 714;\"SET,\"&Setup$"]
+      "examples": [
+        "OUTPUT 714;\"SET,\"&Setup$"
+      ]
     },
     {
       "name": "sleep",
@@ -239,9 +357,15 @@
       "description": "Disable INPUT 1 Circuit. Turns off the A12 Microwave Assembly to minimize the effect of an input connected to the counter when INPUT 1 is temporarily not in use; INPUT 1 measurements cannot be made while SLEEP is on. Passing the 'OFF' parameter turns the A12 Assembly back on.",
       "set": "SLEEP,<ON|OFF>",
       "parameters": [
-        { "name": "state", "range": "ON, OFF" }
+        {
+          "name": "state",
+          "range": "ON, OFF"
+        }
       ],
-      "examples": ["OUTPUT 714;\"SLEEP,ON\"", "OUTPUT 714;\"SLEEP,OFF\""]
+      "examples": [
+        "OUTPUT 714;\"SLEEP,ON\"",
+        "OUTPUT 714;\"SLEEP,OFF\""
+      ]
     },
     {
       "name": "harmonic_determination",
@@ -250,9 +374,15 @@
       "description": "Harmonic Number Determination. Selects how often the harmonic number (N) determination occurs during measurements: N determination takes place after the chosen number of measurements. By default in remote it is every 10 measurements (every measurement in local). Returning to local loses the HARMDET setting.",
       "set": "HARMDET,<num>",
       "parameters": [
-        { "name": "measurements", "range": "number of measurements between harmonic determinations" }
+        {
+          "name": "measurements",
+          "range": "number of measurements between harmonic determinations"
+        }
       ],
-      "examples": ["OUTPUT 714;\"HARMDET,1\"", "OUTPUT 714;\"HARMDET,10\""]
+      "examples": [
+        "OUTPUT 714;\"HARMDET,1\"",
+        "OUTPUT 714;\"HARMDET,10\""
+      ]
     },
     {
       "name": "test_query",
@@ -260,7 +390,9 @@
       "category": "Diagnostics",
       "description": "Send Self Check Results. Performs a self check (similar to the SELF CHECK key) and returns the pass/fail result as 24 ASCII characters, formatted like the front-panel Self Check display but with no decimal points. If one or more failures occur, only the first failure is caught and the counter then exits Self Check.",
       "query": "TEST?",
-      "examples": ["OUTPUT 714;\"TEST?\""]
+      "examples": [
+        "OUTPUT 714;\"TEST?\""
+      ]
     },
     {
       "name": "diag_query",
@@ -268,7 +400,9 @@
       "category": "Diagnostics",
       "description": "Send Diagnostic Results. Returns the current diagnostic result as 24 ASCII characters (no decimal points), in a 'wait until addressed' mode. A DIAG? query must be sent for each result desired; some diagnostic displays contain embedded measurements.",
       "query": "DIAG?",
-      "examples": ["OUTPUT 714;\"DIAG,10\";\"DIAG?\""]
+      "examples": [
+        "OUTPUT 714;\"DIAG,10\";\"DIAG?\""
+      ]
     },
     {
       "name": "key_query",
@@ -276,15 +410,19 @@
       "category": "System",
       "description": "Send Number of Last Key Pressed. Returns, in numeric output format, a code for the last key pressed: 0=No Key, 1=RESET/LOCAL, 2=OFFSET/LST FRQ, 3=SMOOTH/DEC-, 4=SCALE/INC-, 5=SET/ENTER, 9=SAMPLE RATE/0, 10=RESOLUTION/7, 11=DIAGNOSTICS/1, 12=HP-IB ADDRESS/4, 13=TRIGGER/., 14=SELF CHECK/8, 15=FM RATE TOL/2, 16=HIGH RESOL/5, 17=MANUAL/+-, 18=50 OHM/9, 19=AUTO/3, 20=1M OHM/6.",
       "query": "KEY?",
-      "examples": ["OUTPUT 714;\"KEY?\""]
+      "examples": [
+        "OUTPUT 714;\"KEY?\""
+      ]
     },
     {
       "name": "id_query",
       "mnemonic": "ID?",
       "category": "System",
-      "description": "Send Identity. Returns a 7-character string containing the model number in the form '53xxa', where 'xx' is the numeric portion and 'a' the alpha portion of the instrument model number (e.g. '5350a').",
+      "description": "Send Identity. Returns a 7-character string containing the model number in the form '53xxa', where 'xx' is the numeric portion and 'a' the alpha portion of the instrument model number (e.g. '5351a' for the HP 5351A).",
       "query": "ID?",
-      "examples": ["OUTPUT 714;\"ID?\""]
+      "examples": [
+        "OUTPUT 714;\"ID?\""
+      ]
     },
     {
       "name": "set_query",
@@ -292,7 +430,9 @@
       "category": "System",
       "description": "Send Instrument Setup. Returns an ASCII-encoded 'binary' string specifying the current instrument setup: a 34-byte block from the A4 microprocessor RAM converted to a 68-byte string of hexadecimal characters (not enclosed in quotes). Sending the string back with the SET command completely restores the setup; measurement results are not saved.",
       "query": "SET?",
-      "examples": ["OUTPUT 714;\"SET?\""]
+      "examples": [
+        "OUTPUT 714;\"SET?\""
+      ]
     },
     {
       "name": "err_query",
@@ -300,7 +440,9 @@
       "category": "Status",
       "description": "Send Error Number. Returns the current error number in numeric output format; 0 if there is no error. Error numbers: 1=HP-IB interface not installed, 2=Internal HP-IB interface error, 3=Input number out of range, 4=HP-IB command syntax error. The instrument remains in the error state after the query.",
       "query": "ERR?",
-      "examples": ["OUTPUT 714;\"ERR?\""]
+      "examples": [
+        "OUTPUT 714;\"ERR?\""
+      ]
     },
     {
       "name": "rev_query",
@@ -308,7 +450,9 @@
       "category": "System",
       "description": "Send Firmware Revision Datecode. Returns a date code for the last firmware revision as a 4-digit ASCII string.",
       "query": "REV?",
-      "examples": ["OUTPUT 714;\"REV?\""]
+      "examples": [
+        "OUTPUT 714;\"REV?\""
+      ]
     },
     {
       "name": "ser_query",
@@ -316,7 +460,9 @@
       "category": "System",
       "description": "Send Serial Number. Intended for ATE compatibility; the counter cannot return its actual serial number and instead returns a correctly formatted value 'ddddA00000' + CR LF, where 'dddd' is the firmware revision date, 'A' is the country of origin (A = USA), and the number is zero.",
       "query": "SER?",
-      "examples": ["OUTPUT 714;\"SER?\""]
+      "examples": [
+        "OUTPUT 714;\"SER?\""
+      ]
     },
     {
       "name": "ref_query",
@@ -324,7 +470,9 @@
       "category": "System",
       "description": "Send Timebase Reference Status. Returns the reference status: 'EXT' if an external reference is connected, or 'INT' if the counter is using its internal 10 MHz reference. Useful as a check that the instrument is properly connected.",
       "query": "REF?",
-      "examples": ["OUTPUT 714;\"REF?\""]
+      "examples": [
+        "OUTPUT 714;\"REF?\""
+      ]
     },
     {
       "name": "oven_query",
@@ -332,7 +480,9 @@
       "category": "System",
       "description": "Send Oven Status. Returns the oven oscillator status: 'WARM' if ready (also always 'WARM' if neither Option 001 nor Option 010 oven oscillator is installed) or 'COLD' if the oven has not yet reached operating temperature.",
       "query": "OVEN?",
-      "examples": ["OUTPUT 714;\"OVEN?\""]
+      "examples": [
+        "OUTPUT 714;\"OVEN?\""
+      ]
     }
   ]
 }
