@@ -97,5 +97,11 @@ namespace GpibMcp.Instruments
         /// command, answers the handshake, and returns the raw HP-GL. Leaves the bus usable.
         /// </summary>
         CaptureResult CaptureScreen(string resource, string preRoll, string plotCommand, CaptureOptions options);
+
+        /// <summary>
+        /// Captures HP-GL by looping a record-output query (e.g. <c>OUTPPLOT</c> on the 8720/8753 VNAs),
+        /// reading each record to EOI and assembling them until an empty record signals the end (#55).
+        /// </summary>
+        CaptureResult CaptureRecordStream(string resource, string preRoll, string command, CaptureOptions options);
     }
 }

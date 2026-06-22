@@ -88,7 +88,36 @@ namespace GpibMcp.Tests
             Assert.Equal(CaptureCompletion.PenUp, result.Completion);
         }
 
+        [Fact]
+        public void CaptureRecordStream_AssemblesRecords_AndStopsOnEmpty()
+        {
+            // OUTPPLOT-style: each read returns one HP-GL record; an empty read marks the end (#55).
+            var t = new RecordStreamTransport(";;;;DF;IM;", "SP1;PU100,200;", "PD300,400;SP0;");
+            var mgr = new InstrumentManager(t);
+
+            var result = mgr.CaptureRecordStream("GPIB0::16::INSTR", null, "OUTPPLOT",
+                new CaptureOptions { OverallTimeoutMs = 5000 });
+
+            Assert.Equal(";;;;DF;IM;SP1;PU100,200;PD300,400;SP0;", result.Hpgl); // all records, in order
+            Assert.Equal(CaptureCompletion.Inactivity, result.Completion);       // stopped on the empty record
+            Assert.Equal(4, t.WriteCount);                                        // one OUTPPLOT per record + one that returns empty
+        }
+
         private sealed class NonNativeTransport : FakeTransportBase { }
+
+        /// <summary>Returns queued HP-GL records, one per read, then empty (the OUTPPLOT loop end).</summary>
+        private sealed class RecordStreamTransport : FakeTransportBase
+        {
+            private readonly System.Collections.Generic.Queue<string> _records;
+            public int WriteCount;
+            public RecordStreamTransport(params string[] records) =>
+                _records = new System.Collections.Generic.Queue<string>(records);
+            public override void Write(string resource, byte[] payload, int timeoutMs) => WriteCount++;
+            public override TransportReadResult Read(string resource, TransportReadRequest request) =>
+                _records.Count == 0
+                    ? new TransportReadResult(System.Array.Empty<byte>(), true)
+                    : new TransportReadResult(System.Text.Encoding.ASCII.GetBytes(_records.Dequeue()), false);
+        }
 
         /// <summary>A transport that returns a small pen-up plot once, then times out (idle).</summary>
         private sealed class PlotTransport : FakeTransportBase
@@ -111,7 +140,7 @@ namespace GpibMcp.Tests
             public void Open(string resource, int timeoutMs) { }
             public bool Close(string resource) => true;
             public System.Collections.Generic.IList<string> ListOpen() => new System.Collections.Generic.List<string>();
-            public void Write(string resource, byte[] payload, int timeoutMs) { }
+            public virtual void Write(string resource, byte[] payload, int timeoutMs) { }
             public virtual TransportReadResult Read(string resource, TransportReadRequest request) =>
                 new TransportReadResult(System.Array.Empty<byte>(), true);
             public int SerialPoll(string resource) => 0;
