@@ -13,11 +13,14 @@ namespace GpibMcp.Instruments
 
     /// <summary>
     /// Abstraction over the instrument I/O layer consumed by the MCP tools.
-    /// <see cref="VisaInstrumentManager"/> implements it for real hardware; tests can
+    /// <see cref="InstrumentManager"/> implements it for real hardware (over an <see cref="IGpibTransport"/>); tests can
     /// substitute a fake so tool behaviour is verifiable without instruments attached.
     /// </summary>
     public interface IInstrumentManager
     {
+        /// <summary>What the active GPIB backend supports (discovery, serial poll, SRQ, native addressing, ...).</summary>
+        TransportCapabilities Capabilities { get; }
+
         /// <summary>Discovers connected VISA resources matching <paramref name="filter"/>.</summary>
         IList<string> ListResources(string filter);
 
@@ -68,6 +71,13 @@ namespace GpibMcp.Instruments
 
         /// <summary>Serial-polls the instrument and returns its status byte (0-255).</summary>
         int SerialPoll(string resource);
+
+        /// <summary>
+        /// Native query by board/primary/secondary (NI-488.2 style), for backends whose
+        /// <see cref="Capabilities"/> report <see cref="TransportCapabilities.NativeAddressing"/>.
+        /// Throws if the active backend does not support it.
+        /// </summary>
+        string NativeQuery(int board, byte primaryAddress, byte secondaryAddress, string command);
 
         /// <summary>
         /// Blocks until the instrument asserts SRQ or <paramref name="timeoutMs"/> elapses (the backstop).

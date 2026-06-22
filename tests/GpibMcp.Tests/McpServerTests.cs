@@ -159,8 +159,9 @@ namespace GpibMcp.Tests
             {
                 new CommandHistoryEntry("GPIB0::18::INSTR", CommandDirection.Sent, "MKPK HI?\n", DateTime.UtcNow)
             };
+            var inner = new NativeVisaException(unchecked((int)0xBFFF0015));
             fake.QueryError = GpibOperationException.For(GpibOperation.Query, "GPIB0::18::INSTR", "MKPK HI?",
-                new NativeVisaException(unchecked((int)0xBFFF0015)), chain);
+                inner, chain, VisaErrorInfo.Describe(inner));
 
             var request = "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\"," +
                           "\"params\":{\"name\":\"visa_query\",\"arguments\":" +

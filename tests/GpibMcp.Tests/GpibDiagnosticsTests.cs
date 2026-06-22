@@ -105,8 +105,9 @@ namespace GpibMcp.Tests
         [Fact]
         public void Exception_Summary_NamesResourceCommandAndDecodedStatus()
         {
+            var inner = new NativeVisaException(unchecked((int)0xBFFF0015));
             var ex = GpibOperationException.For(GpibOperation.Query, "GPIB0::18::INSTR", "MKPK HI?",
-                new NativeVisaException(unchecked((int)0xBFFF0015)), SampleHistory());
+                inner, SampleHistory(), VisaErrorInfo.Describe(inner));
 
             Assert.Equal("VI_ERROR_TMO", ex.VisaStatusName);
             Assert.Contains("GPIB0::18::INSTR", ex.Message);
@@ -152,8 +153,9 @@ namespace GpibMcp.Tests
         [Fact]
         public void Exception_VerboseDetail_HasDecodedNameRawCodeInnerTextAndChain()
         {
+            var inner = new NativeVisaException(unchecked((int)0xBFFF0015), "raw driver text");
             var ex = GpibOperationException.For(GpibOperation.Query, "GPIB0::18::INSTR", "MKPK HI?",
-                new NativeVisaException(unchecked((int)0xBFFF0015), "raw driver text"), SampleHistory());
+                inner, SampleHistory(), VisaErrorInfo.Describe(inner));
 
             Assert.Equal(unchecked((int)0xBFFF0015), ex.VisaStatusCode);
 

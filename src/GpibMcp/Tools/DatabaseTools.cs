@@ -19,7 +19,7 @@ namespace GpibMcp.Tools
     /// </summary>
     public static class DatabaseTools
     {
-        private const int VisaTimeoutMs = VisaInstrumentManager.DefaultTimeoutMs;
+        private const int VisaTimeoutMs = InstrumentManager.DefaultTimeoutMs;
 
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
