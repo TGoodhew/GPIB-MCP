@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -83,6 +84,42 @@ namespace Hpgl.Rendering.Tests
                 Assert.NotNull(svg);
                 int width = int.Parse(Regex.Match(svg, "width=\"(\\d+)\"").Groups[1].Value);
                 Assert.True(width < 1600, "a 1600px source should be downscaled; thumbnail width = " + width);
+            }
+        }
+
+        /// <summary>A smooth RGB gradient with thousands of distinct colours (forces real quantization).</summary>
+        private static Bitmap MakeGradient(int w, int h)
+        {
+            var bmp = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    bmp.SetPixel(x, y, Color.FromArgb(x * 255 / w, y * 255 / h, (x + y) * 255 / (w + h)));
+            return bmp;
+        }
+
+        [Fact]
+        public void Quantizer_ProducesIndexedPng_WithBoundedPalette_SmallerThanTrueColor()
+        {
+            using (var src = MakeGradient(256, 192)) // ~thousands of colours
+            {
+                byte[] indexed = MedianCutQuantizer.EncodePng(src, 256);
+                byte[] trueColor = Encode(src, ImageFormat.Png);
+
+                Assert.True(indexed.Length > 8 && indexed[0] == 0x89 && indexed[1] == 0x50); // PNG
+                Assert.True(indexed.Length < trueColor.Length,
+                    "indexed PNG (" + indexed.Length + ") should be smaller than true-colour (" + trueColor.Length + ")");
+
+                using (var ms = new MemoryStream(indexed))
+                using (var decoded = new Bitmap(ms))
+                {
+                    Assert.Equal(src.Width, decoded.Width);
+                    Assert.Equal(src.Height, decoded.Height);
+                    var colors = new HashSet<int>();
+                    for (int y = 0; y < decoded.Height; y += 3)
+                        for (int x = 0; x < decoded.Width; x += 3)
+                            colors.Add(decoded.GetPixel(x, y).ToArgb());
+                    Assert.True(colors.Count <= 256, "palette must be <=256 colours; got " + colors.Count);
+                }
             }
         }
 

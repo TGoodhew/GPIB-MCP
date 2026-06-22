@@ -500,8 +500,10 @@ The tool supports **three** capture methods, selected by the model's profile:
   screen *directly as an image*. The server queries the model's `dumpCommand` (e.g. `:DISP:DATA?`),
   strips the IEEE 488.2 `#<n><len>` block header ([`Ieee4882Block`](src/GpibMcp.Core/Instruments/Ieee4882Block.cs)),
   and saves the screenshot. A full-colour screenshot can't be pasted verbatim as an inline artifact, so
-  [`ScreenImage`](src/Hpgl.Rendering/ScreenImage.cs) shows a **downscaled** inline preview while saving
-  the **full-resolution** PNG to disk (the result points the user at the saved file).
+  [`ScreenImage`](src/Hpgl.Rendering/ScreenImage.cs) shows a **downscaled, 256-colour-quantized**
+  ([`MedianCutQuantizer`](src/Hpgl.Rendering/MedianCutQuantizer.cs)) inline preview kept under a safe
+  byte budget, while saving the **full-resolution** 24-bit PNG to disk (the result points the user at
+  the saved file). Bench-verified on a real Rigol DS1104Z (`:DISP:DATA?` → 800×480 BMP).
 
 **Which format (HP-GL boxes)?** Say *"**show** the screen"* → plot. Say *"**capture** the screen"* (or
 leave it ambiguous) and, if the model can print, Claude asks **plot** vs **print** before capturing.

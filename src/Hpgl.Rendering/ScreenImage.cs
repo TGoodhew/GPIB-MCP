@@ -69,7 +69,12 @@ namespace Hpgl.Rendering
         {
             int w = Math.Max(1, targetWidth);
             int h = Math.Max(1, (int)Math.Round(src.Height * (w / (double)src.Width)));
-            byte[] png = ScaleToPng(src, w, h);
+
+            // Quantize the thumbnail to a <=256-colour indexed PNG: a fraction of the 24-bit size, so a
+            // useful preview fits the small paste-verbatim budget. (The saved file stays full colour.)
+            byte[] png;
+            using (var scaled = Scale(src, w, h))
+                png = MedianCutQuantizer.EncodePng(scaled, 256);
             string b64 = Convert.ToBase64String(png);
 
             var sb = new StringBuilder(b64.Length + 200);
@@ -81,22 +86,16 @@ namespace Hpgl.Rendering
             return sb.Length <= maxChars ? sb.ToString() : null;
         }
 
-        private static byte[] ScaleToPng(Bitmap src, int w, int h)
+        private static Bitmap Scale(Bitmap src, int w, int h)
         {
-            using (var dst = new Bitmap(w, h, PixelFormat.Format32bppArgb))
+            var dst = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(dst))
             {
-                using (var g = Graphics.FromImage(dst))
-                {
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    g.PixelOffsetMode = PixelOffsetMode.Half;
-                    g.DrawImage(src, new Rectangle(0, 0, w, h));
-                }
-                using (var ms = new MemoryStream())
-                {
-                    dst.Save(ms, ImageFormat.Png);
-                    return ms.ToArray();
-                }
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.Half;
+                g.DrawImage(src, new Rectangle(0, 0, w, h));
             }
+            return dst;
         }
 
         private static Bitmap Load(byte[] imageBytes)
