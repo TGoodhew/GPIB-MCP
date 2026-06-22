@@ -515,6 +515,10 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 - Only models with a `capture` profile in the database are supported. HP-GL: `{ "method": "hpgl",
   "plotCommand": "...", "printCommand": "...", "preRoll": "...", "postRoll": "..." }` (omit
   `printCommand` for plot-only). SCPI image: `{ "method": "scpi_block", "dumpCommand": ":DISP:DATA?" }`.
+  VNA record-loop (8720/8753): `{ "method": "outpplot", "dumpCommand": "OUTPPLOT", "stretchToFill": true }`
+  — the plot is streamed as many small HP-GL records and assembled. These boxes omit the IP/SC scale
+  header, so their `SR` label text is auto-rescaled to the geometry, and `"stretchToFill": true` renders
+  their near-square graticule to a landscape page (as the hardware/KE5FX show it).
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`
