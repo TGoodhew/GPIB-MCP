@@ -69,6 +69,12 @@ namespace GpibMcp.Mcp
 
         public bool TryGet(string name, out McpTool tool) => _byName.TryGetValue(name ?? "", out tool);
 
+        /// <summary>The registered tools, in registration order (for self-description / overviews).</summary>
+        public IReadOnlyList<McpTool> Tools => _ordered;
+
+        /// <summary>Number of registered tools.</summary>
+        public int Count => _ordered.Count;
+
         public JArray ToListJson()
         {
             var arr = new JArray();

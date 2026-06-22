@@ -266,10 +266,17 @@ writes responses on stdout (one JSON object per line); all diagnostics go to std
 
 ## Usage
 
+The server is **self-describing**: the `initialize` response carries an `instructions` summary the
+client loads up front, and the `gpib_overview` tool returns a detailed, structured rundown on demand.
+So you can simply ask *"What can the GPIB tool do?"* and get an accurate answer (capability areas,
+example asks, and the live tool/model/command counts) rather than a guess assembled from individual
+tool blurbs.
+
 ### Tool reference
 
 | Tool | Required args | Optional args | Purpose |
 |------|---------------|---------------|---------|
+| `gpib_overview` | — | — | Describe what the server can do in detail — capability areas, example asks, and the full tool list. Answers *"what can the GPIB tool do?"* |
 | `visa_list_resources` | — | `filter` | Discover connected VISA resources |
 | `visa_query` | `resource`, `command` | `timeout_ms`, `read_bytes` | Write a command and read the response (e.g. `*IDN?`) |
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |

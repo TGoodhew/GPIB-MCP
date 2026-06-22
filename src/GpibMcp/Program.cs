@@ -36,7 +36,8 @@ namespace GpibMcp
 
                     visa = new InstrumentManager(TransportFactory.Create());
                     ToolRegistry registry = InstrumentTools.BuildRegistry(visa, db, assignments);
-                    var server = new McpServer(registry, stdin, stdout);
+                    string instructions = new ServerOverview(registry, db).Instructions();
+                    var server = new McpServer(registry, stdin, stdout, instructions);
                     server.Run();
                     return 0;
                 }
