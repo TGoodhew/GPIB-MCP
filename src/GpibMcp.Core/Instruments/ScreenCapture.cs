@@ -32,7 +32,18 @@ namespace GpibMcp.Instruments
         /// <summary>No new data for the inactivity interval.</summary>
         Inactivity,
         /// <summary>Overall backstop timeout reached.</summary>
-        Backstop
+        Backstop,
+        /// <summary>PCL end-raster / printer-reset marker seen near the tail - the print dump finished.</summary>
+        EndMarker
+    }
+
+    /// <summary>What wire protocol the capture is reading.</summary>
+    public enum CaptureMode
+    {
+        /// <summary>HP-GL "plot": emulate a 7470A plotter, answering OS/OE queries, complete on pen-up.</summary>
+        PlotterEmulation,
+        /// <summary>PCL "print": read the raster the instrument streams, complete on the PCL end marker / inactivity.</summary>
+        PrinterStream
     }
 
     /// <summary>Result of a screen capture: the raw HP-GL plus metadata.</summary>
@@ -64,6 +75,9 @@ namespace GpibMcp.Instruments
         /// <summary>HP 7470A status sequence: 24 on the first OS, 16 thereafter.</summary>
         public int OsFirst { get; set; } = 24;
         public int OsSubsequent { get; set; } = 16;
+
+        /// <summary>Wire protocol to read: HP-GL plotter emulation (default) or a PCL printer stream.</summary>
+        public CaptureMode Mode { get; set; } = CaptureMode.PlotterEmulation;
 
         /// <summary>Terminator appended to handshake replies.</summary>
         public string ReplyTerminator { get; set; } = "\r\n";
@@ -109,12 +123,20 @@ namespace GpibMcp.Instruments
                 if (!read.TimedOut)
                     continue; // data still flowing - keep reading
 
-                // A pause: the instrument is either waiting for a plotter reply, or it is done.
-                if (TryAnswerQuery(channel, buffer, o, ref osState))
-                    continue;
+                // A pause. In plotter emulation the instrument may be waiting for a plotter reply;
+                // a PCL printer stream never handshakes, so we only answer queries in plot mode.
+                if (o.Mode == CaptureMode.PlotterEmulation)
+                {
+                    if (TryAnswerQuery(channel, buffer, o, ref osState))
+                        continue;
 
-                if (buffer.Length >= o.MinPlotBytes && PenUpInTail(buffer, o.ReadChunkSize))
-                    return Result(buffer, start, nowMs(), CaptureCompletion.PenUp);
+                    if (buffer.Length >= o.MinPlotBytes && PenUpInTail(buffer, o.ReadChunkSize))
+                        return Result(buffer, start, nowMs(), CaptureCompletion.PenUp);
+                }
+                else if (buffer.Length >= o.MinPlotBytes && EndOfPrintInTail(buffer, o.ReadChunkSize))
+                {
+                    return Result(buffer, start, nowMs(), CaptureCompletion.EndMarker);
+                }
 
                 if (buffer.Length >= o.MinPlotBytes && (nowMs() - lastData) >= o.InactivityTimeoutMs)
                     return Result(buffer, start, nowMs(), CaptureCompletion.Inactivity);
@@ -164,6 +186,20 @@ namespace GpibMcp.Instruments
             string tail = buffer.ToString(from, buffer.Length - from);
             return tail.IndexOf("SP;", StringComparison.Ordinal) >= 0
                 || tail.IndexOf("SP0;", StringComparison.Ordinal) >= 0;
+        }
+
+        /// <summary>
+        /// Detects the end of a PCL print dump near the tail: an End Raster Graphics (ESC*rB / ESC*rC)
+        /// or a printer reset (ESC E). Bytes are held as Latin-1 chars, so ESC is char 0x1B.
+        /// </summary>
+        private static bool EndOfPrintInTail(StringBuilder buffer, int window)
+        {
+            const char esc = (char)0x1B;
+            int from = Math.Max(0, buffer.Length - window);
+            string tail = buffer.ToString(from, buffer.Length - from);
+            return tail.IndexOf(esc + "*rB", StringComparison.Ordinal) >= 0
+                || tail.IndexOf(esc + "*rC", StringComparison.Ordinal) >= 0
+                || tail.IndexOf(esc + "E", StringComparison.Ordinal) >= 0;
         }
 
         private static void Append(StringBuilder buffer, byte[] data)

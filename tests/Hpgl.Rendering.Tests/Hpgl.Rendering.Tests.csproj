@@ -37,6 +37,10 @@
     <Content Include="..\..\Test\feature-exercise.plt" Link="fixtures\feature-exercise.plt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- A real HP 8563E PCL "print" dump captured over GPIB (issue #40). -->
+    <Content Include="..\..\Test\test-print.pcl" Link="fixtures\test-print.pcl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

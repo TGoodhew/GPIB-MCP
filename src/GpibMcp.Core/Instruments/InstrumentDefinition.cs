@@ -49,14 +49,25 @@ namespace GpibMcp.Instruments
         /// <summary>Capture method: "hpgl" (plotter emulation). Future: "scpi_block".</summary>
         [JsonProperty("method")] public string Method { get; set; }
 
-        /// <summary>Command that makes the instrument plot, e.g. "PLOT 550,279,9750,7479;".</summary>
+        /// <summary>Command that makes the instrument plot (HP-GL "show"/vector), e.g. "PLOT 550,279,9750,7479;".</summary>
         [JsonProperty("plotCommand")] public string PlotCommand { get; set; }
 
-        /// <summary>Commands to send before plotting, e.g. "SNGLS;TS;" (single sweep, take sweep).</summary>
+        /// <summary>
+        /// Optional command that makes the instrument PRINT (PCL raster hardcopy), e.g. "PRINT;" on the
+        /// HP 8560/8590 series. When present, the capture tool can render a PCL "print" as well as an
+        /// HP-GL "plot" (issue #40). Null/empty means this model only plots.
+        /// </summary>
+        [JsonProperty("printCommand")] public string PrintCommand { get; set; }
+
+        /// <summary>Commands to send before plotting/printing, e.g. "SNGLS;TS;" (single sweep, take sweep).</summary>
         [JsonProperty("preRoll")] public string PreRoll { get; set; }
 
         /// <summary>Optional commands to send after capturing, e.g. "CONTS;" to resume continuous sweep.</summary>
         [JsonProperty("postRoll")] public string PostRoll { get; set; }
+
+        /// <summary>True when this profile can produce a PCL "print" hardcopy in addition to an HP-GL "plot".</summary>
+        [JsonIgnore]
+        public bool CanPrint => !string.IsNullOrEmpty(PrintCommand);
     }
 
     /// <summary>Line terminators the instrument expects/returns, if non-default.</summary>

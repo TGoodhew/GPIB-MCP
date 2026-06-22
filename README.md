@@ -37,7 +37,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [Error reporting](#error-reporting)
   - [Discovery and bus extenders (HP 37204A)](#discovery-and-bus-extenders-hp-37204a)
   - [Instrument command database](#instrument-command-database)
-  - [Screen capture (HP-GL plotter emulation)](#screen-capture-hp-gl-plotter-emulation)
+  - [Screen capture (plot & print)](#screen-capture-plot--print)
   - [Waiting for operations to complete (SRQ)](#waiting-for-operations-to-complete-srq)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
@@ -59,10 +59,11 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   without needing a VISA resource alias.
 - **User-extensible instrument command database** — tell Claude which model sits at an
   address and it looks up the command reference, confirms identity, and drives it.
-- **Screen capture via HP-GL plotter emulation** — grab an instrument's actual screen
-  (graticule, trace, markers, annotation) and show it inline in the chat as an SVG, with a
-  PNG saved to disk. Rendering is a standalone, reusable [`Hpgl.Rendering`](src/Hpgl.Rendering/)
-  library.
+- **Screen capture — plot or print** — grab an instrument's actual screen (graticule, trace,
+  markers, annotation) as an HP-GL **plot** (vector plotter emulation) or an HP **PCL print**
+  (raster printer hardcopy), and show it inline in the chat as an SVG, with a PNG saved to disk.
+  Rendering is a standalone, reusable [`Hpgl.Rendering`](src/Hpgl.Rendering/) library (HP-GL/2 **and**
+  PCL).
 - **SRQ-based operation completion** — wait for an operation to *truly* finish via the bus
   service-request event (data-driven from the model's `statusModel`), instead of guessing with
   a fixed timeout.
@@ -300,7 +301,7 @@ tool blurbs.
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 | `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen (HP-GL plotter emulation); returns an SVG to show inline + saves a PNG to Pictures |
+| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen as an HP-GL `plot` (vector) or PCL `print` (raster); returns an SVG to show inline + saves a PNG to Pictures |
 
 Argument notes:
 
@@ -477,27 +478,39 @@ Keep the database honest:
 > than guessed. Add the relevant programming guide and ask Claude to extract it, or author the
 > JSON yourself.
 
-### Screen capture (HP-GL plotter emulation)
+### Screen capture (plot & print)
 
-For instruments that can plot to an HP 7470A-style plotter (e.g. the **HP 8563E** spectrum
-analyzer), `instrument_capture_screen` grabs the **actual screen** — graticule, trace, markers,
-and annotation. Ask Claude:
+For instruments that can hardcopy their screen (e.g. the **HP 8563E** spectrum analyzer),
+`instrument_capture_screen` grabs the **actual screen** — graticule, trace, markers, and
+annotation. Ask Claude:
 
 > *"Capture the screen of the analyzer at GPIB0::18 and show it to me."*
 
-It works by **plotter emulation**: the server sends the model's plot command (from its capture
-profile), plays the role of the plotter — answering the instrument's `OS` status handshake — and
-collects the HP-GL, which [`Hpgl.Rendering`](src/Hpgl.Rendering/) renders to **both** a PNG and a
-compact **SVG**.
+Most GPIB instruments offer **two** hardcopy formats, and the tool renders both:
+
+- **`plot`** (default) — an HP-GL **plotter** dump (vector). The server plays an HP 7470A: it sends
+  the model's `plotCommand`, answers the instrument's `OS` status handshake, and collects the HP-GL,
+  which [`Hpgl.Rendering`](src/Hpgl.Rendering/) renders to a PNG **and** a compact vector **SVG**.
+- **`print`** — an HP **PCL** raster **printer** dump (the format the instrument would send to a
+  ThinkJet/PaintJet/LaserJet). The server sends the model's `printCommand`, reads the raster stream,
+  and [`PclRenderer`](src/Hpgl.Rendering/PclRenderer.cs) decodes it (all PCL 5 compression methods —
+  unencoded, run-length, TIFF PackBits, delta-row, adaptive — plus embedded HP-GL/2) to a PNG.
+  Bench-verified on a real 8563E (a captured dump is the regression fixture `Test/test-print.pcl`).
+
+**Which format?** Say *"**show** the screen"* and you get a plot. Say *"**capture** the screen"* (or
+leave it ambiguous) and, if the model can print, Claude asks whether you want **plot** or **print**
+before capturing. Pass `format="plot"`/`"print"` to be explicit.
 
 - The model is taken from the resource's [assignment](#instrument-command-database), or pass `model=`.
-- Only models with a `capture` profile in the database are supported (the 8563E ships with one;
-  add others as data — `{ "method": "hpgl", "plotCommand": "...", "preRoll": "...", "postRoll": "..." }`).
+- Only models with a `capture` profile in the database are supported (the 8563E ships with one for
+  both formats; add others as data — `{ "method": "hpgl", "plotCommand": "...", "printCommand":
+  "...", "preRoll": "...", "postRoll": "..." }`. Omit `printCommand` for plot-only models).
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`
   (`CONTS;`) resumes continuous sweeping, so the display isn't left frozen.
-- `return_hpgl=true` also returns the raw HP-GL/2 source; `background`, `width`, `height` tune the image.
+- `return_hpgl=true` also returns the raw source (HP-GL/2 for a plot, PCL for a print); `background`,
+  `width`, `height` tune the image.
 - Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
   (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
   (`save_dir`), or pass `save_path` for a full filename. The saved path is reported in the result.
@@ -517,7 +530,7 @@ coalesced into one `<path>` per pen colour and a long trace is sub-pixel-simplif
 capture drops from ~21 KB to ~7 KB with no visible change. The root is a pure `viewBox` (no fixed
 size) so the artifact scales to fit its panel instead of clipping.
 
-- **`fidelity`** picks the inline label rendering: **`high`** = the exact HP single-stroke plotter
+- **`fidelity`** (plot only) picks the inline label rendering: **`high`** = the exact HP single-stroke plotter
   font (most faithful to a real 7475/7440/7550; ~7 KB); **`low`** = simple text labels (~4 KB, renders
   noticeably faster — only the label font differs, the trace/graticule are identical). The PNG is
   always the exact stroke font. On the first capture the tool asks the user which they prefer and
@@ -734,7 +747,7 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
     InstrumentDatabase.cs          loads/indexes model definitions
     AssignmentStore.cs             persistent resource->model assignments
     InstrumentPaths.cs             DB/bindings paths + install-time prepopulation
-    ScreenCapture.cs               HP-GL plotter-emulation capture handshake
+    ScreenCapture.cs               HP-GL plot handshake + PCL print-stream capture
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
     InstrumentIo.cs                resolves a model's IoSpec (terminators + bounded read)
@@ -744,8 +757,9 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
 src/GpibMcp.NiVisa/                the default GPIB backend - the ONLY project that references NI
   NiVisaTransport.cs               NI-VISA / NI-488.2 IGpibTransport (loaded at runtime)
   VisaErrorInfo.cs                 VISA status decoding for friendly/exact errors
-src/Hpgl.Rendering/                standalone HP-GL/2 -> Bitmap/PNG/SVG renderer (no GPIB deps)
-  HpglParser.cs / HpglRenderer.cs  parse + render pipeline (auto-fit, fills, arcs, labels)
+src/Hpgl.Rendering/                standalone HP-GL/2 + PCL -> Bitmap/PNG/SVG renderers (no GPIB deps)
+  HpglParser.cs / HpglRenderer.cs  HP-GL/2 plot: parse + render pipeline (auto-fit, fills, arcs, labels)
+  PclRasterDecoder.cs / PclRenderer.cs  PCL print: raster decode (all compression methods) -> Bitmap/PNG/SVG
   StrokeFont.cs                    built-in monospaced single-stroke vector font
 src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
   CompletionWaiter.cs              SRQ-edge / direct-bit waiter
@@ -755,6 +769,7 @@ data/instruments/*.json            bundled instrument command database (165 mode
 tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
 tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
 tools/SrqHwHarness/                run the real waiter against live hardware over NI-VISA
+tools/CaptureHarness/              capture a real plot/print over NI-VISA -> raw bytes + PNG (fixtures)
 tests/GpibMcp.Tests/               xUnit tests (protocol, tools, db, capture, SRQ, helpers)
 tests/Hpgl.Rendering.Tests/        xUnit tests (renderer geometry, fonts, golden regression)
 ```
