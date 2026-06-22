@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The NI-VISA / NI-488.2 GPIB backend (the default). This is the ONLY project that references the
+    NI driver assemblies. It is NOT referenced by the server exe at compile time; the exe loads it
+    dynamically at runtime when GPIB_MCP_BACKEND=nivisa (issue #22), so the server builds and runs
+    without NI installed when another backend is selected. The AfterBuild target below copies this
+    DLL next to the server exe so the dynamic loader finds it - hence: build the SOLUTION.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>GpibMcp.NiVisa</AssemblyName>
+    <RootNamespace>GpibMcp</RootNamespace>
+    <PlatformTarget>x86</PlatformTarget>
+    <Platforms>x86</Platforms>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GpibMcp.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibMcp.Core\GpibMcp.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!--
+    NI driver assemblies. Resolved from the installed NI runtime / GAC, so Private=false (do NOT copy
+    locally) - the bitness must match the installed NI-VISA / NI-488.2 runtime (32-bit here).
+    Update HintPaths if NI is installed elsewhere.
+  -->
+  <ItemGroup Label="NI VISA.NET">
+    <Reference Include="Ivi.Visa">
+      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components 8.0.2\Ivi.Visa.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="NationalInstruments.Visa">
+      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET 26.0\NationalInstruments.Visa.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Label="NI-488.2 .NET">
+    <Reference Include="NationalInstruments.Common">
+      <HintPath>C:\Program Files (x86)\National Instruments\Measurement Studio\DotNET\v4.0\AnyCPU\NationalInstruments.Common 19.0.40\NationalInstruments.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="NationalInstruments.NI4882">
+      <HintPath>C:\Program Files (x86)\National Instruments\MeasurementStudioVS2012\DotNET\Assemblies\Current\NationalInstruments.NI4882.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Copy this backend DLL next to the server exe so the runtime dynamic loader finds it. The exe has
+    no compile-time reference to this project (that is what keeps NI optional), so this self-copy is
+    how the default backend reaches the exe's probing directory when the solution is built.
+  -->
+  <Target Name="CopyBackendToServer" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(MSBuildProjectDirectory)\..\GpibMcp\bin\$(Platform)\$(Configuration)\$(TargetFramework)\"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

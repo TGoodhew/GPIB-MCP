@@ -74,7 +74,7 @@ namespace GpibMcp.Tools
 
                     if (!string.IsNullOrEmpty(profile.PostRoll))
                     {
-                        try { visa.Write(resource, profile.PostRoll, VisaInstrumentManager.DefaultTimeoutMs); }
+                        try { visa.Write(resource, profile.PostRoll, InstrumentManager.DefaultTimeoutMs); }
                         catch { /* best effort - the post-roll is cosmetic (e.g. resume continuous sweep) */ }
                     }
 

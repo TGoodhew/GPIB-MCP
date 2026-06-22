@@ -1,5 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    The server executable: entry point + stdio transport only. It references GpibMcp.Core and has
+    NO reference to any backend (no NI). The GPIB backend is loaded dynamically at runtime
+    (TransportFactory); GpibMcp.NiVisa copies its DLL next to this exe when the solution is built.
+    Build the SOLUTION (GPIB-MCP.sln) so the default NI backend is deployed alongside the exe.
+  -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net472</TargetFramework>
@@ -7,8 +13,8 @@
     <AssemblyName>GpibMcp</AssemblyName>
     <RootNamespace>GpibMcp</RootNamespace>
 
-    <!-- NI VISA.NET on this machine is installed 32-bit only (Framework32),
-         so the server must run as a 32-bit process. -->
+    <!-- NI VISA.NET on this machine is 32-bit only, so the server runs as a 32-bit process
+         (the loaded NI backend must match that bitness). -->
     <PlatformTarget>x86</PlatformTarget>
     <Platforms>x86</Platforms>
     <Prefer32Bit>true</Prefer32Bit>
@@ -21,16 +27,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="GpibMcp.Tests" />
+    <ProjectReference Include="..\GpibMcp.Core\GpibMcp.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Hpgl.Rendering\Hpgl.Rendering.csproj" />
-    <ProjectReference Include="..\Srq.Completion\Srq.Completion.csproj" />
-  </ItemGroup>
-
-  <!-- Bundled instrument command database, deployed next to the exe so it is
-       available at install time and used to prepopulate the user database. -->
+  <!-- Bundled instrument command database, deployed next to the exe so it is available at install
+       time and used to prepopulate the user database. -->
   <ItemGroup>
     <Content Include="..\..\data\instruments\*.json"
              Link="data\instruments\%(Filename)%(Extension)"
@@ -38,39 +39,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <!-- Lets `dotnet build` compile net472 without a full VS install. -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <!--
-    NI driver assemblies. These are resolved from the installed NI runtime / GAC,
-    so Private=false (do NOT copy locally) - the bitness must match the installed
-    NI-VISA / NI-488.2 runtime. Update HintPaths if NI is installed elsewhere.
-  -->
-  <ItemGroup Label="NI VISA.NET">
-    <Reference Include="Ivi.Visa">
-      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components 8.0.2\Ivi.Visa.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="NationalInstruments.Visa">
-      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET 26.0\NationalInstruments.Visa.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup Label="NI-488.2 .NET">
-    <Reference Include="NationalInstruments.Common">
-      <HintPath>C:\Program Files (x86)\National Instruments\Measurement Studio\DotNET\v4.0\AnyCPU\NationalInstruments.Common 19.0.40\NationalInstruments.Common.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="NationalInstruments.NI4882">
-      <HintPath>C:\Program Files (x86)\National Instruments\MeasurementStudioVS2012\DotNET\Assemblies\Current\NationalInstruments.NI4882.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
 
 </Project>

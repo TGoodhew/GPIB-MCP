@@ -26,7 +26,7 @@ namespace GpibMcp
                 Log.Info("starting " + McpServer.ServerName + " " + McpServer.ServerVersion +
                          " (MCP " + McpServer.ProtocolVersion + ", log level " + Log.MinimumLevel + ")");
 
-                VisaInstrumentManager visa = null;
+                InstrumentManager visa = null;
                 try
                 {
                     string exeDir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
@@ -34,7 +34,7 @@ namespace GpibMcp
                     var db = InstrumentDatabase.Load(InstrumentPaths.DatabaseDirectories(exeDir));
                     var assignments = AssignmentStore.FromFile(InstrumentPaths.BindingsPath());
 
-                    visa = new VisaInstrumentManager();
+                    visa = new InstrumentManager(TransportFactory.Create());
                     ToolRegistry registry = InstrumentTools.BuildRegistry(visa, db, assignments);
                     var server = new McpServer(registry, stdin, stdout);
                     server.Run();

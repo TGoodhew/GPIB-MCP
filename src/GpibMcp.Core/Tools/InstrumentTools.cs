@@ -72,7 +72,7 @@ namespace GpibMcp.Tools
                 {
                     string resource = ReqStr(args, "resource");
                     string command = ReqStr(args, "command");
-                    int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
+                    int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
                     int readBytes = Int(args, "read_bytes", 0);
                     var io = InstrumentIo.Resolve(db, assignments, resource, timeout, readBytes);
                     return Clean(visa.Query(resource, command, io));
@@ -90,7 +90,7 @@ namespace GpibMcp.Tools
                 {
                     string resource = ReqStr(args, "resource");
                     string command = ReqStr(args, "command");
-                    int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
+                    int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
                     visa.Write(resource, command, timeout);
                     return "OK (wrote: " + command + ")";
                 }));
@@ -109,7 +109,7 @@ namespace GpibMcp.Tools
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
-                    int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
+                    int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
                     int readBytes = Int(args, "read_bytes", 0);
                     var io = InstrumentIo.Resolve(db, assignments, resource, timeout, readBytes);
                     return Clean(visa.Read(resource, io));
@@ -128,7 +128,7 @@ namespace GpibMcp.Tools
                 {
                     string resource = ReqStr(args, "resource");
                     int readBytes = Int(args, "read_bytes", 0);
-                    var io = InstrumentIo.Resolve(db, assignments, resource, VisaInstrumentManager.DefaultTimeoutMs, readBytes);
+                    var io = InstrumentIo.Resolve(db, assignments, resource, InstrumentManager.DefaultTimeoutMs, readBytes);
                     return Clean(visa.Query(resource, "*IDN?", io));
                 }));
 
@@ -144,7 +144,7 @@ namespace GpibMcp.Tools
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
-                    visa.Clear(resource, VisaInstrumentManager.DefaultTimeoutMs);
+                    visa.Clear(resource, InstrumentManager.DefaultTimeoutMs);
                     return "OK (device cleared)";
                 }));
 
@@ -261,7 +261,7 @@ namespace GpibMcp.Tools
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
-                    int timeout = Int(args, "timeout_ms", VisaInstrumentManager.DefaultTimeoutMs);
+                    int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
                     var result = visa.WaitForSrq(resource, timeout);
                     return result.Asserted
                         ? "SRQ asserted on " + resource + " after " + result.ElapsedMs + " ms."
@@ -293,11 +293,12 @@ namespace GpibMcp.Tools
                                  ReqStr(args, "resource"), ReqStr(args, "operation"), Int(args, "timeout_ms", 30000),
                                  args["status_model"] as JObject, Bool(args, "confirm", false)))));
 
-            // ---- NI-488.2: direct GPIB query ------------------------------------
+            // ---- Native GPIB query (board/primary/secondary) --------------------
             registry.Add(new McpTool(
                 "gpib488_query",
-                "Query a GPIB instrument directly via the native NI-488.2 driver, addressing it by " +
-                "board/primary/secondary instead of a VISA resource string.",
+                "Query a GPIB instrument directly by board/primary/secondary address instead of a VISA " +
+                "resource string. Requires a backend with native GPIB addressing (the default NI-VISA/" +
+                "NI-488.2 backend has it; some adapters do not).",
                 Schema(
                     Required("primary_address", "integer", "GPIB primary address (0-30)."),
                     Prop("board", "integer", "GPIB board/controller index (default 0)."),
@@ -305,19 +306,14 @@ namespace GpibMcp.Tools
                     Required("command", "string", "Command/query to send. A newline terminator is added if absent.")),
                 args =>
                 {
+                    if (!visa.Capabilities.NativeAddressing)
+                        return "The active GPIB backend (" + visa.Capabilities.Name + ") does not support native " +
+                               "board/primary/secondary addressing. Use visa_query with a resource string instead.";
                     int board = Int(args, "board", 0);
                     byte primary = (byte)Int(args, "primary_address", -1, 0, 30, "primary_address");
-                    byte secondary = (byte)Int(args, "secondary_address", Gpib488Helper.NoSecondaryAddress);
+                    byte secondary = (byte)Int(args, "secondary_address", InstrumentManager.NoSecondaryAddress);
                     string command = ReqStr(args, "command");
-                    try
-                    {
-                        return Clean(Gpib488Helper.Query(board, primary, secondary, command));
-                    }
-                    catch (GpibOperationException gex)
-                    {
-                        visa.RecordError(gex); // make it retrievable via visa_last_error too
-                        throw;
-                    }
+                    return Clean(visa.NativeQuery(board, primary, secondary, command));
                 }));
 
             // ---- Instrument command database + assignments ----------------------
@@ -476,7 +472,7 @@ namespace GpibMcp.Tools
             private readonly IInstrumentManager _visa;
             private readonly string _resource;
             public VisaStatusChannel(IInstrumentManager visa, string resource) { _visa = visa; _resource = resource; }
-            public void Send(string command) => _visa.Write(_resource, command, VisaInstrumentManager.DefaultTimeoutMs);
+            public void Send(string command) => _visa.Write(_resource, command, InstrumentManager.DefaultTimeoutMs);
             public int SerialPoll() => _visa.SerialPoll(_resource);
         }
 

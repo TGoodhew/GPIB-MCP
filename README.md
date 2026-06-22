@@ -126,10 +126,13 @@ Get-ChildItem "C:\Program Files (x86)\National Instruments" -Recurse `
 
 ### 3. Build
 
+Build the **solution** (not just the exe project): the GPIB backend (`GpibMcp.NiVisa`) is a separate
+assembly that the solution build deploys next to the server exe, so the exe can load it at runtime.
+
 With the **.NET SDK**:
 
 ```bash
-dotnet build GPIB-MCP.sln -c Release
+dotnet build GPIB-MCP.sln -c Release -p:Platform=x86
 ```
 
 Or with **MSBuild** (from a *Developer Command Prompt* / *Developer PowerShell*):
@@ -143,6 +146,8 @@ The resulting executable is:
 ```
 src\GpibMcp\bin\x86\Release\net472\GpibMcp.exe
 ```
+
+…with `GpibMcp.Core.dll` and `GpibMcp.NiVisa.dll` (the default NI backend) deployed alongside it.
 
 ### 4. Verify the build
 
@@ -669,6 +674,22 @@ When configured in an MCP client, set it alongside the command, e.g. for Claude 
 }
 ```
 
+## GPIB backends
+
+Wire-level I/O sits behind a single abstraction, **`IGpibTransport`**, so the adapter is pluggable.
+The default backend is **NI-VISA / NI-488.2** (`GpibMcp.NiVisa`), selected unless you say otherwise:
+
+| `GPIB_MCP_BACKEND` | Backend |
+|--------------------|---------|
+| *(unset)* / `nivisa` | NI-VISA + NI-488.2 (default) |
+| `prologix`, `ar488` | reserved — abstraction is in place; backends are a follow-up |
+
+The NI dependency lives **only** in `GpibMcp.NiVisa`, which the server loads at runtime — so
+`GpibMcp.Core` and the exe build and run without NI-VISA installed when another backend is selected.
+Adding a Prologix/AR488 (or any) adapter means implementing `IGpibTransport` in its own project, with
+no changes to the tools, the instrument database, or the MCP plumbing — see
+[docs/adding-a-gpib-backend.md](docs/adding-a-gpib-backend.md).
+
 ## Why x86?
 
 NI's VISA.NET assemblies are commonly installed under a 32-bit
@@ -685,22 +706,23 @@ GPIB-MCP.sln
 LICENSE
 README.md
 .editorconfig                      shared code-style settings
-src/GpibMcp/
-  GpibMcp.csproj                   net472 / x86 project + NI references
+src/GpibMcp/                       the server EXE - entry point + stdio only (no backend ref)
+  GpibMcp.csproj                   net472 / x86; references GpibMcp.Core, no NI
   Program.cs                       entry point + stdio/UTF-8 setup
+src/GpibMcp.Core/                  backend-neutral core (no driver dependency; builds without NI)
   Diagnostics/
     Log.cs                         leveled stderr logger (GPIB_MCP_LOG_LEVEL)
   Mcp/
     McpServer.cs                   JSON-RPC 2.0 dispatch (initialize / tools / ping)
     McpTool.cs                     tool + registry + error types
   Instruments/
-    IInstrumentManager.cs          instrument-layer abstraction (enables testing)
-    VisaInstrumentManager.cs       NI-VISA session manager (primary path)
+    IInstrumentManager.cs          tool-facing instrument abstraction (enables testing)
+    InstrumentManager.cs           backend-neutral manager (history, errors, capture, the bus lock)
+    IGpibTransport.cs              the wire-level backend seam + capabilities + GpibStatus (#22)
+    TransportFactory.cs            selects/loads the backend by GPIB_MCP_BACKEND (NI default)
     IoSpec.cs                      per-call I/O behaviour (terminators + bounded read)
-    Gpib488Helper.cs               NI-488.2 native GPIB helper
     CommandText.cs                 shared command-termination + log helpers
     CommandHistory.cs              bounded per-resource command/response trace
-    VisaErrorInfo.cs               VISA status decoding for friendly/exact errors
     InstrumentDefinition.cs        instrument command-reference data model
     InstrumentDatabase.cs          loads/indexes model definitions
     AssignmentStore.cs             persistent resource->model assignments
@@ -709,9 +731,12 @@ src/GpibMcp/
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
     InstrumentIo.cs                resolves a model's IoSpec (terminators + bounded read)
-    InstrumentTools.cs             VISA / NI-488.2 + serial-poll / wait-SRQ tools
+    InstrumentTools.cs             VISA / native-GPIB + serial-poll / wait-SRQ tools
     DatabaseTools.cs               command-database + assignment + set_termination tools
     CaptureTools.cs                screen-capture + wait-complete tools
+src/GpibMcp.NiVisa/                the default GPIB backend - the ONLY project that references NI
+  NiVisaTransport.cs               NI-VISA / NI-488.2 IGpibTransport (loaded at runtime)
+  VisaErrorInfo.cs                 VISA status decoding for friendly/exact errors
 src/Hpgl.Rendering/                standalone HP-GL/2 -> Bitmap/PNG/SVG renderer (no GPIB deps)
   HpglParser.cs / HpglRenderer.cs  parse + render pipeline (auto-fit, fills, arcs, labels)
   StrokeFont.cs                    built-in monospaced single-stroke vector font

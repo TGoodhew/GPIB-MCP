@@ -179,8 +179,9 @@ namespace GpibMcp.Tests
             {
                 new CommandHistoryEntry("GPIB0::29::INSTR", CommandDirection.Sent, "*IDN?\n", DateTime.UtcNow)
             };
+            var inner = new NativeVisaException(unchecked((int)0xBFFF0015));
             fake.QueryError = GpibOperationException.For(GpibOperation.Query, "GPIB0::29::INSTR", "*IDN?",
-                new NativeVisaException(unchecked((int)0xBFFF0015)), chain);
+                inner, chain, VisaErrorInfo.Describe(inner));
 
             var registry = InstrumentTools.BuildRegistry(fake);
             registry.TryGet("visa_query", out var query);

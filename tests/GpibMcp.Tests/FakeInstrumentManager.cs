@@ -28,6 +28,19 @@ namespace GpibMcp.Tests
         private readonly CommandHistory _history = new CommandHistory();
         private GpibOperationException _lastError;
 
+        /// <summary>Backend capabilities reported to tools; defaults to a fully-capable backend.</summary>
+        public TransportCapabilities Capabilities { get; set; } =
+            new TransportCapabilities("Fake", discovery: true, serialPoll: true, serviceRequest: true,
+                                      deviceClear: true, returnToLocal: true, nativeAddressing: true);
+
+        public readonly List<string> NativeQueries = new List<string>();
+
+        public string NativeQuery(int board, byte primaryAddress, byte secondaryAddress, string command)
+        {
+            NativeQueries.Add(board + ":" + primaryAddress + ":" + secondaryAddress + "|" + command);
+            return "NATIVE:" + command;
+        }
+
         public IList<string> ListResources(string filter) => new List<string>(ResourceList);
 
         public string Query(string resource, string command, int timeoutMs) =>

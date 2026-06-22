@@ -41,24 +41,27 @@ namespace GpibMcp.Instruments
             History = history ?? Array.Empty<CommandHistoryEntry>();
         }
 
-        /// <summary>Builds a <see cref="GpibOperationException"/> from a raw failure + the command chain.</summary>
+        /// <summary>
+        /// Builds a <see cref="GpibOperationException"/> from a raw failure + the command chain. The
+        /// backend decodes the failure to a <see cref="GpibStatus"/> first (the manager asks its
+        /// transport); pass <see cref="GpibStatus.Empty"/> when no backend decoding is available.
+        /// </summary>
         internal static GpibOperationException For(GpibOperation op, string resource, string command,
-            Exception inner, IReadOnlyList<CommandHistoryEntry> history)
+            Exception inner, IReadOnlyList<CommandHistoryEntry> history, GpibStatus status = default(GpibStatus))
         {
-            VisaErrorInfo.Info info = VisaErrorInfo.Describe(inner);
-            string summary = BuildSummary(op, resource, command, info, inner);
+            string summary = BuildSummary(op, resource, command, status, inner);
             return new GpibOperationException(summary, inner, op, resource, command,
-                info.HasName ? info.Name : null, info.Meaning, info.Code, history);
+                status.HasName ? status.Name : null, status.Meaning, status.Code, history);
         }
 
         private static string BuildSummary(GpibOperation op, string resource, string command,
-            VisaErrorInfo.Info info, Exception inner)
+            GpibStatus status, Exception inner)
         {
             var sb = new StringBuilder();
             sb.Append(op.ToString().ToLowerInvariant()).Append(" failed on ").Append(resource ?? "(no resource)");
             if (!string.IsNullOrEmpty(command)) sb.Append(" [command: ").Append(command).Append(']');
             sb.Append(": ");
-            if (info.HasName) sb.Append(info.Name).Append(" - ").Append(info.Meaning);
+            if (status.HasName) sb.Append(status.Name).Append(" - ").Append(status.Meaning);
             else sb.Append(inner != null ? inner.Message : "unknown error");
             return sb.ToString();
         }
