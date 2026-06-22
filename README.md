@@ -495,6 +495,7 @@ Most GPIB instruments offer **two** hardcopy formats, and the tool renders both:
   ThinkJet/PaintJet/LaserJet). The server sends the model's `printCommand`, reads the raster stream,
   and [`PclRenderer`](src/Hpgl.Rendering/PclRenderer.cs) decodes it (all PCL 5 compression methods —
   unencoded, run-length, TIFF PackBits, delta-row, adaptive — plus embedded HP-GL/2) to a PNG.
+  Bench-verified on a real 8563E (a captured dump is the regression fixture `Test/test-print.pcl`).
 
 **Which format?** Say *"**show** the screen"* and you get a plot. Say *"**capture** the screen"* (or
 leave it ambiguous) and, if the model can print, Claude asks whether you want **plot** or **print**
@@ -768,6 +769,7 @@ data/instruments/*.json            bundled instrument command database (165 mode
 tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
 tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
 tools/SrqHwHarness/                run the real waiter against live hardware over NI-VISA
+tools/CaptureHarness/              capture a real plot/print over NI-VISA -> raw bytes + PNG (fixtures)
 tests/GpibMcp.Tests/               xUnit tests (protocol, tools, db, capture, SRQ, helpers)
 tests/Hpgl.Rendering.Tests/        xUnit tests (renderer geometry, fonts, golden regression)
 ```

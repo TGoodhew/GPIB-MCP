@@ -7,8 +7,10 @@
 // asserts spec conformance rather than self-consistency.
 // -----------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Hpgl.Rendering;
@@ -216,6 +218,48 @@ namespace Hpgl.Rendering.Tests
 
             byte[] hpgl = Encoding.ASCII.GetBytes("IN;SP1;PU0,0;PD1000,1000;SP0;");
             Assert.False(PclRenderer.LooksLikePcl(hpgl));
+        }
+
+        // ---- real HP 8563E print dump (issue #40 bench fixture) -------------
+
+        private static string FixturePath(string name) =>
+            Path.Combine(AppContext.BaseDirectory, "fixtures", name);
+
+        [Fact]
+        public void Decode_Real8563EPrint_IsExpectedRasterShape()
+        {
+            // A genuine 8563E PRINT 0; dump over GPIB: ESC=, ESC*rA, 338x (ESC*b80W + 80 unencoded
+            // bytes), terminated by ESC*rB. No resolution/width/height/compression commands - the
+            // simplest PCL - so the decoder must infer 640x338 from the row geometry.
+            byte[] pcl = File.ReadAllBytes(FixturePath("test-print.pcl"));
+
+            var img = PclRasterDecoder.Decode(pcl);
+
+            Assert.Equal(640, img.Width);
+            Assert.Equal(338, img.Height);
+            Assert.Equal(80, img.RowBytes);
+            Assert.All(img.Rows, r => Assert.Equal(80, r.Length));
+            Assert.Null(img.EmbeddedHpgl);
+        }
+
+        [Fact]
+        public void Render_Real8563EPrint_ProducesNonBlankScreen()
+        {
+            byte[] pcl = File.ReadAllBytes(FixturePath("test-print.pcl"));
+
+            using (var bmp = PclRenderer.RenderToBitmap(pcl,
+                       new HpglRenderOptions { Width = 1024, Height = 768, Background = HpglBackground.Black }))
+            {
+                Assert.Equal(1024, bmp.Width);
+                Assert.Equal(768, bmp.Height);
+                int ink = 0;
+                for (int y = 0; y < bmp.Height; y++)
+                    for (int x = 0; x < bmp.Width; x++)
+                        if (bmp.GetPixel(x, y).ToArgb() != Color.Black.ToArgb()) ink++;
+                // The graticule + trace + annotation mark a substantial, but not overwhelming, area.
+                Assert.True(ink > 20000, "expected the analyzer screen to be drawn, got " + ink + " px");
+                Assert.True(ink < (long)bmp.Width * bmp.Height / 2, "expected mostly-black screen, got " + ink + " px");
+            }
         }
 
         [Fact]
