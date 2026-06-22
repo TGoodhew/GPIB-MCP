@@ -122,12 +122,33 @@ namespace GpibMcp.Tests
             "SP2;PU500,500;PD9500,6500;PU2000,2000;PD8000,5000;" +
             "SP1;PU500,6700;LBSCREEN" + ((char)3) + ";PU0,0;SP0;";
 
+        /// <summary>Canned PCL returned by <see cref="CaptureScreen"/> in printer-stream mode (a 64x48 raster).</summary>
+        public string CapturePcl = BuildCannedPcl();
+
         public readonly List<string> Captures = new List<string>();
 
         public CaptureResult CaptureScreen(string resource, string preRoll, string plotCommand, CaptureOptions options)
         {
             Captures.Add(resource + "|" + preRoll + "|" + plotCommand);
+            if (options != null && options.Mode == CaptureMode.PrinterStream)
+                return new CaptureResult(CapturePcl, CapturePcl.Length, 0, CaptureCompletion.EndMarker);
             return new CaptureResult(CaptureHpgl, CaptureHpgl.Length, 0, CaptureCompletion.PenUp);
+        }
+
+        private static string BuildCannedPcl()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append((char)0x1B).Append("*t75R");   // resolution
+            sb.Append((char)0x1B).Append("*r1A");    // start raster
+            sb.Append((char)0x1B).Append("*r64S");   // width 64 px
+            for (int i = 0; i < 48; i++)
+            {
+                sb.Append((char)0x1B).Append("*b0m8W");
+                for (int k = 0; k < 8; k++) sb.Append((char)0xAA); // alternating dots
+            }
+            sb.Append((char)0x1B).Append("*rC");     // end raster
+            sb.Append((char)0x1B).Append("E");       // reset
+            return sb.ToString();
         }
     }
 }

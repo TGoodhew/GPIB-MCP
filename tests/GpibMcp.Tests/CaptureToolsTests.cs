@@ -33,6 +33,22 @@ namespace GpibMcp.Tests
             Commands = new List<InstrumentCommand>()
         };
 
+        /// <summary>A profile that can both plot (HP-GL) and print (PCL) - the 8560/8590-series shape.</summary>
+        private static InstrumentDefinition WithPrintProfile() => new InstrumentDefinition
+        {
+            Model = "8563E",
+            Category = "Spectrum Analyzer",
+            Identity = new IdentitySpec { Command = "ID?", MatchRegex = "8563" },
+            Capture = new CaptureProfile
+            {
+                Method = "hpgl",
+                PlotCommand = "PLOT 550,279,9750,7479;",
+                PrintCommand = "PRINT 0;",
+                PreRoll = "SNGLS;TS;"
+            },
+            Commands = new List<InstrumentCommand>()
+        };
+
         private static McpTool Tool(InstrumentDatabase db, AssignmentStore store, IInstrumentManager visa)
         {
             InstrumentTools.BuildRegistry(visa, db, store).TryGet("instrument_capture_screen", out var tool);
@@ -233,6 +249,76 @@ namespace GpibMcp.Tests
             Assert.Contains("<text", text);                           // low fidelity -> <text> labels in the SVG
             Assert.Contains("low fidelity", text);                    // noted in the meta line
             Assert.DoesNotContain("hasn't been chosen", text);        // no choose-prompt once a mode is set
+        }
+
+        // ---- format = print (PCL, issue #40) --------------------------------
+
+        [Fact]
+        public void Capture_PrintFormat_SendsPrintCommand_AndRendersPcl()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithPrintProfile() });
+            var visa = new FakeInstrumentManager();
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["format"] = "print" });
+
+            Assert.False(output.IsError);
+            // The print (not plot) command drove the capture, in printer-stream mode.
+            Assert.Contains("GPIB0::18::INSTR|SNGLS;TS;|PRINT 0;", visa.Captures);
+            // A valid PNG was produced from the PCL raster.
+            var image = output.Content.Single(b => b.Kind == ToolContentKind.Image);
+            var bytes = Convert.FromBase64String(image.Data);
+            Assert.True(bytes.Length > 8 && bytes[0] == 0x89 && bytes[1] == 0x50);
+            string text = output.AsText();
+            Assert.Contains("PCL", text);                              // meta names the format
+            Assert.DoesNotContain("fidelity", text.ToLowerInvariant()); // fidelity does not apply to PCL
+        }
+
+        [Fact]
+        public void Capture_PrintFormat_OnPlotOnlyModel_ReturnsError()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() }); // plot-only
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["format"] = "print" });
+
+            Assert.True(output.IsError);
+            Assert.Contains("no PCL print profile", output.AsText());
+        }
+
+        [Fact]
+        public void Capture_FormatOmitted_PrintCapableModel_PlotsAndPromptsForFormat()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithPrintProfile() });
+            var visa = new FakeInstrumentManager();
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+
+            Assert.False(output.IsError);
+            Assert.Contains("GPIB0::18::INSTR|SNGLS;TS;|PLOT 550,279,9750,7479;", visa.Captures); // defaulted to plot
+            string text = output.AsText();
+            Assert.Contains("format=\"plot\" or format=\"print\"", text); // nudged to confirm plot-vs-print
+            Assert.Contains("SHOW the screen", text);
+        }
+
+        [Fact]
+        public void Capture_FormatChosen_NoFormatPrompt()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithPrintProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E", ["format"] = "plot" });
+
+            Assert.False(output.IsError);
+            Assert.DoesNotContain("format=\"plot\" or format=\"print\"", output.AsText());
+        }
+
+        [Fact]
+        public void Capture_PlotOnlyModel_NoFormatPrompt()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() }); // plot-only
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+
+            Assert.False(output.IsError);
+            Assert.DoesNotContain("format=\"plot\" or format=\"print\"", output.AsText());
         }
     }
 }
