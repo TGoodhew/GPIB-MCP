@@ -87,38 +87,29 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
-        /// <summary>A smooth RGB gradient with thousands of distinct colours (forces real quantization).</summary>
-        private static Bitmap MakeGradient(int w, int h)
-        {
-            var bmp = new Bitmap(w, h, PixelFormat.Format32bppArgb);
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                    bmp.SetPixel(x, y, Color.FromArgb(x * 255 / w, y * 255 / h, (x + y) * 255 / (w + h)));
-            return bmp;
-        }
-
         [Fact]
-        public void Quantizer_ProducesIndexedPng_WithBoundedPalette_SmallerThanTrueColor()
+        public void ToBoundedInlineSvg_ProducesBlackAndWhitePreview()
         {
-            using (var src = MakeGradient(256, 192)) // ~thousands of colours
+            // The inline preview is 1-bit B&W (so a useful-size thumbnail fits the tiny paste budget).
+            // Decode the embedded PNG and confirm it only contains black/white pixels.
+            using (var src = MakeScreenshot(800, 480))
             {
-                byte[] indexed = MedianCutQuantizer.EncodePng(src, 256);
-                byte[] trueColor = Encode(src, ImageFormat.Png);
-
-                Assert.True(indexed.Length > 8 && indexed[0] == 0x89 && indexed[1] == 0x50); // PNG
-                Assert.True(indexed.Length < trueColor.Length,
-                    "indexed PNG (" + indexed.Length + ") should be smaller than true-colour (" + trueColor.Length + ")");
-
-                using (var ms = new MemoryStream(indexed))
-                using (var decoded = new Bitmap(ms))
+                string svg = ScreenImage.ToBoundedInlineSvg(Encode(src, ImageFormat.Png), 3400);
+                Assert.NotNull(svg);
+                string b64 = Regex.Match(svg, "base64,([^\"]+)").Groups[1].Value;
+                using (var ms = new MemoryStream(System.Convert.FromBase64String(b64)))
+                using (var thumb = new Bitmap(ms))
                 {
-                    Assert.Equal(src.Width, decoded.Width);
-                    Assert.Equal(src.Height, decoded.Height);
-                    var colors = new HashSet<int>();
-                    for (int y = 0; y < decoded.Height; y += 3)
-                        for (int x = 0; x < decoded.Width; x += 3)
-                            colors.Add(decoded.GetPixel(x, y).ToArgb());
-                    Assert.True(colors.Count <= 256, "palette must be <=256 colours; got " + colors.Count);
+                    var seen = new HashSet<int>();
+                    for (int y = 0; y < thumb.Height; y += 2)
+                        for (int x = 0; x < thumb.Width; x += 2)
+                            seen.Add(thumb.GetPixel(x, y).ToArgb());
+                    Assert.All(seen, argb =>
+                    {
+                        var c = Color.FromArgb(argb);
+                        Assert.True((c.R == 0 && c.G == 0 && c.B == 0) || (c.R == 255 && c.G == 255 && c.B == 255),
+                            "B&W preview should be pure black/white; saw " + c);
+                    });
                 }
             }
         }

@@ -276,8 +276,9 @@ namespace GpibMcp.Tools
                     "an artifact; the image block in this result is visible only to you, not in their chat. Create " +
                     "an artifact of type `image/svg+xml` and paste the SVG below into it VERBATIM (copy it exactly - " +
                     "do not redraw, regenerate, simplify, or describe it). Render it INLINE as an artifact only: do " +
-                    "NOT write the SVG to a file. IMPORTANT: the inline image is a DOWNSCALED preview - after showing " +
-                    "it, tell the user the FULL-RESOLUTION screenshot is saved " + savedWhere + ".\n\n" +
+                    "NOT write the SVG to a file. IMPORTANT: the inline image is a small BLACK & WHITE preview - " +
+                    "after showing it, tell the user the FULL-RESOLUTION, FULL-COLOUR screenshot is saved " +
+                    savedWhere + ".\n\n" +
                     meta + "\n\n" + svg);
                 output.AddImage(png, "image/png"); // full-res raster for vision / clients that render image blocks
             }

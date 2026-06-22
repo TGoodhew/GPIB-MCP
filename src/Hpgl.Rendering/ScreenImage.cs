@@ -15,6 +15,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Hpgl.Rendering
@@ -70,11 +71,13 @@ namespace Hpgl.Rendering
             int w = Math.Max(1, targetWidth);
             int h = Math.Max(1, (int)Math.Round(src.Height * (w / (double)src.Width)));
 
-            // Quantize the thumbnail to a <=256-colour indexed PNG: a fraction of the 24-bit size, so a
-            // useful preview fits the small paste-verbatim budget. (The saved file stays full colour.)
+            // Encode the inline thumbnail as a 1-bit BLACK & WHITE PNG. A colour data-URI is base64 the
+            // model must paste verbatim, and only a tiny one is reliable (~the PCL print's 2.8 KB); a
+            // 1-bit image compresses like that print, so a USEFUL-size preview fits the safe budget. The
+            // saved file stays full-colour, full-resolution (the result points the user to it).
             byte[] png;
             using (var scaled = Scale(src, w, h))
-                png = MedianCutQuantizer.EncodePng(scaled, 256);
+                png = EncodeBlackWhitePng(scaled);
             string b64 = Convert.ToBase64String(png);
 
             var sb = new StringBuilder(b64.Length + 200);
@@ -96,6 +99,59 @@ namespace Hpgl.Rendering
                 g.DrawImage(src, new Rectangle(0, 0, w, h));
             }
             return dst;
+        }
+
+        /// <summary>Luminance threshold (0-255) above which a pixel becomes white in the B&amp;W thumbnail.</summary>
+        private const int BwThreshold = 96;
+
+        /// <summary>
+        /// Encodes a 1-bit black/white PNG by thresholding luminance. An instrument screen is bright
+        /// elements (traces, text, grid) on a dark background, so a threshold reads well, and 1-bit
+        /// compresses to a few KB - small enough to paste inline reliably.
+        /// </summary>
+        private static byte[] EncodeBlackWhitePng(Bitmap scaled)
+        {
+            int w = scaled.Width, h = scaled.Height;
+            var rect = new Rectangle(0, 0, w, h);
+
+            int[] src = new int[w * h];
+            BitmapData sd = scaled.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            try { Marshal.Copy(sd.Scan0, src, 0, src.Length); }
+            finally { scaled.UnlockBits(sd); }
+
+            using (var bw = new Bitmap(w, h, PixelFormat.Format1bppIndexed))
+            {
+                var pal = bw.Palette;
+                pal.Entries[0] = Color.Black;
+                pal.Entries[1] = Color.White;
+                bw.Palette = pal;
+
+                BitmapData dd = bw.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format1bppIndexed);
+                try
+                {
+                    int stride = dd.Stride;
+                    var rows = new byte[stride * h];
+                    for (int y = 0; y < h; y++)
+                    {
+                        int rowBase = y * stride, pxBase = y * w;
+                        for (int x = 0; x < w; x++)
+                        {
+                            int c = src[pxBase + x];
+                            int r = (c >> 16) & 0xFF, g = (c >> 8) & 0xFF, b = c & 0xFF;
+                            int lum = (r * 299 + g * 587 + b * 114) / 1000;
+                            if (lum >= BwThreshold) rows[rowBase + (x >> 3)] |= (byte)(0x80 >> (x & 7));
+                        }
+                    }
+                    Marshal.Copy(rows, 0, dd.Scan0, rows.Length);
+                }
+                finally { bw.UnlockBits(dd); }
+
+                using (var ms = new MemoryStream())
+                {
+                    bw.Save(ms, ImageFormat.Png);
+                    return ms.ToArray();
+                }
+            }
         }
 
         private static Bitmap Load(byte[] imageBytes)

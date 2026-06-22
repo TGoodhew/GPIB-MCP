@@ -499,11 +499,12 @@ The tool supports **three** capture methods, selected by the model's profile:
 - **SCPI image** (`method: "scpi_block"`, modern boxes like Rigol scopes) — the instrument returns the
   screen *directly as an image*. The server queries the model's `dumpCommand` (e.g. `:DISP:DATA?`),
   strips the IEEE 488.2 `#<n><len>` block header ([`Ieee4882Block`](src/GpibMcp.Core/Instruments/Ieee4882Block.cs)),
-  and saves the screenshot. A full-colour screenshot can't be pasted verbatim as an inline artifact, so
-  [`ScreenImage`](src/Hpgl.Rendering/ScreenImage.cs) shows a **downscaled, 256-colour-quantized**
-  ([`MedianCutQuantizer`](src/Hpgl.Rendering/MedianCutQuantizer.cs)) inline preview kept under a safe
-  byte budget, while saving the **full-resolution** 24-bit PNG to disk (the result points the user at
-  the saved file). Bench-verified on a real Rigol DS1104Z (`:DISP:DATA?` → 800×480 BMP).
+  and saves the screenshot. A full-colour screenshot is too large to paste verbatim as an inline
+  artifact (base64 stalls the model above a few KB), so [`ScreenImage`](src/Hpgl.Rendering/ScreenImage.cs)
+  shows a small **black & white** inline preview — 1-bit compresses like the PCL print, so a useful-size
+  thumbnail (~360 px) fits the safe paste budget — while saving the **full-resolution, full-colour** PNG
+  to disk (the result tells the user where). Bench-verified on a real Rigol DS1104Z (`:DISP:DATA?` →
+  800×480 BMP).
 
 **Which format (HP-GL boxes)?** Say *"**show** the screen"* → plot. Say *"**capture** the screen"* (or
 leave it ambiguous) and, if the model can print, Claude asks **plot** vs **print** before capturing.
