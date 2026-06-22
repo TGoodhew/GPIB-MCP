@@ -17,6 +17,10 @@
     "supported": true,
     "description": "Standard SCPI identification query; returns manufacturer, model (MSO1074Z-S), serial number and firmware version."
   },
+  "capture": {
+    "method": "scpi_block",
+    "dumpCommand": ":DISP:DATA?"
+  },
   "commands": [
     {
       "name": "autoscale",

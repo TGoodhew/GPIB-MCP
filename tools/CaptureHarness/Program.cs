@@ -75,9 +75,17 @@ namespace CaptureHarness
             if (!db.TryGet(model, out def)) { Console.Error.WriteLine("Unknown model '" + model + "'."); return 1; }
 
             CaptureProfile profile = def.Capture;
-            if (profile == null || string.IsNullOrEmpty(profile.PlotCommand))
+            if (profile == null)
             {
                 Console.Error.WriteLine("Model '" + def.Model + "' has no capture profile.");
+                return 1;
+            }
+            if (string.Equals(profile.Method, "scpi_block", StringComparison.OrdinalIgnoreCase))
+                return RunScpiBlock(resource, model, profile, timeout, outBase);
+
+            if (string.IsNullOrEmpty(profile.PlotCommand))
+            {
+                Console.Error.WriteLine("Model '" + def.Model + "' has no HP-GL capture profile.");
                 return 1;
             }
             if (print && !profile.CanPrint)
@@ -142,6 +150,56 @@ namespace CaptureHarness
             Console.WriteLine("  png  -> " + pngPath + " (" + png.Length + " bytes)");
             if (print) Console.WriteLine("  looksLikePcl: " + PclRenderer.LooksLikePcl(raw));
             return capture.ByteCount > 0 ? 0 : 2;
+        }
+
+        /// <summary>SCPI image dump path: query the block, strip the IEEE header, save block + image + PNG.</summary>
+        private static int RunScpiBlock(string resource, string model, CaptureProfile profile, int timeout, string outBase)
+        {
+            if (string.IsNullOrEmpty(profile.DumpCommand))
+            {
+                Console.Error.WriteLine("Model '" + model + "' has a scpi_block profile but no dumpCommand.");
+                return 1;
+            }
+
+            Console.WriteLine("=== capture harness - real instrument over NI-VISA ===");
+            Console.WriteLine("  resource : " + resource);
+            Console.WriteLine("  model    : " + model);
+            Console.WriteLine("  format   : scpi image block");
+            Console.WriteLine("  command  : " + profile.DumpCommand);
+            Console.WriteLine();
+
+            byte[] block;
+            using (var visa = new InstrumentManager(new NiVisaTransport()))
+            {
+                if (!string.IsNullOrEmpty(profile.PreRoll))
+                    visa.Write(resource, profile.PreRoll, InstrumentManager.DefaultTimeoutMs);
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                block = visa.QueryBlock(resource, profile.DumpCommand, timeout);
+                sw.Stop();
+                if (!string.IsNullOrEmpty(profile.PostRoll))
+                    try { visa.Write(resource, profile.PostRoll, InstrumentManager.DefaultTimeoutMs); } catch { }
+                Console.WriteLine("RESULT: " + block.Length + " bytes block, " + sw.ElapsedMilliseconds + " ms");
+            }
+
+            byte[] image = Ieee4882Block.ExtractDefiniteLength(block);
+            if (image.Length < 64) { Console.Error.WriteLine("No image returned (" + image.Length + " bytes)."); return 2; }
+
+            if (string.IsNullOrEmpty(outBase))
+                outBase = Path.Combine(Environment.CurrentDirectory, "capture-" + model + "-scpi");
+
+            string ext = image.Length > 1 && image[0] == 0x42 && image[1] == 0x4D ? ".bmp"
+                       : image.Length > 3 && image[0] == 0x89 && image[1] == 0x50 ? ".png" : ".bin";
+            File.WriteAllBytes(outBase + ".scpiblock", block);   // raw IEEE 488.2 block (regression fixture)
+            File.WriteAllBytes(outBase + ext, image);            // extracted native image (BMP/PNG)
+
+            byte[] png = ScreenImage.ToPng(image);
+            ScreenImage.Dimensions(image, out int w, out int h);
+            File.WriteAllBytes(outBase + ".png", png);
+
+            Console.WriteLine("  block -> " + outBase + ".scpiblock (" + block.Length + " bytes)");
+            Console.WriteLine("  image -> " + outBase + ext + " (" + image.Length + " bytes, " + w + "x" + h + ")");
+            Console.WriteLine("  png   -> " + outBase + ".png (" + png.Length + " bytes)");
+            return 0;
         }
 
         private static string Next(string[] args, ref int i) => (++i < args.Length) ? args[i] : null;

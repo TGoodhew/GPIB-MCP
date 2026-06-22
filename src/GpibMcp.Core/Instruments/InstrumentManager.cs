@@ -19,6 +19,9 @@ namespace GpibMcp.Instruments
         /// <summary>Default I/O timeout applied when the caller does not specify one.</summary>
         public const int DefaultTimeoutMs = 5000;
 
+        /// <summary>Upper bound for a single binary image-block read (#10) - generous for any instrument screenshot.</summary>
+        public const long MaxImageBlockBytes = 16L * 1024 * 1024;
+
         /// <summary>VISA resource filter matching any INSTR resource on any bus.</summary>
         public const string DefaultResourceFilter = "?*INSTR";
 
@@ -68,6 +71,35 @@ namespace GpibMcp.Instruments
                     _history.Record(resource, CommandDirection.Received, response);
                     Log.Debug("VISA " + resource + " -> " + CommandText.ForLog(response));
                     return response;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.Query, resource, command, ex);
+                }
+            }
+        }
+
+        public byte[] QueryBlock(string resource, string command, int timeoutMs)
+        {
+            var io = new IoSpec(timeoutMs);
+            lock (_gate)
+            {
+                string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
+                try
+                {
+                    _transport.Open(resource, Timeout(io.TimeoutMs));
+                    Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload) + " (binary block)");
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    _transport.Write(resource, Latin1.GetBytes(payload), Timeout(io.TimeoutMs));
+
+                    // Read the whole block as raw bytes via the bounded raw path: no termination char
+                    // (binary image data contains 0x0A etc.) and a large cap so a single read returns the
+                    // full image at EOI. (The unbounded path text-decodes and breaks on binary.)
+                    var req = new TransportReadRequest { TimeoutMs = Timeout(io.TimeoutMs), TermChar = null, MaxBytes = MaxImageBlockBytes };
+                    byte[] data = _transport.Read(resource, req).Data;
+                    _history.Record(resource, CommandDirection.Received, "<" + data.Length + " bytes binary block>");
+                    Log.Debug("VISA " + resource + " -> " + data.Length + " bytes binary block");
+                    return data;
                 }
                 catch (Exception ex) when (!(ex is GpibOperationException))
                 {

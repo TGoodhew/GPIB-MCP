@@ -46,11 +46,18 @@ namespace GpibMcp.Instruments
     /// <summary>How to capture this instrument's screen (e.g. HP-GL plotter emulation).</summary>
     public sealed class CaptureProfile
     {
-        /// <summary>Capture method: "hpgl" (plotter emulation). Future: "scpi_block".</summary>
+        /// <summary>Capture method: "hpgl" (HP-GL/PCL plotter emulation) or "scpi_block" (binary image query).</summary>
         [JsonProperty("method")] public string Method { get; set; }
 
         /// <summary>Command that makes the instrument plot (HP-GL "show"/vector), e.g. "PLOT 550,279,9750,7479;".</summary>
         [JsonProperty("plotCommand")] public string PlotCommand { get; set; }
+
+        /// <summary>
+        /// SCPI screen-dump query for <c>method="scpi_block"</c> instruments - returns the screen as an
+        /// IEEE 488.2 binary image block (PNG/BMP), e.g. Rigol DS1000Z <c>":DISP:DATA?"</c> or Keysight
+        /// <c>":DISP:DATA? PNG,SCReen"</c>. No HP-GL/PCL rendering is needed; the bytes are the image (#10).
+        /// </summary>
+        [JsonProperty("dumpCommand")] public string DumpCommand { get; set; }
 
         /// <summary>
         /// Optional command that makes the instrument PRINT (PCL raster hardcopy), e.g. "PRINT;" on the
