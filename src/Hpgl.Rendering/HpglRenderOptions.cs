@@ -74,6 +74,15 @@ namespace Hpgl.Rendering
         public bool AutoSizeRelativeText { get; set; } = false;
 
         /// <summary>
+        /// Opt-in: scale each axis independently so the plot fills the canvas instead of preserving its
+        /// aspect ratio. The 8720/8753 emit a near-square measurement graticule; with this on it is
+        /// stretched to a landscape page (as KE5FX renders it). Because the whole plot - geometry AND text -
+        /// is stretched together, labels stay correctly laid out (no overlap), but the text is proportionally
+        /// wider. Default false (aspect-preserving). (#55)
+        /// </summary>
+        public bool StretchToFill { get; set; } = false;
+
+        /// <summary>
         /// Optional explicit pen palette indexed by HP-GL pen number (SP n -&gt; PenColors[n % len]).
         /// When null, a readable default palette is chosen to suit <see cref="Background"/>.
         /// </summary>

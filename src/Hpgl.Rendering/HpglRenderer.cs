@@ -1190,14 +1190,16 @@ namespace Hpgl.Rendering
 
     internal sealed class PlotTransform
     {
-        private readonly double _scale, _srcMinX, _srcMinY, _offX, _offY;
+        private readonly double _scaleX, _scaleY, _srcMinX, _srcMinY, _offX, _offY;
         private readonly int _height;
 
-        public double Scale => _scale;
+        // Representative scale (the vertical one) for size hints like the low-fidelity SVG text height.
+        public double Scale => _scaleY;
 
-        private PlotTransform(double scale, double srcMinX, double srcMinY, double offX, double offY, int height)
+        private PlotTransform(double scaleX, double scaleY, double srcMinX, double srcMinY, double offX, double offY, int height)
         {
-            _scale = scale; _srcMinX = srcMinX; _srcMinY = srcMinY; _offX = offX; _offY = offY; _height = height;
+            _scaleX = scaleX; _scaleY = scaleY; _srcMinX = srcMinX; _srcMinY = srcMinY;
+            _offX = offX; _offY = offY; _height = height;
         }
 
         public static PlotTransform Fit(MeasureSink extent, HpglRenderOptions opt)
@@ -1206,17 +1208,24 @@ namespace Hpgl.Rendering
             double h = Math.Max(1, extent.MaxY - extent.MinY);
             double availW = Math.Max(1, opt.Width - 2 * opt.Margin);
             double availH = Math.Max(1, opt.Height - 2 * opt.Margin);
-            double scale = Math.Min(availW / w, availH / h);
 
-            double offX = opt.Margin + (availW - w * scale) / 2.0;
-            double offY = opt.Margin + (availH - h * scale) / 2.0;
-            return new PlotTransform(scale, extent.MinX, extent.MinY, offX, offY, opt.Height);
+            // Aspect-preserving (default) uses one uniform scale; StretchToFill scales each axis
+            // independently so a non-square plot fills the canvas (e.g. the 8720's square graticule
+            // rendered to a landscape page, like KE5FX). Text is uniformly stretched with the geometry,
+            // so it stays correctly laid out (no overlap) but wider - the cost of filling the page. (#55)
+            double scaleX, scaleY;
+            if (opt.StretchToFill) { scaleX = availW / w; scaleY = availH / h; }
+            else { scaleX = scaleY = Math.Min(availW / w, availH / h); }
+
+            double offX = opt.Margin + (availW - w * scaleX) / 2.0;
+            double offY = opt.Margin + (availH - h * scaleY) / 2.0;
+            return new PlotTransform(scaleX, scaleY, extent.MinX, extent.MinY, offX, offY, opt.Height);
         }
 
-        public float MapX(double x) => (float)(_offX + (x - _srcMinX) * _scale);
+        public float MapX(double x) => (float)(_offX + (x - _srcMinX) * _scaleX);
 
         // HP-GL Y increases upward; raster Y increases downward, so flip.
-        public float MapY(double y) => (float)(_height - (_offY + (y - _srcMinY) * _scale));
+        public float MapY(double y) => (float)(_height - (_offY + (y - _srcMinY) * _scaleY));
     }
 
     internal sealed class GdiSink : IPlotSink, IDisposable

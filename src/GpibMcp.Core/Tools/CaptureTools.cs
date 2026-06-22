@@ -135,7 +135,10 @@ namespace GpibMcp.Tools
                     ? HpglBackground.White : HpglBackground.Black,
                 // 8720/8753 OUTPPLOT carries no IP/SC scale header, so SR label text renders oversized;
                 // let the renderer rescale it to the geometry's frame fill. Other profiles are unaffected. (#55)
-                AutoSizeRelativeText = isOutpplot
+                AutoSizeRelativeText = isOutpplot,
+                // Profiles that ask for it (e.g. the 8720/8753's near-square graticule) fill the page as a
+                // landscape plot instead of preserving aspect. Plot only - PCL print keeps its aspect. (#55)
+                StretchToFill = !isPrint && profile.StretchToFill
             };
 
             byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);

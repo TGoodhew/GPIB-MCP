@@ -72,6 +72,15 @@ namespace GpibMcp.Instruments
         /// <summary>Optional commands to send after capturing, e.g. "CONTS;" to resume continuous sweep.</summary>
         [JsonProperty("postRoll")] public string PostRoll { get; set; }
 
+        /// <summary>
+        /// When true, render the plot stretched to fill the canvas (each axis scaled independently)
+        /// instead of preserving its aspect ratio. The 8720/8753 emit a near-square measurement
+        /// graticule that real hardware/KE5FX show on a landscape page; set this so the capture fills
+        /// the frame the same way. Text stretches with the plot (slightly wider) but stays laid out
+        /// correctly. Plot (HP-GL) only; default false. (#55)
+        /// </summary>
+        [JsonProperty("stretchToFill")] public bool StretchToFill { get; set; }
+
         /// <summary>True when this profile can produce a PCL "print" hardcopy in addition to an HP-GL "plot".</summary>
         [JsonIgnore]
         public bool CanPrint => !string.IsNullOrEmpty(PrintCommand);

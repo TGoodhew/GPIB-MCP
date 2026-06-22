@@ -18,7 +18,8 @@
   },
   "capture": {
     "method": "outpplot",
-    "dumpCommand": "OUTPPLOT"
+    "dumpCommand": "OUTPPLOT",
+    "stretchToFill": true
   },
   "commands": [
     {

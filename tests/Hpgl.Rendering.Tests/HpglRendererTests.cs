@@ -69,6 +69,25 @@ namespace Hpgl.Rendering.Tests
                     "opt-in correction should shrink the oversized label");
         }
 
+        [Fact]
+        public void StretchToFill_FillsBothAxes_ForANonSquarePlot()
+        {
+            // A tall, narrow box: aspect-preserving leaves wide left/right margins on a square canvas;
+            // StretchToFill scales X independently so it reaches both side edges. (#55)
+            var hpgl = "IN;SP1;PU1000,0;PD1500,0;PD1500,7000;PD1000,7000;PD1000,0;";
+            int ColumnHasInk(Bitmap b, int x) { for (int y = 0; y < b.Height; y++) if (b.GetPixel(x, y).ToArgb() != Color.Black.ToArgb()) return 1; return 0; }
+
+            var preserve = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
+            var fill = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false, StretchToFill = true };
+            using (var p = HpglRenderer.RenderToBitmap(hpgl, preserve))
+            using (var f = HpglRenderer.RenderToBitmap(hpgl, fill))
+            {
+                // Near-edge columns: empty when aspect-preserved (centered), inked when stretched to fill.
+                Assert.Equal(0, ColumnHasInk(p, 20) + ColumnHasInk(p, 380));
+                Assert.Equal(2, ColumnHasInk(f, 20) + ColumnHasInk(f, 380));
+            }
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;
