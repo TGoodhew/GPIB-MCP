@@ -111,6 +111,8 @@ namespace GpibMcp.Tests
             string text = output.AsText();
             Assert.Contains("<svg", text);                 // SVG handed to the model to render inline
             Assert.Contains("artifact", text);             // instruction to display it
+            Assert.Contains("INLINE", text);               // names the inline mechanism (issue #48)
+            Assert.Contains("do NOT", text);               // explicitly rules out the file route (issue #48)
             Assert.Contains(output.Content, b => b.Kind == ToolContentKind.Image); // raster kept too
         }
 
