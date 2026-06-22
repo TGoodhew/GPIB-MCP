@@ -42,6 +42,8 @@ namespace CaptureHarness
             string model = null, outBase = null;
             int timeout = 30000;
             bool white = false;
+            string preroll = null, postroll = null;
+            bool prerollSet = false, postrollSet = false;
             for (int i = 1; i < args.Length; i++)
             {
                 switch (args[i])
@@ -52,6 +54,8 @@ namespace CaptureHarness
                     case "--model": model = Next(args, ref i); break;
                     case "--out": outBase = Next(args, ref i); break;
                     case "--timeout": int.TryParse(Next(args, ref i), out timeout); break;
+                    case "--preroll": preroll = Next(args, ref i) ?? ""; prerollSet = true; break;
+                    case "--postroll": postroll = Next(args, ref i) ?? ""; postrollSet = true; break;
                     default: Console.Error.WriteLine("Unknown arg: " + args[i]); Usage(); return 1;
                 }
             }
@@ -83,6 +87,11 @@ namespace CaptureHarness
             }
 
             string command = print ? profile.PrintCommand : profile.PlotCommand;
+            // preRoll/postRoll default to the profile's, but can be overridden (incl. "" to suppress) so
+            // a plot and a print can be taken of the SAME frozen sweep: freeze on the plot, don't resume;
+            // don't re-sweep on the print, then resume.
+            string pre = prerollSet ? preroll : profile.PreRoll;
+            string post = postrollSet ? postroll : profile.PostRoll;
             var options = new CaptureOptions
             {
                 OverallTimeoutMs = timeout,
@@ -93,17 +102,18 @@ namespace CaptureHarness
             Console.WriteLine("  resource : " + resource);
             Console.WriteLine("  model    : " + model);
             Console.WriteLine("  format   : " + (print ? "print (PCL)" : "plot (HP-GL)"));
-            Console.WriteLine("  preRoll  : " + profile.PreRoll);
+            Console.WriteLine("  preRoll  : " + (string.IsNullOrEmpty(pre) ? "(none)" : pre));
             Console.WriteLine("  command  : " + command);
+            Console.WriteLine("  postRoll : " + (string.IsNullOrEmpty(post) ? "(none)" : post));
             Console.WriteLine();
 
             CaptureResult capture;
             using (var visa = new InstrumentManager(new NiVisaTransport()))
             {
-                capture = visa.CaptureScreen(resource, profile.PreRoll, command, options);
-                if (!string.IsNullOrEmpty(profile.PostRoll))
+                capture = visa.CaptureScreen(resource, pre, command, options);
+                if (!string.IsNullOrEmpty(post))
                 {
-                    try { visa.Write(resource, profile.PostRoll, InstrumentManager.DefaultTimeoutMs); }
+                    try { visa.Write(resource, post, InstrumentManager.DefaultTimeoutMs); }
                     catch (Exception ex) { Console.WriteLine("  (post-roll failed: " + ex.Message + ")"); }
                 }
             }
@@ -138,7 +148,10 @@ namespace CaptureHarness
 
         private static void Usage() => Console.Error.WriteLine(
             "Usage:\n" +
-            "  CaptureHarness <resource> [--print|--plot] [--model M] [--out PATHBASE] [--timeout ms] [--white]\n\n" +
+            "  CaptureHarness <resource> [--print|--plot] [--model M] [--out PATHBASE]\n" +
+            "                 [--preroll \"CMDS\"] [--postroll \"CMDS\"] [--timeout ms] [--white]\n\n" +
+            "  --preroll/--postroll override the profile's (pass \"\" to suppress) - e.g. capture a plot\n" +
+            "  and a print of the SAME frozen sweep: plot --postroll \"\", then print --preroll \"\".\n\n" +
             "Examples:\n" +
             "  CaptureHarness GPIB0::18::INSTR --print --model 8563E\n" +
             "  CaptureHarness GPIB0::18::INSTR --plot  --out C:\\tmp\\8563e");
