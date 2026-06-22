@@ -20,7 +20,7 @@
   "capture": {
     "method": "outpplot",
     "dumpCommand": "OUTPPLOT",
-    "stretchToFill": true
+    "plotScaleHeader": "IP250,279,10250,7479;SC0,4095,0,4212;"
   },
   "commands": [
     {
