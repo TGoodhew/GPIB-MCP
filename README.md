@@ -301,7 +301,7 @@ tool blurbs.
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 | `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen as an HP-GL `plot` (vector) or PCL `print` (raster); returns an SVG to show inline + saves a PNG to Pictures |
+| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes); returns an SVG to show inline + saves a PNG to Pictures |
 
 Argument notes:
 
@@ -486,25 +486,31 @@ annotation. Ask Claude:
 
 > *"Capture the screen of the analyzer at GPIB0::18 and show it to me."*
 
-Most GPIB instruments offer **two** hardcopy formats, and the tool renders both:
+The tool supports **three** capture methods, selected by the model's profile:
 
-- **`plot`** (default) — an HP-GL **plotter** dump (vector). The server plays an HP 7470A: it sends
-  the model's `plotCommand`, answers the instrument's `OS` status handshake, and collects the HP-GL,
-  which [`Hpgl.Rendering`](src/Hpgl.Rendering/) renders to a PNG **and** a compact vector **SVG**.
-- **`print`** — an HP **PCL** raster **printer** dump (the format the instrument would send to a
-  ThinkJet/PaintJet/LaserJet). The server sends the model's `printCommand`, reads the raster stream,
-  and [`PclRenderer`](src/Hpgl.Rendering/PclRenderer.cs) decodes it (all PCL 5 compression methods —
-  unencoded, run-length, TIFF PackBits, delta-row, adaptive — plus embedded HP-GL/2) to a PNG.
-  Bench-verified on a real 8563E (a captured dump is the regression fixture `Test/test-print.pcl`).
+- **`plot`** (default, HP-GL boxes) — an HP-GL **plotter** dump (vector). The server plays an HP 7470A:
+  it sends the model's `plotCommand`, answers the instrument's `OS` status handshake, and collects the
+  HP-GL, which [`Hpgl.Rendering`](src/Hpgl.Rendering/) renders to a PNG **and** a compact vector **SVG**.
+- **`print`** (HP-GL boxes) — an HP **PCL** raster **printer** dump (the format the instrument would
+  send to a ThinkJet/PaintJet/LaserJet). The server sends the model's `printCommand`, reads the raster
+  stream, and [`PclRenderer`](src/Hpgl.Rendering/PclRenderer.cs) decodes it (all PCL 5 compression
+  methods — unencoded, run-length, TIFF PackBits, delta-row, adaptive — plus embedded HP-GL/2) to a PNG.
+  Bench-verified on a real 8563E (regression fixture `Test/test-print.pcl`).
+- **SCPI image** (`method: "scpi_block"`, modern boxes like Rigol scopes) — the instrument returns the
+  screen *directly as an image*. The server queries the model's `dumpCommand` (e.g. `:DISP:DATA?`),
+  strips the IEEE 488.2 `#<n><len>` block header ([`Ieee4882Block`](src/GpibMcp.Core/Instruments/Ieee4882Block.cs)),
+  and saves the screenshot. A full-colour screenshot can't be pasted verbatim as an inline artifact, so
+  [`ScreenImage`](src/Hpgl.Rendering/ScreenImage.cs) shows a **downscaled** inline preview while saving
+  the **full-resolution** PNG to disk (the result points the user at the saved file).
 
-**Which format?** Say *"**show** the screen"* and you get a plot. Say *"**capture** the screen"* (or
-leave it ambiguous) and, if the model can print, Claude asks whether you want **plot** or **print**
-before capturing. Pass `format="plot"`/`"print"` to be explicit.
+**Which format (HP-GL boxes)?** Say *"**show** the screen"* → plot. Say *"**capture** the screen"* (or
+leave it ambiguous) and, if the model can print, Claude asks **plot** vs **print** before capturing.
+Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (no `format`).
 
 - The model is taken from the resource's [assignment](#instrument-command-database), or pass `model=`.
-- Only models with a `capture` profile in the database are supported (the 8563E ships with one for
-  both formats; add others as data — `{ "method": "hpgl", "plotCommand": "...", "printCommand":
-  "...", "preRoll": "...", "postRoll": "..." }`. Omit `printCommand` for plot-only models).
+- Only models with a `capture` profile in the database are supported. HP-GL: `{ "method": "hpgl",
+  "plotCommand": "...", "printCommand": "...", "preRoll": "...", "postRoll": "..." }` (omit
+  `printCommand` for plot-only). SCPI image: `{ "method": "scpi_block", "dumpCommand": ":DISP:DATA?" }`.
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`
@@ -748,6 +754,7 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
     AssignmentStore.cs             persistent resource->model assignments
     InstrumentPaths.cs             DB/bindings paths + install-time prepopulation
     ScreenCapture.cs               HP-GL plot handshake + PCL print-stream capture
+    Ieee4882Block.cs               strips the #<n><len> header off a SCPI binary block (#10)
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
     InstrumentIo.cs                resolves a model's IoSpec (terminators + bounded read)
@@ -757,9 +764,10 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
 src/GpibMcp.NiVisa/                the default GPIB backend - the ONLY project that references NI
   NiVisaTransport.cs               NI-VISA / NI-488.2 IGpibTransport (loaded at runtime)
   VisaErrorInfo.cs                 VISA status decoding for friendly/exact errors
-src/Hpgl.Rendering/                standalone HP-GL/2 + PCL -> Bitmap/PNG/SVG renderers (no GPIB deps)
+src/Hpgl.Rendering/                standalone HP-GL/2 + PCL + image -> Bitmap/PNG/SVG (no GPIB deps)
   HpglParser.cs / HpglRenderer.cs  HP-GL/2 plot: parse + render pipeline (auto-fit, fills, arcs, labels)
   PclRasterDecoder.cs / PclRenderer.cs  PCL print: raster decode (all compression methods) -> Bitmap/PNG/SVG
+  ScreenImage.cs                   SCPI image dump: normalize to PNG + bounded inline thumbnail (#10)
   StrokeFont.cs                    built-in monospaced single-stroke vector font
 src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
   CompletionWaiter.cs              SRQ-edge / direct-bit waiter

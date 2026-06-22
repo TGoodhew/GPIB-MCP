@@ -150,5 +150,33 @@ namespace GpibMcp.Tests
             sb.Append((char)0x1B).Append("E");       // reset
             return sb.ToString();
         }
+
+        /// <summary>Commands passed to <see cref="QueryBlock"/> (resource|command).</summary>
+        public readonly List<string> BlockQueries = new List<string>();
+
+        /// <summary>Canned IEEE 488.2 block returned by <see cref="QueryBlock"/> (a #-framed PNG image).</summary>
+        public byte[] BlockResponse = BuildCannedImageBlock();
+
+        public byte[] QueryBlock(string resource, string command, int timeoutMs)
+        {
+            BlockQueries.Add(resource + "|" + command);
+            return BlockResponse;
+        }
+
+        /// <summary>Wraps a tiny valid PNG in an IEEE 488.2 definite-length block: <c>#&lt;n&gt;&lt;len&gt;&lt;png&gt;\n</c>.</summary>
+        private static byte[] BuildCannedImageBlock()
+        {
+            // A minimal valid 1x1 PNG (decodable by System.Drawing).
+            byte[] png = System.Convert.FromBase64String(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+            string len = png.Length.ToString();
+            string header = "#" + len.Length + len;                 // e.g. "#270"
+            byte[] head = System.Text.Encoding.ASCII.GetBytes(header);
+            var block = new byte[head.Length + png.Length + 1];
+            System.Array.Copy(head, 0, block, 0, head.Length);
+            System.Array.Copy(png, 0, block, head.Length, png.Length);
+            block[block.Length - 1] = (byte)'\n';                   // trailing newline some instruments add
+            return block;
+        }
     }
 }

@@ -28,6 +28,13 @@ namespace GpibMcp.Instruments
         string Query(string resource, string command, int timeoutMs);
 
         /// <summary>
+        /// Writes a query and reads the full binary response to EOI (no termination-character handling),
+        /// returning the raw bytes - for IEEE 488.2 arbitrary-block responses such as a SCPI screen
+        /// image (<c>:DISP:DATA?</c>). The caller strips the <c>#&lt;n&gt;&lt;len&gt;</c> header (#10).
+        /// </summary>
+        byte[] QueryBlock(string resource, string command, int timeoutMs);
+
+        /// <summary>
         /// Writes a command and reads the response using the given per-instrument I/O behaviour
         /// (terminators and an optional bounded read), e.g. for a free-running instrument (issue #35).
         /// </summary>

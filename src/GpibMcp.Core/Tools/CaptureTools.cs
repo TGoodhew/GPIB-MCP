@@ -29,7 +29,9 @@ namespace GpibMcp.Tools
                 "FORMAT - 'plot' (HP-GL plotter emulation, vector) or 'print' (PCL raster hardcopy). Decide " +
                 "as follows: if the user says SHOW the screen, use plot. If the user says CAPTURE the screen " +
                 "(or is otherwise ambiguous) and the model supports printing, ASK them whether they want " +
-                "plot or print before capturing. If the model only plots, just plot.",
+                "plot or print before capturing. If the model only plots, just plot. Modern instruments " +
+                "(e.g. Rigol scopes) instead return the screen as a direct image; those are captured " +
+                "automatically and the format arg does not apply.",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::18::INSTR'."),
                     Prop("model", "string", "Model/profile to use if the resource isn't assigned."),
@@ -66,8 +68,15 @@ namespace GpibMcp.Tools
                 return Error("Unknown model '" + model + "'. See instrument_list_models.");
 
             CaptureProfile profile = def.Capture;
-            if (profile == null ||
-                !string.Equals(profile.Method, "hpgl", StringComparison.OrdinalIgnoreCase) ||
+            if (profile == null)
+                return Error("Model '" + def.Model + "' has no capture profile.");
+
+            // SCPI boxes return the screen as a binary image block - a separate path, selected by the
+            // profile's method, with no HP-GL/PCL rendering and no plot/print choice (issue #10).
+            if (string.Equals(profile.Method, "scpi_block", StringComparison.OrdinalIgnoreCase))
+                return CaptureScpiBlock(args, def, profile, visa);
+
+            if (!string.Equals(profile.Method, "hpgl", StringComparison.OrdinalIgnoreCase) ||
                 string.IsNullOrEmpty(profile.PlotCommand))
                 return Error("Model '" + def.Model + "' has no HP-GL capture profile.");
 
@@ -184,6 +193,98 @@ namespace GpibMcp.Tools
                 output.AddImage(png, "image/png");
             }
             if (Bool(args, "return_hpgl", false)) output.AddText(capture.Hpgl);
+            return output;
+        }
+
+        /// <summary>Inline-SVG byte budget: a downscaled thumbnail must fit so the model can paste it verbatim.</summary>
+        private const int InlineSvgBudgetChars = 12000;
+
+        /// <summary>
+        /// SCPI screen dump (issue #10): query the instrument's image block (<c>:DISP:DATA?</c> et al.),
+        /// strip the IEEE 488.2 header, and return the screenshot - saved full-res, shown inline as a
+        /// bounded downscaled thumbnail (a full-colour screenshot can't be pasted verbatim at full size).
+        /// </summary>
+        private static ToolOutput CaptureScpiBlock(JObject args, InstrumentDefinition def,
+                                                   CaptureProfile profile, IInstrumentManager visa)
+        {
+            if (string.IsNullOrEmpty(profile.DumpCommand))
+                return Error("Model '" + def.Model + "' has a scpi_block profile but no dumpCommand.");
+
+            string resource = ReqStr(args, "resource");
+            int timeout = Int(args, "timeout_ms", 30000);
+
+            if (!string.IsNullOrEmpty(profile.PreRoll))
+            {
+                try { visa.Write(resource, profile.PreRoll, InstrumentManager.DefaultTimeoutMs); }
+                catch { /* best effort */ }
+            }
+
+            byte[] block;
+            try { block = visa.QueryBlock(resource, profile.DumpCommand, timeout); }
+            catch (Exception ex) { return Error("Screen dump failed for " + resource + ": " + ex.Message); }
+
+            if (!string.IsNullOrEmpty(profile.PostRoll))
+            {
+                try { visa.Write(resource, profile.PostRoll, InstrumentManager.DefaultTimeoutMs); }
+                catch { /* best effort */ }
+            }
+
+            byte[] imageBytes = Ieee4882Block.ExtractDefiniteLength(block);
+            if (imageBytes == null || imageBytes.Length < 64)
+                return Error("No image returned from " + resource + " (" + (imageBytes?.Length ?? 0) +
+                             " bytes). Check the dump command and that the model returns a screen image.");
+
+            byte[] png;
+            int w, h;
+            try
+            {
+                png = ScreenImage.ToPng(imageBytes);
+                ScreenImage.Dimensions(imageBytes, out w, out h);
+            }
+            catch (Exception ex)
+            {
+                return Error("Captured " + imageBytes.Length + " bytes but it is not a decodable image: " + ex.Message);
+            }
+
+            string savedTo = SaveCapture(args, def.Model + "-screen", png);
+            string savedWhere = savedTo != null ? "at " + savedTo : "in the user's Pictures folder";
+
+            bool inlineSvg = Bool(args, "inline_svg", true);
+            string svg = null;
+            if (inlineSvg)
+            {
+                try { svg = ScreenImage.ToBoundedInlineSvg(imageBytes, InlineSvgBudgetChars); }
+                catch { svg = null; }
+            }
+
+            string meta = def.Model + " screen - " + imageBytes.Length + " bytes image (" + w + "x" + h +
+                          "), SCPI dump";
+            if (savedTo != null) meta += "  |  saved to: " + savedTo;
+
+            var output = new ToolOutput();
+            if (svg != null)
+            {
+                // Same inline-artifact mechanism as a plot/print, but the embedded image is a DOWNSCALED
+                // preview - so explicitly point the user at the full-resolution file (per Tony's request).
+                output.AddText(
+                    "ACTION REQUIRED - show this capture to the user now. They CANNOT see it unless you create " +
+                    "an artifact; the image block in this result is visible only to you, not in their chat. Create " +
+                    "an artifact of type `image/svg+xml` and paste the SVG below into it VERBATIM (copy it exactly - " +
+                    "do not redraw, regenerate, simplify, or describe it). Render it INLINE as an artifact only: do " +
+                    "NOT write the SVG to a file. IMPORTANT: the inline image is a DOWNSCALED preview - after showing " +
+                    "it, tell the user the FULL-RESOLUTION screenshot is saved " + savedWhere + ".\n\n" +
+                    meta + "\n\n" + svg);
+                output.AddImage(png, "image/png"); // full-res raster for vision / clients that render image blocks
+            }
+            else
+            {
+                // Inline disabled, or even the smallest thumbnail exceeded the budget: file + image block.
+                output.AddText(
+                    (inlineSvg ? "The screenshot is too detailed to preview inline. " : "") +
+                    "The full-resolution screenshot is saved " + savedWhere + " and is attached as an image " +
+                    "block (visible to the model and to clients that render image blocks).\n\n" + meta);
+                output.AddImage(png, "image/png");
+            }
             return output;
         }
 

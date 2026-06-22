@@ -49,6 +49,16 @@ namespace GpibMcp.Tests
             Commands = new List<InstrumentCommand>()
         };
 
+        /// <summary>A SCPI-image profile (e.g. a Rigol scope) - captured via a binary block, no HP-GL.</summary>
+        private static InstrumentDefinition WithScpiProfile(string dumpCommand = ":DISP:DATA?") => new InstrumentDefinition
+        {
+            Model = "DS1054Z",
+            Category = "Oscilloscope",
+            Identity = new IdentitySpec { Command = "*IDN?", MatchRegex = "DS1054Z" },
+            Capture = new CaptureProfile { Method = "scpi_block", DumpCommand = dumpCommand },
+            Commands = new List<InstrumentCommand>()
+        };
+
         private static McpTool Tool(InstrumentDatabase db, AssignmentStore store, IInstrumentManager visa)
         {
             InstrumentTools.BuildRegistry(visa, db, store).TryGet("instrument_capture_screen", out var tool);
@@ -180,7 +190,7 @@ namespace GpibMcp.Tests
             var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
                 .Invoke(new JObject { ["resource"] = "GPIB0::7::INSTR", ["model"] = "3325A" });
             Assert.True(output.IsError);
-            Assert.Contains("no HP-GL capture profile", output.AsText());
+            Assert.Contains("no capture profile", output.AsText());
         }
 
         [Fact]
@@ -319,6 +329,63 @@ namespace GpibMcp.Tests
 
             Assert.False(output.IsError);
             Assert.DoesNotContain("format=\"plot\" or format=\"print\"", output.AsText());
+        }
+
+        // ---- method = scpi_block (binary image dump, issue #10) --------------
+
+        [Fact]
+        public void Capture_ScpiBlock_DumpsImage_AndCallsDumpCommand()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithScpiProfile() });
+            var visa = new FakeInstrumentManager();
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "USB0::0x1AB1::0x04CE::INSTR", ["model"] = "DS1054Z" });
+
+            Assert.False(output.IsError);
+            // The dump command (not a plot/print) drove the capture.
+            Assert.Contains("USB0::0x1AB1::0x04CE::INSTR|:DISP:DATA?", visa.BlockQueries);
+            // A valid PNG image block was produced from the decoded image.
+            var image = output.Content.Single(b => b.Kind == ToolContentKind.Image);
+            Assert.Equal("image/png", image.MimeType);
+            var bytes = Convert.FromBase64String(image.Data);
+            Assert.True(bytes.Length > 8 && bytes[0] == 0x89 && bytes[1] == 0x50);
+            Assert.Contains("SCPI dump", output.AsText());
+        }
+
+        [Fact]
+        public void Capture_ScpiBlock_PointsUserToFullResolutionFile()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithScpiProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "USB0::INSTR", ["model"] = "DS1054Z" });
+
+            Assert.False(output.IsError);
+            string text = output.AsText();
+            Assert.Contains("FULL-RESOLUTION", text);   // tells the user the inline is a downscaled preview
+            Assert.Contains("saved", text);
+        }
+
+        [Fact]
+        public void Capture_ScpiBlock_MissingDumpCommand_Errors()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithScpiProfile(dumpCommand: null) });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "USB0::INSTR", ["model"] = "DS1054Z" });
+
+            Assert.True(output.IsError);
+            Assert.Contains("no dumpCommand", output.AsText());
+        }
+
+        [Fact]
+        public void Capture_ScpiBlock_InlineSvgFalse_FallsBackToImageBlock()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithScpiProfile() });
+            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .Invoke(new JObject { ["resource"] = "USB0::INSTR", ["model"] = "DS1054Z", ["inline_svg"] = false });
+
+            Assert.False(output.IsError);
+            Assert.DoesNotContain("<svg", output.AsText());
+            Assert.Contains(output.Content, b => b.Kind == ToolContentKind.Image);
         }
     }
 }

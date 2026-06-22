@@ -76,6 +76,34 @@ namespace GpibMcp.Instruments
             }
         }
 
+        public byte[] QueryBlock(string resource, string command, int timeoutMs)
+        {
+            var io = new IoSpec(timeoutMs);
+            lock (_gate)
+            {
+                string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
+                try
+                {
+                    _transport.Open(resource, Timeout(io.TimeoutMs));
+                    Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload) + " (binary block)");
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    _transport.Write(resource, Latin1.GetBytes(payload), Timeout(io.TimeoutMs));
+
+                    // Read the whole block to EOI as raw bytes: no termination char (binary image data
+                    // contains 0x0A etc.), unbounded so the full image arrives in one logical read.
+                    var req = new TransportReadRequest { TimeoutMs = Timeout(io.TimeoutMs), TermChar = null, MaxBytes = 0 };
+                    byte[] data = _transport.Read(resource, req).Data;
+                    _history.Record(resource, CommandDirection.Received, "<" + data.Length + " bytes binary block>");
+                    Log.Debug("VISA " + resource + " -> " + data.Length + " bytes binary block");
+                    return data;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.Query, resource, command, ex);
+                }
+            }
+        }
+
         public void Write(string resource, string command, int timeoutMs) =>
             Write(resource, command, new IoSpec(timeoutMs));
 
