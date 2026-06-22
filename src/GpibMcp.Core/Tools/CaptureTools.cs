@@ -132,21 +132,10 @@ namespace GpibMcp.Tools
                 Height = Int(args, "height", 768),
                 Background = string.Equals(Str(args, "background", "black"), "white",
                                            StringComparison.OrdinalIgnoreCase)
-                    ? HpglBackground.White : HpglBackground.Black,
-                // Fallback for a plot whose firmware omits the IP/SC header and is NOT repaired by a
-                // plotScaleHeader: rescale oversized SR text to the geometry. No-op once an IP is present
-                // (e.g. after the header injection below), so it never double-corrects. (#55)
-                AutoSizeRelativeText = isOutpplot
+                    ? HpglBackground.White : HpglBackground.Black
             };
 
-            // Inject the profile's plot-scale header (the IP/SC the firmware should have emitted) after the
-            // stream's reset, so a header-less OUTPPLOT plot maps to the plotter frame and renders exactly
-            // as KE5FX does. Plot (HP-GL) only; not PCL. (#55)
-            string renderHpgl = (!isPrint && !string.IsNullOrEmpty(profile.PlotScaleHeader))
-                ? InjectAfterReset(capture.Hpgl, profile.PlotScaleHeader)
-                : capture.Hpgl;
-
-            byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(renderHpgl);
+            byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);
             bool inlineSvg = Bool(args, "inline_svg", true);
 
             // Inline-SVG label fidelity (plot only): 'low' = compact <text> labels (fast); 'high' = exact
@@ -212,25 +201,8 @@ namespace GpibMcp.Tools
                 output.AddText(meta);
                 output.AddImage(png, "image/png");
             }
-            // Return the stream that was actually rendered (header injected), so it re-renders identically.
-            if (Bool(args, "return_hpgl", false)) output.AddText(renderHpgl);
+            if (Bool(args, "return_hpgl", false)) output.AddText(capture.Hpgl);
             return output;
-        }
-
-        /// <summary>
-        /// Inserts <paramref name="header"/> immediately after the captured plot's first reset token
-        /// (IM;/DF;/IN; - whichever appears first), so it survives the reset that clears IP/SC. Falls back
-        /// to prepending if no reset token is found. Used to supply the IP/SC header firmware omits. (#55)
-        /// </summary>
-        private static string InjectAfterReset(string hpgl, string header)
-        {
-            if (string.IsNullOrEmpty(hpgl)) return header;
-            foreach (var token in new[] { "IM;", "DF;", "IN;" })
-            {
-                int i = hpgl.IndexOf(token, StringComparison.Ordinal);
-                if (i >= 0) return hpgl.Substring(0, i + token.Length) + header + hpgl.Substring(i + token.Length);
-            }
-            return header + hpgl;   // no reset token - prepend (best effort)
         }
 
         /// <summary>

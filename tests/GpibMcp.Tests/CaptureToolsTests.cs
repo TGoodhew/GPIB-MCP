@@ -405,33 +405,6 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void Capture_Outpplot_PlotScaleHeader_IsInjectedAfterReset()
-        {
-            // 8720/8753 OUTPPLOT omits the IP/SC header; the profile supplies it. It must be inserted
-            // AFTER the stream's IN/DF reset (DF clears IP/SC), not prepended - here right after "IM;". (#55)
-            var def = WithOutpplotProfile();
-            def.Capture.PlotScaleHeader = "IP250,279,10250,7479;SC0,4095,0,4212;";
-            var db = InstrumentDatabase.FromDefinitions(new[] { def });
-            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
-                .Invoke(new JObject { ["resource"] = "GPIB0::16::INSTR", ["model"] = "8720C", ["return_hpgl"] = true });
-
-            Assert.False(output.IsError);
-            // The fake stream begins "IN;SP1;..."; the header lands immediately after the IN; reset.
-            Assert.Contains("IN;IP250,279,10250,7479;SC0,4095,0,4212;SP1", output.AsText());
-        }
-
-        [Fact]
-        public void Capture_Outpplot_NoPlotScaleHeader_LeavesStreamUnchanged()
-        {
-            var db = InstrumentDatabase.FromDefinitions(new[] { WithOutpplotProfile() });
-            var output = Tool(db, AssignmentStore.InMemory(), new FakeInstrumentManager())
-                .Invoke(new JObject { ["resource"] = "GPIB0::16::INSTR", ["model"] = "8720C", ["return_hpgl"] = true });
-
-            Assert.False(output.IsError);
-            Assert.DoesNotContain("IP250,279,10250,7479;", output.AsText());
-        }
-
-        [Fact]
         public void Capture_ScpiBlock_InlineSvgFalse_FallsBackToImageBlock()
         {
             var db = InstrumentDatabase.FromDefinitions(new[] { WithScpiProfile() });

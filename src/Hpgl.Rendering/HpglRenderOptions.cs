@@ -61,28 +61,6 @@ namespace Hpgl.Rendering
         public bool SvgTextLabels { get; set; } = false;
 
         /// <summary>
-        /// Opt-in: rescale SR (frame-relative) label text to how much the geometry actually fills the
-        /// default plot frame, for streams that set no IP frame. Some instruments omit the scale header
-        /// from their plot output - the 8720/8753 raw OUTPPLOT stream carries no IP/SC, so its geometry
-        /// occupies a fraction of the default frame while SR still sizes text against the whole frame,
-        /// rendering labels ~2x oversized and overlapping. When true (and the stream has no IP), the
-        /// renderer shrinks SR text by the geometry's fill ratio - a no-op if an IP is present. Default
-        /// false: this is a capture-side compensation enabled only for the affected profiles, NOT a
-        /// general renderer behaviour (an instrument whose graticule legitimately has frame margin, e.g.
-        /// the 8563E, must not have its correctly-sized text shrunk). (#55)
-        /// </summary>
-        public bool AutoSizeRelativeText { get; set; } = false;
-
-        /// <summary>
-        /// Opt-in: scale each axis independently so the plot fills the canvas instead of preserving its
-        /// aspect ratio. The 8720/8753 emit a near-square measurement graticule; with this on it is
-        /// stretched to a landscape page (as KE5FX renders it). Because the whole plot - geometry AND text -
-        /// is stretched together, labels stay correctly laid out (no overlap), but the text is proportionally
-        /// wider. Default false (aspect-preserving). (#55)
-        /// </summary>
-        public bool StretchToFill { get; set; } = false;
-
-        /// <summary>
         /// Optional explicit pen palette indexed by HP-GL pen number (SP n -&gt; PenColors[n % len]).
         /// When null, a readable default palette is chosen to suit <see cref="Background"/>.
         /// </summary>

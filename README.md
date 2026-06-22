@@ -518,8 +518,7 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
   VNA record-loop (8720/8753): `{ "method": "outpplot", "dumpCommand": "OUTPPLOT" }` — the dump command is
   sent once and the instrument streams its whole plot as many EOI-bounded HP-GL records (its IP/SC scale
   header first, then geometry), read until the bus goes quiet. The native header gives the correct
-  landscape aspect and text, exactly as KE5FX does. (A profile may set `plotScaleHeader` to inject an IP/SC
-  header after the reset as a fallback for firmware that omits it; the 8720/8753 don't need it.)
+  landscape aspect and text, exactly as KE5FX does.
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`
