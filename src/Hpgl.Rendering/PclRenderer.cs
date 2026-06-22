@@ -56,9 +56,15 @@ namespace Hpgl.Rendering
         }
 
         /// <summary>
-        /// Renders a PCL stream to a self-contained SVG document that embeds the PNG as a data URI. PCL
+        /// Renders a PCL stream to a self-contained SVG document that embeds the raster as a data URI. PCL
         /// output is inherently raster, so - unlike the HP-GL/2 path - there is no vector form; wrapping
-        /// the PNG in an SVG lets it ride the same inline-artifact display path as a plotted capture.
+        /// the bitmap in an SVG lets it ride the same inline-artifact display path as a plotted capture.
+        ///
+        /// The embedded PNG is the NATIVE dot matrix (one pixel per dot) as a 1-bit image, NOT the upscaled
+        /// canvas - so the data URI stays small (comparable to a plotted SVG). This matters because the
+        /// inline path asks the model to reproduce the SVG verbatim into an artifact; a multi-tens-of-KB
+        /// base64 blob stalls that, whereas a native 1-bit raster is a few KB. A viewBox + width/height
+        /// scales it up to fill the artifact, and image-rendering:pixelated keeps the dots crisp.
         /// </summary>
         public static string RenderToSvg(byte[] pcl, HpglRenderOptions options = null)
         {
@@ -67,15 +73,55 @@ namespace Hpgl.Rendering
             if (image.IsEmpty && image.EmbeddedHpgl != null)
                 return HpglRenderer.RenderToSvg(image.EmbeddedHpgl, options);
 
-            byte[] png = RenderToPng(pcl, options);
-            string b64 = Convert.ToBase64String(png);
+            int vw = image.IsEmpty ? options.Width : image.Width;
+            int vh = image.IsEmpty ? options.Height : image.Height;
+            string b64 = image.IsEmpty
+                ? Convert.ToBase64String(RenderToPng(pcl, options))
+                : Convert.ToBase64String(RenderNativePng(image, options.ResolveBackground(), options.ResolvePen(1)));
+
             var sb = new StringBuilder();
             sb.Append("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ")
-              .Append(options.Width).Append(' ').Append(options.Height).Append("\">\n");
-            sb.Append("<image width=\"").Append(options.Width).Append("\" height=\"").Append(options.Height)
-              .Append("\" href=\"data:image/png;base64,").Append(b64).Append("\"/>\n");
+              .Append(vw).Append(' ').Append(vh).Append("\">\n");
+            sb.Append("<image width=\"").Append(vw).Append("\" height=\"").Append(vh)
+              .Append("\" image-rendering=\"pixelated\" href=\"data:image/png;base64,").Append(b64).Append("\"/>\n");
             sb.Append("</svg>");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Encodes the decoded dot matrix as a compact native-resolution 1-bit PNG (palette: background,
+        /// ink). The PCL row bytes are already MSB-first 1-bpp, so they map straight onto the bitmap rows.
+        /// </summary>
+        private static byte[] RenderNativePng(PclRasterImage image, Color background, Color ink)
+        {
+            using (var bmp = new Bitmap(image.Width, image.Height, PixelFormat.Format1bppIndexed))
+            {
+                var palette = bmp.Palette;
+                palette.Entries[0] = background; // bit 0 = background
+                palette.Entries[1] = ink;        // bit 1 = lit dot
+                bmp.Palette = palette;
+
+                var rect = new Rectangle(0, 0, image.Width, image.Height);
+                BitmapData bits = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format1bppIndexed);
+                try
+                {
+                    int stride = bits.Stride;                 // >= RowBytes, padded to 4 bytes
+                    var buffer = new byte[stride * image.Height];
+                    for (int y = 0; y < image.Height; y++)
+                    {
+                        byte[] row = (byte[])image.Rows[y];
+                        Array.Copy(row, 0, buffer, y * stride, Math.Min(stride, row.Length));
+                    }
+                    Marshal.Copy(buffer, 0, bits.Scan0, buffer.Length);
+                }
+                finally { bmp.UnlockBits(bits); }
+
+                using (var ms = new MemoryStream())
+                {
+                    bmp.Save(ms, ImageFormat.Png);
+                    return ms.ToArray();
+                }
+            }
         }
 
         /// <summary>

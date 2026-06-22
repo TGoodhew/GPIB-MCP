@@ -243,6 +243,18 @@ namespace Hpgl.Rendering.Tests
         }
 
         [Fact]
+        public void RenderToSvg_Real8563EPrint_StaysCompactForInlinePaste()
+        {
+            // The inline path asks the model to reproduce the SVG verbatim into an artifact. Embedding the
+            // upscaled 1024x768 raster made a ~32 KB base64 blob that stalled the model (Desktop "hang");
+            // the native 1-bit raster keeps it a few KB - on par with a plotted SVG.
+            byte[] pcl = File.ReadAllBytes(FixturePath("test-print.pcl"));
+            string svg = PclRenderer.RenderToSvg(pcl);
+            Assert.Contains("data:image/png;base64,", svg);
+            Assert.True(svg.Length < 12000, "print SVG must stay compact for inline paste; was " + svg.Length);
+        }
+
+        [Fact]
         public void Render_Real8563EPrint_ProducesNonBlankScreen()
         {
             byte[] pcl = File.ReadAllBytes(FixturePath("test-print.pcl"));
