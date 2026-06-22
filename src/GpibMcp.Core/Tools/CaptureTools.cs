@@ -196,8 +196,13 @@ namespace GpibMcp.Tools
             return output;
         }
 
-        /// <summary>Inline-SVG byte budget: a downscaled thumbnail must fit so the model can paste it verbatim.</summary>
-        private const int InlineSvgBudgetChars = 12000;
+        /// <summary>
+        /// Inline-SVG byte budget for a SCPI screenshot. The model must paste the SVG verbatim, and a
+        /// data-URI PNG is base64 - far harder to reproduce than a vector plot SVG. The working PCL print
+        /// SVG is ~2.8 KB; an ~11 KB base64 blob stalls the model. So keep this near the proven-safe zone:
+        /// a small preview shows, anything bigger falls back to the saved file (issue #10).
+        /// </summary>
+        private const int InlineSvgBudgetChars = 3400;
 
         /// <summary>
         /// SCPI screen dump (issue #10): query the instrument's image block (<c>:DISP:DATA?</c> et al.),
@@ -278,11 +283,15 @@ namespace GpibMcp.Tools
             }
             else
             {
-                // Inline disabled, or even the smallest thumbnail exceeded the budget: file + image block.
+                // Inline disabled, or a full-colour screenshot too detailed to paste verbatim as an
+                // artifact without stalling: deliver via the saved file + the model-visible image block.
                 output.AddText(
-                    (inlineSvg ? "The screenshot is too detailed to preview inline. " : "") +
-                    "The full-resolution screenshot is saved " + savedWhere + " and is attached as an image " +
-                    "block (visible to the model and to clients that render image blocks).\n\n" + meta);
+                    "This is a full-colour instrument screenshot - too detailed to render inline as an " +
+                    "artifact (a large base64 image stalls the paste). It is saved at FULL RESOLUTION " +
+                    savedWhere + ", and the image is attached below as a block that YOU can see. Do this: " +
+                    "(1) describe what is on the instrument's screen for the user, and (2) tell them the " +
+                    "full-resolution screenshot is saved " + savedWhere + ". Do NOT try to create an " +
+                    "image/svg+xml artifact from it.\n\n" + meta);
                 output.AddImage(png, "image/png");
             }
             return output;

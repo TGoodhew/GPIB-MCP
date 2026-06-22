@@ -23,7 +23,7 @@ namespace Hpgl.Rendering
     public static class ScreenImage
     {
         /// <summary>Candidate thumbnail widths (px), largest first; the first whose SVG fits the budget wins.</summary>
-        private static readonly int[] ThumbWidths = { 800, 640, 480, 360, 280, 200, 160 };
+        private static readonly int[] ThumbWidths = { 800, 640, 480, 360, 280, 240, 200, 160, 128, 100, 80 };
 
         /// <summary>
         /// Decodes any supported instrument image (PNG, BMP, GIF, JPEG) and re-encodes it as PNG - so a
