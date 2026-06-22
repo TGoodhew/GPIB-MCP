@@ -24,7 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\GpibMcp\GpibMcp.csproj" />
+    <!-- Core holds the backend-neutral types + tools; NiVisa holds VisaErrorInfo and the NI backend
+         (which the VISA error-decoding tests exercise). -->
+    <ProjectReference Include="..\..\src\GpibMcp.Core\GpibMcp.Core.csproj" />
+    <ProjectReference Include="..\..\src\GpibMcp.NiVisa\GpibMcp.NiVisa.csproj" />
     <ProjectReference Include="..\..\src\Srq.Completion\Srq.Completion.csproj" />
   </ItemGroup>
 

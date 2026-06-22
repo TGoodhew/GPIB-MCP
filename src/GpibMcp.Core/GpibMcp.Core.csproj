@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Backend-neutral core: the MCP server, tools, instrument database, and the IGpibTransport
+    abstraction. Contains NO NI (or any other backend) dependency, so it builds and runs without
+    NI-VISA installed. The NI backend lives in GpibMcp.NiVisa and is loaded at runtime (issue #22).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>GpibMcp.Core</AssemblyName>
+    <RootNamespace>GpibMcp</RootNamespace>
+    <PlatformTarget>x86</PlatformTarget>
+    <Platforms>x86</Platforms>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GpibMcp.Tests" />
+    <!-- Backends are separate assemblies but legitimately use core internals (e.g. CommandText). -->
+    <InternalsVisibleTo Include="GpibMcp.NiVisa" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hpgl.Rendering\Hpgl.Rendering.csproj" />
+    <ProjectReference Include="..\Srq.Completion\Srq.Completion.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Lets `dotnet build` compile net472 without a full VS install. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

@@ -12,7 +12,7 @@ namespace SrqHwHarness
     ///
     /// It deliberately reuses the exact production pieces so a green run here means the server's
     /// instrument_wait_complete tool will behave identically:
-    ///   - I/O:         <see cref="VisaInstrumentManager"/> (the same class the server uses)
+    ///   - I/O:         <see cref="InstrumentManager"/> (the same class the server uses)
     ///   - statusModel: the bundled + user instrument database (<see cref="InstrumentDatabase"/>)
     ///   - resolution:  resource -> assignment -> model, same as the WaitComplete adapter
     ///   - waiter:      <see cref="CompletionWaiter.Wait"/>, traced to the console
@@ -59,7 +59,7 @@ namespace SrqHwHarness
 
             if (opt.List)
             {
-                using (var visaList = new VisaInstrumentManager())
+                using (var visaList = new InstrumentManager(new NiVisaTransport()))
                 {
                     var found = visaList.ListResources(null);
                     Console.WriteLine("VISA resources found: " + found.Count);
@@ -94,12 +94,12 @@ namespace SrqHwHarness
             Console.WriteLine("  timeout  : " + opt.TimeoutMs + " ms, poll " + opt.PollMs + " ms");
             Console.WriteLine();
 
-            using (var visa = new VisaInstrumentManager())
+            using (var visa = new InstrumentManager(new NiVisaTransport()))
             {
                 if (!string.IsNullOrEmpty(opt.Setup))
                 {
                     Console.WriteLine("setup -> " + opt.Setup);
-                    visa.Write(opt.Resource, opt.Setup, VisaInstrumentManager.DefaultTimeoutMs);
+                    visa.Write(opt.Resource, opt.Setup, InstrumentManager.DefaultTimeoutMs);
                 }
 
                 // Same adapter the server's WaitComplete uses: Send=Write, SerialPoll=ReadStatusByte.
@@ -148,7 +148,7 @@ namespace SrqHwHarness
 
             Console.WriteLine("=== SRQ raw probe: " + resource + " ===");
             var clock = Stopwatch.StartNew();
-            using (var visa = new VisaInstrumentManager())
+            using (var visa = new InstrumentManager(new NiVisaTransport()))
             {
                 foreach (var step in steps)
                 {
@@ -161,15 +161,15 @@ namespace SrqHwHarness
                     switch (verb)
                     {
                         case "send":
-                            visa.Write(resource, rest, VisaInstrumentManager.DefaultTimeoutMs);
+                            visa.Write(resource, rest, InstrumentManager.DefaultTimeoutMs);
                             Console.WriteLine("send  -> " + rest);
                             break;
                         case "query":
-                            string resp = visa.Query(resource, rest, VisaInstrumentManager.DefaultTimeoutMs);
+                            string resp = visa.Query(resource, rest, InstrumentManager.DefaultTimeoutMs);
                             Console.WriteLine("query -> " + rest + "  =>  " + (resp == null ? "<null>" : resp.Trim()));
                             break;
                         case "stb":
-                            string stbResp = visa.Query(resource, "STB?", VisaInstrumentManager.DefaultTimeoutMs);
+                            string stbResp = visa.Query(resource, "STB?", InstrumentManager.DefaultTimeoutMs);
                             Console.WriteLine("STB?  -> " + DecodeBoth(ParseInt(stbResp)));
                             break;
                         case "spoll":
@@ -193,7 +193,7 @@ namespace SrqHwHarness
                             break;
                         }
                         case "clear":
-                            visa.Clear(resource, VisaInstrumentManager.DefaultTimeoutMs);
+                            visa.Clear(resource, InstrumentManager.DefaultTimeoutMs);
                             Console.WriteLine("clear (device clear)");
                             break;
                         case "srq":   // prototype of the robust waiter: srq <armMask> <armCmds...>
@@ -202,10 +202,10 @@ namespace SrqHwHarness
                             int armMask = ParseInt(sps < 0 ? rest : rest.Substring(0, sps));
                             string armCmds = sps < 0 ? "TS;" : rest.Substring(sps + 1);
                             const int RQS = 0x40, EXPECT = 0x10, ERR = 0x20; // 8563E read-back layout
-                            visa.Write(resource, "RQS 0", VisaInstrumentManager.DefaultTimeoutMs);
+                            visa.Write(resource, "RQS 0", InstrumentManager.DefaultTimeoutMs);
                             visa.SerialPoll(resource); // best-effort drain
-                            visa.Write(resource, "RQS " + armMask, VisaInstrumentManager.DefaultTimeoutMs);
-                            visa.Write(resource, armCmds, VisaInstrumentManager.DefaultTimeoutMs);
+                            visa.Write(resource, "RQS " + armMask, InstrumentManager.DefaultTimeoutMs);
+                            visa.Write(resource, armCmds, InstrumentManager.DefaultTimeoutMs);
                             Console.WriteLine("srq armed RQS " + armMask + ", started '" + armCmds + "'");
                             long tStart = clock.ElapsedMilliseconds;
                             bool busy = false; int last = -1;
@@ -223,7 +223,7 @@ namespace SrqHwHarness
                                 if (clock.ElapsedMilliseconds - tStart > 30000) { Console.WriteLine("   -> TIMEOUT"); break; }
                                 Thread.Sleep(200);
                             }
-                            visa.Write(resource, "RQS 0;CONTS;", VisaInstrumentManager.DefaultTimeoutMs);
+                            visa.Write(resource, "RQS 0;CONTS;", InstrumentManager.DefaultTimeoutMs);
                             break;
                         }
                         case "sleep":
@@ -297,10 +297,10 @@ namespace SrqHwHarness
         /// <summary>Bridges <see cref="IStatusChannel"/> to real VISA I/O - identical to the server's adapter.</summary>
         private sealed class VisaStatusChannel : IStatusChannel
         {
-            private readonly VisaInstrumentManager _visa;
+            private readonly InstrumentManager _visa;
             private readonly string _resource;
-            public VisaStatusChannel(VisaInstrumentManager visa, string resource) { _visa = visa; _resource = resource; }
-            public void Send(string command) => _visa.Write(_resource, command, VisaInstrumentManager.DefaultTimeoutMs);
+            public VisaStatusChannel(InstrumentManager visa, string resource) { _visa = visa; _resource = resource; }
+            public void Send(string command) => _visa.Write(_resource, command, InstrumentManager.DefaultTimeoutMs);
             public int SerialPoll() => _visa.SerialPoll(_resource);
         }
 

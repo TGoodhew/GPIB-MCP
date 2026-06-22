@@ -25,9 +25,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- The server itself: VisaInstrumentManager, InstrumentDatabase, InstrumentPaths, AssignmentStore.
-         Brings Srq.Completion transitively, but reference it explicitly for clarity. -->
-    <ProjectReference Include="..\..\src\GpibMcp\GpibMcp.csproj" />
+    <!-- The backend-neutral core (InstrumentManager, InstrumentDatabase, InstrumentPaths,
+         AssignmentStore) plus the NI backend it drives directly on the bench. Brings Srq.Completion
+         transitively, but reference it explicitly for clarity. -->
+    <ProjectReference Include="..\..\src\GpibMcp.Core\GpibMcp.Core.csproj" />
+    <ProjectReference Include="..\..\src\GpibMcp.NiVisa\GpibMcp.NiVisa.csproj" />
     <ProjectReference Include="..\..\src\Srq.Completion\Srq.Completion.csproj" />
   </ItemGroup>
 
