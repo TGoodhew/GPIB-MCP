@@ -132,7 +132,10 @@ namespace GpibMcp.Tools
                 Height = Int(args, "height", 768),
                 Background = string.Equals(Str(args, "background", "black"), "white",
                                            StringComparison.OrdinalIgnoreCase)
-                    ? HpglBackground.White : HpglBackground.Black
+                    ? HpglBackground.White : HpglBackground.Black,
+                // 8720/8753 OUTPPLOT carries no IP/SC scale header, so SR label text renders oversized;
+                // let the renderer rescale it to the geometry's frame fill. Other profiles are unaffected. (#55)
+                AutoSizeRelativeText = isOutpplot
             };
 
             byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);

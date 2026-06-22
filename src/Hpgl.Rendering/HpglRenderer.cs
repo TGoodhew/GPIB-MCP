@@ -39,9 +39,11 @@ namespace Hpgl.Rendering
             options = options ?? new HpglRenderOptions();
             var instructions = HpglParser.Parse(hpgl ?? string.Empty);
 
+            double textScale = options.AutoSizeRelativeText ? TextScaleFor(instructions) : 1.0;
+
             // Pass 1: measure the drawn extent so the transform can auto-fit it.
             var measure = new MeasureSink();
-            Execute(instructions, measure);
+            Execute(instructions, measure, textScale);
 
             var bmp = new Bitmap(options.Width, options.Height, PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(bmp))
@@ -53,7 +55,7 @@ namespace Hpgl.Rendering
                 {
                     var transform = PlotTransform.Fit(measure, options);
                     using (var draw = new GdiSink(g, transform, options))
-                        Execute(instructions, draw);
+                        Execute(instructions, draw, textScale);
                 }
             }
             return bmp;
@@ -85,8 +87,10 @@ namespace Hpgl.Rendering
             options = options ?? new HpglRenderOptions();
             var instructions = HpglParser.Parse(hpgl ?? string.Empty);
 
+            double textScale = options.AutoSizeRelativeText ? TextScaleFor(instructions) : 1.0;
+
             var measure = new MeasureSink();
-            Execute(instructions, measure);
+            Execute(instructions, measure, textScale);
 
             var sb = new StringBuilder();
             // Pure responsive root: a viewBox (the coordinate system) + preserveAspectRatio, and NO fixed
@@ -103,7 +107,7 @@ namespace Hpgl.Rendering
             {
                 var transform = PlotTransform.Fit(measure, options);
                 var sink = new SvgSink(sb, transform, options);
-                Execute(instructions, sink);
+                Execute(instructions, sink, textScale);
                 sink.Flush();
             }
 
@@ -124,9 +128,37 @@ namespace Hpgl.Rendering
         // applies uniformly to vectors, fills, and label strokes.
         // ---------------------------------------------------------------------
 
-        private static void Execute(IList<HpglInstruction> instructions, IPlotSink rawSink)
+        // SR (relative) text-size correction for streams that set no IP frame. SR sizes labels as a
+        // percentage of the P1/P2 (IP) frame. A stream that omits IP/SC - notably the 8720/8753 raw
+        // OUTPPLOT plot - emits its geometry in a coordinate range much smaller than the default frame,
+        // while SR still references that big default frame, so the text comes out ~2x oversized and
+        // overlaps. When the caller opts in (HpglRenderOptions.AutoSizeRelativeText), we measure the
+        // geometry alone (no labels) and shrink SR text by how much that geometry under-fills the default
+        // frame. No-op when an IP is present or the geometry already fills the frame. Opt-in only, so
+        // instruments whose graticule legitimately has frame margin (8563E) are unaffected. (#55)
+        internal static double TextScaleFor(IList<HpglInstruction> instructions)
         {
-            var state = new PlotterState();
+            if (HasInputPoints(instructions)) return 1.0;     // explicit frame -> trust the stream's sizing
+            var geom = new MeasureSink();
+            Execute(instructions, geom, 1.0, geometryOnly: true);
+            if (!geom.HasExtent) return 1.0;
+            double gw = Math.Max(1, geom.MaxX - geom.MinX);
+            double gh = Math.Max(1, geom.MaxY - geom.MinY);
+            double fill = Math.Min(PlotterState.DefaultFrameWidth / gw, PlotterState.DefaultFrameHeight / gh);
+            return fill > 1.0 ? 1.0 / fill : 1.0;             // only shrink oversized text; never enlarge
+        }
+
+        private static bool HasInputPoints(IList<HpglInstruction> instructions)
+        {
+            foreach (var i in instructions)
+                if (i.Mnemonic == "IP" && i.Parameters.Count >= 4) return true;
+            return false;
+        }
+
+        private static void Execute(IList<HpglInstruction> instructions, IPlotSink rawSink,
+            double textScale = 1.0, bool geometryOnly = false)
+        {
+            var state = new PlotterState { TextScale = textScale };
             var sink = new ClipSink(rawSink, state);
             PolygonRecorder recorder = null;   // non-null while in polygon mode (PM0..PM2)
             foreach (var instruction in instructions)
@@ -164,7 +196,7 @@ namespace Hpgl.Rendering
                     case "SS": state.ActiveAlternate = false; break;
                     case "SA": state.ActiveAlternate = true; break;
                     case "SM": state.SymbolChar = !string.IsNullOrEmpty(instruction.Text) ? instruction.Text[0] : -1; break;
-                    case "LB": DrawLabel(state, instruction.Text, sink); break;
+                    case "LB": if (!geometryOnly) DrawLabel(state, instruction.Text, sink); break;
                     case "DT": break; // label terminator is resolved by the parser
                     case "CT": if (instruction.Parameters.Count > 0) { /* chord mode (deg/dev) - degrees only */ } break;
                     case "CI": Circle(state, instruction.Parameters, geom); break;
@@ -666,7 +698,8 @@ namespace Hpgl.Rendering
         // square frame. The aspect matters: under SC, scaleX/scaleY = (P2x-P1x)/(P2y-P1y), so a square
         // user range (e.g. SC 0,500,0,500) yields ELLIPSES on real hardware, and seeds SR char size,
         // ticks (TL/XT/YT) and the default hatch spacing. (#28)
-        private const double DefP2X = 10000, DefP2Y = 7200;
+        public const double DefaultFrameWidth = 10000, DefaultFrameHeight = 7200;
+        private const double DefP2X = DefaultFrameWidth, DefP2Y = DefaultFrameHeight;
         private double _ipX1 = 0, _ipY1 = 0, _ipX2 = DefP2X, _ipY2 = DefP2Y;
         private double _scXmin, _scXmax, _scYmin, _scYmax;
         private bool _scaled;
@@ -693,6 +726,10 @@ namespace Hpgl.Rendering
         public bool ActiveAlternate;
         public int SymbolChar = -1;          // -1 = symbol mode off
         public double ChordAngleDeg = 5.0;   // arc/circle subdivision step (HP-GL default 5°)
+
+        // SR text-size correction (1 = none): set <1 by the renderer (opt-in) to shrink frame-relative
+        // label text for streams that omit IP. Survives IN/DF (not reset). See TextScaleFor. (#55)
+        public double TextScale = 1.0;
 
         // Area-fill state (FT/PT). Type 1/2 = solid, 3 = parallel hatch, 4 = cross-hatch.
         public int FillType = 1;
@@ -875,9 +912,10 @@ namespace Hpgl.Rendering
 
         public void SetCharSizeRelative(IReadOnlyList<double> p)
         {
-            // SR width,height as a percentage of the IP frame. SR; -> 0.75% x 1.5%.
-            if (p.Count >= 2) { CharWidthUnits = p[0] / 100.0 * FrameWidth; CharHeightUnits = p[1] / 100.0 * FrameHeight; }
-            else { CharWidthUnits = 0.0075 * FrameWidth; CharHeightUnits = 0.015 * FrameHeight; }
+            // SR width,height as a percentage of the IP frame. SR; -> 0.75% x 1.5%. TextScale (1 unless the
+            // caller opted into the IP-less correction) shrinks the result to the geometry's frame fill (#55).
+            if (p.Count >= 2) { CharWidthUnits = p[0] / 100.0 * FrameWidth * TextScale; CharHeightUnits = p[1] / 100.0 * FrameHeight * TextScale; }
+            else { CharWidthUnits = 0.0075 * FrameWidth * TextScale; CharHeightUnits = 0.015 * FrameHeight * TextScale; }
         }
 
         public void SetSlant(IReadOnlyList<double> p) => SlantTan = p.Count >= 1 ? p[0] : 0;

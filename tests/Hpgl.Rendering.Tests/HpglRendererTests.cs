@@ -22,6 +22,53 @@ namespace Hpgl.Rendering.Tests
             "SP1;PU500,6700;LBCF 300 MHz" + ((char)3) + ";" +     // label (ETX-terminated)
             "PU0,0;SP0;";                                           // pen up / done
 
+        // ---- opt-in SR text-size correction for IP-less streams (#55) ------------
+        // A stream that sets no IP frame but uses SR (relative char size) - like the raw 8720/8753
+        // OUTPPLOT plot - emits geometry in a range smaller than the default frame, so SR text comes out
+        // oversized. With AutoSizeRelativeText, TextScaleFor shrinks it to the geometry's frame fill; it is
+        // a no-op when an IP is present or the geometry already fills the frame, and off by default.
+
+        [Fact]
+        public void TextScale_ShrinksText_WhenNoIpAndGeometryUnderfillsFrame()
+        {
+            // Geometry ~3500 x 4000, well under the 10000 x 7200 default frame; SR label; no IP.
+            var hpgl = "IN;SP1;SR0.98,1.52;PU0,0;PD3500,0;PD3500,4000;PD0,4000;PD0,0;PU100,3800;LBHi" + (char)3 + ";";
+            double ts = HpglRenderer.TextScaleFor(HpglParser.Parse(hpgl));
+            Assert.True(ts < 0.95, $"expected text to shrink, got {ts}");
+        }
+
+        [Fact]
+        public void TextScale_IsNoOp_WhenGeometryFillsFrame()
+        {
+            // Geometry ~9300 x 7200 (fills the default frame, like the 8563E plotting near full page); no IP.
+            var hpgl = "IN;SP1;SR0.98,1.52;PU200,0;PD9500,0;PD9500,7200;PD200,7200;PD200,0;PU300,7000;LBHi" + (char)3 + ";";
+            double ts = HpglRenderer.TextScaleFor(HpglParser.Parse(hpgl));
+            Assert.Equal(1.0, ts, 3);
+        }
+
+        [Fact]
+        public void TextScale_IsNoOp_WhenIpIsPresent()
+        {
+            // Same small geometry, but an explicit IP frame means the stream's sizing is trusted.
+            var hpgl = "IN;IP0,0,3500,4000;SP1;SR0.98,1.52;PU0,0;PD3500,0;PD3500,4000;PD0,4000;PU100,3800;LBHi" + (char)3 + ";";
+            double ts = HpglRenderer.TextScaleFor(HpglParser.Parse(hpgl));
+            Assert.Equal(1.0, ts, 3);
+        }
+
+        [Fact]
+        public void AutoSizeRelativeText_OptIn_ShrinksLabelExtent_LeavesGeometry()
+        {
+            // With the correction on, an IP-less oversized-SR label marks fewer pixels than with it off,
+            // while the (label-free) geometry is identical - proving only the text shrank.
+            var hpgl = "IN;SP1;SR2,3;PU0,0;PD3000,0;PD3000,3500;PD0,3500;PD0,0;PU200,3200;LBWIDE" + (char)3 + ";";
+            var baseOpt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false };
+            var onOpt = new HpglRenderOptions { Width = 400, Height = 400, Background = HpglBackground.Black, Antialias = false, AutoSizeRelativeText = true };
+            using (var off = HpglRenderer.RenderToBitmap(hpgl, baseOpt))
+            using (var on = HpglRenderer.RenderToBitmap(hpgl, onOpt))
+                Assert.True(CountNonBackgroundPixels(on, Color.Black) < CountNonBackgroundPixels(off, Color.Black),
+                    "opt-in correction should shrink the oversized label");
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;
