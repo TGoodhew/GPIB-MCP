@@ -285,7 +285,7 @@ namespace Hpgl.Rendering
             double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
             double sx = s.CharWidthUnits / StrokeFont.Em;
             double sy = s.CharHeightUnits / StrokeFont.Cap;
-            const double cgx = 2, cgy = 3; // approximate glyph centre in grid units (Em/2, Cap/2)
+            const double cgx = 3, cgy = 3; // approximate glyph centre in grid units (Em/2, Cap/2)
 
             foreach (var stroke in glyph)
                 for (int k = 0; k + 3 < stroke.Length; k += 2)
