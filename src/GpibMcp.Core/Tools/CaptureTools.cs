@@ -128,12 +128,17 @@ namespace GpibMcp.Tools
                         // unmistakable directive: the user can ONLY see this via an artifact, and the image
                         // block below is visible to the model alone - so "seeing" it is not "showing" it.
                         // Tell the model to PASTE THE SVG VERBATIM (copying is fast/exact; redrawing stalls).
+                        // Name the inline mechanism and explicitly rule out the file route - otherwise the model
+                        // can rationalise writing the SVG to a file, which is NOT shown inline (issue #48).
                         output.AddText(
                             "ACTION REQUIRED - show this capture to the user now. They CANNOT see it unless you " +
                             "create an artifact; the image block in this result is visible only to you, not in their " +
                             "chat, so describing or summarising the screen does NOT show it to them. Create an artifact " +
                             "of type `image/svg+xml` and paste the SVG below into it VERBATIM (copy it exactly - do not " +
-                            "redraw, regenerate, simplify, or describe it). Do this before saying anything else.\n\n" +
+                            "redraw, regenerate, simplify, or describe it). Render it INLINE as an artifact only: do NOT " +
+                            "write the SVG to a file, save it to outputs, or use any file-presentation path - a saved " +
+                            "file is not shown inline in the chat and does NOT satisfy this. Do this before saying " +
+                            "anything else.\n\n" +
                             meta + "\n\n" + svg);
                         output.AddImage(png, "image/png"); // also the raster, for vision / clients that render image blocks
                         if (!fidelityChosen) output.AddText(FidelityPrompt());
