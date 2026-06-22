@@ -91,7 +91,8 @@ namespace GpibMcp.Tests
         [Fact]
         public void CaptureRecordStream_AssemblesRecords_AndStopsOnEmpty()
         {
-            // OUTPPLOT-style: each read returns one HP-GL record; an empty read marks the end (#55).
+            // OUTPPLOT-style: the dump command is sent ONCE, then each read returns one HP-GL record;
+            // an empty read marks the end. Re-sending per record would skip the analyzer's header (#55).
             var t = new RecordStreamTransport(";;;;DF;IM;", "SP1;PU100,200;", "PD300,400;SP0;");
             var mgr = new InstrumentManager(t);
 
@@ -100,7 +101,7 @@ namespace GpibMcp.Tests
 
             Assert.Equal(";;;;DF;IM;SP1;PU100,200;PD300,400;SP0;", result.Hpgl); // all records, in order
             Assert.Equal(CaptureCompletion.Inactivity, result.Completion);       // stopped on the empty record
-            Assert.Equal(4, t.WriteCount);                                        // one OUTPPLOT per record + one that returns empty
+            Assert.Equal(1, t.WriteCount);                                        // OUTPPLOT sent exactly once
         }
 
         private sealed class NonNativeTransport : FakeTransportBase { }

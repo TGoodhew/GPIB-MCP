@@ -515,11 +515,11 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 - Only models with a `capture` profile in the database are supported. HP-GL: `{ "method": "hpgl",
   "plotCommand": "...", "printCommand": "...", "preRoll": "...", "postRoll": "..." }` (omit
   `printCommand` for plot-only). SCPI image: `{ "method": "scpi_block", "dumpCommand": ":DISP:DATA?" }`.
-  VNA record-loop (8720/8753): `{ "method": "outpplot", "dumpCommand": "OUTPPLOT", "plotScaleHeader":
-  "IP250,279,10250,7479;SC0,4095,0,4212;" }` — the plot is streamed as many small HP-GL records and
-  assembled. This firmware omits the IP/SC scale header from its plot output, so `plotScaleHeader` supplies
-  the scale it should have emitted (injected after the stream's reset); the plot then renders with the
-  correct landscape aspect and text, exactly as KE5FX does.
+  VNA record-loop (8720/8753): `{ "method": "outpplot", "dumpCommand": "OUTPPLOT" }` — the dump command is
+  sent once and the instrument streams its whole plot as many EOI-bounded HP-GL records (its IP/SC scale
+  header first, then geometry), read until the bus goes quiet. The native header gives the correct
+  landscape aspect and text, exactly as KE5FX does. (A profile may set `plotScaleHeader` to inject an IP/SC
+  header after the reset as a fallback for firmware that omits it; the 8720/8753 don't need it.)
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`

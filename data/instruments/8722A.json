@@ -19,8 +19,7 @@
   },
   "capture": {
     "method": "outpplot",
-    "dumpCommand": "OUTPPLOT",
-    "plotScaleHeader": "IP250,279,10250,7479;SC0,4095,0,4212;"
+    "dumpCommand": "OUTPPLOT"
   },
   "commands": [
     {

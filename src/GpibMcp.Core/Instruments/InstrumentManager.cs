@@ -109,11 +109,32 @@ namespace GpibMcp.Instruments
             }
         }
 
+        /// <summary>Reads one EOI-bounded record without sending a command (for the record stream, which
+        /// issues its dump command once and then reads). A timed-out read returns empty (no throw).</summary>
+        private byte[] ReadBlockNoLock(string resource, int timeoutMs)
+        {
+            try
+            {
+                _transport.Open(resource, Timeout(timeoutMs));
+                var req = new TransportReadRequest { TimeoutMs = Timeout(timeoutMs), TermChar = null, MaxBytes = MaxImageBlockBytes };
+                byte[] data = _transport.Read(resource, req).Data;
+                _history.Record(resource, CommandDirection.Received, "<" + data.Length + " bytes>");
+                return data;
+            }
+            catch (Exception ex) when (!(ex is GpibOperationException))
+            {
+                throw Fail(GpibOperation.Query, resource, "<read>", ex);
+            }
+        }
+
         /// <summary>
-        /// Captures HP-GL by looping a record-output query (e.g. <c>OUTPPLOT</c> on the 8720/8753 VNAs):
-        /// the instrument streams its plot as many small HP-GL records, one per query. Each record is read
-        /// to EOI and appended until an empty record signals the end (or the backstop fires). The assembled
-        /// HP-GL renders through the normal plot path. Issue #55.
+        /// Captures HP-GL from a record-output query (e.g. <c>OUTPPLOT</c> on the 8720/8753 VNAs). The
+        /// dump command is sent ONCE; the instrument then streams its whole plot as many EOI-bounded HP-GL
+        /// records (its IP/SC scale header first, then geometry), which we read to EOI and append until a
+        /// read returns empty (the bus goes quiet) or the backstop fires. Re-sending the command per record
+        /// makes the analyzer skip past the header records - confirmed against a 7440-app NI I/O trace, which
+        /// writes OUTPPLOT once and then only reads. The assembled HP-GL renders through the normal plot
+        /// path. Issue #55.
         /// </summary>
         public CaptureResult CaptureRecordStream(string resource, string preRoll, string command, CaptureOptions options)
         {
@@ -131,12 +152,18 @@ namespace GpibMcp.Instruments
                         _transport.Write(resource, Latin1.GetBytes(CommandText.EnsureTerminated(preRoll)), DefaultTimeoutMs);
 
                     Log.Info("Record-stream capture start: " + resource + " cmd='" + command + "'");
+
+                    // Send the dump command ONCE, then read records until the stream is exhausted.
+                    string payload = CommandText.EnsureTerminated(command);
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    _transport.Write(resource, Latin1.GetBytes(payload), perRecordMs);
+
                     var buffer = new StringBuilder();
                     int records = 0;
                     const int maxRecords = 4000; // runaway guard
                     for (int i = 0; i < maxRecords; i++)
                     {
-                        byte[] rec = QueryBlockNoLock(resource, command, perRecordMs);
+                        byte[] rec = ReadBlockNoLock(resource, perRecordMs);
                         if (rec == null || rec.Length == 0) break;   // empty record -> plot exhausted
                         foreach (byte b in rec) buffer.Append((char)b);
                         records++;

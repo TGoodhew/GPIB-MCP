@@ -73,13 +73,13 @@ namespace GpibMcp.Instruments
         [JsonProperty("postRoll")] public string PostRoll { get; set; }
 
         /// <summary>
-        /// Optional HP-GL scale header injected into a captured plot right after its IN/DF reset (NOT sent
-        /// to the bus). Some firmware omits the coordinate-scaling header from its plot output - the
-        /// 8720/8753 raw OUTPPLOT stream carries no IP/SC, so without it the geometry isn't mapped to the
-        /// plotter frame and SR label text renders oversized. Supplying the IP/SC the firmware should have
-        /// emitted (e.g. "IP250,279,10250,7479;SC0,4095,0,4212;") makes it render exactly as KE5FX does -
-        /// correct landscape aspect and text. It must follow the reset (DF clears IP/SC), so it is inserted
-        /// after the stream's first IM;/DF;/IN;, not prepended. Plot (HP-GL) only. (#55)
+        /// Optional fallback HP-GL scale header injected into a captured plot right after its IN/DF reset
+        /// (NOT sent to the bus). The 8720/8753 stream their own IP/SC header natively (the capture loop
+        /// reads it - see <c>CaptureRecordStream</c>), so they do NOT set this. It exists for firmware that
+        /// genuinely omits the coordinate-scaling header: supplying the IP/SC it should have emitted
+        /// (e.g. "IP250,279,10250,7479;SC0,4095,0,4212;") maps the geometry to the plotter frame so SR text
+        /// is not oversized. It must follow the reset (DF clears IP/SC), so it is inserted after the
+        /// stream's first IM;/DF;/IN;, not prepended. Plot (HP-GL) only. (#55)
         /// </summary>
         [JsonProperty("plotScaleHeader")] public string PlotScaleHeader { get; set; }
 
