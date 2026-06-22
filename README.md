@@ -771,7 +771,7 @@ src/Hpgl.Rendering/                standalone HP-GL/2 + PCL + image -> Bitmap/PN
   HpglParser.cs / HpglRenderer.cs  HP-GL/2 plot: parse + render pipeline (auto-fit, fills, arcs, labels)
   PclRasterDecoder.cs / PclRenderer.cs  PCL print: raster decode (all compression methods) -> Bitmap/PNG/SVG
   ScreenImage.cs                   SCPI image dump: normalize to PNG + bounded inline thumbnail (#10)
-  StrokeFont.cs                    built-in monospaced single-stroke vector font
+  StrokeFont.cs                    single-stroke vector font (generated from the KE5FX vchar table, #31)
 src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
   CompletionWaiter.cs              SRQ-edge / direct-bit waiter
   StatusModel.cs / IStatusChannel.cs  data model + transport abstraction
