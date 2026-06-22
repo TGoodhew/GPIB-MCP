@@ -17,6 +17,10 @@
     "supported": true,
     "description": "Standard SCPI identification query; returns manufacturer, model (DS1074Z Plus), serial number and firmware version."
   },
+  "capture": {
+    "method": "scpi_block",
+    "dumpCommand": ":DISP:DATA?"
+  },
   "commands": [
     {
       "name": "autoscale",

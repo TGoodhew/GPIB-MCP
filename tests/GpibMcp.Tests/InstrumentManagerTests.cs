@@ -36,6 +36,24 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void QueryBlock_WritesCommand_AndReadsBinaryViaBoundedRawPath()
+        {
+            // Binary image bytes (incl. 0x0A, high bytes) survive the round-trip; the read must use the
+            // bounded RAW path (no term char, large cap) - the unbounded text path breaks on binary (#10).
+            string binary = new string(new[] { (char)0x89, (char)0x50, (char)0x0A, (char)0xFF, (char)0x42, (char)0x4D });
+            var t = new FakeTransport { NextRead = binary };
+            var mgr = new InstrumentManager(t);
+
+            byte[] data = mgr.QueryBlock("GPIB0::5::INSTR", ":DISP:DATA?", 4000);
+
+            Assert.Equal(":DISP:DATA?\n", Assert.Single(t.Writes));         // command sent (terminated)
+            var req = Assert.Single(t.Reads);
+            Assert.Null(req.TermChar);                                       // no termination char (binary)
+            Assert.Equal(InstrumentManager.MaxImageBlockBytes, req.MaxBytes); // bounded raw read
+            Assert.Equal(new byte[] { 0x89, 0x50, 0x0A, 0xFF, 0x42, 0x4D }, data);
+        }
+
+        [Fact]
         public void Capabilities_ComeFromTheTransport()
         {
             var t = new FakeTransport

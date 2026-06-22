@@ -102,7 +102,8 @@ namespace GpibMcp.Instruments
                 }
             }
 
-            // Unbounded: read to termination/EOI; a timeout here is a genuine error and throws.
+            // Unbounded text read: to termination/EOI as a string. (Binary block reads use the bounded
+            // raw path above with a large MaxBytes - ReadString text-decodes and throws on image bytes.)
             return new TransportReadResult(Latin1.GetBytes(session.RawIO.ReadString()), false);
         }
 
