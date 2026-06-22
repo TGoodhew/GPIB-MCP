@@ -294,6 +294,7 @@ tool blurbs.
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
+| `resolve_setting` | `model`, `command`, `value` | `unit` | Map a human value+unit (e.g. 1 GHz) to the exact wire string to send, converting to a token the box accepts (→ `FR 1000 MZ`); see [unit tokens](docs/instrument-unit-tokens.md) |
 | `instrument_identify` | `resource` | `read_bytes` | Query identity and match against the database |
 | `set_termination` | — (`model` or `resource`) | `read_terminator`, `write_terminator`, `max_read_bytes`, `confirm` | Set a model's read/write terminators and an optional bounded read for free-running instruments (persists on `confirm=true`) |
 | `assign_instrument` | `resource`, `model` | `confirm`, `verify` | Record that a model sits at a resource (persists on `confirm=true`) |

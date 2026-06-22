@@ -37,6 +37,56 @@ namespace GpibMcp.Tests
             return (db, AssignmentStore.InMemory(), new FakeInstrumentManager());
         }
 
+        /// <summary>A model with a settable frequency command carrying audited unit tokens (no GHz token).</summary>
+        private static InstrumentDefinition WithUnitTokens() => new InstrumentDefinition
+        {
+            Model = "8657B",
+            Commands = new List<InstrumentCommand>
+            {
+                new InstrumentCommand { Name = "frequency", Mnemonic = "FR", Set = "FR <value> <unit>",
+                    Parameters = new List<CommandParameter> { new CommandParameter { Name = "frequency",
+                        Units = new List<UnitToken> { new UnitToken("HZ","Hz"), new UnitToken("KZ","kHz"), new UnitToken("MZ","MHz") } } } },
+                new InstrumentCommand { Name = "raw", Mnemonic = "RW", Set = "RW <value> <unit>",
+                    Parameters = new List<CommandParameter> { new CommandParameter { Name = "v",
+                        Units = new List<UnitToken> { new UnitToken("HZ"), new UnitToken("KZ") } } } }, // unaudited
+            }
+        };
+
+        private static string ResolveSetting(JObject args)
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithUnitTokens() });
+            return Tool("resolve_setting", db, AssignmentStore.InMemory(), new FakeInstrumentManager()).InvokeText(args);
+        }
+
+        [Fact]
+        public void ResolveSetting_ConvertsGhzToMHzToken()
+        {
+            // The motivating case: 1 GHz on a box whose top frequency token is MHz -> FR 1000 MZ.
+            var text = ResolveSetting(new JObject { ["model"] = "8657B", ["command"] = "FR", ["value"] = 1, ["unit"] = "GHz" });
+            Assert.Contains("Send: FR 1000 MZ", text);
+        }
+
+        [Fact]
+        public void ResolveSetting_ExactUnit_NoConversion()
+        {
+            var text = ResolveSetting(new JObject { ["model"] = "8657B", ["command"] = "frequency", ["value"] = 100, ["unit"] = "MHz" });
+            Assert.Contains("Send: FR 100 MZ", text);
+        }
+
+        [Fact]
+        public void ResolveSetting_UnauditedTokens_SaysSo()
+        {
+            var text = ResolveSetting(new JObject { ["model"] = "8657B", ["command"] = "RW", ["value"] = 1, ["unit"] = "MHz" });
+            Assert.Contains("not audited", text);
+        }
+
+        [Fact]
+        public void ResolveSetting_UnknownCommand_Errors()
+        {
+            var text = ResolveSetting(new JObject { ["model"] = "8657B", ["command"] = "NOPE", ["value"] = 1, ["unit"] = "MHz" });
+            Assert.Contains("no command matching", text);
+        }
+
         [Fact]
         public void ListModels_ReportsKnownInstruments()
         {
