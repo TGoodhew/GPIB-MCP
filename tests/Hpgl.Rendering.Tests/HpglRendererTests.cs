@@ -88,6 +88,27 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
+        [Fact]
+        public void PenDownBeforeFirstCoordinate_DoesNotStreakFromOrigin()
+        {
+            // The 8720/8753 emit PD before their first PA. The first coordinate must only position the
+            // pen (no line drawn to it from the default origin), else a line streaks from the corner to
+            // the first trace point. Here the only real geometry is a vertical line; a streak would
+            // widen the inked region into a triangle. (#55)
+            var hpgl = "IN;PD;PA8000,2000;PA8000,6000;";
+            var opt = new HpglRenderOptions { Width = 200, Height = 200, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(hpgl, opt))
+            {
+                int minX = bmp.Width, maxX = -1, minY = bmp.Height, maxY = -1;
+                for (int y = 0; y < bmp.Height; y++)
+                    for (int x = 0; x < bmp.Width; x++)
+                        if (bmp.GetPixel(x, y).ToArgb() != Color.Black.ToArgb())
+                        { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+                Assert.True(maxY - minY > 100, "the vertical line should span most of the height");
+                Assert.True(maxX - minX < 20, $"a streak from the origin would widen the ink; width={maxX - minX}");
+            }
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;

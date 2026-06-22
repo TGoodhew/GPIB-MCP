@@ -230,9 +230,14 @@ namespace Hpgl.Rendering
             {
                 double nx, ny;
                 state.NextPosition(p[k], p[k + 1], out nx, out ny);
-                if (state.PenDown) sink.Line(state.X, state.Y, nx, ny, state.Pen);
+                // The first coordinate after a reset only establishes the pen position; never draw a line
+                // to it from the default origin - even if the pen is down. Some instruments (8720/8753)
+                // emit PD before their first PA, which would otherwise streak a line from (0,0) to the
+                // first trace point. Once a position is established, pen-down moves draw normally. (#55)
+                if (state.PenDown && state.PositionEstablished) sink.Line(state.X, state.Y, nx, ny, state.Pen);
                 state.X = nx;
                 state.Y = ny;
+                state.PositionEstablished = true;
                 if (state.SymbolChar >= 0) DrawSymbol(state, state.SymbolChar, nx, ny, sink);
             }
         }
@@ -706,6 +711,9 @@ namespace Hpgl.Rendering
 
         public double X, Y;
         public bool PenDown;
+        // Set once any coordinate has been visited since the last reset. Until then a pen-down move only
+        // positions the pen (no line), so a leading PD before the first PA can't streak from the origin.
+        public bool PositionEstablished;
         public bool Absolute = true;
         public int Pen = 1;
 
@@ -745,6 +753,7 @@ namespace Hpgl.Rendering
         public void Reset()
         {
             _scaled = false;
+            PositionEstablished = false;   // IN/DF: the next coordinate only positions the pen (no leading streak)
             Absolute = true;
             RotationDeg = 0;
             HasClip = false;
