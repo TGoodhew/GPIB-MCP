@@ -59,6 +59,16 @@ namespace GpibMcp.Tests
             Commands = new List<InstrumentCommand>()
         };
 
+        /// <summary>An OUTPPLOT record-loop profile (8720/8753 VNA family) - a plot assembled from records.</summary>
+        private static InstrumentDefinition WithOutpplotProfile() => new InstrumentDefinition
+        {
+            Model = "8720C",
+            Category = "Network Analyzer",
+            Identity = new IdentitySpec { Command = "OUTPIDEN", MatchRegex = "8720" },
+            Capture = new CaptureProfile { Method = "outpplot", DumpCommand = "OUTPPLOT" },
+            Commands = new List<InstrumentCommand>()
+        };
+
         private static McpTool Tool(InstrumentDatabase db, AssignmentStore store, IInstrumentManager visa)
         {
             InstrumentTools.BuildRegistry(visa, db, store).TryGet("instrument_capture_screen", out var tool);
@@ -374,6 +384,24 @@ namespace GpibMcp.Tests
 
             Assert.True(output.IsError);
             Assert.Contains("no dumpCommand", output.AsText());
+        }
+
+        // ---- method = outpplot (8720/8753 VNA record loop, issue #55) --------
+
+        [Fact]
+        public void Capture_Outpplot_RendersAssembledPlot_AndCallsRecordStream()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithOutpplotProfile() });
+            var visa = new FakeInstrumentManager();
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::16::INSTR", ["model"] = "8720C" });
+
+            Assert.False(output.IsError);
+            Assert.Contains("GPIB0::16::INSTR||OUTPPLOT", visa.RecordCaptures);   // looped OUTPPLOT, no preset
+            var image = output.Content.Single(b => b.Kind == ToolContentKind.Image);
+            var bytes = Convert.FromBase64String(image.Data);
+            Assert.True(bytes.Length > 8 && bytes[0] == 0x89 && bytes[1] == 0x50); // PNG
+            Assert.Contains("<svg", output.AsText());                              // a normal vector plot, inline
         }
 
         [Fact]

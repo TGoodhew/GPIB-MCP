@@ -163,6 +163,16 @@ namespace GpibMcp.Tests
             return BlockResponse;
         }
 
+        /// <summary>Commands passed to <see cref="CaptureRecordStream"/> (resource|preRoll|command).</summary>
+        public readonly List<string> RecordCaptures = new List<string>();
+
+        public CaptureResult CaptureRecordStream(string resource, string preRoll, string command, CaptureOptions options)
+        {
+            RecordCaptures.Add(resource + "|" + preRoll + "|" + command);
+            // Assemble a small multi-record HP-GL plot, as OUTPPLOT would deliver it.
+            return new CaptureResult(CaptureHpgl, CaptureHpgl.Length, 0, CaptureCompletion.Inactivity);
+        }
+
         /// <summary>Wraps a tiny valid PNG in an IEEE 488.2 definite-length block: <c>#&lt;n&gt;&lt;len&gt;&lt;png&gt;\n</c>.</summary>
         private static byte[] BuildCannedImageBlock()
         {
