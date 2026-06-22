@@ -31,6 +31,19 @@ namespace GpibMcp.Tools
             if (assignments == null) throw new ArgumentNullException(nameof(assignments));
             var registry = new ToolRegistry();
 
+            // ---- Self-description: detailed capability overview (issue #36) -----
+            // Generated on demand from the LIVE registry + database, so it never drifts. The closure
+            // captures `registry`, which is fully populated by the time the tool is called.
+            registry.Add(new McpTool(
+                "gpib_overview",
+                "Describe what this GPIB/VISA server can do, in detail: capability areas (discovery, I/O, " +
+                "identify/assign, the instrument command database, screen capture, SRQ completion, error " +
+                "reporting, configuration), example phrasings, and a complete list of the available tools. " +
+                "Call this to answer 'what can the GPIB tool do?' or 'what instruments/commands are supported?' " +
+                "instead of guessing from individual tool descriptions.",
+                Schema(),
+                args => new ServerOverview(registry, db).Detailed()));
+
             // ---- VISA: discovery -------------------------------------------------
             registry.Add(new McpTool(
                 "visa_list_resources",

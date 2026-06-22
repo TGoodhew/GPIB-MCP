@@ -43,6 +43,25 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Initialize_OmitsInstructions_WhenNotProvided()
+        {
+            // The bare constructor (used by most tests) supplies no instructions.
+            Assert.Null(Run(null, Init()).Single()["result"]["instructions"]);
+        }
+
+        [Fact]
+        public void Initialize_IncludesInstructions_WhenProvided()
+        {
+            var registry = InstrumentTools.BuildRegistry(new FakeInstrumentManager());
+            var input = new StringReader(Init() + "\n");
+            var output = new StringWriter();
+            new McpServer(registry, input, output, "CAPABILITY SUMMARY HERE").Run();
+
+            var result = JObject.Parse(output.ToString().Trim())["result"];
+            Assert.Equal("CAPABILITY SUMMARY HERE", (string)result["instructions"]);
+        }
+
+        [Fact]
         public void Initialize_EchoesClientProtocolVersion()
         {
             var responses = Run(null, Init("2024-11-05"));
@@ -64,7 +83,8 @@ namespace GpibMcp.Tests
             var tools = (JArray)responses.Single()["result"]["tools"];
 
             var names = tools.Select(t => (string)t["name"]).ToList();
-            Assert.Equal(24, names.Count);
+            Assert.Equal(25, names.Count);
+            Assert.Contains("gpib_overview", names);
             Assert.Contains("visa_list_resources", names);
             Assert.Contains("instrument_db_refresh", names);
             Assert.Contains("set_termination", names);

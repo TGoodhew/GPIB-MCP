@@ -26,13 +26,15 @@ namespace GpibMcp.Mcp
         private readonly ToolRegistry _tools;
         private readonly TextReader _input;
         private readonly TextWriter _output;
+        private readonly string _instructions;
         private readonly object _writeGate = new object();
 
-        public McpServer(ToolRegistry tools, TextReader input, TextWriter output)
+        public McpServer(ToolRegistry tools, TextReader input, TextWriter output, string instructions = null)
         {
             _tools = tools ?? throw new ArgumentNullException(nameof(tools));
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _output = output ?? throw new ArgumentNullException(nameof(output));
+            _instructions = instructions;
         }
 
         /// <summary>Blocking read loop. Returns when stdin reaches EOF (client disconnected).</summary>
@@ -139,7 +141,7 @@ namespace GpibMcp.Mcp
             Log.Info("initialize from client '" + clientName + "' (protocol " +
                      (clientProtocol ?? "unspecified") + ")");
 
-            return new JObject
+            var result = new JObject
             {
                 ["protocolVersion"] = string.IsNullOrEmpty(clientProtocol) ? ProtocolVersion : clientProtocol,
                 ["capabilities"] = new JObject
@@ -152,6 +154,10 @@ namespace GpibMcp.Mcp
                     ["version"] = ServerVersion
                 }
             };
+            // MCP spec: optional high-level guidance the client loads up front so the model can answer
+            // capability questions accurately (issue #36).
+            if (!string.IsNullOrEmpty(_instructions)) result["instructions"] = _instructions;
+            return result;
         }
 
         private JObject CallTool(JObject prms)
