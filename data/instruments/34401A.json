@@ -19,8 +19,8 @@
       "description": "Preset and make a DC voltage measurement with the specified range and resolution; the reading is sent to the output buffer.",
       "query": "MEASure:VOLTage:DC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "100 mV, 1 V, 10 V, 100 V, 1000 V; or MIN|MAX|DEF (DEF = autorange)" },
-        { "name": "resolution", "units": ["V"], "range": "in volts; MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "100 mV, 1 V, 10 V, 100 V, 1000 V; or MIN|MAX|DEF (DEF = autorange)" },
+        { "name": "resolution", "units": [{"unit": "V"}], "range": "in volts; MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:VOLT:DC?", "MEAS:VOLT:DC? 10,0.003"]
     },
@@ -31,8 +31,8 @@
       "description": "Preset and make a DC:DC ratio measurement. The specified range applies to the Input terminals; the reference (Sense terminals) is always autoranged.",
       "query": "MEASure:VOLTage:DC:RATio? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "100 mV to 1000 V; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["V"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "100 mV to 1000 V; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "V"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:VOLT:DC:RAT? 10,0.001"]
     },
@@ -43,8 +43,8 @@
       "description": "Preset and make an AC voltage measurement. For AC, resolution is fixed at 6.5 digits; the resolution parameter only affects the front-panel display.",
       "query": "MEASure:VOLTage:AC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "100 mV, 1 V, 10 V, 100 V, 750 V; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["V"], "range": "MIN|MAX|DEF (display only)" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "100 mV, 1 V, 10 V, 100 V, 750 V; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "V"}], "range": "MIN|MAX|DEF (display only)" }
       ],
       "examples": ["MEAS:VOLT:AC?", "MEAS:VOLT:AC? 1,0.001"]
     },
@@ -55,8 +55,8 @@
       "description": "Preset and make a DC current measurement with the specified range and resolution; the reading is sent to the output buffer.",
       "query": "MEASure:CURRent:DC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "10 mA, 100 mA, 1 A, 3 A; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["A"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "10 mA, 100 mA, 1 A, 3 A; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "A"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:CURR:DC?", "MEAS:CURR:DC? 1,0.0001"]
     },
@@ -67,8 +67,8 @@
       "description": "Preset and make an AC current measurement. For AC, resolution is fixed at 6.5 digits; the resolution parameter only affects the front-panel display.",
       "query": "MEASure:CURRent:AC? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "1 A, 3 A; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["A"], "range": "MIN|MAX|DEF (display only)" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "1 A, 3 A; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "A"}], "range": "MIN|MAX|DEF (display only)" }
       ],
       "examples": ["MEAS:CURR:AC?"]
     },
@@ -79,8 +79,8 @@
       "description": "Preset and make a 2-wire ohms measurement with the specified range and resolution.",
       "query": "MEASure:RESistance? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["Ohm"], "range": "100, 1k, 10k, 100k, 1M, 10M, 100M ohms; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["Ohm"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "100, 1k, 10k, 100k, 1M, 10M, 100M ohms; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "Ohm"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:RES?", "MEAS:RES? 10000,1"]
     },
@@ -91,8 +91,8 @@
       "description": "Preset and make a 4-wire ohms measurement with the specified range and resolution.",
       "query": "MEASure:FRESistance? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["Ohm"], "range": "100 to 100M ohms; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["Ohm"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "100 to 100M ohms; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "Ohm"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:FRES?"]
     },
@@ -103,8 +103,8 @@
       "description": "Preset and make a frequency measurement. One 'range' covers all inputs between 3 Hz and 300 kHz; with no input applied the result is 0.",
       "query": "MEASure:FREQuency? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["Hz"], "range": "input voltage range; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["Hz"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "Hz"}], "range": "input voltage range; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "Hz"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:FREQ?"]
     },
@@ -115,8 +115,8 @@
       "description": "Preset and make a period measurement. One 'range' covers all inputs between 0.33 s and 3.3 us; with no input applied the result is 0.",
       "query": "MEASure:PERiod? {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["s"], "range": "input voltage range; or MIN|MAX|DEF" },
-        { "name": "resolution", "units": ["s"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "s"}], "range": "input voltage range; or MIN|MAX|DEF" },
+        { "name": "resolution", "units": [{"unit": "s"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["MEAS:PER?"]
     },
@@ -143,8 +143,8 @@
       "description": "Preset and configure the multimeter for DC voltage measurements; does not initiate the measurement.",
       "set": "CONFigure:VOLTage:DC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "100 mV to 1000 V; or MIN|MAX|DEF (DEF = autorange)" },
-        { "name": "resolution", "units": ["V"], "range": "MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "100 mV to 1000 V; or MIN|MAX|DEF (DEF = autorange)" },
+        { "name": "resolution", "units": [{"unit": "V"}], "range": "MIN|MAX|DEF" }
       ],
       "examples": ["CONF:VOLT:DC 10,0.003", "CONF:VOLT:DC AUTO"]
     },
@@ -163,7 +163,7 @@
       "description": "Preset and configure for AC voltage measurements; does not initiate. Resolution is fixed at 6.5 digits (parameter affects display only).",
       "set": "CONFigure:VOLTage:AC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "100 mV to 750 V; or MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "100 mV to 750 V; or MIN|MAX|DEF" }
       ],
       "examples": ["CONF:VOLT:AC 1,0.001"]
     },
@@ -174,7 +174,7 @@
       "description": "Preset and configure for DC current measurements; does not initiate the measurement.",
       "set": "CONFigure:CURRent:DC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "10 mA to 3 A; or MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "10 mA to 3 A; or MIN|MAX|DEF" }
       ],
       "examples": ["CONF:CURR:DC 1,0.0001"]
     },
@@ -185,7 +185,7 @@
       "description": "Preset and configure for AC current measurements; does not initiate. Resolution fixed at 6.5 digits (parameter affects display only).",
       "set": "CONFigure:CURRent:AC {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "1 A, 3 A; or MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "1 A, 3 A; or MIN|MAX|DEF" }
       ],
       "examples": ["CONF:CURR:AC 1"]
     },
@@ -196,7 +196,7 @@
       "description": "Preset and configure for 2-wire ohms measurements; does not initiate the measurement.",
       "set": "CONFigure:RESistance {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["Ohm"], "range": "100 to 100M ohms; or MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "100 to 100M ohms; or MIN|MAX|DEF" }
       ],
       "examples": ["CONF:RES 10000,1"]
     },
@@ -207,7 +207,7 @@
       "description": "Preset and configure for 4-wire ohms measurements; does not initiate the measurement.",
       "set": "CONFigure:FRESistance {<range>|MIN|MAX|DEF},{<resolution>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["Ohm"], "range": "100 to 100M ohms; or MIN|MAX|DEF" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "100 to 100M ohms; or MIN|MAX|DEF" }
       ],
       "examples": ["CONF:FRES 10000,1"]
     },
@@ -308,7 +308,7 @@
       "description": "Select the aperture (gate) time for frequency measurements (default 0.1 s). Choose 10 ms (4.5 digits), 100 ms (5.5 digits), or 1 s (6.5 digits).",
       "set": "[SENSe:]FREQuency:APERture {0.01|0.1|1|MINimum|MAXimum}",
       "query": "[SENSe:]FREQuency:APERture? [MINimum|MAXimum]",
-      "parameters": [ { "name": "aperture", "units": ["s"], "range": "0.01 | 0.1 | 1 (MIN=0.01, MAX=1)" } ],
+      "parameters": [ { "name": "aperture", "units": [{"unit": "s"}], "range": "0.01 | 0.1 | 1 (MIN=0.01, MAX=1)" } ],
       "examples": ["FREQ:APER 1", "FREQ:APER?"]
     },
     {
@@ -318,7 +318,7 @@
       "description": "Select the aperture (gate) time for period measurements (default 0.1 s). Choose 10 ms (4.5 digits), 100 ms (5.5 digits), or 1 s (6.5 digits).",
       "set": "[SENSe:]PERiod:APERture {0.01|0.1|1|MINimum|MAXimum}",
       "query": "[SENSe:]PERiod:APERture? [MINimum|MAXimum]",
-      "parameters": [ { "name": "aperture", "units": ["s"], "range": "0.01 | 0.1 | 1" } ],
+      "parameters": [ { "name": "aperture", "units": [{"unit": "s"}], "range": "0.01 | 0.1 | 1" } ],
       "examples": ["PER:APER 0.1"]
     },
     {
@@ -328,7 +328,7 @@
       "description": "Specify the lowest frequency expected in the input signal; selects the slow, medium (default), or fast AC filter. Query returns +3.000000E+00, +2.000000E+01, or +2.000000E+02.",
       "set": "[SENSe:]DETector:BANDwidth {3|20|200|MINimum|MAXimum}",
       "query": "[SENSe:]DETector:BANDwidth? [MINimum|MAXimum]",
-      "parameters": [ { "name": "bandwidth", "units": ["Hz"], "range": "3 | 20 | 200 (MIN=3, MAX=200)" } ],
+      "parameters": [ { "name": "bandwidth", "units": [{"unit": "Hz"}], "range": "3 | 20 | 200 (MIN=3, MAX=200)" } ],
       "examples": ["DET:BAND 20", "DET:BAND?"]
     },
     {
@@ -427,7 +427,7 @@
       "description": "Store a relative value in the dB Relative Register (math must be on first). Range 0 to +/-200 dBm (MIN=-200, MAX=200).",
       "set": "CALCulate:DB:REFerence {<value>|MINimum|MAXimum}",
       "query": "CALCulate:DB:REFerence? [MINimum|MAXimum]",
-      "parameters": [ { "name": "value", "units": ["dBm"], "range": "-200.00 to 200.00 dBm" } ],
+      "parameters": [ { "name": "value", "units": [{"unit": "dBm"}], "range": "-200.00 to 200.00 dBm" } ],
       "examples": ["CALC:DB:REF 10", "CALC:DB:REF?"]
     },
     {
@@ -437,7 +437,7 @@
       "description": "Select the dBm reference resistance. Choices: 50, 75, 93, 110, 124, 125, 135, 150, 250, 300, 500, 600, 800, 900, 1000, 1200, or 8000 ohms (MIN=50, MAX=8000). Stored in non-volatile memory.",
       "set": "CALCulate:DBM:REFerence {<value>|MINimum|MAXimum}",
       "query": "CALCulate:DBM:REFerence? [MINimum|MAXimum]",
-      "parameters": [ { "name": "value", "units": ["Ohm"], "range": "50 to 8000 ohms (discrete set)" } ],
+      "parameters": [ { "name": "value", "units": [{"unit": "Ohm"}], "range": "50 to 8000 ohms (discrete set)" } ],
       "examples": ["CALC:DBM:REF 600", "CALC:DBM:REF?"]
     },
     {
@@ -508,7 +508,7 @@
       "description": "Insert a trigger delay between the trigger and each sample. Range 0 to 3600 seconds (MIN=0, MAX=3600).",
       "set": "TRIGger:DELay {<seconds>|MINimum|MAXimum}",
       "query": "TRIGger:DELay? [MINimum|MAXimum]",
-      "parameters": [ { "name": "seconds", "units": ["s"], "range": "0 to 3600 s" } ],
+      "parameters": [ { "name": "seconds", "units": [{"unit": "s"}], "range": "0 to 3600 s" } ],
       "examples": ["TRIG:DEL 1", "TRIG:DEL? MAX"]
     },
     {

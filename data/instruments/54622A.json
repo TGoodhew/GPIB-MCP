@@ -580,7 +580,7 @@
         {
           "name": "complete",
           "units": [
-            "%"
+            {"unit": "%"}
           ],
           "range": "100 (integer, NR1)"
         }
@@ -652,7 +652,7 @@
         {
           "name": "sample rate",
           "units": [
-            "samples/s"
+            {"unit": "sps"}
           ],
           "range": "NR3 format"
         }
@@ -934,7 +934,7 @@
         {
           "name": "skew_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "-100 ns to +100 ns (NR3)"
         }
@@ -1403,7 +1403,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "0 Hz to 25.00 GHz (NR3)"
         }
@@ -1496,7 +1496,7 @@
         {
           "name": "level",
           "units": [
-            "dBV"
+            {"unit": "dBV"}
           ],
           "range": "-400.0 dBV to +400.0 dBV (NR3)"
         }
@@ -1557,7 +1557,7 @@
         {
           "name": "span",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "1 Hz to 100 GHz (NR3)"
         }
@@ -1874,7 +1874,7 @@
         {
           "name": "return_value",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "counter frequency (NR3)"
         }
@@ -1921,7 +1921,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "delay time in seconds (NR3)"
         }
@@ -1966,7 +1966,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "time between lower and upper thresholds (NR3)"
         }
@@ -1990,7 +1990,7 @@
         {
           "name": "return_value",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "frequency (NR3)"
         }
@@ -2014,7 +2014,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "negative pulse width (NR3)"
         }
@@ -2038,7 +2038,7 @@
         {
           "name": "return_value",
           "units": [
-            "%"
+            {"unit": "%"}
           ],
           "range": "percent overshoot (NR3)"
         }
@@ -2062,7 +2062,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "waveform period (NR3)"
         }
@@ -2086,7 +2086,7 @@
         {
           "name": "return_value",
           "units": [
-            "degrees"
+            {"unit": "deg"}
           ],
           "range": "phase angle (NR3)"
         }
@@ -2110,7 +2110,7 @@
         {
           "name": "return_value",
           "units": [
-            "%"
+            {"unit": "%"}
           ],
           "range": "percent preshoot (NR3)"
         }
@@ -2134,7 +2134,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "positive pulse width (NR3)"
         }
@@ -2158,7 +2158,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "rise time (NR3)"
         }
@@ -2230,7 +2230,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "time of the specified transition (NR3)"
         }
@@ -2249,7 +2249,7 @@
         {
           "name": "value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "voltage level the waveform must cross"
         },
@@ -2268,7 +2268,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "time of specified voltage crossing (NR3)"
         }
@@ -2292,7 +2292,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "amplitude (NR3)"
         }
@@ -2316,7 +2316,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "calculated average voltage (NR3)"
         }
@@ -2340,7 +2340,7 @@
         {
           "name": "base_voltage",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "voltage at the base of the waveform (NR3)"
         }
@@ -2364,7 +2364,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "maximum voltage (NR3)"
         }
@@ -2388,7 +2388,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "minimum voltage (NR3)"
         }
@@ -2412,7 +2412,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "peak-to-peak voltage (NR3)"
         }
@@ -2436,7 +2436,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "calculated dc RMS voltage (NR3)"
         }
@@ -2455,7 +2455,7 @@
         {
           "name": "vtime",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "displayed time from trigger (NR3)"
         },
@@ -2466,7 +2466,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "voltage at the specified time (NR3)"
         }
@@ -2490,7 +2490,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "voltage at the top of the waveform (NR3)"
         }
@@ -2731,7 +2731,7 @@
         {
           "name": "pos",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "time from trigger event to display reference point (NR3)"
         }
@@ -2752,7 +2752,7 @@
         {
           "name": "range_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "50 ns to 500 s (54620-series); 10 ns to 500 s (54640-series) (NR3)"
         }
@@ -2791,7 +2791,7 @@
         {
           "name": "scale_value",
           "units": [
-            "s/div"
+            {"unit": "s/div"}
           ],
           "range": "scale value in seconds (NR3)"
         }
@@ -2812,7 +2812,7 @@
         {
           "name": "pos",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "time from trigger event to delayed view reference point (NR3)"
         }
@@ -2833,7 +2833,7 @@
         {
           "name": "range_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "range value in seconds for the delayed window (NR3)"
         }
@@ -2854,7 +2854,7 @@
         {
           "name": "scale_value",
           "units": [
-            "s/div"
+            {"unit": "s/div"}
           ],
           "range": "scale value in seconds for the delayed window (NR3)"
         }
@@ -2969,7 +2969,7 @@
         {
           "name": "value",
           "units": [
-            "%"
+            {"unit": "%"}
           ],
           "range": "{60 | 62.5 | 68 | 70 | 75 | 87.5} (NR3)"
         }
@@ -2989,7 +2989,7 @@
         {
           "name": "baudrate",
           "units": [
-            "bit/s"
+            {"unit": "bps"}
           ],
           "range": "{10000 | 20000 | 33300 | 50000 | 62500 | 83300 | 100000 | 125000 | 250000 | 500000 | 800000 | 1000000}"
         }
@@ -3207,7 +3207,7 @@
         {
           "name": "level",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 8 V"
         },
@@ -3340,7 +3340,7 @@
         {
           "name": "level",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "internal: .75 x full-scale from center (NR3); external: 2 V at 1:1; digital (546xxD): 6 V"
         },
@@ -3470,7 +3470,7 @@
         {
           "name": "holdoff_time",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "60 ns to 10 s (NR3)"
         }
@@ -3593,7 +3593,7 @@
         {
           "name": "baudrate",
           "units": [
-            "bit/s"
+            {"unit": "bps"}
           ],
           "range": "{2400 | 9600 | 19200}"
         }
@@ -3838,7 +3838,7 @@
         {
           "name": "time_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "100 ns to 10 s (NR3)"
         }
@@ -3900,7 +3900,7 @@
         {
           "name": "time_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "time in seconds (NR1)"
         }
@@ -4385,7 +4385,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "x-increment (NR3)"
         }
@@ -4404,7 +4404,7 @@
         {
           "name": "return_value",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "x-origin value (NR3)"
         }
@@ -4439,7 +4439,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "y-increment value (NR3)"
         }
@@ -4458,7 +4458,7 @@
         {
           "name": "return_value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "y-origin value (NR3)"
         }

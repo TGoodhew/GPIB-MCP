@@ -40,7 +40,7 @@
       "description": "Sets the Main register (OUTPUT display) value explicitly, in numeric, scientific or engineering notation. Replaces the manual incremental adjustment. If resolution is too high the value is truncated and an SRQ/RQS status byte is generated. With OUTPUT already ON, an M command alone updates the register but high-voltage outputs do not ramp until a separate 'O1=' string is received.",
       "set": "M<value>",
       "parameters": [
-        { "name": "value", "units": ["V", "A", "ohm"], "range": "Function/range dependent; accepts numeric, scientific (E) or engineering notation, e.g. M-153, M+1.6212574, M1621257E-6, M.002563" }
+        { "name": "value", "units": [{"unit": "V"}, {"unit": "A"}, {"unit": "Ohm"}], "range": "Function/range dependent; accepts numeric, scientific (E) or engineering notation, e.g. M-153, M+1.6212574, M1621257E-6, M.002563" }
       ],
       "examples": ["M-153=", "M1621257E-6="]
     },
@@ -73,7 +73,7 @@
       "description": "Sets the Auxiliary register (frequency) value for AC functions, in numeric, scientific or engineering notation. Frequency autoranges to the correct range for the H value (no frequency range code needed). Resolved to three significant digits; excess significance is truncated and reported by SRQ status byte. The manual frequency Store memories cannot be set via the bus.",
       "set": "H<value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "AC function dependent; three significant digits; numeric/scientific/engineering notation" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "AC function dependent; three significant digits; numeric/scientific/engineering notation" }
       ],
       "examples": ["H1000=", "H1E3="]
     },

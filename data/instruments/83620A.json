@@ -648,7 +648,7 @@
       "set": "[:SOURce]:POWer:SLOPe <num>[DB/GHZ]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:SLOPe?",
       "parameters": [
-        { "name": "slope", "units": ["DB/GHZ"], "range": "-2.5 to +2.5 dB/GHz" }
+        { "name": "slope", "units": [{"unit": "dB/GHz"}], "range": "-2.5 to +2.5 dB/GHz" }
       ],
       "examples": [":POW:SLOP 1", ":POW:SLOP?"]
     },

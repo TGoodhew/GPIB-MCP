@@ -150,8 +150,8 @@
       "query": ":APPLy? [CH1|CH2|CH3[,CURRent|VOLTage]]",
       "parameters": [
         { "name": "channel", "range": "CH1|CH2|CH3" },
-        { "name": "voltage", "units": ["V"], "range": "model/channel dependent (e.g. 0 to 32V on CH1 of DP832A)" },
-        { "name": "current", "units": ["A"], "range": "model/channel dependent (e.g. 0 to 3.2A on CH1 of DP832A)" }
+        { "name": "voltage", "units": [{"unit": "V"}], "range": "model/channel dependent (e.g. 0 to 32V on CH1 of DP832A)" },
+        { "name": "current", "units": [{"unit": "A"}], "range": "model/channel dependent (e.g. 0 to 3.2A on CH1 of DP832A)" }
       ],
       "examples": [":APPL CH1,5,1", ":APPL? CH1,VOLTage"]
     },
@@ -164,7 +164,7 @@
       "query": "[SOURce[<n>]:]VOLTage[:LEVel][:IMMediate][:AMPLitude]? [{MINimum|MAXimum}]",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "voltage", "units": ["V"], "range": "model/channel dependent (see Table 2-1)" }
+        { "name": "voltage", "units": [{"unit": "V"}], "range": "model/channel dependent (see Table 2-1)" }
       ],
       "examples": [":VOLT 7.5", ":SOUR1:VOLT 5", ":VOLT?"]
     },
@@ -177,7 +177,7 @@
       "query": "[SOURce[<n>]:]VOLTage[:LEVel][:IMMediate]:STEP[:INCRement]? [{DEFault}]",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "step", "units": ["V"], "range": "0 to max voltage of channel; default 0.001V or 0.01V model dependent" }
+        { "name": "step", "units": [{"unit": "V"}], "range": "0 to max voltage of channel; default 0.001V or 0.01V model dependent" }
       ],
       "examples": [":VOLT:STEP 0.1", ":VOLT:STEP?"]
     },
@@ -190,7 +190,7 @@
       "query": "[SOURce[<n>]:]VOLTage[:LEVel]:TRIGgered[:AMPLitude]? {MIN|MAX}",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "voltage", "units": ["V"], "range": "0 to maximum voltage of channel; default 0V" }
+        { "name": "voltage", "units": [{"unit": "V"}], "range": "0 to maximum voltage of channel; default 0V" }
       ],
       "examples": [":VOLT:TRIG 1", ":VOLT:TRIG?"]
     },
@@ -212,7 +212,7 @@
       "query": "[SOURce[<n>]:]VOLTage:PROTection[:LEVel]? [{MINimum|MAXimum}]",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "voltage", "units": ["V"], "range": "model/channel dependent (see Table 2-2)" }
+        { "name": "voltage", "units": [{"unit": "V"}], "range": "model/channel dependent (see Table 2-2)" }
       ],
       "examples": [":VOLT:PROT 8.8", ":VOLT:PROT?"]
     },
@@ -257,7 +257,7 @@
       "query": "[SOURce[<n>]:]CURRent[:LEVel][:IMMediate][:AMPLitude]? [{MINimum|MAXimum}]",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "current", "units": ["A"], "range": "model/channel dependent (see Table 2-1)" }
+        { "name": "current", "units": [{"unit": "A"}], "range": "model/channel dependent (see Table 2-1)" }
       ],
       "examples": [":CURR 1.5", ":SOUR1:CURR 1", ":CURR?"]
     },
@@ -270,7 +270,7 @@
       "query": "[SOURce[<n>]:]CURRent[:LEVel][:IMMediate]:STEP[:INCRement]? [{DEFault}]",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "step", "units": ["A"], "range": "0 to max current of channel; default model dependent" }
+        { "name": "step", "units": [{"unit": "A"}], "range": "0 to max current of channel; default model dependent" }
       ],
       "examples": [":CURR:STEP 0.1", ":CURR:STEP?"]
     },
@@ -283,7 +283,7 @@
       "query": "[SOURce[<n>]:]CURRent[:LEVel]:TRIGgered[:AMPLitude]? {MIN|MAX}",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "current", "units": ["A"], "range": "0 to maximum current of channel; default 0.1A" }
+        { "name": "current", "units": [{"unit": "A"}], "range": "0 to maximum current of channel; default 0.1A" }
       ],
       "examples": [":CURR:TRIG 1", ":CURR:TRIG?"]
     },
@@ -305,7 +305,7 @@
       "query": "[SOURce[<n>]:]CURRent:PROTection[:LEVel]? [{MINimum|MAXimum}]",
       "parameters": [
         { "name": "channel", "range": "1|2|3" },
-        { "name": "current", "units": ["A"], "range": "model/channel dependent (see Table 2-2)" }
+        { "name": "current", "units": [{"unit": "A"}], "range": "model/channel dependent (see Table 2-2)" }
       ],
       "examples": [":CURR:PROT 5", ":CURR:PROT?"]
     },
@@ -441,7 +441,7 @@
       "query": ":OUTPut:OCP:VALue? {CH1|CH2|CH3}[,MINimum|MAXimum]",
       "parameters": [
         { "name": "channel", "range": "CH1|CH2|CH3" },
-        { "name": "value", "units": ["A"], "range": "model/channel dependent (see Table 2-2)" }
+        { "name": "value", "units": [{"unit": "A"}], "range": "model/channel dependent (see Table 2-2)" }
       ],
       "examples": [":OUTP:OCP:VAL CH1,5", ":OUTP:OCP:VAL? CH1"]
     },
@@ -485,7 +485,7 @@
       "query": ":OUTPut:OVP:VALue? {CH1|CH2|CH3}[,MINimum|MAXimum]",
       "parameters": [
         { "name": "channel", "range": "CH1|CH2|CH3" },
-        { "name": "value", "units": ["V"], "range": "model/channel dependent (see Table 2-2)" }
+        { "name": "value", "units": [{"unit": "V"}], "range": "model/channel dependent (see Table 2-2)" }
       ],
       "examples": [":OUTP:OVP:VAL CH1,8.8", ":OUTP:OVP:VAL? CH1"]
     },
@@ -540,9 +540,9 @@
       "parameters": [
         { "name": "channel", "range": "P8V|P30V|N30V" },
         { "name": "secnum", "range": "0 to 2047 (group number)" },
-        { "name": "volt", "units": ["V"], "range": "voltage range of channel" },
-        { "name": "curr", "units": ["A"], "range": "current range of channel" },
-        { "name": "time", "units": ["s"], "range": "1 to 99999" }
+        { "name": "volt", "units": [{"unit": "V"}], "range": "voltage range of channel" },
+        { "name": "curr", "units": [{"unit": "A"}], "range": "current range of channel" },
+        { "name": "time", "units": [{"unit": "s"}], "range": "1 to 99999" }
       ],
       "examples": [":OUTP:TIME P8V,1,5,1,10", ":OUTP:TIME? P8V"]
     },
@@ -597,7 +597,7 @@
       "description": "Set/query the trigger delay time of the sequence trigger system.",
       "set": ":TRIGger[:SEQuence]:DELay <value>",
       "query": ":TRIGger[:SEQuence]:DELay?",
-      "parameters": [ { "name": "delay", "units": ["s"] } ],
+      "parameters": [ { "name": "delay", "units": [{"unit": "s"}] } ],
       "examples": [":TRIG:DEL 3", ":TRIG:DEL?"]
     },
     {
@@ -643,7 +643,7 @@
       "parameters": [
         { "name": "secnum", "range": "0 to 2047 (group number)" },
         { "name": "state", "range": "ON|OFF" },
-        { "name": "time", "units": ["s"], "range": "1 to 99999" }
+        { "name": "time", "units": [{"unit": "s"}], "range": "1 to 99999" }
       ],
       "examples": [":DELAY:PARA 1,ON,2", ":DELAY:PARA? 3,2"]
     },
@@ -712,9 +712,9 @@
       "query": ":TIMEr:PARAmeter? <firnum>[,<timercount>]",
       "parameters": [
         { "name": "secnum", "range": "0 to 2047 (group number)" },
-        { "name": "volt", "units": ["V"] },
-        { "name": "curr", "units": ["A"] },
-        { "name": "time", "units": ["s"], "range": "1 to 99999" }
+        { "name": "volt", "units": [{"unit": "V"}] },
+        { "name": "curr", "units": [{"unit": "A"}] },
+        { "name": "time", "units": [{"unit": "s"}], "range": "1 to 99999" }
       ],
       "examples": [":TIME:PARA 1,8,1,10", ":TIME:PARA? 1,2"]
     },

@@ -181,7 +181,7 @@
           "name": "value",
           "range": "{ <QString> | <Block> }",
           "units": [
-            "s"
+            {"unit": "s"}
           ]
         }
       ],
@@ -800,7 +800,7 @@
           "name": "value",
           "range": "{ SEConds | HERtz | DEGrees | PERcent }",
           "units": [
-            "s"
+            {"unit": "s"}
           ]
         }
       ],
@@ -963,7 +963,7 @@
           "name": "value",
           "range": "{ <NR3> | CLEAR | AUTO | INFInite | OFF }",
           "units": [
-            "s"
+            {"unit": "s"}
           ]
         }
       ],
@@ -3184,7 +3184,7 @@
           "name": "value",
           "range": "{ ECL | TTL | <NR3> }",
           "units": [
-            "V"
+            {"unit": "V"}
           ]
         }
       ],
@@ -3205,7 +3205,7 @@
           "name": "value",
           "range": "{ <NR3> | ECL | TTL }",
           "units": [
-            "V"
+            {"unit": "V"}
           ]
         }
       ],
@@ -3226,7 +3226,7 @@
           "name": "value",
           "range": "{ <NR3> | TTL | ECL }",
           "units": [
-            "V"
+            {"unit": "V"}
           ]
         }
       ],
@@ -3247,7 +3247,7 @@
           "name": "value",
           "range": "{ <NR3> | ECL | TTL }",
           "units": [
-            "V"
+            {"unit": "V"}
           ]
         }
       ],

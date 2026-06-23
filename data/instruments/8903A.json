@@ -889,7 +889,7 @@
         {
           "name": "load",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ],
           "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load"
         }

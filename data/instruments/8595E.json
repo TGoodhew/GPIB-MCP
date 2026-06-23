@@ -374,15 +374,15 @@
           "name": "level",
           "units": [
             { "token": "DBM", "unit": "dBm" },
-            "DBMV",
+            { "token": "DBMV", "unit": "dBmV" },
             { "token": "DBUV", "unit": "dBuV" },
             { "token": "DB", "unit": "dB" },
             { "token": "V", "unit": "V" },
             { "token": "MV", "unit": "mV" },
             { "token": "UV", "unit": "uV" },
-            "W",
-            "MW",
-            "UW"
+            { "token": "W", "unit": "W" },
+            { "token": "MW", "unit": "mW" },
+            { "token": "UW", "unit": "uW" }
           ],
           "range": "amplitude range of the spectrum analyzer"
         }
@@ -1510,7 +1510,7 @@
           "name": "level",
           "units": [
             { "token": "DBM", "unit": "dBm" },
-            "DBMV",
+            { "token": "DBMV", "unit": "dBmV" },
             { "token": "DBUV", "unit": "dBuV" },
             { "token": "V", "unit": "V" }
           ]
@@ -1534,7 +1534,7 @@
           "name": "level",
           "units": [
             { "token": "DBM", "unit": "dBm" },
-            "DBMV",
+            { "token": "DBMV", "unit": "dBmV" },
             { "token": "DBUV", "unit": "dBuV" },
             { "token": "V", "unit": "V" }
           ]

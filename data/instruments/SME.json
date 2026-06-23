@@ -685,7 +685,7 @@
       "set": ":SOURce:POWer <value>",
       "query": ":SOURce:POWer?",
       "parameters": [
-        { "name": "level", "units": [{"token": "dBm", "unit": "dBm"}, "dBW", {"token": "V", "unit": "V"}, {"token": "mV", "unit": "mV"}, {"token": "uV", "unit": "uV"}], "range": "-144 to +16 dBm; UP | DOWN" }
+        { "name": "level", "units": [{"token": "dBm", "unit": "dBm"}, {"unit": "dBW"}, {"token": "V", "unit": "V"}, {"token": "mV", "unit": "mV"}, {"token": "uV", "unit": "uV"}], "range": "-144 to +16 dBm; UP | DOWN" }
       ],
       "examples": ["SOUR:POW 30", ":POW 15", ":SOUR:POW:LEV:IMM:AMPL 15"]
     },
@@ -1030,7 +1030,7 @@
       "set": ":SOURce:PM1:DEViation <value>",
       "query": ":SOURce:PM1:DEViation?",
       "parameters": [
-        { "name": "deviation", "units": ["rad", {"token": "deg", "unit": "deg"}], "range": "-360 deg to +360 deg" }
+        { "name": "deviation", "units": [{"unit": "rad"}, {"token": "deg", "unit": "deg"}], "range": "-360 deg to +360 deg" }
       ],
       "examples": ["SOUR:PM:DEV 20DEGR"]
     },
@@ -1205,7 +1205,7 @@
       "set": ":SOURce:PHASe:ADJust <value>",
       "query": ":SOURce:PHASe:ADJust?",
       "parameters": [
-        { "name": "phase", "units": [{"token": "deg", "unit": "deg"}, "rad"], "range": "-360 deg to +360 deg" }
+        { "name": "phase", "units": [{"token": "deg", "unit": "deg"}, {"unit": "rad"}], "range": "-360 deg to +360 deg" }
       ],
       "examples": [":SOUR:PHAS:ADJ 2DEG", ":SOUR:PHAS:ADJ 0.1RAD"]
     },

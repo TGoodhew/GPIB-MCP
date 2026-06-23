@@ -299,7 +299,7 @@
       "set": "SD<d>",
       "query": "OPSD",
       "parameters": [
-        { "name": "scale", "units": ["dB/div"], "range": "Variable length numeric" }
+        { "name": "scale", "units": [{"unit": "dB/div"}], "range": "Variable length numeric" }
       ],
       "examples": ["SD5", "OPSD"]
     },

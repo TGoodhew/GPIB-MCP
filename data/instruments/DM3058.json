@@ -321,7 +321,7 @@
       "set": ":CALCulate:DB:REFErence {<range>|MIN|MAX|DEF}",
       "query": ":CALCulate:DB:REFErence?",
       "parameters": [
-        { "name": "range", "units": ["dBm"], "range": "-120 dBm to +120 dBm; MIN=-120, MAX=+120, DEF=0" }
+        { "name": "range", "units": [{"unit": "dBm"}], "range": "-120 dBm to +120 dBm; MIN=-120, MAX=+120, DEF=0" }
       ],
       "examples": [":CALC:DB:REF 0", ":CALC:DB:REF?"]
     },
@@ -353,7 +353,7 @@
       "set": ":CALCulate:DBM:REFErence {<range>|MIN|MAX|DEF}",
       "query": ":CALCulate:DBM:REFErence?",
       "parameters": [
-        { "name": "range", "units": ["Ohm"], "range": "2 to 8000 Ohm; MIN=2, MAX=8000, DEF=600" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "2 to 8000 Ohm; MIN=2, MAX=8000, DEF=600" }
       ],
       "examples": [":CALC:DBM:REF 600", ":CALC:DBM:REF?"]
     },
@@ -991,7 +991,7 @@
       "description": "Sets the resistance limit (beep threshold) under continuity measurement. Consecutive integer 1 to 2000 Ohm, default 10 Ohm.",
       "set": ":MEASure:CONTinuity {<range>|MIN|MAX|DEF}",
       "parameters": [
-        { "name": "range", "units": ["Ohm"], "range": "1 to 2000 Ohm; DEF=10" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "1 to 2000 Ohm; DEF=10" }
       ],
       "examples": [":MEAS:CONT 1000", ":MEAS:CONT?"]
     },
@@ -1235,7 +1235,7 @@
       "set": ":TRIGger:AUTO:INTErval <value>",
       "query": ":TRIGger:AUTO:INTErval?",
       "parameters": [
-        { "name": "value", "units": ["ms"], "range": "rate-dependent, up to 2000 ms" }
+        { "name": "value", "units": [{"unit": "ms"}], "range": "rate-dependent, up to 2000 ms" }
       ],
       "examples": [":TRIG:AUTO:INTE 400", ":TRIG:AUTO:INTE?"]
     },
@@ -1315,7 +1315,7 @@
       "set": ":TRIGger:VMComplete:PULSewidth <value>",
       "query": ":TRIGger:VMComplete:PULSewidth?",
       "parameters": [
-        { "name": "value", "units": ["ms"], "range": "rate-dependent: S 1-399, M 1-49, F 1-7; DEF=100" }
+        { "name": "value", "units": [{"unit": "ms"}], "range": "rate-dependent: S 1-399, M 1-49, F 1-7; DEF=100" }
       ],
       "examples": [":TRIG:VMC:PULS 100", ":TRIG:VMC:PULS?"]
     },

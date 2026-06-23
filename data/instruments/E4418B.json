@@ -1392,7 +1392,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": ["baud"], "range": "standard rates, e.g. 1200..115200" }
+        { "name": "numeric_value", "units": [{"unit": "baud"}], "range": "standard rates, e.g. 1200..115200" }
       ],
       "examples": ["SYST:COMM:SER:BAUD 9600", "SYST:COMM:SER:BAUD?"]
     },
@@ -1462,7 +1462,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": ["baud"], "range": "standard rates" }
+        { "name": "numeric_value", "units": [{"unit": "baud"}], "range": "standard rates" }
       ],
       "examples": ["SYST:COMM:SER:TRAN:BAUD 9600", "SYST:COMM:SER:TRAN:BAUD?"]
     },

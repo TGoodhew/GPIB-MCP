@@ -18,11 +18,15 @@ namespace GpibMcp.Instruments
             Ok = ok; Value = value; Token = token; Error = error;
         }
 
-        public static UnitResolution Resolved(double value, string token) => new UnitResolution(true, value, token, null);
+        // Token is coerced to "" (never null) so a tokenless resolution is safe to splice into set templates.
+        public static UnitResolution Resolved(double value, string token) => new UnitResolution(true, value, token ?? "", null);
         public static UnitResolution Fail(string error) => new UnitResolution(false, 0, null, error);
 
-        /// <summary>The value+token as it goes on the wire, e.g. "1000 MZ" (number cleanly formatted).</summary>
-        public string Formatted => Ok ? UnitResolver.FormatNumber(Value) + " " + Token : null;
+        /// <summary>The value+token as it goes on the wire, e.g. "1000 MZ" - or just the number for a
+        /// tokenless (bare-number) parameter.</summary>
+        public string Formatted => !Ok ? null
+            : string.IsNullOrEmpty(Token) ? UnitResolver.FormatNumber(Value)
+            : UnitResolver.FormatNumber(Value) + " " + Token;
     }
 
     /// <summary>

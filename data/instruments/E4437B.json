@@ -137,7 +137,7 @@
           "name": "phase",
           "units": [
             {"token": "deg", "unit": "deg"},
-            "rad"
+            {"token": "RAD", "unit": "rad"}
           ]
         }
       ],
@@ -242,9 +242,9 @@
         {
           "name": "symbol_rate",
           "units": [
-            "sps",
-            "ksps",
-            "Msps"
+            {"unit": "sps"},
+            {"unit": "ksps"},
+            {"unit": "Msps"}
           ]
         }
       ],
@@ -263,9 +263,9 @@
         {
           "name": "bit_rate",
           "units": [
-            "bps",
-            "kbps",
-            "Mbps"
+            {"unit": "bps"},
+            {"unit": "kbps"},
+            {"unit": "Mbps"}
           ]
         }
       ],

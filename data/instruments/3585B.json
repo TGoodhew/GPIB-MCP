@@ -158,7 +158,7 @@
           "name": "level",
           "units": [
             { "token": "DM", "unit": "dBm" },
-            "DV"
+            { "token": "DV", "unit": "dBV" }
           ],
           "range": "10 dB above range to 100 dB below range"
         }

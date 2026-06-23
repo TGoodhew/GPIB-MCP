@@ -96,7 +96,7 @@
       "set": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe] <value><unit>",
       "query": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe]?",
       "parameters": [
-        { "name": "phase", "units": [{"token": "deg", "unit": "deg"}, "rad"] }
+        { "name": "phase", "units": [{"token": "deg", "unit": "deg"}, {"token": "RAD", "unit": "rad"}] }
       ],
       "examples": [":RADio:CUSTom:MODulation:MSK:PHASe 90deg"]
     },
@@ -168,7 +168,7 @@
       "set": "[:SOURce]:RADio:<format>:SRATe <value>",
       "query": "[:SOURce]:RADio:<format>:SRATe?",
       "parameters": [
-        { "name": "symbol_rate", "units": ["sps", "ksps", "Msps"] }
+        { "name": "symbol_rate", "units": [{"unit": "sps"}, {"unit": "ksps"}, {"unit": "Msps"}] }
       ],
       "examples": [":RADio:CUSTom:SRATe 24.3ksps"]
     },
@@ -180,7 +180,7 @@
       "set": "[:SOURce]:RADio:<format>:BRATe <value>",
       "query": "[:SOURce]:RADio:<format>:BRATe?",
       "parameters": [
-        { "name": "bit_rate", "units": ["bps", "kbps", "Mbps"] }
+        { "name": "bit_rate", "units": [{"unit": "bps"}, {"unit": "kbps"}, {"unit": "Mbps"}] }
       ],
       "examples": [":RADio:CUSTom:BRATe 270.833kbps"]
     },

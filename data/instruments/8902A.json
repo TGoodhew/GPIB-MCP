@@ -1239,7 +1239,7 @@
         {
           "name": "delay",
           "units": [
-            "ms"
+            {"unit": "ms"}
           ],
           "range": "0-99"
         }

@@ -286,7 +286,7 @@
         {
           "name": "window",
           "units": [
-            "%"
+            {"unit": "%"}
           ],
           "range": "0.01 to 20 (default 1)"
         }
@@ -340,7 +340,7 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to 1010 (default 1000)"
         }
@@ -377,7 +377,7 @@
         {
           "name": "nplc",
           "units": [
-            "PLC"
+            {"unit": "PLC"}
           ],
           "range": "0.01 to 10 (default 1)"
         }
@@ -465,7 +465,7 @@
         {
           "name": "reference",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "-1010 to +1010 (default 0)"
         }
@@ -512,7 +512,7 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to 757.5 (default 757.5)"
         }
@@ -549,7 +549,7 @@
         {
           "name": "nplc",
           "units": [
-            "PLC"
+            {"unit": "PLC"}
           ],
           "range": "0.01 to 10 (default 1)"
         }
@@ -569,7 +569,7 @@
         {
           "name": "bandwidth",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "3 to 300e3 (default 30)"
         }
@@ -589,7 +589,7 @@
         {
           "name": "range",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "0 to 3.1 (default 3)"
         }
@@ -626,7 +626,7 @@
         {
           "name": "nplc",
           "units": [
-            "PLC"
+            {"unit": "PLC"}
           ],
           "range": "0.01 to 10 (default 1)"
         }
@@ -646,7 +646,7 @@
         {
           "name": "range",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "0 to 3.1 (default 3)"
         }
@@ -683,7 +683,7 @@
         {
           "name": "range",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ],
           "range": "0 to 120e6 (default 100e6)"
         }
@@ -720,7 +720,7 @@
         {
           "name": "nplc",
           "units": [
-            "PLC"
+            {"unit": "PLC"}
           ],
           "range": "0.01 to 10 (default 1)"
         }
@@ -740,7 +740,7 @@
         {
           "name": "range",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ],
           "range": "0 to 101e6 (default 100e6)"
         }
@@ -777,7 +777,7 @@
         {
           "name": "nplc",
           "units": [
-            "PLC"
+            {"unit": "PLC"}
           ],
           "range": "0.01 to 10 (default 1)"
         }
@@ -834,7 +834,7 @@
         {
           "name": "aperture",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0.01 to 1.0 (default 1.0)"
         }
@@ -854,7 +854,7 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to 1010 (default 10)"
         }
@@ -874,7 +874,7 @@
         {
           "name": "aperture",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0.01 to 1.0 (default 1.0)"
         }
@@ -894,7 +894,7 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to 1010 (default 10)"
         }
@@ -914,7 +914,7 @@
         {
           "name": "range",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "0 to 1e-3 (default 1e-3)"
         }
@@ -934,7 +934,7 @@
         {
           "name": "threshold",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ],
           "range": "1 to 1000 (default 10)"
         }
@@ -972,7 +972,7 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to 757.5 (default 757.5)"
         }
@@ -1077,7 +1077,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "20 to 20000 (default 60)"
         }
@@ -1210,7 +1210,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "20 to 50000, above LCO (default 50000)"
         }
@@ -1247,7 +1247,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "20 to 50000, below HCO (default 20)"
         }
@@ -1353,7 +1353,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "20 to 50e3"
         }
@@ -1393,7 +1393,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "20 to 50e3 (default 20)"
         }
@@ -1413,7 +1413,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "20 to 50e3 (default 20480)"
         }
@@ -1433,7 +1433,7 @@
         {
           "name": "freqlist",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "up to 50 frequencies"
         }
@@ -1937,7 +1937,7 @@
         {
           "name": "reference",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "1e-7 to 1000 (default 1)"
         }
@@ -1957,7 +1957,7 @@
         {
           "name": "impedance",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ],
           "range": "1 to 9999 (default 75)"
         }
@@ -2029,7 +2029,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "10 to 20000 (default 60)"
         }
@@ -2049,7 +2049,7 @@
         {
           "name": "amplitude",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to 4 for HIZ, 0 to 2 for others (default 0.5)"
         }
@@ -2124,7 +2124,7 @@
         {
           "name": "delay",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "seconds (default 0)"
         }
@@ -2269,7 +2269,7 @@
         {
           "name": "delay",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0 to 999999.999 (default 0)"
         }
@@ -2324,7 +2324,7 @@
         {
           "name": "interval",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0.001 to 999999.999 (default 0.1)"
         }

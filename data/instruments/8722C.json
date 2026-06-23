@@ -2519,7 +2519,7 @@
           "name": "value",
           "range": "0.001 to 1000",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ]
         }
       ],
@@ -2892,7 +2892,7 @@
           "name": "value",
           "range": "0 to 10000",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ]
         }
       ],
@@ -2969,7 +2969,7 @@
           "name": "value",
           "range": "0.001 to 1000",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ]
         }
       ],

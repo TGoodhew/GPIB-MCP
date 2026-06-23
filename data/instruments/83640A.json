@@ -1004,7 +1004,7 @@
         {
           "name": "slope",
           "units": [
-            "DB/GHZ"
+            {"unit": "dB/GHz"}
           ],
           "range": "-2.5 to +2.5 dB/GHz"
         }

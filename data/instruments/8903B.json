@@ -653,7 +653,7 @@
       "set": "19.<load>SP",
       "query": false,
       "parameters": [
-        { "name": "load", "units": ["ohm"], "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load" }
+        { "name": "load", "units": [{"unit": "Ohm"}], "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load" }
       ],
       "examples": ["19.0SP", "19.016SP"]
     },

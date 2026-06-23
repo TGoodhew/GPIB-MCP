@@ -294,7 +294,7 @@
       "set": ":SOURce:DELay <n>",
       "query": ":SOURce:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s"], "range": "0 to 9999.999" }
+        { "name": "delay", "units": [{"unit": "s"}], "range": "0 to 9999.999" }
       ],
       "examples": [":SOUR:DEL 0.1", ":SOUR:DEL?"]
     },
@@ -362,7 +362,7 @@
       "set": ":SOURce:CURRent:RANGe <n>|UP|DOWN",
       "query": ":SOURce:CURRent:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "model-dependent (e.g. 1.05e-4 default); UP | DOWN" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "model-dependent (e.g. 1.05e-4 default); UP | DOWN" }
       ],
       "examples": [":SOUR:CURR:RANG 1e-3", ":SOUR:CURR:RANG?"]
     },
@@ -386,7 +386,7 @@
       "set": ":SOURce:CURRent:LEVel <n>",
       "query": ":SOURce:CURRent:LEVel?",
       "parameters": [
-        { "name": "level", "units": ["A"], "range": "within selected/source range" }
+        { "name": "level", "units": [{"unit": "A"}], "range": "within selected/source range" }
       ],
       "examples": [":SOUR:CURR:LEV 0.01", ":SOUR:CURR?"]
     },
@@ -398,7 +398,7 @@
       "set": ":SOURce:CURRent:LEVel:TRIGgered <n>",
       "query": ":SOURce:CURRent:LEVel:TRIGgered?",
       "parameters": [
-        { "name": "level", "units": ["A"], "range": "within source range" }
+        { "name": "level", "units": [{"unit": "A"}], "range": "within source range" }
       ],
       "examples": [":SOUR:CURR:TRIG 0.01"]
     },
@@ -410,7 +410,7 @@
       "set": ":SOURce:CURRent:STARt <n>",
       "query": ":SOURce:CURRent:STARt?",
       "parameters": [
-        { "name": "start", "units": ["A"] }
+        { "name": "start", "units": [{"unit": "A"}] }
       ],
       "examples": [":SOUR:CURR:STAR 0"]
     },
@@ -422,7 +422,7 @@
       "set": ":SOURce:CURRent:STOP <n>",
       "query": ":SOURce:CURRent:STOP?",
       "parameters": [
-        { "name": "stop", "units": ["A"] }
+        { "name": "stop", "units": [{"unit": "A"}] }
       ],
       "examples": [":SOUR:CURR:STOP 0.01"]
     },
@@ -434,7 +434,7 @@
       "set": ":SOURce:CURRent:STEP <n>",
       "query": ":SOURce:CURRent:STEP?",
       "parameters": [
-        { "name": "step", "units": ["A"] }
+        { "name": "step", "units": [{"unit": "A"}] }
       ],
       "examples": [":SOUR:CURR:STEP 0.001"]
     },
@@ -446,7 +446,7 @@
       "set": ":SOURce:CURRent:CENTer <n>",
       "query": ":SOURce:CURRent:CENTer?",
       "parameters": [
-        { "name": "center", "units": ["A"] }
+        { "name": "center", "units": [{"unit": "A"}] }
       ],
       "examples": [":SOUR:CURR:CENT 0"]
     },
@@ -458,7 +458,7 @@
       "set": ":SOURce:CURRent:SPAN <n>",
       "query": ":SOURce:CURRent:SPAN?",
       "parameters": [
-        { "name": "span", "units": ["A"] }
+        { "name": "span", "units": [{"unit": "A"}] }
       ],
       "examples": [":SOUR:CURR:SPAN 0.01"]
     },
@@ -482,7 +482,7 @@
       "set": ":SOURce:VOLTage:RANGe <n>|UP|DOWN",
       "query": ":SOURce:VOLTage:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "model-dependent (e.g. 21 default); UP | DOWN" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "model-dependent (e.g. 21 default); UP | DOWN" }
       ],
       "examples": [":SOUR:VOLT:RANG 20", ":SOUR:VOLT:RANG?"]
     },
@@ -506,7 +506,7 @@
       "set": ":SOURce:VOLTage:LEVel <n>",
       "query": ":SOURce:VOLTage:LEVel?",
       "parameters": [
-        { "name": "level", "units": ["V"], "range": "within selected/source range" }
+        { "name": "level", "units": [{"unit": "V"}], "range": "within selected/source range" }
       ],
       "examples": [":SOUR:VOLT:LEV 1.0", ":SOUR:VOLT?"]
     },
@@ -518,7 +518,7 @@
       "set": ":SOURce:VOLTage:LEVel:TRIGgered <n>",
       "query": ":SOURce:VOLTage:LEVel:TRIGgered?",
       "parameters": [
-        { "name": "level", "units": ["V"], "range": "within source range" }
+        { "name": "level", "units": [{"unit": "V"}], "range": "within source range" }
       ],
       "examples": [":SOUR:VOLT:TRIG 5"]
     },
@@ -530,7 +530,7 @@
       "set": ":SOURce:VOLTage:PROTection <NRf>",
       "query": ":SOURce:VOLTage:PROTection?",
       "parameters": [
-        { "name": "level", "units": ["V"], "range": "instrument-dependent (e.g. 20, 40, 60, 80, 100, 120, 160, NONE)" }
+        { "name": "level", "units": [{"unit": "V"}], "range": "instrument-dependent (e.g. 20, 40, 60, 80, 100, 120, 160, NONE)" }
       ],
       "examples": [":SOUR:VOLT:PROT 40"]
     },
@@ -550,7 +550,7 @@
       "set": ":SOURce:VOLTage:STARt <n>",
       "query": ":SOURce:VOLTage:STARt?",
       "parameters": [
-        { "name": "start", "units": ["V"] }
+        { "name": "start", "units": [{"unit": "V"}] }
       ],
       "examples": [":SOUR:VOLT:STAR 0"]
     },
@@ -562,7 +562,7 @@
       "set": ":SOURce:VOLTage:STOP <n>",
       "query": ":SOURce:VOLTage:STOP?",
       "parameters": [
-        { "name": "stop", "units": ["V"] }
+        { "name": "stop", "units": [{"unit": "V"}] }
       ],
       "examples": [":SOUR:VOLT:STOP 10"]
     },
@@ -574,7 +574,7 @@
       "set": ":SOURce:VOLTage:STEP <n>",
       "query": ":SOURce:VOLTage:STEP?",
       "parameters": [
-        { "name": "step", "units": ["V"] }
+        { "name": "step", "units": [{"unit": "V"}] }
       ],
       "examples": [":SOUR:VOLT:STEP 0.1"]
     },
@@ -586,7 +586,7 @@
       "set": ":SOURce:VOLTage:CENTer <n>",
       "query": ":SOURce:VOLTage:CENTer?",
       "parameters": [
-        { "name": "center", "units": ["V"] }
+        { "name": "center", "units": [{"unit": "V"}] }
       ],
       "examples": [":SOUR:VOLT:CENT 5"]
     },
@@ -598,7 +598,7 @@
       "set": ":SOURce:VOLTage:SPAN <n>",
       "query": ":SOURce:VOLTage:SPAN?",
       "parameters": [
-        { "name": "span", "units": ["V"] }
+        { "name": "span", "units": [{"unit": "V"}] }
       ],
       "examples": [":SOUR:VOLT:SPAN 10"]
     },
@@ -610,7 +610,7 @@
       "set": ":SOURce:SOAK <NRf>",
       "query": ":SOURce:SOAK?",
       "parameters": [
-        { "name": "time", "units": ["s"], "range": "0.00000 to 9999.999" }
+        { "name": "time", "units": [{"unit": "s"}], "range": "0.00000 to 9999.999" }
       ],
       "examples": [":SOUR:SOAK 0.1"]
     },
@@ -682,7 +682,7 @@
       "set": ":SOURce:LIST:CURRent <NRf>{,<NRf>}",
       "query": ":SOURce:LIST:CURRent?",
       "parameters": [
-        { "name": "values", "units": ["A"], "range": "comma-separated list" }
+        { "name": "values", "units": [{"unit": "A"}], "range": "comma-separated list" }
       ],
       "examples": [":SOUR:LIST:CURR 1e-3,2e-3,3e-3"]
     },
@@ -693,7 +693,7 @@
       "description": "Append current-source values to the end of the existing current list.",
       "set": ":SOURce:LIST:CURRent:APPend <NRf>{,<NRf>}",
       "parameters": [
-        { "name": "values", "units": ["A"], "range": "comma-separated list" }
+        { "name": "values", "units": [{"unit": "A"}], "range": "comma-separated list" }
       ],
       "examples": [":SOUR:LIST:CURR:APP 4e-3,5e-3"]
     },
@@ -713,7 +713,7 @@
       "set": ":SOURce:LIST:VOLTage <NRf>{,<NRf>}",
       "query": ":SOURce:LIST:VOLTage?",
       "parameters": [
-        { "name": "values", "units": ["V"], "range": "comma-separated list" }
+        { "name": "values", "units": [{"unit": "V"}], "range": "comma-separated list" }
       ],
       "examples": [":SOUR:LIST:VOLT 1,2,3,4"]
     },
@@ -724,7 +724,7 @@
       "description": "Append voltage-source values to the end of the existing voltage list.",
       "set": ":SOURce:LIST:VOLTage:APPend <NRf>{,<NRf>}",
       "parameters": [
-        { "name": "values", "units": ["V"], "range": "comma-separated list" }
+        { "name": "values", "units": [{"unit": "V"}], "range": "comma-separated list" }
       ],
       "examples": [":SOUR:LIST:VOLT:APP 5,6"]
     },
@@ -790,7 +790,7 @@
       "set": ":SOURce:PULSe:WIDTh <n>",
       "query": ":SOURce:PULSe:WIDTh?",
       "parameters": [
-        { "name": "width", "units": ["s"], "range": "0.00015 to 0.005" }
+        { "name": "width", "units": [{"unit": "s"}], "range": "0.00015 to 0.005" }
       ],
       "examples": [":SOUR:PULS:WIDT 0.001"]
     },
@@ -802,7 +802,7 @@
       "set": ":SOURce:PULSe:DELay <n>",
       "query": ":SOURce:PULSe:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s"], "range": "0 to 9999.999" }
+        { "name": "delay", "units": [{"unit": "s"}], "range": "0 to 9999.999" }
       ],
       "examples": [":SOUR:PULS:DEL 0.01"]
     },
@@ -894,7 +894,7 @@
       "set": ":SENSe:CURRent:RANGe <n>|UP|DOWN",
       "query": ":SENSe:CURRent:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "model-dependent; UP | DOWN" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "model-dependent; UP | DOWN" }
       ],
       "examples": [":SENS:CURR:RANG 1e-3", ":SENS:CURR:RANG?"]
     },
@@ -918,7 +918,7 @@
       "set": ":SENSe:CURRent:NPLCycles <n>",
       "query": ":SENSe:CURRent:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10" }
       ],
       "examples": [":SENS:CURR:NPLC 1", ":SENS:CURR:NPLC 0.1"]
     },
@@ -930,7 +930,7 @@
       "set": ":SENSe:CURRent:PROTection <n>",
       "query": ":SENSe:CURRent:PROTection?",
       "parameters": [
-        { "name": "compliance", "units": ["A"], "range": "model-dependent" }
+        { "name": "compliance", "units": [{"unit": "A"}], "range": "model-dependent" }
       ],
       "examples": [":SENS:CURR:PROT 0.01", ":SENS:CURR:PROT?"]
     },
@@ -950,7 +950,7 @@
       "set": ":SENSe:VOLTage:RANGe <n>|UP|DOWN",
       "query": ":SENSe:VOLTage:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "model-dependent; UP | DOWN" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "model-dependent; UP | DOWN" }
       ],
       "examples": [":SENS:VOLT:RANG 20", ":SENS:VOLT:RANG?"]
     },
@@ -974,7 +974,7 @@
       "set": ":SENSe:VOLTage:NPLCycles <n>",
       "query": ":SENSe:VOLTage:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10" }
       ],
       "examples": [":SENS:VOLT:NPLC 1"]
     },
@@ -986,7 +986,7 @@
       "set": ":SENSe:VOLTage:PROTection <n>",
       "query": ":SENSe:VOLTage:PROTection?",
       "parameters": [
-        { "name": "compliance", "units": ["V"], "range": "model-dependent" }
+        { "name": "compliance", "units": [{"unit": "V"}], "range": "model-dependent" }
       ],
       "examples": [":SENS:VOLT:PROT 10", ":SENS:VOLT:PROT?"]
     },
@@ -1018,7 +1018,7 @@
       "set": ":SENSe:RESistance:RANGe <n>|UP|DOWN",
       "query": ":SENSe:RESistance:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["ohm"], "range": "model-dependent; UP | DOWN" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "model-dependent; UP | DOWN" }
       ],
       "examples": [":SENS:RES:RANG 1e3"]
     },
@@ -1054,7 +1054,7 @@
       "set": ":SENSe:RESistance:NPLCycles <n>",
       "query": ":SENSe:RESistance:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10" }
       ],
       "examples": [":SENS:RES:NPLC 1"]
     },
@@ -1425,7 +1425,7 @@
       "set": ":TRIGger:DELay <n>",
       "query": ":TRIGger:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s"], "range": "0 to 999.9999" }
+        { "name": "delay", "units": [{"unit": "s"}], "range": "0 to 999.9999" }
       ],
       "examples": [":TRIG:DEL 0.1"]
     },
@@ -1481,7 +1481,7 @@
       "set": ":ARM:TIMer <n>",
       "query": ":ARM:TIMer?",
       "parameters": [
-        { "name": "interval", "units": ["s"], "range": "0.001 to 99999.99" }
+        { "name": "interval", "units": [{"unit": "s"}], "range": "0.001 to 99999.99" }
       ],
       "examples": [":ARM:TIM 0.5"]
     },
@@ -1590,7 +1590,7 @@
       "set": ":SYSTem:LFRequency <freq>",
       "query": ":SYSTem:LFRequency?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "50 | 60" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "50 | 60" }
       ],
       "examples": [":SYST:LFR 60"]
     },
@@ -1625,7 +1625,7 @@
       "description": "Specify the resistance threshold for the contact check (default 50 ohm).",
       "set": ":SYSTem:CCHeck:RESistance <NRf>",
       "parameters": [
-        { "name": "threshold", "units": ["ohm"], "range": "2 | 15 | 50 (option-dependent)" }
+        { "name": "threshold", "units": [{"unit": "Ohm"}], "range": "2 | 15 | 50 (option-dependent)" }
       ],
       "examples": [":SYST:CCH:RES 50"]
     },
@@ -1648,8 +1648,8 @@
       "description": "Sound the beeper at a specified frequency for a specified time.",
       "set": ":SYSTem:BEEPer <freq>,<time>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "65 to 2e6" },
-        { "name": "time", "units": ["s"], "range": "0 to 7.9" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "65 to 2e6" },
+        { "name": "time", "units": [{"unit": "s"}], "range": "0 to 7.9" }
       ],
       "examples": [":SYST:BEEP 1000,0.5"]
     },

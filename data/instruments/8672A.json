@@ -18,7 +18,7 @@
       "description": "Program frequency. The string begins with the program code for the most-significant digit being programmed and is followed by the frequency digits, then the Execute code Z and a dummy argument. Digit codes: P=10 GHz, Q=1 GHz, R=100 MHz, S=10 MHz, T=1 MHz, U=100 kHz, V=10 kHz, W=1 kHz. Accepts any frequency in range to 8 significant digits; above 6.2 GHz the 1 kHz digit is rounded to the 2/3 kHz resolution. Frequency is stored in two blocks (10 GHz..10 MHz and 1 MHz..1 kHz); programming one block does not change the other except for rounding above 6.2 GHz.",
       "set": "<digit-code><digits...>Z<dummy>",
       "parameters": [
-        { "name": "frequency", "units": ["GHz", "MHz", "kHz"], "range": "2 to 18 GHz, 8 significant digits" }
+        { "name": "frequency", "units": [{"unit": "GHz"}, {"unit": "MHz"}, {"unit": "kHz"}], "range": "2 to 18 GHz, 8 significant digits" }
       ],
       "examples": ["P12596365Z0", "P12345678Z1"]
     },
@@ -40,7 +40,7 @@
       "description": "Program output level RANGE in 10 dB steps. Code K followed by an argument: 0=0 dBm, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, : (colon)=-100, ; (semicolon)=-110. The +10 dBm (over-range) position is set via the ALC code, not here.",
       "set": "K<arg>",
       "parameters": [
-        { "name": "range", "units": ["dBm"], "range": "0=0, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, :=-100, ;=-110" }
+        { "name": "range", "units": [{"unit": "dBm"}], "range": "0=0, 1=-10, 2=-20, 3=-30, 4=-40, 5=-50, 6=-60, 7=-70, 8=-80, 9=-90, :=-100, ;=-110" }
       ],
       "examples": ["K9", "K1"]
     },
@@ -51,7 +51,7 @@
       "description": "Program output level VERNIER in 1 dB steps from +3 to -10 dB. Code L followed by an argument: ( =+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, : =-7, ; =-8, < =-9, = =-10 dB.",
       "set": "L<arg>",
       "parameters": [
-        { "name": "vernier", "units": ["dB"], "range": "+3 to -10 dB in 1 dB steps; (=+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, :=-7, ;=-8, <=-9, ==-10" }
+        { "name": "vernier", "units": [{"unit": "dB"}], "range": "+3 to -10 dB in 1 dB steps; (=+3, 1=+2, 2=+1, 3=0, 4=-1, 5=-2, 6=-3, 7=-4, 8=-5, 9=-6, :=-7, ;=-8, <=-9, ==-10" }
       ],
       "examples": ["L7", "L3"]
     },

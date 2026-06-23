@@ -70,7 +70,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "INPUT 1 range (500 MHz to 20 GHz); or LASTF for last measurement"
         }
@@ -186,7 +186,7 @@
         {
           "name": "offset_frequency",
           "units": [
-            "Hz"
+            {"unit": "Hz"}
           ],
           "range": "positive or negative; or LASTF"
         }

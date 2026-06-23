@@ -992,7 +992,7 @@
           "name": "level",
           "units": [
             {"token": "dBm", "unit": "dBm"},
-            "dBW",
+            {"unit": "dBW"},
             {"token": "V", "unit": "V"},
             {"token": "mV", "unit": "mV"},
             {"token": "uV", "unit": "uV"}
@@ -1537,7 +1537,7 @@
         {
           "name": "deviation",
           "units": [
-            "rad",
+            {"unit": "rad"},
             {"token": "deg", "unit": "deg"}
           ],
           "range": "-360 deg to +360 deg"
@@ -1821,7 +1821,7 @@
           "name": "phase",
           "units": [
             {"token": "deg", "unit": "deg"},
-            "rad"
+            {"unit": "rad"}
           ],
           "range": "-360 deg to +360 deg"
         }

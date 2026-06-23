@@ -67,6 +67,28 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Tokenless_AuditedParam_SendsBareNumber()
+        {
+            // {"unit":"V"} with no token: the box takes a bare number; the value's unit is still recorded.
+            var bareVolts = new List<UnitToken> { new UnitToken(null, "V") };
+            Assert.True(bareVolts[0].IsAudited);
+            Assert.False(bareVolts[0].HasWireToken);
+
+            var exact = UnitResolver.Resolve(5, "V", bareVolts);
+            Assert.True(exact.Ok);
+            Assert.Equal("5", exact.Formatted);          // no trailing token/space
+            Assert.Equal("", exact.Token);
+
+            // A sub-unit converts to the recorded unit and still goes out bare (5 mV -> 0.005 V).
+            var conv = UnitResolver.Resolve(5, "mV", bareVolts);
+            Assert.True(conv.Ok);
+            Assert.Equal("0.005", conv.Formatted);
+
+            // No unit given is fine when there is a single audited token to mean.
+            Assert.Equal("12", UnitResolver.Resolve(12, null, bareVolts).Formatted);
+        }
+
+        [Fact]
         public void DbF_IsExactMatchOnly()
         {
             var dbf = new List<UnitToken> { new UnitToken("DF", "dBf") };

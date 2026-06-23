@@ -2416,7 +2416,7 @@
         {
           "name": "numeric_value",
           "units": [
-            "baud"
+            {"unit": "baud"}
           ],
           "range": "standard rates, e.g. 1200..115200"
         }
@@ -2533,7 +2533,7 @@
         {
           "name": "numeric_value",
           "units": [
-            "baud"
+            {"unit": "baud"}
           ],
           "range": "standard rates"
         }
