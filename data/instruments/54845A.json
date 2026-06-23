@@ -1,0 +1,1213 @@
+{
+  "model": "54845A",
+  "manufacturer": "Agilent",
+  "category": "Oscilloscope",
+  "description": "Agilent (Hewlett-Packard) 54845A Infiniium digital oscilloscope. Bandwidth 1.5 GHz; 4 analog channels. Member of the Infiniium 548xx series; controlled by SCPI commands over GPIB (IEEE 488.2) or LAN.",
+  "source": "Infiniium Oscilloscopes Programmer's Quick Reference Guide (publication 54810-97065, Feb 2001) + Infiniium Oscilloscopes Programmer's Reference (standard 548xx SCPI command set)",
+  "aliases": [
+    "HP 54845A",
+    "Agilent 54845A",
+    "Infiniium 54845A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "54845A",
+    "supported": true,
+    "description": "Standard IEEE 488.2 identification query; returns manufacturer, model (54845A), serial number and firmware revision."
+  },
+  "capture": {
+    "method": "scpi_block",
+    "dumpCommand": ":WAVeform:DATA?"
+  },
+  "commands": [
+    {
+      "name": "idn",
+      "mnemonic": "*IDN?",
+      "category": "Common",
+      "description": "Query the oscilloscope identification string (manufacturer, model, serial number, firmware revision).",
+      "query": "*IDN?",
+      "examples": [
+        "*IDN?"
+      ]
+    },
+    {
+      "name": "reset",
+      "mnemonic": "*RST",
+      "category": "Common",
+      "description": "Reset the oscilloscope to its default (factory) configuration.",
+      "set": "*RST",
+      "examples": [
+        "*RST"
+      ]
+    },
+    {
+      "name": "opc",
+      "mnemonic": "*OPC",
+      "category": "Common",
+      "description": "Set the operation complete bit in the standard event status register when all pending operations complete; the query form returns 1 when all operations are finished.",
+      "set": "*OPC",
+      "query": "*OPC?",
+      "examples": [
+        "*OPC",
+        "*OPC?"
+      ]
+    },
+    {
+      "name": "cls",
+      "mnemonic": "*CLS",
+      "category": "Common",
+      "description": "Clear the status data structures, the device-defined error queue and the request-for-OPC flag.",
+      "set": "*CLS",
+      "examples": [
+        "*CLS"
+      ]
+    },
+    {
+      "name": "ese",
+      "mnemonic": "*ESE <mask>",
+      "category": "Common",
+      "description": "Set or query the standard event status enable register mask.",
+      "set": "*ESE <mask>",
+      "query": "*ESE?",
+      "parameters": [
+        {
+          "name": "<mask>",
+          "range": "0 to 255 (integer enabling bits in the Standard Event Status Enable register)"
+        }
+      ],
+      "examples": [
+        "*ESE 1",
+        "*ESE?"
+      ]
+    },
+    {
+      "name": "sre",
+      "mnemonic": "*SRE <mask>",
+      "category": "Common",
+      "description": "Set or query the service request enable register mask.",
+      "set": "*SRE <mask>",
+      "query": "*SRE?",
+      "parameters": [
+        {
+          "name": "<mask>",
+          "range": "0 to 255 (integer enabling bits in the Service Request Enable register)"
+        }
+      ],
+      "examples": [
+        "*SRE 16",
+        "*SRE?"
+      ]
+    },
+    {
+      "name": "stb",
+      "mnemonic": "*STB?",
+      "category": "Common",
+      "description": "Query the status byte register.",
+      "query": "*STB?",
+      "examples": [
+        "*STB?"
+      ]
+    },
+    {
+      "name": "esr",
+      "mnemonic": "*ESR?",
+      "category": "Common",
+      "description": "Query the standard event status register.",
+      "query": "*ESR?",
+      "examples": [
+        "*ESR?"
+      ]
+    },
+    {
+      "name": "trg",
+      "mnemonic": "*TRG",
+      "category": "Common",
+      "description": "Trigger command equivalent to a group execute trigger; starts an acquisition when armed.",
+      "set": "*TRG",
+      "examples": [
+        "*TRG"
+      ]
+    },
+    {
+      "name": "wai",
+      "mnemonic": "*WAI",
+      "category": "Common",
+      "description": "Wait until all pending device operations complete before executing subsequent commands.",
+      "set": "*WAI",
+      "examples": [
+        "*WAI"
+      ]
+    },
+    {
+      "name": "save_setup",
+      "mnemonic": "*SAV <register>",
+      "category": "Common",
+      "description": "Save the current oscilloscope setup to the specified save/recall register.",
+      "set": "*SAV <register>",
+      "parameters": [
+        {
+          "name": "<register>",
+          "range": "0 to 9 (setup memory number)"
+        }
+      ],
+      "examples": [
+        "*SAV 1"
+      ]
+    },
+    {
+      "name": "recall_setup",
+      "mnemonic": "*RCL <register>",
+      "category": "Common",
+      "description": "Recall a previously saved oscilloscope setup from the specified register.",
+      "set": "*RCL <register>",
+      "parameters": [
+        {
+          "name": "<register>",
+          "range": "0 to 9 (setup memory number)"
+        }
+      ],
+      "examples": [
+        "*RCL 1"
+      ]
+    },
+    {
+      "name": "autoscale",
+      "mnemonic": ":AUToscale",
+      "category": "Root",
+      "description": "Automatically configure the vertical, horizontal and trigger controls to display the input signals.",
+      "set": ":AUToscale",
+      "examples": [
+        ":AUToscale"
+      ]
+    },
+    {
+      "name": "run",
+      "mnemonic": ":RUN",
+      "category": "Root",
+      "description": "Start repetitive acquisitions (run mode).",
+      "set": ":RUN",
+      "examples": [
+        ":RUN"
+      ]
+    },
+    {
+      "name": "stop",
+      "mnemonic": ":STOP",
+      "category": "Root",
+      "description": "Stop acquiring data; the displayed waveform is the last acquired record.",
+      "set": ":STOP",
+      "examples": [
+        ":STOP"
+      ]
+    },
+    {
+      "name": "single",
+      "mnemonic": ":SINGle",
+      "category": "Root",
+      "description": "Arm the oscilloscope for a single acquisition.",
+      "set": ":SINGle",
+      "examples": [
+        ":SINGle"
+      ]
+    },
+    {
+      "name": "digitize",
+      "mnemonic": ":DIGitize <source>",
+      "category": "Root",
+      "description": "Acquire a waveform on the specified source(s) using the current acquisition settings, then stop; prepares data for a :WAVeform:DATA? read.",
+      "set": ":DIGitize <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>} (one or more, comma separated); n = 1 to 4"
+        }
+      ],
+      "examples": [
+        ":DIGitize CHANnel1",
+        ":DIGitize CHANnel1,CHANnel2"
+      ]
+    },
+    {
+      "name": "aer",
+      "mnemonic": ":AER?",
+      "category": "Root",
+      "description": "Query the arm event register; returns 1 if the trigger has armed since the last read.",
+      "query": ":AER?",
+      "examples": [
+        ":AER?"
+      ]
+    },
+    {
+      "name": "ter",
+      "mnemonic": ":TER?",
+      "category": "Root",
+      "description": "Query the trigger event register; returns 1 if a trigger has occurred since the last read.",
+      "query": ":TER?",
+      "examples": [
+        ":TER?"
+      ]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": ":SYSTem:ERRor?",
+      "category": "SYSTem",
+      "description": "Query the next entry in the error queue (error number and message).",
+      "query": ":SYSTem:ERRor?",
+      "examples": [
+        ":SYSTem:ERRor?"
+      ]
+    },
+    {
+      "name": "system_header",
+      "mnemonic": ":SYSTem:HEADer <bool>",
+      "category": "SYSTem",
+      "description": "Enable or disable the inclusion of the command header in query responses, or query its state.",
+      "set": ":SYSTem:HEADer <bool>",
+      "query": ":SYSTem:HEADer?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":SYSTem:HEADer OFF",
+        ":SYSTem:HEADer?"
+      ]
+    },
+    {
+      "name": "system_longform",
+      "mnemonic": ":SYSTem:LONGform <bool>",
+      "category": "SYSTem",
+      "description": "Enable or disable long-form keywords in query responses, or query its state.",
+      "set": ":SYSTem:LONGform <bool>",
+      "query": ":SYSTem:LONGform?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":SYSTem:LONGform OFF",
+        ":SYSTem:LONGform?"
+      ]
+    },
+    {
+      "name": "acquire_mode",
+      "mnemonic": ":ACQuire:MODE <mode>",
+      "category": "ACQuire",
+      "description": "Set or query the acquisition sampling mode.",
+      "set": ":ACQuire:MODE <mode>",
+      "query": ":ACQuire:MODE?",
+      "parameters": [
+        {
+          "name": "<mode>",
+          "range": "{ETIMe|RTIMe} (equivalent-time or real-time sampling)"
+        }
+      ],
+      "examples": [
+        ":ACQuire:MODE RTIMe",
+        ":ACQuire:MODE?"
+      ]
+    },
+    {
+      "name": "acquire_average",
+      "mnemonic": ":ACQuire:AVERage <bool>",
+      "category": "ACQuire",
+      "description": "Enable or disable averaging acquisition, or query its state.",
+      "set": ":ACQuire:AVERage <bool>",
+      "query": ":ACQuire:AVERage?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":ACQuire:AVERage ON",
+        ":ACQuire:AVERage?"
+      ]
+    },
+    {
+      "name": "acquire_count",
+      "mnemonic": ":ACQuire:COUNt <count>",
+      "category": "ACQuire",
+      "description": "Set or query the number of averages used when averaging is enabled.",
+      "set": ":ACQuire:COUNt <count>",
+      "query": ":ACQuire:COUNt?",
+      "parameters": [
+        {
+          "name": "<count>",
+          "range": "2 to 4096 (integer)"
+        }
+      ],
+      "examples": [
+        ":ACQuire:COUNt 16",
+        ":ACQuire:COUNt?"
+      ]
+    },
+    {
+      "name": "acquire_points",
+      "mnemonic": ":ACQuire:POINts <points>",
+      "category": "ACQuire",
+      "description": "Set or query the number of points (memory depth) acquired per channel.",
+      "set": ":ACQuire:POINts <points>",
+      "query": ":ACQuire:POINts?",
+      "parameters": [
+        {
+          "name": "<points>",
+          "range": "16 to 32768 (4-channel real-time) up to 65536 (2-channel); see manual Points Value Ranges"
+        }
+      ],
+      "examples": [
+        ":ACQuire:POINts 1000",
+        ":ACQuire:POINts?"
+      ]
+    },
+    {
+      "name": "acquire_srate",
+      "mnemonic": ":ACQuire:SRATe <rate>",
+      "category": "ACQuire",
+      "description": "Set or query the acquisition sample rate.",
+      "set": ":ACQuire:SRATe <rate>",
+      "query": ":ACQuire:SRATe?",
+      "parameters": [
+        {
+          "name": "<rate>",
+          "units": [
+            {"unit": "sps"}
+          ],
+          "range": "Floating-point sample rate (samples per second); valid rates depend on timebase and channel count"
+        }
+      ],
+      "examples": [
+        ":ACQuire:SRATe 2E9",
+        ":ACQuire:SRATe?"
+      ]
+    },
+    {
+      "name": "acquire_interpolate",
+      "mnemonic": ":ACQuire:INTerpolate <bool>",
+      "category": "ACQuire",
+      "description": "Enable or disable sin(x)/x interpolation between sample points, or query its state.",
+      "set": ":ACQuire:INTerpolate <bool>",
+      "query": ":ACQuire:INTerpolate?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":ACQuire:INTerpolate ON",
+        ":ACQuire:INTerpolate?"
+      ]
+    },
+    {
+      "name": "channel_display",
+      "mnemonic": ":CHANnel<n>:DISPlay <bool>",
+      "category": "CHANnel",
+      "description": "Turn the display of the specified channel on or off, or query its state.",
+      "set": ":CHANnel<n>:DISPlay <bool>",
+      "query": ":CHANnel<n>:DISPlay?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:DISPlay ON",
+        ":CHANnel1:DISPlay?"
+      ]
+    },
+    {
+      "name": "channel_scale",
+      "mnemonic": ":CHANnel<n>:SCALe <scale>",
+      "category": "CHANnel",
+      "description": "Set or query the vertical scale (volts per division) of the specified channel.",
+      "set": ":CHANnel<n>:SCALe <scale>",
+      "query": ":CHANnel<n>:SCALe?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<scale>",
+          "units": [
+            {"unit": "V/div"}
+          ],
+          "range": "Real number; volts per division (depends on attenuation factor)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:SCALe 0.1",
+        ":CHANnel1:SCALe?"
+      ]
+    },
+    {
+      "name": "channel_range",
+      "mnemonic": ":CHANnel<n>:RANGe <range>",
+      "category": "CHANnel",
+      "description": "Set or query the full-scale vertical range of the specified channel (eight divisions).",
+      "set": ":CHANnel<n>:RANGe <range>",
+      "query": ":CHANnel<n>:RANGe?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<range>",
+          "units": [
+            {"unit": "V"}
+          ],
+          "range": "Real number; full-scale volts across all eight divisions (depends on attenuation factor)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:RANGe 0.8",
+        ":CHANnel1:RANGe?"
+      ]
+    },
+    {
+      "name": "channel_offset",
+      "mnemonic": ":CHANnel<n>:OFFSet <offset>",
+      "category": "CHANnel",
+      "description": "Set or query the vertical offset (voltage at the centre of the screen) of the specified channel.",
+      "set": ":CHANnel<n>:OFFSet <offset>",
+      "query": ":CHANnel<n>:OFFSet?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<offset>",
+          "units": [
+            {"unit": "V"}
+          ],
+          "range": "Real number; offset voltage (range depends on vertical scale and attenuation)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:OFFSet 0",
+        ":CHANnel1:OFFSet?"
+      ]
+    },
+    {
+      "name": "channel_coupling",
+      "mnemonic": ":CHANnel<n>:INPut <coupling>",
+      "category": "CHANnel",
+      "description": "Set or query the input coupling and impedance of the specified channel.",
+      "set": ":CHANnel<n>:INPut <coupling>",
+      "query": ":CHANnel<n>:INPut?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<coupling>",
+          "range": "{DC|DC50|DCFifty|LFReject} (1 MOhm DC, 50 Ohm DC, or AC/low-frequency reject)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:INPut DC50",
+        ":CHANnel1:INPut?"
+      ]
+    },
+    {
+      "name": "channel_probe",
+      "mnemonic": ":CHANnel<n>:PROBe <atten>",
+      "category": "CHANnel",
+      "description": "Set or query the probe attenuation factor of the specified channel.",
+      "set": ":CHANnel<n>:PROBe <atten>",
+      "query": ":CHANnel<n>:PROBe?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<atten>",
+          "range": "Real number from 0.0001 to 1000000 (attenuation ratio)"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:PROBe 10",
+        ":CHANnel1:PROBe?"
+      ]
+    },
+    {
+      "name": "channel_bwlimit",
+      "mnemonic": ":CHANnel<n>:BWLimit <bool>",
+      "category": "CHANnel",
+      "description": "Enable or disable the bandwidth limit filter on the specified channel, or query its state.",
+      "set": ":CHANnel<n>:BWLimit <bool>",
+      "query": ":CHANnel<n>:BWLimit?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:BWLimit ON",
+        ":CHANnel1:BWLimit?"
+      ]
+    },
+    {
+      "name": "channel_units",
+      "mnemonic": ":CHANnel<n>:UNITs <units>",
+      "category": "CHANnel",
+      "description": "Set or query the vertical measurement units of the specified channel.",
+      "set": ":CHANnel<n>:UNITs <units>",
+      "query": ":CHANnel<n>:UNITs?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "range": "{1|2|3|4}"
+        },
+        {
+          "name": "<units>",
+          "range": "{VOLT|AMPere|WATT|UNKNown}"
+        }
+      ],
+      "examples": [
+        ":CHANnel1:UNITs VOLT",
+        ":CHANnel1:UNITs?"
+      ]
+    },
+    {
+      "name": "timebase_scale",
+      "mnemonic": ":TIMebase:SCALe <scale>",
+      "category": "TIMebase",
+      "description": "Set or query the horizontal scale (seconds per division).",
+      "set": ":TIMebase:SCALe <scale>",
+      "query": ":TIMebase:SCALe?",
+      "parameters": [
+        {
+          "name": "<scale>",
+          "units": [
+            {"unit": "s/div"}
+          ],
+          "range": "Real number; seconds per division"
+        }
+      ],
+      "examples": [
+        ":TIMebase:SCALe 1E-6",
+        ":TIMebase:SCALe?"
+      ]
+    },
+    {
+      "name": "timebase_range",
+      "mnemonic": ":TIMebase:RANGe <range>",
+      "category": "TIMebase",
+      "description": "Set or query the full-scale horizontal range (ten divisions) in seconds.",
+      "set": ":TIMebase:RANGe <range>",
+      "query": ":TIMebase:RANGe?",
+      "parameters": [
+        {
+          "name": "<range>",
+          "units": [
+            {"unit": "s"}
+          ],
+          "range": "Real number; full-scale seconds across all ten divisions"
+        }
+      ],
+      "examples": [
+        ":TIMebase:RANGe 1E-5",
+        ":TIMebase:RANGe?"
+      ]
+    },
+    {
+      "name": "timebase_position",
+      "mnemonic": ":TIMebase:POSition <pos>",
+      "category": "TIMebase",
+      "description": "Set or query the horizontal position (time of the trigger reference point relative to the display).",
+      "set": ":TIMebase:POSition <pos>",
+      "query": ":TIMebase:POSition?",
+      "parameters": [
+        {
+          "name": "<pos>",
+          "units": [
+            {"unit": "s"}
+          ],
+          "range": "Real number; time in seconds"
+        }
+      ],
+      "examples": [
+        ":TIMebase:POSition 0",
+        ":TIMebase:POSition?"
+      ]
+    },
+    {
+      "name": "timebase_reference",
+      "mnemonic": ":TIMebase:REFerence <ref>",
+      "category": "TIMebase",
+      "description": "Set or query the horizontal reference point (where the time position is measured from).",
+      "set": ":TIMebase:REFerence <ref>",
+      "query": ":TIMebase:REFerence?",
+      "parameters": [
+        {
+          "name": "<ref>",
+          "range": "{LEFT|CENTer|RIGHt}"
+        }
+      ],
+      "examples": [
+        ":TIMebase:REFerence CENTer",
+        ":TIMebase:REFerence?"
+      ]
+    },
+    {
+      "name": "timebase_delay",
+      "mnemonic": ":TIMebase:DELay <delay>",
+      "category": "TIMebase",
+      "description": "Set or query the timebase delay (offset of the trigger point from the horizontal reference).",
+      "set": ":TIMebase:DELay <delay>",
+      "query": ":TIMebase:DELay?",
+      "parameters": [
+        {
+          "name": "<delay>",
+          "units": [
+            {"unit": "s"}
+          ],
+          "range": "Real number; delay time in seconds"
+        }
+      ],
+      "examples": [
+        ":TIMebase:DELay 0",
+        ":TIMebase:DELay?"
+      ]
+    },
+    {
+      "name": "trigger_sweep",
+      "mnemonic": ":TRIGger:SWEep <mode>",
+      "category": "TRIGger",
+      "description": "Set or query the trigger sweep mode (how the oscilloscope arms and triggers).",
+      "set": ":TRIGger:SWEep <mode>",
+      "query": ":TRIGger:SWEep?",
+      "parameters": [
+        {
+          "name": "<mode>",
+          "range": "{AUTO|TRIGgered|SINGle}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SWEep AUTO",
+        ":TRIGger:SWEep?"
+      ]
+    },
+    {
+      "name": "trigger_mode",
+      "mnemonic": ":TRIGger:MODE <mode>",
+      "category": "TRIGger",
+      "description": "Set or query the trigger mode (the type of trigger condition).",
+      "set": ":TRIGger:MODE <mode>",
+      "query": ":TRIGger:MODE?",
+      "parameters": [
+        {
+          "name": "<mode>",
+          "range": "{EDGE|GLITch|ADVanced|TV|COMM|DELay|PATTern|STATe}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:MODE EDGE",
+        ":TRIGger:MODE?"
+      ]
+    },
+    {
+      "name": "trigger_edge_source",
+      "mnemonic": ":TRIGger:EDGE:SOURce <source>",
+      "category": "TRIGger",
+      "description": "Set or query the source for edge triggering.",
+      "set": ":TRIGger:EDGE:SOURce <source>",
+      "query": ":TRIGger:EDGE:SOURce?",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|AUX|LINE}; n = 1 to 4"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:SOURce CHANnel1",
+        ":TRIGger:EDGE:SOURce?"
+      ]
+    },
+    {
+      "name": "trigger_edge_slope",
+      "mnemonic": ":TRIGger:EDGE:SLOPe <slope>",
+      "category": "TRIGger",
+      "description": "Set or query the edge slope (rising or falling) used for edge triggering.",
+      "set": ":TRIGger:EDGE:SLOPe <slope>",
+      "query": ":TRIGger:EDGE:SLOPe?",
+      "parameters": [
+        {
+          "name": "<slope>",
+          "range": "{POSitive|NEGative}"
+        }
+      ],
+      "examples": [
+        ":TRIGger:EDGE:SLOPe POSitive",
+        ":TRIGger:EDGE:SLOPe?"
+      ]
+    },
+    {
+      "name": "trigger_level",
+      "mnemonic": ":TRIGger:LEVel <source>,<level>",
+      "category": "TRIGger",
+      "description": "Set or query the trigger threshold voltage level for the specified source.",
+      "set": ":TRIGger:LEVel <source>,<level>",
+      "query": ":TRIGger:LEVel? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|AUX}; n = 1 to 4"
+        },
+        {
+          "name": "<level>",
+          "units": [
+            {"unit": "V"}
+          ],
+          "range": "Real number; trigger threshold voltage"
+        }
+      ],
+      "examples": [
+        ":TRIGger:LEVel CHANnel1,0.5",
+        ":TRIGger:LEVel? CHANnel1"
+      ]
+    },
+    {
+      "name": "trigger_holdoff",
+      "mnemonic": ":TRIGger:HOLDoff <time>",
+      "category": "TRIGger",
+      "description": "Set or query the trigger holdoff time (minimum time between valid triggers).",
+      "set": ":TRIGger:HOLDoff <time>",
+      "query": ":TRIGger:HOLDoff?",
+      "parameters": [
+        {
+          "name": "<time>",
+          "units": [
+            {"unit": "s"}
+          ],
+          "range": "Real number; holdoff time (60 ns to 320 ns)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:HOLDoff 1E-7",
+        ":TRIGger:HOLDoff?"
+      ]
+    },
+    {
+      "name": "measure_source",
+      "mnemonic": ":MEASure:SOURce <source>",
+      "category": "MEASure",
+      "description": "Set or query the default source(s) used by subsequent measurement commands.",
+      "set": ":MEASure:SOURce <source>",
+      "query": ":MEASure:SOURce?",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>} (one or two, comma separated); n = 1 to 4"
+        }
+      ],
+      "examples": [
+        ":MEASure:SOURce CHANnel1",
+        ":MEASure:SOURce?"
+      ]
+    },
+    {
+      "name": "measure_vpp",
+      "mnemonic": ":MEASure:VPP? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the peak-to-peak voltage of the specified source.",
+      "query": ":MEASure:VPP? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional; uses default source if omitted)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VPP? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vamplitude",
+      "mnemonic": ":MEASure:VAMPlitude? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the amplitude (top minus base) voltage of the specified source.",
+      "query": ":MEASure:VAMPlitude? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VAMPlitude? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vmax",
+      "mnemonic": ":MEASure:VMAX? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the maximum voltage of the specified source.",
+      "query": ":MEASure:VMAX? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VMAX? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vmin",
+      "mnemonic": ":MEASure:VMIN? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the minimum voltage of the specified source.",
+      "query": ":MEASure:VMIN? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VMIN? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vrms",
+      "mnemonic": ":MEASure:VRMS? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the RMS voltage of the specified source.",
+      "query": ":MEASure:VRMS? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VRMS? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_vaverage",
+      "mnemonic": ":MEASure:VAVerage? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the average voltage of the specified source.",
+      "query": ":MEASure:VAVerage? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:VAVerage? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_frequency",
+      "mnemonic": ":MEASure:FREQuency? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the frequency of the specified source.",
+      "query": ":MEASure:FREQuency? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:FREQuency? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_period",
+      "mnemonic": ":MEASure:PERiod? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the period of the specified source.",
+      "query": ":MEASure:PERiod? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:PERiod? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_risetime",
+      "mnemonic": ":MEASure:RISetime? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the rise time of the specified source.",
+      "query": ":MEASure:RISetime? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:RISetime? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_falltime",
+      "mnemonic": ":MEASure:FALLtime? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the fall time of the specified source.",
+      "query": ":MEASure:FALLtime? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:FALLtime? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_dutycycle",
+      "mnemonic": ":MEASure:DUTYcycle? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the duty cycle (percent) of the specified source.",
+      "query": ":MEASure:DUTYcycle? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:DUTYcycle? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_pwidth",
+      "mnemonic": ":MEASure:PWIDth? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the positive pulse width of the specified source.",
+      "query": ":MEASure:PWIDth? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:PWIDth? CHANnel1"
+      ]
+    },
+    {
+      "name": "measure_nwidth",
+      "mnemonic": ":MEASure:NWIDth? <source>",
+      "category": "MEASure",
+      "description": "Measure and return the negative pulse width of the specified source.",
+      "query": ":MEASure:NWIDth? <source>",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4 (optional)"
+        }
+      ],
+      "examples": [
+        ":MEASure:NWIDth? CHANnel1"
+      ]
+    },
+    {
+      "name": "waveform_source",
+      "mnemonic": ":WAVeform:SOURce <source>",
+      "category": "WAVeform",
+      "description": "Set or query the source used by subsequent waveform data and preamble queries.",
+      "set": ":WAVeform:SOURce <source>",
+      "query": ":WAVeform:SOURce?",
+      "parameters": [
+        {
+          "name": "<source>",
+          "range": "{CHANnel<n>|FUNCtion<n>|WMEMory<n>}; n = 1 to 4"
+        }
+      ],
+      "examples": [
+        ":WAVeform:SOURce CHANnel1",
+        ":WAVeform:SOURce?"
+      ]
+    },
+    {
+      "name": "waveform_format",
+      "mnemonic": ":WAVeform:FORMat <format>",
+      "category": "WAVeform",
+      "description": "Set or query the data encoding format for waveform data transfers.",
+      "set": ":WAVeform:FORMat <format>",
+      "query": ":WAVeform:FORMat?",
+      "parameters": [
+        {
+          "name": "<format>",
+          "range": "{ASCii|BYTE|WORD}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:FORMat WORD",
+        ":WAVeform:FORMat?"
+      ]
+    },
+    {
+      "name": "waveform_byteorder",
+      "mnemonic": ":WAVeform:BYTeorder <order>",
+      "category": "WAVeform",
+      "description": "Set or query the byte order used for WORD-format waveform data transfers.",
+      "set": ":WAVeform:BYTeorder <order>",
+      "query": ":WAVeform:BYTeorder?",
+      "parameters": [
+        {
+          "name": "<order>",
+          "range": "{MSBFirst|LSBFirst}"
+        }
+      ],
+      "examples": [
+        ":WAVeform:BYTeorder MSBFirst",
+        ":WAVeform:BYTeorder?"
+      ]
+    },
+    {
+      "name": "waveform_points",
+      "mnemonic": ":WAVeform:POINts?",
+      "category": "WAVeform",
+      "description": "Query the number of points available in the currently selected waveform record.",
+      "query": ":WAVeform:POINts?",
+      "examples": [
+        ":WAVeform:POINts?"
+      ]
+    },
+    {
+      "name": "waveform_type",
+      "mnemonic": ":WAVeform:TYPE?",
+      "category": "WAVeform",
+      "description": "Query the acquisition type of the currently selected waveform (e.g. NORMal, AVERage, RAW).",
+      "query": ":WAVeform:TYPE?",
+      "examples": [
+        ":WAVeform:TYPE?"
+      ]
+    },
+    {
+      "name": "waveform_preamble",
+      "mnemonic": ":WAVeform:PREamble?",
+      "category": "WAVeform",
+      "description": "Query the waveform preamble (format, type, points, count and the X/Y scaling factors needed to convert raw data to engineering units).",
+      "query": ":WAVeform:PREamble?",
+      "examples": [
+        ":WAVeform:PREamble?"
+      ]
+    },
+    {
+      "name": "waveform_data",
+      "mnemonic": ":WAVeform:DATA?",
+      "category": "WAVeform",
+      "description": "Query the waveform data of the currently selected source in the current format (IEEE 488.2 definite-length block for BYTE/WORD).",
+      "query": ":WAVeform:DATA?",
+      "examples": [
+        ":WAVeform:DATA?"
+      ]
+    },
+    {
+      "name": "waveform_xincrement",
+      "mnemonic": ":WAVeform:XINCrement?",
+      "category": "WAVeform",
+      "description": "Query the time between successive waveform data points (X increment) in seconds.",
+      "query": ":WAVeform:XINCrement?",
+      "examples": [
+        ":WAVeform:XINCrement?"
+      ]
+    },
+    {
+      "name": "waveform_xorigin",
+      "mnemonic": ":WAVeform:XORigin?",
+      "category": "WAVeform",
+      "description": "Query the X-axis value (time, in seconds) of the first waveform data point.",
+      "query": ":WAVeform:XORigin?",
+      "examples": [
+        ":WAVeform:XORigin?"
+      ]
+    },
+    {
+      "name": "waveform_yincrement",
+      "mnemonic": ":WAVeform:YINCrement?",
+      "category": "WAVeform",
+      "description": "Query the voltage value of each quantization level (Y increment) for the selected waveform.",
+      "query": ":WAVeform:YINCrement?",
+      "examples": [
+        ":WAVeform:YINCrement?"
+      ]
+    },
+    {
+      "name": "waveform_yorigin",
+      "mnemonic": ":WAVeform:YORigin?",
+      "category": "WAVeform",
+      "description": "Query the Y-axis value (voltage) at the centre of the screen for the selected waveform.",
+      "query": ":WAVeform:YORigin?",
+      "examples": [
+        ":WAVeform:YORigin?"
+      ]
+    },
+    {
+      "name": "display_connect",
+      "mnemonic": ":DISPlay:CONNect <bool>",
+      "category": "DISPlay",
+      "description": "Enable or disable connecting (vectoring) waveform data dots on the display, or query its state.",
+      "set": ":DISPlay:CONNect <bool>",
+      "query": ":DISPlay:CONNect?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "range": "{{1|ON}|{0|OFF}}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:CONNect ON",
+        ":DISPlay:CONNect?"
+      ]
+    },
+    {
+      "name": "display_persistence",
+      "mnemonic": ":DISPlay:PERSistence <value>",
+      "category": "DISPlay",
+      "description": "Set or query the waveform persistence time on the display.",
+      "set": ":DISPlay:PERSistence <value>",
+      "query": ":DISPlay:PERSistence?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "range": "{MINimum|INFinite| 0.1 to 40 } (persistence in seconds, or minimum/infinite)"
+        }
+      ],
+      "examples": [
+        ":DISPlay:PERSistence INFinite",
+        ":DISPlay:PERSistence?"
+      ]
+    }
+  ]
+}

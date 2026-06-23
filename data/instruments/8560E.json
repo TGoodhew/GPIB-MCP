@@ -1,0 +1,194 @@
+{
+  "model": "8560E",
+  "manufacturer": "HP/Agilent",
+  "category": "Spectrum Analyzer",
+  "description": "HP/Agilent 8560E portable spectrum analyzer, 30 Hz to 2.9 GHz. Part of the 8560 E-series; uses the 8560-series command language (not SCPI).",
+  "source": "HP/Agilent 8560 E-Series Programming Guide",
+  "aliases": ["8560E", "HP 8560E", "Agilent 8560E"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "command": "ID?",
+    "matchRegex": "8560E",
+    "description": "Returns the model number (e.g. HP8560E/EC) and installed options."
+  },
+  "capture": {
+    "method": "hpgl",
+    "plotCommand": "PLOT 550,279,9750,7479;",
+    "printCommand": "PRINT 0;",
+    "preRoll": "SNGLS;TS;",
+    "postRoll": "CONTS;"
+  },
+  "statusModel": {
+    "srqSupported": true,
+    "serialPoll": { "clearsRqs": true },
+    "enableMask": { "setCommand": "RQS {mask}", "clearCommand": "RQS 0", "maskFormat": "decimal" },
+    "doneSupport": { "supported": true, "mnemonic": "DONE" },
+    "errorBit": "error",
+    "requestServiceBit": "requestService",
+    "bits": {
+      "message": 2,
+      "endOfSweep": 4,
+      "commandComplete": 16,
+      "error": 32,
+      "requestService": 64
+    },
+    "operations": {
+      "sweepComplete": { "arm": "SNGLS;TS;", "expectBit": "commandComplete", "restore": "CONTS;" },
+      "sweepAndPeak": { "arm": "SNGLS;TS;MKPK HI;DONE;", "expectBit": "commandComplete", "restore": "CONTS;" }
+    }
+  },
+  "commands": [
+    {
+      "name": "preset",
+      "mnemonic": "IP",
+      "category": "System",
+      "description": "Instrument preset. Returns the analyzer to a known state.",
+      "set": "IP",
+      "examples": ["IP"]
+    },
+    {
+      "name": "identify",
+      "mnemonic": "ID",
+      "category": "System",
+      "description": "Outputs the analyzer model number and installed options.",
+      "query": "ID?",
+      "examples": ["ID?"]
+    },
+    {
+      "name": "center_frequency",
+      "mnemonic": "CF",
+      "category": "Frequency",
+      "description": "Sets or queries the center frequency, placing the analyzer in center/span mode.",
+      "set": "CF <number><unit>",
+      "query": "CF?",
+      "parameters": [
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "0 to 2.9 GHz (8560E/EC)" }
+      ],
+      "examples": ["CF 300MHZ", "CF?"]
+    },
+    {
+      "name": "frequency_span",
+      "mnemonic": "SP",
+      "category": "Frequency",
+      "description": "Sets or queries the frequency span (full width of the display).",
+      "set": "SP <number><unit>",
+      "query": "SP?",
+      "parameters": [
+        { "name": "span", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "0 Hz (zero span) to full span" }
+      ],
+      "examples": ["SP 100MHZ", "SP 0HZ", "SP?"]
+    },
+    {
+      "name": "start_frequency",
+      "mnemonic": "FA",
+      "category": "Frequency",
+      "description": "Sets or queries the start (left edge) frequency.",
+      "set": "FA <number><unit>",
+      "query": "FA?",
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
+      "examples": ["FA 100MHZ", "FA?"]
+    },
+    {
+      "name": "stop_frequency",
+      "mnemonic": "FB",
+      "category": "Frequency",
+      "description": "Sets or queries the stop (right edge) frequency.",
+      "set": "FB <number><unit>",
+      "query": "FB?",
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
+      "examples": ["FB 500MHZ", "FB?"]
+    },
+    {
+      "name": "center_frequency_step",
+      "mnemonic": "SS",
+      "category": "Frequency",
+      "description": "Sets or queries the center-frequency step size (used by the UP/DN step keys).",
+      "set": "SS <number><unit>",
+      "query": "SS?",
+      "parameters": [ { "name": "step", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
+      "examples": ["SS 1MHZ", "SS?"]
+    },
+    {
+      "name": "reference_level",
+      "mnemonic": "RL",
+      "category": "Amplitude",
+      "description": "Sets or queries the reference level (amplitude at the top graticule line).",
+      "set": "RL <number><unit>",
+      "query": "RL?",
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }, { "token": "W", "unit": "W" }], "range": "instrument dependent" } ],
+      "examples": ["RL -10DBM", "RL?"]
+    },
+    {
+      "name": "resolution_bandwidth",
+      "mnemonic": "RB",
+      "category": "Bandwidth",
+      "description": "Sets or queries the resolution bandwidth.",
+      "set": "RB <number><unit>",
+      "query": "RB?",
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
+      "examples": ["RB 1MHZ", "RB?"]
+    },
+    {
+      "name": "video_bandwidth",
+      "mnemonic": "VB",
+      "category": "Bandwidth",
+      "description": "Sets or queries the video bandwidth.",
+      "set": "VB <number><unit>",
+      "query": "VB?",
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
+      "examples": ["VB 10KHZ", "VB?"]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "ST",
+      "category": "Sweep",
+      "description": "Sets or queries the sweep time.",
+      "set": "ST <number><unit>",
+      "query": "ST?",
+      "parameters": [ { "name": "time", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }] } ],
+      "examples": ["ST 100MS", "ST?"]
+    },
+    {
+      "name": "take_sweep",
+      "mnemonic": "TS",
+      "category": "Sweep",
+      "description": "Takes one full sweep, then returns. Used to synchronise measurements.",
+      "set": "TS",
+      "examples": ["TS"]
+    },
+    {
+      "name": "marker_peak_search",
+      "mnemonic": "MKPK",
+      "category": "Marker",
+      "description": "Positions the active marker. MKPK HI finds the highest peak.",
+      "set": "MKPK HI",
+      "examples": ["MKPK HI"]
+    },
+    {
+      "name": "marker_frequency",
+      "mnemonic": "MKF",
+      "category": "Marker",
+      "description": "Sets or queries the active marker frequency.",
+      "set": "MKF <number><unit>",
+      "query": "MKF?",
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
+      "examples": ["MKF?"]
+    },
+    {
+      "name": "marker_amplitude",
+      "mnemonic": "MKA",
+      "category": "Marker",
+      "description": "Queries the amplitude of the active marker.",
+      "query": "MKA?",
+      "examples": ["MKA?"]
+    },
+    {
+      "name": "marker_to_center_frequency",
+      "mnemonic": "MKCF",
+      "category": "Marker",
+      "description": "Sets the center frequency equal to the active marker frequency.",
+      "set": "MKCF",
+      "examples": ["MKCF"]
+    }
+  ]
+}

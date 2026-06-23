@@ -1,7 +1,7 @@
 # Instrument database catalog
 
 Auto-generated index of the bundled instrument command database.
-**165 models, 29989 documented commands.** Each is one `<model>.json` file in this folder.
+**188 models, 34367 documented commands.** Each is one `<model>.json` file in this folder.
 
 Regenerate with `python tools/gen_instrument_catalog.py` after adding or editing definitions.
 
@@ -22,6 +22,7 @@ query (typically listen-only legacy HP-IB gear).
 | 54641D | Agilent | Oscilloscope | 233 | `*IDN?` |
 | 54642A | Agilent | Oscilloscope | 233 | `*IDN?` |
 | 54642D | Agilent | Oscilloscope | 233 | `*IDN?` |
+| 54845A | Agilent | Oscilloscope | 74 | `*IDN?` |
 | 8711C | Agilent | Network Analyzer | 145 | `*IDN?` |
 | 8712C | Agilent | Network Analyzer | 145 | `*IDN?` |
 | 8712ES | Agilent | Network Analyzer | 145 | `*IDN?` |
@@ -38,7 +39,9 @@ query (typically listen-only legacy HP-IB gear).
 | E4436B | Agilent | Signal Generator | 34 | `*IDN?` |
 | E4437B | Agilent | Signal Generator | 34 | `*IDN?` |
 | E4438C | Agilent | Vector Signal Generator | 184 | `*IDN?` |
+| N9320A | Agilent | Spectrum Analyzer | 54 | `*IDN?` |
 | 4708 | Datron | Multifunction Calibrator | 20 | (none) |
+| 5440B | Fluke | DC Voltage Calibrator | 51 | (none) |
 | 11713A | HP | Attenuator / Switch Driver | 4 | (none) |
 | 3245A | HP | Universal Source | 108 | `ID?` |
 | 3325A | HP | Synthesizer / Function Generator | 16 | `ID?` |
@@ -51,6 +54,7 @@ query (typically listen-only legacy HP-IB gear).
 | 437B | HP | RF Power Meter | 70 | `*IDN?` |
 | 438A | HP | RF Power Meter | 50 | `?ID` |
 | 5342A | HP | Frequency Counter | 26 | (none) |
+| 5343A | HP | Frequency Counter | 30 | (none) |
 | 5350A | HP | Frequency Counter | 34 | `ID?` |
 | 5351A | HP | Frequency Counter | 34 | `ID?` |
 | 5352A | HP | Frequency Counter | 34 | `ID?` |
@@ -64,6 +68,7 @@ query (typically listen-only legacy HP-IB gear).
 | 8350A | HP | Sweep Oscillator | 71 | (none) |
 | 8350B | HP | Sweep Oscillator | 78 | `OI` |
 | 8508A | HP | Vector Voltmeter | 44 | `*IDN?` |
+| 8656A | HP | Signal Generator | 19 | (none) |
 | 8656B | HP | Signal Generator | 26 | (none) |
 | 8657A | HP | Signal Generator | 29 | (none) |
 | 8657B | HP | Signal Generator | 32 | (none) |
@@ -101,6 +106,7 @@ query (typically listen-only legacy HP-IB gear).
 | 83711B | HP/Agilent | Synthesized CW Generator | 29 | `*IDN?` |
 | 83712A | HP/Agilent | Synthesized CW Generator | 29 | `*IDN?` |
 | 83712B | HP/Agilent | Synthesized CW Generator | 29 | `*IDN?` |
+| 8560E | HP/Agilent | Spectrum Analyzer | 16 | `ID?` |
 | 8563E | HP/Agilent | Spectrum Analyzer | 16 | `ID?` |
 | 8591E | HP/Agilent | Spectrum Analyzer | 207 | `ID?` |
 | 8592E | HP/Agilent | Spectrum Analyzer | 207 | `ID?` |
@@ -121,6 +127,8 @@ query (typically listen-only legacy HP-IB gear).
 | 2425 | Keithley | SourceMeter (SMU) | 171 | `*IDN?` |
 | 2430 | Keithley | SourceMeter (SMU) | 171 | `*IDN?` |
 | 2440 | Keithley | SourceMeter (SMU) | 171 | `*IDN?` |
+| M9711 | Maynuo | DC Electronic Load | 66 | `0x03 0x0B06` |
+| M9712 | Maynuo | DC Electronic Load | 66 | `0x03 0x0B06` |
 | DG1000Z | Rigol | Function / Arbitrary Waveform Generator | 261 | `*IDN?` |
 | DG1022Z | Rigol | Function / Arbitrary Waveform Generator | 261 | `*IDN?` |
 | DG1032Z | Rigol | Function / Arbitrary Waveform Generator | 261 | `*IDN?` |
@@ -146,6 +154,10 @@ query (typically listen-only legacy HP-IB gear).
 | DS1074Z-S Plus | Rigol | Oscilloscope | 404 | `*IDN?` |
 | DS1104Z Plus | Rigol | Oscilloscope | 404 | `*IDN?` |
 | DS1104Z-S Plus | Rigol | Oscilloscope | 404 | `*IDN?` |
+| DSA815 | Rigol | Spectrum Analyzer | 59 | `*IDN?` |
+| DSA832 | Rigol | Spectrum Analyzer | 59 | `*IDN?` |
+| DSA832E | Rigol | Spectrum Analyzer | 59 | `*IDN?` |
+| DSA875 | Rigol | Spectrum Analyzer | 59 | `*IDN?` |
 | MSO1074Z | Rigol | Oscilloscope | 404 | `*IDN?` |
 | MSO1074Z-S | Rigol | Oscilloscope | 404 | `*IDN?` |
 | MSO1104Z | Rigol | Oscilloscope | 404 | `*IDN?` |
@@ -155,18 +167,29 @@ query (typically listen-only legacy HP-IB gear).
 | SME03 | Rohde & Schwarz | Signal Generator | 186 | `*IDN?` |
 | SME03E | Rohde & Schwarz | Signal Generator | 186 | `*IDN?` |
 | SME06 | Rohde & Schwarz | Signal Generator | 186 | `*IDN?` |
+| SMT02 | Rohde & Schwarz | Signal Generator | 186 | `*IDN?` |
+| SMT03 | Rohde & Schwarz | Signal Generator | 186 | `*IDN?` |
+| SMT06 | Rohde & Schwarz | Signal Generator | 186 | `*IDN?` |
 | DPO3012 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | DPO3014 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | DPO3032 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | DPO3034 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | DPO3052 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | DPO3054 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| DPO4032 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| DPO4034 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| DPO4054 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| DPO4104 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | MSO3000 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | MSO3012 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | MSO3014 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | MSO3032 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | MSO3034 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | MSO3054 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| MSO4032 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| MSO4034 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| MSO4054 | Tektronix | Oscilloscope | 401 | `*IDN?` |
+| MSO4104 | Tektronix | Oscilloscope | 401 | `*IDN?` |
 | TDS520C | Tektronix | Oscilloscope | 450 | `*IDN?` |
 | TDS540C | Tektronix | Oscilloscope | 450 | `*IDN?` |
 | TDS620B | Tektronix | Oscilloscope | 450 | `*IDN?` |
