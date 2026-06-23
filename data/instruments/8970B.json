@@ -18,7 +18,7 @@
       "description": "FREQUENCY key. Sets the fixed tuned frequency. Enter value in MHz (HP-IB inputs are rounded to the nearest MHz). Range 10-1600 MHz in Mode 1.0/1.5/1.9 (2047 MHz opt 020), 10-26500 MHz with test set, 10-99999 MHz in Modes 1.1-1.3/1.6-1.8. Terminate with MZ (MHz) or HZ (Hz); all values are taken as the unit shown. Default 30 MHz (Mode 1.0).",
       "set": "FR <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 to 1600 MHz (up to 26500/99999 MHz depending on mode/test set)" }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "10 to 1600 MHz (up to 26500/99999 MHz depending on mode/test set)" }
       ],
       "examples": ["FR100MZ", "FR30MZ"]
     },
@@ -29,7 +29,7 @@
       "description": "START FREQ key (Special Function not used). Sets the sweep start frequency. Default 10 MHz.",
       "set": "FA <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 MHz to upper measurement-mode limit" }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "10 MHz to upper measurement-mode limit" }
       ],
       "examples": ["FA100MZ", "FA3000MZ"]
     },
@@ -40,7 +40,7 @@
       "description": "STOP FREQ key. Sets the sweep stop frequency.",
       "set": "FB <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 MHz to upper measurement-mode limit" }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "10 MHz to upper measurement-mode limit" }
       ],
       "examples": ["FB400MZ", "FB4000MZ"]
     },
@@ -51,7 +51,7 @@
       "description": "STEP SIZE key. Sets the frequency step (increment) between measurement points in a sweep.",
       "set": "SS <value> MZ",
       "parameters": [
-        { "name": "step", "units": ["MZ", "HZ"], "range": "1 MHz to span" }
+        { "name": "step", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "1 MHz to span" }
       ],
       "examples": ["SS50MZ", "SS200MZ"]
     },
@@ -62,7 +62,7 @@
       "description": "FREQ INCR key. Sets the fixed-frequency tuning increment used by the UP/DN step keys. Enter integer MHz (decimals are rounded to nearest MHz).",
       "set": "FN <value> MZ",
       "parameters": [
-        { "name": "increment", "units": ["MZ", "HZ"], "range": "integer MHz" }
+        { "name": "increment", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "integer MHz" }
       ],
       "examples": ["FN50MZ", "FN1MZ"]
     },
@@ -230,7 +230,7 @@
       "description": "Enter IF frequency (Special Function 3.0) for Modes 1.1, 1.3, 1.6 and 1.8.",
       "set": "IF <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"] }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }] }
       ],
       "examples": ["IF70MZ", "IF4000MZ"]
     },
@@ -241,7 +241,7 @@
       "description": "Enter LO frequency (Special Function 3.1) for Modes 1.2, 1.4, 1.7 and 1.9.",
       "set": "LF <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"] }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }] }
       ],
       "examples": ["LF5000MZ"]
     },

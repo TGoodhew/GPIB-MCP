@@ -28,7 +28,7 @@
       "set": "FA <value> <suffix>",
       "query": "OPFA",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent (values up to +/-2% out of range are accepted)" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent (values up to +/-2% out of range are accepted)" }
       ],
       "examples": ["FA 2 GZ", "OUTPUT 719;\"OPFA\""]
     },
@@ -40,7 +40,7 @@
       "set": "FB <value> <suffix>",
       "query": "OPFB",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["FB 8 GZ", "OUTPUT 719;\"OPFB\""]
     },
@@ -52,7 +52,7 @@
       "set": "CW <value> <suffix>",
       "query": "OPCW",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["CW 5 GZ", "OUTPUT 719;\"OPCW\""]
     },
@@ -72,7 +72,7 @@
       "set": "CF <value> <suffix>",
       "query": "OPCF",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["CF 4 GZ", "OUTPUT 719;\"OPCF\""]
     },
@@ -84,7 +84,7 @@
       "set": "DF <value> <suffix>",
       "query": "OPDF",
       "parameters": [
-        { "name": "span", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "span", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["DF 500 MZ", "OUTPUT 719;\"OPDF\""]
     },
@@ -112,7 +112,7 @@
       "set": "VR <value> <suffix>",
       "query": "OPVR",
       "parameters": [
-        { "name": "vernier", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "+/-0.05% of band" }
+        { "name": "vernier", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "+/-0.05% of band" }
       ],
       "examples": ["VR 0 MZ", "OUTPUT 719;\"OPVR\""]
     },
@@ -124,7 +124,7 @@
       "set": "SHVR <value> <suffix>",
       "query": "OPSHVR",
       "parameters": [
-        { "name": "offset", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Up to full plug-in range" }
+        { "name": "offset", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Up to full plug-in range" }
       ],
       "examples": ["SHVR 10 MZ", "OUTPUT 719;\"OPSHVR\""]
     },
@@ -154,7 +154,7 @@
       "set": "M1 <value> <suffix>",
       "query": "OPM1",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["M1 3 GZ", "OUTPUT 719;\"OPM1\""]
     },
@@ -166,7 +166,7 @@
       "set": "M2 <value> <suffix>",
       "query": "OPM2",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["M2 5 GZ", "OUTPUT 719;\"OPM2\""]
     },
@@ -178,7 +178,7 @@
       "set": "M3 <value> <suffix>",
       "query": "OPM3",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["M3 6 GZ", "OUTPUT 719;\"OPM3\""]
     },
@@ -190,7 +190,7 @@
       "set": "M4 <value> <suffix>",
       "query": "OPM4",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["M4 7 GZ", "OUTPUT 719;\"OPM4\""]
     },
@@ -202,7 +202,7 @@
       "set": "M5 <value> <suffix>",
       "query": "OPM5",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["M5 8 GZ", "OUTPUT 719;\"OPM5\""]
     },
@@ -282,7 +282,7 @@
       "set": "PL <value> dBm",
       "query": "OPPL",
       "parameters": [
-        { "name": "power", "units": ["dBm"], "range": "Plug-in dependent" }
+        { "name": "power", "units": [{ "token": "dBm", "unit": "dBm" }], "range": "Plug-in dependent" }
       ],
       "examples": ["PL 0 dBm", "OUTPUT 719;\"OPPL\""]
     },
@@ -294,7 +294,7 @@
       "set": "PS <value> dB",
       "query": "OPPS",
       "parameters": [
-        { "name": "sweep", "units": ["dB"], "range": "Plug-in dependent" }
+        { "name": "sweep", "units": [{ "token": "dB", "unit": "dB" }], "range": "Plug-in dependent" }
       ],
       "examples": ["PS 10 dB", "PS1", "OUTPUT 719;\"OPPS\""]
     },
@@ -306,7 +306,7 @@
       "set": "SL <value> dB",
       "query": "OPSL",
       "parameters": [
-        { "name": "slope", "units": ["dB"], "range": "Plug-in dependent" }
+        { "name": "slope", "units": [{ "token": "dB", "unit": "dB" }], "range": "Plug-in dependent" }
       ],
       "examples": ["SL 1 dB", "SL1", "OUTPUT 719;\"OPSL\""]
     },
@@ -361,7 +361,7 @@
       "set": "SM <value> <suffix>",
       "query": "OPSM",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "frequency", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["SM 4 GZ", "OUTPUT 719;\"OPSM\""]
     },
@@ -373,7 +373,7 @@
       "set": "ST <value> <suffix>",
       "query": "OPST",
       "parameters": [
-        { "name": "time", "units": ["SC", "MS"], "range": "0.01 to 100 seconds" }
+        { "name": "time", "units": [{ "token": "SC", "unit": "s" }, { "token": "MS", "unit": "ms" }], "range": "0.01 to 100 seconds" }
       ],
       "examples": ["ST 10 SC", "ST 100 MS", "OUTPUT 719;\"OPST\""]
     },
@@ -440,7 +440,7 @@
       "description": "Frequency step size, used by the step up/down keys for START, STOP, CF, CW, MARKER and MANUAL SWEEP. Follow with a frequency suffix. Not displayed.",
       "set": "SF <value> <suffix>",
       "parameters": [
-        { "name": "step", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "Plug-in dependent" }
+        { "name": "step", "units": [{ "token": "GZ", "unit": "GHz" }, { "token": "MZ", "unit": "MHz" }, { "token": "KZ", "unit": "kHz" }, { "token": "HZ", "unit": "Hz" }], "range": "Plug-in dependent" }
       ],
       "examples": ["SF 250 MZ"]
     },
@@ -452,7 +452,7 @@
       "set": "SP <value> dBm",
       "query": "OPSP",
       "parameters": [
-        { "name": "step", "units": ["dBm", "dB"], "range": "Plug-in dependent" }
+        { "name": "step", "units": [{ "token": "dBm", "unit": "dBm" }, { "token": "dB", "unit": "dB" }], "range": "Plug-in dependent" }
       ],
       "examples": ["SP 1 dBm", "OUTPUT 719;\"OPSP\""]
     },

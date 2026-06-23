@@ -18,7 +18,7 @@
       "description": "Carrier frequency function entry. Follow with a numeric value and a frequency unit code (HZ, KZ, or MZ). Up to 8 digits. Default after Clear: 100.00000 MHz.",
       "set": "FR <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "100 kHz to 1040 MHz (10 kHz with underrange)" }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}], "range": "100 kHz to 1040 MHz (10 kHz with underrange)" }
       ],
       "examples": ["FR 123.4 MZ", "FR 100 MZ"]
     },
@@ -29,7 +29,7 @@
       "description": "Carrier output amplitude function entry. Follow with a numeric value (minus sign allowed) and an amplitude unit code. Default after Clear: -143.5 dBm.",
       "set": "AP <value> <unit>",
       "parameters": [
-        { "name": "amplitude", "units": ["DM", "DB", "DF", "EM", "VL", "MV", "UV"], "range": "+13 dBm to -143.5 dBm into 50 ohm (DM=dBm, DB=dB, DF=dBf, EM=EMF, VL=Volts, MV=mV, UV=uV)" }
+        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DB", "unit": "dB"}, "DF", "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+13 dBm to -143.5 dBm into 50 ohm (DM=dBm, DB=dB, DF=dBf, EM=EMF, VL=Volts, MV=mV, UV=uV)" }
       ],
       "examples": ["AP -10 DM", "AP 15.0 DB"]
     },
@@ -40,7 +40,7 @@
       "description": "Amplitude offset function entry.",
       "set": "AO <value> <unit>",
       "parameters": [
-        { "name": "offset", "units": ["DB"] }
+        { "name": "offset", "units": [{"token": "DB", "unit": "dB"}] }
       ],
       "examples": ["AO 0 DB"]
     },
@@ -51,7 +51,7 @@
       "description": "Amplitude modulation depth function entry. Used with a modulation source qualifier (S1/S2/S3/S4). Up to 3 digits. Units in percent (PC or %). Default after Clear: 0%.",
       "set": "AM <value> <unit>",
       "parameters": [
-        { "name": "depth", "units": ["PC", "%"], "range": "0 to 99 %" }
+        { "name": "depth", "units": [{"token": "PC", "unit": "%"}, {"token": "%", "unit": "%"}], "range": "0 to 99 %" }
       ],
       "examples": ["S2 AM 30 PC", "AM 50 %"]
     },
@@ -62,7 +62,7 @@
       "description": "Frequency modulation peak deviation function entry. Used with a modulation source qualifier (S1/S2/S3/S4). Up to 3 digits. Default after Clear: 0.0 kHz.",
       "set": "FM <value> <unit>",
       "parameters": [
-        { "name": "deviation", "units": ["HZ", "KZ"], "range": "0 to 99 kHz (band dependent)" }
+        { "name": "deviation", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}], "range": "0 to 99 kHz (band dependent)" }
       ],
       "examples": ["S3 FM 10 KZ", "FM 5 KZ"]
     },

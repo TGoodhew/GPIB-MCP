@@ -38,10 +38,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent (values up to +/-2% out of range are accepted)"
         }
@@ -62,10 +62,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -86,10 +86,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -120,10 +120,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -144,10 +144,10 @@
         {
           "name": "span",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -188,10 +188,10 @@
         {
           "name": "vernier",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "+/-0.05% of band"
         }
@@ -212,10 +212,10 @@
         {
           "name": "offset",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Up to full plug-in range"
         }
@@ -236,10 +236,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -260,10 +260,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -284,10 +284,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -308,10 +308,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -332,10 +332,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -446,7 +446,7 @@
         {
           "name": "power",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ],
           "range": "Plug-in dependent"
         }
@@ -467,7 +467,7 @@
         {
           "name": "sweep",
           "units": [
-            "dB"
+            { "token": "dB", "unit": "dB" }
           ],
           "range": "Plug-in dependent"
         }
@@ -489,7 +489,7 @@
         {
           "name": "slope",
           "units": [
-            "dB"
+            { "token": "dB", "unit": "dB" }
           ],
           "range": "Plug-in dependent"
         }
@@ -568,10 +568,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -592,8 +592,8 @@
         {
           "name": "time",
           "units": [
-            "SC",
-            "MS"
+            { "token": "SC", "unit": "s" },
+            { "token": "MS", "unit": "ms" }
           ],
           "range": "0.01 to 100 seconds"
         }
@@ -684,10 +684,10 @@
         {
           "name": "step",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Plug-in dependent"
         }
@@ -707,8 +707,8 @@
         {
           "name": "step",
           "units": [
-            "dBm",
-            "dB"
+            { "token": "dBm", "unit": "dBm" },
+            { "token": "dB", "unit": "dB" }
           ],
           "range": "Plug-in dependent"
         }

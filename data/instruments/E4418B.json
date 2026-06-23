@@ -330,7 +330,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": ["dB"], "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": [{ "token": "DB", "unit": "dB" }], "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
       ],
       "examples": ["CALC1:GAIN 10", "CALC1:GAIN?"]
     },
@@ -524,7 +524,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": ["PCT (%)"], "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": [{ "token": "PCT", "unit": "%" }], "range": "1.0 to 150.0 PCT | DEF | MIN | MAX" }
       ],
       "examples": ["CAL:RCF 98.7PCT", "CAL1:RCF?"]
     },
@@ -803,7 +803,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value list", "units": ["PCT (%)"], "range": "1.0 to 150.0 PCT per point" }
+        { "name": "numeric_value list", "units": [{ "token": "PCT", "unit": "%" }], "range": "1.0 to 150.0 PCT per point" }
       ],
       "examples": ["MEM:TABL:GAIN 95.0,96.5,97.2", "MEM:TABL:GAIN?"]
     },
@@ -1006,7 +1006,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": ["PCT (%)"], "range": "0.001 to 99.999 PCT | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": [{ "token": "PCT", "unit": "%" }], "range": "0.001 to 99.999 PCT | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:CORR:DCYC 16PCT", "SENS1:CORR:DCYC?"]
     },
@@ -1064,7 +1064,7 @@
       "set": true,
       "query": true,
       "parameters": [
-        { "name": "numeric_value", "units": ["dB"], "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
+        { "name": "numeric_value", "units": [{ "token": "DB", "unit": "dB" }], "range": "-100.0 to 100.0 dB | DEF | MIN | MAX" }
       ],
       "examples": ["SENS1:CORR:LOSS2 10", "SENS1:CORR:LOSS2?"]
     },

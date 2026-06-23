@@ -295,8 +295,8 @@
         {
           "name": "delay",
           "units": [
-            "s",
-            "ns"
+            {"token": "s", "unit": "s"},
+            {"token": "ns", "unit": "ns"}
           ],
           "range": "0 to 10000 ns | DEFault"
         }
@@ -751,7 +751,7 @@
         {
           "name": "voltage",
           "units": [
-            "V"
+            {"token": "V", "unit": "V"}
           ],
           "range": "0 V to 4 V"
         }
@@ -771,10 +771,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz); UP | DOWN"
         }
@@ -812,10 +812,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)"
         }
@@ -834,10 +834,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)"
         }
@@ -874,10 +874,10 @@
         {
           "name": "offset",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "-50 to +50 GHz"
         }
@@ -898,10 +898,10 @@
         {
           "name": "span",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "0 to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)"
         }
@@ -921,10 +921,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)"
         }
@@ -944,10 +944,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)"
         }
@@ -967,10 +967,10 @@
         {
           "name": "step",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "0 to 1 GHz"
         }
@@ -991,11 +991,11 @@
         {
           "name": "level",
           "units": [
-            "dBm",
+            {"token": "dBm", "unit": "dBm"},
             "dBW",
-            "V",
-            "mV",
-            "uV"
+            {"token": "V", "unit": "V"},
+            {"token": "mV", "unit": "mV"},
+            {"token": "uV", "unit": "uV"}
           ],
           "range": "-144 to +16 dBm; UP | DOWN"
         }
@@ -1017,7 +1017,7 @@
         {
           "name": "offset",
           "units": [
-            "dB"
+            {"token": "dB", "unit": "dB"}
           ],
           "range": "-100 to +100 dB"
         }
@@ -1107,7 +1107,7 @@
         {
           "name": "limit",
           "units": [
-            "dBm"
+            {"token": "dBm", "unit": "dBm"}
           ],
           "range": "-144 to +16 dBm"
         }
@@ -1127,7 +1127,7 @@
         {
           "name": "level",
           "units": [
-            "dBm"
+            {"token": "dBm", "unit": "dBm"}
           ],
           "range": "-144 to +16 dBm"
         }
@@ -1164,7 +1164,7 @@
         {
           "name": "level",
           "units": [
-            "dBm"
+            {"token": "dBm", "unit": "dBm"}
           ],
           "range": "-144 to +16 dBm"
         }
@@ -1184,7 +1184,7 @@
         {
           "name": "level",
           "units": [
-            "dBm"
+            {"token": "dBm", "unit": "dBm"}
           ],
           "range": "-144 to +16 dBm"
         }
@@ -1204,7 +1204,7 @@
         {
           "name": "step",
           "units": [
-            "dB"
+            {"token": "dB", "unit": "dB"}
           ],
           "range": "0.1 to 10 dB"
         }
@@ -1267,10 +1267,10 @@
         {
           "name": "frequency_list",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "5 kHz to 1.5 GHz each (SME03E/03/06: to 2.2/3/6 GHz)"
         }
@@ -1289,7 +1289,7 @@
         {
           "name": "power_list",
           "units": [
-            "dB"
+            {"token": "dB", "unit": "dB"}
           ],
           "range": "-40 dB to 6 dB each"
         }
@@ -1325,7 +1325,7 @@
         {
           "name": "depth",
           "units": [
-            "PCT"
+            {"token": "PCT", "unit": "%"}
           ],
           "range": "0 to 100 PCT"
         }
@@ -1360,8 +1360,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -1430,9 +1430,9 @@
         {
           "name": "deviation",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"}
           ],
           "range": "0 to 1 MHz (SME03/03E: 0 to 2 MHz; SME06: 0 to 4 MHz)"
         }
@@ -1467,8 +1467,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -1538,7 +1538,7 @@
           "name": "deviation",
           "units": [
             "rad",
-            "deg"
+            {"token": "deg", "unit": "deg"}
           ],
           "range": "-360 deg to +360 deg"
         }
@@ -1573,8 +1573,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -1626,7 +1626,7 @@
         {
           "name": "impedance",
           "units": [
-            "Ohm"
+            {"token": "Ohm", "unit": "Ohm"}
           ],
           "range": "50 Ohm | 10 kOhm"
         }
@@ -1645,9 +1645,9 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"}
           ],
           "range": "0.01176 Hz to 10 MHz"
         }
@@ -1716,9 +1716,9 @@
         {
           "name": "delay",
           "units": [
-            "s",
-            "us",
-            "ns"
+            {"token": "s", "unit": "s"},
+            {"token": "us", "unit": "us"},
+            {"token": "ns", "unit": "ns"}
           ],
           "range": "40 ns to 1 s"
         }
@@ -1738,9 +1738,9 @@
         {
           "name": "delay",
           "units": [
-            "s",
-            "us",
-            "ns"
+            {"token": "s", "unit": "s"},
+            {"token": "us", "unit": "us"},
+            {"token": "ns", "unit": "ns"}
           ],
           "range": "60 ns to 1 s"
         }
@@ -1776,9 +1776,9 @@
         {
           "name": "period",
           "units": [
-            "s",
-            "us",
-            "ns"
+            {"token": "s", "unit": "s"},
+            {"token": "us", "unit": "us"},
+            {"token": "ns", "unit": "ns"}
           ],
           "range": "100 ns to 85 s"
         }
@@ -1798,9 +1798,9 @@
         {
           "name": "width",
           "units": [
-            "s",
-            "us",
-            "ns"
+            {"token": "s", "unit": "s"},
+            {"token": "us", "unit": "us"},
+            {"token": "ns", "unit": "ns"}
           ],
           "range": "20 ns to 1 s"
         }
@@ -1820,7 +1820,7 @@
         {
           "name": "phase",
           "units": [
-            "deg",
+            {"token": "deg", "unit": "deg"},
             "rad"
           ],
           "range": "-360 deg to +360 deg"
@@ -1851,8 +1851,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "MHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "MHz", "unit": "MHz"}
           ],
           "range": "1 to 16 MHz"
         }
@@ -1936,8 +1936,8 @@
         {
           "name": "dwell",
           "units": [
-            "s",
-            "ms"
+            {"token": "s", "unit": "s"},
+            {"token": "ms", "unit": "ms"}
           ],
           "range": "10 ms to 5 s"
         }
@@ -2004,10 +2004,10 @@
         {
           "name": "step",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz",
-            "GHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"},
+            {"token": "GHz", "unit": "GHz"}
           ],
           "range": "0 to 1 GHz"
         }
@@ -2026,7 +2026,7 @@
         {
           "name": "step",
           "units": [
-            "PCT"
+            {"token": "PCT", "unit": "%"}
           ],
           "range": "0.01 to 50 PCT"
         }
@@ -2045,8 +2045,8 @@
         {
           "name": "dwell",
           "units": [
-            "s",
-            "ms"
+            {"token": "s", "unit": "s"},
+            {"token": "ms", "unit": "ms"}
           ],
           "range": "10 ms to 5 s"
         }
@@ -2097,7 +2097,7 @@
         {
           "name": "step",
           "units": [
-            "dB"
+            {"token": "dB", "unit": "dB"}
           ],
           "range": "0 to 10 dB"
         }
@@ -2117,8 +2117,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -2137,8 +2137,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -2173,8 +2173,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -2193,8 +2193,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)"
         }
@@ -2239,8 +2239,8 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "kHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"}
           ],
           "range": "0.1 Hz to 500 kHz"
         }
@@ -2617,8 +2617,8 @@
         {
           "name": "dwell_list",
           "units": [
-            "s",
-            "ms"
+            {"token": "s", "unit": "s"},
+            {"token": "ms", "unit": "ms"}
           ],
           "range": "50 ms to 60 s each"
         }

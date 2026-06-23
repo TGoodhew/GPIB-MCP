@@ -29,7 +29,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "ref_cal_factor", "units": ["%"], "range": "50.0 to 120.0" }
+        { "name": "ref_cal_factor", "units": [{ "token": "%", "unit": "%" }], "range": "50.0 to 120.0" }
       ],
       "examples": ["CL98.5EN", "CL98.5%"]
     },
@@ -50,7 +50,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "cal_factor", "units": ["%"], "range": "1.0 to 150.0" }
+        { "name": "cal_factor", "units": [{ "token": "%", "unit": "%" }], "range": "1.0 to 150.0" }
       ],
       "examples": ["KB99.9%", "KB95.0EN"]
     },
@@ -197,7 +197,7 @@
       "set": true,
       "query": false,
       "parameters": [
-        { "name": "duty_cycle", "units": ["%"], "range": "0.001 to 99.999" }
+        { "name": "duty_cycle", "units": [{ "token": "%", "unit": "%" }], "range": "0.001 to 99.999" }
       ],
       "examples": ["DY98.5EN", "DY50%"]
     },
@@ -457,7 +457,7 @@
       "query": false,
       "parameters": [
         { "name": "table", "units": [""], "range": "0 to 9" },
-        { "name": "ref_cal_factor", "units": ["%"], "range": "sensor REF CF" }
+        { "name": "ref_cal_factor", "units": [{ "token": "%", "unit": "%" }], "range": "sensor REF CF" }
       ],
       "examples": ["RF398.5%", "RF0100EN"]
     },

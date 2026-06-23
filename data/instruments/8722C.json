@@ -411,7 +411,7 @@
         {
           "name": "value",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ]
         }
       ],
@@ -443,7 +443,7 @@
           "name": "value",
           "range": "2 ms to 86400",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         },
         {
@@ -1090,7 +1090,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ],
           "range": "Depends on frequency resolution"
         }
@@ -1112,7 +1112,7 @@
           "name": "value",
           "range": "-360 to +360",
           "units": [
-            "deg"
+            { "token": "deg", "unit": "deg" }
           ]
         }
       ],
@@ -1141,7 +1141,7 @@
         {
           "name": "value",
           "units": [
-            "Hz"
+            { "token": "HZ", "unit": "Hz" }
           ]
         }
       ],
@@ -1254,7 +1254,7 @@
           "name": "value",
           "range": "0.05 to 20",
           "units": [
-            "%"
+            { "token": "%", "unit": "%" }
           ]
         }
       ],
@@ -1364,7 +1364,7 @@
           "name": "value",
           "range": "0 to 100",
           "units": [
-            "%"
+            { "token": "%", "unit": "%" }
           ]
         }
       ],
@@ -1385,7 +1385,7 @@
           "name": "value",
           "range": "0 to 100",
           "units": [
-            "%"
+            { "token": "%", "unit": "%" }
           ]
         }
       ],
@@ -1525,7 +1525,7 @@
           "name": "value",
           "range": "0 to 100",
           "units": [
-            "%"
+            { "token": "%", "unit": "%" }
           ]
         }
       ],
@@ -1545,7 +1545,7 @@
           "name": "value",
           "range": "0 to 100",
           "units": [
-            "%"
+            { "token": "%", "unit": "%" }
           ]
         }
       ],
@@ -2551,7 +2551,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],
@@ -2570,7 +2570,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],
@@ -2590,7 +2590,7 @@
           "name": "value",
           "range": "-20 to +20",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ]
         }
       ],
@@ -2931,7 +2931,7 @@
           "name": "value",
           "range": "-10 to 10",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],
@@ -3599,7 +3599,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],
@@ -3617,7 +3617,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],
@@ -3635,7 +3635,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],
@@ -3653,7 +3653,7 @@
         {
           "name": "value",
           "units": [
-            "s"
+            { "token": "S", "unit": "s" }
           ]
         }
       ],

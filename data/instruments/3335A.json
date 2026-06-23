@@ -18,7 +18,7 @@
       "description": "Selects the frequency function and sets the output frequency. Enter the value then a unit suffix (M=MHz, K=kHz, H=Hz). Code 'F' = ASCII 'F' (decimal 70).",
       "set": "F<value><unit>",
       "parameters": [
-        { "name": "frequency", "units": ["M", "K", "H"], "range": "200 Hz to 80.999999999 MHz (75 ohm); unit M=MHz, K=kHz, H=Hz" }
+        { "name": "frequency", "units": [{ "token": "M", "unit": "MHz" }, { "token": "K", "unit": "kHz" }, { "token": "H", "unit": "Hz" }], "range": "200 Hz to 80.999999999 MHz (75 ohm); unit M=MHz, K=kHz, H=Hz" }
       ],
       "examples": ["F12.34M", "F12500K"]
     },
@@ -29,7 +29,7 @@
       "description": "Selects the amplitude function and sets the output level. Enter the value then a level unit suffix (K=+dBm, M=-dBm). Code 'A' = ASCII 'A' (decimal 65).",
       "set": "A<value><unit>",
       "parameters": [
-        { "name": "amplitude", "units": ["K", "M"], "range": "+11.25 dBm to -88.74 dBm (75 ohm); unit K=+dBm, M=-dBm" }
+        { "name": "amplitude", "units": [{ "token": "K", "unit": "dBm" }, { "token": "M", "unit": "dBm" }], "range": "+11.25 dBm to -88.74 dBm (75 ohm); unit K=+dBm, M=-dBm" }
       ],
       "examples": ["A40.01M", "A3K"]
     },
@@ -40,7 +40,7 @@
       "description": "Programs the frequency increment (step size) used by INCR up/down. The 'I' instruction acts on the currently selected function; precede with 'F' to ensure a frequency increment (e.g. 'FI4K'). Code 'I' = ASCII 'I' (decimal 73).",
       "set": "FI<value><unit>",
       "parameters": [
-        { "name": "increment", "units": ["M", "K", "H"], "range": "frequency step; unit M=MHz, K=kHz, H=Hz" }
+        { "name": "increment", "units": [{ "token": "M", "unit": "MHz" }, { "token": "K", "unit": "kHz" }, { "token": "H", "unit": "Hz" }], "range": "frequency step; unit M=MHz, K=kHz, H=Hz" }
       ],
       "examples": ["FI4K", "FI500H"]
     },
@@ -51,7 +51,7 @@
       "description": "Programs the amplitude increment (step size) used by INCR up/down. The 'I' instruction acts on the currently selected function; precede with 'A' to ensure an amplitude increment (e.g. 'AI2K'). Code 'I' = ASCII 'I' (decimal 73).",
       "set": "AI<value><unit>",
       "parameters": [
-        { "name": "increment", "units": ["K", "M"], "range": "amplitude step in dB; unit K=+dBm, M=-dBm" }
+        { "name": "increment", "units": [{ "token": "K", "unit": "dBm" }, { "token": "M", "unit": "dBm" }], "range": "amplitude step in dB; unit K=+dBm, M=-dBm" }
       ],
       "examples": ["AI2K", "AI0.5K"]
     },
@@ -62,7 +62,7 @@
       "description": "Programs the phase increment in degrees (entered with the H = degrees unit suffix). Stepping with INCR up/down then advances the output phase relative to the reference. Code 'P' = ASCII 'P' (decimal 80). May also be reached via 'PI'.",
       "set": "P<value>H",
       "parameters": [
-        { "name": "phase_increment", "units": ["H"], "range": "phase step in degrees (H = deg)" }
+        { "name": "phase_increment", "units": [{ "token": "H", "unit": "deg" }], "range": "phase step in degrees (H = deg)" }
       ],
       "examples": ["P45H", "P3H"]
     },
@@ -89,7 +89,7 @@
       "description": "Selects the sweep width (span) function and sets the sweep width, centered on the current frequency. Enter the value then a frequency unit suffix (M=MHz, K=kHz, H=Hz). Code 'W' = ASCII 'W' (decimal 87).",
       "set": "W<value><unit>",
       "parameters": [
-        { "name": "sweep_width", "units": ["M", "K", "H"], "range": "sweep span; unit M=MHz, K=kHz, H=Hz" }
+        { "name": "sweep_width", "units": [{ "token": "M", "unit": "MHz" }, { "token": "K", "unit": "kHz" }, { "token": "H", "unit": "Hz" }], "range": "sweep span; unit M=MHz, K=kHz, H=Hz" }
       ],
       "examples": ["W1.5K", "W500K"]
     },

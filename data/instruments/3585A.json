@@ -26,7 +26,7 @@
       "description": "Center frequency. Up to 9 digits plus decimal, 0 to 40.1 MHz. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
       "set": "CF <value> <suffix>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }, { "token": "MZ", "unit": "MHz" }], "range": "0 to 40.1 MHz" }
       ],
       "examples": ["CF 10 MZ", "CF 1.5MZ"]
     },
@@ -37,7 +37,7 @@
       "description": "Frequency span (sweep width). Up to 9 digits plus decimal. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
       "set": "FS <value> <suffix>",
       "parameters": [
-        { "name": "span", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+        { "name": "span", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }, { "token": "MZ", "unit": "MHz" }], "range": "0 to 40.1 MHz" }
       ],
       "examples": ["FS 1 MZ", "FS 100 KZ"]
     },
@@ -48,7 +48,7 @@
       "description": "Start frequency. Up to 9 digits plus decimal. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
       "set": "FA <value> <suffix>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }, { "token": "MZ", "unit": "MHz" }], "range": "0 to 40.1 MHz" }
       ],
       "examples": ["FA 20 HZ", "FA 0 HZ"]
     },
@@ -59,7 +59,7 @@
       "description": "Stop frequency. Up to 9 digits plus decimal. Terminate with a frequency suffix (HZ/KZ/MZ) or use UP/DN to step.",
       "set": "FB <value> <suffix>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }, { "token": "MZ", "unit": "MHz" }], "range": "0 to 40.1 MHz" }
       ],
       "examples": ["FB 40 MZ", "FB 40.1 MZ"]
     },
@@ -70,7 +70,7 @@
       "description": "Center frequency step size. Sets the increment used by UP/DN when stepping the center frequency. Terminate with a frequency suffix (HZ/KZ/MZ).",
       "set": "CS <value> <suffix>",
       "parameters": [
-        { "name": "step", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz" }
+        { "name": "step", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }, { "token": "MZ", "unit": "MHz" }], "range": "0 to 40.1 MHz" }
       ],
       "examples": ["CS 1 MZ", "CS 100 KZ"]
     },
@@ -89,7 +89,7 @@
       "description": "Reference level (log amplitude). Up to 3 digits plus decimal, from 10 dB above range to 100 dB below range. Terminate with DM (dBm) or DV (dBV), or use UP/DN to step. Up to two decimal places allowed.",
       "set": "RL <value> <suffix>",
       "parameters": [
-        { "name": "level", "units": ["DM", "DV"], "range": "10 dB above range to 100 dB below range" }
+        { "name": "level", "units": [{ "token": "DM", "unit": "dBm" }, "DV"], "range": "10 dB above range to 100 dB below range" }
       ],
       "examples": ["RL 0 DM", "RL -10 DM"]
     },
@@ -100,7 +100,7 @@
       "description": "Reference level in volts (linear amplitude). Up to 3 digits plus decimal, from range x 3.14 to range x 1x10^5. Terminate with V (volts), MV (millivolts) or UV (microvolts), or use UP/DN to step.",
       "set": "RV <value> <suffix>",
       "parameters": [
-        { "name": "level", "units": ["V", "MV", "UV"], "range": "range x 3.14 to range x 1x10^5" }
+        { "name": "level", "units": [{ "token": "V", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "UV", "unit": "uV" }], "range": "range x 3.14 to range x 1x10^5" }
       ],
       "examples": ["RV 1 V", "RV 100 MV"]
     },
@@ -111,7 +111,7 @@
       "description": "dB per division (vertical scale). Valid values are 1, 2, 5 or 10 dB/division. Terminate with DB, or use UP/DN to step.",
       "set": "DD <value> DB",
       "parameters": [
-        { "name": "scale", "units": ["DB"], "range": "1, 2, 5 or 10 dB/division" }
+        { "name": "scale", "units": [{ "token": "DB", "unit": "dB" }], "range": "1, 2, 5 or 10 dB/division" }
       ],
       "examples": ["DD 10 DB", "DD 1 DB"]
     },
@@ -190,7 +190,7 @@
       "description": "Resolution bandwidth (RBW). Valid values 3, 10, 30 ... up to 30000 Hz (1-3-10 sequence). Terminate with HZ or KZ, or use UP/DN to step.",
       "set": "RB <value> <suffix>",
       "parameters": [
-        { "name": "bandwidth", "units": ["HZ", "KZ"], "range": "3 Hz to 30 kHz, 1-3-10 sequence" }
+        { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }], "range": "3 Hz to 30 kHz, 1-3-10 sequence" }
       ],
       "examples": ["RB 10 HZ", "RB 30 KZ"]
     },
@@ -201,7 +201,7 @@
       "description": "Video bandwidth (VBW). Valid values 1, 3, 10 ... up to 30000 Hz. Terminate with HZ or KZ, or use UP/DN to step.",
       "set": "VB <value> <suffix>",
       "parameters": [
-        { "name": "bandwidth", "units": ["HZ", "KZ"], "range": "1 Hz to 30 kHz" }
+        { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }], "range": "1 Hz to 30 kHz" }
       ],
       "examples": ["VB 1 HZ", "VB 30 KZ"]
     },
@@ -234,7 +234,7 @@
       "description": "Sweep time. Range 0.2 to 999999 seconds, in 0.2 second steps. Terminate with SC (seconds), or use UP/DN to step.",
       "set": "ST <value> SC",
       "parameters": [
-        { "name": "time", "units": ["SC"], "range": "0.2 to 999999 seconds (0.2 s steps)" }
+        { "name": "time", "units": [{ "token": "SC", "unit": "s" }], "range": "0.2 to 999999 seconds (0.2 s steps)" }
       ],
       "examples": ["ST 1 SC", "ST 0.2 SC"]
     },
@@ -261,7 +261,7 @@
       "description": "Manual sweep mode. Accepts any numeric entry from 0 to 40,100,000 that falls within the frequency span limits, terminated with a frequency suffix (HZ/KZ/MZ), or use UP/DN to step.",
       "set": "S3 <value> <suffix>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "0 to 40.1 MHz, within current span" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }, { "token": "MZ", "unit": "MHz" }], "range": "0 to 40.1 MHz, within current span" }
       ],
       "examples": ["S3 10 MZ", "S3"]
     },

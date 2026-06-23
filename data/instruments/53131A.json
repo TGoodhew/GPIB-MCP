@@ -442,7 +442,7 @@
       "description": "Sets the input impedance (50 ohm or 1 Mohm) for channel 1 or 2.",
       "set": "INPut[1|2]:IMPedance <numeric_value>[OHM]",
       "query": "INPut[1|2]:IMPedance?",
-      "parameters": [ { "name": "impedance", "range": "50 or 1E6", "units": ["OHM"] } ],
+      "parameters": [ { "name": "impedance", "range": "50 or 1E6", "units": [ { "token": "OHM", "unit": "Ohm" } ] } ],
       "examples": ["INP1:IMP 50"]
     },
     {
@@ -504,7 +504,7 @@
       "description": "Sets the percentage (0-100%) of the peak-to-peak range at which the instrument auto-triggers.",
       "set": "[SENSe]:EVENt[1|2]:LEVel:RELative <numeric_value>[PCT]",
       "query": "[SENSe]:EVENt[1|2]:LEVel:RELative?",
-      "parameters": [ { "name": "percent", "range": "0 to 100", "units": ["PCT"] } ],
+      "parameters": [ { "name": "percent", "range": "0 to 100", "units": [ { "token": "PCT", "unit": "%" } ] } ],
       "examples": ["SENS:EVEN1:LEV:REL 50"]
     },
     {
@@ -514,7 +514,7 @@
       "description": "Sets the size of the hysteresis window as a percentage of allowable hysteresis for event channel 1 or 2.",
       "set": "[SENSe]:EVENt[1|2]:HYSTeresis:RELative <numeric_value>[PCT]",
       "query": "[SENSe]:EVENt[1|2]:HYSTeresis:RELative?",
-      "parameters": [ { "name": "percent", "range": "0 to 100", "units": ["PCT"] } ],
+      "parameters": [ { "name": "percent", "range": "0 to 100", "units": [ { "token": "PCT", "unit": "%" } ] } ],
       "examples": ["SENS:EVEN1:HYST:REL 100"]
     },
     {

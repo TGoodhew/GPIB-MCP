@@ -239,8 +239,8 @@
         {
           "name": "depth",
           "units": [
-            "PCT",
-            "DB"
+            { "token": "PCT", "unit": "%" },
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "0 to 40 dB (percent equivalent)"
         }
@@ -261,9 +261,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ],
           "range": "instrument internal AM source range"
         }
@@ -494,7 +494,7 @@
         {
           "name": "pairs",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "up to 801 {freq, dB} pairs"
         }
@@ -525,7 +525,7 @@
         {
           "name": "values",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "up to 1601 points"
         }
@@ -563,10 +563,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "10 MHz to 20 GHz (83620A specified range)"
         }
@@ -605,10 +605,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "10 MHz to 20 GHz"
         }
@@ -629,10 +629,10 @@
         {
           "name": "span",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "0 to (MAX-MIN)"
         }
@@ -653,10 +653,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "10 MHz to 20 GHz"
         }
@@ -677,10 +677,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "10 MHz to 20 GHz"
         }
@@ -719,10 +719,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "between current start and stop limits"
         }
@@ -779,10 +779,10 @@
         {
           "name": "offset",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "-99.999 to +99.999 GHz"
         }
@@ -821,10 +821,10 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "instrument frequency range"
         }
@@ -863,7 +863,7 @@
         {
           "name": "power",
           "units": [
-            "DBM"
+            { "token": "DBM", "unit": "dBm" }
           ],
           "range": "specified power range of the instrument"
         }
@@ -920,7 +920,7 @@
         {
           "name": "power",
           "units": [
-            "DBM"
+            { "token": "DBM", "unit": "dBm" }
           ],
           "range": "specified power range"
         }
@@ -941,7 +941,7 @@
         {
           "name": "span",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "-45 to +45 dB"
         }
@@ -962,7 +962,7 @@
         {
           "name": "power",
           "units": [
-            "DBM"
+            { "token": "DBM", "unit": "dBm" }
           ],
           "range": "specified power range"
         }
@@ -983,7 +983,7 @@
         {
           "name": "power",
           "units": [
-            "DBM"
+            { "token": "DBM", "unit": "dBm" }
           ],
           "range": "specified power range"
         }
@@ -1043,8 +1043,8 @@
         {
           "name": "offset",
           "units": [
-            "DB",
-            "DBM"
+            { "token": "DB", "unit": "dB" },
+            { "token": "DBM", "unit": "dBm" }
           ],
           "range": "instrument power offset range"
         }
@@ -1083,7 +1083,7 @@
         {
           "name": "attenuation",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "0 to 90 dB"
         }
@@ -1122,7 +1122,7 @@
         {
           "name": "range",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "-30 to -90 dB"
         }
@@ -1161,7 +1161,7 @@
         {
           "name": "step",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "0.01 to 20 dB"
         }
@@ -1236,8 +1236,8 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" }
           ],
           "range": "instrument ALC bandwidth range"
         }
@@ -1276,7 +1276,7 @@
         {
           "name": "factor",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "0 to -90 dB"
         }
@@ -1351,9 +1351,9 @@
         {
           "name": "deviation",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ],
           "range": "instrument FM deviation range"
         }
@@ -1392,8 +1392,8 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" }
           ],
           "range": "instrument FM AC bandwidth range"
         }
@@ -1414,9 +1414,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ],
           "range": "instrument internal FM source range"
         }
@@ -1509,9 +1509,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ],
           "range": "instrument pulse frequency range"
         }
@@ -1532,10 +1532,10 @@
         {
           "name": "period",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" },
+            { "token": "NS", "unit": "ns" }
           ],
           "range": "instrument pulse period range"
         }
@@ -1556,10 +1556,10 @@
         {
           "name": "width",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" },
+            { "token": "NS", "unit": "ns" }
           ],
           "range": "instrument pulse width range"
         }
@@ -1634,10 +1634,10 @@
         {
           "name": "delay",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" },
+            { "token": "NS", "unit": "ns" }
           ],
           "range": "instrument pulse delay range"
         }
@@ -1658,9 +1658,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ],
           "range": "instrument internal pulse frequency range"
         }
@@ -1681,10 +1681,10 @@
         {
           "name": "period",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" },
+            { "token": "NS", "unit": "ns" }
           ],
           "range": "instrument internal pulse period range"
         }
@@ -1705,10 +1705,10 @@
         {
           "name": "width",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" },
+            { "token": "NS", "unit": "ns" }
           ],
           "range": "instrument internal pulse width range"
         }
@@ -1765,10 +1765,10 @@
         {
           "name": "slew",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" },
+            { "token": "NS", "unit": "ns" }
           ],
           "range": "instrument pulse slew range"
         }
@@ -1871,10 +1871,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "10 MHz to 20 GHz"
         }
@@ -1965,7 +1965,7 @@
         {
           "name": "depth",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "+10 to -10 dB"
         }
@@ -2052,9 +2052,9 @@
         {
           "name": "delay",
           "units": [
-            "S",
-            "MS",
-            "US"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" }
           ],
           "range": "0 to 3.2 s"
         }
@@ -2075,8 +2075,8 @@
         {
           "name": "time",
           "units": [
-            "S",
-            "MS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" }
           ],
           "range": "133 ms to 200 s"
         }
@@ -2115,8 +2115,8 @@
         {
           "name": "time",
           "units": [
-            "S",
-            "MS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" }
           ],
           "range": "instrument sweep-time range"
         }
@@ -2137,8 +2137,8 @@
         {
           "name": "time",
           "units": [
-            "MS",
-            "US"
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" }
           ],
           "range": "0.1 to 3200 ms"
         }
@@ -2195,10 +2195,10 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "function of current span"
         }
@@ -2373,10 +2373,10 @@
         {
           "name": "frequencies",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "up to 801 points within specified freq range"
         }
@@ -2414,8 +2414,8 @@
         {
           "name": "dwell",
           "units": [
-            "MS",
-            "US"
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" }
           ],
           "range": "0.1 to 3200 ms, up to 801 values"
         }
@@ -2482,7 +2482,7 @@
         {
           "name": "correction",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "+40 to -40 dB, up to 801 values"
         }

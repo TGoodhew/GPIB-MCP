@@ -84,7 +84,7 @@
       "set": "[:SOURce]:RADio:<format>:MODulation:FSK[:DEViation] <value><unit>",
       "query": "[:SOURce]:RADio:<format>:MODulation:FSK[:DEViation]?",
       "parameters": [
-        { "name": "deviation", "units": ["Hz", "kHz", "MHz"] }
+        { "name": "deviation", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}] }
       ],
       "examples": [":RADio:CUSTom:MODulation:FSK:DEViation 5kHz"]
     },
@@ -96,7 +96,7 @@
       "set": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe] <value><unit>",
       "query": "[:SOURce]:RADio:<format>:MODulation:MSK[:PHASe]?",
       "parameters": [
-        { "name": "phase", "units": ["deg", "rad"] }
+        { "name": "phase", "units": [{"token": "deg", "unit": "deg"}, "rad"] }
       ],
       "examples": [":RADio:CUSTom:MODulation:MSK:PHASe 90deg"]
     },
@@ -252,7 +252,7 @@
       "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:TIME <value>",
       "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:TIME?",
       "parameters": [
-        { "name": "rise_time", "units": ["bits", "s"] }
+        { "name": "rise_time", "units": ["bits", {"token": "s", "unit": "s"}] }
       ],
       "examples": [":RADio:CUSTom:BURSt:SHAPe:RISE:TIME 1"]
     },
@@ -264,7 +264,7 @@
       "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:DELay <value>",
       "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:RISE:DELay?",
       "parameters": [
-        { "name": "rise_delay", "units": ["bits", "s"] }
+        { "name": "rise_delay", "units": ["bits", {"token": "s", "unit": "s"}] }
       ],
       "examples": [":RADio:CUSTom:BURSt:SHAPe:RISE:DELay 0"]
     },
@@ -276,7 +276,7 @@
       "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:TIME <value>",
       "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:TIME?",
       "parameters": [
-        { "name": "fall_time", "units": ["bits", "s"] }
+        { "name": "fall_time", "units": ["bits", {"token": "s", "unit": "s"}] }
       ],
       "examples": [":RADio:CUSTom:BURSt:SHAPe:FALL:TIME 1"]
     },
@@ -288,7 +288,7 @@
       "set": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:DELay <value>",
       "query": "[:SOURce]:RADio:<format>:BURSt:SHAPe:FALL:DELay?",
       "parameters": [
-        { "name": "fall_delay", "units": ["bits", "s"] }
+        { "name": "fall_delay", "units": ["bits", {"token": "s", "unit": "s"}] }
       ],
       "examples": [":RADio:CUSTom:BURSt:SHAPe:FALL:DELay 0"]
     },
@@ -336,7 +336,7 @@
       "set": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay <value>",
       "query": "[:SOURce]:RADio:<format>:TRIGger[:SOURce]:EXTernal:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["bits", "s"] }
+        { "name": "delay", "units": ["bits", {"token": "s", "unit": "s"}] }
       ],
       "examples": [":RADio:CUSTom:TRIGger:SOURce:EXTernal:DELay 10"]
     },

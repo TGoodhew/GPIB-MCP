@@ -253,7 +253,7 @@
         {
           "name": "attenuation",
           "units": [
-            "dB"
+            { "token": "N1", "unit": "dB" }
           ]
         }
       ],
@@ -460,7 +460,7 @@
         {
           "name": "factor",
           "units": [
-            "%"
+            { "token": "CF", "unit": "%" }
           ]
         }
       ],
@@ -510,7 +510,7 @@
         {
           "name": "frequency",
           "units": [
-            "MHz"
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0.150 to 1300 MHz"
         }
@@ -530,7 +530,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            { "token": "HZ", "unit": "Hz" }
           ]
         }
       ],
@@ -1054,7 +1054,7 @@
         {
           "name": "lo_frequency",
           "units": [
-            "MHz"
+            { "token": "MZ", "unit": "MHz" }
           ]
         }
       ],

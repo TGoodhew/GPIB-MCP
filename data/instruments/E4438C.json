@@ -149,7 +149,7 @@
       "description": "Sets the signal generator output frequency for CW frequency mode, or increments/decrements the current RF frequency by the step value.",
       "set": ":FREQuency <val><unit>|UP|DOWN",
       "query": ":FREQuency?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent: 501=1 GHz, 502=2 GHz, 503=3 GHz, 504=4 GHz, 506=6 GHz)" }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }], "range": "100 kHz to 6 GHz (option-dependent: 501=1 GHz, 502=2 GHz, 503=3 GHz, 504=4 GHz, 506=6 GHz)" }],
       "examples": [":FREQ 1 GHZ", ":FREQ:CW 2.4GHZ", ":FREQ UP"]
     },
     {
@@ -159,7 +159,7 @@
       "description": "Sets the step increment used by the FREQuency UP/DOWN command and the front-panel arrow keys.",
       "set": ":FREQuency:STEP <val><unit>",
       "query": ":FREQuency:STEP?",
-      "parameters": [{ "name": "increment", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "parameters": [{ "name": "increment", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }] }],
       "examples": [":FREQ:STEP 1 MHZ"]
     },
     {
@@ -169,7 +169,7 @@
       "description": "Sets the signal generator output frequency for the fixed (CW) frequency mode.",
       "set": ":FREQuency:FIXed <val><unit>",
       "query": ":FREQuency:FIXed?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent)" }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }], "range": "100 kHz to 6 GHz (option-dependent)" }],
       "examples": [":FREQ:FIX 1 GHZ"]
     },
     {
@@ -189,7 +189,7 @@
       "description": "Sets the first frequency point in a step sweep.",
       "set": ":FREQuency:STARt <val><unit>",
       "query": ":FREQuency:STARt?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent)" }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }], "range": "100 kHz to 6 GHz (option-dependent)" }],
       "examples": [":FREQ:STAR 1 GHZ"]
     },
     {
@@ -199,7 +199,7 @@
       "description": "Sets the last frequency point in a step sweep.",
       "set": ":FREQuency:STOP <val><unit>",
       "query": ":FREQuency:STOP?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "100 kHz to 6 GHz (option-dependent)" }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }], "range": "100 kHz to 6 GHz (option-dependent)" }],
       "examples": [":FREQ:STOP 2 GHZ"]
     },
     {
@@ -219,7 +219,7 @@
       "description": "Sets a frequency offset value applied to the displayed frequency.",
       "set": ":FREQuency:OFFSet <val><unit>",
       "query": ":FREQuency:OFFSet?",
-      "parameters": [{ "name": "offset", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "parameters": [{ "name": "offset", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }] }],
       "examples": [":FREQ:OFFS 10 MHZ"]
     },
     {
@@ -239,7 +239,7 @@
       "description": "Sets the frequency reference value; subsequent frequency settings are relative to this reference when reference mode is on.",
       "set": ":FREQuency:REFerence <val><unit>",
       "query": ":FREQuency:REFerence?",
-      "parameters": [{ "name": "reference", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "parameters": [{ "name": "reference", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }] }],
       "examples": [":FREQ:REF 1 GHZ"]
     },
     {
@@ -289,7 +289,7 @@
       "description": "Adjusts the phase of the output signal relative to the phase reference.",
       "set": ":PHASe <val><unit>",
       "query": ":PHASe?",
-      "parameters": [{ "name": "phase", "units": ["RAD", "DEG"] }],
+      "parameters": [{ "name": "phase", "units": ["RAD", { "token": "DEG", "unit": "deg" }] }],
       "examples": [":PHAS 0.5 RAD"]
     },
     {
@@ -308,7 +308,7 @@
       "description": "Sets the RF output power level.",
       "set": ":POWer <val><unit>",
       "query": ":POWer?",
-      "parameters": [{ "name": "amplitude", "units": ["dBm", "dBuV", "uV", "mV", "V"], "range": "approx -136 to +17 dBm (option/frequency-dependent; Std up to +13 dBm, Opt UNB up to +17 dBm)" }],
+      "parameters": [{ "name": "amplitude", "units": [{ "token": "dBm", "unit": "dBm" }, { "token": "dBuV", "unit": "dBuV" }, { "token": "uV", "unit": "uV" }, { "token": "mV", "unit": "mV" }, { "token": "V", "unit": "V" }], "range": "approx -136 to +17 dBm (option/frequency-dependent; Std up to +13 dBm, Opt UNB up to +17 dBm)" }],
       "examples": [":POW -10 DBM", ":POW:LEV:IMM:AMPL 0 DBM"]
     },
     {
@@ -318,7 +318,7 @@
       "description": "Sets the incremental step value for the amplitude parameter, or increments/decrements the current output power.",
       "set": ":POWer:STEP <val><unit>|UP|DOWN",
       "query": ":POWer:STEP?",
-      "parameters": [{ "name": "increment", "units": ["dB"], "range": "0.02 to 100 dB" }],
+      "parameters": [{ "name": "increment", "units": [{ "token": "dB", "unit": "dB" }], "range": "0.02 to 100 dB" }],
       "examples": [":POW:STEP 1 DB", ":POW UP"]
     },
     {
@@ -328,7 +328,7 @@
       "description": "Sets a power offset value applied to the displayed/output amplitude.",
       "set": ":POWer:OFFSet <val>DB",
       "query": ":POWer:OFFSet?",
-      "parameters": [{ "name": "offset", "units": ["dB"] }],
+      "parameters": [{ "name": "offset", "units": [{ "token": "dB", "unit": "dB" }] }],
       "examples": [":POW:OFFS 10 DB"]
     },
     {
@@ -348,7 +348,7 @@
       "description": "Sets the first amplitude point in a step sweep.",
       "set": ":POWer:STARt <val><unit>",
       "query": ":POWer:STARt?",
-      "parameters": [{ "name": "amplitude", "units": ["dBm"] }],
+      "parameters": [{ "name": "amplitude", "units": [{ "token": "dBm", "unit": "dBm" }] }],
       "examples": [":POW:STAR -20 DBM"]
     },
     {
@@ -358,7 +358,7 @@
       "description": "Sets the last amplitude point in a step sweep.",
       "set": ":POWer:STOP <val><unit>",
       "query": ":POWer:STOP?",
-      "parameters": [{ "name": "amplitude", "units": ["dBm"] }],
+      "parameters": [{ "name": "amplitude", "units": [{ "token": "dBm", "unit": "dBm" }] }],
       "examples": [":POW:STOP 0 DBM"]
     },
     {
@@ -368,7 +368,7 @@
       "description": "Sets the power reference value; output power settings are relative to this reference when reference mode is on.",
       "set": ":POWer:REFerence <val><unit>",
       "query": ":POWer:REFerence?",
-      "parameters": [{ "name": "reference", "units": ["dBm"] }],
+      "parameters": [{ "name": "reference", "units": [{ "token": "dBm", "unit": "dBm" }] }],
       "examples": [":POW:REF -10 DBM"]
     },
     {
@@ -388,7 +388,7 @@
       "description": "Sets the attenuator value (when attenuator auto is off).",
       "set": ":POWer:ATTenuation <val>DB",
       "query": ":POWer:ATTenuation?",
-      "parameters": [{ "name": "attenuation", "units": ["dB"] }],
+      "parameters": [{ "name": "attenuation", "units": [{ "token": "dB", "unit": "dB" }] }],
       "examples": [":POW:ATT 10 DB"]
     },
     {
@@ -438,7 +438,7 @@
       "description": "Sets the ALC level for the modulator attenuator.",
       "set": ":POWer:ALC:LEVel <val>DB",
       "query": ":POWer:ALC:LEVel?",
-      "parameters": [{ "name": "level", "units": ["dB"] }],
+      "parameters": [{ "name": "level", "units": [{ "token": "dB", "unit": "dB" }] }],
       "examples": [":POW:ALC:LEV 10 DB"]
     },
     {
@@ -510,7 +510,7 @@
       "description": "Sets the linear amplitude modulation depth (in percent) for the selected AM path.",
       "set": ":AM <val>PCT",
       "query": ":AM?",
-      "parameters": [{ "name": "depth", "units": ["%"], "range": "0 to 100 %" }],
+      "parameters": [{ "name": "depth", "units": [{ "token": "%", "unit": "%" }], "range": "0 to 100 %" }],
       "examples": [":AM 30PCT", ":AM2 50PCT"]
     },
     {
@@ -530,7 +530,7 @@
       "description": "Sets the internal modulation frequency for the AM source.",
       "set": ":AM:INTernal:FREQuency <val><unit>",
       "query": ":AM:INTernal:FREQuency?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":AM:INT:FREQ 1 KHZ"]
     },
     {
@@ -581,7 +581,7 @@
       "description": "Sets the frequency modulation peak deviation for the selected FM path.",
       "set": ":FM <val><unit>",
       "query": ":FM?",
-      "parameters": [{ "name": "deviation", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "deviation", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":FM 10 KHZ", ":FM2 5KHZ"]
     },
     {
@@ -601,7 +601,7 @@
       "description": "Sets the internal modulation frequency for the FM source.",
       "set": ":FM:INTernal:FREQuency <val><unit>",
       "query": ":FM:INTernal:FREQuency?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":FM:INT:FREQ 1 KHZ"]
     },
     {
@@ -642,7 +642,7 @@
       "description": "Sets the phase modulation peak deviation for the selected PhiM path.",
       "set": ":PM <val><unit>",
       "query": ":PM?",
-      "parameters": [{ "name": "deviation", "units": ["RAD", "DEG", "PIRAD"] }],
+      "parameters": [{ "name": "deviation", "units": ["RAD", { "token": "DEG", "unit": "deg" }, "PIRAD"] }],
       "examples": [":PM 1 RAD", ":PM2 90DEG"]
     },
     {
@@ -662,7 +662,7 @@
       "description": "Sets the internal modulation frequency for the PhiM source.",
       "set": ":PM:INTernal:FREQuency <val><unit>",
       "query": ":PM:INTernal:FREQuency?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":PM:INT:FREQ 1 KHZ"]
     },
     {
@@ -713,7 +713,7 @@
       "description": "Sets the internal pulse modulation rate (frequency).",
       "set": ":PULM:INTernal:FREQuency <val><unit>",
       "query": ":PULM:INTernal:FREQuency?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":PULM:INT:FREQ 1 KHZ"]
     },
     {
@@ -723,7 +723,7 @@
       "description": "Sets the period of the internal pulse modulation generator.",
       "set": ":PULM:INTernal:PERiod <val><unit>",
       "query": ":PULM:INTernal:PERiod?",
-      "parameters": [{ "name": "period", "units": ["s", "ms", "us", "ns"] }],
+      "parameters": [{ "name": "period", "units": [{ "token": "s", "unit": "s" }, { "token": "ms", "unit": "ms" }, { "token": "us", "unit": "us" }, { "token": "ns", "unit": "ns" }] }],
       "examples": [":PULM:INT:PER 1 MS"]
     },
     {
@@ -733,7 +733,7 @@
       "description": "Sets the pulse width of the internal pulse modulation generator.",
       "set": ":PULM:INTernal:PWIDth <val><unit>",
       "query": ":PULM:INTernal:PWIDth?",
-      "parameters": [{ "name": "width", "units": ["s", "ms", "us", "ns"] }],
+      "parameters": [{ "name": "width", "units": [{ "token": "s", "unit": "s" }, { "token": "ms", "unit": "ms" }, { "token": "us", "unit": "us" }, { "token": "ns", "unit": "ns" }] }],
       "examples": [":PULM:INT:PWID 1 US"]
     },
     {
@@ -764,7 +764,7 @@
       "description": "Sets the amplitude of the LF output signal.",
       "set": ":LFOutput:AMPLitude <val>VP",
       "query": ":LFOutput:AMPLitude?",
-      "parameters": [{ "name": "amplitude", "units": ["VP", "V"] }],
+      "parameters": [{ "name": "amplitude", "units": ["VP", { "token": "V", "unit": "V" }] }],
       "examples": [":LFO:AMPL 1 VP"]
     },
     {
@@ -784,7 +784,7 @@
       "description": "Sets the frequency of the LF output internal function generator.",
       "set": ":LFOutput:FUNCtion:FREQuency <val><unit>",
       "query": ":LFOutput:FUNCtion:FREQuency?",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":LFO:FUNC:FREQ 1 KHZ"]
     },
     {
@@ -835,7 +835,7 @@
       "description": "Sets the I/Q gain balance adjustment.",
       "set": ":DM:IQADjustment:GAIN <val>DB",
       "query": ":DM:IQADjustment:GAIN?",
-      "parameters": [{ "name": "gain", "units": ["dB"] }],
+      "parameters": [{ "name": "gain", "units": [{ "token": "dB", "unit": "dB" }] }],
       "examples": [":DM:IQAD:GAIN 0.1 DB"]
     },
     {
@@ -845,7 +845,7 @@
       "description": "Sets the I-channel DC offset adjustment (percent of full scale).",
       "set": ":DM:IQADjustment:IOFFset <val>",
       "query": ":DM:IQADjustment:IOFFset?",
-      "parameters": [{ "name": "offset", "units": ["%"] }],
+      "parameters": [{ "name": "offset", "units": [{ "token": "%", "unit": "%" }] }],
       "examples": [":DM:IQAD:IOFF 1.0"]
     },
     {
@@ -855,7 +855,7 @@
       "description": "Sets the Q-channel DC offset adjustment (percent of full scale).",
       "set": ":DM:IQADjustment:QOFFset <val>",
       "query": ":DM:IQADjustment:QOFFset?",
-      "parameters": [{ "name": "offset", "units": ["%"] }],
+      "parameters": [{ "name": "offset", "units": [{ "token": "%", "unit": "%" }] }],
       "examples": [":DM:IQAD:QOFF 1.0"]
     },
     {
@@ -865,7 +865,7 @@
       "description": "Sets the I/Q quadrature angle (skew) adjustment.",
       "set": ":DM:IQADjustment:QSKew <val>",
       "query": ":DM:IQADjustment:QSKew?",
-      "parameters": [{ "name": "skew", "units": ["DEG"] }],
+      "parameters": [{ "name": "skew", "units": [{ "token": "DEG", "unit": "deg" }] }],
       "examples": [":DM:IQAD:QSK 0.5"]
     },
     {
@@ -906,7 +906,7 @@
       "description": "Sets the ARB sample (waveform) clock rate.",
       "set": ":RADio:ARB:SCLock:RATE <val><unit>",
       "query": ":RADio:ARB:SCLock:RATE?",
-      "parameters": [{ "name": "rate", "units": ["Hz", "kHz", "MHz"] }],
+      "parameters": [{ "name": "rate", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }] }],
       "examples": [":RAD:ARB:SCL:RATE 40MHZ"]
     },
     {
@@ -916,7 +916,7 @@
       "description": "Sets the runtime scaling (in percent) applied to the ARB waveform to avoid DAC overflow.",
       "set": ":RADio:ARB:RSCaling <val>",
       "query": ":RADio:ARB:RSCaling?",
-      "parameters": [{ "name": "scaling", "units": ["%"], "range": "1 to 100 %" }],
+      "parameters": [{ "name": "scaling", "units": [{ "token": "%", "unit": "%" }], "range": "1 to 100 %" }],
       "examples": [":RAD:ARB:RSC 70"]
     },
     {
@@ -976,7 +976,7 @@
       "description": "Sets the carrier-to-noise ratio for the ARB noise function.",
       "set": ":RADio:ARB:NOISe:CN <val>DB",
       "query": ":RADio:ARB:NOISe:CN?",
-      "parameters": [{ "name": "cn", "units": ["dB"] }],
+      "parameters": [{ "name": "cn", "units": [{ "token": "dB", "unit": "dB" }] }],
       "examples": [":RAD:ARB:NOIS:CN 10 DB"]
     },
     {
@@ -1127,7 +1127,7 @@
       "description": "Defines the list of frequency points for list-mode sweep.",
       "set": ":LIST:FREQuency <val>{,<val>}",
       "query": ":LIST:FREQuency?",
-      "parameters": [{ "name": "frequencies", "units": ["Hz", "kHz", "MHz", "GHz"] }],
+      "parameters": [{ "name": "frequencies", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }] }],
       "examples": [":LIST:FREQ 1GHZ,1.5GHZ,2GHZ"]
     },
     {
@@ -1145,7 +1145,7 @@
       "description": "Defines the list of power (amplitude) points for list-mode sweep.",
       "set": ":LIST:POWer <val>{,<val>}",
       "query": ":LIST:POWer?",
-      "parameters": [{ "name": "powers", "units": ["dBm"] }],
+      "parameters": [{ "name": "powers", "units": [{ "token": "dBm", "unit": "dBm" }] }],
       "examples": [":LIST:POW -10DBM,-5DBM,0DBM"]
     },
     {
@@ -1163,7 +1163,7 @@
       "description": "Defines the list of dwell times (seconds per point) for list-mode sweep.",
       "set": ":LIST:DWELl <val>{,<val>}",
       "query": ":LIST:DWELl?",
-      "parameters": [{ "name": "dwell", "units": ["s", "ms", "us"] }],
+      "parameters": [{ "name": "dwell", "units": [{ "token": "s", "unit": "s" }, { "token": "ms", "unit": "ms" }, { "token": "us", "unit": "us" }] }],
       "examples": [":LIST:DWEL 0.1,0.1,0.1"]
     },
     {
@@ -1237,7 +1237,7 @@
       "description": "Sets the dwell time for step sweep (time spent at each point).",
       "set": ":SWEep:DWELl <val><unit>",
       "query": ":SWEep:DWELl?",
-      "parameters": [{ "name": "dwell", "units": ["s", "ms", "us"] }],
+      "parameters": [{ "name": "dwell", "units": [{ "token": "s", "unit": "s" }, { "token": "ms", "unit": "ms" }, { "token": "us", "unit": "us" }] }],
       "examples": [":SWE:DWEL 100 MS"]
     },
     {
@@ -1347,7 +1347,7 @@
       "category": "Correction",
       "description": "Sets a frequency and amplitude correction pair in the user-flatness array (max 1601 points).",
       "set": ":CORRection:FLATness:PAIR <freq>[<unit>],<corr>[<unit>]",
-      "parameters": [{ "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"] }, { "name": "correction", "units": ["dB"] }],
+      "parameters": [{ "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "kHz", "unit": "kHz" }, { "token": "MHz", "unit": "MHz" }, { "token": "GHz", "unit": "GHz" }] }, { "name": "correction", "units": [{ "token": "dB", "unit": "dB" }] }],
       "examples": [":CORR:FLAT:PAIR 1GHZ,1.5DB"]
     },
     {

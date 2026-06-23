@@ -220,7 +220,7 @@
       "description": "Enters the QPSK modulator calibration data (a delay for the digital FM signal). DEFault uses the value saved in FLASH memory. Option SME-B11.",
       "set": ":CALibration:QPSK:DATA <value>",
       "parameters": [
-        { "name": "delay", "units": ["s", "ns"], "range": "0 to 10000 ns | DEFault" }
+        { "name": "delay", "units": [{"token": "s", "unit": "s"}, {"token": "ns", "unit": "ns"}], "range": "0 to 10000 ns | DEFault" }
       ],
       "examples": [":CAL:QPSK:DATA 10000ns"]
     },
@@ -553,7 +553,7 @@
       "description": "Sets the LF output voltage (a characteristic of the output, kept even if another LF generator is connected). *RST value 1 V.",
       "set": ":OUTPut2:VOLTage <value>",
       "parameters": [
-        { "name": "voltage", "units": ["V"], "range": "0 V to 4 V" }
+        { "name": "voltage", "units": [{"token": "V", "unit": "V"}], "range": "0 V to 4 V" }
       ],
       "examples": [":OUTP2:VOLT 3.0V"]
     },
@@ -566,7 +566,7 @@
       "set": ":SOURce:FREQuency:CW <value>",
       "query": ":SOURce:FREQuency:CW?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz); UP | DOWN" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz); UP | DOWN" }
       ],
       "examples": ["SOUR:FREQ 100E6", ":SOUR:FREQ:CW 100kHz"]
     },
@@ -589,7 +589,7 @@
       "set": ":SOURce:FREQuency:CENTer <value>",
       "query": ":SOURce:FREQuency:CENTer?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
       ],
       "examples": [":SOUR:FREQ:CENT 100kHz"]
     },
@@ -600,7 +600,7 @@
       "description": "Sets the frequency when SWEep:MODE MANual and FREQuency:MODE SWEep are set; only values between STARt and STOP are permitted. *RST value 100 MHz.",
       "set": ":SOURce:FREQuency:MANual <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
       ],
       "examples": [":SOUR:FREQ:MAN 500MHz"]
     },
@@ -624,7 +624,7 @@
       "set": ":SOURce:FREQuency:OFFSet <value>",
       "query": ":SOURce:FREQuency:OFFSet?",
       "parameters": [
-        { "name": "offset", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "-50 to +50 GHz" }
+        { "name": "offset", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "-50 to +50 GHz" }
       ],
       "examples": [":SOUR:FREQ:OFFS 0", ":SOUR:FREQ:OFFS 100MHz"]
     },
@@ -636,7 +636,7 @@
       "set": ":SOURce:FREQuency:SPAN <value>",
       "query": ":SOURce:FREQuency:SPAN?",
       "parameters": [
-        { "name": "span", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "0 to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
+        { "name": "span", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "0 to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
       ],
       "examples": [":SOUR:FREQ:SPAN 1GHz"]
     },
@@ -648,7 +648,7 @@
       "set": ":SOURce:FREQuency:STARt <value>",
       "query": ":SOURce:FREQuency:STARt?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
       ],
       "examples": [":SOUR:FREQ:STAR 1MHz"]
     },
@@ -660,7 +660,7 @@
       "set": ":SOURce:FREQuency:STOP <value>",
       "query": ":SOURce:FREQuency:STOP?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "5 kHz to 1.5 GHz (SME03E/03/06: to 2.2/3/6 GHz)" }
       ],
       "examples": [":SOUR:FREQ:STOP 100MHz"]
     },
@@ -672,7 +672,7 @@
       "set": ":SOURce:FREQuency:STEP:INCRement <value>",
       "query": ":SOURce:FREQuency:STEP:INCRement?",
       "parameters": [
-        { "name": "step", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "0 to 1 GHz" }
+        { "name": "step", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "0 to 1 GHz" }
       ],
       "examples": [":SOUR:FREQ:STEP:INCR 1MHz", "SOUR:FREQ:STEP 1MHz"]
     },
@@ -685,7 +685,7 @@
       "set": ":SOURce:POWer <value>",
       "query": ":SOURce:POWer?",
       "parameters": [
-        { "name": "level", "units": ["dBm", "dBW", "V", "mV", "uV"], "range": "-144 to +16 dBm; UP | DOWN" }
+        { "name": "level", "units": [{"token": "dBm", "unit": "dBm"}, "dBW", {"token": "V", "unit": "V"}, {"token": "mV", "unit": "mV"}, {"token": "uV", "unit": "uV"}], "range": "-144 to +16 dBm; UP | DOWN" }
       ],
       "examples": ["SOUR:POW 30", ":POW 15", ":SOUR:POW:LEV:IMM:AMPL 15"]
     },
@@ -697,7 +697,7 @@
       "set": ":SOURce:POWer:OFFSet <value>",
       "query": ":SOURce:POWer:OFFSet?",
       "parameters": [
-        { "name": "offset", "units": ["dB"], "range": "-100 to +100 dB" }
+        { "name": "offset", "units": [{"token": "dB", "unit": "dB"}], "range": "-100 to +100 dB" }
       ],
       "examples": ["SOUR:POW:OFFS 0", ":POW:OFFS 0"]
     },
@@ -755,7 +755,7 @@
       "set": ":SOURce:POWer:LIMit <value>",
       "query": ":SOURce:POWer:LIMit?",
       "parameters": [
-        { "name": "limit", "units": ["dBm"], "range": "-144 to +16 dBm" }
+        { "name": "limit", "units": [{"token": "dBm", "unit": "dBm"}], "range": "-144 to +16 dBm" }
       ],
       "examples": ["SOUR:POW:LIM 16 dBm", ":SOUR:POW:LIM:AMPL 15"]
     },
@@ -766,7 +766,7 @@
       "description": "Sets the level when POWer:MODE SWEep and SWEep:MODE MANual are set; only values between START and STOP permitted. *RST value -30 dBm.",
       "set": ":SOURce:POWer:MANual <value>",
       "parameters": [
-        { "name": "level", "units": ["dBm"], "range": "-144 to +16 dBm" }
+        { "name": "level", "units": [{"token": "dBm", "unit": "dBm"}], "range": "-144 to +16 dBm" }
       ],
       "examples": [":SOUR:POW:MAN 1dBm"]
     },
@@ -790,7 +790,7 @@
       "set": ":SOURce:POWer:STARt <value>",
       "query": ":SOURce:POWer:STARt?",
       "parameters": [
-        { "name": "level", "units": ["dBm"], "range": "-144 to +16 dBm" }
+        { "name": "level", "units": [{"token": "dBm", "unit": "dBm"}], "range": "-144 to +16 dBm" }
       ],
       "examples": [":SOUR:POW:STAR -20"]
     },
@@ -802,7 +802,7 @@
       "set": ":SOURce:POWer:STOP <value>",
       "query": ":SOURce:POWer:STOP?",
       "parameters": [
-        { "name": "level", "units": ["dBm"], "range": "-144 to +16 dBm" }
+        { "name": "level", "units": [{"token": "dBm", "unit": "dBm"}], "range": "-144 to +16 dBm" }
       ],
       "examples": [":SOUR:POW:STOP 3"]
     },
@@ -814,7 +814,7 @@
       "set": ":SOURce:POWer:STEP:INCRement <value>",
       "query": ":SOURce:POWer:STEP:INCRement?",
       "parameters": [
-        { "name": "step", "units": ["dB"], "range": "0.1 to 10 dB" }
+        { "name": "step", "units": [{"token": "dB", "unit": "dB"}], "range": "0.1 to 10 dB" }
       ],
       "examples": [":SOUR:POW:STEP:INCR 2"]
     },
@@ -857,7 +857,7 @@
       "description": "Transmits the frequency points for the selected UCOR table (comma-separated list). *RST does not influence data lists.",
       "set": ":SOURce:CORRection:CSET:DATA:FREQuency <f1>{,<fn>}",
       "parameters": [
-        { "name": "frequency_list", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "5 kHz to 1.5 GHz each (SME03E/03/06: to 2.2/3/6 GHz)" }
+        { "name": "frequency_list", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "5 kHz to 1.5 GHz each (SME03E/03/06: to 2.2/3/6 GHz)" }
       ],
       "examples": ["SOUR:CORR:CSET:DATA:FREQ 100 MHz, 102 MHz, 103 MHz"]
     },
@@ -868,7 +868,7 @@
       "description": "Transmits the level correction values for the selected UCOR table (comma-separated list). *RST does not influence data lists.",
       "set": ":SOURce:CORRection:CSET:DATA:POWer <p1>{,<pn>}",
       "parameters": [
-        { "name": "power_list", "units": ["dB"], "range": "-40 dB to 6 dB each" }
+        { "name": "power_list", "units": [{"token": "dB", "unit": "dB"}], "range": "-40 dB to 6 dB each" }
       ],
       "examples": [":SOUR:CORR:CSET:DATA:POWer 1dB, 0.8dB, 0.75dB"]
     },
@@ -892,7 +892,7 @@
       "set": ":SOURce:AM:DEPTh <value>",
       "query": ":SOURce:AM:DEPTh?",
       "parameters": [
-        { "name": "depth", "units": ["PCT"], "range": "0 to 100 PCT" }
+        { "name": "depth", "units": [{"token": "PCT", "unit": "%"}], "range": "0 to 100 PCT" }
       ],
       "examples": [":SOUR:AM:DEPT 15PCT"]
     },
@@ -914,7 +914,7 @@
       "description": "Sets the internal AM modulation frequency. INT1 = LF generator 1, INT2 = LF generator 2. Without SM-B2/SM-B6 only 400 Hz/1 kHz/3 kHz/15 kHz; with SM-B2 0.1 Hz-500 kHz; with SM-B6 0.1 Hz-1 MHz. *RST value 1 kHz.",
       "set": ":SOURce:AM:INTernal:FREQuency <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR:AM:INT:FREQ 15kHz"]
     },
@@ -961,7 +961,7 @@
       "set": ":SOURce:FM1:DEViation <value>",
       "query": ":SOURce:FM1:DEViation?",
       "parameters": [
-        { "name": "deviation", "units": ["Hz", "kHz", "MHz"], "range": "0 to 1 MHz (SME03/03E: 0 to 2 MHz; SME06: 0 to 4 MHz)" }
+        { "name": "deviation", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}], "range": "0 to 1 MHz (SME03/03E: 0 to 2 MHz; SME06: 0 to 4 MHz)" }
       ],
       "examples": [":SOUR:FM1:DEV 5kHz"]
     },
@@ -983,7 +983,7 @@
       "description": "Sets the internal FM modulation frequency (FM1 uses LF generator 1, FM2 LF generator 2). Without SM-B2/SM-B6 only 400 Hz/1 kHz/3 kHz/15 kHz; with SM-B2 0.1 Hz-500 kHz; with SM-B6 0.1 Hz-1 MHz. *RST value 1 kHz.",
       "set": ":SOURce:FM:INTernal:FREQuency <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR:FM:INT:FREQ 10kHz"]
     },
@@ -1030,7 +1030,7 @@
       "set": ":SOURce:PM1:DEViation <value>",
       "query": ":SOURce:PM1:DEViation?",
       "parameters": [
-        { "name": "deviation", "units": ["rad", "deg"], "range": "-360 deg to +360 deg" }
+        { "name": "deviation", "units": ["rad", {"token": "deg", "unit": "deg"}], "range": "-360 deg to +360 deg" }
       ],
       "examples": ["SOUR:PM:DEV 20DEGR"]
     },
@@ -1052,7 +1052,7 @@
       "description": "Sets the internal PM modulation frequency (PM1 uses LF generator 1, PM2 LF generator 2). Without SM-B2/SM-B6 only 400 Hz/1 kHz/3 kHz/15 kHz; with SM-B2 0.1 Hz-500 kHz; with SM-B6 0.1 Hz-1 MHz. *RST value 1 kHz.",
       "set": ":SOURce:PM:INTernal:FREQuency <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR:PM:INT:FREQ 10kHz"]
     },
@@ -1087,7 +1087,7 @@
       "description": "Sets the impedance of the external pulse modulation input socket (independent of PM/FM input settings). Options SM-B3/SM-B4/SM-B8/SM-B9. *RST value 10 kOhm.",
       "set": ":SOURce:PULM:EXTernal:IMPedance <value>",
       "parameters": [
-        { "name": "impedance", "units": ["Ohm"], "range": "50 Ohm | 10 kOhm" }
+        { "name": "impedance", "units": [{"token": "Ohm", "unit": "Ohm"}], "range": "50 Ohm | 10 kOhm" }
       ],
       "examples": [":SOUR:PULM:EXT:IMP 10E3"]
     },
@@ -1098,7 +1098,7 @@
       "description": "Sets the internal pulse generator frequency (coupled to PULSe:PERiod). *RST value 100 kHz.",
       "set": ":SOURce:PULM:INTernal:FREQuency <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz", "MHz"], "range": "0.01176 Hz to 10 MHz" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}], "range": "0.01176 Hz to 10 MHz" }
       ],
       "examples": [":SOUR:PULM:INT:FREQ 1MHz"]
     },
@@ -1145,7 +1145,7 @@
       "set": ":SOURce:PULSe:DELay <value>",
       "query": ":SOURce:PULSe:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s", "us", "ns"], "range": "40 ns to 1 s" }
+        { "name": "delay", "units": [{"token": "s", "unit": "s"}, {"token": "us", "unit": "us"}, {"token": "ns", "unit": "ns"}], "range": "40 ns to 1 s" }
       ],
       "examples": [":SOUR:PULS:DEL 10us"]
     },
@@ -1157,7 +1157,7 @@
       "set": ":SOURce:PULSe:DOUBle:DELay <value>",
       "query": ":SOURce:PULSe:DOUBle:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s", "us", "ns"], "range": "60 ns to 1 s" }
+        { "name": "delay", "units": [{"token": "s", "unit": "s"}, {"token": "us", "unit": "us"}, {"token": "ns", "unit": "ns"}], "range": "60 ns to 1 s" }
       ],
       "examples": [":SOUR:PULS:DOUB:DEL 10us"]
     },
@@ -1180,7 +1180,7 @@
       "set": ":SOURce:PULSe:PERiod <value>",
       "query": ":SOURce:PULSe:PERiod?",
       "parameters": [
-        { "name": "period", "units": ["s", "us", "ns"], "range": "100 ns to 85 s" }
+        { "name": "period", "units": [{"token": "s", "unit": "s"}, {"token": "us", "unit": "us"}, {"token": "ns", "unit": "ns"}], "range": "100 ns to 85 s" }
       ],
       "examples": [":SOUR:PULS:PER 2s"]
     },
@@ -1192,7 +1192,7 @@
       "set": ":SOURce:PULSe:WIDTh <value>",
       "query": ":SOURce:PULSe:WIDTh?",
       "parameters": [
-        { "name": "width", "units": ["s", "us", "ns"], "range": "20 ns to 1 s" }
+        { "name": "width", "units": [{"token": "s", "unit": "s"}, {"token": "us", "unit": "us"}, {"token": "ns", "unit": "ns"}], "range": "20 ns to 1 s" }
       ],
       "examples": [":SOUR:PULS:WIDT 0.1s"]
     },
@@ -1205,7 +1205,7 @@
       "set": ":SOURce:PHASe:ADJust <value>",
       "query": ":SOURce:PHASe:ADJust?",
       "parameters": [
-        { "name": "phase", "units": ["deg", "rad"], "range": "-360 deg to +360 deg" }
+        { "name": "phase", "units": [{"token": "deg", "unit": "deg"}, "rad"], "range": "-360 deg to +360 deg" }
       ],
       "examples": [":SOUR:PHAS:ADJ 2DEG", ":SOUR:PHAS:ADJ 0.1RAD"]
     },
@@ -1225,7 +1225,7 @@
       "description": "Informs the instrument of the external reference oscillator frequency. *RST value 10 MHz.",
       "set": ":SOURce:ROSCillator:EXTernal:FREQuency <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "MHz"], "range": "1 to 16 MHz" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "MHz", "unit": "MHz"}], "range": "1 to 16 MHz" }
       ],
       "examples": [":SOUR:ROSC:FREQ 5MHz"]
     },
@@ -1282,7 +1282,7 @@
       "set": ":SOURce:SWEep:FREQuency:DWELl <value>",
       "query": ":SOURce:SWEep:FREQuency:DWELl?",
       "parameters": [
-        { "name": "dwell", "units": ["s", "ms"], "range": "10 ms to 5 s" }
+        { "name": "dwell", "units": [{"token": "s", "unit": "s"}, {"token": "ms", "unit": "ms"}], "range": "10 ms to 5 s" }
       ],
       "examples": [":SOUR:SWE:DWEL 12ms"]
     },
@@ -1326,7 +1326,7 @@
       "description": "Sets the step width for a linear frequency sweep (adapts POINts for SPACing LINear). *RST value 1 MHz.",
       "set": ":SOURce:SWEep:FREQuency:STEP:LINear <value>",
       "parameters": [
-        { "name": "step", "units": ["Hz", "kHz", "MHz", "GHz"], "range": "0 to 1 GHz" }
+        { "name": "step", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}, {"token": "MHz", "unit": "MHz"}, {"token": "GHz", "unit": "GHz"}], "range": "0 to 1 GHz" }
       ],
       "examples": [":SOUR:SWE:STEP 1MHz"]
     },
@@ -1337,7 +1337,7 @@
       "description": "Sets the step width factor (percent of prior frequency) for a logarithmic frequency sweep. Suffix PCT must be used explicitly. *RST value 1 PCT.",
       "set": ":SOURce:SWEep:FREQuency:STEP:LOGarithmic <value>",
       "parameters": [
-        { "name": "step", "units": ["PCT"], "range": "0.01 to 50 PCT" }
+        { "name": "step", "units": [{"token": "PCT", "unit": "%"}], "range": "0.01 to 50 PCT" }
       ],
       "examples": [":SOUR:SWE:STEP:LOG 10PCT"]
     },
@@ -1348,7 +1348,7 @@
       "description": "Sets the dwell time per level step. *RST value 15 ms.",
       "set": ":SOURce:SWEep:POWer:DWELl <value>",
       "parameters": [
-        { "name": "dwell", "units": ["s", "ms"], "range": "10 ms to 5 s" }
+        { "name": "dwell", "units": [{"token": "s", "unit": "s"}, {"token": "ms", "unit": "ms"}], "range": "10 ms to 5 s" }
       ],
       "examples": [":SOUR:SWE:POW:DWEL 12ms"]
     },
@@ -1381,7 +1381,7 @@
       "description": "Sets the step width factor for a logarithmic level sweep (suffix dB must be used explicitly). *RST value 1 dB.",
       "set": ":SOURce:SWEep:POWer:STEP:LOGarithmic <value>",
       "parameters": [
-        { "name": "step", "units": ["dB"], "range": "0 to 10 dB" }
+        { "name": "step", "units": [{"token": "dB", "unit": "dB"}], "range": "0 to 10 dB" }
       ],
       "examples": [":SOUR:SWE:STEP 10dB"]
     },
@@ -1394,7 +1394,7 @@
       "set": ":SOURce2:FREQuency:CW <value>",
       "query": ":SOURce2:FREQuency:CW?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "400 Hz | 1 kHz | 3 kHz | 15 kHz, or 0.1 Hz to 500 kHz (SM-B2), or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR2:FREQ:CW 1kHz"]
     },
@@ -1405,7 +1405,7 @@
       "description": "Sets the LF generator frequency when SOURce2:SWEep:MODE MANual and SOURce2:FREQuency:MODE SWEep are set; only values between STARt and STOP allowed. *RST value 1 kHz.",
       "set": ":SOURce2:FREQuency:MANual <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR2:FREQ:MAN 1kHz"]
     },
@@ -1427,7 +1427,7 @@
       "description": "Sets the start value of the LF generator sweep frequency (SOURce2). *RST value 1 kHz.",
       "set": ":SOURce2:FREQuency:STARt <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR2:FREQ:STAR 100kHz"]
     },
@@ -1438,7 +1438,7 @@
       "description": "Sets the end value of the LF generator sweep frequency (SOURce2). *RST value 100 kHz.",
       "set": ":SOURce2:FREQuency:STOP <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "0.1 Hz to 500 kHz (SM-B2) or 0.1 Hz to 1 MHz (SM-B6)" }
       ],
       "examples": [":SOUR2:FREQ:STOP 200kHz"]
     },
@@ -1468,7 +1468,7 @@
       "description": "Sets the LF frequency-sweep marker (selected by suffix 1|2|3) to the indicated frequency. *RST values MARK1: 100 kHz, MARK2: 10 kHz, MARK3: 1 kHz.",
       "set": ":SOURce2:MARKer1:FREQuency <value>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "kHz"], "range": "0.1 Hz to 500 kHz" }
+        { "name": "frequency", "units": [{"token": "Hz", "unit": "Hz"}, {"token": "kHz", "unit": "kHz"}], "range": "0.1 Hz to 500 kHz" }
       ],
       "examples": [":SOUR2:MARK1:FREQ 9000"]
     },
@@ -1738,7 +1738,7 @@
       "description": "Transmits the dwell-time list for the selected memory sequence (one value applies to all states). Not influenced by *RST.",
       "set": ":SYSTem:MSEQuence:DWELl <t1>{,<tn>}",
       "parameters": [
-        { "name": "dwell_list", "units": ["s", "ms"], "range": "50 ms to 60 s each" }
+        { "name": "dwell_list", "units": [{"token": "s", "unit": "s"}, {"token": "ms", "unit": "ms"}], "range": "50 ms to 60 s each" }
       ],
       "examples": [":SYST:MSEQ:DWEL 1s"]
     },

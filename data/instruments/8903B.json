@@ -29,7 +29,7 @@
       "set": "FR <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }], "range": "20 Hz to 100 kHz" }
       ],
       "examples": ["FR440HZ", "FR20KZ"]
     },
@@ -41,7 +41,7 @@
       "set": "AP <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "amplitude", "units": ["VL", "MV", "DV"], "range": "0.6 mV to 6 V" }
+        { "name": "amplitude", "units": [{ "token": "VL", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "DV", "unit": "dBm" }], "range": "0.6 mV to 6 V" }
       ],
       "examples": ["AP1.5VL", "AP600MV", "AP0DV"]
     },
@@ -53,7 +53,7 @@
       "set": "AN <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "increment", "units": ["VL", "MV", "DV"] }
+        { "name": "increment", "units": [{ "token": "VL", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "DV", "unit": "dBm" }] }
       ],
       "examples": ["AN100MV", "AN1DV"]
     },
@@ -65,7 +65,7 @@
       "set": "FN <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "increment", "units": ["HZ", "KZ"] }
+        { "name": "increment", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }] }
       ],
       "examples": ["FN10HZ", "FN1KZ"]
     },
@@ -327,7 +327,7 @@
       "set": "FA <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }], "range": "20 Hz to 100 kHz" }
       ],
       "examples": ["FA20HZ", "FA1KZ"]
     },
@@ -339,7 +339,7 @@
       "set": "FB <value> <unit>",
       "query": false,
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ"], "range": "20 Hz to 100 kHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KZ", "unit": "kHz" }], "range": "20 Hz to 100 kHz" }
       ],
       "examples": ["FB20KZ", "FB100KZ"]
     },
@@ -351,7 +351,7 @@
       "set": "PL <value> <unit> <UL|LL>",
       "query": false,
       "parameters": [
-        { "name": "value", "units": ["UL", "LL", "DB", "VL", "MV", "DV"], "range": "depends on selected measurement units" }
+        { "name": "value", "units": ["UL", "LL", { "token": "DB", "unit": "dB" }, { "token": "VL", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "DV", "unit": "dBm" }], "range": "depends on selected measurement units" }
       ],
       "examples": ["PL0DBUL", "PL-80DBLL"]
     },

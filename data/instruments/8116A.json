@@ -74,7 +74,7 @@
       "set": "FRQ <value> <unit>",
       "query": "IFRQ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "1.00 mHz to 50.0 MHz (3 digit resolution); MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+        { "name": "frequency", "units": ["MZ", { "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "1.00 mHz to 50.0 MHz (3 digit resolution); MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
       ],
       "examples": ["FRQ 1 KHZ", "FRQ 50 MHZ", "IFRQ"]
     },
@@ -86,7 +86,7 @@
       "set": "DTY <value> %",
       "query": "IDTY",
       "parameters": [
-        { "name": "duty_cycle", "units": ["%"], "range": "10 % to 90 % (1 mHz-999 kHz); 20 % to 80 % (1-9.99 MHz); 50 % only (>= 10 MHz)" }
+        { "name": "duty_cycle", "units": [ { "token": "%", "unit": "%" } ], "range": "10 % to 90 % (1 mHz-999 kHz); 20 % to 80 % (1-9.99 MHz); 50 % only (>= 10 MHz)" }
       ],
       "examples": ["DTY 50 %", "IDTY"]
     },
@@ -98,7 +98,7 @@
       "set": "WID <value> <unit>",
       "query": "IWID",
       "parameters": [
-        { "name": "width", "units": ["NS", "US", "MS"], "range": "10.0 ns to 999 ms (3 digit resolution); NS=nanoseconds, US=microseconds, MS=milliseconds" }
+        { "name": "width", "units": [ { "token": "NS", "unit": "ns" }, { "token": "US", "unit": "us" }, { "token": "MS", "unit": "ms" } ], "range": "10.0 ns to 999 ms (3 digit resolution); NS=nanoseconds, US=microseconds, MS=milliseconds" }
       ],
       "examples": ["WID 100 NS", "WID 100 US", "IWID"]
     },
@@ -110,7 +110,7 @@
       "set": "AMP <value> <unit>",
       "query": "IAMP",
       "parameters": [
-        { "name": "amplitude", "units": ["MV", "V"], "range": "10.0 mVpp to 16.0 Vpp into 50 ohm (up to 32 Vpp into high impedance); MV=millivolts, V=volts" }
+        { "name": "amplitude", "units": [ { "token": "MV", "unit": "mV" }, { "token": "V", "unit": "V" } ], "range": "10.0 mVpp to 16.0 Vpp into 50 ohm (up to 32 Vpp into high impedance); MV=millivolts, V=volts" }
       ],
       "examples": ["AMP 1.00 V", "AMP 120 MV", "IAMP"]
     },
@@ -122,7 +122,7 @@
       "set": "OFS <value> <unit>",
       "query": "IOFS",
       "parameters": [
-        { "name": "offset", "units": ["MV", "V"], "range": "0 to +/- 7.95 V (0 to +/- 795 mV on low level window); MV=millivolts, V=volts" }
+        { "name": "offset", "units": [ { "token": "MV", "unit": "mV" }, { "token": "V", "unit": "V" } ], "range": "0 to +/- 7.95 V (0 to +/- 795 mV on low level window); MV=millivolts, V=volts" }
       ],
       "examples": ["OFS 100 MV", "OFS 120 MV", "IOFS"]
     },
@@ -134,7 +134,7 @@
       "set": "HIL <value> V",
       "query": "IHIL",
       "parameters": [
-        { "name": "high_level", "units": ["V"], "range": "V = volts" }
+        { "name": "high_level", "units": [ { "token": "V", "unit": "V" } ], "range": "V = volts" }
       ],
       "examples": ["HIL 3.5V", "HIL 4.00V", "IHIL"]
     },
@@ -146,7 +146,7 @@
       "set": "LOL <value> V",
       "query": "ILOL",
       "parameters": [
-        { "name": "low_level", "units": ["V"], "range": "V = volts" }
+        { "name": "low_level", "units": [ { "token": "V", "unit": "V" } ], "range": "V = volts" }
       ],
       "examples": ["LOL 3.0V", "LOL -1.00V", "ILOL"]
     },
@@ -170,7 +170,7 @@
       "set": "RPT <value> <unit>",
       "query": "IRPT",
       "parameters": [
-        { "name": "repetition_rate", "units": ["NS", "US", "MS"], "range": "NS=nanoseconds, US=microseconds, MS=milliseconds" }
+        { "name": "repetition_rate", "units": [ { "token": "NS", "unit": "ns" }, { "token": "US", "unit": "us" }, { "token": "MS", "unit": "ms" } ], "range": "NS=nanoseconds, US=microseconds, MS=milliseconds" }
       ],
       "examples": ["RPT 100 MS", "IRPT"]
     },
@@ -182,7 +182,7 @@
       "set": "STA <value> <unit>",
       "query": "ISTA",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+        { "name": "frequency", "units": ["MZ", { "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
       ],
       "examples": ["STA 1.00 KHZ", "ISTA"]
     },
@@ -194,7 +194,7 @@
       "set": "STP <value> <unit>",
       "query": "ISTP",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+        { "name": "frequency", "units": ["MZ", { "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
       ],
       "examples": ["STP 100 KHZ", "ISTP"]
     },
@@ -206,7 +206,7 @@
       "set": "MRK <value> <unit>",
       "query": "IMRK",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ", "KHZ", "MHZ"], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
+        { "name": "frequency", "units": ["MZ", { "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "MZ=millihertz, HZ=hertz, KHZ=kilohertz, MHZ=megahertz" }
       ],
       "examples": ["MRK 10.0 KHZ", "IMRK"]
     },
@@ -218,7 +218,7 @@
       "set": "SWT <value> <unit>",
       "query": "ISWT",
       "parameters": [
-        { "name": "time", "units": ["S", "MS"], "range": "S=seconds, MS=milliseconds" }
+        { "name": "time", "units": [ { "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" } ], "range": "S=seconds, MS=milliseconds" }
       ],
       "examples": ["SWT 50.0 MS", "ISWT"]
     },

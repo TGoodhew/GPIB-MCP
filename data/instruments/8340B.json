@@ -30,10 +30,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "0.01 to 26.5 GHz (8340B); 0.01 to 20 GHz (8341B)"
         }
@@ -54,10 +54,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "0.01 to 26.5 GHz (8340B); 0.01 to 20 GHz (8341B)"
         }
@@ -78,10 +78,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "10.00005 MHz to 26.49999995 GHz (center frequency)"
         }
@@ -102,10 +102,10 @@
         {
           "name": "sweep_width",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "100 Hz to 26.49 GHz"
         }
@@ -136,10 +136,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "0.01 to 26.5 GHz (8340B); 0.01 to 20 GHz (8341B)"
         }
@@ -180,10 +180,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Within the sweep range"
         }
@@ -204,10 +204,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Within the sweep range"
         }
@@ -228,10 +228,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Within the sweep range"
         }
@@ -252,10 +252,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Within the sweep range"
         }
@@ -276,10 +276,10 @@
         {
           "name": "frequency",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Within the sweep range"
         }
@@ -452,8 +452,8 @@
         {
           "name": "time",
           "units": [
-            "SC",
-            "MS"
+            { "token": "SC", "unit": "s" },
+            { "token": "MS", "unit": "ms" }
           ],
           "range": "10 ms to 100 s (typical)"
         }
@@ -737,8 +737,8 @@
         {
           "name": "power",
           "units": [
-            "DM",
-            "DB"
+            { "token": "DM", "unit": "dBm" },
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "Instrument/option dependent leveled output power"
         }
@@ -951,10 +951,10 @@
         {
           "name": "step_size",
           "units": [
-            "GZ",
-            "MZ",
-            "KZ",
-            "HZ"
+            { "token": "GZ", "unit": "GHz" },
+            { "token": "MZ", "unit": "MHz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "Frequency step increment"
         }
@@ -975,8 +975,8 @@
         {
           "name": "step_size",
           "units": [
-            "DB",
-            "DM"
+            { "token": "DB", "unit": "dB" },
+            { "token": "DM", "unit": "dBm" }
           ],
           "range": "Power step increment"
         }

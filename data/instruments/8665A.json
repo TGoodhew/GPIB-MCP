@@ -199,10 +199,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "0.1 MHz to 3000 MHz (8664A); UP|DOWN|MIN|MAX accepted; default unit Hz"
         }
@@ -224,10 +224,10 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -248,10 +248,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -271,10 +271,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -294,10 +294,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -317,10 +317,10 @@
         {
           "name": "span",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -340,10 +340,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -363,10 +363,10 @@
         {
           "name": "offset",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -465,12 +465,12 @@
         {
           "name": "amplitude",
           "units": [
-            "DBM",
+            {"token": "DBM", "unit": "dBm"},
             "DBMW",
-            "DBUV",
-            "V",
-            "MV",
-            "UV"
+            {"token": "DBUV", "unit": "dBuV"},
+            {"token": "V", "unit": "V"},
+            {"token": "MV", "unit": "mV"},
+            {"token": "UV", "unit": "uV"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default unit is AMPLitude:UNIT"
         }
@@ -492,10 +492,10 @@
         {
           "name": "step",
           "units": [
-            "DB",
-            "V",
-            "MV",
-            "UV"
+            {"token": "DB", "unit": "dB"},
+            {"token": "V", "unit": "V"},
+            {"token": "MV", "unit": "mV"},
+            {"token": "UV", "unit": "uV"}
           ],
           "range": "MIN|MAX accepted; default dB"
         }
@@ -551,10 +551,10 @@
         {
           "name": "unit",
           "units": [
-            "DBM",
+            {"token": "DBM", "unit": "dBm"},
             "DBMW",
-            "V",
-            "DBUV"
+            {"token": "V", "unit": "V"},
+            {"token": "DBUV", "unit": "dBuV"}
           ],
           "range": "must be specified"
         }
@@ -574,12 +574,12 @@
         {
           "name": "limit",
           "units": [
-            "DBM",
+            {"token": "DBM", "unit": "dBm"},
             "DBMW",
-            "DBUV",
-            "V",
-            "MV",
-            "UV"
+            {"token": "DBUV", "unit": "dBuV"},
+            {"token": "V", "unit": "V"},
+            {"token": "MV", "unit": "mV"},
+            {"token": "UV", "unit": "uV"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -599,7 +599,7 @@
         {
           "name": "attenuation",
           "units": [
-            "dB"
+            {"token": "dB", "unit": "dB"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -636,7 +636,7 @@
         {
           "name": "gain",
           "units": [
-            "dB"
+            {"token": "dB", "unit": "dB"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -716,8 +716,8 @@
         {
           "name": "depth",
           "units": [
-            "PCT",
-            "%"
+            {"token": "PCT", "unit": "%"},
+            {"token": "%", "unit": "%"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default unit %"
         }
@@ -739,8 +739,8 @@
         {
           "name": "step",
           "units": [
-            "PCT",
-            "%"
+            {"token": "PCT", "unit": "%"},
+            {"token": "%", "unit": "%"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -813,9 +813,9 @@
         {
           "name": "deviation",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default Hz"
         }
@@ -837,9 +837,9 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -956,7 +956,7 @@
         {
           "name": "deviation",
           "units": [
-            "DEG",
+            {"token": "DEG", "unit": "deg"},
             "RAD"
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default radians"
@@ -1064,9 +1064,9 @@
         {
           "name": "impedance",
           "units": [
-            "OHM",
-            "KOHM",
-            "MOHM"
+            {"token": "OHM", "unit": "Ohm"},
+            {"token": "KOHM", "unit": "kOhm"},
+            {"token": "MOHM", "unit": "MOhm"}
           ],
           "range": "MIN|MAX accepted; default OHM"
         }
@@ -1103,10 +1103,10 @@
         {
           "name": "delay",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            {"token": "S", "unit": "s"},
+            {"token": "MS", "unit": "ms"},
+            {"token": "US", "unit": "us"},
+            {"token": "NS", "unit": "ns"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default seconds"
         }
@@ -1126,10 +1126,10 @@
         {
           "name": "step",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            {"token": "S", "unit": "s"},
+            {"token": "MS", "unit": "ms"},
+            {"token": "US", "unit": "us"},
+            {"token": "NS", "unit": "ns"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -1149,10 +1149,10 @@
         {
           "name": "width",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            {"token": "S", "unit": "s"},
+            {"token": "MS", "unit": "ms"},
+            {"token": "US", "unit": "us"},
+            {"token": "NS", "unit": "ns"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default seconds"
         }
@@ -1172,10 +1172,10 @@
         {
           "name": "step",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            {"token": "S", "unit": "s"},
+            {"token": "MS", "unit": "ms"},
+            {"token": "US", "unit": "us"},
+            {"token": "NS", "unit": "ns"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -1212,9 +1212,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -1234,9 +1234,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default Hz"
         }
@@ -1257,9 +1257,9 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -1314,9 +1314,9 @@
         {
           "name": "level",
           "units": [
-            "V",
-            "MV",
-            "UV"
+            {"token": "V", "unit": "V"},
+            {"token": "MV", "unit": "mV"},
+            {"token": "UV", "unit": "uV"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default V"
         }
@@ -1337,9 +1337,9 @@
         {
           "name": "step",
           "units": [
-            "V",
-            "MV",
-            "UV"
+            {"token": "V", "unit": "V"},
+            {"token": "MV", "unit": "mV"},
+            {"token": "UV", "unit": "uV"}
           ],
           "range": "MIN|MAX accepted"
         }
@@ -1386,9 +1386,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -1442,9 +1442,9 @@
         {
           "name": "level",
           "units": [
-            "V",
-            "MV",
-            "UV"
+            {"token": "V", "unit": "V"},
+            {"token": "MV", "unit": "mV"},
+            {"token": "UV", "unit": "uV"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -1464,7 +1464,7 @@
         {
           "name": "phase",
           "units": [
-            "DEG",
+            {"token": "DEG", "unit": "deg"},
             "RAD"
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default radians"
@@ -1485,10 +1485,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            {"token": "HZ", "unit": "Hz"},
+            {"token": "KHZ", "unit": "kHz"},
+            {"token": "MHZ", "unit": "MHz"},
+            {"token": "GHZ", "unit": "GHz"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted"
         }
@@ -1537,7 +1537,7 @@
         {
           "name": "phase",
           "units": [
-            "DEG",
+            {"token": "DEG", "unit": "deg"},
             "RAD"
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default radians"
@@ -1559,7 +1559,7 @@
         {
           "name": "step",
           "units": [
-            "DEG",
+            {"token": "DEG", "unit": "deg"},
             "RAD"
           ],
           "range": "MIN|MAX accepted"
@@ -1680,10 +1680,10 @@
         {
           "name": "time",
           "units": [
-            "S",
-            "MS",
-            "US",
-            "NS"
+            {"token": "S", "unit": "s"},
+            {"token": "MS", "unit": "ms"},
+            {"token": "US", "unit": "us"},
+            {"token": "NS", "unit": "ns"}
           ],
           "range": "1-2-5 sequence; UP|DOWN|MIN|MAX accepted"
         }

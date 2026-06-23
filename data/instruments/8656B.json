@@ -18,7 +18,7 @@
       "description": "Carrier frequency function entry. Follow with a numeric value (up to 9 digits, decimal point allowed, no sign) and a frequency unit code (HZ, KZ, or MZ). Default after Clear: 100.00000 MHz.",
       "set": "FR <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ"], "range": "100 kHz to 990 MHz (10 kHz to 990 MHz with uncalibrated output)" }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}], "range": "100 kHz to 990 MHz (10 kHz to 990 MHz with uncalibrated output)" }
       ],
       "examples": ["FR 123.45 MZ", "FR 990 MZ"]
     },
@@ -29,7 +29,7 @@
       "description": "Carrier output amplitude function entry. Follow with a numeric value (up to 9 digits, decimal point and minus sign allowed) and one or more amplitude unit codes. dBm/dBf are logarithmic terminators; DB and EM (EMF) may be combined with a linear unit. Default after Clear: -127.0 dBm.",
       "set": "AP <value> <unit>",
       "parameters": [
-        { "name": "amplitude", "units": ["DM", "DF", "DB", "EM", "VL", "MV", "UV"], "range": "+13 dBm to -127 dBm (+1.00 V to +0.100 uV); DM=dBm, DF=dBf, DB=dB, EM=EMF, VL=Volts, MV=mV, UV=microvolts" }
+        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, "DF", {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+13 dBm to -127 dBm (+1.00 V to +0.100 uV); DM=dBm, DF=dBf, DB=dB, EM=EMF, VL=Volts, MV=mV, UV=microvolts" }
       ],
       "examples": ["AP -12.3 DM", "AP -2.0 DB EM UV"]
     },
@@ -40,7 +40,7 @@
       "description": "Re-displays the current amplitude in a different unit configuration without changing the actual output. With the Amplitude function selected, send one or more units codes. Does not affect the RF output level.",
       "set": "<unit>",
       "parameters": [
-        { "name": "units", "units": ["DM", "DF", "DB", "EM", "VL", "MV", "UV"] }
+        { "name": "units", "units": [{"token": "DM", "unit": "dBm"}, "DF", {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}] }
       ],
       "examples": ["DB UV"]
     },
@@ -51,7 +51,7 @@
       "description": "Amplitude offset function entry. Adds a fixed dB offset to the RF output amplitude. Offset register initializes to 0 dB at preset and at STBY-to-ON.",
       "set": "AO <value> DB",
       "parameters": [
-        { "name": "offset", "units": ["DB"] }
+        { "name": "offset", "units": [{"token": "DB", "unit": "dB"}] }
       ],
       "examples": ["AO 2 DB"]
     },
@@ -72,7 +72,7 @@
       "set": "<source> AM <value> <unit>",
       "parameters": [
         { "name": "source", "units": ["S1", "S2", "S3", "S4"] },
-        { "name": "depth", "units": ["PC", "%"], "range": "0 to 99 % (+7 dBm)" }
+        { "name": "depth", "units": [{"token": "PC", "unit": "%"}, {"token": "%", "unit": "%"}], "range": "0 to 99 % (+7 dBm)" }
       ],
       "examples": ["S2 AM 75 PC", "S2 AM 75 %"]
     },
@@ -93,7 +93,7 @@
       "set": "<source> FM <value> <unit>",
       "parameters": [
         { "name": "source", "units": ["S1", "S2", "S3", "S4"] },
-        { "name": "deviation", "units": ["KZ", "HZ"], "range": "max peak deviation depends on carrier band" }
+        { "name": "deviation", "units": [{"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "max peak deviation depends on carrier band" }
       ],
       "examples": ["S2 FM 25 KZ", "S1 FM 3 KZ"]
     },
@@ -113,7 +113,7 @@
       "description": "Selects DC-coupled FM using an external source at the front-panel MOD INPUT/OUTPUT. Follow with a numeric peak-deviation value and a frequency unit. Selecting DC FM (program code S5) automatically enables the external modulation input.",
       "set": "S5 <value> <unit>",
       "parameters": [
-        { "name": "deviation", "units": ["KZ", "HZ"], "range": "max peak deviation depends on carrier band; resolution 0.1 kHz below 10 kHz, 1 kHz at/above" }
+        { "name": "deviation", "units": [{"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "max peak deviation depends on carrier band; resolution 0.1 kHz below 10 kHz, 1 kHz at/above" }
       ],
       "examples": ["S5 50 KZ"]
     },

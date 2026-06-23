@@ -317,7 +317,7 @@
         {
           "name": "span",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ]
         }
       ],
@@ -412,7 +412,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ]
         }
       ],
@@ -431,7 +431,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ]
         }
       ],
@@ -512,7 +512,7 @@
         {
           "name": "x",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ]
         }
       ],
@@ -680,7 +680,7 @@
         {
           "name": "target",
           "units": [
-            "dB"
+            { "token": "dB", "unit": "dB" }
           ],
           "range": "e.g. -3 for 3 dB bandwidth"
         }
@@ -700,7 +700,7 @@
         {
           "name": "target",
           "units": [
-            "dB"
+            { "token": "dB", "unit": "dB" }
           ],
           "range": "e.g. -6"
         }
@@ -801,10 +801,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "Hz", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -824,10 +824,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "Hz", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -846,10 +846,10 @@
         {
           "name": "frequency",
           "units": [
-            "Hz",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "Hz", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -868,10 +868,10 @@
         {
           "name": "span",
           "units": [
-            "Hz",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "Hz", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -890,7 +890,7 @@
         {
           "name": "span",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ]
         }
       ],
@@ -943,9 +943,9 @@
         {
           "name": "time",
           "units": [
-            "s",
-            "MS",
-            "US"
+            { "token": "s", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" }
           ]
         }
       ],
@@ -1041,7 +1041,7 @@
         {
           "name": "bandwidth",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ],
           "range": "15 (fine)|250 (narrow)|1200 (medium narrow)|3700 (medium)|4000 (medium wide)|6500 (wide)"
         }
@@ -1305,9 +1305,9 @@
         {
           "name": "delay",
           "units": [
-            "s",
-            "NS",
-            "PS"
+            { "token": "s", "unit": "s" },
+            { "token": "NS", "unit": "ns" },
+            { "token": "PS", "unit": "ps" }
           ]
         }
       ],
@@ -1342,7 +1342,7 @@
         {
           "name": "power",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ]
         }
       ],
@@ -1362,7 +1362,7 @@
         {
           "name": "power",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ]
         }
       ],
@@ -1398,7 +1398,7 @@
         {
           "name": "power",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ]
         }
       ],
@@ -1417,7 +1417,7 @@
         {
           "name": "power",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ]
         }
       ],
@@ -1586,7 +1586,7 @@
         {
           "name": "scale_per_div",
           "units": [
-            "dB"
+            { "token": "dB", "unit": "dB" }
           ]
         }
       ],
@@ -1605,7 +1605,7 @@
         {
           "name": "reference_level",
           "units": [
-            "dB"
+            { "token": "dB", "unit": "dB" }
           ]
         }
       ],
@@ -2150,13 +2150,13 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ]
         },
         {
           "name": "duration",
           "units": [
-            "s"
+            { "token": "s", "unit": "s" }
           ]
         },
         {

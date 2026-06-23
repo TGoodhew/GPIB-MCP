@@ -109,8 +109,8 @@
         {
           "name": "time",
           "units": [
-            "S",
-            "MS"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" }
           ]
         }
       ],
@@ -169,10 +169,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "frequency range of the spectrum analyzer (to 1.8 GHz)"
         }
@@ -193,10 +193,10 @@
         {
           "name": "span",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ],
           "range": "0 Hz (zero span) to full span"
         }
@@ -218,10 +218,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -241,10 +241,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -284,10 +284,10 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -308,10 +308,10 @@
         {
           "name": "offset",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -373,13 +373,13 @@
         {
           "name": "level",
           "units": [
-            "DBM",
+            { "token": "DBM", "unit": "dBm" },
             "DBMV",
-            "DBUV",
-            "DB",
-            "V",
-            "MV",
-            "UV",
+            { "token": "DBUV", "unit": "dBuV" },
+            { "token": "DB", "unit": "dB" },
+            { "token": "V", "unit": "V" },
+            { "token": "MV", "unit": "mV" },
+            { "token": "UV", "unit": "uV" },
             "W",
             "MW",
             "UW"
@@ -413,7 +413,7 @@
         {
           "name": "offset",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ]
         }
       ],
@@ -457,7 +457,7 @@
         {
           "name": "attenuation",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "input attenuator range of the spectrum analyzer (0 to 70 dB)"
         }
@@ -498,7 +498,7 @@
         {
           "name": "scale",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "dB per division"
         }
@@ -529,8 +529,8 @@
         {
           "name": "level",
           "units": [
-            "DB",
-            "DBM"
+            { "token": "DB", "unit": "dB" },
+            { "token": "DBM", "unit": "dBm" }
           ]
         }
       ],
@@ -580,7 +580,7 @@
         {
           "name": "gain",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ]
         }
       ],
@@ -610,9 +610,9 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ],
           "range": "1 kHz to 3 MHz (30 Hz to 3 MHz with Option 130)"
         }
@@ -634,9 +634,9 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ]
         }
       ],
@@ -704,9 +704,9 @@
         {
           "name": "time",
           "units": [
-            "S",
-            "MS",
-            "US"
+            { "token": "S", "unit": "s" },
+            { "token": "MS", "unit": "ms" },
+            { "token": "US", "unit": "us" }
           ]
         }
       ],
@@ -1146,10 +1146,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -1169,10 +1169,10 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ",
-            "GHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" },
+            { "token": "GHZ", "unit": "GHz" }
           ]
         }
       ],
@@ -1351,7 +1351,7 @@
         {
           "name": "excursion",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ]
         }
       ],
@@ -1371,7 +1371,7 @@
         {
           "name": "level",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ]
         }
       ],
@@ -1456,9 +1456,9 @@
         {
           "name": "resolution",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ]
         }
       ],
@@ -1509,10 +1509,10 @@
         {
           "name": "level",
           "units": [
-            "DBM",
+            { "token": "DBM", "unit": "dBm" },
             "DBMV",
-            "DBUV",
-            "V"
+            { "token": "DBUV", "unit": "dBuV" },
+            { "token": "V", "unit": "V" }
           ]
         }
       ],
@@ -1533,10 +1533,10 @@
         {
           "name": "level",
           "units": [
-            "DBM",
+            { "token": "DBM", "unit": "dBm" },
             "DBMV",
-            "DBUV",
-            "V"
+            { "token": "DBUV", "unit": "dBuV" },
+            { "token": "V", "unit": "V" }
           ]
         }
       ],
@@ -2083,9 +2083,9 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ]
         }
       ],
@@ -2105,9 +2105,9 @@
         {
           "name": "spacing",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ]
         }
       ],
@@ -2212,7 +2212,7 @@
         {
           "name": "distance",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ]
         }
       ],
@@ -2296,9 +2296,9 @@
         {
           "name": "deviation",
           "units": [
-            "HZ",
-            "KHZ",
-            "MHZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KHZ", "unit": "kHz" },
+            { "token": "MHZ", "unit": "MHz" }
           ]
         }
       ],
