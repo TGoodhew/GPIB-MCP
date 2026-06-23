@@ -391,7 +391,7 @@
         {
           "name": "scale",
           "units": [
-            "dB/div"
+            {"unit": "dB/div"}
           ],
           "range": "Variable length numeric"
         }

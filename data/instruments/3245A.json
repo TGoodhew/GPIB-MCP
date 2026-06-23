@@ -59,7 +59,7 @@
       "category": "DC Output",
       "description": "Outputs a DC voltage on the use channel.",
       "set": "APPLY DCV <volts>",
-      "parameters": [ { "name": "volts", "units": ["V"], "range": "approx -10.25 to +10.25 V" } ],
+      "parameters": [ { "name": "volts", "units": [{"unit": "V"}], "range": "approx -10.25 to +10.25 V" } ],
       "examples": ["APPLY DCV 1.5", "APPLY DCV 5"]
     },
     {
@@ -68,7 +68,7 @@
       "category": "DC Output",
       "description": "Outputs a DC current on the use channel.",
       "set": "APPLY DCI <amps>",
-      "parameters": [ { "name": "amps", "units": ["A"], "range": "-0.1 to +0.1 A" } ],
+      "parameters": [ { "name": "amps", "units": [{"unit": "A"}], "range": "-0.1 to +0.1 A" } ],
       "examples": ["APPLY DCI 0.05", "APPLY DCI -0.05"]
     },
     {
@@ -93,7 +93,7 @@
       "category": "AC Waveform",
       "description": "Outputs a sine wave voltage (peak-to-peak) on the use channel.",
       "set": "APPLY ACV <volts>",
-      "parameters": [ { "name": "volts", "units": ["Vpp"], "range": "0.03125 to 20 Vpp (open circuit)" } ],
+      "parameters": [ { "name": "volts", "units": [{"unit": "Vpp"}], "range": "0.03125 to 20 Vpp (open circuit)" } ],
       "examples": ["APPLY ACV 5", "APPLY ACV 1"]
     },
     {
@@ -102,7 +102,7 @@
       "category": "AC Waveform",
       "description": "Outputs a sine wave current (peak-to-peak) on the use channel.",
       "set": "APPLY ACI <amps>",
-      "parameters": [ { "name": "amps", "units": ["App"], "range": "0.00001 to 0.2 App" } ],
+      "parameters": [ { "name": "amps", "units": [{"unit": "App"}], "range": "0.00001 to 0.2 App" } ],
       "examples": ["APPLY ACI 0.05"]
     },
     {
@@ -111,7 +111,7 @@
       "category": "AC Waveform",
       "description": "Outputs a ramp wave voltage (peak-to-peak) on the use channel.",
       "set": "APPLY RPV <volts>",
-      "parameters": [ { "name": "volts", "units": ["Vpp"], "range": "0.03125 to 20 Vpp" } ],
+      "parameters": [ { "name": "volts", "units": [{"unit": "Vpp"}], "range": "0.03125 to 20 Vpp" } ],
       "examples": ["APPLY RPV 5"]
     },
     {
@@ -120,7 +120,7 @@
       "category": "AC Waveform",
       "description": "Outputs a ramp wave current (peak-to-peak) on the use channel.",
       "set": "APPLY RPI <amps>",
-      "parameters": [ { "name": "amps", "units": ["App"] } ],
+      "parameters": [ { "name": "amps", "units": [{"unit": "App"}] } ],
       "examples": ["APPLY RPI 0.05"]
     },
     {
@@ -129,7 +129,7 @@
       "category": "AC Waveform",
       "description": "Outputs a square wave voltage (peak-to-peak) on the use channel.",
       "set": "APPLY SQV <volts>",
-      "parameters": [ { "name": "volts", "units": ["Vpp"], "range": "0.03125 to 20 Vpp" } ],
+      "parameters": [ { "name": "volts", "units": [{"unit": "Vpp"}], "range": "0.03125 to 20 Vpp" } ],
       "examples": ["APPLY SQV 5"]
     },
     {
@@ -138,7 +138,7 @@
       "category": "AC Waveform",
       "description": "Outputs a square wave current (peak-to-peak) on the use channel.",
       "set": "APPLY SQI <amps>",
-      "parameters": [ { "name": "amps", "units": ["App"] } ],
+      "parameters": [ { "name": "amps", "units": [{"unit": "App"}] } ],
       "examples": ["APPLY SQI 0.05"]
     },
     {
@@ -147,7 +147,7 @@
       "category": "Arbitrary Waveform",
       "description": "Outputs an arbitrary (user-defined or precomputed) voltage waveform from an array.",
       "set": "APPLY WFV <pp_amplitude> [,<array>]",
-      "parameters": [ { "name": "pp_amplitude", "units": ["Vpp"], "range": "0.03125 to 20 Vpp" } ],
+      "parameters": [ { "name": "pp_amplitude", "units": [{"unit": "Vpp"}], "range": "0.03125 to 20 Vpp" } ],
       "examples": ["APPLY WFV 5,A"]
     },
     {
@@ -156,7 +156,7 @@
       "category": "Arbitrary Waveform",
       "description": "Outputs an arbitrary (user-defined or precomputed) current waveform from an array.",
       "set": "APPLY WFI <pp_amplitude> [,<array>]",
-      "parameters": [ { "name": "pp_amplitude", "units": ["App"] } ],
+      "parameters": [ { "name": "pp_amplitude", "units": [{"unit": "App"}] } ],
       "examples": ["APPLY WFI 0.05,A"]
     },
     {
@@ -182,7 +182,7 @@
       "description": "Sets or queries the waveform frequency. For dual-frequency triggered mode two values may be given (FREQ f1,f2).",
       "set": "FREQ <freq1> [,<freq2>]",
       "query": "FREQ?",
-      "parameters": [ { "name": "freq1", "units": ["Hz"], "range": "0 to 1 MHz" } ],
+      "parameters": [ { "name": "freq1", "units": [{"unit": "Hz"}], "range": "0 to 1 MHz" } ],
       "examples": ["FREQ 1000", "FREQ 5E3", "FREQ 50,500", "FREQ?"]
     },
     {
@@ -192,7 +192,7 @@
       "description": "Sets or queries the DC offset voltage applied to an AC/arbitrary waveform. Limited to about 50% of the selected range.",
       "set": "DCOFF <volts>",
       "query": "DCOFF?",
-      "parameters": [ { "name": "volts", "units": ["V"], "range": "+/- 50% of range" } ],
+      "parameters": [ { "name": "volts", "units": [{"unit": "V"}], "range": "+/- 50% of range" } ],
       "examples": ["DCOFF 1", "DCOFF?"]
     },
     {
@@ -202,7 +202,7 @@
       "description": "Sets or queries the duty cycle (percentage) of square/ramp waveforms.",
       "set": "DUTY <percent>",
       "query": "DUTY?",
-      "parameters": [ { "name": "percent", "units": ["%"], "range": "5 to 95" } ],
+      "parameters": [ { "name": "percent", "units": [{"unit": "%"}], "range": "5 to 95" } ],
       "examples": ["DUTY 30", "DUTY?"]
     },
     {
@@ -212,7 +212,7 @@
       "description": "Sets or queries the phase angle of the waveform in degrees.",
       "set": "PANG <degrees>",
       "query": "PANG?",
-      "parameters": [ { "name": "degrees", "units": ["degrees"], "range": "0 to 360" } ],
+      "parameters": [ { "name": "degrees", "units": [{"unit": "deg"}], "range": "0 to 360" } ],
       "examples": ["PANG 180", "PANG 0", "PANG?"]
     },
     {
@@ -242,7 +242,7 @@
       "description": "Sets or queries the output impedance (0 ohm or 50 ohm). Power-on is 0 ohm.",
       "set": "IMP <mode>",
       "query": "IMP?",
-      "parameters": [ { "name": "mode", "units": ["ohm"], "range": "0, 50" } ],
+      "parameters": [ { "name": "mode", "units": [{"unit": "Ohm"}], "range": "0, 50" } ],
       "examples": ["IMP 50", "IMP 0", "IMP?"]
     },
     {
@@ -282,7 +282,7 @@
       "description": "Sets or queries the output settling delay time. Power-on default 0.04 seconds.",
       "set": "DELAY [<time>]",
       "query": "DELAY?",
-      "parameters": [ { "name": "time", "units": ["s"], "range": "default 0.04 s" } ],
+      "parameters": [ { "name": "time", "units": [{"unit": "s"}], "range": "default 0.04 s" } ],
       "examples": ["DELAY 0.1", "DELAY?"]
     },
     {
@@ -869,7 +869,7 @@
       "category": "I/O",
       "description": "Pauses command execution for the specified time in seconds.",
       "set": "WAIT <time>",
-      "parameters": [ { "name": "time", "units": ["s"] } ],
+      "parameters": [ { "name": "time", "units": [{"unit": "s"}] } ],
       "examples": ["WAIT 2", "WAIT 3.5E-3"]
     },
     {

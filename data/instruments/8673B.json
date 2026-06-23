@@ -19,7 +19,7 @@
       "set": "FR<value><units>",
       "query": "FROA",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz (1.95 to 26.5 GHz overrange)" }
+        { "name": "frequency", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "2.0 to 26.0 GHz (1.95 to 26.5 GHz overrange)" }
       ],
       "examples": ["FR16.232334GZ", "FR16232.334MZ"]
     },
@@ -30,7 +30,7 @@
       "description": "Set the frequency increment (step) used by UP/DN tuning (preferred code FI; FN or Fl also accepted). Followed by numeric value and units terminator.",
       "set": "FI<value><units>",
       "parameters": [
-        { "name": "increment", "units": ["GZ", "MZ", "KZ", "HZ"] }
+        { "name": "increment", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}] }
       ],
       "examples": ["FI1.5MZ", "FI1500KZ"]
     },
@@ -73,7 +73,7 @@
       "description": "Set frequency offset for downconverter/harmonic-mixing applications (preferred code FT; FO also accepted). Positive offset needs no sign. Entering an offset of zero deactivates offset mode. The offset is not multiplied by the display multiplier.",
       "set": "FT<value><units>",
       "parameters": [
-        { "name": "offset", "units": ["GZ", "MZ", "KZ", "HZ"] }
+        { "name": "offset", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}] }
       ],
       "examples": ["FT63.238MZ", "FT-63238KZ"]
     },
@@ -96,7 +96,7 @@
       "set": "LE<value>DM",
       "query": "LEOA",
       "parameters": [
-        { "name": "level", "units": ["DB", "DM"], "range": "approx -100 to +13 dBm" }
+        { "name": "level", "units": [{"token": "DB", "unit": "dB"}, {"token": "DM", "unit": "dBm"}], "range": "approx -100 to +13 dBm" }
       ],
       "examples": ["LE-56DM", "LE-6DM"]
     },
@@ -107,7 +107,7 @@
       "description": "Set output level RANGE (step attenuator), in 10 dB steps from +10 to -90 dB. The 0 to -90 dB ranges directly control a 90 dB step attenuator. Used with the VERNIER to set output level separately from the direct LE code.",
       "set": "RA<value>DB",
       "parameters": [
-        { "name": "range", "units": ["DB", "DM"], "range": "+10 to -90 dB in 10 dB steps" }
+        { "name": "range", "units": [{"token": "DB", "unit": "dB"}, {"token": "DM", "unit": "dBm"}], "range": "+10 to -90 dB in 10 dB steps" }
       ],
       "examples": ["RA-50DB", "RA-50DBVE-6DM"]
     },
@@ -118,7 +118,7 @@
       "description": "Set the VERNIER (ALC) level setting. Continuously variable -10 to +3 dBm (ALC controls -10 to +13 dBm); remote DAC resolution is 0.1 dB. Used together with RANGE (RA) to set output level.",
       "set": "VE<value>DM",
       "parameters": [
-        { "name": "vernier", "units": ["DB", "DM"], "range": "-10 to +3 dBm continuously variable" }
+        { "name": "vernier", "units": [{"token": "DB", "unit": "dB"}, {"token": "DM", "unit": "dBm"}], "range": "-10 to +3 dBm continuously variable" }
       ],
       "examples": ["VE-6DM", "RA-50DBVE-6DM"]
     },
@@ -193,7 +193,7 @@
       "description": "Select the FM peak-deviation range. D2=0.03 MHz, D3=0.1 MHz, D4=0.3 MHz, D5=1 MHz, D6=3 MHz, D7=10 MHz. Actual deviation is set by the amplitude of the external modulating signal at the FM IN connector.",
       "set": "D<n>",
       "parameters": [
-        { "name": "range", "units": ["MHz"], "range": "D2=0.03, D3=0.1, D4=0.3, D5=1, D6=3, D7=10 MHz" }
+        { "name": "range", "units": [{"unit": "MHz"}], "range": "D2=0.03, D3=0.1, D4=0.3, D5=1, D6=3, D7=10 MHz" }
       ],
       "examples": ["D3", "D7"]
     },
@@ -301,7 +301,7 @@
       "set": "CF<value><units>",
       "query": "CFOA",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+        { "name": "frequency", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "2.0 to 26.0 GHz" }
       ],
       "examples": ["CF16.232334GZ", "CF16232.334MZ"]
     },
@@ -313,7 +313,7 @@
       "set": "DF<value><units>",
       "query": "DFOA",
       "parameters": [
-        { "name": "span", "units": ["GZ", "MZ", "KZ", "HZ"] }
+        { "name": "span", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}] }
       ],
       "examples": ["DF4.5GZ", "DF4500MZ"]
     },
@@ -324,7 +324,7 @@
       "description": "Set the sweep start frequency. Followed by numeric value and units terminator.",
       "set": "FA<value><units>",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+        { "name": "frequency", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "2.0 to 26.0 GHz" }
       ],
       "examples": ["FA16.232334GZ", "FA16232.334MZ"]
     },
@@ -335,7 +335,7 @@
       "description": "Set the sweep stop frequency. Followed by numeric value and units terminator. Setting stop lower than start produces a negative (down) sweep span.",
       "set": "FB<value><units>",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+        { "name": "frequency", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "2.0 to 26.0 GHz" }
       ],
       "examples": ["FB16.232334GZ", "FB16232.334MZ"]
     },
@@ -347,7 +347,7 @@
       "set": "SP<value><units>",
       "query": "SPOA",
       "parameters": [
-        { "name": "value", "units": ["SS", "GZ", "MZ", "KZ", "HZ"], "range": "number of steps 1 to 9999, or step size in frequency units" }
+        { "name": "value", "units": ["SS", {"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "number of steps 1 to 9999, or step size in frequency units" }
       ],
       "examples": ["SP350SS", "SP455KZ"]
     },
@@ -359,7 +359,7 @@
       "set": "DW<value>MS",
       "query": "DWOA",
       "parameters": [
-        { "name": "dwell", "units": ["MS"], "range": "1 to 255 ms per step" }
+        { "name": "dwell", "units": [{"token": "MS", "unit": "ms"}], "range": "1 to 255 ms per step" }
       ],
       "examples": ["DW20MS"]
     },
@@ -397,7 +397,7 @@
       "description": "Set a sweep marker frequency: marker identifier (M1-M5 or X1-X5) followed by the frequency value and units terminator (GZ/MZ/KZ/HZ).",
       "set": "M<n><value><units>",
       "parameters": [
-        { "name": "frequency", "units": ["GZ", "MZ", "KZ", "HZ"], "range": "2.0 to 26.0 GHz" }
+        { "name": "frequency", "units": [{"token": "GZ", "unit": "GHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "2.0 to 26.0 GHz" }
       ],
       "examples": ["M312.34GZ", "M312340MZ"]
     },

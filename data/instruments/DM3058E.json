@@ -432,7 +432,7 @@
         {
           "name": "range",
           "units": [
-            "dBm"
+            {"unit": "dBm"}
           ],
           "range": "-120 dBm to +120 dBm; MIN=-120, MAX=+120, DEF=0"
         }
@@ -481,7 +481,7 @@
         {
           "name": "range",
           "units": [
-            "Ohm"
+            {"unit": "Ohm"}
           ],
           "range": "2 to 8000 Ohm; MIN=2, MAX=8000, DEF=600"
         }
@@ -1351,7 +1351,7 @@
         {
           "name": "range",
           "units": [
-            "Ohm"
+            {"unit": "Ohm"}
           ],
           "range": "1 to 2000 Ohm; DEF=10"
         }
@@ -1706,7 +1706,7 @@
         {
           "name": "value",
           "units": [
-            "ms"
+            {"unit": "ms"}
           ],
           "range": "rate-dependent, up to 2000 ms"
         }
@@ -1828,7 +1828,7 @@
         {
           "name": "value",
           "units": [
-            "ms"
+            {"unit": "ms"}
           ],
           "range": "rate-dependent: S 1-399, M 1-49, F 1-7; DEF=100"
         }

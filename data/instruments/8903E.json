@@ -41,8 +41,8 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" }
           ],
           "range": "20 Hz to 100 kHz"
         }
@@ -63,9 +63,9 @@
         {
           "name": "amplitude",
           "units": [
-            "VL",
-            "MV",
-            "DV"
+            { "token": "VL", "unit": "V" },
+            { "token": "MV", "unit": "mV" },
+            { "token": "DV", "unit": "dBm" }
           ],
           "range": "0.6 mV to 6 V"
         }
@@ -87,9 +87,9 @@
         {
           "name": "increment",
           "units": [
-            "VL",
-            "MV",
-            "DV"
+            { "token": "VL", "unit": "V" },
+            { "token": "MV", "unit": "mV" },
+            { "token": "DV", "unit": "dBm" }
           ]
         }
       ],
@@ -109,8 +109,8 @@
         {
           "name": "increment",
           "units": [
-            "HZ",
-            "KZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" }
           ]
         }
       ],
@@ -431,8 +431,8 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" }
           ],
           "range": "20 Hz to 100 kHz"
         }
@@ -453,8 +453,8 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" }
           ],
           "range": "20 Hz to 100 kHz"
         }
@@ -477,10 +477,10 @@
           "units": [
             "UL",
             "LL",
-            "DB",
-            "VL",
-            "MV",
-            "DV"
+            { "token": "DB", "unit": "dB" },
+            { "token": "VL", "unit": "V" },
+            { "token": "MV", "unit": "mV" },
+            { "token": "DV", "unit": "dBm" }
           ],
           "range": "depends on selected measurement units"
         }
@@ -889,7 +889,7 @@
         {
           "name": "load",
           "units": [
-            "ohm"
+            {"unit": "Ohm"}
           ],
           "range": "19.0 (8 ohm) or 19.NNN for NNN-ohm load"
         }

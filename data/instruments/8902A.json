@@ -467,7 +467,7 @@
         {
           "name": "calFactor",
           "units": [
-            "%"
+            { "token": "CF", "unit": "%" }
           ],
           "range": "percent value"
         }
@@ -528,7 +528,7 @@
         {
           "name": "frequency",
           "units": [
-            "Hz"
+            { "token": "HZ", "unit": "Hz" }
           ],
           "range": "signed mantissa up to 8 digits with optional exponent"
         }
@@ -547,7 +547,7 @@
         {
           "name": "frequency",
           "units": [
-            "MHz"
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "signed mantissa up to 8 digits with optional exponent"
         }
@@ -1239,7 +1239,7 @@
         {
           "name": "delay",
           "units": [
-            "ms"
+            {"unit": "ms"}
           ],
           "range": "0-99"
         }

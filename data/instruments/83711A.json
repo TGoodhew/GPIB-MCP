@@ -30,7 +30,7 @@
         {
           "name": "freq",
           "units": [
-            "Hz"
+            { "token": "Hz", "unit": "Hz" }
           ],
           "range": "0.01 GHz to 20 GHz (83712A/12B); 1.0 GHz to 20 GHz (83711A/11B). Resolution 1 kHz (1 Hz with Option 1E8)."
         }
@@ -69,7 +69,7 @@
         {
           "name": "level",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ],
           "range": "-15 dBm to +30 dBm standard; -120 dBm to +30 dBm with Option 1E1 (-100 dBm to +30 dBm on 83711A/12A)"
         }
@@ -125,7 +125,7 @@
         {
           "name": "pmeter",
           "units": [
-            "dBm"
+            { "token": "dBm", "unit": "dBm" }
           ],
           "range": "External meter reading: -15 dBm to +30 dBm standard; -100 dBm to +30 dBm with Option 1E1 (preset 0 dBm)"
         }

@@ -261,7 +261,7 @@
         {
           "name": "offset",
           "units": [
-            "dB"
+            {"unit": "dB"}
           ],
           "range": "-99.99 to +99.99 (0.01 dB increments)"
         }
@@ -293,7 +293,7 @@
         {
           "name": "lowLimit",
           "units": [
-            "dBm"
+            {"unit": "dBm"}
           ],
           "range": "signed value sxxx.xxx"
         }
@@ -314,7 +314,7 @@
         {
           "name": "highLimit",
           "units": [
-            "dBm"
+            {"unit": "dBm"}
           ],
           "range": "signed value sxxx.xxx"
         }

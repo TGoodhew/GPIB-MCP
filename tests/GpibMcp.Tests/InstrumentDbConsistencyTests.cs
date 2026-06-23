@@ -74,6 +74,34 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void NoBareUnitString_LooksLikeAKnownUnit()
+        {
+            // Every unit-looking entry must be explicitly classified: tokenful {"token","unit"} when a
+            // suffix goes on the wire, or tokenless {"unit"} when the box takes a bare number. A LEFTOVER
+            // bare string that normalises to a canonical unit (e.g. "V", "Hz", "Vpp") is an un-recorded
+            // gap - it cannot be told apart from "not yet audited". Genuine non-units (div, digits, code,
+            // "dBm or W") stay bare freely because they are not canonical units. This guard blocks NEW
+            // gaps once the floor has been classified (#46 Phase 0b).
+            var offenders = new List<string>();
+            foreach (var (file, json) in AllDefinitions())
+            {
+                var def = json.ToObject<InstrumentDefinition>();
+                foreach (var cmd in def.Commands ?? Enumerable.Empty<InstrumentCommand>())
+                    foreach (var p in cmd.Parameters ?? Enumerable.Empty<CommandParameter>())
+                        foreach (var t in p.Units ?? Enumerable.Empty<UnitToken>())
+                        {
+                            if (t.IsAudited) continue;                       // classified (tokenful or tokenless)
+                            if (UnitResolver.Canonical(t.Token) != null)     // bare string IS a known unit -> gap
+                                offenders.Add(file + ": " + cmd.Mnemonic + "/" + p.Name + " bare unit '" + t.Token +
+                                    "' must be classified as {\"token\",\"unit\"} or tokenless {\"unit\"}");
+                        }
+            }
+            Assert.True(offenders.Count == 0,
+                "Bare unit strings that look like known units must be explicitly classified (#46):\n  " +
+                string.Join("\n  ", offenders));
+        }
+
+        [Fact]
         public void NoTwoFiles_ClaimTheSameModelOrAlias()
         {
             // Maps each lower-cased model/alias to the file(s) that claim it. Any name claimed by more

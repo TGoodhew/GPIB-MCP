@@ -18,7 +18,7 @@
       "description": "Carrier (RF output) frequency function entry. Follow with a numeric value and a frequency unit code (HZ, KZ, MZ or GZ). Range 100 kHz to 2560 MHz (settable down to 1 kHz, unspecified). Resolution 0.1 Hz below 640 MHz, 0.2 Hz to 1280 MHz, 0.4 Hz above. Also serves as the center frequency for Span sweep. Default after System Clear: 100.0 MHz.",
       "set": "FR <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "100 kHz to 2560 MHz" }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}], "range": "100 kHz to 2560 MHz" }
       ],
       "examples": ["FR 250 MZ", "FR 1,200,000 HZ"]
     },
@@ -29,7 +29,7 @@
       "description": "RF output amplitude function entry. Follow with a numeric value (leading sign allowed under HP-IB only, e.g. +13 DM) and an amplitude unit code; otherwise the sign must be carried in the unit code (+D or -D). Range +16 to -129.9 dBm (999 mV to 0.072 uV), 0.1 dB resolution.",
       "set": "AP <value> <unit>",
       "parameters": [
-        { "name": "amplitude", "units": ["DM", "DB", "+D", "-D", "MV", "UV"], "range": "+16 to -129.9 dBm (DM=dBm w/sign on data, +D=+dBm, -D=-dBm, DB=dB, MV=mV, UV=uV)" }
+        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DB", "unit": "dB"}, {"token": "+D", "unit": "dBm"}, {"token": "-D", "unit": "dBm"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+16 to -129.9 dBm (DM=dBm w/sign on data, +D=+dBm, -D=-dBm, DB=dB, MV=mV, UV=uV)" }
       ],
       "examples": ["AP 12.7 -D", "AP -12.7 DM"]
     },
@@ -48,7 +48,7 @@
       "description": "Amplitude modulation depth function entry. Follow with a numeric value and the percent unit code (PC). Depth 0 to 95 %, 0.1 % resolution. Select the modulation source with M1/M2/M3/M4 and the rate with MOD FREQ (MF). To turn AM off select AM then FCTN OFF (FO).",
       "set": "AM <value> PC",
       "parameters": [
-        { "name": "depth", "units": ["PC"], "range": "0 to 95 %" }
+        { "name": "depth", "units": [{"token": "PC", "unit": "%"}], "range": "0 to 95 %" }
       ],
       "examples": ["AM 45 PC"]
     },
@@ -59,7 +59,7 @@
       "description": "Frequency modulation peak deviation function entry. Follow with a numeric value and the kHz unit code (KZ is the only valid unit). Maximum peak deviation depends on carrier band (e.g. up to 100 kHz below 120 MHz, up to 400 kHz from 1280 MHz). Select source with M1/M2/M3/M4 and rate with MOD FREQ (MF). Default after System Clear: 20.0 kHz. Turn FM off with AM/FM/PM then FCTN OFF (FO).",
       "set": "FM <value> KZ",
       "parameters": [
-        { "name": "deviation", "units": ["KZ"], "range": "carrier-band dependent (e.g. <=100 kHz below 120 MHz, <=400 kHz above 1280 MHz)" }
+        { "name": "deviation", "units": [{"token": "KZ", "unit": "kHz"}], "range": "carrier-band dependent (e.g. <=100 kHz below 120 MHz, <=400 kHz above 1280 MHz)" }
       ],
       "examples": ["FM 25 KZ"]
     },
@@ -70,7 +70,7 @@
       "description": "Phase modulation (front-panel label phi-M) peak deviation function entry. Follow with a numeric value and the deg unit code (DG is the only valid unit). Maximum peak deviation depends on carrier band (e.g. 100 deg below 120 MHz, up to 400 deg from 1280 MHz), 1-4 deg resolution. Select source with M1/M2/M3/M4 and rate with MOD FREQ (MF). Default after System Clear: 20 deg. Phase modulation requires Option 002.",
       "set": "PM <value> DG",
       "parameters": [
-        { "name": "deviation", "units": ["DG"], "range": "carrier-band dependent (100 to 400 degrees peak)" }
+        { "name": "deviation", "units": [{"token": "DG", "unit": "deg"}], "range": "carrier-band dependent (100 to 400 degrees peak)" }
       ],
       "examples": ["PM 25 DG"]
     },
@@ -97,7 +97,7 @@
       "description": "Internal/external modulation rate (MOD FREQ) function entry. Follow with a numeric value and a unit code (HZ or KZ). Variable rate 10 Hz to 99.9 kHz; resolution varies with rate. Default after System Clear: 1 kHz.",
       "set": "MF <value> <unit>",
       "parameters": [
-        { "name": "rate", "units": ["HZ", "KZ"], "range": "10 Hz to 99.9 kHz" }
+        { "name": "rate", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}], "range": "10 Hz to 99.9 kHz" }
       ],
       "examples": ["MF 4 KZ", "MF 10 KZ"]
     },
@@ -156,7 +156,7 @@
       "description": "RF sweep Start frequency function entry (START FREQ). Follow with a numeric value and a unit code. Sweep width 100 kHz to 2560 MHz.",
       "set": "FA <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "100 kHz to 2560 MHz" }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}], "range": "100 kHz to 2560 MHz" }
       ],
       "examples": ["FA 600 MZ", "FA 200 KZ"]
     },
@@ -167,7 +167,7 @@
       "description": "RF sweep Stop frequency function entry (STOP FREQ). Follow with a numeric value and a unit code. Sweep width 100 kHz to 2560 MHz.",
       "set": "FB <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "100 kHz to 2560 MHz" }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}], "range": "100 kHz to 2560 MHz" }
       ],
       "examples": ["FB 800 MZ", "FB 300 MZ"]
     },
@@ -178,7 +178,7 @@
       "description": "RF sweep Span frequency function entry (SPAN FREQ); total peak-to-peak deviation about the center frequency set with FR. Follow with a numeric value and a unit code. Span width 0.2 Hz to 2560 MHz (depends on center frequency).",
       "set": "FS <value> <unit>",
       "parameters": [
-        { "name": "span", "units": ["HZ", "KZ", "MZ", "GZ"], "range": "0.2 Hz to 2560 MHz" }
+        { "name": "span", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}], "range": "0.2 Hz to 2560 MHz" }
       ],
       "examples": ["FS 100 MZ"]
     },
@@ -189,7 +189,7 @@
       "description": "Set a constant sweep step size of your choice (SET SIZE). Follow with a numeric value and a unit code. Resolution 0.1 Hz below 640 MHz, 0.2 Hz to 1280 MHz, 0.4 Hz above.",
       "set": "N3 <value> <unit>",
       "parameters": [
-        { "name": "step_size", "units": ["HZ", "KZ", "MZ", "GZ"] }
+        { "name": "step_size", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}] }
       ],
       "examples": ["N3 100 KZ"]
     },
@@ -304,7 +304,7 @@
       "description": "Marker 1. As a frequency entry follow with a value and unit; as an increment/copy target use the X1 code alone.",
       "set": "X1 <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}] }
       ],
       "examples": ["X1 500 MZ", "X1"]
     },
@@ -315,7 +315,7 @@
       "description": "Marker 2 (frequency entry or selection).",
       "set": "X2 <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}] }
       ],
       "examples": ["X2"]
     },
@@ -326,7 +326,7 @@
       "description": "Marker 3 (frequency entry or selection).",
       "set": "X3 <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}] }
       ],
       "examples": ["X3"]
     },
@@ -337,7 +337,7 @@
       "description": "Marker 4 (frequency entry or selection).",
       "set": "X4 <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}] }
       ],
       "examples": ["X4"]
     },
@@ -348,7 +348,7 @@
       "description": "Marker 5 (frequency entry or selection).",
       "set": "X5 <value> <unit>",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KZ", "MZ", "GZ"] }
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}, {"token": "GZ", "unit": "GHz"}] }
       ],
       "examples": ["X5"]
     },

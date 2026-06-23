@@ -83,7 +83,7 @@
       "category": "System",
       "description": "Suspends all spectrum analyzer operation for the specified time duration.",
       "set": "WAIT <number>",
-      "parameters": [ { "name": "time", "units": ["S", "MS"] } ],
+      "parameters": [ { "name": "time", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }] } ],
       "examples": ["WAIT 1S"]
     },
     {
@@ -127,7 +127,7 @@
       "set": "CF <number><unit>",
       "query": "CF?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "frequency range of the spectrum analyzer (to 1.8 GHz)" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "frequency range of the spectrum analyzer (to 1.8 GHz)" }
       ],
       "examples": ["CF 300MHZ", "CF?"]
     },
@@ -139,7 +139,7 @@
       "set": "SP <number><unit>",
       "query": "SP?",
       "parameters": [
-        { "name": "span", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0 Hz (zero span) to full span" }
+        { "name": "span", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "0 Hz (zero span) to full span" }
       ],
       "examples": ["SP 20MHZ", "SP 0HZ", "SP?"]
     },
@@ -150,7 +150,7 @@
       "description": "Specifies the start (left edge) frequency.",
       "set": "FA <number><unit>",
       "query": "FA?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["FA 100MHZ", "FA?"]
     },
     {
@@ -160,7 +160,7 @@
       "description": "Specifies the stop (right edge) frequency.",
       "set": "FB <number><unit>",
       "query": "FB?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["FB 500MHZ", "FB?"]
     },
     {
@@ -186,7 +186,7 @@
       "description": "Specifies the center-frequency step size used by the UP/DN step keys. Accepts AUTO to couple to span.",
       "set": "SS <number><unit>",
       "query": "SS?",
-      "parameters": [ { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "step", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["SS 1MHZ", "SS AUTO", "SS?"]
     },
     {
@@ -196,7 +196,7 @@
       "description": "Specifies the frequency offset for all absolute frequency readouts such as center frequency.",
       "set": "FOFFSET <number><unit>",
       "query": "FOFFSET?",
-      "parameters": [ { "name": "offset", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "offset", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["FOFFSET 10MHZ", "FOFFSET?"]
     },
     {
@@ -240,7 +240,7 @@
       "description": "Specifies the amplitude value of the reference level. Default unit is the current amplitude unit. Preset 0 dBm.",
       "set": "RL <number><unit>",
       "query": "RL?",
-      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "DB", "V", "MV", "UV", "W", "MW", "UW"], "range": "amplitude range of the spectrum analyzer" } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "DB", "unit": "dB" }, { "token": "V", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "UV", "unit": "uV" }, { "token": "W", "unit": "W" }, { "token": "MW", "unit": "mW" }, { "token": "UW", "unit": "uW" }], "range": "amplitude range of the spectrum analyzer" } ],
       "examples": ["RL -10DBM", "RL?"]
     },
     {
@@ -258,7 +258,7 @@
       "description": "Offsets all amplitude readouts without affecting the trace.",
       "set": "ROFFSET <number>DB",
       "query": "ROFFSET?",
-      "parameters": [ { "name": "offset", "units": ["DB"] } ],
+      "parameters": [ { "name": "offset", "units": [{ "token": "DB", "unit": "dB" }] } ],
       "examples": ["ROFFSET 10DB", "ROFFSET?"]
     },
     {
@@ -286,7 +286,7 @@
       "description": "Specifies the RF input attenuation in 10 dB steps. Default unit dB. Accepts AUTO/UP/DN. Preset 10 dB.",
       "set": "AT <number>DB",
       "query": "AT?",
-      "parameters": [ { "name": "attenuation", "units": ["DB"], "range": "input attenuator range of the spectrum analyzer (0 to 70 dB)" } ],
+      "parameters": [ { "name": "attenuation", "units": [{ "token": "DB", "unit": "dB" }], "range": "input attenuator range of the spectrum analyzer (0 to 70 dB)" } ],
       "examples": ["AT 40DB", "AT AUTO", "AT?"]
     },
     {
@@ -306,7 +306,7 @@
       "description": "Specifies the vertical graticule divisions as logarithmic units (dB/division), without changing the reference level.",
       "set": "LG <number>DB",
       "query": "LG?",
-      "parameters": [ { "name": "scale", "units": ["DB"], "range": "dB per division" } ],
+      "parameters": [ { "name": "scale", "units": [{ "token": "DB", "unit": "dB" }], "range": "dB per division" } ],
       "examples": ["LG 10DB", "LG?"]
     },
     {
@@ -324,7 +324,7 @@
       "description": "Specifies the maximum signal level applied to the input mixer for a signal equal to or below the reference level.",
       "set": "ML <number>DB",
       "query": "ML?",
-      "parameters": [ { "name": "level", "units": ["DB", "DBM"] } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DB", "unit": "dB" }, { "token": "DBM", "unit": "dBm" }] } ],
       "examples": ["ML -10DB", "ML?"]
     },
     {
@@ -353,7 +353,7 @@
       "description": "Subtracts a positive or negative preamplifier gain value from the displayed signal.",
       "set": "PREAMPG <number>DB",
       "query": "PREAMPG?",
-      "parameters": [ { "name": "gain", "units": ["DB"] } ],
+      "parameters": [ { "name": "gain", "units": [{ "token": "DB", "unit": "dB" }] } ],
       "examples": ["PREAMPG 20DB", "PREAMPG?"]
     },
     {
@@ -372,7 +372,7 @@
       "description": "Specifies the resolution bandwidth. Default unit Hz. Accepts AUTO to couple to span. Preset 3 MHz. Range 1 kHz to 3 MHz (30 Hz to 3 MHz with Option 130).",
       "set": "RB <number><unit>",
       "query": "RB?",
-      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"], "range": "1 kHz to 3 MHz (30 Hz to 3 MHz with Option 130)" } ],
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "1 kHz to 3 MHz (30 Hz to 3 MHz with Option 130)" } ],
       "examples": ["RB 1KHZ", "RB AUTO", "RB?"]
     },
     {
@@ -382,7 +382,7 @@
       "description": "Specifies the video bandwidth. Accepts AUTO to couple to resolution bandwidth.",
       "set": "VB <number><unit>",
       "query": "VB?",
-      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["VB 10KHZ", "VB AUTO", "VB?"]
     },
     {
@@ -421,7 +421,7 @@
       "description": "Specifies the time in which the spectrum analyzer sweeps the displayed frequency range. Accepts AUTO to couple to span.",
       "set": "ST <number><unit>",
       "query": "ST?",
-      "parameters": [ { "name": "time", "units": ["S", "MS", "US"] } ],
+      "parameters": [ { "name": "time", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }] } ],
       "examples": ["ST 100MS", "ST AUTO", "ST?"]
     },
     {
@@ -748,7 +748,7 @@
       "description": "Activates and moves the marker to the specified frequency.",
       "set": "MKN <number><unit>",
       "query": "MKN?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["MKN 300MHZ", "MKN?"]
     },
     {
@@ -758,7 +758,7 @@
       "description": "Specifies the frequency value of the active marker.",
       "set": "MKF <number><unit>",
       "query": "MKF?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["MKF?"]
     },
     {
@@ -888,7 +888,7 @@
       "description": "Specifies the minimum signal excursion for the internal peak-identification routine.",
       "set": "MKPX <number>DB",
       "query": "MKPX?",
-      "parameters": [ { "name": "excursion", "units": ["DB"] } ],
+      "parameters": [ { "name": "excursion", "units": [{ "token": "DB", "unit": "dB" }] } ],
       "examples": ["MKPX 6DB", "MKPX?"]
     },
     {
@@ -898,7 +898,7 @@
       "description": "Returns the bandwidth at the specified power level relative to an on-screen marker or the signal peak.",
       "set": "MKBW <number>DB",
       "query": "MKBW?",
-      "parameters": [ { "name": "level", "units": ["DB"] } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DB", "unit": "dB" }] } ],
       "examples": ["MKBW -3DB", "MKBW?"]
     },
     {
@@ -958,7 +958,7 @@
       "description": "Sets the resolution of the marker frequency counter. Accepts AUTO.",
       "set": "MKFCR <number><unit>",
       "query": "MKFCR?",
-      "parameters": [ { "name": "resolution", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "resolution", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["MKFCR 1KHZ", "MKFCR AUTO", "MKFCR?"]
     },
     {
@@ -993,7 +993,7 @@
       "description": "Defines the level of the display line in the active amplitude units and displays the display line on the screen. Accepts ON/OFF.",
       "set": "DL <number><unit>",
       "query": "DL?",
-      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "V"] } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }] } ],
       "examples": ["DL -50DBM", "DL OFF", "DL?"]
     },
     {
@@ -1003,7 +1003,7 @@
       "description": "Clips signal responses below the threshold level. Accepts ON/OFF.",
       "set": "TH <number><unit>",
       "query": "TH?",
-      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "V"] } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }] } ],
       "examples": ["TH -90DBM", "TH OFF", "TH?"]
     },
     {
@@ -1435,7 +1435,7 @@
       "description": "Specifies the channel bandwidth used for the ACP, ACPE, and CHP measurements.",
       "set": "ACPBW <number><unit>",
       "query": "ACPBW?",
-      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["ACPBW 30KHZ", "ACPBW?"]
     },
     {
@@ -1445,7 +1445,7 @@
       "description": "Specifies the frequency spacing between channels.",
       "set": "ACPSP <number><unit>",
       "query": "ACPSP?",
-      "parameters": [ { "name": "spacing", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "spacing", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["ACPSP 30KHZ", "ACPSP?"]
     },
     {
@@ -1521,7 +1521,7 @@
       "description": "Specifies the distance (in dB) from the signal peak for the N dB points measurement.",
       "set": "NDB <number>DB",
       "query": "NDB?",
-      "parameters": [ { "name": "distance", "units": ["DB"] } ],
+      "parameters": [ { "name": "distance", "units": [{ "token": "DB", "unit": "dB" }] } ],
       "examples": ["NDB -3DB", "NDB?"]
     },
     {
@@ -1581,7 +1581,7 @@
       "description": "Sets the total FM frequency deviation for full screen demodulation.",
       "set": "FMGAIN <number><unit>",
       "query": "FMGAIN?",
-      "parameters": [ { "name": "deviation", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "deviation", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["FMGAIN 100KHZ", "FMGAIN?"]
     },
     {

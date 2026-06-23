@@ -142,7 +142,7 @@
         {
           "name": "value",
           "units": [
-            "degrees"
+            {"unit": "deg"}
           ]
         }
       ],
@@ -354,7 +354,7 @@
         {
           "name": "impedance",
           "units": [
-            "ohms"
+            {"unit": "Ohm"}
           ],
           "range": "50 | 75"
         }
@@ -405,7 +405,7 @@
         {
           "name": "timeout",
           "units": [
-            "seconds"
+            {"unit": "s"}
           ],
           "range": "0 to 30 (default 30)"
         }

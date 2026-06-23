@@ -102,7 +102,7 @@
       "set": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision <power>",
       "query": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision?",
       "parameters": [
-        { "name": "power", "units": ["DB"], "range": "scale per division" }
+        { "name": "power", "units": [{ "token": "DB", "unit": "dB" }], "range": "scale per division" }
       ],
       "examples": ["DISPlay:SPECtrum:WINDow:TRACe:Y:PDIVision 10DB", "DISPlay:SPECtrum:WINDow:TRACe:Y:PDIVision?"]
     },
@@ -114,7 +114,7 @@
       "set": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel <power>",
       "query": "DISPlay:SPECtrum[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel?",
       "parameters": [
-        { "name": "power", "units": ["DBM"], "range": "reference level" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }], "range": "reference level" }
       ],
       "examples": ["DISPlay:SPECtrum:WINDow:TRACe:Y:RLEVel -10DBM", "DISPlay:SPECtrum:WINDow:TRACe:Y:RLEVel?"]
     },
@@ -126,7 +126,7 @@
       "set": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision <power>",
       "query": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:PDIVision?",
       "parameters": [
-        { "name": "power", "units": ["DB"], "range": "scale per division" }
+        { "name": "power", "units": [{ "token": "DB", "unit": "dB" }], "range": "scale per division" }
       ],
       "examples": ["DISPlay:WAVeform:WINDow:TRACe:Y:PDIVision 10DB", "DISPlay:WAVeform:WINDow:TRACe:Y:PDIVision?"]
     },
@@ -138,7 +138,7 @@
       "set": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel <power>",
       "query": "DISPlay:WAVeform[n]:WINDow[m]:TRACe:Y[:SCALe]:RLEVel?",
       "parameters": [
-        { "name": "power", "units": ["DBM"], "range": "reference level" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }], "range": "reference level" }
       ],
       "examples": ["DISPlay:WAVeform:WINDow:TRACe:Y:RLEVel -10DBM", "DISPlay:WAVeform:WINDow:TRACe:Y:RLEVel?"]
     },
@@ -162,7 +162,7 @@
       "set": "INPut:IMPedance:REFerence <integer>",
       "query": "INPut:IMPedance:REFerence?",
       "parameters": [
-        { "name": "reference", "units": ["OHM"], "range": "integer impedance reference value" }
+        { "name": "reference", "units": [{ "token": "OHM", "unit": "Ohm" }], "range": "integer impedance reference value" }
       ],
       "examples": ["INPut:IMPedance:REFerence 50", "INPut:IMPedance:REFerence?"]
     },
@@ -186,7 +186,7 @@
       "set": "INPut:OFFSet:I <level>",
       "query": "INPut:OFFSet:I?",
       "parameters": [
-        { "name": "level", "units": ["V"], "range": "DC offset voltage" }
+        { "name": "level", "units": [{ "token": "V", "unit": "V" }], "range": "DC offset voltage" }
       ],
       "examples": ["INPut:OFFSet:I 0.0V", "INPut:OFFSet:I?"]
     },
@@ -198,7 +198,7 @@
       "set": "INPut:OFFSet:Q <level>",
       "query": "INPut:OFFSet:Q?",
       "parameters": [
-        { "name": "level", "units": ["V"], "range": "DC offset voltage" }
+        { "name": "level", "units": [{ "token": "V", "unit": "V" }], "range": "DC offset voltage" }
       ],
       "examples": ["INPut:OFFSet:Q 0.0V", "INPut:OFFSet:Q?"]
     },
@@ -304,7 +304,7 @@
       "set": "SENSe:POWer:IQ:RANGe[:UPPer] <power> [DBM]|DBMV|W",
       "query": "SENSe:POWer:IQ:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "power", "units": ["DBM", "DBMV", "W"], "range": "maximum expected total power" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "W", "unit": "W" }], "range": "maximum expected total power" }
       ],
       "examples": ["SENSe:POWer:IQ:RANGe:UPPer 0DBM", "SENSe:POWer:IQ:RANGe:UPPer?"]
     },
@@ -316,7 +316,7 @@
       "set": "SENSe:VOLTage:IQ:RANGe[:UPPer] <level>",
       "query": "SENSe:VOLTage:IQ:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "level", "units": ["V"], "range": "upper voltage range" }
+        { "name": "level", "units": [{ "token": "V", "unit": "V" }], "range": "upper voltage range" }
       ],
       "examples": ["SENSe:VOLTage:IQ:RANGe:UPPer 1.0V", "SENSe:VOLTage:IQ:RANGe:UPPer?"]
     }

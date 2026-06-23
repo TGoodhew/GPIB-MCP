@@ -37,9 +37,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ",
-            "MZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0 to 40.1 MHz"
         }
@@ -59,9 +59,9 @@
         {
           "name": "span",
           "units": [
-            "HZ",
-            "KZ",
-            "MZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0 to 40.1 MHz"
         }
@@ -81,9 +81,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ",
-            "MZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0 to 40.1 MHz"
         }
@@ -103,9 +103,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ",
-            "MZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0 to 40.1 MHz"
         }
@@ -125,9 +125,9 @@
         {
           "name": "step",
           "units": [
-            "HZ",
-            "KZ",
-            "MZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0 to 40.1 MHz"
         }
@@ -157,8 +157,8 @@
         {
           "name": "level",
           "units": [
-            "DM",
-            "DV"
+            { "token": "DM", "unit": "dBm" },
+            { "token": "DV", "unit": "dBV" }
           ],
           "range": "10 dB above range to 100 dB below range"
         }
@@ -178,9 +178,9 @@
         {
           "name": "level",
           "units": [
-            "V",
-            "MV",
-            "UV"
+            { "token": "V", "unit": "V" },
+            { "token": "MV", "unit": "mV" },
+            { "token": "UV", "unit": "uV" }
           ],
           "range": "range x 3.14 to range x 1x10^5"
         }
@@ -200,7 +200,7 @@
         {
           "name": "scale",
           "units": [
-            "DB"
+            { "token": "DB", "unit": "dB" }
           ],
           "range": "1, 2, 5 or 10 dB/division"
         }
@@ -318,8 +318,8 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" }
           ],
           "range": "3 Hz to 30 kHz, 1-3-10 sequence"
         }
@@ -339,8 +339,8 @@
         {
           "name": "bandwidth",
           "units": [
-            "HZ",
-            "KZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" }
           ],
           "range": "1 Hz to 30 kHz"
         }
@@ -394,7 +394,7 @@
         {
           "name": "time",
           "units": [
-            "SC"
+            { "token": "SC", "unit": "s" }
           ],
           "range": "0.2 to 999999 seconds (0.2 s steps)"
         }
@@ -434,9 +434,9 @@
         {
           "name": "frequency",
           "units": [
-            "HZ",
-            "KZ",
-            "MZ"
+            { "token": "HZ", "unit": "Hz" },
+            { "token": "KZ", "unit": "kHz" },
+            { "token": "MZ", "unit": "MHz" }
           ],
           "range": "0 to 40.1 MHz, within current span"
         }

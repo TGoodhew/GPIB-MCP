@@ -18,7 +18,7 @@
       "description": "FREQUENCY key. Sets the fixed tuned frequency. Enter value in MHz (HP-IB inputs are rounded to the nearest MHz). Range 10-1600 MHz in Mode 1.0/1.5/1.9 (2047 MHz opt 020), 10-26500 MHz with test set, 10-99999 MHz in Modes 1.1-1.3/1.6-1.8. Terminate with MZ (MHz) or HZ (Hz); all values are taken as the unit shown. Default 30 MHz (Mode 1.0).",
       "set": "FR <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 to 1600 MHz (up to 26500/99999 MHz depending on mode/test set)" }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "10 to 1600 MHz (up to 26500/99999 MHz depending on mode/test set)" }
       ],
       "examples": ["FR100MZ", "FR30MZ"]
     },
@@ -29,7 +29,7 @@
       "description": "START FREQ key (Special Function not used). Sets the sweep start frequency. Default 10 MHz.",
       "set": "FA <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 MHz to upper measurement-mode limit" }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "10 MHz to upper measurement-mode limit" }
       ],
       "examples": ["FA100MZ", "FA3000MZ"]
     },
@@ -40,7 +40,7 @@
       "description": "STOP FREQ key. Sets the sweep stop frequency.",
       "set": "FB <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"], "range": "10 MHz to upper measurement-mode limit" }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "10 MHz to upper measurement-mode limit" }
       ],
       "examples": ["FB400MZ", "FB4000MZ"]
     },
@@ -51,7 +51,7 @@
       "description": "STEP SIZE key. Sets the frequency step (increment) between measurement points in a sweep.",
       "set": "SS <value> MZ",
       "parameters": [
-        { "name": "step", "units": ["MZ", "HZ"], "range": "1 MHz to span" }
+        { "name": "step", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "1 MHz to span" }
       ],
       "examples": ["SS50MZ", "SS200MZ"]
     },
@@ -62,7 +62,7 @@
       "description": "FREQ INCR key. Sets the fixed-frequency tuning increment used by the UP/DN step keys. Enter integer MHz (decimals are rounded to nearest MHz).",
       "set": "FN <value> MZ",
       "parameters": [
-        { "name": "increment", "units": ["MZ", "HZ"], "range": "integer MHz" }
+        { "name": "increment", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }], "range": "integer MHz" }
       ],
       "examples": ["FN50MZ", "FN1MZ"]
     },
@@ -230,7 +230,7 @@
       "description": "Enter IF frequency (Special Function 3.0) for Modes 1.1, 1.3, 1.6 and 1.8.",
       "set": "IF <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"] }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }] }
       ],
       "examples": ["IF70MZ", "IF4000MZ"]
     },
@@ -241,7 +241,7 @@
       "description": "Enter LO frequency (Special Function 3.1) for Modes 1.2, 1.4, 1.7 and 1.9.",
       "set": "LF <value> MZ",
       "parameters": [
-        { "name": "frequency", "units": ["MZ", "HZ"] }
+        { "name": "frequency", "units": [{ "token": "MZ", "unit": "MHz" }, { "token": "HZ", "unit": "Hz" }] }
       ],
       "examples": ["LF5000MZ"]
     },
@@ -288,7 +288,7 @@
       "description": "Enter and Use Spot ENR (Special Function 5.3). Follow with the spot ENR value in dB and EN. Default 15.2 dB.",
       "set": "NE <value> EN",
       "parameters": [
-        { "name": "enr", "units": ["dB"], "range": "default 15.20 dB" }
+        { "name": "enr", "units": [{"unit": "dB"}], "range": "default 15.20 dB" }
       ],
       "examples": ["NE15.2EN"]
     },
@@ -299,8 +299,8 @@
       "description": "ENR key / Enter ENR Table. Enters ENR table edit mode, then accepts up to 35 frequency(MHz)/ENR(dB) pairs each separated by EN, and is terminated by sending FR to end the entry. The table improves measurement accuracy across frequency.",
       "set": "NR <freq>EN<enr>EN ... FR",
       "parameters": [
-        { "name": "frequency", "units": ["MHz"] },
-        { "name": "enr", "units": ["dB"] }
+        { "name": "frequency", "units": [{"unit": "MHz"}] },
+        { "name": "enr", "units": [{"unit": "dB"}] }
       ],
       "examples": ["NR10EN15.15EN100EN15.40EN1000EN15.20EN FR", "NR"]
     },
@@ -490,7 +490,7 @@
       "description": "Loss Compensation (Special Function 34.0-34.4). L0=Off, L1=On, LA=Enter loss before DUT in dB, LB=Enter loss after DUT in dB, LT=Enter temperature of losses. Enter LA/LB/LT values terminated with EN.",
       "set": "L0 | L1 | LA <dB> EN | LB <dB> EN | LT <temp> EN",
       "parameters": [
-        { "name": "value", "units": ["dB", "K"], "range": "loss in dB or temperature" }
+        { "name": "value", "units": [{"unit": "dB"}, "K"], "range": "loss in dB or temperature" }
       ],
       "examples": ["L1", "LA1.5EN", "L0"]
     },
@@ -643,7 +643,7 @@
       "description": "Enter Oscilloscope Limits (Special Function 8.1-8.4). NL=Noise Figure Lower Limit, NU=Noise Figure Upper Limit, GL=Gain Lower Limit, GU=Gain Upper Limit. Follow with value and EN.",
       "set": "NL <value> EN | NU <value> EN | GL <value> EN | GU <value> EN",
       "parameters": [
-        { "name": "value", "units": ["dB"] }
+        { "name": "value", "units": [{"unit": "dB"}] }
       ],
       "examples": ["NL0EN", "GU30EN"]
     },
@@ -858,7 +858,7 @@
       "description": "System LO Commands (Special Function 42.0-42.7). AC=Auxiliary commands, PS=CW prefix/suffix, TM=Settling time in ms, MN=Minimum frequency in MHz, MX=Maximum frequency in MHz, PL=System LO power level, PC=Power prefix/suffix for custom LO, FC=Frequency prefix/suffix for custom LO. Follow value entries with EN.",
       "set": "AC | PS | TM <ms> EN | MN <MHz> EN | MX <MHz> EN | PL <value> EN | PC | FC",
       "parameters": [
-        { "name": "value", "units": ["ms", "MHz"], "range": "depends on subfunction" }
+        { "name": "value", "units": [{"unit": "ms"}, {"unit": "MHz"}], "range": "depends on subfunction" }
       ],
       "examples": ["TM50EN", "PL10EN"]
     },
@@ -913,7 +913,7 @@
       "description": "Noise Figure Measurement System Internal IF (Special Function 19.2-19.5). S2=Display/enter internal IF for SSB2, S3=internal IF for SSB3, S4=internal IF for DSB, S5=Display NFM input frequency. Defaults: SSB2=700, SSB3=450, DSB=25 MHz.",
       "set": "S2 <MHz> EN | S3 <MHz> EN | S4 <MHz> EN | S5",
       "parameters": [
-        { "name": "if", "units": ["MHz"], "range": "SSB2 default 700, SSB3 default 450, DSB default 25" }
+        { "name": "if", "units": [{"unit": "MHz"}], "range": "SSB2 default 700, SSB3 default 450, DSB default 25" }
       ],
       "examples": ["S2700EN", "S5"]
     },

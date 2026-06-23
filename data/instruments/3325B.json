@@ -37,7 +37,7 @@
       "set": "FR <value> <unit>",
       "query": "FR?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KH", "MH"], "range": "1 uHz to 21 MHz (sine); function dependent" }
+        { "name": "frequency", "units": [ { "token": "HZ", "unit": "Hz" }, { "token": "KH", "unit": "kHz" }, { "token": "MH", "unit": "MHz" } ], "range": "1 uHz to 21 MHz (sine); function dependent" }
       ],
       "examples": ["FR 1 MH", "FR 10000 HZ", "FR?"]
     },
@@ -59,7 +59,7 @@
       "set": "AM <value> <unit>",
       "query": "AM?",
       "parameters": [
-        { "name": "amplitude", "units": ["VO", "MV", "VR", "MR", "DB"], "description": "VO=Vpp, MV=mVpp, VR=Vrms, MR=mVrms, DB=dBm" }
+        { "name": "amplitude", "units": [{ "token": "VO", "unit": "Vpp" }, { "token": "MV", "unit": "mVpp" }, { "token": "VR", "unit": "Vrms" }, { "token": "MR", "unit": "mVrms" }, { "token": "DB", "unit": "dBm" }], "description": "VO=Vpp, MV=mVpp, VR=Vrms, MR=mVrms, DB=dBm" }
       ],
       "examples": ["AM 1.2 VO", "AM 0 DB", "AM?"]
     },
@@ -70,7 +70,7 @@
       "description": "Sets or queries the DC offset voltage.",
       "set": "OF <value> <unit>",
       "query": "OF?",
-      "parameters": [ { "name": "offset", "units": ["VO", "MV"] } ],
+      "parameters": [ { "name": "offset", "units": [{ "token": "VO", "unit": "V" }, { "token": "MV", "unit": "mV" }] } ],
       "examples": ["OF 1 VO", "OF?"]
     },
     {
@@ -80,7 +80,7 @@
       "description": "Sets or queries the phase of the output signal.",
       "set": "PH <value> DE",
       "query": "PH?",
-      "parameters": [ { "name": "phase", "units": ["DE"], "description": "DE = degrees" } ],
+      "parameters": [ { "name": "phase", "units": [ { "token": "DE", "unit": "deg" } ], "description": "DE = degrees" } ],
       "examples": ["PH 90 DE", "PH?"]
     },
     {
@@ -106,7 +106,7 @@
       "description": "Sets or queries the sweep start frequency.",
       "set": "ST <value> <unit>",
       "query": "ST?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KH", "MH"] } ],
+      "parameters": [ { "name": "frequency", "units": [ { "token": "HZ", "unit": "Hz" }, { "token": "KH", "unit": "kHz" }, { "token": "MH", "unit": "MHz" } ] } ],
       "examples": ["ST 1 KH", "ST?"]
     },
     {
@@ -116,7 +116,7 @@
       "description": "Sets or queries the sweep stop frequency.",
       "set": "SP <value> <unit>",
       "query": "SP?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KH", "MH"] } ],
+      "parameters": [ { "name": "frequency", "units": [ { "token": "HZ", "unit": "Hz" }, { "token": "KH", "unit": "kHz" }, { "token": "MH", "unit": "MHz" } ] } ],
       "examples": ["SP 10 MH", "SP?"]
     },
     {
@@ -126,7 +126,7 @@
       "description": "Sets or queries the sweep time.",
       "set": "TI <value> SE",
       "query": "TI?",
-      "parameters": [ { "name": "time", "units": ["SE", "MS"], "description": "SE = seconds" } ],
+      "parameters": [ { "name": "time", "units": [ { "token": "SE", "unit": "s" }, { "token": "MS", "unit": "ms" } ], "description": "SE = seconds" } ],
       "examples": ["TI 1 SE", "TI?"]
     },
     {

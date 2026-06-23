@@ -221,14 +221,14 @@
         {
           "name": "voltage",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "model/channel dependent (e.g. 0 to 32V on CH1 of DP832A)"
         },
         {
           "name": "current",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "model/channel dependent (e.g. 0 to 3.2A on CH1 of DP832A)"
         }
@@ -253,7 +253,7 @@
         {
           "name": "voltage",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "model/channel dependent (see Table 2-1)"
         }
@@ -279,7 +279,7 @@
         {
           "name": "step",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to max voltage of channel; default 0.001V or 0.01V model dependent"
         }
@@ -304,7 +304,7 @@
         {
           "name": "voltage",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "0 to maximum voltage of channel; default 0V"
         }
@@ -345,7 +345,7 @@
         {
           "name": "voltage",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "model/channel dependent (see Table 2-2)"
         }
@@ -426,7 +426,7 @@
         {
           "name": "current",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "model/channel dependent (see Table 2-1)"
         }
@@ -452,7 +452,7 @@
         {
           "name": "step",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "0 to max current of channel; default model dependent"
         }
@@ -477,7 +477,7 @@
         {
           "name": "current",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "0 to maximum current of channel; default 0.1A"
         }
@@ -518,7 +518,7 @@
         {
           "name": "current",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "model/channel dependent (see Table 2-2)"
         }
@@ -761,7 +761,7 @@
         {
           "name": "value",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "model/channel dependent (see Table 2-2)"
         }
@@ -841,7 +841,7 @@
         {
           "name": "value",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "model/channel dependent (see Table 2-2)"
         }
@@ -943,21 +943,21 @@
         {
           "name": "volt",
           "units": [
-            "V"
+            {"unit": "V"}
           ],
           "range": "voltage range of channel"
         },
         {
           "name": "curr",
           "units": [
-            "A"
+            {"unit": "A"}
           ],
           "range": "current range of channel"
         },
         {
           "name": "time",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "1 to 99999"
         }
@@ -1050,7 +1050,7 @@
         {
           "name": "delay",
           "units": [
-            "s"
+            {"unit": "s"}
           ]
         }
       ],
@@ -1136,7 +1136,7 @@
         {
           "name": "time",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "1 to 99999"
         }
@@ -1259,19 +1259,19 @@
         {
           "name": "volt",
           "units": [
-            "V"
+            {"unit": "V"}
           ]
         },
         {
           "name": "curr",
           "units": [
-            "A"
+            {"unit": "A"}
           ]
         },
         {
           "name": "time",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "1 to 99999"
         }

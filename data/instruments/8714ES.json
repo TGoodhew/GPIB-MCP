@@ -229,7 +229,7 @@
       "set": "CALCulate[1|2]:GDAPerture:SPAN <num>",
       "query": "CALCulate[1|2]:GDAPerture:SPAN?",
       "parameters": [
-        { "name": "span", "units": ["Hz"] }
+        { "name": "span", "units": [{ "token": "Hz", "unit": "Hz" }] }
       ],
       "examples": ["CALC1:GDAP:SPAN 1E6"]
     },
@@ -297,7 +297,7 @@
       "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STARt <num>",
       "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STARt?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }] }
       ],
       "examples": ["CALC1:LIM:SEGM1:FREQ:STAR 1E6"]
     },
@@ -309,7 +309,7 @@
       "set": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STOP <num>",
       "query": "CALCulate[1|2]:LIMit:SEGMent[1|2|...12]:FREQuency:STOP?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }] }
       ],
       "examples": ["CALC1:LIM:SEGM1:FREQ:STOP 1E9"]
     },
@@ -365,7 +365,7 @@
       "set": "CALCulate[1|2]:MARKer[1|2|...8]:X <num>",
       "query": "CALCulate[1|2]:MARKer[1|2|...8]:X?",
       "parameters": [
-        { "name": "x", "units": ["Hz"] }
+        { "name": "x", "units": [{ "token": "Hz", "unit": "Hz" }] }
       ],
       "examples": ["CALC1:MARK1:X 1E9"]
     },
@@ -489,7 +489,7 @@
       "set": "CALCulate[1|2]:MARKer:BWIDth <num>",
       "query": "CALCulate[1|2]:MARKer:BWIDth?",
       "parameters": [
-        { "name": "target", "units": ["dB"], "range": "e.g. -3 for 3 dB bandwidth" }
+        { "name": "target", "units": [{ "token": "dB", "unit": "dB" }], "range": "e.g. -3 for 3 dB bandwidth" }
       ],
       "examples": ["CALC1:MARK:BWID -3"]
     },
@@ -501,7 +501,7 @@
       "set": "CALCulate[1|2]:MARKer:NOTCh <num>",
       "query": "CALCulate[1|2]:MARKer:NOTCh?",
       "parameters": [
-        { "name": "target", "units": ["dB"], "range": "e.g. -6" }
+        { "name": "target", "units": [{ "token": "dB", "unit": "dB" }], "range": "e.g. -6" }
       ],
       "examples": ["CALC1:MARK:NOTC -6"]
     },
@@ -572,7 +572,7 @@
       "set": "SENSe[1|2]:FREQuency:STARt <num>",
       "query": "SENSe[1|2]:FREQuency:STARt?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+        { "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] }
       ],
       "examples": ["SENS1:FREQ:STAR 1MHZ", "SENS:FREQ:STAR 300E3"]
     },
@@ -584,7 +584,7 @@
       "set": "SENSe[1|2]:FREQuency:STOP <num>",
       "query": "SENSe[1|2]:FREQuency:STOP?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+        { "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] }
       ],
       "examples": ["SENS1:FREQ:STOP 1.3GHZ"]
     },
@@ -596,7 +596,7 @@
       "set": "SENSe[1|2]:FREQuency:CENTer <num>",
       "query": "SENSe[1|2]:FREQuency:CENTer?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+        { "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] }
       ],
       "examples": ["SENS1:FREQ:CENT 900MHZ"]
     },
@@ -608,7 +608,7 @@
       "set": "SENSe[1|2]:FREQuency:SPAN <num>",
       "query": "SENSe[1|2]:FREQuency:SPAN?",
       "parameters": [
-        { "name": "span", "units": ["Hz", "KHZ", "MHZ", "GHZ"] }
+        { "name": "span", "units": [{ "token": "Hz", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] }
       ],
       "examples": ["SENS1:FREQ:SPAN 100MHZ"]
     },
@@ -620,7 +620,7 @@
       "set": "SENSe[1|2]:FREQuency:SPAN:MAXimum <num>",
       "query": "SENSe[1|2]:FREQuency:SPAN:MAXimum?",
       "parameters": [
-        { "name": "span", "units": ["Hz"] }
+        { "name": "span", "units": [{ "token": "Hz", "unit": "Hz" }] }
       ],
       "examples": ["SENS1:FREQ:SPAN:MAX 50MHZ"]
     },
@@ -656,7 +656,7 @@
       "set": "SENSe[1|2]:SWEep:TIME <num>",
       "query": "SENSe[1|2]:SWEep:TIME?",
       "parameters": [
-        { "name": "time", "units": ["s", "MS", "US"] }
+        { "name": "time", "units": [{ "token": "s", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }] }
       ],
       "examples": ["SENS1:SWE:TIME 0.1"]
     },
@@ -724,7 +724,7 @@
       "set": "SENSe[1|2]:BWIDth[:RESolution] <num>",
       "query": "SENSe[1|2]:BWIDth[:RESolution]?",
       "parameters": [
-        { "name": "bandwidth", "units": ["Hz"], "range": "15 (fine)|250 (narrow)|1200 (medium narrow)|3700 (medium)|4000 (medium wide)|6500 (wide)" }
+        { "name": "bandwidth", "units": [{ "token": "Hz", "unit": "Hz" }], "range": "15 (fine)|250 (narrow)|1200 (medium narrow)|3700 (medium)|4000 (medium wide)|6500 (wide)" }
       ],
       "examples": ["SENS1:BWID 3700"]
     },
@@ -908,7 +908,7 @@
       "set": "SENSe[1|2]:CORRection:EDELay:TIME <num>",
       "query": "SENSe[1|2]:CORRection:EDELay:TIME?",
       "parameters": [
-        { "name": "delay", "units": ["s", "NS", "PS"] }
+        { "name": "delay", "units": [{ "token": "s", "unit": "s" }, { "token": "NS", "unit": "ns" }, { "token": "PS", "unit": "ps" }] }
       ],
       "examples": ["SENS1:CORR:EDEL:TIME 1E-9"]
     },
@@ -931,7 +931,7 @@
       "set": "SOURce[1|2]:POWer[:LEVel][:IMMediate][:AMPLitude] <num>",
       "query": "SOURce[1|2]:POWer[:LEVel][:IMMediate][:AMPLitude]?",
       "parameters": [
-        { "name": "power", "units": ["dBm"] }
+        { "name": "power", "units": [{ "token": "dBm", "unit": "dBm" }] }
       ],
       "examples": ["SOUR1:POW 0", "SOUR:POW -10"]
     },
@@ -943,7 +943,7 @@
       "set": "SOURce[1|2]:POWer:PRESet <num>",
       "query": "SOURce[1|2]:POWer:PRESet?",
       "parameters": [
-        { "name": "power", "units": ["dBm"] }
+        { "name": "power", "units": [{ "token": "dBm", "unit": "dBm" }] }
       ],
       "examples": ["SOUR1:POW:PRES 0"]
     },
@@ -967,7 +967,7 @@
       "set": "SOURce[1|2]:POWer:STARt <num>",
       "query": "SOURce[1|2]:POWer:STARt?",
       "parameters": [
-        { "name": "power", "units": ["dBm"] }
+        { "name": "power", "units": [{ "token": "dBm", "unit": "dBm" }] }
       ],
       "examples": ["SOUR1:POW:STAR -20"]
     },
@@ -979,7 +979,7 @@
       "set": "SOURce[1|2]:POWer:STOP <num>",
       "query": "SOURce[1|2]:POWer:STOP?",
       "parameters": [
-        { "name": "power", "units": ["dBm"] }
+        { "name": "power", "units": [{ "token": "dBm", "unit": "dBm" }] }
       ],
       "examples": ["SOUR1:POW:STOP 0"]
     },
@@ -1094,7 +1094,7 @@
       "set": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:PDIVision <num>",
       "query": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:PDIVision?",
       "parameters": [
-        { "name": "scale_per_div", "units": ["dB"] }
+        { "name": "scale_per_div", "units": [{ "token": "dB", "unit": "dB" }] }
       ],
       "examples": ["DISP:WIND1:TRAC:Y:PDIV 10"]
     },
@@ -1106,7 +1106,7 @@
       "set": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:RLEVel <num>",
       "query": "DISPlay:WINDow[1|2]:TRACe:Y[:SCALe]:RLEVel?",
       "parameters": [
-        { "name": "reference_level", "units": ["dB"] }
+        { "name": "reference_level", "units": [{ "token": "dB", "unit": "dB" }] }
       ],
       "examples": ["DISP:WIND1:TRAC:Y:RLEV 0"]
     },
@@ -1495,8 +1495,8 @@
       "description": "Instruct the analyzer to beep. Optional arguments are frequency (Hz), duration (seconds) and volume (0 to 1).",
       "set": "SYSTem:BEEPer[:IMMediate] [<freq>[,<dur>[,<vol>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] },
-        { "name": "duration", "units": ["s"] },
+        { "name": "frequency", "units": [{ "token": "Hz", "unit": "Hz" }] },
+        { "name": "duration", "units": [{ "token": "s", "unit": "s" }] },
         { "name": "volume", "range": "0 to 1" }
       ],
       "examples": ["SYST:BEEP", "SYST:BEEP 1000,0.2,0.5"]

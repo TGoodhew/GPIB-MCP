@@ -62,7 +62,7 @@
       "set": "CF <number><unit>",
       "query": "CF?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0 to 26.5 GHz (8563E/EC)" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "0 to 26.5 GHz (8563E/EC)" }
       ],
       "examples": ["CF 300MHZ", "CF?"]
     },
@@ -74,7 +74,7 @@
       "set": "SP <number><unit>",
       "query": "SP?",
       "parameters": [
-        { "name": "span", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0 Hz (zero span) to full span" }
+        { "name": "span", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "0 Hz (zero span) to full span" }
       ],
       "examples": ["SP 100MHZ", "SP 0HZ", "SP?"]
     },
@@ -85,7 +85,7 @@
       "description": "Sets or queries the start (left edge) frequency.",
       "set": "FA <number><unit>",
       "query": "FA?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["FA 100MHZ", "FA?"]
     },
     {
@@ -95,7 +95,7 @@
       "description": "Sets or queries the stop (right edge) frequency.",
       "set": "FB <number><unit>",
       "query": "FB?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["FB 500MHZ", "FB?"]
     },
     {
@@ -105,7 +105,7 @@
       "description": "Sets or queries the center-frequency step size (used by the UP/DN step keys).",
       "set": "SS <number><unit>",
       "query": "SS?",
-      "parameters": [ { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "step", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["SS 1MHZ", "SS?"]
     },
     {
@@ -115,7 +115,7 @@
       "description": "Sets or queries the reference level (amplitude at the top graticule line).",
       "set": "RL <number><unit>",
       "query": "RL?",
-      "parameters": [ { "name": "level", "units": ["DBM", "DBMV", "DBUV", "V", "W"], "range": "instrument dependent" } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }, { "token": "W", "unit": "W" }], "range": "instrument dependent" } ],
       "examples": ["RL -10DBM", "RL?"]
     },
     {
@@ -125,7 +125,7 @@
       "description": "Sets or queries the resolution bandwidth.",
       "set": "RB <number><unit>",
       "query": "RB?",
-      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["RB 1MHZ", "RB?"]
     },
     {
@@ -135,7 +135,7 @@
       "description": "Sets or queries the video bandwidth.",
       "set": "VB <number><unit>",
       "query": "VB?",
-      "parameters": [ { "name": "bandwidth", "units": ["HZ", "KHZ", "MHZ"] } ],
+      "parameters": [ { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }] } ],
       "examples": ["VB 10KHZ", "VB?"]
     },
     {
@@ -145,7 +145,7 @@
       "description": "Sets or queries the sweep time.",
       "set": "ST <number><unit>",
       "query": "ST?",
-      "parameters": [ { "name": "time", "units": ["S", "MS", "US"] } ],
+      "parameters": [ { "name": "time", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }] } ],
       "examples": ["ST 100MS", "ST?"]
     },
     {
@@ -171,7 +171,7 @@
       "description": "Sets or queries the active marker frequency.",
       "set": "MKF <number><unit>",
       "query": "MKF?",
-      "parameters": [ { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"] } ],
+      "parameters": [ { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }] } ],
       "examples": ["MKF?"]
     },
     {

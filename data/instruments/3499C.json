@@ -241,7 +241,7 @@
         {
           "name": "seconds",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments"
         }
@@ -281,7 +281,7 @@
         {
           "name": "seconds",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments"
         }
@@ -302,7 +302,7 @@
         {
           "name": "seconds",
           "units": [
-            "s"
+            {"unit": "s"}
           ],
           "range": "0 to 99999.999, 1 ms resolution"
         },

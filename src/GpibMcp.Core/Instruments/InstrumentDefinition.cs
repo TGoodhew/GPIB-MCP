@@ -167,14 +167,21 @@ namespace GpibMcp.Instruments
     /// </summary>
     public sealed class UnitToken
     {
-        [JsonProperty("token")] public string Token { get; set; }
+        [JsonProperty("token", NullValueHandling = NullValueHandling.Ignore)] public string Token { get; set; }
         [JsonProperty("unit")] public string Unit { get; set; }
 
         public UnitToken() { }
         public UnitToken(string token, string unit = null) { Token = token; Unit = unit; }
 
-        /// <summary>True once the token's physical unit is known (so the resolver can use/convert it).</summary>
+        /// <summary>True once the value's physical unit is known (so the resolver can use/convert it). An
+        /// audited entry may be tokenless (<see cref="HasWireToken"/> false) when the instrument takes a
+        /// bare number with no suffix - the value's unit is still recorded (#46).</summary>
         [JsonIgnore]
         public bool IsAudited => !string.IsNullOrEmpty(Unit);
+
+        /// <summary>True when a literal suffix is sent on the wire after the value (e.g. MZ in "1000MZ").
+        /// False for audited-but-tokenless params, whose set command takes a bare number.</summary>
+        [JsonIgnore]
+        public bool HasWireToken => !string.IsNullOrEmpty(Token);
     }
 }

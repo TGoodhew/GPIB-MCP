@@ -180,7 +180,7 @@
       "set": ":AM[:DEPTh] <num>[PCT]|<num>DB|MAXimum|MINimum",
       "query": ":AM[:DEPTh]? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "depth", "units": ["PCT", "DB"], "range": "0 to 40 dB (percent equivalent)" }
+        { "name": "depth", "units": [{ "token": "PCT", "unit": "%" }, { "token": "DB", "unit": "dB" }], "range": "0 to 40 dB (percent equivalent)" }
       ],
       "examples": [":AM 30PCT", ":AM:DEPTh? MAX"]
     },
@@ -192,7 +192,7 @@
       "set": ":AM:INTernal:FREQuency <num>[freq suffix]|MAXimum|MINimum",
       "query": ":AM:INTernal:FREQuency? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument internal AM source range" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "instrument internal AM source range" }
       ],
       "examples": [":AM:INT:FREQ 1KHZ", ":AM:INT:FREQ?"]
     },
@@ -350,7 +350,7 @@
       "set": ":CORRection:FLATness <num>[freq suffix],<num>DB{,...}",
       "query": ":CORRection:FLATness?",
       "parameters": [
-        { "name": "pairs", "units": ["DB"], "range": "up to 801 {freq, dB} pairs" }
+        { "name": "pairs", "units": [{ "token": "DB", "unit": "dB" }], "range": "up to 801 {freq, dB} pairs" }
       ],
       "examples": [":CORR:FLAT 2GHZ,0.5DB", ":CORR:FLAT?"]
     },
@@ -370,7 +370,7 @@
       "set": ":CORRection:ARRay[0|1] <num>[DB]{,...}",
       "query": ":CORRection:ARRay[0|1]?",
       "parameters": [
-        { "name": "values", "units": ["DB"], "range": "up to 1601 points" }
+        { "name": "values", "units": [{ "token": "DB", "unit": "dB" }], "range": "up to 1601 points" }
       ],
       "examples": [":CORR:ARR0?"]
     },
@@ -395,7 +395,7 @@
       "set": "[:SOURce]:FREQuency[:CW] <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:FREQuency[:CW]? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz (83620A specified range)" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "10 MHz to 20 GHz (83620A specified range)" }
       ],
       "examples": [":FREQ:CW 10GHZ", ":FREQ:CW?"]
     },
@@ -419,7 +419,7 @@
       "set": "[:SOURce]:FREQuency:CENTer <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:FREQuency:CENTer? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "10 MHz to 20 GHz" }
       ],
       "examples": [":FREQ:CENT 10GHZ", ":FREQ:CENT?"]
     },
@@ -431,7 +431,7 @@
       "set": "[:SOURce]:FREQuency:SPAN <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:FREQuency:SPAN? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "span", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "0 to (MAX-MIN)" }
+        { "name": "span", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "0 to (MAX-MIN)" }
       ],
       "examples": [":FREQ:SPAN 2GHZ", ":FREQ:SPAN?"]
     },
@@ -443,7 +443,7 @@
       "set": "[:SOURce]:FREQuency:STARt <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:FREQuency:STARt? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "10 MHz to 20 GHz" }
       ],
       "examples": [":FREQ:STAR 2GHZ", ":FREQ:STAR?"]
     },
@@ -455,7 +455,7 @@
       "set": "[:SOURce]:FREQuency:STOP <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:FREQuency:STOP? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "10 MHz to 20 GHz" }
       ],
       "examples": [":FREQ:STOP 18GHZ", ":FREQ:STOP?"]
     },
@@ -479,7 +479,7 @@
       "set": "[:SOURce]:FREQuency:MANual <num>[freq suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:FREQuency:MANual? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "between current start and stop limits" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "between current start and stop limits" }
       ],
       "examples": [":FREQ:MAN 5GHZ", ":FREQ:MAN?"]
     },
@@ -515,7 +515,7 @@
       "set": "[:SOURce]:FREQuency:OFFSet <num>[freq suffix]|MAXimum|MINimum",
       "query": "[:SOURce]:FREQuency:OFFSet?",
       "parameters": [
-        { "name": "offset", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "-99.999 to +99.999 GHz" }
+        { "name": "offset", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "-99.999 to +99.999 GHz" }
       ],
       "examples": [":FREQ:OFFS 1GHZ", ":FREQ:OFFS?"]
     },
@@ -539,7 +539,7 @@
       "set": "[:SOURce]:FREQuency:STEP[:INCRement] <num>[freq suffix]|MAXimum|MINimum",
       "query": "[:SOURce]:FREQuency:STEP[:INCRement]?",
       "parameters": [
-        { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "instrument frequency range" }
+        { "name": "step", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "instrument frequency range" }
       ],
       "examples": [":FREQ:STEP 1MHZ", ":FREQ:STEP?"]
     },
@@ -564,7 +564,7 @@
       "set": "[:SOURce]:POWer[:LEVel] <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer[:LEVel]? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "power", "units": ["DBM"], "range": "specified power range of the instrument" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }], "range": "specified power range of the instrument" }
       ],
       "examples": [":POW 0DBM", ":POW?"]
     },
@@ -600,7 +600,7 @@
       "set": "[:SOURce]:POWer:CENTer <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:CENTer?",
       "parameters": [
-        { "name": "power", "units": ["DBM"], "range": "specified power range" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }], "range": "specified power range" }
       ],
       "examples": [":POW:CENT 0DBM", ":POW:CENT?"]
     },
@@ -612,7 +612,7 @@
       "set": "[:SOURce]:POWer:SPAN <num>[DB]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:SPAN?",
       "parameters": [
-        { "name": "span", "units": ["DB"], "range": "-45 to +45 dB" }
+        { "name": "span", "units": [{ "token": "DB", "unit": "dB" }], "range": "-45 to +45 dB" }
       ],
       "examples": [":POW:SPAN 10DB", ":POW:SPAN?"]
     },
@@ -624,7 +624,7 @@
       "set": "[:SOURce]:POWer:STARt <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:STARt?",
       "parameters": [
-        { "name": "power", "units": ["DBM"], "range": "specified power range" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }], "range": "specified power range" }
       ],
       "examples": [":POW:STAR -10DBM", ":POW:STAR?"]
     },
@@ -636,7 +636,7 @@
       "set": "[:SOURce]:POWer:STOP <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:STOP?",
       "parameters": [
-        { "name": "power", "units": ["DBM"], "range": "specified power range" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }], "range": "specified power range" }
       ],
       "examples": [":POW:STOP 0DBM", ":POW:STOP?"]
     },
@@ -648,7 +648,7 @@
       "set": "[:SOURce]:POWer:SLOPe <num>[DB/GHZ]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:SLOPe?",
       "parameters": [
-        { "name": "slope", "units": ["DB/GHZ"], "range": "-2.5 to +2.5 dB/GHz" }
+        { "name": "slope", "units": [{"unit": "dB/GHz"}], "range": "-2.5 to +2.5 dB/GHz" }
       ],
       "examples": [":POW:SLOP 1", ":POW:SLOP?"]
     },
@@ -672,7 +672,7 @@
       "set": "[:SOURce]:POWer:OFFSet <num>[lvl suffix]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:OFFSet?",
       "parameters": [
-        { "name": "offset", "units": ["DB", "DBM"], "range": "instrument power offset range" }
+        { "name": "offset", "units": [{ "token": "DB", "unit": "dB" }, { "token": "DBM", "unit": "dBm" }], "range": "instrument power offset range" }
       ],
       "examples": [":POW:OFFS 0", ":POW:OFFS?"]
     },
@@ -696,7 +696,7 @@
       "set": "[:SOURce]:POWer:ATTenuation <num>[DB]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:ATTenuation?",
       "parameters": [
-        { "name": "attenuation", "units": ["DB"], "range": "0 to 90 dB" }
+        { "name": "attenuation", "units": [{ "token": "DB", "unit": "dB" }], "range": "0 to 90 dB" }
       ],
       "examples": [":POW:ATT 10DB", ":POW:ATT?"]
     },
@@ -720,7 +720,7 @@
       "set": "[:SOURce]:POWer:RANGe <num>[DB]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["DB"], "range": "-30 to -90 dB" }
+        { "name": "range", "units": [{ "token": "DB", "unit": "dB" }], "range": "-30 to -90 dB" }
       ],
       "examples": [":POW:RANG -30", ":POW:RANG?"]
     },
@@ -744,7 +744,7 @@
       "set": "[:SOURce]:POWer:STEP[:INCRement] <num>[DB]|MAXimum|MINimum",
       "query": "[:SOURce]:POWer:STEP[:INCRement]?",
       "parameters": [
-        { "name": "step", "units": ["DB"], "range": "0.01 to 20 dB" }
+        { "name": "step", "units": [{ "token": "DB", "unit": "dB" }], "range": "0.01 to 20 dB" }
       ],
       "examples": [":POW:STEP 1DB", ":POW:STEP?"]
     },
@@ -792,7 +792,7 @@
       "set": "[:SOURce]:POWer:ALC:BANDwidth <num>[freq suffix]|MAXimum|MINimum",
       "query": "[:SOURce]:POWer:ALC:BANDwidth?",
       "parameters": [
-        { "name": "bandwidth", "units": ["HZ", "KHZ"], "range": "instrument ALC bandwidth range" }
+        { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }], "range": "instrument ALC bandwidth range" }
       ],
       "examples": [":POW:ALC:BAND MAX", ":POW:ALC:BAND?"]
     },
@@ -816,7 +816,7 @@
       "set": "[:SOURce]:POWer:ALC:CFACtor <num>[DB]|MAXimum|MINimum|UP|DOWN",
       "query": "[:SOURce]:POWer:ALC:CFACtor?",
       "parameters": [
-        { "name": "factor", "units": ["DB"], "range": "0 to -90 dB" }
+        { "name": "factor", "units": [{ "token": "DB", "unit": "dB" }], "range": "0 to -90 dB" }
       ],
       "examples": [":POW:ALC:CFAC 16DB", ":POW:ALC:CFAC?"]
     },
@@ -865,7 +865,7 @@
       "set": ":FM[:DEViation] <num>[freq suffix]|MAXimum|MINimum",
       "query": ":FM[:DEViation]? [MAXimum|MINimum]",
       "parameters": [
-        { "name": "deviation", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument FM deviation range" }
+        { "name": "deviation", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "instrument FM deviation range" }
       ],
       "examples": [":FM 1MHZ", ":FM?"]
     },
@@ -889,7 +889,7 @@
       "set": ":FM:FILTer:HPASs <num>[freq suffix]|MAXimum|MINimum",
       "query": ":FM:FILTer:HPASs?",
       "parameters": [
-        { "name": "bandwidth", "units": ["HZ", "KHZ"], "range": "instrument FM AC bandwidth range" }
+        { "name": "bandwidth", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }], "range": "instrument FM AC bandwidth range" }
       ],
       "examples": [":FM:FILT:HPAS MAX", ":FM:FILT:HPAS?"]
     },
@@ -901,7 +901,7 @@
       "set": ":FM:INTernal:FREQuency <num>[freq suffix]|MAXimum|MINimum",
       "query": ":FM:INTernal:FREQuency?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument internal FM source range" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "instrument internal FM source range" }
       ],
       "examples": [":FM:INT:FREQ 1MHZ", ":FM:INT:FREQ?"]
     },
@@ -962,7 +962,7 @@
       "set": ":PULSe:FREQuency <num>[freq suffix]|MAXimum|MINimum",
       "query": ":PULSe:FREQuency?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument pulse frequency range" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "instrument pulse frequency range" }
       ],
       "examples": [":PULS:FREQ 500KHZ", ":PULS:FREQ?"]
     },
@@ -974,7 +974,7 @@
       "set": ":PULSe:PERiod <num>[time suffix]|MAXimum|MINimum",
       "query": ":PULSe:PERiod?",
       "parameters": [
-        { "name": "period", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse period range" }
+        { "name": "period", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }, { "token": "NS", "unit": "ns" }], "range": "instrument pulse period range" }
       ],
       "examples": [":PULS:PER 2US", ":PULS:PER?"]
     },
@@ -986,7 +986,7 @@
       "set": ":PULSe:WIDTh <num>[time suffix]|MAXimum|MINimum",
       "query": ":PULSe:WIDTh?",
       "parameters": [
-        { "name": "width", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse width range" }
+        { "name": "width", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }, { "token": "NS", "unit": "ns" }], "range": "instrument pulse width range" }
       ],
       "examples": [":PULS:WIDT 1US", ":PULS:WIDT?"]
     },
@@ -1035,7 +1035,7 @@
       "set": ":PULM:EXTernal:DELay <num>[time suffix]|MAXimum|MINimum",
       "query": ":PULM:EXTernal:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse delay range" }
+        { "name": "delay", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }, { "token": "NS", "unit": "ns" }], "range": "instrument pulse delay range" }
       ],
       "examples": [":PULM:EXT:DEL MIN", ":PULM:EXT:DEL?"]
     },
@@ -1047,7 +1047,7 @@
       "set": ":PULM:INTernal:FREQuency <num>[freq suffix]|MAXimum|MINimum",
       "query": ":PULM:INTernal:FREQuency?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ"], "range": "instrument internal pulse frequency range" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }], "range": "instrument internal pulse frequency range" }
       ],
       "examples": [":PULM:INT:FREQ 500KHZ", ":PULM:INT:FREQ?"]
     },
@@ -1059,7 +1059,7 @@
       "set": ":PULM:INTernal:PERiod <num>[time suffix]|MAXimum|MINimum",
       "query": ":PULM:INTernal:PERiod?",
       "parameters": [
-        { "name": "period", "units": ["S", "MS", "US", "NS"], "range": "instrument internal pulse period range" }
+        { "name": "period", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }, { "token": "NS", "unit": "ns" }], "range": "instrument internal pulse period range" }
       ],
       "examples": [":PULM:INT:PER 2US", ":PULM:INT:PER?"]
     },
@@ -1071,7 +1071,7 @@
       "set": ":PULM:INTernal:WIDTh <num>[time suffix]|MAXimum|MINimum",
       "query": ":PULM:INTernal:WIDTh?",
       "parameters": [
-        { "name": "width", "units": ["S", "MS", "US", "NS"], "range": "instrument internal pulse width range" }
+        { "name": "width", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }, { "token": "NS", "unit": "ns" }], "range": "instrument internal pulse width range" }
       ],
       "examples": [":PULM:INT:WIDT 1US", ":PULM:INT:WIDT?"]
     },
@@ -1107,7 +1107,7 @@
       "set": ":PULM:SLEW <num>[time suffix]|MAXimum|MINimum",
       "query": ":PULM:SLEW?",
       "parameters": [
-        { "name": "slew", "units": ["S", "MS", "US", "NS"], "range": "instrument pulse slew range" }
+        { "name": "slew", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }, { "token": "NS", "unit": "ns" }], "range": "instrument pulse slew range" }
       ],
       "examples": [":PULM:SLEW MIN", ":PULM:SLEW?"]
     },
@@ -1177,7 +1177,7 @@
       "set": ":MARKer[n]:FREQuency <num>[freq suffix]|MAXimum|MINimum",
       "query": ":MARKer[n]:FREQuency?",
       "parameters": [
-        { "name": "frequency", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "10 MHz to 20 GHz" }
+        { "name": "frequency", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "10 MHz to 20 GHz" }
       ],
       "examples": [":MARK1:FREQ 10GHZ", ":MARK1:FREQ?"]
     },
@@ -1236,7 +1236,7 @@
       "set": ":MARKer[n]:AMPLitude:VALue <num>[DB]|MAXimum|MINimum",
       "query": ":MARKer[n]:AMPLitude:VALue?",
       "parameters": [
-        { "name": "depth", "units": ["DB"], "range": "+10 to -10 dB" }
+        { "name": "depth", "units": [{ "token": "DB", "unit": "dB" }], "range": "+10 to -10 dB" }
       ],
       "examples": [":MARK1:AMPL:VAL 2", ":MARK1:AMPL:VAL?"]
     },
@@ -1297,7 +1297,7 @@
       "set": ":TRIGger:ODELay <num>[time suffix]",
       "query": ":TRIGger:ODELay?",
       "parameters": [
-        { "name": "delay", "units": ["S", "MS", "US"], "range": "0 to 3.2 s" }
+        { "name": "delay", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }], "range": "0 to 3.2 s" }
       ],
       "examples": [":TRIG:ODEL 1MS", ":TRIG:ODEL?"]
     },
@@ -1310,7 +1310,7 @@
       "set": ":SWEep:TIME <num>[time suffix]|MAXimum|MINimum",
       "query": ":SWEep:TIME?",
       "parameters": [
-        { "name": "time", "units": ["S", "MS"], "range": "133 ms to 200 s" }
+        { "name": "time", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }], "range": "133 ms to 200 s" }
       ],
       "examples": [":SWE:TIME 100MS", ":SWE:TIME?"]
     },
@@ -1334,7 +1334,7 @@
       "set": ":SWEep:TIME:LLIMit <num>[time suffix]|MAXimum|MINimum",
       "query": ":SWEep:TIME:LLIMit?",
       "parameters": [
-        { "name": "time", "units": ["S", "MS"], "range": "instrument sweep-time range" }
+        { "name": "time", "units": [{ "token": "S", "unit": "s" }, { "token": "MS", "unit": "ms" }], "range": "instrument sweep-time range" }
       ],
       "examples": [":SWE:TIME:LLIM 10MS", ":SWE:TIME:LLIM?"]
     },
@@ -1346,7 +1346,7 @@
       "set": ":SWEep:DWELl <num>[time suffix]|MAXimum|MINimum",
       "query": ":SWEep:DWELl?",
       "parameters": [
-        { "name": "time", "units": ["MS", "US"], "range": "0.1 to 3200 ms" }
+        { "name": "time", "units": [{ "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }], "range": "0.1 to 3200 ms" }
       ],
       "examples": [":SWE:DWEL 1MS", ":SWE:DWEL?"]
     },
@@ -1382,7 +1382,7 @@
       "set": ":SWEep:STEP <num>[freq suffix]|MAXimum|MINimum",
       "query": ":SWEep:STEP?",
       "parameters": [
-        { "name": "step", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "function of current span" }
+        { "name": "step", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "function of current span" }
       ],
       "examples": [":SWE:STEP 100MHZ", ":SWE:STEP?"]
     },
@@ -1499,7 +1499,7 @@
       "set": ":LIST:FREQuency <num>[freq suffix]{,...}|MAXimum|MINimum",
       "query": ":LIST:FREQuency?",
       "parameters": [
-        { "name": "frequencies", "units": ["HZ", "KHZ", "MHZ", "GHZ"], "range": "up to 801 points within specified freq range" }
+        { "name": "frequencies", "units": [{ "token": "HZ", "unit": "Hz" }, { "token": "KHZ", "unit": "kHz" }, { "token": "MHZ", "unit": "MHz" }, { "token": "GHZ", "unit": "GHz" }], "range": "up to 801 points within specified freq range" }
       ],
       "examples": [":LIST:FREQ 1GHZ,2GHZ,3GHZ", ":LIST:FREQ?"]
     },
@@ -1523,7 +1523,7 @@
       "set": ":LIST:DWELl <num>[time suffix]{,...}|MAXimum|MINimum",
       "query": ":LIST:DWELl?",
       "parameters": [
-        { "name": "dwell", "units": ["MS", "US"], "range": "0.1 to 3200 ms, up to 801 values" }
+        { "name": "dwell", "units": [{ "token": "MS", "unit": "ms" }, { "token": "US", "unit": "us" }], "range": "0.1 to 3200 ms, up to 801 values" }
       ],
       "examples": [":LIST:DWEL 1MS", ":LIST:DWEL?"]
     },
@@ -1567,7 +1567,7 @@
       "set": ":LIST[:POWer]:CORRection <num>[DB]{,...}|MAXimum|MINimum",
       "query": ":LIST[:POWer]:CORRection?",
       "parameters": [
-        { "name": "correction", "units": ["DB"], "range": "+40 to -40 dB, up to 801 values" }
+        { "name": "correction", "units": [{ "token": "DB", "unit": "dB" }], "range": "+40 to -40 dB, up to 801 values" }
       ],
       "examples": [":LIST:CORR 0", ":LIST:CORR?"]
     },

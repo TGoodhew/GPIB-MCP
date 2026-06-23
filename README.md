@@ -290,10 +290,10 @@ tool blurbs.
 | `visa_last_error` | — | `resource` | Return the exact, verbatim details (codes + text) of the most recent GPIB/VISA failure |
 | `visa_serial_poll` | `resource` | — | Serial-poll the instrument; return the status byte (decimal + hex) and the named bits set |
 | `visa_wait_srq` | `resource` | `timeout_ms` | Block until the instrument asserts SRQ, or the backstop timeout expires |
-| `instrument_wait_complete` | `resource`, `operation` | `timeout_ms`, `status_model`, `confirm` | Wait for an operation to truly complete via SRQ (data-driven; no fixed-timeout guess). If the model's `statusModel` is missing, pass `status_model` to define-and-persist it (proposes first; writes on `confirm=true`, then waits) |
+| `instrument_wait_complete` | `resource`, `operation` | `timeout_ms`, `status_model`, `confirm` | The **WAIT** step of the arm → wait → read contract: wait for an operation to truly complete via SRQ (data-driven; no fixed-timeout guess) before reading. If the model's `statusModel` is missing, pass `status_model` to define-and-persist it (proposes first; writes on `confirm=true`, then waits) |
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
-| `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
+| `instrument_reference` | `model` | `command`, `search`, `category` | Browse a model's commands, or (with `command=`) get a read/write **recipe**: `read.send` is the exact query string; `write` gives the template + whether to append a suffix token (→ use `resolve_setting`) or send a bare number. Model-level output also carries a `triggering` **arm → wait → read** contract for swept/triggered measurements |
 | `resolve_setting` | `model`, `command`, `value` | `unit` | Map a human value+unit (e.g. 1 GHz) to the exact wire string to send, converting to a token the box accepts (→ `FR 1000 MZ`); see [unit tokens](docs/instrument-unit-tokens.md) |
 | `instrument_identify` | `resource` | `read_bytes` | Query identity and match against the database |
 | `set_termination` | — (`model` or `resource`) | `read_terminator`, `write_terminator`, `max_read_bytes`, `confirm` | Set a model's read/write terminators and an optional bounded read for free-running instruments (persists on `confirm=true`) |

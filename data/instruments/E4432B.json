@@ -115,9 +115,9 @@
         {
           "name": "deviation",
           "units": [
-            "Hz",
-            "kHz",
-            "MHz"
+            {"token": "Hz", "unit": "Hz"},
+            {"token": "kHz", "unit": "kHz"},
+            {"token": "MHz", "unit": "MHz"}
           ]
         }
       ],
@@ -136,8 +136,8 @@
         {
           "name": "phase",
           "units": [
-            "deg",
-            "rad"
+            {"token": "deg", "unit": "deg"},
+            {"token": "RAD", "unit": "rad"}
           ]
         }
       ],
@@ -242,9 +242,9 @@
         {
           "name": "symbol_rate",
           "units": [
-            "sps",
-            "ksps",
-            "Msps"
+            {"unit": "sps"},
+            {"unit": "ksps"},
+            {"unit": "Msps"}
           ]
         }
       ],
@@ -263,9 +263,9 @@
         {
           "name": "bit_rate",
           "units": [
-            "bps",
-            "kbps",
-            "Mbps"
+            {"unit": "bps"},
+            {"unit": "kbps"},
+            {"unit": "Mbps"}
           ]
         }
       ],
@@ -371,7 +371,7 @@
           "name": "rise_time",
           "units": [
             "bits",
-            "s"
+            {"token": "s", "unit": "s"}
           ]
         }
       ],
@@ -391,7 +391,7 @@
           "name": "rise_delay",
           "units": [
             "bits",
-            "s"
+            {"token": "s", "unit": "s"}
           ]
         }
       ],
@@ -411,7 +411,7 @@
           "name": "fall_time",
           "units": [
             "bits",
-            "s"
+            {"token": "s", "unit": "s"}
           ]
         }
       ],
@@ -431,7 +431,7 @@
           "name": "fall_delay",
           "units": [
             "bits",
-            "s"
+            {"token": "s", "unit": "s"}
           ]
         }
       ],
@@ -503,7 +503,7 @@
           "name": "delay",
           "units": [
             "bits",
-            "s"
+            {"token": "s", "unit": "s"}
           ]
         }
       ],

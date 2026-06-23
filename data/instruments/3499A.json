@@ -155,7 +155,7 @@
       "set": "ARM:TIMer <seconds>|MIN|MAX",
       "query": "ARM:TIMer? [MIN|MAX]",
       "parameters": [
-        { "name": "seconds", "units": ["s"], "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments" }
+        { "name": "seconds", "units": [{"unit": "s"}], "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments" }
       ],
       "examples": ["ARM:TIM 5", "ARM:TIM?"]
     },
@@ -179,7 +179,7 @@
       "set": "TRIGger:TIMer <seconds>|MIN|MAX",
       "query": "TRIGger:TIMer? [MIN|MAX]",
       "parameters": [
-        { "name": "seconds", "units": ["s"], "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments" }
+        { "name": "seconds", "units": [{"unit": "s"}], "range": "0.000 (MIN) to 99999.999 (MAX), 0.001 s increments" }
       ],
       "examples": ["TRIG:TIM 5", "TRIG:TIM?"]
     },
@@ -191,7 +191,7 @@
       "set": "[ROUTe:][CHANnel:]DELay <seconds>,<channel_list>|ALL",
       "query": "[ROUTe:][CHANnel:]DELay? <channel_list>",
       "parameters": [
-        { "name": "seconds", "units": ["s"], "range": "0 to 99999.999, 1 ms resolution" },
+        { "name": "seconds", "units": [{"unit": "s"}], "range": "0 to 99999.999, 1 ms resolution" },
         { "name": "channel_list", "range": "Form @snn; single, list, range, grouped, combination; or ALL" }
       ],
       "examples": ["ROUT:CHAN:DEL 2,(@101)", "ROUT:DEL? (@101)"]

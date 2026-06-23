@@ -15,9 +15,9 @@
       "description": "Outputs a sine wave with the specified frequency, amplitude, and offset in a single command.",
       "set": "APPLy:SINusoid [<frequency> [,<amplitude> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 15 MHz (sine)" },
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"], "range": "50 mVpp to 10 Vpp into 50 ohms" },
-        { "name": "offset", "units": ["V"], "range": "function/amplitude dependent" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "100 mHz to 15 MHz (sine)" },
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}], "range": "50 mVpp to 10 Vpp into 50 ohms" },
+        { "name": "offset", "units": [{"unit": "V"}], "range": "function/amplitude dependent" }
       ],
       "examples": ["APPL:SIN 5.0E+3, 3.0, -2.5", "APPL:SIN 5 KHZ, 3.0 VPP, -2.5 V"]
     },
@@ -28,9 +28,9 @@
       "description": "Outputs a square wave with the specified frequency, amplitude, and offset.",
       "set": "APPLy:SQUare [<frequency> [,<amplitude> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 15 MHz" },
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"], "range": "50 mVpp to 10 Vpp into 50 ohms" },
-        { "name": "offset", "units": ["V"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "100 mHz to 15 MHz" },
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}], "range": "50 mVpp to 10 Vpp into 50 ohms" },
+        { "name": "offset", "units": [{"unit": "V"}] }
       ],
       "examples": ["APPL:SQU 2000, 4.0, 0"]
     },
@@ -41,9 +41,9 @@
       "description": "Outputs a triangle wave with the specified frequency, amplitude, and offset.",
       "set": "APPLy:TRIangle [<frequency> [,<amplitude> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 100 kHz" },
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
-        { "name": "offset", "units": ["V"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "100 mHz to 100 kHz" },
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}] },
+        { "name": "offset", "units": [{"unit": "V"}] }
       ],
       "examples": ["APPL:TRI 1000, 2.0, 0"]
     },
@@ -54,9 +54,9 @@
       "description": "Outputs a ramp wave with the specified frequency, amplitude, and offset.",
       "set": "APPLy:RAMP [<frequency> [,<amplitude> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 100 kHz" },
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
-        { "name": "offset", "units": ["V"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "100 mHz to 100 kHz" },
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}] },
+        { "name": "offset", "units": [{"unit": "V"}] }
       ],
       "examples": ["APPL:RAMP 1000, 5.0, 0"]
     },
@@ -67,9 +67,9 @@
       "description": "Outputs noise with the specified amplitude and offset. The frequency parameter is ignored but a value or DEFault must be specified.",
       "set": "APPLy:NOISe [<frequency|DEFault> [,<amplitude> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "ignored; specify value or DEFault" },
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
-        { "name": "offset", "units": ["V"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "ignored; specify value or DEFault" },
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}] },
+        { "name": "offset", "units": [{"unit": "V"}] }
       ],
       "examples": ["APPL:NOIS DEF, 5.0, 0"]
     },
@@ -80,9 +80,9 @@
       "description": "Outputs a DC voltage. Frequency and amplitude parameters are ignored but a value or DEFault must be specified; the offset sets the DC level.",
       "set": "APPLy:DC [<frequency|DEFault> [,<amplitude|DEFault> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "ignored; specify value or DEFault" },
-        { "name": "amplitude", "units": ["V"], "range": "ignored; specify value or DEFault" },
-        { "name": "offset", "units": ["V"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "ignored; specify value or DEFault" },
+        { "name": "amplitude", "units": [{"unit": "V"}], "range": "ignored; specify value or DEFault" },
+        { "name": "offset", "units": [{"unit": "V"}] }
       ],
       "examples": ["APPL:DC DEF, DEF, 2.5"]
     },
@@ -93,9 +93,9 @@
       "description": "Outputs the arbitrary waveform currently selected by FUNCtion:USER, with the specified frequency, amplitude, and offset.",
       "set": "APPLy:USER [<frequency> [,<amplitude> [,<offset>]]]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 5 MHz (arb point dependent)" },
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"] },
-        { "name": "offset", "units": ["V"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "100 mHz to 5 MHz (arb point dependent)" },
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}] },
+        { "name": "offset", "units": [{"unit": "V"}] }
       ],
       "examples": ["APPL:USER 1000, 5.0, 0"]
     },
@@ -127,7 +127,7 @@
       "set": "[SOURce:]FREQuency {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]FREQuency? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "100 mHz to 15 MHz (function dependent)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "100 mHz to 15 MHz (function dependent)" }
       ],
       "examples": ["FREQ 5.0E+3", "FREQ? MAX"]
     },
@@ -139,7 +139,7 @@
       "set": "[SOURce:]PULSe:DCYCle {<percent>|MINimum|MAXimum}",
       "query": "[SOURce:]PULSe:DCYCle? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "percent", "units": ["%"], "range": "square waves only" }
+        { "name": "percent", "units": [{"unit": "%"}], "range": "square waves only" }
       ],
       "examples": ["PULS:DCYC 45", "PULS:DCYC?"]
     },
@@ -151,7 +151,7 @@
       "set": "[SOURce:]VOLTage {<amplitude>|MINimum|MAXimum}",
       "query": "[SOURce:]VOLTage? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "amplitude", "units": ["Vpp", "Vrms", "dBm"], "range": "50 mVpp to 10 Vpp into 50 ohms" }
+        { "name": "amplitude", "units": [{"unit": "Vpp"}, {"unit": "Vrms"}, {"unit": "dBm"}], "range": "50 mVpp to 10 Vpp into 50 ohms" }
       ],
       "examples": ["VOLT 3.0", "VOLT? MAX"]
     },
@@ -163,7 +163,7 @@
       "set": "[SOURce:]VOLTage:OFFSet {<offset>|MINimum|MAXimum}",
       "query": "[SOURce:]VOLTage:OFFSet? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "offset", "units": ["V"], "range": "amplitude/function dependent" }
+        { "name": "offset", "units": [{"unit": "V"}], "range": "amplitude/function dependent" }
       ],
       "examples": ["VOLT:OFFS -2.5", "VOLT:OFFS?"]
     },
@@ -187,7 +187,7 @@
       "set": "OUTPut:LOAD {50|INFinity|MINimum|MAXimum}",
       "query": "OUTPut:LOAD? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "load", "units": ["ohm"], "range": "50|INFinity (open circuit)" }
+        { "name": "load", "units": [{"unit": "Ohm"}], "range": "50|INFinity (open circuit)" }
       ],
       "examples": ["OUTP:LOAD 50", "OUTP:LOAD INF"]
     },
@@ -211,7 +211,7 @@
       "set": "[SOURce:]AM:DEPTh {<depth in percent>|MINimum|MAXimum}",
       "query": "[SOURce:]AM:DEPTh? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "depth", "units": ["%"] }
+        { "name": "depth", "units": [{"unit": "%"}] }
       ],
       "examples": ["AM:DEPT 80", "AM:DEPT?"]
     },
@@ -235,7 +235,7 @@
       "set": "[SOURce:]AM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]AM:INTernal:FREQuency? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["AM:INT:FREQ 100", "AM:INT:FREQ?"]
     },
@@ -271,7 +271,7 @@
       "set": "[SOURce:]FM:DEViation {<peak deviation in Hz>|MINimum|MAXimum}",
       "query": "[SOURce:]FM:DEViation? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "deviation", "units": ["Hz"] }
+        { "name": "deviation", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["FM:DEV 100", "FM:DEV?"]
     },
@@ -295,7 +295,7 @@
       "set": "[SOURce:]FM:INTernal:FREQuency {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]FM:INTernal:FREQuency? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["FM:INT:FREQ 100", "FM:INT:FREQ?"]
     },
@@ -331,7 +331,7 @@
       "set": "[SOURce:]BM:PHASe {<degrees>|MINimum|MAXimum}",
       "query": "[SOURce:]BM:PHASe? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "phase", "units": ["degrees"], "range": "-360 to +360" }
+        { "name": "phase", "units": [{"unit": "deg"}], "range": "-360 to +360" }
       ],
       "examples": ["BM:PHAS 0", "BM:PHAS?"]
     },
@@ -343,7 +343,7 @@
       "set": "[SOURce:]BM:INTernal:RATE {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]BM:INTernal:RATE? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "rate", "units": ["Hz"] }
+        { "name": "rate", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["BM:INT:RATE 100", "BM:INT:RATE?"]
     },
@@ -379,7 +379,7 @@
       "set": "[SOURce:]FSKey:FREQuency {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]FSKey:FREQuency? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["FSK:FREQ 500", "FSK:FREQ?"]
     },
@@ -391,7 +391,7 @@
       "set": "[SOURce:]FSKey:INTernal:RATE {<rate in Hz>|MINimum|MAXimum}",
       "query": "[SOURce:]FSKey:INTernal:RATE? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "rate", "units": ["Hz"] }
+        { "name": "rate", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["FSK:INT:RATE 100", "FSK:INT:RATE?"]
     },
@@ -427,7 +427,7 @@
       "set": "[SOURce:]FREQuency:STARt {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]FREQuency:STARt? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["FREQ:STAR 100", "FREQ:STAR?"]
     },
@@ -439,7 +439,7 @@
       "set": "[SOURce:]FREQuency:STOP {<frequency>|MINimum|MAXimum}",
       "query": "[SOURce:]FREQuency:STOP? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"] }
+        { "name": "frequency", "units": [{"unit": "Hz"}] }
       ],
       "examples": ["FREQ:STOP 10000", "FREQ:STOP?"]
     },
@@ -463,7 +463,7 @@
       "set": "[SOURce:]SWEep:TIME {<seconds>|MINimum|MAXimum}",
       "query": "[SOURce:]SWEep:TIME? [MINimum|MAXimum]",
       "parameters": [
-        { "name": "seconds", "units": ["s"] }
+        { "name": "seconds", "units": [{"unit": "s"}] }
       ],
       "examples": ["SWE:TIME 1", "SWE:TIME?"]
     },

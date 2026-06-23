@@ -592,7 +592,7 @@
           "name": "impedance",
           "range": "50 or 1E6",
           "units": [
-            "OHM"
+            { "token": "OHM", "unit": "Ohm" }
           ]
         }
       ],
@@ -676,7 +676,7 @@
           "name": "percent",
           "range": "0 to 100",
           "units": [
-            "PCT"
+            { "token": "PCT", "unit": "%" }
           ]
         }
       ],
@@ -696,7 +696,7 @@
           "name": "percent",
           "range": "0 to 100",
           "units": [
-            "PCT"
+            { "token": "PCT", "unit": "%" }
           ]
         }
       ],

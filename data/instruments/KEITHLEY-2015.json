@@ -206,7 +206,7 @@
       "set": "[SENSe[1]]:HOLD:WINDow <NRf>",
       "query": "[SENSe[1]]:HOLD:WINDow?",
       "parameters": [
-        { "name": "window", "units": ["%"], "range": "0.01 to 20 (default 1)" }
+        { "name": "window", "units": [{"unit": "%"}], "range": "0.01 to 20 (default 1)" }
       ],
       "examples": ["HOLD:WIND 1"]
     },
@@ -242,7 +242,7 @@
       "set": "[SENSe[1]]:VOLTage:DC:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:VOLTage:DC:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "0 to 1010 (default 1000)" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "0 to 1010 (default 1000)" }
       ],
       "examples": ["VOLT:DC:RANG 10"]
     },
@@ -266,7 +266,7 @@
       "set": "[SENSe[1]]:VOLTage:DC:NPLCycles <n>",
       "query": "[SENSe[1]]:VOLTage:DC:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10 (default 1)" }
       ],
       "examples": ["VOLT:DC:NPLC 0.01"]
     },
@@ -326,7 +326,7 @@
       "set": "[SENSe[1]]:VOLTage:DC:REFerence <n>",
       "query": "[SENSe[1]]:VOLTage:DC:REFerence?",
       "parameters": [
-        { "name": "reference", "units": ["V"], "range": "-1010 to +1010 (default 0)" }
+        { "name": "reference", "units": [{"unit": "V"}], "range": "-1010 to +1010 (default 0)" }
       ],
       "examples": ["VOLT:DC:REF 0"]
     },
@@ -358,7 +358,7 @@
       "set": "[SENSe[1]]:VOLTage:AC:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:VOLTage:AC:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "0 to 757.5 (default 757.5)" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "0 to 757.5 (default 757.5)" }
       ],
       "examples": ["VOLT:AC:RANG 7.5"]
     },
@@ -382,7 +382,7 @@
       "set": "[SENSe[1]]:VOLTage:AC:NPLCycles <n>",
       "query": "[SENSe[1]]:VOLTage:AC:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10 (default 1)" }
       ],
       "examples": ["VOLT:AC:NPLC 1"]
     },
@@ -394,7 +394,7 @@
       "set": "[SENSe[1]]:VOLTage:AC:DETector:BANDwidth <NRf>",
       "query": "[SENSe[1]]:VOLTage:AC:DETector:BANDwidth?",
       "parameters": [
-        { "name": "bandwidth", "units": ["Hz"], "range": "3 to 300e3 (default 30)" }
+        { "name": "bandwidth", "units": [{"unit": "Hz"}], "range": "3 to 300e3 (default 30)" }
       ],
       "examples": ["VOLT:AC:DET:BAND 30"]
     },
@@ -406,7 +406,7 @@
       "set": "[SENSe[1]]:CURRent:DC:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:CURRent:DC:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "0 to 3.1 (default 3)" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "0 to 3.1 (default 3)" }
       ],
       "examples": ["CURR:DC:RANG 3"]
     },
@@ -430,7 +430,7 @@
       "set": "[SENSe[1]]:CURRent:DC:NPLCycles <n>",
       "query": "[SENSe[1]]:CURRent:DC:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10 (default 1)" }
       ],
       "examples": ["CURR:DC:NPLC 1"]
     },
@@ -442,7 +442,7 @@
       "set": "[SENSe[1]]:CURRent:AC:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:CURRent:AC:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "0 to 3.1 (default 3)" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "0 to 3.1 (default 3)" }
       ],
       "examples": ["CURR:AC:RANG 3"]
     },
@@ -466,7 +466,7 @@
       "set": "[SENSe[1]]:RESistance:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:RESistance:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["ohm"], "range": "0 to 120e6 (default 100e6)" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "0 to 120e6 (default 100e6)" }
       ],
       "examples": ["RES:RANG 1e3"]
     },
@@ -490,7 +490,7 @@
       "set": "[SENSe[1]]:RESistance:NPLCycles <n>",
       "query": "[SENSe[1]]:RESistance:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10 (default 1)" }
       ],
       "examples": ["RES:NPLC 1"]
     },
@@ -502,7 +502,7 @@
       "set": "[SENSe[1]]:FRESistance:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:FRESistance:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["ohm"], "range": "0 to 101e6 (default 100e6)" }
+        { "name": "range", "units": [{"unit": "Ohm"}], "range": "0 to 101e6 (default 100e6)" }
       ],
       "examples": ["FRES:RANG 1e3"]
     },
@@ -526,7 +526,7 @@
       "set": "[SENSe[1]]:TEMPerature:NPLCycles <n>",
       "query": "[SENSe[1]]:TEMPerature:NPLCycles?",
       "parameters": [
-        { "name": "nplc", "units": ["PLC"], "range": "0.01 to 10 (default 1)" }
+        { "name": "nplc", "units": [{"unit": "PLC"}], "range": "0.01 to 10 (default 1)" }
       ],
       "examples": ["TEMP:NPLC 1"]
     },
@@ -562,7 +562,7 @@
       "set": "[SENSe[1]]:FREQuency:APERture <n>",
       "query": "[SENSe[1]]:FREQuency:APERture?",
       "parameters": [
-        { "name": "aperture", "units": ["s"], "range": "0.01 to 1.0 (default 1.0)" }
+        { "name": "aperture", "units": [{"unit": "s"}], "range": "0.01 to 1.0 (default 1.0)" }
       ],
       "examples": ["FREQ:APER 1.0"]
     },
@@ -574,7 +574,7 @@
       "set": "[SENSe[1]]:FREQuency:THReshold:VOLTage:RANGe <n>",
       "query": "[SENSe[1]]:FREQuency:THReshold:VOLTage:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "0 to 1010 (default 10)" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "0 to 1010 (default 10)" }
       ],
       "examples": ["FREQ:THR:VOLT:RANG 10"]
     },
@@ -586,7 +586,7 @@
       "set": "[SENSe[1]]:PERiod:APERture <n>",
       "query": "[SENSe[1]]:PERiod:APERture?",
       "parameters": [
-        { "name": "aperture", "units": ["s"], "range": "0.01 to 1.0 (default 1.0)" }
+        { "name": "aperture", "units": [{"unit": "s"}], "range": "0.01 to 1.0 (default 1.0)" }
       ],
       "examples": ["PER:APER 1.0"]
     },
@@ -598,7 +598,7 @@
       "set": "[SENSe[1]]:PERiod:THReshold:VOLTage:RANGe <n>",
       "query": "[SENSe[1]]:PERiod:THReshold:VOLTage:RANGe?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "0 to 1010 (default 10)" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "0 to 1010 (default 10)" }
       ],
       "examples": ["PER:THR:VOLT:RANG 10"]
     },
@@ -610,7 +610,7 @@
       "set": "[SENSe[1]]:DIODe:CURRent:RANGe[:UPPer] <NRf>",
       "query": "[SENSe[1]]:DIODe:CURRent:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["A"], "range": "0 to 1e-3 (default 1e-3)" }
+        { "name": "range", "units": [{"unit": "A"}], "range": "0 to 1e-3 (default 1e-3)" }
       ],
       "examples": ["DIOD:CURR:RANG 1e-3"]
     },
@@ -622,7 +622,7 @@
       "set": "[SENSe[1]]:CONTinuity:THReshold <NRf>",
       "query": "[SENSe[1]]:CONTinuity:THReshold?",
       "parameters": [
-        { "name": "threshold", "units": ["ohm"], "range": "1 to 1000 (default 10)" }
+        { "name": "threshold", "units": [{"unit": "Ohm"}], "range": "1 to 1000 (default 10)" }
       ],
       "examples": ["CONT:THR 10"]
     },
@@ -646,7 +646,7 @@
       "set": "[SENSe[1]]:DISTortion:RANGe[:UPPer] <n>",
       "query": "[SENSe[1]]:DISTortion:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "range", "units": ["V"], "range": "0 to 757.5 (default 757.5)" }
+        { "name": "range", "units": [{"unit": "V"}], "range": "0 to 757.5 (default 757.5)" }
       ],
       "examples": ["DIST:RANG 7.5"]
     },
@@ -718,7 +718,7 @@
       "set": "[SENSe[1]]:DISTortion:FREQuency[:SET] <NRf>",
       "query": "[SENSe[1]]:DISTortion:FREQuency[:SET]?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "20 to 20000 (default 60)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "20 to 20000 (default 60)" }
       ],
       "examples": ["DIST:FREQ 1000", "DIST:FREQ 20"]
     },
@@ -810,7 +810,7 @@
       "set": "[SENSe[1]]:DISTortion:HCO <NRf>",
       "query": "[SENSe[1]]:DISTortion:HCO?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "20 to 50000, above LCO (default 50000)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "20 to 50000, above LCO (default 50000)" }
       ],
       "examples": ["DIST:HCO 50000"]
     },
@@ -834,7 +834,7 @@
       "set": "[SENSe[1]]:DISTortion:LCO <NRf>",
       "query": "[SENSe[1]]:DISTortion:LCO?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "20 to 50000, below HCO (default 20)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "20 to 50000, below HCO (default 20)" }
       ],
       "examples": ["DIST:LCO 20"]
     },
@@ -909,7 +909,7 @@
       "description": "Move the present location marker to the bin associated with the specified frequency (Model 2015-P).",
       "set": "[SENSe[1]]:DISTortion:PEAK:SRF <freq>",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "20 to 50e3" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "20 to 50e3" }
       ],
       "examples": ["DIST:PEAK:SRF 600"]
     },
@@ -937,7 +937,7 @@
       "set": "[SENSe[1]]:DISTortion:PEAK:LOWER <freq>",
       "query": "[SENSe[1]]:DISTortion:PEAK:LOWER?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "20 to 50e3 (default 20)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "20 to 50e3 (default 20)" }
       ],
       "examples": ["DIST:PEAK:LOWER 20"]
     },
@@ -949,7 +949,7 @@
       "set": "[SENSe[1]]:DISTortion:PEAK:UPPER <freq>",
       "query": "[SENSe[1]]:DISTortion:PEAK:UPPER?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "20 to 50e3 (default 20480)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "20 to 50e3 (default 20480)" }
       ],
       "examples": ["DIST:PEAK:UPPER 20480"]
     },
@@ -961,7 +961,7 @@
       "set": "[SENSe[1]]:DISTortion:PEAK:LIST <freqlist>",
       "query": "[SENSe[1]]:DISTortion:PEAK:LIST?",
       "parameters": [
-        { "name": "freqlist", "units": ["Hz"], "range": "up to 50 frequencies" }
+        { "name": "freqlist", "units": [{"unit": "Hz"}], "range": "up to 50 frequencies" }
       ],
       "examples": ["DIST:PEAK:LIST 1e3,1.1e3,1.2e3"]
     },
@@ -1322,7 +1322,7 @@
       "set": "UNIT:VOLTage:AC:DB:REFerence <n>",
       "query": "UNIT:VOLTage:AC:DB:REFerence?",
       "parameters": [
-        { "name": "reference", "units": ["V"], "range": "1e-7 to 1000 (default 1)" }
+        { "name": "reference", "units": [{"unit": "V"}], "range": "1e-7 to 1000 (default 1)" }
       ],
       "examples": ["UNIT:VOLT:AC:DB:REF 1"]
     },
@@ -1334,7 +1334,7 @@
       "set": "UNIT:VOLTage:AC:DBM:IMPedance <n>",
       "query": "UNIT:VOLTage:AC:DBM:IMPedance?",
       "parameters": [
-        { "name": "impedance", "units": ["ohm"], "range": "1 to 9999 (default 75)" }
+        { "name": "impedance", "units": [{"unit": "Ohm"}], "range": "1 to 9999 (default 75)" }
       ],
       "examples": ["UNIT:VOLT:AC:DBM:IMP 600"]
     },
@@ -1382,7 +1382,7 @@
       "set": "OUTPut:FREQuency <NRf>",
       "query": "OUTPut:FREQuency?",
       "parameters": [
-        { "name": "frequency", "units": ["Hz"], "range": "10 to 20000 (default 60)" }
+        { "name": "frequency", "units": [{"unit": "Hz"}], "range": "10 to 20000 (default 60)" }
       ],
       "examples": ["OUTP:FREQ 1000"]
     },
@@ -1394,7 +1394,7 @@
       "set": "OUTPut:AMPLitude <NRf>",
       "query": "OUTPut:AMPLitude?",
       "parameters": [
-        { "name": "amplitude", "units": ["V"], "range": "0 to 4 for HIZ, 0 to 2 for others (default 0.5)" }
+        { "name": "amplitude", "units": [{"unit": "V"}], "range": "0 to 4 for HIZ, 0 to 2 for others (default 0.5)" }
       ],
       "examples": ["OUTP:AMPL 0.25"]
     },
@@ -1447,7 +1447,7 @@
       "set": "OUTPut:LIST:DELay <NRf>",
       "query": "OUTPut:LIST:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s"], "range": "seconds (default 0)" }
+        { "name": "delay", "units": [{"unit": "s"}], "range": "seconds (default 0)" }
       ],
       "examples": ["OUTP:LIST:DEL 0.1"]
     },
@@ -1551,7 +1551,7 @@
       "set": "TRIGger[:SEQuence[1]]:DELay <n>",
       "query": "TRIGger[:SEQuence[1]]:DELay?",
       "parameters": [
-        { "name": "delay", "units": ["s"], "range": "0 to 999999.999 (default 0)" }
+        { "name": "delay", "units": [{"unit": "s"}], "range": "0 to 999999.999 (default 0)" }
       ],
       "examples": ["TRIG:DEL 0"]
     },
@@ -1587,7 +1587,7 @@
       "set": "TRIGger[:SEQuence[1]]:TIMer <n>",
       "query": "TRIGger[:SEQuence[1]]:TIMer?",
       "parameters": [
-        { "name": "interval", "units": ["s"], "range": "0.001 to 999999.999 (default 0.1)" }
+        { "name": "interval", "units": [{"unit": "s"}], "range": "0.001 to 999999.999 (default 0.1)" }
       ],
       "examples": ["TRIG:TIM 0.1"]
     },
