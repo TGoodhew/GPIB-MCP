@@ -144,7 +144,15 @@ namespace GpibMcp.Instruments
     /// <summary>Tunables for the plotter-emulation capture (KE5FX-derived defaults).</summary>
     public sealed class CaptureOptions
     {
-        public int PerReadTimeoutMs { get; set; } = 1000;
+        /// <summary>
+        /// How long each read blocks waiting for data before returning (and, when empty, letting the loop
+        /// poll again). The streaming phase is bounded by the instrument's HP-GL plotter output rate
+        /// (~2 KB/s on an 8563E - confirmed against the KE5FX reference), so this does NOT speed up the
+        /// transfer; it sets how promptly we catch the first byte and notice the plot has finished. KE5FX
+        /// uses 1000 ms; we use a shorter poll to trim the warm-up and tail (#53), bounded by
+        /// <see cref="InactivityTimeoutMs"/>/<see cref="OverallTimeoutMs"/>.
+        /// </summary>
+        public int PerReadTimeoutMs { get; set; } = 250;
         public int InactivityTimeoutMs { get; set; } = 3500;
         public int OverallTimeoutMs { get; set; } = 30000;
         public int MinPlotBytes { get; set; } = 128;
@@ -217,7 +225,20 @@ namespace GpibMcp.Instruments
                 }
 
                 if (!read.TimedOut)
+                {
+                    // Early completion (#53 tail): a SHORT, non-timed-out read ended on EOI/term - the
+                    // instrument finished a block, not mid-burst (a full-buffer read returns n == chunk).
+                    // If the end marker is already at the tail, finish now instead of burning a whole
+                    // PerReadTimeoutMs waiting for the next (empty) read to time out.
+                    if (n > 0 && n < o.ReadChunkSize && buffer.Length >= o.MinPlotBytes)
+                    {
+                        if (o.Mode == CaptureMode.PlotterEmulation && PenUpInTail(buffer, o.ReadChunkSize))
+                            return Result(buffer, start, nowMs(), CaptureCompletion.PenUp, reads, firstByteAt, lastByteAt);
+                        if (o.Mode == CaptureMode.PrinterStream && EndOfPrintInTail(buffer, o.ReadChunkSize))
+                            return Result(buffer, start, nowMs(), CaptureCompletion.EndMarker, reads, firstByteAt, lastByteAt);
+                    }
                     continue; // data still flowing - keep reading
+                }
 
                 // A pause. In plotter emulation the instrument may be waiting for a plotter reply;
                 // a PCL printer stream never handshakes, so we only answer queries in plot mode.
