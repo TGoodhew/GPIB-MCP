@@ -57,6 +57,11 @@ namespace GpibMcp.Tools
                           "built-in database (" + Stats() + "); capture an instrument's screen as an inline SVG " +
                           "(HP-GL emulation); wait for an operation to truly finish via SRQ; and report exact " +
                           "decoded VISA errors with a command history.");
+            sb.AppendLine("Sending the right string: call instrument_reference(model, command=<name>) for a " +
+                          "read/write recipe - 'read.send' is the EXACT string to query; for a write, use " +
+                          "resolve_setting(model, command, value, unit) to get the exact set string (it picks the " +
+                          "device's wire suffix and converts units) rather than guessing. The mnemonic alone is " +
+                          "rarely the right thing to put on the wire.");
             sb.AppendLine("When the user asks what this tool can do, or which instruments/commands are supported, " +
                           "call the gpib_overview tool for a detailed, structured answer with example asks rather " +
                           "than guessing from individual tool descriptions.");
@@ -100,9 +105,12 @@ namespace GpibMcp.Tools
 
             Section(sb, "Instrument command database",
                 "A built-in reference of " + ModelCount + " models and " + CommandCount.ToString("N0") + " documented " +
-                "commands. Browse the catalogue, look up a model's commands (with mnemonics, set/query forms, parameters " +
-                "and examples), and extend it: add or refresh a model and override bundled entries with your own (user " +
-                "copies win and persist).",
+                "commands. Browse the catalogue or look up a model's commands. Per command, instrument_reference returns " +
+                "a READ/WRITE RECIPE: 'read.send' is the exact string to put on the wire to query it; 'write' gives the " +
+                "template plus how to fill it. To set a value, call resolve_setting(model, command, value, unit) - it " +
+                "maps the human value to the EXACT string, picking the device's wire suffix token and converting units " +
+                "(e.g. 1 GHz -> 'FR 1000 MZ'), so you never guess. Extend the DB too: add/refresh a model and override " +
+                "bundled entries (user copies win and persist).",
                 new[] { "\"Show the commands for an HP 3458A.\"", "\"List the spectrum analyzers you know.\"",
                         "\"How do I set the resolution bandwidth on the 8563E?\"" });
 

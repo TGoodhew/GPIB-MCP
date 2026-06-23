@@ -114,15 +114,62 @@ namespace GpibMcp.Tests
             Assert.NotNull(json["commandIndex"]);
         }
 
-        [Fact]
-        public void Reference_SpecificCommand_ReturnsDetail()
+        /// <summary>A model whose commands exercise all three recipe shapes: suffix-token, tokenless, literal action.</summary>
+        private static InstrumentDefinition RecipeModel() => new InstrumentDefinition
         {
-            var (db, store, visa) = Fixture();
-            var text = Tool("instrument_reference", db, store, visa)
-                .InvokeText(new JObject { ["model"] = "8563E", ["command"] = "CF" });
-            var json = JObject.Parse(text);
-            Assert.Equal("center_frequency", (string)json["name"]);
-            Assert.Equal("CF?", (string)json["query"]);
+            Model = "REC1",
+            Commands = new List<InstrumentCommand>
+            {
+                new InstrumentCommand { Name = "center_frequency", Mnemonic = "CF", Category = "Frequency",
+                    Description = "Center frequency.", Set = "CF <n><unit>", Query = "CF?",
+                    Parameters = new List<CommandParameter> { new CommandParameter { Name = "freq", Range = "0-2 GHz",
+                        Units = new List<UnitToken> { new UnitToken("HZ","Hz"), new UnitToken("KZ","kHz"), new UnitToken("MZ","MHz") } } } },
+                new InstrumentCommand { Name = "channel_offset", Mnemonic = "OFFS", Description = "DC offset.",
+                    Set = ":OFFS <v>",
+                    Parameters = new List<CommandParameter> { new CommandParameter { Name = "off",
+                        Units = new List<UnitToken> { new UnitToken(null, "V") } } } },   // tokenless
+                new InstrumentCommand { Name = "preset", Mnemonic = "IP", Description = "Instrument preset.", Set = "IP" },
+            }
+        };
+
+        private static JObject Recipe(string command)
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { RecipeModel() });
+            var text = Tool("instrument_reference", db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .InvokeText(new JObject { ["model"] = "REC1", ["command"] = command });
+            return JObject.Parse(text);
+        }
+
+        [Fact]
+        public void Reference_SpecificCommand_ReturnsReadWriteRecipe()
+        {
+            var json = Recipe("CF");
+            Assert.Equal("center_frequency", (string)json["command"]);
+            // READ: the query string is given verbatim as the thing to send.
+            Assert.Equal("CF?", (string)json["read"]["send"]);
+            // WRITE: a suffix-token command points at resolve_setting and lists unit=token pairs.
+            Assert.NotNull(json["write"]);
+            Assert.Contains("resolve_setting", (string)json["write"]["howToWrite"]);
+            Assert.Contains("MHz=MZ", (string)json["write"]["units"]);   // unit=token summary
+        }
+
+        [Fact]
+        public void Reference_TokenlessCommand_SaysSendBareNumber()
+        {
+            var json = Recipe("channel_offset");
+            // A SCPI bare-number param: the recipe must tell the model NOT to append a suffix.
+            Assert.Contains("bare number", (string)json["write"]["units"]);
+            Assert.Contains("V", (string)json["write"]["units"]);
+            Assert.Null(json["read"]);   // write-only (no query)
+        }
+
+        [Fact]
+        public void Reference_ActionCommand_GivesLiteralSend()
+        {
+            var json = Recipe("preset");
+            // A literal action ("IP") is given as an exact send string, not a template to fill.
+            Assert.Equal("IP", (string)json["write"]["send"]);
+            Assert.Null(json["read"]);
         }
 
         [Fact]

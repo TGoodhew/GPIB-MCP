@@ -68,7 +68,9 @@ namespace GpibMcp.Tools
                 "instrument_reference",
                 "Get a model's command reference from the database so you can work out what it can do. " +
                 "With no command/search, returns metadata plus a compact command index; pass command=<name " +
-                "or mnemonic> for full detail of one command, or search=/category= to filter.",
+                "or mnemonic> for a READ/WRITE RECIPE for that command - 'read.send' is the EXACT string to put " +
+                "on the wire to query it, and 'write' tells you the template + how to fill it (use resolve_setting " +
+                "for value+unit so you never guess the suffix). Or use search=/category= to filter.",
                 Schema(
                     Required("model", "string", "Model name or alias, e.g. '8563E'."),
                     Prop("command", "string", "Return full detail for this command (name or mnemonic)."),
@@ -87,7 +89,7 @@ namespace GpibMcp.Tools
                         var cmd = FindCommand(def, command);
                         if (cmd == null)
                             return "Model '" + def.Model + "' has no command matching '" + command + "'.";
-                        return JsonConvert.SerializeObject(cmd, JsonSettings);
+                        return BuildRecipe(def, cmd).ToString(Formatting.Indented);
                     }
 
                     IEnumerable<InstrumentCommand> cmds = def.Commands ?? new List<InstrumentCommand>();
@@ -618,6 +620,101 @@ namespace GpibMcp.Tools
             return def.Commands.FirstOrDefault(c =>
                 string.Equals(c.Name, key, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(c.Mnemonic, key, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Presents one command as an explicit READ/WRITE recipe (#47): the exact string to send to read,
+        /// and how to build the write (pointing at <c>resolve_setting</c> for value+unit so the model never
+        /// guesses a wire suffix). Derived from the existing fields - no schema change.
+        /// </summary>
+        private static JObject BuildRecipe(InstrumentDefinition def, InstrumentCommand cmd)
+        {
+            var r = new JObject
+            {
+                ["model"] = def.Model,
+                ["command"] = cmd.Name,
+                ["mnemonic"] = cmd.Mnemonic,
+                ["category"] = cmd.Category,
+                ["description"] = cmd.Description,
+            };
+
+            // READ: the query string goes on the wire verbatim.
+            if (!string.IsNullOrEmpty(cmd.Query))
+                r["read"] = new JObject
+                {
+                    ["send"] = cmd.Query,
+                    ["then"] = "Send this exact string, then read the response to the terminator and parse the value."
+                };
+
+            // WRITE: a settable value parameter (one carrying unit tokens) - prefer an audited one.
+            var settable = (cmd.Parameters ?? new List<CommandParameter>())
+                .Where(p => p.Units != null && p.Units.Count > 0)
+                .OrderByDescending(p => p.Units.Any(u => u.IsAudited))
+                .FirstOrDefault();
+
+            if (settable != null)
+            {
+                var summary = UnitsSummary(settable);
+                var w = new JObject { ["template"] = cmd.Set ?? (cmd.Mnemonic + " <value><unit>") };
+                if (summary.Mode == "suffix")
+                {
+                    w["units"] = "Append a wire suffix token after the value. Accepts (unit=token): " + summary.Accepts + ".";
+                    w["howToWrite"] = "Call resolve_setting(model='" + def.Model + "', command='" + cmd.Name +
+                        "', value=<n>, unit='<unit>') to get the EXACT string to send - it picks the right token and " +
+                        "converts the unit. Do not guess the suffix.";
+                }
+                else if (summary.Mode == "bareNumber")
+                {
+                    w["units"] = "Send a bare number with NO unit suffix. The value is in: " + summary.Accepts + ".";
+                    w["howToWrite"] = "Substitute the number into the template (no suffix). resolve_setting(model='" +
+                        def.Model + "', command='" + cmd.Name + "', value=<n>, unit='<unit>') will format/convert it too.";
+                }
+                else // unaudited
+                {
+                    w["units"] = "Unit tokens not yet audited (#46) - follow the documented set form exactly.";
+                    w["howToWrite"] = "Send the documented form: " + (cmd.Set ?? cmd.Mnemonic ?? "?") + ".";
+                }
+                if (!string.IsNullOrEmpty(settable.Range)) w["range"] = settable.Range;
+                if (cmd.Examples != null && cmd.Examples.Count > 0) w["examples"] = JArray.FromObject(cmd.Examples);
+                r["write"] = w;
+            }
+            else if (!string.IsNullOrEmpty(cmd.Set))
+            {
+                // Parameter-free write: a literal action ("*RST", "OUTP ON", "SNGLS;TS;") or a templated set.
+                bool literal = cmd.Set.IndexOf('<') < 0;
+                var w = new JObject();
+                if (literal) { w["send"] = cmd.Set; w["then"] = "Write-only; send this exact string. No response to read."; }
+                else { w["template"] = cmd.Set; w["howToWrite"] = "Substitute the <...> placeholders, then write the string."; }
+                if (cmd.Examples != null && cmd.Examples.Count > 0) w["examples"] = JArray.FromObject(cmd.Examples);
+                r["write"] = w;
+            }
+            else if (string.IsNullOrEmpty(cmd.Query) && !string.IsNullOrEmpty(cmd.Mnemonic))
+            {
+                // No set, no query: an action whose mnemonic IS the wire string (e.g. take_sweep "TS").
+                r["write"] = new JObject
+                {
+                    ["send"] = cmd.Mnemonic,
+                    ["then"] = "Action command - send this exact string; there is no value to substitute."
+                };
+            }
+
+            // Full parameter detail (names, descriptions, ranges, tokens) for completeness when present.
+            if (cmd.Parameters != null && cmd.Parameters.Count > 0)
+                r["parameters"] = JArray.FromObject(cmd.Parameters, Serializer());
+
+            return r;
+        }
+
+        /// <summary>Summarises a settable parameter's units for the recipe: a suffix-token list, a bare-number
+        /// unit list, or "unaudited" (#46/#47).</summary>
+        private static (string Mode, string Accepts) UnitsSummary(CommandParameter param)
+        {
+            var audited = param.Units.Where(u => u.IsAudited).ToList();
+            if (audited.Count == 0) return ("unaudited", null);
+            var withToken = audited.Where(u => u.HasWireToken).ToList();
+            if (withToken.Count > 0)
+                return ("suffix", string.Join(", ", withToken.Select(u => u.Unit + "=" + u.Token)));
+            return ("bareNumber", string.Join(", ", audited.Select(u => u.Unit).Distinct()));
         }
 
         /// <summary>Builds the literal set string from the command's <c>set</c> template (unit placeholder -&gt;
