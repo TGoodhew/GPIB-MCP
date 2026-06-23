@@ -1,0 +1,497 @@
+{
+  "model": "5440B",
+  "manufacturer": "Fluke",
+  "category": "DC Voltage Calibrator",
+  "description": "Fluke 5440B Direct Voltage Calibrator - a precision DC voltage standard providing calibrated outputs from microvolts to 1100 V, with voltage-boost (to higher current) and current-boost modes when used with a 5205A/5220A amplifier. IEEE-488 (1978) interface. The Calibrator uses Fluke's own legacy device-dependent command set (Table 4-7), NOT SCPI: messages are five-character-max alphabetic headers (e.g. SOUT, OPER, STBY, DIVY) optionally followed by a numeric/integer argument. Several device-dependent messages may be combined into one statement separated by the separator character (default comma ','); a statement executes only when terminated and must be under 127 characters. Get* headers cause the Calibrator to queue a response that is sent when it is next addressed to talk. Incoming lower-case is folded to upper-case and the parity bit is ignored.",
+  "source": "5440B-AF User Manual.pdf",
+  "aliases": ["Fluke 5440B", "5440B-AF"],
+  "identity": {
+    "supported": false,
+    "description": "The 5440B predates IEEE 488.2 and has no '*IDN?' or other command returning a fixed model-identification string. The nearest feature is GVRS (Get Version), which returns only the Calibrator software version number in the format 'dd.dd' - not a model name or manufacturer - so it cannot be used as a reliable instrument-identity query."
+  },
+  "commands": [
+    {
+      "name": "reset",
+      "mnemonic": "RESET",
+      "category": "System",
+      "description": "Aborts the statement being executed and returns the Calibrator to the power-on / RESET-key state (Standby, internal sense and guard, divider off, etc.). Equivalent to pressing the front-panel RESET key.",
+      "set": "RESET",
+      "parameters": [],
+      "examples": ["RESET"]
+    },
+    {
+      "name": "set_separator",
+      "mnemonic": "SSEP",
+      "category": "System",
+      "description": "Defines the ASCII character recognised as the separator between device-dependent messages within a statement. SSEP0 selects comma ',' (default); SSEP1 selects semicolon ';'.",
+      "set": "SSEP<n>",
+      "parameters": [
+        { "name": "separator", "description": "0 = comma ',' (default), 1 = semicolon ';'", "units": [], "range": "0-1" }
+      ],
+      "examples": ["SSEP0", "SSEP1"]
+    },
+    {
+      "name": "get_separator",
+      "mnemonic": "GSEP",
+      "category": "System",
+      "description": "Queries the currently selected separator character; the Calibrator returns it on the IEEE-488 interface when next addressed to talk.",
+      "query": "GSEP",
+      "parameters": [],
+      "examples": ["GSEP"]
+    },
+    {
+      "name": "set_terminator",
+      "mnemonic": "STRM",
+      "category": "Format",
+      "description": "Defines the terminator appended to messages the Calibrator sends. 0 = END (EOI) with last data byte, 1 = CR with END on last LF (default), 2 = END with last LF, 3 = CR LF, 4 = LF.",
+      "set": "STRM<n>",
+      "parameters": [
+        { "name": "terminator", "description": "0=END on last byte, 1=CR/END-on-LF (default), 2=END on last LF, 3=CR LF, 4=LF", "units": [], "range": "0-4" }
+      ],
+      "examples": ["STRM1", "STRM3"]
+    },
+    {
+      "name": "get_terminator",
+      "mnemonic": "GTRM",
+      "category": "Format",
+      "description": "Queries the currently selected output terminator; the Calibrator returns the corresponding integer code on the IEEE-488 interface.",
+      "query": "GTRM",
+      "parameters": [],
+      "examples": ["GTRM"]
+    },
+    {
+      "name": "boost_current_mode",
+      "mnemonic": "BSTC",
+      "category": "Mode",
+      "description": "Enables Current Boost mode (same as BOOST then CURR BOOST soft key). Disables Voltage Boost mode and ordinary Voltage mode. In this mode SOUT arguments are in amps.",
+      "set": "BSTC",
+      "parameters": [],
+      "examples": ["BSTC"]
+    },
+    {
+      "name": "boost_voltage_mode",
+      "mnemonic": "BSTV",
+      "category": "Mode",
+      "description": "Enables Voltage Boost mode (same as BOOST then VOLT BOOST soft key). Disables Current Boost mode and ordinary Voltage mode.",
+      "set": "BSTV",
+      "parameters": [],
+      "examples": ["BSTV"]
+    },
+    {
+      "name": "boost_off",
+      "mnemonic": "BSTO",
+      "category": "Mode",
+      "description": "Disables boost operation and enables ordinary Voltage mode.",
+      "set": "BSTO",
+      "parameters": [],
+      "examples": ["BSTO"]
+    },
+    {
+      "name": "set_output",
+      "mnemonic": "SOUT",
+      "category": "Output",
+      "description": "Sets the Calibrator output to the value of the numeric argument and auto-ranges to suit. The unit is volts in Voltage and Voltage Boost modes, and amps in Current Boost mode. SOUT does not set the error-mode reference; to set the reference send SOUT followed by SREF. Mantissa under eight significant digits; absolute value between 1E-12 and 1E8.",
+      "set": "SOUT<value>",
+      "parameters": [
+        { "name": "value", "description": "Output level. Volts in Voltage/Voltage-Boost mode (0 to +-1100 V); amps in Current Boost mode. Accepts decimal or scientific notation.", "units": [{ "unit": "V" }, { "unit": "A" }], "range": "+-1100 V (voltage modes); current-mode value per amplifier; |value| in 1E-12..1E8" }
+      ],
+      "examples": ["SOUT10", "SOUT1.0185E1", "SOUT-1000", "SOUT.01"]
+    },
+    {
+      "name": "get_output",
+      "mnemonic": "GOUT",
+      "category": "Output",
+      "description": "Queries the present output value; the Calibrator sends it as a mantissa on the IEEE-488 interface when next addressed to talk.",
+      "query": "GOUT",
+      "parameters": [],
+      "examples": ["GOUT"]
+    },
+    {
+      "name": "increment_output",
+      "mnemonic": "INCR",
+      "category": "Output",
+      "description": "Adds the numeric argument to the present output value (relative step). Unit follows the active mode (volts or amps).",
+      "set": "INCR<value>",
+      "parameters": [
+        { "name": "delta", "description": "Amount added to the present output. Volts in voltage modes, amps in current-boost mode.", "units": [{ "unit": "V" }, { "unit": "A" }], "range": "Function/range dependent" }
+      ],
+      "examples": ["INCR.001", "INCR-1E-3"]
+    },
+    {
+      "name": "set_reference",
+      "mnemonic": "SREF",
+      "category": "Mode",
+      "description": "Stores the present output value as the error-mode reference. Used with the error-mode (% of reference) calculations; typically sent after SOUT to fix the nominal value being characterised.",
+      "set": "SREF",
+      "parameters": [],
+      "examples": ["SREF"]
+    },
+    {
+      "name": "get_reference",
+      "mnemonic": "GREF",
+      "category": "Mode",
+      "description": "Sets the Calibrator output back to the stored error-mode reference value.",
+      "set": "GREF",
+      "parameters": [],
+      "examples": ["GREF"]
+    },
+    {
+      "name": "operate",
+      "mnemonic": "OPER",
+      "category": "Output",
+      "description": "Places the Calibrator in Operate (same as the OPR/STANDBY key lit): the programmed output is connected to the OUTPUT / SENSE terminals.",
+      "set": "OPER",
+      "parameters": [],
+      "examples": ["OPER"]
+    },
+    {
+      "name": "standby",
+      "mnemonic": "STBY",
+      "category": "Output",
+      "description": "Places the Calibrator in Standby (same as the OPR/STANDBY key un-lit): the output is removed from the terminals. Standby is the power-up/RESET default for safety.",
+      "set": "STBY",
+      "parameters": [],
+      "examples": ["STBY"]
+    },
+    {
+      "name": "external_sense",
+      "mnemonic": "ESNS",
+      "category": "Mode",
+      "description": "Selects external (4-wire remote) sensing (same as SENSE key lit). The Calibrator regulates voltage at the remote SENSE terminals.",
+      "set": "ESNS",
+      "parameters": [],
+      "examples": ["ESNS"]
+    },
+    {
+      "name": "internal_sense",
+      "mnemonic": "ISNS",
+      "category": "Mode",
+      "description": "Selects internal (2-wire) sensing (same as SENSE key un-lit). The Calibrator regulates voltage at its own OUTPUT terminals.",
+      "set": "ISNS",
+      "parameters": [],
+      "examples": ["ISNS"]
+    },
+    {
+      "name": "external_guard",
+      "mnemonic": "EGRD",
+      "category": "Mode",
+      "description": "Selects external guard (same as GUARD key lit): the internal guard is opened so the user provides the guard connection.",
+      "set": "EGRD",
+      "parameters": [],
+      "examples": ["EGRD"]
+    },
+    {
+      "name": "internal_guard",
+      "mnemonic": "IGRD",
+      "category": "Mode",
+      "description": "Selects internal guard (same as GUARD key un-lit): the internal guard is shorted to output low.",
+      "set": "IGRD",
+      "parameters": [],
+      "examples": ["IGRD"]
+    },
+    {
+      "name": "divider_enable",
+      "mnemonic": "DIVY",
+      "category": "Mode",
+      "description": "Turns on the internal output divider (used for low-voltage / high-accuracy 2 V and 0.2 V ranges).",
+      "set": "DIVY",
+      "parameters": [],
+      "examples": ["DIVY"]
+    },
+    {
+      "name": "divider_disable",
+      "mnemonic": "DIVN",
+      "category": "Mode",
+      "description": "Turns off the internal output divider.",
+      "set": "DIVN",
+      "parameters": [],
+      "examples": ["DIVN"]
+    },
+    {
+      "name": "set_voltage_limit",
+      "mnemonic": "SVLM",
+      "category": "System",
+      "description": "Sets a voltage limit (same as LIMIT then VOLT LIMITS soft key) to the numeric value. In Voltage/Voltage-Boost mode the polarity of the argument selects whether the positive or negative limit is set; send one positive and one negative entry to bound both. Not recognised in Current Boost mode.",
+      "set": "SVLM<value>",
+      "parameters": [
+        { "name": "limit", "description": "Voltage limit; sign selects the positive or negative limit.", "units": [{ "unit": "V" }], "range": "+-1100 V" }
+      ],
+      "examples": ["SVLM100", "SVLM-100"]
+    },
+    {
+      "name": "get_voltage_limit",
+      "mnemonic": "GVLM",
+      "category": "System",
+      "description": "Queries the voltage limit(s); the Calibrator sends the value(s) on the IEEE-488 interface. In Voltage Boost mode the response is two mantissas (positive then negative limit); in plain Voltage mode it is a single mantissa.",
+      "query": "GVLM",
+      "parameters": [],
+      "examples": ["GVLM"]
+    },
+    {
+      "name": "set_current_limit",
+      "mnemonic": "SCLM",
+      "category": "System",
+      "description": "Sets a current limit (same as LIMIT then CURR LIMTS soft key) to the numeric value. In Voltage mode it is a current-trip threshold (absolute value of the argument). In Current Boost mode the argument polarity selects the positive or negative limit. Not recognised in Voltage Boost mode.",
+      "set": "SCLM<value>",
+      "parameters": [
+        { "name": "limit", "description": "Current limit / trip value; in current-boost mode sign selects positive or negative limit.", "units": [{ "unit": "A" }], "range": "Amplifier dependent" }
+      ],
+      "examples": ["SCLM.02", "SCLM-.02"]
+    },
+    {
+      "name": "get_current_limit",
+      "mnemonic": "GCLM",
+      "category": "System",
+      "description": "Queries the current limit(s); the Calibrator sends the value(s) on the IEEE-488 interface. In Current Boost mode the response is two mantissas (positive then negative limit); in Voltage mode it is a single mantissa.",
+      "query": "GCLM",
+      "parameters": [],
+      "examples": ["GCLM"]
+    },
+    {
+      "name": "set_tolerance_floor",
+      "mnemonic": "SFLR",
+      "category": "Mode",
+      "description": "Sets the error-mode tolerance floor (same as ERROR MODE then ENTER TOL soft key) to the fractional value of the numeric argument. Combined with SPRF to form the pass/fail tolerance band. Value is a dimensionless fraction.",
+      "set": "SFLR<value>",
+      "parameters": [
+        { "name": "floor", "description": "Tolerance floor as a dimensionless fraction.", "units": [], "range": "0..1 (fraction)" }
+      ],
+      "examples": ["SFLR.0001"]
+    },
+    {
+      "name": "get_tolerance_floor",
+      "mnemonic": "GFLR",
+      "category": "Mode",
+      "description": "Queries the error-mode tolerance floor; the Calibrator sends it as a mantissa on the IEEE-488 interface.",
+      "query": "GFLR",
+      "parameters": [],
+      "examples": ["GFLR"]
+    },
+    {
+      "name": "set_percent_of_reference",
+      "mnemonic": "SPRF",
+      "category": "Mode",
+      "description": "Sets the error-mode percentage-of-error specification to the value of the numeric argument (a dimensionless fraction). Combined with SFLR to form the tolerance band used by the % error pass/fail (GEPF) test.",
+      "set": "SPRF<value>",
+      "parameters": [
+        { "name": "fraction", "description": "Percent-of-reference error spec, expressed as a dimensionless fraction (e.g. .0001 = 0.01%).", "units": [], "range": "0..1 (fraction)" }
+      ],
+      "examples": ["SPRF.0001"]
+    },
+    {
+      "name": "get_percent_of_reference",
+      "mnemonic": "GPRF",
+      "category": "Mode",
+      "description": "Queries the error-mode percent-of-reference specification; the Calibrator sends it as a mantissa on the IEEE-488 interface.",
+      "query": "GPRF",
+      "parameters": [],
+      "examples": ["GPRF"]
+    },
+    {
+      "name": "get_percent_error",
+      "mnemonic": "GPCT",
+      "category": "Status",
+      "description": "Queries the calculated percent error of the present output from the stored reference; the Calibrator sends the result as a fraction (mantissa) on the IEEE-488 interface.",
+      "query": "GPCT",
+      "parameters": [],
+      "examples": ["GPCT"]
+    },
+    {
+      "name": "get_setup_status",
+      "mnemonic": "GSTS",
+      "category": "Status",
+      "description": "Queries the Setup Status. The Calibrator sends the sum of the active setup codes (Table 4-5): 1=Voltage mode, 2=Current Boost mode, 4=Voltage Boost mode, 8=Divider on, 16=Internal sense (not external), 32=Operate (not standby), 64=Internal guard shorted to low, 128=Rear output active. Returned as an integer.",
+      "query": "GSTS",
+      "parameters": [],
+      "examples": ["GSTS"]
+    },
+    {
+      "name": "get_error",
+      "mnemonic": "GERR",
+      "category": "Status",
+      "description": "Queries the remote error status. The Calibrator resets all remote error flags and sends the error code as one to three decimal digits on the IEEE-488 interface (see Section 2 for error code meanings).",
+      "query": "GERR",
+      "parameters": [],
+      "examples": ["GERR"]
+    },
+    {
+      "name": "get_version",
+      "mnemonic": "GVRS",
+      "category": "Status",
+      "description": "Queries the Calibrator software version number; sent in the format 'dd.dd' on the IEEE-488 interface. This is a firmware version, not a model identity string.",
+      "query": "GVRS",
+      "parameters": [],
+      "examples": ["GVRS"]
+    },
+    {
+      "name": "get_doing_state",
+      "mnemonic": "GONG",
+      "category": "Status",
+      "description": "Queries what long-term operation the Calibrator is performing (any operation longer than ~5 s, e.g. internal calibration, self test). Returns an integer state code per Table 4-6 (0 = Idle). Receiving GONG also clears the Doing State Change SRQ bit.",
+      "query": "GONG",
+      "parameters": [],
+      "examples": ["GONG"]
+    },
+    {
+      "name": "get_percent_error_pass_fail",
+      "mnemonic": "GEPF",
+      "category": "Status",
+      "description": "Queries the error-mode pass/fail result; the Calibrator sends 1 for pass or 0 for fail on the IEEE-488 interface, based on the present output versus the SFLR/SPRF tolerance band.",
+      "query": "GEPF",
+      "parameters": [],
+      "examples": ["GEPF"]
+    },
+    {
+      "name": "calibration_internal",
+      "mnemonic": "CALI",
+      "category": "System",
+      "description": "Starts the Internal Calibration procedure (self-cal of the A/D and ranges). Progress can be monitored with GONG; this is a long-term operation.",
+      "set": "CALI",
+      "parameters": [],
+      "examples": ["CALI"]
+    },
+    {
+      "name": "calibration_external",
+      "mnemonic": "CALE",
+      "category": "System",
+      "description": "Starts the External Calibration procedure, in which the operator enters the value of an external voltage standard (via CSTD) for each range.",
+      "set": "CALE",
+      "parameters": [],
+      "examples": ["CALE"]
+    },
+    {
+      "name": "calibration_standard",
+      "mnemonic": "CSTD",
+      "category": "System",
+      "description": "During external calibration, supplies the value of the external calibration standard voltage as the numeric argument.",
+      "set": "CSTD<value>",
+      "parameters": [
+        { "name": "standard", "description": "Measured value of the external voltage standard for the current cal range.", "units": [{ "unit": "V" }], "range": "Range dependent" }
+      ],
+      "examples": ["CSTD10.0000123"]
+    },
+    {
+      "name": "calibrator_nulled",
+      "mnemonic": "CNUL",
+      "category": "System",
+      "description": "During external calibration, tells the Calibrator that it has been nulled against the external voltage standard for the present range (advances the cal sequence).",
+      "set": "CNUL",
+      "parameters": [],
+      "examples": ["CNUL"]
+    },
+    {
+      "name": "calibration_skip_range",
+      "mnemonic": "CSKP",
+      "category": "System",
+      "description": "During external calibration, skips the present calibration range without changing its stored constant.",
+      "set": "CSKP",
+      "parameters": [],
+      "examples": ["CSKP"]
+    },
+    {
+      "name": "get_calibration_constant",
+      "mnemonic": "GCAL",
+      "category": "System",
+      "description": "Queries a stored calibration constant identified by the integer argument; the Calibrator sends the constant as a mantissa on the IEEE-488 interface. Refer to the Service Manual for the constant index meanings.",
+      "query": "GCAL<n>",
+      "parameters": [
+        { "name": "index", "description": "Integer index identifying which calibration constant to read.", "units": [], "range": "0-255 (integer < 256)" }
+      ],
+      "examples": ["GCAL0", "GCAL1"]
+    },
+    {
+      "name": "test_analog",
+      "mnemonic": "TSTA",
+      "category": "System",
+      "description": "Executes the analog self-test. On failure the Calibrator sends an error code on the IEEE-488 interface; on pass there is no response. Completion can be detected when GONG returns idle.",
+      "set": "TSTA",
+      "parameters": [],
+      "examples": ["TSTA"]
+    },
+    {
+      "name": "test_digital",
+      "mnemonic": "TSTD",
+      "category": "System",
+      "description": "Executes the digital self-test. On failure the Calibrator sends an error code; on pass there is no response. Completion can be detected when GONG returns idle.",
+      "set": "TSTD",
+      "parameters": [],
+      "examples": ["TSTD"]
+    },
+    {
+      "name": "test_high_voltage",
+      "mnemonic": "TSTH",
+      "category": "System",
+      "description": "Executes the high-voltage self-test. WARNING: hazardous voltage may appear at OUTPUT HI / SENSE HI during this test. On failure an error code is sent; on pass there is no response. Completion can be detected when GONG returns idle.",
+      "set": "TSTH",
+      "parameters": [],
+      "examples": ["TSTH"]
+    },
+    {
+      "name": "set_baud_rate",
+      "mnemonic": "SBDR",
+      "category": "System",
+      "description": "Sets the RS-232-C baud rate to the value selected by the integer code (0..12): 0=50, 1=75, 2=110, 3=134.5, 4=150, 5=200, 6=300, 7=600, 8=1200, 9=1800, 10=2400, 11=4800, 12=9600 baud.",
+      "set": "SBDR<n>",
+      "parameters": [
+        { "name": "rate", "description": "Baud-rate code 0..12 (0=50 baud .. 12=9600 baud).", "units": [], "range": "0-12" }
+      ],
+      "examples": ["SBDR12", "SBDR8"]
+    },
+    {
+      "name": "get_baud_rate",
+      "mnemonic": "GBDR",
+      "category": "System",
+      "description": "Queries the RS-232-C baud-rate code; the Calibrator sends the integer on the IEEE-488 interface.",
+      "query": "GBDR",
+      "parameters": [],
+      "examples": ["GBDR"]
+    },
+    {
+      "name": "monitor_on",
+      "mnemonic": "MONY",
+      "category": "System",
+      "description": "Turns the RS-232-C monitor on: internal-calibration and analog-test data are sent out on the RS-232-C interface.",
+      "set": "MONY",
+      "parameters": [],
+      "examples": ["MONY"]
+    },
+    {
+      "name": "monitor_off",
+      "mnemonic": "MONN",
+      "category": "System",
+      "description": "Turns the RS-232-C monitor off.",
+      "set": "MONN",
+      "parameters": [],
+      "examples": ["MONN"]
+    },
+    {
+      "name": "set_service_request",
+      "mnemonic": "SSRQ",
+      "category": "Status",
+      "description": "Sets the SRQ Mask to enable interrupts for the conditions selected by the integer (sum of: 0=never, 4=doing a long-term operation, 8=requested message ready to send, 16=output settled, 32=error condition). Default mask value is 0.",
+      "set": "SSRQ<n>",
+      "parameters": [
+        { "name": "mask", "description": "SRQ mask: sum of 4 (long-term op), 8 (message ready), 16 (output settled), 32 (error). 0 disables all.", "units": [], "range": "0-60" }
+      ],
+      "examples": ["SSRQ32", "SSRQ0", "SSRQ40"]
+    },
+    {
+      "name": "get_service_request_mask",
+      "mnemonic": "GSRQ",
+      "category": "Status",
+      "description": "Queries the SRQ Mask; the Calibrator sends its value as an integer on the IEEE-488 interface.",
+      "query": "GSRQ",
+      "parameters": [],
+      "examples": ["GSRQ"]
+    },
+    {
+      "name": "get_serial_poll_byte",
+      "mnemonic": "GSPB",
+      "category": "Status",
+      "description": "Queries the Serial Poll Status Byte; the Calibrator sends its decimal equivalent on the IEEE-488 interface. Bit weights: Request for Service, Error Condition, Output Settled, Message Ready To Send, Doing State Change (see Figure 4-6).",
+      "query": "GSPB",
+      "parameters": [],
+      "examples": ["GSPB"]
+    }
+  ]
+}

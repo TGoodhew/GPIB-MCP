@@ -1,0 +1,645 @@
+{
+  "model": "M9711",
+  "manufacturer": "Maynuo",
+  "category": "DC Electronic Load",
+  "description": "Maynuo M9711 150 W programmable DC electronic load (0-30 A, 0-150 V; CC range 0-3 A / 0-30 A, CR 0.03-10 kOhm, CW 0-150 W). Six operating modes: CC, CR, CV, CW, CC+CV and CR+CV, plus soft-start, dynamic (transient), short-circuit, battery-test and list functions. IMPORTANT: the M97xx series does NOT use a SCPI text command set. It is controlled with a binary Modbus-RTU protocol over a DB9 multifunctional serial port supporting RS-232 / RS-485 / USB (the latter via the optional M-133 DB9-to-USB cable; a plain RS-232 cable will not work). Each frame is: Slave Address (1 byte, 1-200) + Function Code (1 byte) + Data + 16-bit CRC (low byte first). Frame format: 1 start bit, 8 data bits, 1 stop bit, selectable NONE/ODD/EVEN parity, baud 2400/9600/14400/28800/57600/115200. Only four function codes exist: 0x01 Read Coil Status (read one bit), 0x05 Force Single Coil (write one bit, 0xFF00=ON / 0x0000=OFF), 0x03 Read Holding Registers (read words), 0x10 Preset Multiple Registers (write words). The 'commands' below are therefore Modbus coil/register accesses, not text mnemonics: the mnemonic encodes the function code and the coil/register address. Setpoint registers (IFIX, UFIX, PFIX, RFIX, timing and threshold registers) hold an IEEE-754 single-precision float occupying two consecutive 16-bit registers (high word first). An operation is performed by presetting the relevant value register(s) and then writing the numeric mode code to the CMD register (0x0A00). All addresses, coil/register tables and CMD codes are transcribed verbatim from the M97xx User's Guide.",
+  "source": "M9811.pdf",
+  "aliases": ["M9711"],
+  "termination": { "write": "", "read": "" },
+  "identity": {
+    "command": "0x03 0x0B06",
+    "matchRegex": "",
+    "supported": false,
+    "description": "No remote *IDN-style identification query. The protocol is binary Modbus and exposes a numeric MODEL holding register (u16) at address 0x0B06 (read with function code 0x03) plus a software-version register EDITION at 0x0B07, but the manual does not publish the MODEL code values, so the model cannot be confirmed by string match. Identity verification over the bus is not supported."
+  },
+  "commands": [
+    {
+      "name": "modbus_read_coil_status",
+      "mnemonic": "0x01",
+      "category": "Modbus / Protocol",
+      "description": "Read Coil Status. Reads one or more single-bit coils starting at a coil address. Query frame: <addr> 0x01 <start_hi> <start_lo> <count_hi> <count_lo> <crc_lo> <crc_hi>. Example: read ISTATE (input on/off) at coil 0x0510 -> 0x01 0x01 0x05 0x10 0x00 0x01 0xFC 0xC3; a normal response 0x01 0x01 0x01 0x48 0x51 0xBE returns one data byte whose lowest bit is the coil state (0 = input OFF here).",
+      "set": "<addr> 0x01 <coil_address> <num_points> <crc>",
+      "examples": ["0x01 0x01 0x05 0x10 0x00 0x01 0xFC 0xC3"]
+    },
+    {
+      "name": "modbus_force_single_coil",
+      "mnemonic": "0x05",
+      "category": "Modbus / Protocol",
+      "description": "Force Single Coil. Writes one bit. Force data 0xFF00 turns the coil ON, 0x0000 turns it OFF; any other value is ignored. Example: place the load in remote control by forcing PC1 (coil 0x0500) ON -> 0x01 0x05 0x05 0x00 0xFF 0x00 0x8C 0xF6.",
+      "set": "<addr> 0x05 <coil_address> <0xFF00|0x0000> <crc>",
+      "parameters": [
+        { "name": "force_data", "units": [], "range": "0xFF00 (ON) or 0x0000 (OFF)" }
+      ],
+      "examples": ["0x01 0x05 0x05 0x00 0xFF 0x00 0x8C 0xF6"]
+    },
+    {
+      "name": "modbus_read_holding_registers",
+      "mnemonic": "0x03",
+      "category": "Modbus / Protocol",
+      "description": "Read Holding Registers. Reads n 16-bit words starting at a register address (n = 1..32). A float value occupies two words (high word first). Example: read present voltage U (register 0x0B00, two words) -> 0x01 0x03 0x0B 0x00 0x00 0x02 0xC6 0x2F; response 0x01 0x03 0x04 0x41 0x20 0x00 0x2A 0x6E 0x1A carries 0x41200 02A = 10.0 V.",
+      "set": "<addr> 0x03 <start_address> <num_points> <crc>",
+      "examples": ["0x01 0x03 0x0B 0x00 0x00 0x02 0xC6 0x2F"]
+    },
+    {
+      "name": "modbus_preset_multiple_registers",
+      "mnemonic": "0x10",
+      "category": "Modbus / Protocol",
+      "description": "Preset Multiple Registers. Writes n 16-bit words (n = 1..32) starting at a register address. Example: set constant current IFIX (register 0x0A01, two words = one float) to 2.3 A -> 0x01 0x10 0x0A 0x01 0x00 0x02 0x04 0x40 0x13 0x33 0x33 0xFC 0x23; the 0x40133333 payload is the IEEE-754 float 2.3.",
+      "set": "<addr> 0x10 <start_address> <num_registers> <byte_count> <data> <crc>",
+      "examples": ["0x01 0x10 0x0A 0x01 0x00 0x02 0x04 0x40 0x13 0x33 0x33 0xFC 0x23"]
+    },
+
+    {
+      "name": "coil_pc1_remote",
+      "mnemonic": "0x05 0x0500",
+      "category": "Coil (W/R)",
+      "description": "PC1 remote-control bit (coil 0x0500). Force to 1 (0xFF00) to enter remote control, which disables the front-panel keys; force to 0 (0x0000) to return to local. Mandatory before sending other remote commands.",
+      "set": "0x05 0x0500 {0xFF00|0x0000}",
+      "parameters": [
+        { "name": "state", "units": [], "range": "1 = remote (keys locked), 0 = local" }
+      ],
+      "examples": ["0x01 0x05 0x05 0x00 0xFF 0x00 0x8C 0xF6"]
+    },
+    {
+      "name": "coil_pc2_local_lockout",
+      "mnemonic": "0x05 0x0501",
+      "category": "Coil (W/R)",
+      "description": "PC2 local-prohibition bit (coil 0x0501). When set to 1 the front-panel 'Shift + 7' (local) key is disabled.",
+      "set": "0x05 0x0501 {0xFF00|0x0000}",
+      "parameters": [
+        { "name": "state", "units": [], "range": "1 = local key disabled, 0 = allowed" }
+      ]
+    },
+    {
+      "name": "coil_trig",
+      "mnemonic": "0x05 0x0502",
+      "category": "Coil (W/R)",
+      "description": "TRIG bit (coil 0x0502). Forcing it generates one software trigger (used by dynamic/list/trigger modes).",
+      "set": "0x05 0x0502 0xFF00"
+    },
+    {
+      "name": "coil_remote_sense",
+      "mnemonic": "0x05 0x0503",
+      "category": "Coil (W/R)",
+      "description": "REMOTE bit (coil 0x0503). 1 = remote input-voltage sensing (remote voltage compensation) enabled.",
+      "set": "0x05 0x0503 {0xFF00|0x0000}",
+      "parameters": [
+        { "name": "state", "units": [], "range": "1 = remote sense on, 0 = off" }
+      ]
+    },
+    {
+      "name": "coil_istate",
+      "mnemonic": "0x01 0x0510",
+      "category": "Coil (Read-only)",
+      "description": "ISTATE input-status bit (coil 0x0510, read-only). 1 = input ON, 0 = input OFF.",
+      "query": "0x01 0x0510"
+    },
+    {
+      "name": "coil_track",
+      "mnemonic": "0x01 0x0511",
+      "category": "Coil (Read-only)",
+      "description": "TRACK status bit (coil 0x0511, read-only). 1 = voltage tracking, 0 = current tracking.",
+      "query": "0x01 0x0511"
+    },
+    {
+      "name": "coil_memory",
+      "mnemonic": "0x01 0x0512",
+      "category": "Coil (Read-only)",
+      "description": "MEMORY bit (coil 0x0512, read-only). 1 = input-state memory (input recall) enabled.",
+      "query": "0x01 0x0512"
+    },
+    {
+      "name": "coil_voiceen",
+      "mnemonic": "0x01 0x0513",
+      "category": "Coil (Read-only)",
+      "description": "VOICEEN bit (coil 0x0513, read-only). 1 = audible key sound ON; also reflects multi/single connect mode in the manual's overlapping notes.",
+      "query": "0x01 0x0513"
+    },
+    {
+      "name": "coil_connect",
+      "mnemonic": "0x01 0x0514",
+      "category": "Coil (Read-only)",
+      "description": "CONNECT bit (coil 0x0514, read-only). Indicates automatic-test mode / pattern waiting to be triggered.",
+      "query": "0x01 0x0514"
+    },
+    {
+      "name": "coil_atest",
+      "mnemonic": "0x01 0x0515",
+      "category": "Coil (Read-only)",
+      "description": "ATEST bit (coil 0x0515, read-only). 1 = automatic test passed, 0 = failed (per the manual's note for this row).",
+      "query": "0x01 0x0515"
+    },
+    {
+      "name": "coil_atestun",
+      "mnemonic": "0x01 0x0516",
+      "category": "Coil (Read-only)",
+      "description": "ATESTUN bit (coil 0x0516, read-only). Automatic-test status tag (see manual; this row carries over-current/over-voltage tag notes that overlap adjacent rows in the source table).",
+      "query": "0x01 0x0516"
+    },
+    {
+      "name": "coil_atestpass",
+      "mnemonic": "0x01 0x0517",
+      "category": "Coil (Read-only)",
+      "description": "ATESTPASS bit (coil 0x0517, read-only). Automatic-test pass tag.",
+      "query": "0x01 0x0517"
+    },
+    {
+      "name": "coil_iover",
+      "mnemonic": "0x01 0x0520",
+      "category": "Coil (Read-only)",
+      "description": "IOVER over-current protection tag (coil 0x0520, read-only). 1 = over-current.",
+      "query": "0x01 0x0520"
+    },
+    {
+      "name": "coil_uover",
+      "mnemonic": "0x01 0x0521",
+      "category": "Coil (Read-only)",
+      "description": "UOVER over-voltage protection tag (coil 0x0521, read-only). 1 = over-voltage.",
+      "query": "0x01 0x0521"
+    },
+    {
+      "name": "coil_pover",
+      "mnemonic": "0x01 0x0522",
+      "category": "Coil (Read-only)",
+      "description": "POVER over-power protection tag (coil 0x0522, read-only). 1 = over-power.",
+      "query": "0x01 0x0522"
+    },
+    {
+      "name": "coil_heat",
+      "mnemonic": "0x01 0x0523",
+      "category": "Coil (Read-only)",
+      "description": "HEAT over-temperature protection tag (coil 0x0523, read-only). 1 = over-heated.",
+      "query": "0x01 0x0523"
+    },
+    {
+      "name": "coil_reverse",
+      "mnemonic": "0x01 0x0524",
+      "category": "Coil (Read-only)",
+      "description": "REVERSE polarity-reversal tag (coil 0x0524, read-only). 1 = reverse polarity detected.",
+      "query": "0x01 0x0524"
+    },
+    {
+      "name": "coil_unreg",
+      "mnemonic": "0x01 0x0525",
+      "category": "Coil (Read-only)",
+      "description": "UNREG unregulated / registered-parameter-fail tag (coil 0x0525, read-only).",
+      "query": "0x01 0x0525"
+    },
+    {
+      "name": "coil_errep",
+      "mnemonic": "0x01 0x0526",
+      "category": "Coil (Read-only)",
+      "description": "ERREP EEPROM-error tag (coil 0x0526, read-only). 1 = EEPROM error.",
+      "query": "0x01 0x0526"
+    },
+    {
+      "name": "coil_errcal",
+      "mnemonic": "0x01 0x0527",
+      "category": "Coil (Read-only)",
+      "description": "ERRCAL calibration-data-error tag (coil 0x0527, read-only). 1 = calibration data error.",
+      "query": "0x01 0x0527"
+    },
+
+    {
+      "name": "reg_cmd",
+      "mnemonic": "0x10 0x0A00",
+      "category": "Register / Command (W/R)",
+      "description": "CMD command register (0x0A00, 1 word, u16). Writing a numeric mode code makes the load execute that operation; the low 8 bits are the logical code and the high 8 bits are its complement. Codes: 1=CC, 2=CV, 3=CW, 4=CR, 20=CC soft start, 25=Dynamic mode, 26=Short-circuit mode, 27=List mode, 30=CC load/unload, 31=CV load/unload, 32=CW load/unload, 33=CR load/unload, 34=CC->CV, 36=CR->CV, 38=Battery test, 39=CV soft start, 41=Change system parameters, 42=Input ON, 43=Input OFF. (The mode-table also references 35 for CR->CV; the CMD list prints 36.)",
+      "set": "0x10 0x0A00 <cmd_code>",
+      "query": "0x03 0x0A00",
+      "parameters": [
+        { "name": "cmd_code", "units": [], "range": "1,2,3,4,20,25,26,27,30,31,32,33,34,36,38,39,41,42,43" }
+      ],
+      "examples": ["0x10 0x0A00 ... 42 (Input ON)", "0x10 0x0A00 ... 43 (Input OFF)"]
+    },
+    {
+      "name": "reg_ifix",
+      "mnemonic": "0x10 0x0A01",
+      "category": "Register / Setpoint (W/R)",
+      "description": "IFIX constant-current setpoint register (0x0A01, 2 words, IEEE-754 float). Used by CC, CC soft-start, CC load/unload, CC->CV, battery-test and dynamic-base operations. After presetting IFIX, write the mode code to CMD.",
+      "set": "0x10 0x0A01 <float A>",
+      "query": "0x03 0x0A01",
+      "parameters": [
+        { "name": "current", "units": [{ "unit": "A" }], "range": "0 to 3 A (low range) / 0 to 30 A (high range)" }
+      ],
+      "examples": ["0x01 0x10 0x0A 0x01 0x00 0x02 0x04 0x40 0x13 0x33 0x33 0xFC 0x23"]
+    },
+    {
+      "name": "reg_ufix",
+      "mnemonic": "0x10 0x0A03",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UFIX constant-voltage setpoint register (0x0A03, 2 words, IEEE-754 float). Used by CV, CV soft-start and CV load/unload operations.",
+      "set": "0x10 0x0A03 <float V>",
+      "query": "0x03 0x0A03",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_pfix",
+      "mnemonic": "0x10 0x0A05",
+      "category": "Register / Setpoint (W/R)",
+      "description": "PFIX constant-power setpoint register (0x0A05, 2 words, IEEE-754 float). Used by CW and CW load/unload operations.",
+      "set": "0x10 0x0A05 <float W>",
+      "query": "0x03 0x0A05",
+      "parameters": [
+        { "name": "power", "units": [{ "unit": "W" }], "range": "0 to 150 W" }
+      ]
+    },
+    {
+      "name": "reg_rfix",
+      "mnemonic": "0x10 0x0A07",
+      "category": "Register / Setpoint (W/R)",
+      "description": "RFIX constant-resistance setpoint register (0x0A07, 2 words, IEEE-754 float). Used by CR, CR load/unload and CR->CV operations.",
+      "set": "0x10 0x0A07 <float Ohm>",
+      "query": "0x03 0x0A07",
+      "parameters": [
+        { "name": "resistance", "units": [{ "unit": "Ohm" }], "range": "0.03 to 10000 Ohm (0.03-10 kOhm)" }
+      ]
+    },
+    {
+      "name": "reg_tmccs",
+      "mnemonic": "0x10 0x0A09",
+      "category": "Register / Setpoint (W/R)",
+      "description": "TMCCS constant-current soft-start rise-time register (0x0A09, 2 words, float). Available presets per the spec table: 1, 2, 5, 10, 20, 50, 100, 200 ms.",
+      "set": "0x10 0x0A09 <float s>",
+      "query": "0x03 0x0A09",
+      "parameters": [
+        { "name": "rise_time", "units": [{ "unit": "s" }], "range": "1 ms to 200 ms (0.001 to 0.2 s)" }
+      ]
+    },
+    {
+      "name": "reg_tmcvs",
+      "mnemonic": "0x10 0x0A0B",
+      "category": "Register / Setpoint (W/R)",
+      "description": "TMCVS constant-voltage soft-start rise-time register (0x0A0B, 2 words, float).",
+      "set": "0x10 0x0A0B <float s>",
+      "query": "0x03 0x0A0B",
+      "parameters": [
+        { "name": "rise_time", "units": [{ "unit": "s" }], "range": "1 ms to 200 ms (0.001 to 0.2 s)" }
+      ]
+    },
+    {
+      "name": "reg_ucconset",
+      "mnemonic": "0x10 0x0A0D",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCCONSET constant-current load (on) voltage register (0x0A0D, 2 words, float). Loading threshold voltage for CC load/unload mode.",
+      "set": "0x10 0x0A0D <float V>",
+      "query": "0x03 0x0A0D",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_uccoffset",
+      "mnemonic": "0x10 0x0A0F",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCCOFFSET constant-current unload (off) voltage register (0x0A0F, 2 words, float). Unloading threshold voltage for CC load/unload mode.",
+      "set": "0x10 0x0A0F <float V>",
+      "query": "0x03 0x0A0F",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucvonset",
+      "mnemonic": "0x10 0x0A11",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCVONSET constant-voltage load (on) voltage register (0x0A11, 2 words, float). Loading threshold for CV load/unload mode.",
+      "set": "0x10 0x0A11 <float V>",
+      "query": "0x03 0x0A11",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucvoffset",
+      "mnemonic": "0x10 0x0A13",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCVOFFSET constant-voltage unload (off) voltage register (0x0A13, 2 words, float). Unloading threshold for CV load/unload mode.",
+      "set": "0x10 0x0A13 <float V>",
+      "query": "0x03 0x0A13",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucponset",
+      "mnemonic": "0x10 0x0A15",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCPONSET constant-power load (on) voltage register (0x0A15, 2 words, float). Loading threshold for CW load/unload mode.",
+      "set": "0x10 0x0A15 <float V>",
+      "query": "0x03 0x0A15",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucpoffset",
+      "mnemonic": "0x10 0x0A17",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCPOFFSET constant-power unload (off) voltage register (0x0A17, 2 words, float). Unloading threshold for CW load/unload mode.",
+      "set": "0x10 0x0A17 <float V>",
+      "query": "0x03 0x0A17",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucronset",
+      "mnemonic": "0x10 0x0A19",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCRONSET constant-resistance load (on) voltage register (0x0A19, 2 words, float). Loading threshold for CR load/unload mode.",
+      "set": "0x10 0x0A19 <float V>",
+      "query": "0x03 0x0A19",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucroffset",
+      "mnemonic": "0x10 0x0A1B",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCROFFSET constant-resistance unload (off) voltage register (0x0A1B, 2 words, float). Unloading threshold for CR load/unload mode.",
+      "set": "0x10 0x0A1B <float V>",
+      "query": "0x03 0x0A1B",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucccv",
+      "mnemonic": "0x10 0x0A1D",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCCCV constant-current-shift-to-constant-voltage register (0x0A1D, 2 words, float). The CV crossover voltage used by the CC->CV (CMD 34) operation.",
+      "set": "0x10 0x0A1D <float V>",
+      "query": "0x03 0x0A1D",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ucrcv",
+      "mnemonic": "0x10 0x0A1F",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UCRCV constant-resistance-shift-to-constant-voltage register (0x0A1F, 2 words, float). The CV crossover voltage used by the CR->CV operation.",
+      "set": "0x10 0x0A1F <float V>",
+      "query": "0x03 0x0A1F",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_ia",
+      "mnemonic": "0x10 0x0A21",
+      "category": "Register / Setpoint (W/R)",
+      "description": "IA dynamic-mode A-phase current register (0x0A21, 2 words, float). First level current for dynamic (transient) testing.",
+      "set": "0x10 0x0A21 <float A>",
+      "query": "0x03 0x0A21",
+      "parameters": [
+        { "name": "current", "units": [{ "unit": "A" }], "range": "0 to 30 A" }
+      ]
+    },
+    {
+      "name": "reg_ib",
+      "mnemonic": "0x10 0x0A23",
+      "category": "Register / Setpoint (W/R)",
+      "description": "IB dynamic-mode B-phase current register (0x0A23, 2 words, float). Second level current for dynamic (transient) testing.",
+      "set": "0x10 0x0A23 <float A>",
+      "query": "0x03 0x0A23",
+      "parameters": [
+        { "name": "current", "units": [{ "unit": "A" }], "range": "0 to 30 A" }
+      ]
+    },
+    {
+      "name": "reg_tmawd",
+      "mnemonic": "0x10 0x0A25",
+      "category": "Register / Setpoint (W/R)",
+      "description": "TMAWD dynamic-mode A-phase pulse-width (dwell) register (0x0A25, 2 words, float). T1 dwell time. Dynamic timing range T1&T2: 60 us to 999 s.",
+      "set": "0x10 0x0A25 <float s>",
+      "query": "0x03 0x0A25",
+      "parameters": [
+        { "name": "pulse_width", "units": [{ "unit": "s" }], "range": "60 us to 999 s" }
+      ]
+    },
+    {
+      "name": "reg_tmbwd",
+      "mnemonic": "0x10 0x0A27",
+      "category": "Register / Setpoint (W/R)",
+      "description": "TMBWD dynamic-mode B-phase pulse-width (dwell) register (0x0A27, 2 words, float). T2 dwell time. Dynamic timing range T1&T2: 60 us to 999 s.",
+      "set": "0x10 0x0A27 <float s>",
+      "query": "0x03 0x0A27",
+      "parameters": [
+        { "name": "pulse_width", "units": [{ "unit": "s" }], "range": "60 us to 999 s" }
+      ]
+    },
+    {
+      "name": "reg_tmtranris",
+      "mnemonic": "0x10 0x0A29",
+      "category": "Register / Setpoint (W/R)",
+      "description": "TMTRANRIS dynamic-mode rising-edge time register (0x0A29, 2 words, float). Maximum current slew 2.5 A/us.",
+      "set": "0x10 0x0A29 <float s>",
+      "query": "0x03 0x0A29",
+      "parameters": [
+        { "name": "rise_time", "units": [{ "unit": "s" }], "range": "transient rise time (slew up to 2.5 A/us)" }
+      ]
+    },
+    {
+      "name": "reg_tmtranfal",
+      "mnemonic": "0x10 0x0A2B",
+      "category": "Register / Setpoint (W/R)",
+      "description": "TMTRANFAL dynamic-mode falling-edge time register (0x0A2B, 2 words, float).",
+      "set": "0x10 0x0A2B <float s>",
+      "query": "0x03 0x0A2B",
+      "parameters": [
+        { "name": "fall_time", "units": [{ "unit": "s" }], "range": "transient fall time (slew up to 2.5 A/us)" }
+      ]
+    },
+    {
+      "name": "reg_modetran",
+      "mnemonic": "0x10 0x0A2D",
+      "category": "Register / Mode (W/R)",
+      "description": "MODETRAN dynamic-mode sub-mode register (0x0A2D, 1 word, u16). Selects the transient waveform style: 0..2 corresponding to CONTINUOUS / PULSED / TRIGGER dynamic modes.",
+      "set": "0x10 0x0A2D <0|1|2>",
+      "query": "0x03 0x0A2D",
+      "parameters": [
+        { "name": "submode", "units": [], "range": "0 = continuous, 1 = pulsed, 2 = trigger" }
+      ]
+    },
+    {
+      "name": "reg_ubattend",
+      "mnemonic": "0x10 0x0A2E",
+      "category": "Register / Setpoint (W/R)",
+      "description": "UBATTEND battery-test termination-voltage register (0x0A2E, 2 words, float). Discharge stops when the measured voltage falls to this value. Battery input range 0.5 to 120 V.",
+      "set": "0x10 0x0A2E <float V>",
+      "query": "0x03 0x0A2E",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0.5 to 120 V" }
+      ]
+    },
+    {
+      "name": "reg_batt",
+      "mnemonic": "0x10 0x0A30",
+      "category": "Register / Setpoint (W/R)",
+      "description": "BATT battery-capacity register (0x0A30, 2 words, float). Capacity accumulator / setting for battery test; max measurement capacity 999 Ah.",
+      "set": "0x10 0x0A30 <float Ah>",
+      "query": "0x03 0x0A30",
+      "parameters": [
+        { "name": "capacity", "units": [], "range": "0 to 999 Ah (ampere-hours; non-canonical unit, sent as a bare float)" }
+      ]
+    },
+    {
+      "name": "reg_serlist",
+      "mnemonic": "0x10 0x0A32",
+      "category": "Register / Mode (W/R)",
+      "description": "SERLIST LIST serial-number register (0x0A32, 1 word, u16). Selects the stored LIST (arbitrary-waveform) sequence number.",
+      "set": "0x10 0x0A32 <u16>",
+      "query": "0x03 0x0A32",
+      "parameters": [
+        { "name": "list_number", "units": [], "range": "LIST sequence index (u16)" }
+      ]
+    },
+    {
+      "name": "reg_seratest",
+      "mnemonic": "0x10 0x0A33",
+      "category": "Register / Mode (W/R)",
+      "description": "SERATEST automatic-test serial-number register (0x0A33, 1 word, u16). Selects the stored automatic-test sequence number.",
+      "set": "0x10 0x0A33 <u16>",
+      "query": "0x03 0x0A33",
+      "parameters": [
+        { "name": "atest_number", "units": [], "range": "automatic-test sequence index (u16)" }
+      ]
+    },
+    {
+      "name": "reg_imax",
+      "mnemonic": "0x10 0x0A34",
+      "category": "Register / Protection (W/R)",
+      "description": "IMAX maximum-current register (0x0A34, 2 words, float). Over-current protection / current ceiling. Set together with CMD 41 (change system parameters).",
+      "set": "0x10 0x0A34 <float A>",
+      "query": "0x03 0x0A34",
+      "parameters": [
+        { "name": "current", "units": [{ "unit": "A" }], "range": "0 to 30 A" }
+      ]
+    },
+    {
+      "name": "reg_umax",
+      "mnemonic": "0x10 0x0A36",
+      "category": "Register / Protection (W/R)",
+      "description": "UMAX maximum-voltage register (0x0A36, 2 words, float). Over-voltage protection / voltage ceiling. Set together with CMD 41.",
+      "set": "0x10 0x0A36 <float V>",
+      "query": "0x03 0x0A36",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "0 to 150 V" }
+      ]
+    },
+    {
+      "name": "reg_pmax",
+      "mnemonic": "0x10 0x0A38",
+      "category": "Register / Protection (W/R)",
+      "description": "PMAX maximum-power register (0x0A38, 2 words, float). Over-power protection / power ceiling. Set together with CMD 41.",
+      "set": "0x10 0x0A38 <float W>",
+      "query": "0x03 0x0A38",
+      "parameters": [
+        { "name": "power", "units": [{ "unit": "W" }], "range": "0 to 150 W" }
+      ]
+    },
+    {
+      "name": "reg_ilcal",
+      "mnemonic": "0x10 0x0A3A",
+      "category": "Register / Calibration (W/R)",
+      "description": "ILCAL current low-end calibration target register (0x0A3A, 2 words, float). Calibration use only.",
+      "set": "0x10 0x0A3A <float A>",
+      "query": "0x03 0x0A3A",
+      "parameters": [
+        { "name": "current", "units": [{ "unit": "A" }], "range": "calibration target current" }
+      ]
+    },
+    {
+      "name": "reg_ihcal",
+      "mnemonic": "0x10 0x0A3C",
+      "category": "Register / Calibration (W/R)",
+      "description": "IHCAL current high-end calibration target register (0x0A3C, 2 words, float). Calibration use only.",
+      "set": "0x10 0x0A3C <float A>",
+      "query": "0x03 0x0A3C",
+      "parameters": [
+        { "name": "current", "units": [{ "unit": "A" }], "range": "calibration target current" }
+      ]
+    },
+    {
+      "name": "reg_ulcal",
+      "mnemonic": "0x10 0x0A3E",
+      "category": "Register / Calibration (W/R)",
+      "description": "ULCAL voltage low-end calibration target register (0x0A3E, 2 words, float). Calibration use only.",
+      "set": "0x10 0x0A3E <float V>",
+      "query": "0x03 0x0A3E",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "calibration target voltage" }
+      ]
+    },
+    {
+      "name": "reg_uhcal",
+      "mnemonic": "0x10 0x0A40",
+      "category": "Register / Calibration (W/R)",
+      "description": "UHCAL voltage high-end calibration target register (0x0A40, 2 words, float). Calibration use only.",
+      "set": "0x10 0x0A40 <float V>",
+      "query": "0x03 0x0A40",
+      "parameters": [
+        { "name": "voltage", "units": [{ "unit": "V" }], "range": "calibration target voltage" }
+      ]
+    },
+    {
+      "name": "reg_tagscal",
+      "mnemonic": "0x10 0x0A42",
+      "category": "Register / Calibration (W/R)",
+      "description": "TAGSCAL calibration-state tag register (0x0A42, 1 word, u16). Marks calibration state.",
+      "set": "0x10 0x0A42 <u16>",
+      "query": "0x03 0x0A42",
+      "parameters": [
+        { "name": "cal_tag", "units": [], "range": "calibration-state code (u16)" }
+      ]
+    },
+    {
+      "name": "reg_u_measure",
+      "mnemonic": "0x03 0x0B00",
+      "category": "Register / Measurement (Read-only)",
+      "description": "U present-voltage register (0x0B00, 2 words, IEEE-754 float, read-only). Returns the measured input voltage. Example response 0x41200 02A = 10.0 V.",
+      "query": "0x03 0x0B00",
+      "examples": ["0x01 0x03 0x0B 0x00 0x00 0x02 0xC6 0x2F"]
+    },
+    {
+      "name": "reg_i_measure",
+      "mnemonic": "0x03 0x0B02",
+      "category": "Register / Measurement (Read-only)",
+      "description": "I present-current register (0x0B02, 2 words, IEEE-754 float, read-only). Returns the measured input current.",
+      "query": "0x03 0x0B02"
+    },
+    {
+      "name": "reg_setmode",
+      "mnemonic": "0x03 0x0B04",
+      "category": "Register / Status (Read-only)",
+      "description": "SETMODE operation-mode register (0x0B04, 1 word, u16, read-only). Reports the current operating mode.",
+      "query": "0x03 0x0B04"
+    },
+    {
+      "name": "reg_inputmode",
+      "mnemonic": "0x03 0x0B05",
+      "category": "Register / Status (Read-only)",
+      "description": "INPUTMODE input-status register (0x0B05, 1 word, u16, read-only). Reports the input on/off state.",
+      "query": "0x03 0x0B05"
+    },
+    {
+      "name": "reg_model",
+      "mnemonic": "0x03 0x0B06",
+      "category": "Register / Status (Read-only)",
+      "description": "MODEL register (0x0B06, 1 word, u16, read-only). Numeric model identifier. Code values are not published in the manual.",
+      "query": "0x03 0x0B06"
+    },
+    {
+      "name": "reg_edition",
+      "mnemonic": "0x03 0x0B07",
+      "category": "Register / Status (Read-only)",
+      "description": "EDITION software-version register (0x0B07, 1 word, u16, read-only). Firmware revision number.",
+      "query": "0x03 0x0B07"
+    }
+  ]
+}

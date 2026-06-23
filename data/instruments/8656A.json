@@ -1,0 +1,204 @@
+{
+  "model": "8656A",
+  "manufacturer": "HP",
+  "category": "Signal Generator",
+  "description": "HP 8656A synthesized signal generator (100 kHz to 990 MHz; nominally 0.1-990 MHz). Legacy HP-IB (IEEE-488) instrument using two-letter function/units program codes, NOT SCPI. It is strictly listen-only (interface functions SH1, AH1, T0, L2, SR0, RL1, PP0, DC1, DT0, C0): the Signal Generator cannot talk, so it has NO query forms, no status byte, no SRQ, and no identify query. Carrier parameters use a Function-Data-Units sequence (e.g. FR 123.45 MZ); modulation parameters use a Source-Function-Data-Units sequence (e.g. S2 AM 75 PC). Program codes may be upper or lower case. Data is fixed-point; a minus sign is only allowed in Amplitude entries. The data message End Of String (EOS) may be a Line Feed (LF), a bus END (EOI) message, or an internally produced EOS. A Device Clear (DCL/SDC) presets the instrument to 100 MHz, -127.0 dBm, modulation off. The 8656A is the earlier model of the 8656B; it lacks the 8656B's amplitude offset (AO), DC FM (S5), carrier phase increment/decrement (PI/PD), and separate RF on/off (R2/R3) commands.",
+  "source": "8656A-OM.pdf",
+  "aliases": ["8656A", "HP 8656A"],
+  "termination": { "write": "\n", "read": "\n" },
+  "identity": {
+    "supported": false,
+    "description": "The 8656A is strictly listen-only (HP-IB interface functions include T0 = no talker capability). It cannot talk, has no query forms and no status byte, so there is no remote identification query."
+  },
+  "commands": [
+    {
+      "name": "frequency",
+      "mnemonic": "FR",
+      "category": "Frequency",
+      "description": "Carrier frequency function entry. Follow with a numeric value (up to 9 digits, decimal point allowed, no sign) and a frequency unit code (HZ, KZ, or MZ). Default after Clear: 100 MHz.",
+      "set": "FR <value> <unit>",
+      "parameters": [
+        { "name": "frequency", "units": [{"token": "HZ", "unit": "Hz"}, {"token": "KZ", "unit": "kHz"}, {"token": "MZ", "unit": "MHz"}], "range": "100 kHz to 990 MHz (10 kHz to 990 MHz with uncalibrated output)" }
+      ],
+      "examples": ["FR 123.45 MZ", "FR 990 MZ"]
+    },
+    {
+      "name": "amplitude",
+      "mnemonic": "AP",
+      "category": "Amplitude",
+      "description": "Carrier output amplitude function entry. Follow with a numeric value (up to 9 digits, decimal point and minus sign allowed) and one or more amplitude unit codes. dBm/dBf are logarithmic terminators; DB and EM (EMF) may be combined with a linear unit. Default after Clear: -127.0 dBm.",
+      "set": "AP <value> <unit>",
+      "parameters": [
+        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DF", "unit": "dBf"}, {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+13 dBm to -127 dBm (+1.00 V to +0.100 uV); DM=dBm, DF=dBf, DB=dB, EM=EMF, VL=Volts, MV=mV, UV=microvolts" }
+      ],
+      "examples": ["AP -12.3 DM", "AP -2.0 DB EM UV"]
+    },
+    {
+      "name": "amplitude_conversion",
+      "mnemonic": "DB",
+      "category": "Amplitude",
+      "description": "Re-displays the current amplitude in a different unit configuration without changing the actual output. With the Amplitude function selected, send one or more units codes. Does not affect the RF output level.",
+      "set": "<unit>",
+      "parameters": [
+        { "name": "units", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DF", "unit": "dBf"}, {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}] }
+      ],
+      "examples": ["DB UV"]
+    },
+    {
+      "name": "amplitude_step",
+      "mnemonic": "UP",
+      "category": "Amplitude",
+      "description": "Steps the output amplitude up (UP) or down (DN) by the amplitude increment value once the Amplitude function is selected. Repeated UP/DN codes may be sent over the bus. Use Increment Set (IS) to define the step size.",
+      "set": "UP | DN",
+      "parameters": [],
+      "examples": ["AP UP", "AP UP UP UP", "AP DN"]
+    },
+    {
+      "name": "am_depth",
+      "mnemonic": "AM",
+      "category": "Modulation",
+      "description": "Amplitude modulation depth function entry. Preceded by a modulation source qualifier (S1/S2/S3/S4). Up to 2 digits, decimal point allowed, no sign. Units in percent (PC or %). Default after Clear: 0%.",
+      "set": "<source> AM <value> <unit>",
+      "parameters": [
+        { "name": "source", "units": ["S1", "S2", "S3", "S4"] },
+        { "name": "depth", "units": [{"token": "PC", "unit": "%"}, {"token": "%", "unit": "%"}], "range": "0 to 99 % (+7 dBm output levels and below)" }
+      ],
+      "examples": ["S2 AM 75 PC", "S2 AM 75 %"]
+    },
+    {
+      "name": "am_step",
+      "mnemonic": "UP",
+      "category": "Modulation",
+      "description": "Steps the AM depth up (UP) or down (DN) by the AM depth increment value once the AM function is selected. If no source is selected, defaults to internal 1 kHz. Set step size with Increment Set (IS).",
+      "set": "UP | DN",
+      "parameters": [],
+      "examples": ["AM UP", "AM DN"]
+    },
+    {
+      "name": "fm_deviation",
+      "mnemonic": "FM",
+      "category": "Modulation",
+      "description": "Frequency modulation peak deviation function entry. Preceded by a modulation source qualifier (S1/S2/S3/S4). Up to 2 digits. Peak deviation up to 99 kHz; resolution 0.1 kHz below 10 kHz, 1 kHz at/above 10 kHz; internal rate 400 Hz or 1 kHz. Default after Clear: 0.0 kHz.",
+      "set": "<source> FM <value> <unit>",
+      "parameters": [
+        { "name": "source", "units": ["S1", "S2", "S3", "S4"] },
+        { "name": "deviation", "units": [{"token": "KZ", "unit": "kHz"}, {"token": "HZ", "unit": "Hz"}], "range": "up to 99 kHz peak deviation; max depends on carrier band" }
+      ],
+      "examples": ["S2 FM 25 KZ", "S1 FM 3 KZ"]
+    },
+    {
+      "name": "fm_step",
+      "mnemonic": "UP",
+      "category": "Modulation",
+      "description": "Steps the FM peak deviation up (UP) or down (DN) by the FM peak deviation increment value once the FM function is selected. Set step size with Increment Set (IS).",
+      "set": "UP | DN",
+      "parameters": [],
+      "examples": ["FM UP", "FM DN"]
+    },
+    {
+      "name": "modulation_source_external",
+      "mnemonic": "S1",
+      "category": "Modulation",
+      "description": "Selects the external modulation source (front-panel MOD INPUT/OUTPUT) as the source for the AM or FM function. Source qualifier used ahead of an AM/FM function entry.",
+      "set": "S1",
+      "parameters": [],
+      "examples": ["S1 FM 3 KZ"]
+    },
+    {
+      "name": "modulation_source_int_400",
+      "mnemonic": "S2",
+      "category": "Modulation",
+      "description": "Selects the internal 400 Hz modulation source for the AM or FM function. Only one internal source (400 Hz or 1 kHz) can be active at a time.",
+      "set": "S2",
+      "parameters": [],
+      "examples": ["S2 AM 75 PC", "S2 FM 25 KZ"]
+    },
+    {
+      "name": "modulation_source_int_1k",
+      "mnemonic": "S3",
+      "category": "Modulation",
+      "description": "Selects the internal 1 kHz modulation source for the AM or FM function. Only one internal source (400 Hz or 1 kHz) can be active at a time.",
+      "set": "S3",
+      "parameters": [],
+      "examples": ["S3 FM 5 KZ"]
+    },
+    {
+      "name": "modulation_source_off",
+      "mnemonic": "S4",
+      "category": "Modulation",
+      "description": "Turns off a modulation source (or the selected modulation function). To turn off an AM/FM function send the function code then S4 (e.g. AM S4); with multiple sources active, send the specific source qualifier then S4 to disable just that source.",
+      "set": "S4",
+      "parameters": [],
+      "examples": ["FM S1 S4", "AM S4", "AM S2 S4"]
+    },
+    {
+      "name": "standby",
+      "mnemonic": "R0",
+      "category": "Output",
+      "description": "Programmatically places the instrument in the STBY (standby) state. The front-panel RESET/STBY/ON switch must be set to the ON position for this to take effect.",
+      "set": "R0",
+      "parameters": [],
+      "examples": ["R0"]
+    },
+    {
+      "name": "on",
+      "mnemonic": "R1",
+      "category": "Output",
+      "description": "Programmatically places the instrument in the ON state. The front-panel RESET/STBY/ON switch must be set to the ON position for this to take effect.",
+      "set": "R1",
+      "parameters": [],
+      "examples": ["R1"]
+    },
+    {
+      "name": "increment_set",
+      "mnemonic": "IS",
+      "category": "Increment",
+      "description": "Increment Set qualifier. Defines the step (increment) value used by UP/DN for the currently selected function. Sequence is Function IS Data Units. Sending Function IS alone displays (locally) the current increment. AM increment is unitless percent; FM increment is in kHz only.",
+      "set": "<function> IS <value> <unit>",
+      "parameters": [
+        { "name": "value", "range": "limits same as the selected function" }
+      ],
+      "examples": ["FR IS 1 MZ", "FR IS"]
+    },
+    {
+      "name": "store",
+      "mnemonic": "ST",
+      "category": "Memory",
+      "description": "Stores the complete front-panel setup (exclusive of increment settings) into one of ten storage registers (0-9). Follow with a single-digit register number.",
+      "set": "ST <register>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9" }
+      ],
+      "examples": ["ST 2"]
+    },
+    {
+      "name": "recall",
+      "mnemonic": "RC",
+      "category": "Memory",
+      "description": "Recalls the stored contents from one of ten storage registers (0-9) and sets the output to those values. Follow with a single-digit register number.",
+      "set": "RC <register>",
+      "parameters": [
+        { "name": "register", "range": "0 to 9" }
+      ],
+      "examples": ["RC 2"]
+    },
+    {
+      "name": "sequence",
+      "mnemonic": "SQ",
+      "category": "Memory",
+      "description": "Sequentially recalls the stored contents of the storage registers, advancing the sequence counter each time it is sent. Remote sequence operation is also available via an external switch closure.",
+      "set": "SQ",
+      "parameters": [],
+      "examples": ["SQ"]
+    },
+    {
+      "name": "reverse_power_reset",
+      "mnemonic": "RP",
+      "category": "Output",
+      "description": "Resets the reverse-power-protection circuitry after the source of reverse power applied to the RF OUTPUT has been removed.",
+      "set": "RP",
+      "parameters": [],
+      "examples": ["RP"]
+    }
+  ]
+}

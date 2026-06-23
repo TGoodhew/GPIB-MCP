@@ -1,0 +1,4112 @@
+{
+  "model": "DPO4032",
+  "manufacturer": "Tektronix",
+  "category": "Oscilloscope",
+  "description": "Tektronix DPO4032 digital-phosphor oscilloscope: 350 MHz bandwidth, 2 analog channels (DPO model, no digital channels; the corresponding MSO model adds 16 digital channels), 5 GS/s sample rate, 10 M record length. Remotely programmed using Tektronix codes and formats conforming to IEEE 488.2 over USB, LAN (VXI-11) or the optional GPIB adapter. Shares the MSO4000/DPO4000 Series programmer command set. Mnemonics follow the Tektronix short-form convention (uppercase letters are required, lowercase are optional). <x> denotes a numeric suffix such as a channel, bus or search number.",
+  "source": "MSO4000-and-DPO4000-Programmer-Manual.pdf",
+  "aliases": [
+    "DPO4032"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "DPO4032",
+    "supported": true,
+    "description": "Tektronix *IDN? returns 'TEKTRONIX,DPO4032,...'. Matched on 'DPO4032'."
+  },
+  "commands": [
+    {
+      "name": "acquire",
+      "mnemonic": "ACQuire?",
+      "category": "Acquisition",
+      "description": "Returns the acquisition parameters",
+      "query": "ACQuire?"
+    },
+    {
+      "name": "acquire_magnivu",
+      "mnemonic": "ACQuire:MAGnivu",
+      "category": "Acquisition",
+      "description": "Sets or returns the MagniVu feature",
+      "set": "ACQuire:MAGnivu {OFF|ON|0|1}",
+      "query": "ACQuire:MAGnivu?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | 0 | 1 }"
+        }
+      ],
+      "examples": [
+        "ACQUIRE:MAXSAMPLERATE?"
+      ]
+    },
+    {
+      "name": "acquire_maxsamplerate",
+      "mnemonic": "ACQuire:MAXSamplerate?",
+      "category": "Acquisition",
+      "description": "Returns the maximum real-time sample rate",
+      "query": "ACQuire:MAXSamplerate?"
+    },
+    {
+      "name": "acquire_mode",
+      "mnemonic": "ACQuire:MODe",
+      "category": "Acquisition",
+      "description": "Sets or returns the acquisition mode",
+      "set": "ACQuire:MODe {SAMple|PEAKdetect|HIRes|AVErage|ENVelope}",
+      "query": "ACQuire:MODe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ SAMple | PEAKdetect | HIRes | AVErage | ENVelope }"
+        }
+      ],
+      "examples": [
+        "ACQUIRE:MODE ENVELOPE",
+        "ACQUIRE:MODE?"
+      ]
+    },
+    {
+      "name": "acquire_numacq",
+      "mnemonic": "ACQuire:NUMACq?",
+      "category": "Acquisition",
+      "description": "Returns the number of acquisitions that have occurred",
+      "query": "ACQuire:NUMACq?"
+    },
+    {
+      "name": "acquire_numavg",
+      "mnemonic": "ACQuire:NUMAVg",
+      "category": "Acquisition",
+      "description": "Sets or returns the number of acquisitions for an averaged waveform",
+      "set": "ACQuire:NUMAVg <NR1>",
+      "query": "ACQuire:NUMAVg?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "2 to 512 in powers of two"
+        }
+      ],
+      "examples": [
+        "ACQUIRE:NUMAVG 16",
+        "ACQUIRE:NUMAVG?"
+      ]
+    },
+    {
+      "name": "acquire_numenv",
+      "mnemonic": "ACQuire:NUMEnv",
+      "category": "Acquisition",
+      "description": "This command controls the number of envelopes (when acquisition mode has been set to ENVelope using ACQuire:MODe). The number of envelopes can be set from 1 to 2000 in increments of 1, or to INFInite.",
+      "set": "ACQuire:NUMEnv {<NR1>|INFInite}",
+      "query": "ACQuire:NUMEnv?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR1> | INFInite }"
+        }
+      ],
+      "examples": [
+        "ACQuire:NUMEnv 22",
+        "ACQuire:NUMEnv?"
+      ]
+    },
+    {
+      "name": "acquire_state",
+      "mnemonic": "ACQuire:STATE",
+      "category": "Acquisition",
+      "description": "Starts or stops the acquisition system",
+      "set": "ACQuire:STATE {OFF|ON|RUN|STOP|<NR1>}",
+      "query": "ACQuire:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | RUN | STOP | <NR1> }"
+        }
+      ],
+      "examples": [
+        "ACQUIRE:STATE?"
+      ]
+    },
+    {
+      "name": "acquire_stopafter",
+      "mnemonic": "ACQuire:STOPAfter",
+      "category": "Acquisition",
+      "description": "Sets or returns whether the acquisition is continuous or single sequence",
+      "set": "ACQuire:STOPAfter {RUNSTop|SEQuence}",
+      "query": "ACQuire:STOPAfter?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ RUNSTop | SEQuence }"
+        }
+      ],
+      "examples": [
+        "ACQUIRE:STOPAFTER RUnsTOP",
+        "ACQUIRE:STOPAFTER?"
+      ]
+    },
+    {
+      "name": "alias",
+      "mnemonic": "ALIas",
+      "category": "Alias",
+      "description": "Sets or returns the alias state",
+      "set": "ALIas {OFF|ON|<NR1>}",
+      "query": "ALIas?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | <NR1> }"
+        }
+      ],
+      "examples": [
+        "ALIAS?",
+        "ALIas:CATalog? (Query Only)"
+      ]
+    },
+    {
+      "name": "alias_catalog",
+      "mnemonic": "ALIas:CATalog?",
+      "category": "Alias",
+      "description": "Returns a list of the currently defined alias labels",
+      "query": "ALIas:CATalog?"
+    },
+    {
+      "name": "alias_define",
+      "mnemonic": "ALIas:DEFine",
+      "category": "Alias",
+      "description": "Assigns a sequence of program messages to an alias label",
+      "set": "ALIas:DEFine? <QString>",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <QString> | <Block> }",
+          "units": [
+            {"unit": "s"}
+          ]
+        }
+      ],
+      "examples": [
+        "ALIAS:DEFINE \"ST1\",\":RECALL:SETUP 5;:AUTOSET",
+        "ALIAS:DEFINE? \"ST1\""
+      ]
+    },
+    {
+      "name": "alias_delete",
+      "mnemonic": "ALIas:DELEte",
+      "category": "Alias",
+      "description": "Removes a specified alias",
+      "set": "ALIas:DELEte"
+    },
+    {
+      "name": "alias_delete_all",
+      "mnemonic": "ALIas:DELEte:ALL",
+      "category": "Alias",
+      "description": "Deletes all existing aliases",
+      "set": "ALIas:DELEte:ALL"
+    },
+    {
+      "name": "alias_delete_name",
+      "mnemonic": "ALIas:DELEte[:NAMe]",
+      "category": "Alias",
+      "description": "Removes a specified alias",
+      "set": "ALIas:DELEte"
+    },
+    {
+      "name": "alias_state",
+      "mnemonic": "ALIas[:STATE]",
+      "category": "Alias",
+      "description": "Sets or returns the alias state",
+      "set": "ALIas",
+      "query": "ALIas?"
+    },
+    {
+      "name": "bus",
+      "mnemonic": "BUS",
+      "category": "Bus",
+      "description": "Returns the parameters for each bus",
+      "set": "BUS"
+    },
+    {
+      "name": "bus_bx_audio_clock_source",
+      "mnemonic": "BUS:B<x>:AUDio:CLOCk:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the clock source waveform for the AUDIO bus",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:AUDio:CLOCk:SOUrce?",
+      "examples": [
+        "BUS:B1:AUDIO:CLOCK:SOURCE D1",
+        "BUS:B1:AUDIO:CLOCK:SOURCE?"
+      ]
+    },
+    {
+      "name": "bus_bx_audio_data_source",
+      "mnemonic": "BUS:B<x>:AUDio:DATa:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the data source waveform for the AUDIO bus",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:AUDio:DATa:SOUrce?",
+      "examples": [
+        "BUS:B1:AUDIO:DATA:SOURCE D1",
+        "BUS:B1:AUDIO:DATA:SOURCE?"
+      ]
+    },
+    {
+      "name": "bus_bx_audio_framesync_source",
+      "mnemonic": "BUS:B<x>:AUDio:FRAMESync:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the frame sync source waveform for the AUDIO bus",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:AUDio:FRAMESync:SOUrce?",
+      "examples": [
+        "BUS:B1:AUDIO:FRAMESYNC:SOURCE CH1",
+        "BUS:B1:AUDIO:FRAMESYNC:SOURCE?"
+      ]
+    },
+    {
+      "name": "bus_bx_audio_type",
+      "mnemonic": "BUS:B<x>:AUDio:TYPe",
+      "category": "Bus",
+      "description": "Sets or returns the audio format (type) for the AUDIO bus",
+      "set": "BUS:B<x>:AUDio:TYPe {I2S|LJ|RJ|TDM}",
+      "query": "BUS:B<x>:AUDio:TYPe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ I2S | LJ | RJ | TDM }"
+        }
+      ],
+      "examples": [
+        "BUS:B1:AUDIO:TYPE RJ",
+        "BUS:B1:AUDIO:TYPE?"
+      ]
+    },
+    {
+      "name": "bus_bx_audio_wordsel_source",
+      "mnemonic": "BUS:B<x>:AUDio:WORDSel:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the word select source waveform for the AUDIO bus",
+      "set": "BUS:B<x>:AUDio:WORDSel:SOUrce {CH1|CH2|CH3|CH4",
+      "query": "BUS:B<x>:AUDio:WORDSel:SOUrce?",
+      "examples": [
+        "BUS:B1:AUDIO:WORDSEL:SOURCE CH1",
+        "BUS:B1:AUDIO:WORDSEL:SOURCE?"
+      ]
+    },
+    {
+      "name": "bus_bx_can_source",
+      "mnemonic": "BUS:B<x>:CAN:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the CAN data source",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:CAN:SOUrce?"
+    },
+    {
+      "name": "bus_bx_display_format",
+      "mnemonic": "BUS:B<x>:DISplay:FORMAt",
+      "category": "Bus",
+      "description": "Sets the display format for the numerical information in the specified bus waveform",
+      "set": "BUS:B<x>:DISplay:FORMAt",
+      "query": "BUS:B<x>:DISplay:FORMAt?"
+    },
+    {
+      "name": "bus_bx_display_type",
+      "mnemonic": "BUS:B<x>:DISplay:TYPe",
+      "category": "Bus",
+      "description": "Sets the display type for the specified bus",
+      "set": "BUS:B<x>:DISplay:TYPe {BUS|BOTh}",
+      "query": "BUS:B<x>:DISplay:TYPe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ BUS | BOTh }"
+        }
+      ]
+    },
+    {
+      "name": "bus_bx_flexray_source",
+      "mnemonic": "BUS:B<x>:FLEXray:SOUrce",
+      "category": "Bus",
+      "description": "This command specifies the FlexRay data source",
+      "set": "BUS:B<x>:FLEXray:SOUrce",
+      "query": "BUS:B<x>:FLEXray:SOUrce?",
+      "examples": [
+        "BUS:B1:FLEXRAY:SOURCE CH4",
+        "BUS:B1:FLEXRAY:SOURCE?"
+      ]
+    },
+    {
+      "name": "bus_bx_label",
+      "mnemonic": "BUS:B<x>:LABel",
+      "category": "Bus",
+      "description": "Sets or returns the waveform label for the specified bus",
+      "set": "BUS:B<x>:LABel <Qstring>",
+      "query": "BUS:B<x>:LABel?"
+    },
+    {
+      "name": "bus_bx_lin_source",
+      "mnemonic": "BUS:B<x>:LIN:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the LIN data source",
+      "set": "BUS:B<x>:LIN:SOUrce {CH1|CH2|CH3|CH4|}",
+      "query": "BUS:B<x>:LIN:SOUrce?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH1 | CH2 | CH3 | CH4 |  }"
+        }
+      ],
+      "examples": [
+        "BUS:B1:LIN:SOURCE CH4",
+        "BUS:B1:LIN:SOURCE?"
+      ]
+    },
+    {
+      "name": "bus_bx_mil1553_b_source",
+      "mnemonic": "BUS:B<x>:MIL1553B:SOUrce",
+      "category": "Bus",
+      "description": "This command specifies the MIL-STD-1553 bus source for differential input.",
+      "set": "BUS:B<x>:MIL1553B:SOUrce",
+      "query": "BUS:B<x>:MIL1553B:SOUrce?",
+      "examples": [
+        "BUS:B1:MIL1553B:SOUrce ref4",
+        "BUS:B1:MIL1553B:SOUrce?"
+      ]
+    },
+    {
+      "name": "bus_bx_parallel_bitx_source",
+      "mnemonic": "BUS:B<x>:PARallel:BIT<x>:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the parallel bit source for the specified bus",
+      "set": "BUS:B<x>:PARallel:BIT<x>:SOUrce",
+      "query": "BUS:B<x>:PARallel:BIT<x>:SOUrce?"
+    },
+    {
+      "name": "bus_bx_parallel_clock_edge",
+      "mnemonic": "BUS:B<x>:PARallel:CLOCK:EDGE",
+      "category": "Bus",
+      "description": "Sets or returns the parallel clock edge for the specified bus",
+      "set": "BUS:B<x>:PARallel:CLOCK:EDGE {EITher|RISing|FALling}",
+      "query": "BUS:B<x>:PARallel:CLOCK:EDGE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ EITher | RISing | FALling }"
+        }
+      ]
+    },
+    {
+      "name": "bus_bx_parallel_clock_source",
+      "mnemonic": "BUS:B<x>:PARallel:CLOCK:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the parallel clock source for the specified bus",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:PARallel:CLOCK:SOUrce?"
+    },
+    {
+      "name": "bus_bx_position",
+      "mnemonic": "BUS:B<x>:POSition",
+      "category": "Bus",
+      "description": "Sets or returns the position of the specified bus waveform",
+      "set": "BUS:B<x>:POSition <NR3>",
+      "query": "BUS:B<x>:POSition?"
+    },
+    {
+      "name": "bus_bx_rs232_c_rx_source",
+      "mnemonic": "BUS:B<x>:RS232C:RX:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the RS-232 RX source",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:RS232C:RX:SOUrce?"
+    },
+    {
+      "name": "bus_bx_rs232_c_tx_source",
+      "mnemonic": "BUS:B<x>:RS232C:TX:SOUrce",
+      "category": "Bus",
+      "description": "Sets or returns the RS-232 TX Source BUS:B<x>:SPI{:CLOCK|:SCLK}:POLARity Sets or returns the SPI SCLK polarity BUS:B<x>:SPI{:CLOCK|:SCLK}:SOUrce Sets or returns the SPI SCLK source BUS:B<x>:SPI:DATA{:IN|:MISO}:POLARity Sets or returns the SPI MISO polarity BUS:B<x>:SPI:DATA{:IN|:MISO}:SOUrce Sets or returns the SPI MISO source",
+      "set": "D0|D1|D2|D3|D4|D5|D6|D7|D8|D9|D10|D11|D12|D13|D14|D15}",
+      "query": "BUS:B<x>:RS232C:TX:SOUrce?"
+    },
+    {
+      "name": "bus_bx_state",
+      "mnemonic": "BUS:B<x>:STATE",
+      "category": "Bus",
+      "description": "Turns the specified bus on and off",
+      "set": "BUS:B<x>:STATE {<NR1>|OFF|ON}",
+      "query": "BUS:B<x>:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR1> | OFF | ON }"
+        }
+      ]
+    },
+    {
+      "name": "cal",
+      "mnemonic": "*CAL?",
+      "category": "Calibration",
+      "description": "Instructs the oscilloscope to perform self-calibration and returns the oscilloscope self calibration status",
+      "query": "*CAL?"
+    },
+    {
+      "name": "calibrate_factory_status",
+      "mnemonic": "CALibrate:FACtory:STATus?",
+      "category": "Calibration",
+      "description": "Returns the factory calibration status value saved in nonvolatile memory",
+      "query": "CALibrate:FACtory:STATus?"
+    },
+    {
+      "name": "calibrate_internal",
+      "mnemonic": "CALibrate:INTERNal",
+      "category": "Calibration",
+      "description": "Starts a signal path compensation",
+      "set": "CALibrate:INTERNal"
+    },
+    {
+      "name": "calibrate_internal_start",
+      "mnemonic": "CALibrate:INTERNal:STARt",
+      "category": "Calibration",
+      "description": "Starts the internal signal path calibration",
+      "set": "CALibrate:INTERNal:STARt"
+    },
+    {
+      "name": "calibrate_internal_status",
+      "mnemonic": "CALibrate:INTERNal:STATus?",
+      "category": "Calibration",
+      "description": "Returns the current status of the internal signal path calibration",
+      "query": "CALibrate:INTERNal:STATus?"
+    },
+    {
+      "name": "calibrate_results",
+      "mnemonic": "CALibrate:RESults?",
+      "category": "Calibration",
+      "description": "Returns the status of all calibration subsystems without performing an SPC operation",
+      "query": "CALibrate:RESults?"
+    },
+    {
+      "name": "calibrate_results_factory",
+      "mnemonic": "CALibrate:RESults:FACtory?",
+      "category": "Calibration",
+      "description": "Returns the status of internal and factory calibration",
+      "query": "CALibrate:RESults:FACtory?"
+    },
+    {
+      "name": "calibrate_results_spc",
+      "mnemonic": "CALibrate:RESults:SPC?",
+      "category": "Calibration",
+      "description": "Returns the results of the last SPC operation",
+      "query": "CALibrate:RESults:SPC?"
+    },
+    {
+      "name": "diag_loop_option",
+      "mnemonic": "DIAg:LOOP:OPTion",
+      "category": "Calibration",
+      "description": "Sets the self-test loop option",
+      "set": "DIAg:LOOP:OPTion {ALWAYS|FAIL|ONFAIL|ONCE|NTIMES}",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ALWAYS | FAIL | ONFAIL | ONCE | NTIMES }"
+        }
+      ],
+      "examples": [
+        "DIAG:LOOP:OPTION ONCE runs one loop of self tests"
+      ]
+    },
+    {
+      "name": "diag_loop_option_ntimes",
+      "mnemonic": "DIAg:LOOP:OPTion:NTIMes",
+      "category": "Calibration",
+      "description": "Sets the self-test loop option to run N times",
+      "set": "DIAg:LOOP:OPTion:NTIMes <NR1>",
+      "query": "DIAg:LOOP:OPTion:NTIMes?",
+      "examples": [
+        "DIAG:LOOP:OPTION:NTIMES 3",
+        "DIAG:LOOP:OPTION:NTIMES?"
+      ]
+    },
+    {
+      "name": "diag_loop_stop",
+      "mnemonic": "DIAg:LOOP:STOP",
+      "category": "Calibration",
+      "description": "Stops the self-test at the end of the current loop",
+      "set": "DIAg:LOOP:STOP"
+    },
+    {
+      "name": "diag_result_flag",
+      "mnemonic": "DIAg:RESUlt:FLAg?",
+      "category": "Calibration",
+      "description": "Returns the pass/fail status from the last self-test sequence execution",
+      "query": "DIAg:RESUlt:FLAg?"
+    },
+    {
+      "name": "diag_result_log",
+      "mnemonic": "DIAg:RESUlt:LOG?",
+      "category": "Calibration",
+      "description": "Returns the internal results log from the last self-test sequence execution",
+      "query": "DIAg:RESUlt:LOG?"
+    },
+    {
+      "name": "diag_select_function",
+      "mnemonic": "DIAg:SELect:<function>",
+      "category": "Calibration",
+      "description": "Selects one of the available self-test areas",
+      "set": "DIAg:SELect:<function>"
+    },
+    {
+      "name": "diag_state",
+      "mnemonic": "DIAg:STATE",
+      "category": "Calibration",
+      "description": "Sets the oscilloscope operating state",
+      "set": "DIAg:STATE"
+    },
+    {
+      "name": "diag_select",
+      "mnemonic": "DIAg:SELect",
+      "category": "Calibration",
+      "description": "Sets the type of diagnostics grouping",
+      "set": "DIAg:SELect"
+    },
+    {
+      "name": "configuration_advmath",
+      "mnemonic": "CONFIGuration:ADVMATH?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the advanced math feature is present.",
+      "query": "CONFIGuration:ADVMATH?"
+    },
+    {
+      "name": "configuration_analog_gndcplg",
+      "mnemonic": "CONFIGuration:ANALOg:GNDCPLG?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the ground coupling feature for analog channels is present.",
+      "query": "CONFIGuration:ANALOg:GNDCPLG?"
+    },
+    {
+      "name": "configuration_analog_maxbandwidth",
+      "mnemonic": "CONFIGuration:ANALOg:MAXBANDWidth?",
+      "category": "Configuration",
+      "description": "This query returns the maximum bandwidth for analog channels.",
+      "query": "CONFIGuration:ANALOg:MAXBANDWidth?"
+    },
+    {
+      "name": "maxsamplerate",
+      "mnemonic": "MAXSAMPLERate?",
+      "category": "Configuration",
+      "description": "for analog channels.",
+      "query": "MAXSAMPLERate?"
+    },
+    {
+      "name": "configuration_analog_numchannels",
+      "mnemonic": "CONFIGuration:ANALOg:NUMCHANnels?",
+      "category": "Configuration",
+      "description": "This query returns the number of analog channels.",
+      "query": "CONFIGuration:ANALOg:NUMCHANnels?"
+    },
+    {
+      "name": "configuration_analog_reclens",
+      "mnemonic": "CONFIGuration:ANALOg:RECLENS?",
+      "category": "Configuration",
+      "description": "This query returns a comma-separated list of supported record lengths for the analog channels.",
+      "query": "CONFIGuration:ANALOg:RECLENS?"
+    },
+    {
+      "name": "configuration_analog_vertinvert",
+      "mnemonic": "CONFIGuration:ANALOg:VERTINVert?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the vertical invert feature for analog channels is present.",
+      "query": "CONFIGuration:ANALOg:VERTINVert?"
+    },
+    {
+      "name": "configuration_applications_limitmask",
+      "mnemonic": "CONFIGuration:APPLications:LIMITMask?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional mask/limit test application feature is present. As the MSO/DPO3000 Series oscilloscopes do not support this feature, this query always returns 0.",
+      "query": "CONFIGuration:APPLications:LIMITMask?"
+    },
+    {
+      "name": "configuration_applications_power",
+      "mnemonic": "CONFIGuration:APPLications:POWer?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional power application feature is present.",
+      "query": "CONFIGuration:APPLications:POWer?"
+    },
+    {
+      "name": "configuration_auxin",
+      "mnemonic": "CONFIGuration:AUXIN?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the instrument has an auxiliary input.",
+      "query": "CONFIGuration:AUXIN?"
+    },
+    {
+      "name": "configuration_buswaveforms_audio",
+      "mnemonic": "CONFIGuration:BUSWAVEFORMS:AUDIO?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional audio bus triggering and analysis feature is present.",
+      "query": "CONFIGuration:BUSWAVEFORMS:AUDIO?"
+    },
+    {
+      "name": "configuration_buswaveforms_can",
+      "mnemonic": "CONFIGuration:BUSWAVEFORMS:CAN?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional CAN bus triggering and analysis feature is present.",
+      "query": "CONFIGuration:BUSWAVEFORMS:CAN?"
+    },
+    {
+      "name": "configuration_buswaveforms_i2_c",
+      "mnemonic": "CONFIGuration:BUSWAVEFORMS:I2C?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional I2C bus triggering and analysis feature is present.",
+      "query": "CONFIGuration:BUSWAVEFORMS:I2C?"
+    },
+    {
+      "name": "configuration_buswaveforms_lin",
+      "mnemonic": "CONFIGuration:BUSWAVEFORMS:LIN?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional LIN bus triggering and analysis feature is present.",
+      "query": "CONFIGuration:BUSWAVEFORMS:LIN?"
+    },
+    {
+      "name": "configuration_buswaveforms_rs232",
+      "mnemonic": "CONFIGuration:BUSWAVEFORMS:RS232?",
+      "category": "Configuration",
+      "description": "This query returns a boolean value to indicate whether the optional RS232 bus triggering and analysis feature is present.",
+      "query": "CONFIGuration:BUSWAVEFORMS:RS232?"
+    },
+    {
+      "name": "cursor",
+      "mnemonic": "CURSor?",
+      "category": "Cursor",
+      "description": "Returns the cursor settings",
+      "query": "CURSor?",
+      "examples": [
+        "CURSOR?",
+        "CURSor:DDT? (Query Only)"
+      ]
+    },
+    {
+      "name": "cursor_ddt",
+      "mnemonic": "CURSor:DDT?",
+      "category": "Cursor",
+      "description": "Returns the cursor deltaY/deltaT (dY/dT) readout",
+      "query": "CURSor:DDT?"
+    },
+    {
+      "name": "cursor_function",
+      "mnemonic": "CURSor:FUNCtion",
+      "category": "Cursor",
+      "description": "Sets or returns the cursor type",
+      "set": "CURSor:FUNCtion {OFF|SCREEN|WAVEform}",
+      "query": "CURSor:FUNCtion?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | SCREEN | WAVEform }"
+        }
+      ],
+      "examples": [
+        "CURSOR:FUNCTION?",
+        "CURSor:HBArs? (Query Only)"
+      ]
+    },
+    {
+      "name": "cursor_hbars",
+      "mnemonic": "CURSor:HBArs?",
+      "category": "Cursor",
+      "description": "Returns the hbar cursor settings",
+      "query": "CURSor:HBArs?"
+    },
+    {
+      "name": "cursor_hbars_delta",
+      "mnemonic": "CURSor:HBArs:DELTa?",
+      "category": "Cursor",
+      "description": "Returns the hbars cursors vertical difference",
+      "query": "CURSor:HBArs:DELTa?"
+    },
+    {
+      "name": "cursor_hbars_positionx",
+      "mnemonic": "CURSor:HBArs:POSITION<x>",
+      "category": "Cursor",
+      "description": "Sets or returns the hbar cursor<x> vertical position",
+      "set": "CURSor:HBArs:POSITION<x> <NR3>",
+      "query": "CURSor:HBArs:POSITION<x>?",
+      "examples": [
+        "CURSOR:HBARS:POSITION2?"
+      ]
+    },
+    {
+      "name": "cursor_hbars_units",
+      "mnemonic": "CURSor:HBArs:UNIts",
+      "category": "Cursor",
+      "description": "Returns the hbar cursor units",
+      "set": "CURSor:HBArs:UNIts {BASE|PERcent}",
+      "query": "CURSor:HBArs:UNIts?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ BASE | PERcent }"
+        }
+      ],
+      "examples": [
+        "CURSor:HBArs:USE (No Query Form)"
+      ]
+    },
+    {
+      "name": "cursor_hbars_use",
+      "mnemonic": "CURSor:HBArs:USE",
+      "category": "Cursor",
+      "description": "Sets the horizontal bar cursor measurement scale, for use with ratio cursors",
+      "set": "CURSor:HBArs:USE"
+    },
+    {
+      "name": "cursor_mode",
+      "mnemonic": "CURSor:MODe",
+      "category": "Cursor",
+      "description": "Sets or returns whether cursors move in unison or separately",
+      "set": "CURSor:MODe {TRACk|INDependent}",
+      "query": "CURSor:MODe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ TRACk | INDependent }"
+        }
+      ],
+      "examples": [
+        "CURSOR:MODE TRACK",
+        "CURSOR:MODE?"
+      ]
+    },
+    {
+      "name": "cursor_vbars",
+      "mnemonic": "CURSor:VBArs?",
+      "category": "Cursor",
+      "description": "Sets or returns the position of vertical bar cursors",
+      "query": "CURSor:VBArs?"
+    },
+    {
+      "name": "cursor_vbars_alternatex",
+      "mnemonic": "CURSor:VBArs:ALTERNATE<x>?",
+      "category": "Cursor",
+      "description": "Returns the alternate readout for the waveform (Vbar) cursors",
+      "query": "CURSor:VBArs:ALTERNATE<x>?"
+    },
+    {
+      "name": "cursor_vbars_units",
+      "mnemonic": "CURSor:VBArs:UNIts",
+      "category": "Cursor",
+      "description": "Sets or returns the horizontal units for vbar cursors",
+      "set": "CURSor:VBArs:UNIts {SEConds|HERtz|DEGrees|PERcent}",
+      "query": "CURSor:VBArs:UNIts?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ SEConds | HERtz | DEGrees | PERcent }",
+          "units": [
+            {"unit": "s"}
+          ]
+        }
+      ],
+      "examples": [
+        "CURSOR:VBARS:UNITS HERtz",
+        "CURSOR:VBARS:UNITS?"
+      ]
+    },
+    {
+      "name": "cursor_xy_polar_radius_units",
+      "mnemonic": "CURSor:XY:POLar:RADIUS:UNIts?",
+      "category": "Cursor",
+      "description": "Returns the polar radius units",
+      "query": "CURSor:XY:POLar:RADIUS:UNIts?"
+    },
+    {
+      "name": "cursor_xy_polar_theta_units",
+      "mnemonic": "CURSor:XY:POLar:THETA:UNIts?",
+      "category": "Cursor",
+      "description": "Returns the cursor polar coordinate units",
+      "query": "CURSor:XY:POLar:THETA:UNIts?"
+    },
+    {
+      "name": "cursor_xy_product_units",
+      "mnemonic": "CURSor:XY:PRODUCT:UNIts?",
+      "category": "Cursor",
+      "description": "Returns the XY cursor product units",
+      "query": "CURSor:XY:PRODUCT:UNIts?"
+    },
+    {
+      "name": "cursor_xy_ratio_units",
+      "mnemonic": "CURSor:XY:RATIO:UNIts?",
+      "category": "Cursor",
+      "description": "Returns the X and Y cursor units for the ratio measurement",
+      "query": "CURSor:XY:RATIO:UNIts?"
+    },
+    {
+      "name": "cursor_xy_rectangular_x_units",
+      "mnemonic": "CURSor:XY:RECTangular:X:UNIts?",
+      "category": "Cursor",
+      "description": "Returns the cursor X rectangular units",
+      "query": "CURSor:XY:RECTangular:X:UNIts?"
+    },
+    {
+      "name": "cursor_xy_rectangular_y_units",
+      "mnemonic": "CURSor:XY:RECTangular:Y:UNIts?",
+      "category": "Cursor",
+      "description": "Returns the cursor Y rectangular units",
+      "query": "CURSor:XY:RECTangular:Y:UNIts?"
+    },
+    {
+      "name": "display",
+      "mnemonic": "DISplay?",
+      "category": "Display",
+      "description": "Returns the current display settings",
+      "query": "DISplay?"
+    },
+    {
+      "name": "display_clock",
+      "mnemonic": "DISplay:CLOCk",
+      "category": "Display",
+      "description": "Sets or returns the display of the date/time stamp",
+      "set": "DISplay:CLOCk {ON|OFF|<NR1>}",
+      "query": "DISplay:CLOCk?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ON | OFF | <NR1> }"
+        }
+      ],
+      "examples": [
+        "DISPLAY:CLOCK ON enables display of date and time",
+        "DISPLAY:CLOCK?"
+      ]
+    },
+    {
+      "name": "display_digital_height",
+      "mnemonic": "DISplay:DIGital:HEIght",
+      "category": "Display",
+      "description": "Sets or returns the number of available digital waveform position slots",
+      "set": "DISplay:DIGital:HEIght {SMAll|MEDium|LARge}",
+      "query": "DISplay:DIGital:HEIght?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ SMAll | MEDium | LARge }"
+        }
+      ]
+    },
+    {
+      "name": "display_graticule",
+      "mnemonic": "DISplay:GRAticule",
+      "category": "Display",
+      "description": "This command specifies the type of graticule the oscilloscope displays.",
+      "set": "DISplay:GRAticule {CROSSHair|FRAme|FULl|GRId|SOLid}",
+      "query": "DISplay:GRAticule?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CROSSHair | FRAme | FULl | GRId | SOLid }"
+        }
+      ],
+      "examples": [
+        "DISPLAY:GRATICULE FRAme",
+        "DISPLAY:GRATICULE?"
+      ]
+    },
+    {
+      "name": "display_intensity",
+      "mnemonic": "DISplay:INTENSITy?",
+      "category": "Display",
+      "description": "Returns all the display intensity settings",
+      "query": "DISplay:INTENSITy?"
+    },
+    {
+      "name": "display_intensity_backlight",
+      "mnemonic": "DISplay:INTENSITy:BACKLight",
+      "category": "Display",
+      "description": "Sets or returns the backlight intensity for the display",
+      "set": "DISplay:INTENSITy:BACKLight {LOW|MEDium|HIGH}",
+      "query": "DISplay:INTENSITy:BACKLight?",
+      "examples": [
+        "DISPLAY:INTENSITY:BACKLIGHT?",
+        "DISPLAY:INTEnsITY:BACKLIGHT HIGH"
+      ]
+    },
+    {
+      "name": "display_intensity_graticule",
+      "mnemonic": "DISplay:INTENSITy:GRAticule",
+      "category": "Display",
+      "description": "Sets or returns the graticule intensity for the display",
+      "set": "DISplay:INTENSITy:GRAticule <NR1>",
+      "query": "DISplay:INTENSITy:GRAticule?",
+      "examples": [
+        "DISPLAY:INTENSITY:GRATICULE?",
+        "DISPLAY:INTEnsITY:GRATICULE 30"
+      ]
+    },
+    {
+      "name": "display_intensity_waveform",
+      "mnemonic": "DISplay:INTENSITy:WAVEform",
+      "category": "Display",
+      "description": "Sets or returns the intensity of the waveforms",
+      "set": "DISplay:INTENSITy:WAVEform <NR1>",
+      "query": "DISplay:INTENSITy:WAVEform?",
+      "examples": [
+        "DISPLAY:INTENSITY:WAVEFORM?",
+        "DISPLAY:INTEnsITY:WAVEFORM 60"
+      ]
+    },
+    {
+      "name": "display_persistence",
+      "mnemonic": "DISplay:PERSistence",
+      "category": "Display",
+      "description": "Sets or returns the display persistence setting",
+      "set": "DISplay:PERSistence {<NR3>|CLEAR|AUTO|INFInite|OFF}",
+      "query": "DISplay:PERSistence?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR3> | CLEAR | AUTO | INFInite | OFF }",
+          "units": [
+            {"unit": "s"}
+          ]
+        }
+      ],
+      "examples": [
+        "DISPLAY:PERSISTENCE 3"
+      ]
+    },
+    {
+      "name": "display_style_dotsonly",
+      "mnemonic": "DISplay:STYle:DOTsonly",
+      "category": "Display",
+      "description": "Sets a dots-only display",
+      "set": "DISplay:STYle:DOTsonly {ON|OFF|<NR1>}",
+      "query": "DISplay:STYle:DOTsonly?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ON | OFF | <NR1> }"
+        }
+      ]
+    },
+    {
+      "name": "display_xy",
+      "mnemonic": "DISplay:XY",
+      "category": "Display",
+      "description": "This command turns on or off the XY display mode.",
+      "set": "DISplay:XY {OFF|TRIGgered}",
+      "query": "DISplay:XY?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | TRIGgered }"
+        }
+      ],
+      "examples": [
+        "DISplay:XY TRIG",
+        "DISPLAY:XY?"
+      ]
+    },
+    {
+      "name": "message",
+      "mnemonic": "MESSage",
+      "category": "Display",
+      "description": "Sets or queries message box (screen annotation) parameters",
+      "set": "MESSage",
+      "query": "MESSage?",
+      "examples": [
+        "MESSAGE?"
+      ]
+    },
+    {
+      "name": "message_state",
+      "mnemonic": "MESSage:STATE",
+      "category": "Display",
+      "description": "Controls the display of the message box",
+      "set": "MESSage:STATE {OFF|ON|0|1}",
+      "query": "MESSage:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | 0 | 1 }"
+        }
+      ]
+    },
+    {
+      "name": "ethernet_dhcpbootp",
+      "mnemonic": "ETHERnet:DHCPbootp",
+      "category": "Ethernet",
+      "description": "Sets or returns the network initialization search for a DHCP/BOOTP server",
+      "set": "ETHERnet:DHCPbootp {ON|OFF}",
+      "query": "ETHERnet:DHCPbootp?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ON | OFF }"
+        }
+      ],
+      "examples": [
+        "ETHERNET:DHCPBOOTP ON"
+      ]
+    },
+    {
+      "name": "ethernet_dns_ipaddress",
+      "mnemonic": "ETHERnet:DNS:IPADDress",
+      "category": "Ethernet",
+      "description": "Sets or returns the network Domain Name Server (Dns) IP address",
+      "set": "ETHERnet:DNS:IPADDress <QString>",
+      "query": "ETHERnet:DNS:IPADDress?",
+      "examples": [
+        "ETHERNET:DNS:IPADDRESS “128.196.13.352”"
+      ]
+    },
+    {
+      "name": "ethernet_domainname",
+      "mnemonic": "ETHERnet:DOMAINname",
+      "category": "Ethernet",
+      "description": "Sets or returns the network domain name",
+      "set": "ETHERnet:DOMAINname <Qstring>",
+      "query": "ETHERnet:DOMAINname?",
+      "examples": [
+        "ETHERNET:DOMAINNAME “Alpha1.Mycorp.com”",
+        "ETHERnet:ENET:ADDress? (Query Only)"
+      ]
+    },
+    {
+      "name": "ethernet_enet_address",
+      "mnemonic": "ETHERnet:ENET:ADDress?",
+      "category": "Ethernet",
+      "description": "Returns the Ethernet address value assigned to the oscilloscope",
+      "query": "ETHERnet:ENET:ADDress?"
+    },
+    {
+      "name": "ethernet_gateway_ipaddress",
+      "mnemonic": "ETHERnet:GATEWay:IPADDress",
+      "category": "Ethernet",
+      "description": "Sets or returns the remote interface gateway IP address",
+      "set": "ETHERnet:GATEWay:IPADDress <QString>",
+      "query": "ETHERnet:GATEWay:IPADDress?",
+      "examples": [
+        "ETHERNET:GATEWAY:IPADDRESS “128.143.16.1”"
+      ]
+    },
+    {
+      "name": "ethernet_httpport",
+      "mnemonic": "ETHERnet:HTTPPort",
+      "category": "Ethernet",
+      "description": "Sets or returns the remote interface HTTP port value",
+      "set": "ETHERnet:HTTPPort <QString>",
+      "query": "ETHERnet:HTTPPort?",
+      "examples": [
+        "ETHERNET:HTTPPORT “80”"
+      ]
+    },
+    {
+      "name": "ethernet_ipaddress",
+      "mnemonic": "ETHERnet:IPADDress",
+      "category": "Ethernet",
+      "description": "Sets or returns the IP address assigned to the oscilloscope",
+      "set": "ETHERnet:IPADDress <QString>",
+      "query": "ETHERnet:IPADDress?",
+      "examples": [
+        "ETHERNET:IPADDRESS “123.121.13.214”"
+      ]
+    },
+    {
+      "name": "ethernet_name",
+      "mnemonic": "ETHERnet:NAME",
+      "category": "Ethernet",
+      "description": "Sets or returns the network name assigned to the oscilloscope",
+      "set": "ETHERnet:NAME <QString>",
+      "query": "ETHERnet:NAME?",
+      "examples": [
+        "ETHERNET:NAME “labscope1”"
+      ]
+    },
+    {
+      "name": "ethernet_password",
+      "mnemonic": "ETHERnet:PASSWord",
+      "category": "Ethernet",
+      "description": "Sets or returns the Ethernet access password",
+      "set": "ETHERnet:PASSWord <new>",
+      "query": "ETHERnet:PASSWord?",
+      "examples": [
+        "ETHERNET:PASSWORD?",
+        "ETHERnet:PING (No Query Form)"
+      ]
+    },
+    {
+      "name": "ethernet_ping",
+      "mnemonic": "ETHERnet:PING",
+      "category": "Ethernet",
+      "description": "Causes the oscilloscope to ping the gateway IP address",
+      "set": "ETHERnet:PING"
+    },
+    {
+      "name": "ethernet_ping_status",
+      "mnemonic": "ETHERnet:PING:STATUS?",
+      "category": "Ethernet",
+      "description": "Returns the results from pinging the gateway IP address",
+      "query": "ETHERnet:PING:STATUS?"
+    },
+    {
+      "name": "ethernet_subnetmask",
+      "mnemonic": "ETHERnet:SUBNETMask",
+      "category": "Ethernet",
+      "description": "Sets or returns the remote interface subnet mask value",
+      "set": "ETHERnet:SUBNETMask <QString>",
+      "query": "ETHERnet:SUBNETMask?",
+      "examples": [
+        "ETHERNET:SUBNETMASK “255.255.255.0”"
+      ]
+    },
+    {
+      "name": "filesystem",
+      "mnemonic": "FILESystem?",
+      "category": "File System",
+      "description": "Returns the directory listing of the current working directory and the number of bytes of free space available",
+      "query": "FILESystem?"
+    },
+    {
+      "name": "filesystem_cwd",
+      "mnemonic": "FILESystem:CWD",
+      "category": "File System",
+      "description": "Sets or returns the current working directory for FILESystem commands",
+      "set": "FILESystem:CWD {<new working directory path>}",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <new working directory path> }"
+        }
+      ],
+      "examples": [
+        "FILESYSTEM:CWD \"D:/TekScope/images\"",
+        "FILESYSTEM:CWD?"
+      ]
+    },
+    {
+      "name": "filesystem_delete",
+      "mnemonic": "FILESystem:DELEte",
+      "category": "File System",
+      "description": "Deletes a named file or directory",
+      "set": "FILESystem:DELEte"
+    },
+    {
+      "name": "filesystem_dir",
+      "mnemonic": "FILESystem:DIR?",
+      "category": "File System",
+      "description": "Returns a list of directory contents",
+      "query": "FILESystem:DIR?"
+    },
+    {
+      "name": "filesystem_format",
+      "mnemonic": "FILESystem:FORMat",
+      "category": "File System",
+      "description": "Formats a named drive",
+      "set": "FILESystem:FORMat"
+    },
+    {
+      "name": "filesystem_freespace",
+      "mnemonic": "FILESystem:FREESpace?",
+      "category": "File System",
+      "description": "Returns the number of bytes of free space on the current drive",
+      "query": "FILESystem:FREESpace?"
+    },
+    {
+      "name": "filesystem_mkdir",
+      "mnemonic": "FILESystem:MKDir",
+      "category": "File System",
+      "description": "Creates a new directory",
+      "set": "FILESystem:MKDir"
+    },
+    {
+      "name": "filesystem_readfile",
+      "mnemonic": "FILESystem:READFile",
+      "category": "File System",
+      "description": "Writes the contents of the specified file to the specified interface",
+      "set": "FILESystem:READFile"
+    },
+    {
+      "name": "filesystem_rename",
+      "mnemonic": "FILESystem:REName",
+      "category": "File System",
+      "description": "Assigns a new name to an existing file",
+      "set": "FILESystem:REName"
+    },
+    {
+      "name": "filesystem_rmdir",
+      "mnemonic": "FILESystem:RMDir",
+      "category": "File System",
+      "description": "Deletes a named directory",
+      "set": "FILESystem:RMDir"
+    },
+    {
+      "name": "filesystem_writefile",
+      "mnemonic": "FILESystem:WRITEFile",
+      "category": "File System",
+      "description": "Writes the specified block data to the oscilloscope current working directory",
+      "set": "FILESystem:WRITEFile"
+    },
+    {
+      "name": "hardcopy",
+      "mnemonic": "HARDCopy",
+      "category": "Hardcopy/Save",
+      "description": "Sends a copy of the screen display to the selected printer",
+      "set": "HARDCopy"
+    },
+    {
+      "name": "hardcopy_activeprinter",
+      "mnemonic": "HARDCopy:ACTIVeprinter",
+      "category": "Hardcopy/Save",
+      "description": "Sets or returns the currently active printer",
+      "set": "HARDCopy:ACTIVeprinter {<NR1>|<name>}",
+      "query": "HARDCopy:ACTIVeprinter?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR1> | <name> }"
+        }
+      ]
+    },
+    {
+      "name": "hardcopy_inksaver",
+      "mnemonic": "HARDCopy:INKSaver",
+      "category": "Hardcopy/Save",
+      "description": "Changes hard copy output to print color traces and graticule on a white background",
+      "query": "HARDCopy:INKSaver?"
+    },
+    {
+      "name": "hardcopy_layout",
+      "mnemonic": "HARDCopy:LAYout",
+      "category": "Hardcopy/Save",
+      "description": "Sets or returns the page orientation for hard copy",
+      "set": "HARDCopy:LAYout {PORTRait|LANdscape}",
+      "query": "HARDCopy:LAYout?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ PORTRait | LANdscape }"
+        }
+      ],
+      "examples": [
+        "HARDCOPY:LAYOUT LANDSCAPE",
+        "HARDCOPY:LAYOUT?"
+      ]
+    },
+    {
+      "name": "hardcopy_preview",
+      "mnemonic": "HARDCopy:PREVIEW",
+      "category": "Hardcopy/Save",
+      "description": "Previews the current screen contents with the InkSaver palette applied",
+      "set": "HARDCopy:PREVIEW"
+    },
+    {
+      "name": "hardcopy_printer_add",
+      "mnemonic": "HARDCopy:PRINTer:ADD",
+      "category": "Hardcopy/Save",
+      "description": "Adds a network printer to the list of available printers",
+      "set": "HARDCopy:PRINTer:ADD"
+    },
+    {
+      "name": "hardcopy_printer_delete",
+      "mnemonic": "HARDCopy:PRINTer:DELete",
+      "category": "Hardcopy/Save",
+      "description": "Removes a network printer from the list of available printers",
+      "set": "HARDCopy:PRINTer:DELete"
+    },
+    {
+      "name": "hardcopy_printer_list",
+      "mnemonic": "HARDCopy:PRINTer:LIST?",
+      "category": "Hardcopy/Save",
+      "description": "Returns the list of currently attached printers",
+      "query": "HARDCopy:PRINTer:LIST?"
+    },
+    {
+      "name": "hardcopy_printer_rename",
+      "mnemonic": "HARDCopy:PRINTer:REName",
+      "category": "Hardcopy/Save",
+      "description": "Renames a network printer in the list of available printers",
+      "set": "HARDCopy:PRINTer:REName"
+    },
+    {
+      "name": "horizontal",
+      "mnemonic": "HORizontal?",
+      "category": "Horizontal",
+      "description": "Returns settings for the horizontal commands",
+      "query": "HORizontal?"
+    },
+    {
+      "name": "horizontal_delay_mode",
+      "mnemonic": "HORizontal:DELay:MODe",
+      "category": "Horizontal",
+      "description": "Sets or returns the horizontal delay mode",
+      "set": "HORizontal:DELay:MODe {OFF|ON|<NR1>}",
+      "query": "HORizontal:DELay:MODe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | <NR1> }"
+        }
+      ],
+      "examples": [
+        "HORIZONTAL:DELAY:MODE OFF",
+        "HORIZONTAL:DELAY:MODE?"
+      ]
+    },
+    {
+      "name": "horizontal_delay_time",
+      "mnemonic": "HORizontal:DELay:TIMe",
+      "category": "Horizontal",
+      "description": "Sets or returns the horizontal delay time (position) that is used when delay is on",
+      "set": "HORizontal:DELay:TIMe <NR3>",
+      "query": "HORizontal:DELay:TIMe?",
+      "examples": [
+        "HORizontal:DELay:TIME 0.3",
+        "HORizontal:DIGital:RECOrdlength:MAGnivu? (Query Only)"
+      ]
+    },
+    {
+      "name": "magnivu",
+      "mnemonic": "MAGnivu?",
+      "category": "Horizontal",
+      "description": "digital acquisition",
+      "query": "MAGnivu?"
+    },
+    {
+      "name": "horizontal_digital_recordlength_main",
+      "mnemonic": "HORizontal:DIGital:RECOrdlength:MAIN?",
+      "category": "Horizontal",
+      "description": "Returns the record length of the main digital acquisition",
+      "query": "HORizontal:DIGital:RECOrdlength:MAIN?"
+    },
+    {
+      "name": "horizontal_digital_samplerate_main",
+      "mnemonic": "HORizontal:DIGital:SAMPLERate:MAIN?",
+      "category": "Horizontal",
+      "description": "Returns the sample rate of the main digital acquisition",
+      "query": "HORizontal:DIGital:SAMPLERate:MAIN?"
+    },
+    {
+      "name": "horizontal_position",
+      "mnemonic": "HORizontal:POSition",
+      "category": "Horizontal",
+      "description": "Sets or returns the horizontal position, in percent, that is used when delay is off",
+      "set": "HORizontal:POSition <NR3>",
+      "query": "HORizontal:POSition?",
+      "examples": [
+        "HORIZONTAL:POSITION 50",
+        "HORIZONTAL:POSITION?"
+      ]
+    },
+    {
+      "name": "horizontal_previewstate",
+      "mnemonic": "HORizontal:PREViewstate?",
+      "category": "Horizontal",
+      "description": "Returns the display system preview state",
+      "query": "HORizontal:PREViewstate?"
+    },
+    {
+      "name": "horizontal_recordlength",
+      "mnemonic": "HORizontal:RECOrdlength",
+      "category": "Horizontal",
+      "description": "Sets or returns the record length",
+      "set": "HORizontal:RECOrdlength <NR1>",
+      "query": "HORizontal:RECOrdlength?",
+      "examples": [
+        "HORIZONTAL:RECORDLENGTH 10000",
+        "HORIZONTAL:RECORDLENGTH?"
+      ]
+    },
+    {
+      "name": "horizontal_samplerate",
+      "mnemonic": "HORizontal:SAMPLERate",
+      "category": "Horizontal",
+      "description": "Sets or returns the sample rate",
+      "set": "HORizontal:SAMPLERate <NR3>",
+      "query": "HORizontal:SAMPLERate?"
+    },
+    {
+      "name": "horizontal_scale",
+      "mnemonic": "HORizontal:SCAle",
+      "category": "Horizontal",
+      "description": "Sets or returns the horizontal scale",
+      "set": "HORizontal:SCAle <NR3>",
+      "query": "HORizontal:SCAle?",
+      "examples": [
+        "HORIZONTAL:SCALE 2E-6",
+        "HORIZONTAL:SCALE?"
+      ]
+    },
+    {
+      "name": "mark_create",
+      "mnemonic": "MARK:CREATE",
+      "category": "Mark",
+      "description": "Creates a mark on a particular waveform or all waveforms in a column",
+      "set": "MARK:CREATE"
+    },
+    {
+      "name": "mark_delete",
+      "mnemonic": "MARK:DELEte",
+      "category": "Mark",
+      "description": "Deletes a mark on a particular waveform, all waveforms in a column, or all marks",
+      "set": "MARK:DELEte"
+    },
+    {
+      "name": "mark_free",
+      "mnemonic": "MARK:FREE?",
+      "category": "Mark",
+      "description": "Returns how many marks are free to be used",
+      "query": "MARK:FREE?"
+    },
+    {
+      "name": "mark_selected_end",
+      "mnemonic": "MARK:SELected:END?",
+      "category": "Mark",
+      "description": "Returns the end of the selected mark, in terms of 0 to 100% of the waveform",
+      "query": "MARK:SELected:END?"
+    },
+    {
+      "name": "mark_selected_focus",
+      "mnemonic": "MARK:SELected:FOCUS?",
+      "category": "Mark",
+      "description": "Returns the focus of the selected mark, in terms of 0 to 100% of the waveform",
+      "query": "MARK:SELected:FOCUS?"
+    },
+    {
+      "name": "mark_selected_marksincolumn",
+      "mnemonic": "MARK:SELected:MARKSINCOLumn?",
+      "category": "Mark",
+      "description": "Returns how many marks are in the current zoom pixel column",
+      "query": "MARK:SELected:MARKSINCOLumn?"
+    },
+    {
+      "name": "mark_selected_owner",
+      "mnemonic": "MARK:SELected:OWNer?",
+      "category": "Mark",
+      "description": "Returns the owner of the selected mark",
+      "query": "MARK:SELected:OWNer?"
+    },
+    {
+      "name": "mark_selected_source",
+      "mnemonic": "MARK:SELected:SOURCE?",
+      "category": "Mark",
+      "description": "Returns the source waveform of the selected mark",
+      "query": "MARK:SELected:SOURCE?"
+    },
+    {
+      "name": "mark_selected_start",
+      "mnemonic": "MARK:SELected:STARt?",
+      "category": "Mark",
+      "description": "Returns the start of the selected mark, in terms of 0 to 100% of the waveform",
+      "query": "MARK:SELected:STARt?"
+    },
+    {
+      "name": "mark_selected_state",
+      "mnemonic": "MARK:SELected:STATe?",
+      "category": "Mark",
+      "description": "Returns the on or off state of the selected mark",
+      "query": "MARK:SELected:STATe?"
+    },
+    {
+      "name": "mark_selected_zoom_position",
+      "mnemonic": "MARK:SELected:ZOOm:POSition?",
+      "category": "Mark",
+      "description": "Returns the position of the selected mark, in terms of 0 to 100% of the upper window",
+      "query": "MARK:SELected:ZOOm:POSition?"
+    },
+    {
+      "name": "mark_total",
+      "mnemonic": "MARK:TOTal?",
+      "category": "Mark",
+      "description": "Returns how many marks are used",
+      "query": "MARK:TOTal?"
+    },
+    {
+      "name": "math1_define",
+      "mnemonic": "MATH[1]:DEFine",
+      "category": "Math",
+      "description": "Sets or returns the current math function as a text string",
+      "set": "MATH:DEFine",
+      "query": "MATH:DEFine?"
+    },
+    {
+      "name": "math1_horizontal_scale",
+      "mnemonic": "MATH[1]:HORizontal:SCAle",
+      "category": "Math",
+      "description": "Sets or returns the math horizontal display scale for FFT or for Dual Math waveforms",
+      "set": "MATH:HORizontal:SCAle",
+      "query": "MATH:HORizontal:SCAle?"
+    },
+    {
+      "name": "math1_horizontal_units",
+      "mnemonic": "MATH[1]:HORizontal:UNIts",
+      "category": "Math",
+      "description": "Returns the math waveform horizontal unit value {MATH|MATH1}:LABel Sets or queries the waveform label for the math waveform",
+      "set": "MATH:HORizontal:UNIts",
+      "query": "MATH:HORizontal:UNIts?"
+    },
+    {
+      "name": "math1_spectral_mag",
+      "mnemonic": "MATH[1]:SPECTral:MAG",
+      "category": "Math",
+      "description": "Sets or returns the units of spectral magnification in the math string",
+      "set": "MATH:SPECTral:MAG",
+      "query": "MATH:SPECTral:MAG?"
+    },
+    {
+      "name": "math1_spectral_window",
+      "mnemonic": "MATH[1]:SPECTral:WINdow",
+      "category": "Math",
+      "description": "Sets or returns the window function for math waveform spectral input data",
+      "set": "MATH:SPECTral:WINdow",
+      "query": "MATH:SPECTral:WINdow?"
+    },
+    {
+      "name": "math1_vertical_position",
+      "mnemonic": "MATH[1]:VERTical:POSition",
+      "category": "Math",
+      "description": "Sets or returns the vertical position of the currently selected math type",
+      "set": "MATH:VERTical:POSition",
+      "query": "MATH:VERTical:POSition?"
+    },
+    {
+      "name": "math1_vertical_scale",
+      "mnemonic": "MATH[1]:VERTical:SCAle",
+      "category": "Math",
+      "description": "Sets or returns the vertical scale of the currently selected math type",
+      "set": "MATH:VERTical:SCAle",
+      "query": "MATH:VERTical:SCAle?"
+    },
+    {
+      "name": "math1_vertical_units",
+      "mnemonic": "MATH[1]:VERTical:UNIts",
+      "category": "Math",
+      "description": "Returns the math waveform vertical units",
+      "set": "MATH:VERTical:UNIts",
+      "query": "MATH:VERTical:UNIts?"
+    },
+    {
+      "name": "math1_horizontal_position",
+      "mnemonic": "MATH[1]:HORizontal:POSition",
+      "category": "Math",
+      "description": "Sets or returns the math horizontal display position for FFT or (non-live) math reference waveforms",
+      "set": "MATH:HORizontal:POSition",
+      "query": "MATH:HORizontal:POSition?"
+    },
+    {
+      "name": "math1_type",
+      "mnemonic": "MATH[1]:TYPe",
+      "category": "Math",
+      "description": "Sets or returns the math waveform mode type",
+      "set": "MATH:TYPe",
+      "query": "MATH:TYPe?"
+    },
+    {
+      "name": "mathvar_varx",
+      "mnemonic": "MATHVAR:VAR<x>",
+      "category": "Math",
+      "description": "Sets or returns numerical values you can use within math expressions",
+      "set": "MATHVAR:VAR<x> <NR3>",
+      "query": "MATHVAR:VAR<x>?",
+      "examples": [
+        "MATHVAR:VAR2?"
+      ]
+    },
+    {
+      "name": "measurement",
+      "mnemonic": "MEASUrement?",
+      "category": "Measurement",
+      "description": "Returns all measurement parameters",
+      "query": "MEASUrement?"
+    },
+    {
+      "name": "measurement_clearsnapshot",
+      "mnemonic": "MEASUrement:CLEARSNapshot",
+      "category": "Measurement",
+      "description": "Removes the measurement snapshot display",
+      "set": "MEASUrement:CLEARSNapshot"
+    },
+    {
+      "name": "measurement_gating",
+      "mnemonic": "MEASUrement:GATing",
+      "category": "Measurement",
+      "description": "Sets or returns the measurement gating",
+      "set": "MEASUrement:GATing {OFF|SCREen|CURSor}",
+      "query": "MEASUrement:GATing?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | SCREen | CURSor }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:GATING?",
+        "MEASUrement:IMMed? (Query Only)"
+      ]
+    },
+    {
+      "name": "measurement_immed",
+      "mnemonic": "MEASUrement:IMMed?",
+      "category": "Measurement",
+      "description": "Returns all immediate measurement setup parameters",
+      "query": "MEASUrement:IMMed?"
+    },
+    {
+      "name": "measurement_immed_delay",
+      "mnemonic": "MEASUrement:IMMed:DELay?",
+      "category": "Measurement",
+      "description": "Returns information about the immediate delay measurement",
+      "query": "MEASUrement:IMMed:DELay?"
+    },
+    {
+      "name": "measurement_immed_delay_direction",
+      "mnemonic": "MEASUrement:IMMed:DELay:DIRection",
+      "category": "Measurement",
+      "description": "Sets or returns the search direction to use for immediate delay measurements",
+      "set": "MEASUrement:IMMed:DELay:DIRection {BACKWards|FORWards}",
+      "query": "MEASUrement:IMMed:DELay:DIRection?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ BACKWards | FORWards }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:IMMED:DELAY:DIRECTION?"
+      ]
+    },
+    {
+      "name": "measurement_immed_delay_edgex",
+      "mnemonic": "MEASUrement:IMMed:DELay:EDGE<x>",
+      "category": "Measurement",
+      "description": "Sets or returns the slope of the edge used for immediate delay “from” and “to” waveform measurements",
+      "set": "MEASUrement:IMMed:DELay:EDGE<x> {FALL|RISe}",
+      "query": "MEASUrement:IMMed:DELay:EDGE<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ FALL | RISe }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:IMMED:DELAY:EDGE1 RISE",
+        "MEASUREMENT:IMMED:DELAY:EDGE1?"
+      ]
+    },
+    {
+      "name": "measurement_immed_sourcex",
+      "mnemonic": "MEASUrement:IMMed:SOUrce<x>",
+      "category": "Measurement",
+      "description": "Sets or returns the source for the current single channel measurement",
+      "set": "MEASUrement:IMMed:SOUrce<x> {CH1|CH2|CH3|CH4|MATH|D<x>}",
+      "query": "MEASUrement:IMMed:SOUrce<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH1 | CH2 | CH3 | CH4 | MATH | D<x> }"
+        }
+      ]
+    },
+    {
+      "name": "measurement_immed_source1",
+      "mnemonic": "MEASUrement:IMMed:SOUrce1",
+      "category": "Measurement",
+      "description": "Sets or returns the “from” source for all single channel immediate measurements",
+      "set": "MEASUrement:IMMed:SOUrce1 {CH<x>|MATH<y>|REF<x>|D<x>}",
+      "query": "MEASUrement:IMMed:SOUrce1?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH<x> | MATH<y> | REF<x> | D<x> }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:IMMED:SOURCE1 1 MATH1",
+        "MEASUREMENT:IMMED:SOURCE1?"
+      ]
+    },
+    {
+      "name": "measurement_immed_source2",
+      "mnemonic": "MEASUrement:IMMed:SOUrce2",
+      "category": "Measurement",
+      "description": "Sets or returns the source to measure “to” for phase or delay immediate measurements",
+      "set": "MEASUrement:IMMed:SOUrce2 {CH<x>|MATH<y>|REF<x>|D<x>}",
+      "query": "MEASUrement:IMMed:SOUrce2?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH<x> | MATH<y> | REF<x> | D<x> }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:IMMED:SOURCE2 REF3",
+        "MEASUREMENT:IMMED:SOURCE2?"
+      ]
+    },
+    {
+      "name": "measurement_immed_type",
+      "mnemonic": "MEASUrement:IMMed:TYPe",
+      "category": "Measurement",
+      "description": "Sets or returns the type of the immediate measurement",
+      "set": "MEASUrement:IMMed:TYPe",
+      "query": "MEASUrement:IMMed:TYPe?",
+      "examples": [
+        "MEASUREMENT:IMMED:TYPE?",
+        "MEASUrement:IMMed:UNIts? (Query Only)"
+      ]
+    },
+    {
+      "name": "measurement_immed_units",
+      "mnemonic": "MEASUrement:IMMed:UNIts?",
+      "category": "Measurement",
+      "description": "Returns the units of the immediate measurement",
+      "query": "MEASUrement:IMMed:UNIts?"
+    },
+    {
+      "name": "measurement_immed_value",
+      "mnemonic": "MEASUrement:IMMed:VALue?",
+      "category": "Measurement",
+      "description": "Returns the value of the immediate measurement",
+      "query": "MEASUrement:IMMed:VALue?"
+    },
+    {
+      "name": "measurement_indicators_state",
+      "mnemonic": "MEASUrement:INDICators:STATE",
+      "category": "Measurement",
+      "description": "Sets or returns the state of visible measurement indicators",
+      "set": "MEASUrement:INDICators:STATE {OFF|MEAS<x>}",
+      "query": "MEASUrement:INDICators:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | MEAS<x> }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:INDICATORS:STATE?",
+        "MEASUREMENT:INDICATORS:STATE OFF"
+      ]
+    },
+    {
+      "name": "measurement_measx_delay",
+      "mnemonic": "MEASUrement:MEAS<x>:DELay?",
+      "category": "Measurement",
+      "description": "Returns the delay measurement parameters for the specified measurement",
+      "query": "MEASUrement:MEAS<x>:DELay?"
+    },
+    {
+      "name": "measurement_measx_delay_direction",
+      "mnemonic": "MEASUrement:MEAS<x>:DELay:DIRection",
+      "category": "Measurement",
+      "description": "Sets or returns the search direction to use for delay measurements",
+      "set": "MEASUrement:MEAS<x>:DELay:DIRection {BACKWards|FORWards}",
+      "query": "MEASUrement:MEAS<x>:DELay:DIRection?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ BACKWards | FORWards }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:MEAS3:DELAY:DIRECTION?"
+      ]
+    },
+    {
+      "name": "measurement_measx_delay_edgex",
+      "mnemonic": "MEASUrement:MEAS<x>:DELay:EDGE<x>",
+      "category": "Measurement",
+      "description": "Sets or returns the slope of the edge to use for delay “from” and “to” waveform measurements",
+      "set": "MEASUrement:MEAS<x>:DELay:EDGE<x> {FALL|RISe}",
+      "query": "MEASUrement:MEAS<x>:DELay:EDGE<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ FALL | RISe }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:MEAS1:DELAY:EDGE1 RISE",
+        "MEASUREMENT:MEAS1:DELAY:EDGE1?"
+      ]
+    },
+    {
+      "name": "measurement_measx_sourcex",
+      "mnemonic": "MEASUrement:MEAS<x>:SOUrce<x>",
+      "category": "Measurement",
+      "description": "Sets or returns the source for the specified measurement",
+      "set": "MEASUrement:MEAS<x>:SOUrce<x> {CH<x>|MATH|D<x>}",
+      "query": "MEASUrement:MEAS<x>:SOUrce<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH<x> | MATH | D<x> }"
+        }
+      ]
+    },
+    {
+      "name": "measurement_measx_source1",
+      "mnemonic": "MEASUrement:MEAS<x>:SOURCE[1]",
+      "category": "Measurement",
+      "description": "Sets or returns the channel from which measurements are taken",
+      "set": "MEASUrement:MEAS<x>:SOURCE[1] {CH<x>|MATH<y>|REF<x>}",
+      "query": "MEASUrement:MEAS<x>:SOURCE[1]?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH<x> | MATH<y> | REF<x> }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:MEAS2:SOURCE1 MATH1",
+        "MEASUREMENT:MEAS1:SOURCE1?"
+      ]
+    },
+    {
+      "name": "measurement_measx_source2",
+      "mnemonic": "MEASUrement:MEAS<x>:SOURCE2",
+      "category": "Measurement",
+      "description": "Sets or returns the channel to which measurements are sent",
+      "set": "MEASUrement:MEAS<x>:SOURCE2 {CH<x>|MATH<y>|REF<x>|D<x>}",
+      "query": "MEASUrement:MEAS<x>:SOURCE2?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ CH<x> | MATH<y> | REF<x> | D<x> }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:MEAS4:SOURCE2 CH1",
+        "MEASUREMENT:MEAS2:SOURCE2?"
+      ]
+    },
+    {
+      "name": "measurement_measx_state",
+      "mnemonic": "MEASUrement:MEAS<x>:STATE",
+      "category": "Measurement",
+      "description": "Sets or returns whether the specified measurement slot is computed and displayed",
+      "set": "MEASUrement:MEAS<x>:STATE {OFF|ON|<NR1>}",
+      "query": "MEASUrement:MEAS<x>:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | <NR1> }"
+        }
+      ],
+      "examples": [
+        "MEASUREMENT:MEAS1:STATE?",
+        "MEASUrement:MEAS<x>:STDdev? (Query Only)"
+      ]
+    },
+    {
+      "name": "measurement_measx_type",
+      "mnemonic": "MEASUrement:MEAS<x>:TYPe",
+      "category": "Measurement",
+      "description": "Sets or returns the measurement<x> type",
+      "set": "MEASUrement:MEAS<x>:TYPe",
+      "query": "MEASUrement:MEAS<x>:TYPe?",
+      "examples": [
+        "MEASUREMENT:MEAS2:TYPE FREQUENCY defines measurement 2 as a",
+        "MEASUREMENT:MEAS1:TYPE?"
+      ]
+    },
+    {
+      "name": "measurement_measx_units",
+      "mnemonic": "MEASUrement:MEAS<x>:UNIts?",
+      "category": "Measurement",
+      "description": "Returns measurement<x> units",
+      "query": "MEASUrement:MEAS<x>:UNIts?"
+    },
+    {
+      "name": "measurement_measx_value",
+      "mnemonic": "MEASUrement:MEAS<x>:VALue?",
+      "category": "Measurement",
+      "description": "Returns the value of measurement<x>",
+      "query": "MEASUrement:MEAS<x>:VALue?"
+    },
+    {
+      "name": "application_license_slotx_location",
+      "mnemonic": "APPLication:LICENSE:SLOT<x>:LOCation?",
+      "category": "Miscellaneous",
+      "description": "This query returns the application license location. < x> can be slot number 1–4.",
+      "query": "APPLication:LICENSE:SLOT<x>:LOCation?"
+    },
+    {
+      "name": "application_license_slotx_type",
+      "mnemonic": "APPLication:LICENSE:SLOT<x>:TYPe?",
+      "category": "Miscellaneous",
+      "description": "This query returns the application license type of the module that is currently inserted in the specified application module slot.",
+      "query": "APPLication:LICENSE:SLOT<x>:TYPe?"
+    },
+    {
+      "name": "autoset",
+      "mnemonic": "AUTOSet",
+      "category": "Miscellaneous",
+      "description": "Sets the vertical, horizontal, and trigger controls of the oscilloscope to automatically acquire and display the appropriate waveform(s). This is equivalent to pressing the front panel Autoset button",
+      "set": "AUTOSet"
+    },
+    {
+      "name": "autoset_enable",
+      "mnemonic": "AUTOSet:ENAble",
+      "category": "Miscellaneous",
+      "description": "Enables or disables the autoset feature",
+      "set": "AUTOSet:ENAble {OFF|ON|0|1}",
+      "query": "AUTOSet:ENAble?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | 0 | 1 }"
+        }
+      ],
+      "examples": [
+        "AUTOSET:ENABLE 1 enables the front-panel Autoset button",
+        "AUTOSET:ENABLE?"
+      ]
+    },
+    {
+      "name": "clearmenu",
+      "mnemonic": "CLEARMenu",
+      "category": "Miscellaneous",
+      "description": "Clears the current menu from the display",
+      "set": "CLEARMenu"
+    },
+    {
+      "name": "date",
+      "mnemonic": "DATE",
+      "category": "Miscellaneous",
+      "description": "Sets or returns the date displayed by the oscilloscope",
+      "set": "DATE",
+      "query": "DATE?"
+    },
+    {
+      "name": "ddt",
+      "mnemonic": "*DDT",
+      "category": "Miscellaneous",
+      "description": "Sets or returns the commands that will be executed by the group execute trigger",
+      "set": "*DDT {<Block>|<QString>}",
+      "query": "*DDT?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <Block> | <QString> }"
+        }
+      ]
+    },
+    {
+      "name": "fpanel_hold",
+      "mnemonic": "FPAnel:HOLD",
+      "category": "Miscellaneous",
+      "description": "This command is used to emulate the button push-and-hold feature. Presently, only the Cursors button is supported by this command.",
+      "set": "FPAnel:HOLD"
+    },
+    {
+      "name": "fpanel_press",
+      "mnemonic": "FPAnel:PRESS",
+      "category": "Miscellaneous",
+      "description": "Simulates the action of pressing a specified front-panel button",
+      "set": "FPAnel:PRESS"
+    },
+    {
+      "name": "fpanel_turn",
+      "mnemonic": "FPAnel:TURN",
+      "category": "Miscellaneous",
+      "description": "Duplicates the action of turning a specified front-panel control knob",
+      "set": "FPAnel:TURN"
+    },
+    {
+      "name": "gpibusb_address",
+      "mnemonic": "GPIBUsb:ADDress?",
+      "category": "Miscellaneous",
+      "description": "Returns the current GPIB address",
+      "query": "GPIBUsb:ADDress?"
+    },
+    {
+      "name": "gpibusb_id",
+      "mnemonic": "GPIBUsb:ID?",
+      "category": "Miscellaneous",
+      "description": "Returns the identification string of the connected adaptor module and firmware version",
+      "query": "GPIBUsb:ID?"
+    },
+    {
+      "name": "header",
+      "mnemonic": "HEADer",
+      "category": "Miscellaneous",
+      "description": "Sets or returns the Response Header Enable State",
+      "set": "HEADer {OFF|ON|<NR1>}",
+      "query": "HEADer?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | <NR1> }"
+        }
+      ],
+      "examples": [
+        "HEADER OFF",
+        "HEADER?"
+      ]
+    },
+    {
+      "name": "id",
+      "mnemonic": "ID?",
+      "category": "Miscellaneous",
+      "description": "Returns identifying information about the oscilloscope and its firmware",
+      "query": "ID?"
+    },
+    {
+      "name": "idn",
+      "mnemonic": "*IDN?",
+      "category": "Miscellaneous",
+      "description": "Returns the same information as the ID? command except the data is formatted according to Tektronix Codes & Formats",
+      "query": "*IDN?"
+    },
+    {
+      "name": "language",
+      "mnemonic": "LANGuage",
+      "category": "Miscellaneous",
+      "description": "Sets or returns the user interface display language",
+      "set": "KOREan|RUSSian|SIMPlifiedchinese|TRADitionalchinese}",
+      "query": "LANGuage?",
+      "examples": [
+        "LANGUAGE?"
+      ]
+    },
+    {
+      "name": "lock",
+      "mnemonic": "LOCk",
+      "category": "Miscellaneous",
+      "description": "Sets or returns the front panel lock state",
+      "set": "LOCk {ALL|NONe}",
+      "query": "LOCk?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ALL | NONe }"
+        }
+      ],
+      "examples": [
+        "LOCK ALL locks the front-panel controls",
+        "LOCK?"
+      ]
+    },
+    {
+      "name": "lrn",
+      "mnemonic": "*LRN?",
+      "category": "Miscellaneous",
+      "description": "Returns a listing of oscilloscope settings",
+      "query": "*LRN?"
+    },
+    {
+      "name": "newpass",
+      "mnemonic": "NEWpass",
+      "category": "Miscellaneous",
+      "description": "Changes the password for user protected data",
+      "set": "NEWpass"
+    },
+    {
+      "name": "password",
+      "mnemonic": "PASSWord",
+      "category": "Miscellaneous",
+      "description": "Enables the *PUD and NEWpass set commands",
+      "set": "PASSWord"
+    },
+    {
+      "name": "pictbridge_dateprint",
+      "mnemonic": "PICTBridge:DATEPrint",
+      "category": "PictBridge",
+      "description": "Enables or disables printing the date on the print output",
+      "set": "PICTBridge:DATEPrint {DEFLT|OFF|ON}",
+      "query": "PICTBridge:DATEPrint?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ DEFLT | OFF | ON }"
+        }
+      ],
+      "examples": [
+        "PICTBRIDGE:DATEPRINT?",
+        "PICTBridge:DEFault (No Query Form)"
+      ]
+    },
+    {
+      "name": "pictbridge_default",
+      "mnemonic": "PICTBridge:DEFault",
+      "category": "PictBridge",
+      "description": "Sets the arguments for all PICTBridge commands to their default values",
+      "set": "PICTBridge:DEFault"
+    },
+    {
+      "name": "pictbridge_idprint",
+      "mnemonic": "PICTBridge:IDPrint",
+      "category": "PictBridge",
+      "description": "Enables or disables printing the oscilloscope model and serial number on the print output",
+      "set": "PICTBridge:IDPrint {DEFLT|OFF|ON}",
+      "query": "PICTBridge:IDPrint?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ DEFLT | OFF | ON }"
+        }
+      ],
+      "examples": [
+        "PICTBRIDGE:IDPRINT?"
+      ]
+    },
+    {
+      "name": "pictbridge_imagesize",
+      "mnemonic": "PICTBridge:IMAGESize",
+      "category": "PictBridge",
+      "description": "Sets or returns the image print size",
+      "set": "A4|LETTER}",
+      "query": "PICTBridge:IMAGESize?",
+      "examples": [
+        "PICTBRIDGE:IMAGESIZE CARD",
+        "PICTBRIDGE:IMAGESIZE?"
+      ]
+    },
+    {
+      "name": "pictbridge_papersize",
+      "mnemonic": "PICTBridge:PAPERSize",
+      "category": "PictBridge",
+      "description": "Sets the output print paper size",
+      "set": "DEFLT|L|L2|HAGAKIPCARD|MM54BY86|MM100BY150|IN4BY6|IN8BY10",
+      "query": "PICTBridge:PAPERSize?",
+      "examples": [
+        "PICTBRIDGE:PAPERSIZE?"
+      ]
+    },
+    {
+      "name": "pictbridge_papertype",
+      "mnemonic": "PICTBridge:PAPERType",
+      "category": "PictBridge",
+      "description": "Sets or returns the paper type",
+      "set": "PICTBridge:PAPERType {DEFLT|PLAIN|PHOTO|FASTPHOTO}",
+      "query": "PICTBridge:PAPERType?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ DEFLT | PLAIN | PHOTO | FASTPHOTO }"
+        }
+      ],
+      "examples": [
+        "PICTBRIDGE:PAPERTYPE PLAIN",
+        "PICTBRIDGE:PAPERTYPE?"
+      ]
+    },
+    {
+      "name": "pictbridge_printqual",
+      "mnemonic": "PICTBridge:PRINTQual",
+      "category": "PictBridge",
+      "description": "Sets or returns the output print quality",
+      "set": "PICTBridge:PRINTQual {DEFLT|NRMAL|FINE|DRAFT}",
+      "query": "PICTBridge:PRINTQual?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ DEFLT | NRMAL | FINE | DRAFT }"
+        }
+      ],
+      "examples": [
+        "PICTBRIDGE:PRINTQUAL FINE",
+        "PICTBRIDGE:PRINTQUAL?"
+      ]
+    },
+    {
+      "name": "usbdevice_configure",
+      "mnemonic": "USBDevice:CONFigure",
+      "category": "PictBridge",
+      "description": "Enables or disables the rear USB port for use with Pictbridge printers",
+      "set": "USBDevice:CONFigure {DISabled|IMAge|USBTmc}",
+      "query": "USBDevice:CONFigure?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ DISabled | IMAge | USBTmc }"
+        }
+      ],
+      "examples": [
+        "USBDEVICE:CONFIGURE ?"
+      ]
+    },
+    {
+      "name": "power_harmonics_display_type",
+      "mnemonic": "POWer:HARMonics:DISPlay:TYPe",
+      "category": "Power",
+      "description": "Sets or returns the display type for harmonics tests",
+      "set": "POWer:HARMonics:DISPlay:TYPe {GRAph|TABle}",
+      "query": "POWer:HARMonics:DISPlay:TYPe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ GRAph | TABle }"
+        }
+      ],
+      "examples": [
+        "POWER:HARMONICS:DISPLAY:TYPE GRAph",
+        "POWER:HARMONICS:DISPLAY:TYPE?"
+      ]
+    },
+    {
+      "name": "power_harmonics_results_iec_pohc",
+      "mnemonic": "POWer:HARMonics:RESults:IEC:POHC?",
+      "category": "Power",
+      "description": "Returns the IEC POHC measurement",
+      "query": "POWer:HARMonics:RESults:IEC:POHC?"
+    },
+    {
+      "name": "power_harmonics_results_iec_pohl",
+      "mnemonic": "POWer:HARMonics:RESults:IEC:POHL?",
+      "category": "Power",
+      "description": "Returns the IEC POHL measurement",
+      "query": "POWer:HARMonics:RESults:IEC:POHL?"
+    },
+    {
+      "name": "power_harmonics_results_iec_power",
+      "mnemonic": "POWer:HARMonics:RESults:IEC:POWer?",
+      "category": "Power",
+      "description": "Returns the IEC input power measurement",
+      "query": "POWer:HARMonics:RESults:IEC:POWer?"
+    },
+    {
+      "name": "power_harmonics_results_passfail",
+      "mnemonic": "POWer:HARMonics:RESults:PASSFail?",
+      "category": "Power",
+      "description": "Returns the overall harmonics test result: PASS, FAIL or NA",
+      "query": "POWer:HARMonics:RESults:PASSFail?"
+    },
+    {
+      "name": "power_harmonics_results_rms",
+      "mnemonic": "POWer:HARMonics:RESults:RMS?",
+      "category": "Power",
+      "description": "Returns the root mean square value of the source waveform",
+      "query": "POWer:HARMonics:RESults:RMS?"
+    },
+    {
+      "name": "power_harmonics_results_save",
+      "mnemonic": "POWer:HARMonics:RESults:SAVe",
+      "category": "Power",
+      "description": "Saves the harmonic results to the specified file in CSV format",
+      "set": "POWer:HARMonics:RESults:SAVe"
+    },
+    {
+      "name": "power_harmonics_results_thdf",
+      "mnemonic": "POWer:HARMonics:RESults:THDF?",
+      "category": "Power",
+      "description": "Returns the Total Harmonic Distortion (THD) in percentage, measured as a ratio to the RMS value of the fundamental component of the source waveform",
+      "query": "POWer:HARMonics:RESults:THDF?"
+    },
+    {
+      "name": "power_harmonics_results_thdr",
+      "mnemonic": "POWer:HARMonics:RESults:THDR?",
+      "category": "Power",
+      "description": "Returns the Total Harmonic Distortion (THD) in percentage, measured as a ratio to the RMS value of the source waveform",
+      "query": "POWer:HARMonics:RESults:THDR?"
+    },
+    {
+      "name": "power_modulation_source",
+      "mnemonic": "POWer:MODulation:SOUrce",
+      "category": "Power",
+      "description": "Sets or returns the source waveform for modulation tests",
+      "set": "POWer:MODulation:SOUrce {VOLTage|CURRent}",
+      "query": "POWer:MODulation:SOUrce?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ VOLTage | CURRent }"
+        }
+      ],
+      "examples": [
+        "POWER:MODULATION:SOURCE CURRent",
+        "POWER:MODULATION:SOURCE?"
+      ]
+    },
+    {
+      "name": "power_modulation_type",
+      "mnemonic": "POWer:MODulation:TYPe",
+      "category": "Power",
+      "description": "Sets or returns the modulation type",
+      "set": "POWer:MODulation:TYPe",
+      "query": "POWer:MODulation:TYPe?",
+      "examples": [
+        "POWER:MODULATION:TYPE NWIDTH",
+        "POWER:MODULATION:TYPE?"
+      ]
+    },
+    {
+      "name": "power_ripple_results_amplitude",
+      "mnemonic": "POWer:RIPPle:RESults:AMPLitude?",
+      "category": "Power",
+      "description": "Returns the peak-to-peak ripple measurement",
+      "query": "POWer:RIPPle:RESults:AMPLitude?"
+    },
+    {
+      "name": "power_ripple_results_max",
+      "mnemonic": "POWer:RIPPle:RESults:MAX?",
+      "category": "Power",
+      "description": "Returns the maximum of the peak-to-peak ripple measurements",
+      "query": "POWer:RIPPle:RESults:MAX?"
+    },
+    {
+      "name": "power_ripple_results_mean",
+      "mnemonic": "POWer:RIPPle:RESults:MEAN?",
+      "category": "Power",
+      "description": "Returns the mean of the peak-to-peak ripple measurements",
+      "query": "POWer:RIPPle:RESults:MEAN?"
+    },
+    {
+      "name": "power_ripple_results_min",
+      "mnemonic": "POWer:RIPPle:RESults:MIN?",
+      "category": "Power",
+      "description": "Returns the minimum of the peak-to-peak ripple measurement",
+      "query": "POWer:RIPPle:RESults:MIN?"
+    },
+    {
+      "name": "power_ripple_results_stddev",
+      "mnemonic": "POWer:RIPPle:RESults:STDdev?",
+      "category": "Power",
+      "description": "Returns the standard deviation of the peak-to-peak ripple measurements",
+      "query": "POWer:RIPPle:RESults:STDdev?"
+    },
+    {
+      "name": "power_ripple_source",
+      "mnemonic": "POWer:RIPPle:SOUrce",
+      "category": "Power",
+      "description": "Sets or returns the source waveform for ripple tests",
+      "set": "POWer:RIPPle:SOUrce {VOLTage|CURRent}",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ VOLTage | CURRent }"
+        }
+      ],
+      "examples": [
+        "POWER:RIPPLE:SOURCE CURRent",
+        "POWER:RIPPLE:SOURCE?"
+      ]
+    },
+    {
+      "name": "power_soa_plottype",
+      "mnemonic": "POWer:SOA:PLOTTYPe",
+      "category": "Power",
+      "description": "Sets or returns the SOA plot type",
+      "set": "POWer:SOA:PLOTTYPe {LOG|LINear}",
+      "query": "POWer:SOA:PLOTTYPe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ LOG | LINear }"
+        }
+      ],
+      "examples": [
+        "POWER:SOA:PLOTTYPE LINear",
+        "POWER:SOA:PLOTTYPE ?"
+      ]
+    },
+    {
+      "name": "factory",
+      "mnemonic": "FACtory",
+      "category": "Save/Recall",
+      "description": "Resets the oscilloscope to factory default settings",
+      "set": "FACtory"
+    },
+    {
+      "name": "rcl",
+      "mnemonic": "*RCL",
+      "category": "Save/Recall",
+      "description": "Recalls saved oscilloscope settings",
+      "set": "*RCL"
+    },
+    {
+      "name": "recall_setup",
+      "mnemonic": "RECAll:SETUp",
+      "category": "Save/Recall",
+      "description": "Recalls saved oscilloscope settings",
+      "set": "RECAll:SETUp"
+    },
+    {
+      "name": "recall_waveform",
+      "mnemonic": "RECAll:WAVEform",
+      "category": "Save/Recall",
+      "description": "This command (no query form) recalls a stored waveform to a reference location. Only the first waveform in a .CSV file is recalled for multiple waveform .CSV files. Recall of digital waveforms (D0 through D15) is not supported.",
+      "set": "RECAll:WAVEform"
+    },
+    {
+      "name": "sav",
+      "mnemonic": "*SAV",
+      "category": "Save/Recall",
+      "description": "Stores the state of the oscilloscope to a specified memory location",
+      "set": "*SAV"
+    },
+    {
+      "name": "save_assign_type",
+      "mnemonic": "SAVe:ASSIgn:TYPe",
+      "category": "Save/Recall",
+      "description": "Sets or returns the assignment of the Save button",
+      "set": "SAVe:ASSIgn:TYPe {IMAGe|WAVEform|SETUp}",
+      "query": "SAVe:ASSIgn:TYPe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ IMAGe | WAVEform | SETUp }"
+        }
+      ]
+    },
+    {
+      "name": "save_eventtable_busx",
+      "mnemonic": "SAVe:EVENTtable:BUS<x>",
+      "category": "Save/Recall",
+      "description": "Saves event table data from bus<x> to a specified file",
+      "set": "SAVe:EVENTtable:BUS<x>"
+    },
+    {
+      "name": "save_image",
+      "mnemonic": "SAVe:IMAGe",
+      "category": "Save/Recall",
+      "description": "Saves a capture of the screen image to the specified file",
+      "set": "SAVe:IMAGe"
+    },
+    {
+      "name": "save_image_fileformat",
+      "mnemonic": "SAVe:IMAGe:FILEFormat",
+      "category": "Save/Recall",
+      "description": "Sets or returns the file format to use for saving screen images. The file format is not automatically determined by the file name extension. You need to choose a file name with an extension which is consistent with the selected file format",
+      "set": "SAVe:IMAGe:FILEFormat {PNG|BMP|TIFf}",
+      "query": "SAVe:IMAGe:FILEFormat?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ PNG | BMP | TIFf }"
+        }
+      ]
+    },
+    {
+      "name": "save_image_inksaver",
+      "mnemonic": "SAVe:IMAGe:INKSaver",
+      "category": "Save/Recall",
+      "description": "Sets or returns the current inksaver setting for the SAVe:IMAGe command",
+      "set": "SAVe:IMAGe:INKSaver {OFF|ON|0|1}",
+      "query": "SAVe:IMAGe:INKSaver?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | 0 | 1 }"
+        }
+      ]
+    },
+    {
+      "name": "save_image_layout",
+      "mnemonic": "SAVe:IMAGe:LAYout",
+      "category": "Save/Recall",
+      "description": "Sets or returns the layout to use for saved screen images",
+      "set": "SAVe:IMAGe:LAYout {LANdscape|PORTRait}",
+      "query": "SAVe:IMAGe:LAYout?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ LANdscape | PORTRait }"
+        }
+      ],
+      "examples": [
+        "SAVe:WAVEform (No Query Form)",
+        "REF<x>) can be saved to reference memory locations"
+      ]
+    },
+    {
+      "name": "save_setup",
+      "mnemonic": "SAVe:SETUp",
+      "category": "Save/Recall",
+      "description": "Saves the state of the oscilloscope to a specified memory location or file",
+      "set": "SAVe:SETUp"
+    },
+    {
+      "name": "save_waveform",
+      "mnemonic": "SAVe:WAVEform",
+      "category": "Save/Recall",
+      "description": "Saves a waveform to one of the reference memory locations or a file",
+      "set": "SAVe:WAVEform"
+    },
+    {
+      "name": "save_waveform_fileformat",
+      "mnemonic": "SAVe:WAVEform:FILEFormat",
+      "category": "Save/Recall",
+      "description": "Sets or returns the format for saved waveforms",
+      "set": "SAVe:WAVEform:FILEFormat {INTERNal|SPREADSheet}",
+      "query": "SAVe:WAVEform:FILEFormat?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ INTERNal | SPREADSheet }"
+        }
+      ],
+      "examples": [
+        "SAVE:WAVEFORM:FILEFORMAT INTERNAL",
+        "SAVE:WAVEFORM:FILEFORMAT?"
+      ]
+    },
+    {
+      "name": "search_searchx_state",
+      "mnemonic": "SEARCH:SEARCH<x>:STATE",
+      "category": "Search",
+      "description": "Sets the search state to on or off",
+      "set": "SEARCH:SEARCH<x>:STATE {<NR1>|OFF|ON}",
+      "query": "SEARCH:SEARCH<x>:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR1> | OFF | ON }"
+        }
+      ],
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS?"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_audio_data_hivalue",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:HIVALue",
+      "category": "Search",
+      "description": "be used to search on audio bus data. This command sets the upper word value to",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:HIVALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:HIVALue?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_audio_data_offset",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:OFFSet",
+      "category": "Search",
+      "description": "be used to search on audio bus data. This commands sets the data offset value to",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:OFFSet <NR1>",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:OFFSet?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_audio_data_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:VALue",
+      "category": "Search",
+      "description": "be used to search on audio bus data. This command sets the lower word value to",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:VALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:AUDio:DATa:VALue?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_can_data_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:CAN:DATa:VALue",
+      "category": "Search",
+      "description": "be used to search on CAN bus data. This command sets the binary data value to",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:CAN:DATa:VALue <bin>",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:CAN:DATa:VALue?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_cyclecount_hivalue",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:HIVALue",
+      "category": "Search",
+      "description": "of the range to be used when searching on This command specifies the upper data value the FlexRay bus cycle count field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:",
+      "query": "HIVALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:CYCLECOUNT:HIVALUE?"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_cyclecount_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:VALue",
+      "category": "Search",
+      "description": "to be used when searching on the FlexRay This command specifies the low data value bus cycle count field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:",
+      "query": "VALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:CYCLECOUNT:VALUE?"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_data_hivalue",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:HIVALue",
+      "category": "Search",
+      "description": "use when searching on the FlexRay bus This command specifies the high value to data field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:HIVALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:HIVALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:DATA:HIVALUE? might"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_data_offset",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:OFFSet",
+      "category": "Search",
+      "description": "string in bytes to be used when searching on This command specifies the offset of the data the FlexRay bus data field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:OFFSet",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:OFFSet?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:DATA:OFFSET 10 sets",
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:DATA:OFFSET? might"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_data_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:VALue",
+      "category": "Search",
+      "description": "when searching on the FlexRay bus data This command specifies the low value to use field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:VALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:DATa:VALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:DATA:VALUE? might"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_frameid_hivalue",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:HIVALue",
+      "category": "Search",
+      "description": "use when searching on the FlexRay bus This command specifies the high value to frame ID field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:HIVALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:HIVALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:FLEXRAY:FRAMEID:HIVALUE?"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_flexray_frameid_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:VALue",
+      "category": "Search",
+      "description": "when searching on the FlexRay bus frame This command specifies the low value to use ID field.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:VALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:VALue?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_i2_c_address_mode",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:MODe",
+      "category": "Search",
+      "description": "or 10-Bit Sets or returns the I2C address mode to 7",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:MODe",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:MODe?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_i2_c_address_type",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:TYPe",
+      "category": "Search",
+      "description": "special addresses Sets or returns the I2C address type to I2C",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:TYPe",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:TYPe?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_i2_c_address_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:VALue",
+      "category": "Search",
+      "description": "be used for I2C search Sets or returns the binary address string to",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:VALue <bin>",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:ADDRess:VALue?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_i2_c_data_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:DATa:VALue",
+      "category": "Search",
+      "description": "used for I2C search Sets or returns the binary data string to be",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:DATa:VALue <bin>",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:I2C:DATa:VALue?"
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_lin_data_hivalue",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:DATa:HIVALue",
+      "category": "Search",
+      "description": "used for LIN searches if the search condition Sets or returns the binary data string to be is ID or IDANDDATA",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:DATa:HIVALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:DATa:HIVALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:LIN:DATA:HIVALUE? might"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_lin_data_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:DATa:VALue",
+      "category": "Search",
+      "description": "for a LIN search Sets or returns the binary data string used",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:DATa:VALue <QString>",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:DATa:VALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:LIN:DATA:VALUE? might"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_lin_identifier_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:IDentifier:VALue",
+      "category": "Search",
+      "description": "used for LIN search Sets or returns the binary address string",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:IDentifier:VALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:LIN:IDentifier:VALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGGER:A:BUS:B1:LIN:IDENTIFIER:VALUE? might"
+      ]
+    },
+    {
+      "name": "search_searchx_trigger_a_bus_bx_mil1553_b_data_value",
+      "mnemonic": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:MIL1553B:DATa:VALue",
+      "category": "Search",
+      "description": "condition is set to DATa, this command When the MIL-STD-1553 bus search specifies the data binary pattern to be used in the search.",
+      "set": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:MIL1553B:DATa:VALue",
+      "query": "SEARCH:SEARCH<x>:TRIGger:A:BUS:B<x>:MIL1553B:DATa:VALue?",
+      "examples": [
+        "SEARCH:SEARCH1:TRIGger:A:BUS:B1:MIL1553B:DATa:VALue “01000”",
+        "SEARCH:SEARCH1:TRIGger:A:BUS:B1:MIL1553B:DATa:VALue? might"
+      ]
+    },
+    {
+      "name": "allev",
+      "mnemonic": "ALLEv?",
+      "category": "Status/Error",
+      "description": "Returns all events and their messages",
+      "query": "ALLEv?"
+    },
+    {
+      "name": "cls",
+      "mnemonic": "*CLS",
+      "category": "Status/Error",
+      "description": "Clears status",
+      "set": "*CLS"
+    },
+    {
+      "name": "ese",
+      "mnemonic": "*ESE",
+      "category": "Status/Error",
+      "description": "Sets or returns the bits in the Event Status Enable Register",
+      "set": "*ESE <NR1>",
+      "query": "*ESE?"
+    },
+    {
+      "name": "esr",
+      "mnemonic": "*ESR?",
+      "category": "Status/Error",
+      "description": "Returns the contents of the Standard Event Status Register",
+      "query": "*ESR?"
+    },
+    {
+      "name": "evmsg",
+      "mnemonic": "EVMsg?",
+      "category": "Status/Error",
+      "description": "Returns event code, message from the event queue",
+      "query": "EVMsg?"
+    },
+    {
+      "name": "evqty",
+      "mnemonic": "EVQty?",
+      "category": "Status/Error",
+      "description": "Return number of events in the event queue",
+      "query": "EVQty?"
+    },
+    {
+      "name": "opc",
+      "mnemonic": "*OPC",
+      "category": "Status/Error",
+      "description": "Generates the operation complete message in the standard event status register when all pending operations are finished Or returns \"1\" when all current operations are finished",
+      "set": "*OPC",
+      "query": "*OPC?"
+    },
+    {
+      "name": "psc",
+      "mnemonic": "*PSC",
+      "category": "Status/Error",
+      "description": "Sets or returns the power on status flag",
+      "set": "*PSC {OFF|ON|NR1>}",
+      "query": "*PSC?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ OFF | ON | NR1> }"
+        }
+      ]
+    },
+    {
+      "name": "pud",
+      "mnemonic": "*PUD",
+      "category": "Status/Error",
+      "description": "Sets or returns a string of protected user data",
+      "set": "*PUD {<Block>|<QString>}",
+      "query": "*PUD?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <Block> | <QString> }"
+        }
+      ]
+    },
+    {
+      "name": "rst",
+      "mnemonic": "*RST",
+      "category": "Status/Error",
+      "description": "Resets the oscilloscope to factory default settings",
+      "set": "*RST"
+    },
+    {
+      "name": "sre",
+      "mnemonic": "*SRE",
+      "category": "Status/Error",
+      "description": "Sets or returns the bits in the Service Request Enable Register",
+      "set": "*SRE <NR1>",
+      "query": "*SRE?"
+    },
+    {
+      "name": "stb",
+      "mnemonic": "*STB?",
+      "category": "Status/Error",
+      "description": "Returns the contents of the Status Byte Register",
+      "query": "*STB?"
+    },
+    {
+      "name": "wai",
+      "mnemonic": "*WAI",
+      "category": "Status/Error",
+      "description": "Prevents the oscilloscope from executing further commands until all pending operations finish",
+      "set": "*WAI"
+    },
+    {
+      "name": "trigger_a_bus_bx_audio_data_hivalue",
+      "mnemonic": "TRIGger:A:BUS:B<x>:AUDio:DATa:HIVALue",
+      "category": "Trigger",
+      "description": "This command sets the upper word value to be used when triggering on audio bus data.",
+      "set": "TRIGger:A:BUS:B<x>:AUDio:DATa:HIVALue <String>",
+      "query": "TRIGger:A:BUS:B<x>:AUDio:DATa:HIVALue?"
+    },
+    {
+      "name": "trigger_a_bus_bx_audio_data_offset",
+      "mnemonic": "TRIGger:A:BUS:B<x>:AUDio:DATa:OFFSet",
+      "category": "Trigger",
+      "description": "This command sets the data offset value to be used when triggering on audio bus data.",
+      "set": "TRIGger:A:BUS:B<x>:AUDio:DATa:OFFSet <NR1>",
+      "query": "TRIGger:A:BUS:B<x>:AUDio:DATa:OFFSet?"
+    },
+    {
+      "name": "trigger_a_bus_bx_audio_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:AUDio:DATa:VALue",
+      "category": "Trigger",
+      "description": "This command sets the lower word value to be used when triggering on audio bus data.",
+      "set": "TRIGger:A:BUS:B<x>:AUDio:DATa:VALue <String>",
+      "query": "TRIGger:A:BUS:B<x>:AUDio:DATa:VALue?"
+    },
+    {
+      "name": "trigger_a_bus_bx_can_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:CAN:DATa:VALue",
+      "category": "Trigger",
+      "description": "This command sets the binary data value to be used when triggering on CAN bus data.",
+      "set": "TRIGger:A:BUS:B<x>:CAN:DATa:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:CAN:DATa:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:CAN:DATA:VALUE 1011"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_cyclecount_hivalue",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:HIVALue",
+      "category": "Trigger",
+      "description": "This command specifies the high value when triggering on the FlexRay bus cycle count field.",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:HIVALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:HIVALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:CYCLECOUNT:HIVALUE “110010”",
+        "TRIGGER:A:BUS:B1:FLEXRAY:CYCLECOUNT:HIVALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_cyclecount_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:VALue",
+      "category": "Trigger",
+      "description": "This command specifies the low value when triggering on the FlexRay bus cycle count field.",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:CYCLEcount:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:CYCLECOUNT:VALUE “11001101”",
+        "TRIGGER:A:BUS:B1:FLEXRAY:CYCLECOUNT:VALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_data_hivalue",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:DATa:HIVALue",
+      "category": "Trigger",
+      "description": "This command specifies the high value when triggering on the FlexRay bus data field.",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:DATa:HIVALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:DATa:HIVALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:DATA:HIVALUE? might"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_data_offset",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:DATa:OFFSet",
+      "category": "Trigger",
+      "description": "This command specifies the offset of the data string, to use, in bytes, when triggering on the FlexRay bus data field.",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:DATa:OFFSet <NR1>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:DATa:OFFSet?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:DATA:OFFSET?",
+        "TRIGGER:A:BUS:B1:FLEXRAY:DATA:OFFSET 0"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:DATa:VALue",
+      "category": "Trigger",
+      "description": "This command specifies the low value when triggering on the FlexRay bus data field.",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:DATa:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:DATa:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:DATA:VALUE “11001101”",
+        "TRIGGER:A:BUS:B1:FLEXRAY:DATA:VALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_frameid_hivalue",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:HIVALue",
+      "category": "Trigger",
+      "description": "This command specifies the binary data string to be used for FlexRay frame ID high value",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:HIVALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:HIVALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:FRAMEID:HIVALUE “11001100101”",
+        "TRIGGER:A:BUS:B1:FLEXRAY:FRAMEID:HIVALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_flexray_frameid_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:VALue",
+      "category": "Trigger",
+      "description": "This command specifies the binary data string to be used for FlexRay frame ID low value",
+      "set": "TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:FLEXray:FRAMEID:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:FLEXRAY:FRAMEID:VALUE “11001100101”",
+        "TRIGGER:A:BUS:B1:FLEXRAY:FRAMEID:VALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_lin_data_hivalue",
+      "mnemonic": "TRIGger:A:BUS:B<x>:LIN:DATa:HIVALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary data string to be used for LIN trigger",
+      "set": "TRIGger:A:BUS:B<x>:LIN:DATa:HIVALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:LIN:DATa:HIVALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:LIN:DATA:HIVALUE \"11001010\"",
+        "TRIGGER:A:BUS:B1:LIN:DATA:HIVALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_lin_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:LIN:DATa:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary data string",
+      "set": "TRIGger:A:BUS:B<x>:LIN:DATa:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:LIN:DATa:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:LIN:DATA:VALUE?",
+        "TRIGGER:A:BUS:B1:LIN:DATA:VALUE \"XXXXXXXX\""
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_lin_identifier_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:LIN:IDentifier:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary address string used for LIN trigger",
+      "set": "TRIGger:A:BUS:B<x>:LIN:IDentifier:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:LIN:IDentifier:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:LIN:IDENTIFIER:VALUE \"110010\"",
+        "TRIGGER:A:BUS:B1:LIN:IDENTIFIER:VALUE?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_i2_c_address_mode",
+      "mnemonic": "TRIGger:A:BUS:B<x>:I2C:ADDRess:MODe",
+      "category": "Trigger",
+      "description": "Sets or returns the I2C address mode to 7 or 10-bit",
+      "set": "TRIGger:A:BUS:B<x>:I2C:ADDRess:MODe {ADDR7|ADDR10}",
+      "query": "TRIGger:A:BUS:B<x>:I2C:ADDRess:MODe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ADDR7 | ADDR10 }"
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:BUS:B1:I2C:ADDRESS:MODE ADDR10"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_i2_c_address_type",
+      "mnemonic": "TRIGger:A:BUS:B<x>:I2C:ADDRess:TYPe",
+      "category": "Trigger",
+      "description": "Sets or returns the I2C address type to USER",
+      "set": "TRIGger:A:BUS:B<x>:I2C:ADDRess:TYPe",
+      "query": "TRIGger:A:BUS:B<x>:I2C:ADDRess:TYPe?"
+    },
+    {
+      "name": "trigger_a_bus_bx_i2_c_address_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:I2C:ADDRess:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary address string used for the I2C trigger",
+      "set": "TRIGger:A:BUS:B<x>:I2C:ADDRess:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:I2C:ADDRess:VALue?",
+      "examples": [
+        "TRIGGER:A:BUS:B1:I2C:ADDRESS:VALUE 1011"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_i2_c_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:I2C:DATa:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary data string used for I2C triggering",
+      "set": "TRIGger:A:BUS:B<x>:I2C:DATa:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:I2C:DATa:VALue?"
+    },
+    {
+      "name": "hivalue",
+      "mnemonic": "HIVALue",
+      "category": "Trigger",
+      "description": "bus trigger condition is set to COMMAND, and the qualifier is set to INrange or OUTrange, this command specifies the upper limit of the range for the remote terminal address field.",
+      "set": "HIVALue"
+    },
+    {
+      "name": "value",
+      "mnemonic": "VALue",
+      "category": "Trigger",
+      "description": "bus trigger condition is set to COMMAND, and the qualifier is set to LESSthan, MOREthan, EQual, UNEQual, LESSEQual or MOREEQual, this command specifies the value of the 5–bit remote terminal address to be used in the trigger.",
+      "set": "VALue"
+    },
+    {
+      "name": "trigger_a_bus_bx_mil1553_b_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:MIL1553B:DATa:VALue",
+      "category": "Trigger",
+      "description": "When the MIL-STD-1553 bus trigger condition is set to DATa, this command specifies the data binary pattern to be used in the trigger.",
+      "set": "TRIGger:A:BUS:B<x>:MIL1553B:DATa:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:MIL1553B:DATa:VALue?",
+      "examples": [
+        "TRIGger:A:BUS:B1:MIL1553B:DATa:VALue “01000”",
+        "TRIGger:A:BUS:B1:MIL1553B:DATa:VALue?"
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_mil1553_b_status_address_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:MIL1553B:STATus:ADDRess:VALue",
+      "category": "Trigger",
+      "description": "When the MIL-STD-1553 bus trigger condition is set to STATus, and the qualifier is set to LESSthan, MOREthan, EQual, UNEQual, LESSEQual or MOREEQual, this command specifies the value of the 5–bit remote terminal address to be used in the trigger.",
+      "set": "TRIGger:A:BUS:B<x>:MIL1553B:STATus:ADDRess:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:MIL1553B:STATus:ADDRess:VALue?",
+      "examples": [
+        "TRIGger:A:BUS:B1:MIL1553B:STATus:ADDRess:VALue \"01000\" sets",
+        "TRIGger:A:BUS:B1:MIL1553B:STATus:ADDRess:VALue \"01000\""
+      ]
+    },
+    {
+      "name": "trigger_a_bus_bx_parallel_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:PARallel:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary data string to be used for a Parallel trigger",
+      "set": "TRIGger:A:BUS:B<x>:PARallel:VALue <QString>",
+      "query": "TRIGger:A:BUS:B<x>:PARallel:VALue?"
+    },
+    {
+      "name": "trigger_a_bus_bx_rs232_c_rx_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:RS232C:RX:DATa:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary data string for an RX RS-232 trigger",
+      "set": "TRIGger:A:BUS:B<x>:RS232C:RX:DATa:VALue",
+      "query": "TRIGger:A:BUS:B<x>:RS232C:RX:DATa:VALue?"
+    },
+    {
+      "name": "trigger_a_bus_bx_rs232_c_tx_data_value",
+      "mnemonic": "TRIGger:A:BUS:B<x>:RS232C:TX:DATa:VALue",
+      "category": "Trigger",
+      "description": "Sets or returns the binary data string for an RS-232 trigger if the trigger condition involves TX",
+      "set": "TRIGger:A:BUS:B<x>:RS232C:TX:DATa:VALue",
+      "query": "TRIGger:A:BUS:B<x>:RS232C:TX:DATa:VALue?"
+    },
+    {
+      "name": "trigger_a_bus_source",
+      "mnemonic": "TRIGger:A:BUS:SOUrce",
+      "category": "Trigger",
+      "description": "Sets or returns the source for a Serial bus trigger",
+      "set": "Returns the trigger source, coupling, and slope for the A edge trigger.",
+      "query": "TRIGger:A:BUS:SOUrce?",
+      "examples": [
+        "TRIGGER:A:EDGE?"
+      ]
+    },
+    {
+      "name": "trigger_a_edge",
+      "mnemonic": "TRIGger:A:EDGE?",
+      "category": "Trigger",
+      "description": "Returns the source, coupling and source for the A edge trigger",
+      "query": "TRIGger:A:EDGE?"
+    },
+    {
+      "name": "trigger_a_edge_coupling",
+      "mnemonic": "TRIGger:A:EDGE:COUPling",
+      "category": "Trigger",
+      "description": "Sets or returns the type of coupling for the A edge trigger",
+      "set": "TRIGger:A:EDGE:COUPling {AC|DC|HFRej|LFRej|NOISErej}",
+      "query": "TRIGger:A:EDGE:COUPling?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ AC | DC | HFRej | LFRej | NOISErej }"
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:EDGE:COUPLING DC",
+        "TRIGGER:A:EDGE:COUPLING?"
+      ]
+    },
+    {
+      "name": "trigger_a_edge_slope",
+      "mnemonic": "TRIGger:A:EDGE:SLOpe",
+      "category": "Trigger",
+      "description": "Sets or returns the slope for the A edge trigger",
+      "set": "TRIGger:A:EDGE:SLOpe {RISe|FALL}",
+      "query": "TRIGger:A:EDGE:SLOpe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ RISe | FALL }"
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:EDGE:SLOPE RISE",
+        "TRIGGER:A:EDGE:SLOPE?"
+      ]
+    },
+    {
+      "name": "trigger_a_edge_source",
+      "mnemonic": "TRIGger:A:EDGE:SOUrce",
+      "category": "Trigger",
+      "description": "Sets or returns the source for the A edge trigger",
+      "set": "TRIGger:A:EDGE:SOUrce",
+      "query": "TRIGger:A:EDGE:SOUrce?",
+      "examples": [
+        "TRIGGER:A:EDGE:SOURCE CH1",
+        "TRIGGER:A:EDGE:SOURCE?"
+      ]
+    },
+    {
+      "name": "trigger_a_level",
+      "mnemonic": "TRIGger:A:LEVel",
+      "category": "Trigger",
+      "description": "Sets or returns the trigger level for the A trigger",
+      "set": "TRIGger:A:LEVel {ECL|TTL|<NR3>}",
+      "query": "TRIGger:A:LEVel?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ECL | TTL | <NR3> }",
+          "units": [
+            {"unit": "V"}
+          ]
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:LEVEL?",
+        "TRIGGER:A:LEVEL TTL"
+      ]
+    },
+    {
+      "name": "trigger_a_level_auxin",
+      "mnemonic": "TRIGger:A:LEVel:AUXin",
+      "category": "Trigger",
+      "description": "Sets or returns the trigger level for the AUXIN port",
+      "set": "TRIGger:A:LEVel:AUXin {<NR3>|ECL|TTL}",
+      "query": "TRIGger:A:LEVel:AUXin?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR3> | ECL | TTL }",
+          "units": [
+            {"unit": "V"}
+          ]
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:LEVEL:AUXIN ECL",
+        "TRIGGER:A:LEVEL:AUXIN?"
+      ]
+    },
+    {
+      "name": "trigger_a_level_chx",
+      "mnemonic": "TRIGger:A:LEVel:CH<x>",
+      "category": "Trigger",
+      "description": "Specifies or returns the trigger level for the specified trigger channel",
+      "set": "TRIGger:A:LEVel:CH<x> {<NR3>|TTL|ECL}",
+      "query": "TRIGger:A:LEVel:CH<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR3> | TTL | ECL }",
+          "units": [
+            {"unit": "V"}
+          ]
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:LEVEL:CH2?",
+        "TRIGGER:A:LEVEL:CH3 TTL"
+      ]
+    },
+    {
+      "name": "trigger_a_level_dx",
+      "mnemonic": "TRIGger:A:LEVel:D<x>",
+      "category": "Trigger",
+      "description": "Sets or returns the trigger level for the specified digital channel",
+      "set": "TRIGger:A:LEVel:D<x> {<NR3>|ECL|TTL}",
+      "query": "TRIGger:A:LEVel:D<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <NR3> | ECL | TTL }",
+          "units": [
+            {"unit": "V"}
+          ]
+        }
+      ],
+      "examples": [
+        "TRIGGER:A:LOGIC?",
+        "CH3 0.0000;CH4 0.0000;:TRIGGER:A:LOGIC:INPUT:CH1"
+      ]
+    },
+    {
+      "name": "auxin",
+      "mnemonic": "AUXin?",
+      "category": "Vertical",
+      "description": "Returns auxiliary input parameters",
+      "query": "AUXin?"
+    },
+    {
+      "name": "auxin_probe",
+      "mnemonic": "AUXin:PRObe",
+      "category": "Vertical",
+      "description": "Returns all information concerning the probe attached to auxiliary input",
+      "set": "AUXin:PRObe",
+      "query": "AUXin:PRObe?",
+      "examples": [
+        "AUXIN:PROBE?",
+        "AUXin:PRObe:AUTOZero (No Query Form)"
+      ]
+    },
+    {
+      "name": "auxin_probe_autozero",
+      "mnemonic": "AUXin:PRObe:AUTOZero",
+      "category": "Vertical",
+      "description": "Sets the TekVPI probe attached to the auxiliary input to autozero",
+      "set": "AUXin:PRObe:AUTOZero"
+    },
+    {
+      "name": "auxin_probe_command",
+      "mnemonic": "AUXin:PRObe:COMMAND",
+      "category": "Vertical",
+      "description": "Sets the state of the specified probe control",
+      "set": "AUXin:PRObe:COMMAND"
+    },
+    {
+      "name": "auxin_probe_degauss",
+      "mnemonic": "AUXin:PRObe:DEGAUss",
+      "category": "Vertical",
+      "description": "Starts a degauss/autozero cycle on a TekVPI current probe attached to the auxiliary input",
+      "set": "AUXin:PRObe:DEGAUss"
+    },
+    {
+      "name": "auxin_probe_degauss_state",
+      "mnemonic": "AUXin:PRObe:DEGAUss:STATE?",
+      "category": "Vertical",
+      "description": "Returns the degauss state of the TekVPI current probe attached to the auxiliary input",
+      "query": "AUXin:PRObe:DEGAUss:STATE?"
+    },
+    {
+      "name": "auxin_probe_forcedrange",
+      "mnemonic": "AUXin:PRObe:FORCEDRange",
+      "category": "Vertical",
+      "description": "Sets or returns the range of the TekVPI probe attached to the auxiliary input",
+      "set": "AUXin:PRObe:FORCEDRange <NR3>",
+      "query": "AUXin:PRObe:FORCEDRange?"
+    },
+    {
+      "name": "auxin_probe_gain",
+      "mnemonic": "AUXin:PRObe:GAIN",
+      "category": "Vertical",
+      "description": "Sets or returns the gain factor of the probe that is attached to the auxiliary input",
+      "set": "AUXin:PRObe:GAIN <NR3>",
+      "query": "AUXin:PRObe:GAIN?",
+      "examples": [
+        "AUXin:PROBE:GAIN?",
+        "AUXin:PRObe:ID:SERnumber? (Query Only)"
+      ]
+    },
+    {
+      "name": "auxin_probe_id_sernumber",
+      "mnemonic": "AUXin:PRObe:ID:SERnumber?",
+      "category": "Vertical",
+      "description": "Returns the serial number of the probe that is attached to the auxiliary input",
+      "query": "AUXin:PRObe:ID:SERnumber?"
+    },
+    {
+      "name": "auxin_probe_units",
+      "mnemonic": "AUXin:PRObe:UNIts?",
+      "category": "Vertical",
+      "description": "Returns the units of measure of the probe that is attached to the auxiliary input",
+      "query": "AUXin:PRObe:UNIts?"
+    },
+    {
+      "name": "chx_bandwidth",
+      "mnemonic": "CH<x>:BANdwidth",
+      "category": "Vertical",
+      "description": "Sets or returns the bandwidth of the specified channel",
+      "set": "CH<x>:BANdwidth",
+      "query": "CH<x>:BANdwidth?"
+    },
+    {
+      "name": "chx_coupling",
+      "mnemonic": "CH<x>:COUPling",
+      "category": "Vertical",
+      "description": "Sets or returns the coupling setting for the specified channel",
+      "set": "CH<x>:COUPling",
+      "query": "CH<x>:COUPling?"
+    },
+    {
+      "name": "chx_offset",
+      "mnemonic": "CH<x>:OFFSet",
+      "category": "Vertical",
+      "description": "Sets or returns the channel offset",
+      "set": "CH<x>:OFFSet",
+      "query": "CH<x>:OFFSet?"
+    },
+    {
+      "name": "chx_position",
+      "mnemonic": "CH<x>:POSition",
+      "category": "Vertical",
+      "description": "Sets or returns the channel vertical position",
+      "set": "CH<x>:POSition",
+      "query": "CH<x>:POSition?"
+    },
+    {
+      "name": "chx_probe_degauss_state",
+      "mnemonic": "CH<x>:PRObe:DEGAUss:STATE?",
+      "category": "Vertical",
+      "description": "Returns the state of the probe degauss",
+      "query": "CH<x>:PRObe:DEGAUss:STATE?"
+    },
+    {
+      "name": "chx_probe_model",
+      "mnemonic": "CH<x>:PRObe:MODel",
+      "category": "Vertical",
+      "description": "Sets or returns the probe model for the specified channel",
+      "set": "CH<x>:PRObe:MODel",
+      "query": "CH<x>:PRObe:MODel?"
+    },
+    {
+      "name": "chx_probe_propdelay",
+      "mnemonic": "CH<x>:PRObe:PROPDELay",
+      "category": "Vertical",
+      "description": "Sets or returns the propagation delay for the probe connected to the specified channel",
+      "set": "CH<x>:PRObe:PROPDELay",
+      "query": "CH<x>:PRObe:PROPDELay?"
+    },
+    {
+      "name": "chx_probe_units",
+      "mnemonic": "CH<x>:PRObe:UNIts?",
+      "category": "Vertical",
+      "description": "Returns the units of measure of the probe that is attached to the specified channel",
+      "query": "CH<x>:PRObe:UNIts?"
+    },
+    {
+      "name": "chx_scale",
+      "mnemonic": "CH<x>:SCAle",
+      "category": "Vertical",
+      "description": "Sets or returns the vertical scale of the specified channel",
+      "set": "CH<x>:SCAle",
+      "query": "CH<x>:SCAle?"
+    },
+    {
+      "name": "chx_yunits",
+      "mnemonic": "CH<x>:YUNits",
+      "category": "Vertical",
+      "description": "Sets or returns the units for the specified channel",
+      "set": "CH<x>:YUNits",
+      "query": "CH<x>:YUNits?"
+    },
+    {
+      "name": "dx_position",
+      "mnemonic": "D<x>:POSition",
+      "category": "Vertical",
+      "description": "Sets or returns the vertical position for digital channel<x>",
+      "set": "D<x>:POSition",
+      "query": "D<x>:POSition?"
+    },
+    {
+      "name": "refx_horizontal_delay_time",
+      "mnemonic": "REF<x>:HORizontal:DELay:TIMe",
+      "category": "Vertical",
+      "description": "Sets or returns the horizontal delay time for reference waveform <x>, where x is the reference channel number. The delay time is expressed in seconds and is limited to ±5 times the reference horizontal scale",
+      "set": "REF<x>:HORizontal:DELay:TIMe",
+      "query": "REF<x>:HORizontal:DELay:TIMe?"
+    },
+    {
+      "name": "refx_horizontal_scale",
+      "mnemonic": "REF<x>:HORizontal:SCAle",
+      "category": "Vertical",
+      "description": "Sets or returns the horizontal scale for a reference waveform",
+      "set": "REF<x>:HORizontal:SCAle",
+      "query": "REF<x>:HORizontal:SCAle?"
+    },
+    {
+      "name": "refx_vertical_position",
+      "mnemonic": "REF<x>:VERTical:POSition",
+      "category": "Vertical",
+      "description": "Sets or returns the vertical position of the specified reference waveform",
+      "set": "REF<x>:VERTical:POSition",
+      "query": "REF<x>:VERTical:POSition?"
+    },
+    {
+      "name": "refx_vertical_scale",
+      "mnemonic": "REF<x>:VERTical:SCAle",
+      "category": "Vertical",
+      "description": "Sets or returns the reference waveform vertical scale in vertical units/div",
+      "set": "REF<x>:VERTical:SCAle",
+      "query": "REF<x>:VERTical:SCAle?"
+    },
+    {
+      "name": "select_chx",
+      "mnemonic": "SELect:CH<x>",
+      "category": "Vertical",
+      "description": "Turns on or off the specified waveform or returns whether the specified channel is on or off",
+      "set": "SELect:CH<x> {ON|OFF|<NR1>}",
+      "query": "SELect:CH<x>?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ON | OFF | <NR1> }"
+        }
+      ],
+      "examples": [
+        "SELECT:CH1?"
+      ]
+    },
+    {
+      "name": "curve",
+      "mnemonic": "CURVe",
+      "category": "Waveform Transfer",
+      "description": "The CURVe command transfers the waveform data points TO the oscilloscope’s internal reference memory location (REF1–4), which is specified by the DATa:DESTination command. The CURVe? query transfers data FROM the oscilloscope; the source waveform is specified by the DATa:SOUrce command. The first and last data points are specified by the DATa:STARt and DATa:STOP commands. Associated with each waveform transferred using the CURVe command or query is a waveform preamble that provides the data format, scale and associated information needed to interpret the waveform data points. The preamble information for waveforms sent TO the oscilloscope is specified using the WFMInpre commands. The preamble information for waveforms transferred FROM the oscilloscope is specified or queried using the WFMOutpre commands. If the waveform is not displayed, the query form generates an error. The CURVe command and CURVe? query transfer waveform data in ASCII or binary format. ASCII data is sent as a comma-separated list of decimal values. Binary data is sent with the IEEE488.2 binary block header immediately followed by the binary data.",
+      "set": "CURVe {<Block>|<asc curve>}",
+      "query": "CURVe?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ <Block> | <asc curve> }"
+        }
+      ],
+      "examples": [
+        "CURVe 0,1,4,32,-120 …",
+        "CURVe #510000<10000 binary bytes>"
+      ]
+    },
+    {
+      "name": "data",
+      "mnemonic": "DATa",
+      "category": "Waveform Transfer",
+      "description": "These commands specify the format and location of waveform data that is transferred using the CURVe command, or return the format and location of the waveform data that is transferred with the CURVe? query. You can use the INIT argument to reset all of the DATa parameters to default values. (Note that the *RST and FACtory commands do not reset the DATa parameters.) You can use the SNap argument to automatically set the DATa:STARt and DATa:STOP values to the starting and stopping point of the waveform cursors (if on). Note that setting DATa:STARt and DATa:STOP automatically sets WFMOutpre:NR_Pt.",
+      "set": "DATa {INIT|SNAp}",
+      "query": "DATa?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ INIT | SNAp }"
+        }
+      ],
+      "examples": [
+        "DATA?"
+      ]
+    },
+    {
+      "name": "data_destination",
+      "mnemonic": "DATa:DESTination",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the reference memory location (REF1–4) for storing waveform data transferred into the oscilloscope using the CURVe command.",
+      "set": "DATa:DESTination REF<x>",
+      "query": "DATa:DESTination?",
+      "examples": [
+        "DATA:DESTINATION?"
+      ]
+    },
+    {
+      "name": "data_encdg",
+      "mnemonic": "DATa:ENCdg",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the encoding format for outgoing waveform data. This command is equivalent to setting WFMOutpre:ENCdg, WFMOutpre:BN_Fmt, and WFMOutpre:BYT_Or. Setting the DATa:ENGdg value causes the corresponding WFMOutpre values to be updated.",
+      "set": "DATa:ENCdg",
+      "query": "DATa:ENCdg?",
+      "examples": [
+        "DATA:ENCDG?",
+        "DATA:ENCDG RPBinary"
+      ]
+    },
+    {
+      "name": "data_source",
+      "mnemonic": "DATa:SOUrce",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the source waveform to be transferred from the oscilloscope using the CURVe? query. The valid waveform sources are CH1-CH4, MATH, REF1-REF4, D0-D15, and DIGital. Setting DATa:SOUrce automatically constrains the following to valid values for the specified source waveform: WFMOutpre:BYT_Nr, WFMOutpre:BIT_Nr and WFMOutpre:BN_Fmt.",
+      "set": "DATa:SOUrce",
+      "query": "DATa:SOUrce?",
+      "examples": [
+        "DATA:SOURCE?",
+        "DATA:SOURCE CH1"
+      ]
+    },
+    {
+      "name": "data_start",
+      "mnemonic": "DATa:STARt",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the starting data point for incoming or outgoing waveform transfer using the CURVe command or query. (Use DATa:STOP to specify the ending data point.) You can set the DATa:STARt and DATa:STOP values automatically to the starting and stopping points of the waveform cursors, if on, using DATa SNap. Note that setting DATa:STARt and DATa:STOP automatically sets WFMOutpre:NR_Pt.",
+      "set": "DATa:STARt <NR1>",
+      "query": "DATa:STARt?",
+      "examples": [
+        "DATA:START?",
+        "DATA:START 10"
+      ]
+    },
+    {
+      "name": "data_stop",
+      "mnemonic": "DATa:STOP",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the final data point that will be transferred when using the CURVe command or query for incoming or outgoing waveform transfer. (UseDATa:STARt to specify the starting data point.)",
+      "set": "DATa:STOP <NR1>",
+      "query": "DATa:STOP?",
+      "examples": [
+        "DATA:STOP?",
+        "DATA:STOP 15000"
+      ]
+    },
+    {
+      "name": "data_width",
+      "mnemonic": "DATa:WIDth",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the width, in bytes per point, for waveform data transferred from the scope via the CURVe? query. (This command is synonymous with WFMOutpre:BYT_Nr .) When the source isCH1-CH4, REF1-REF4, MATH or D0-D15, the default width is 1 byte.",
+      "set": "DATa:WIDth <NR1>",
+      "query": "DATa:WIDth?",
+      "examples": [
+        "DATa:WIDth 2",
+        "DATa:WIDth?"
+      ]
+    },
+    {
+      "name": "wavfrm",
+      "mnemonic": "WAVFrm?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the waveform preamble and the waveform data for the source waveform specified by the DATa:SOUrce command. This command is equivalent to sending bothWFMOutpre? and CURVe?, with the additional provision that the response to WAVFrm? is guaranteed to provide a synchronized preamble and curve.",
+      "query": "WAVFrm?"
+    },
+    {
+      "name": "wfminpre",
+      "mnemonic": "WFMInpre?",
+      "category": "Waveform Transfer",
+      "description": "Returns the waveform formatting and scaling specifications to be applied to the next incoming CURVe command data.",
+      "query": "WFMInpre?"
+    },
+    {
+      "name": "wfminpre_bit_nr",
+      "mnemonic": "WFMInpre:BIT_Nr",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the number of bits per data point in the waveform data to be sent to the oscilloscope using the CURVe command. Changing this value also changes the value of WFMInpre:BYT_Nr.",
+      "set": "WFMInpre:BIT_Nr <NR1>",
+      "query": "WFMInpre:BIT_Nr?",
+      "examples": [
+        "WFMINPRE:BIT_NR 16",
+        "WFMINPRE:BIT_NR?"
+      ]
+    },
+    {
+      "name": "wfminpre_bn_fmt",
+      "mnemonic": "WFMInpre:BN_Fmt",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the format of the data for outgoing waveforms when WFMInpre:ENCdg is set to BINary. The format can either be RI (signed integer) or RP (positive integer).",
+      "set": "WFMInpre:BN_Fmt {RI|RP}",
+      "query": "WFMInpre:BN_Fmt?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ RI | RP }"
+        }
+      ],
+      "examples": [
+        "WFMINPRE:BN_FMT RP",
+        "WFMINPRE:BN_FMT?"
+      ]
+    },
+    {
+      "name": "wfminpre_byt_nr",
+      "mnemonic": "WFMInpre:BYT_Nr",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the number of bytes per data point in the waveform data to be sent to the oscilloscope using the CURVe command. Changing this value also changes the value of WFMInpre:BIT_Nr.",
+      "set": "WFMInpre:BYT_Nr <NR1>",
+      "query": "WFMInpre:BYT_Nr?",
+      "examples": [
+        "WFMINPRE:BYT_NR 1",
+        "WFMINPRE:BYT_NR?"
+      ]
+    },
+    {
+      "name": "wfminpre_byt_or",
+      "mnemonic": "WFMInpre:BYT_Or",
+      "category": "Waveform Transfer",
+      "description": "This command specifies which byte of incoming binary waveform data is transmitted first (the byte order). The byte order can either be MSB (most significant byte first) or LSB (least significant byte first, also known as IBM format). This specification only has meaning when WFMInpre:ENCdg is set to BINary and WFMInpre:BYT_Nr is 2.",
+      "set": "WFMInpre:BYT_Or {LSB|MSB}",
+      "query": "WFMInpre:BYT_Or?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ LSB | MSB }"
+        }
+      ],
+      "examples": [
+        "WFMINPRE:BYT_OR MSB",
+        "WFMINPRE:BYT_OR?"
+      ]
+    },
+    {
+      "name": "wfminpre_centerfrequency",
+      "mnemonic": "WFMInpre:CENTERFREQuency",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the center frequency of an incoming RF trace. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored, and the query always returns 0.0000.",
+      "set": "WFMInpre:CENTERFREQuency <NR3>",
+      "query": "WFMInpre:CENTERFREQuency?"
+    },
+    {
+      "name": "wfminpre_domain",
+      "mnemonic": "WFMInpre:DOMain",
+      "category": "Waveform Transfer",
+      "description": "This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored and the query always returns TIMe.",
+      "set": "WFMInpre:DOMain {TIMe|FREQuency}",
+      "query": "WFMInpre:DOMain?"
+    },
+    {
+      "name": "wfminpre_encdg",
+      "mnemonic": "WFMInpre:ENCdg",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the type of encoding of the incoming waveform data to be sent to the oscilloscope using the CURVe command. Supported types are BINary and ASCii.",
+      "set": "WFMInpre:ENCdg {ASCii|BINary}",
+      "query": "WFMInpre:ENCdg?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ASCii | BINary }"
+        }
+      ],
+      "examples": [
+        "WFMINPRE:ENCDG ASC",
+        "WFMINPRE:ENCDG ?"
+      ]
+    },
+    {
+      "name": "wfminpre_nr_pt",
+      "mnemonic": "WFMInpre:NR_Pt",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the number of data points that are in the incoming waveform record to be sent to the oscilloscope using the CURVe command.",
+      "set": "WFMInpre:NR_Pt <NR1>",
+      "query": "WFMInpre:NR_Pt?",
+      "examples": [
+        "WFMINPRE:NR_PT 10000",
+        "WFMINPRE:NR_PT ?"
+      ]
+    },
+    {
+      "name": "wfminpre_pt_fmt",
+      "mnemonic": "WFMInpre:PT_Fmt",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the format of the data points to be sent to the oscilloscope using the CURVE command. This can be Y for YT format, or ENV for envelope format (min/max pairs). Regardless of the argument used, the scale, offset, and so on are interpreted similarly. When ENV is used, waveform data is interpreted as min-max pairs (the minimum value precedes the maximum for each pair); when Y is used, it is interpreted over a single point.",
+      "set": "WFMInpre:PT_Fmt {ENV|Y}",
+      "query": "WFMInpre:PT_Fmt?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ENV | Y }"
+        }
+      ],
+      "examples": [
+        "WFMINPRE:PT_FMT ENV",
+        "WFMINPRE:PT_FMT?"
+      ]
+    },
+    {
+      "name": "wfminpre_pt_off",
+      "mnemonic": "WFMInpre:PT_Off",
+      "category": "Waveform Transfer",
+      "description": "The set form of this command is ignored. The query form always returns a 0.",
+      "set": "WFMInpre:PT_Off <NR1>",
+      "query": "WFMInpre:PT_Off?"
+    },
+    {
+      "name": "wfminpre_reflevel",
+      "mnemonic": "WFMInpre:REFLevel",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the Reference Level of the incoming waveform. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored, and the query always returns 0.0000.",
+      "set": "WFMInpre:REFLevel <NR3>",
+      "query": "WFMInpre:REFLevel?"
+    },
+    {
+      "name": "wfminpre_span",
+      "mnemonic": "WFMInpre:SPAN",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the frequency span of an incoming RF trace. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored, and the query always returns 0.0000.",
+      "set": "WFMInpre:SPAN <NR3>",
+      "query": "WFMInpre:SPAN?"
+    },
+    {
+      "name": "wfminpre_wfmtype",
+      "mnemonic": "WFMInpre:WFMTYPe",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the type of waveform that is being transferred to the oscilloscope for storage in one of the REF1 — REF4 memory locations. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored and the query always returns ANALOG.",
+      "set": "WFMInpre:WFMTYPe {ANALOG|RF_TD|RF_FD}",
+      "query": "WFMInpre:WFMTYPe?"
+    },
+    {
+      "name": "wfminpre_xincr",
+      "mnemonic": "WFMInpre:XINcr",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the horizontal interval between incoming waveform points sent to the oscilloscope using the CURVE command. The units can be time, in seconds, or frequency, in hertz, and can be specified or queried using the WFMInpre:XUNit command.",
+      "set": "WFMInpre:XINcr <NR3>",
+      "query": "WFMInpre:XINcr?",
+      "examples": [
+        "WFMINPRE:XINCR 3E-3",
+        "WFMINPRE:XINCR ?"
+      ]
+    },
+    {
+      "name": "wfminpre_xunit",
+      "mnemonic": "WFMInpre:XUNit",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the horizontal units of the x-axis of the data points being sent to the oscilloscope using the CURVE command. This value can be in “s” or “Hz”.",
+      "set": "WFMInpre:XUNit <QString>",
+      "query": "WFMInpre:XUNit?",
+      "examples": [
+        "WFMINPRE:XUNIT \"HZ\"",
+        "WFMINPRE:XUNIT?"
+      ]
+    },
+    {
+      "name": "wfminpre_xzero",
+      "mnemonic": "WFMInpre:XZEro",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the position value of the first data point in the incoming waveform record being sent to the oscilloscope using the CURVE command. The units are determined or queried using the WFMInpre:XUNit command and are typically time, in seconds, or frequency, in hertz. This time or frequency is relative to the time or frequency of the trigger, which is always 0. Thus, the XZEro value can be negative.",
+      "set": "WFMInpre:XZEro <NR3>",
+      "query": "WFMInpre:XZEro?",
+      "examples": [
+        "WFMINPRE:XZERO 5.7E-6, which",
+        "WFMINPRE:XZERO?"
+      ]
+    },
+    {
+      "name": "wfminpre_ymult",
+      "mnemonic": "WFMInpre:YMUlt",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the vertical scale multiplying factor to be used to convert the incoming data point values being sent to the oscilloscope, from digitizing levels into the units specified by the WFMInpre:YUNit command. For one byte waveform data, there are 256 digitizing levels. For two byte waveform data there are 65,536 digitizing levels.",
+      "set": "WFMInpre:YMUlt <NR3>",
+      "query": "WFMInpre:YMUlt?",
+      "examples": [
+        "WFMINPRE:YMULT?",
+        "WFMINPRE:YMULT 20E-3"
+      ]
+    },
+    {
+      "name": "wfminpre_yoff",
+      "mnemonic": "WFMInpre:YOFf",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the vertical position of the destination reference waveform in digitizing levels. There are 25 digitizing levels per vertical division for 1-byte data, and 6400 digitizing levels per vertical division for 2-byte data. Variations in this number are analogous to changing the vertical position of the waveform.",
+      "set": "WFMInpre:YOFf <NR3>",
+      "query": "WFMInpre:YOFf?",
+      "examples": [
+        "WFMINPRE:YOFF 50",
+        "WFMINPRE:YOFF?"
+      ]
+    },
+    {
+      "name": "wfminpre_yunit",
+      "mnemonic": "WFMInpre:YUNit",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the vertical units of data points in the incoming waveform record sent to the oscilloscope using the CURVE command. This can be any of several string values, depending upon the vertical units of the waveform being sent.",
+      "set": "WFMInpre:YUNit <QString>",
+      "query": "WFMInpre:YUNit?",
+      "examples": [
+        "WFMINPRE:YUNIT?",
+        "WFMINPRE:YUNIT \"A\""
+      ]
+    },
+    {
+      "name": "wfminpre_yzero",
+      "mnemonic": "WFMInpre:YZEro",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the vertical offset of the destination reference waveform in units specified by the WFMInpre:YUNit command. Variations in this number are analogous to changing the vertical offset of the waveform. The WFMInpre:YMUlt, WFMInpre:YOFf, and WFMInpre:YZEro commands are used to convert waveform record values to units specified using the WFMInpre:YUNit command (YUNit units).",
+      "set": "WFMInpre:YZEro <NR3>",
+      "query": "WFMInpre:YZEro?",
+      "examples": [
+        "WFMINPRE:YZERO 1.5E+0",
+        "WFMInpre:YUNit is set to V)"
+      ]
+    },
+    {
+      "name": "wfmoutpre",
+      "mnemonic": "WFMOutpre?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the information needed to interpret the waveform data points returned by the CURVe? query. It returns the waveform transmission and formatting parameters for the waveform specified by the DATa:SOUrce command.",
+      "query": "WFMOutpre?"
+    },
+    {
+      "name": "wfmoutpre_bit_nr",
+      "mnemonic": "WFMOutpre:BIT_Nr",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the number of bits per data point in the outgoing waveform being transferred using the CURVe? query. Changing the value of WFMOutpre:BIT_Nr also changes the values of WFMOutpre:BYT_Or and DATa:WIDth.",
+      "set": "WFMOutpre:BIT_Nr <NR1>",
+      "query": "WFMOutpre:BIT_Nr?",
+      "examples": [
+        "WFMOUTPRE:BIT_NR 16",
+        "WFMOUTPRE:BIT_NR?"
+      ]
+    },
+    {
+      "name": "wfmoutpre_bn_fmt",
+      "mnemonic": "WFMOutpre:BN_Fmt",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the format of the binary data for outgoing waveforms when WFMOutpre:ENCdg is set to BINary. The format can be RI (signed integer) or RP (positive integer) for analog channels. Changing the value of WFMOutpre:BN_Fmt also changes the value of DATa:ENCdg. The waveform is specified by the DATa:SOUrce command.",
+      "set": "WFMOutpre:BN_Fmt {RI|RP}",
+      "query": "WFMOutpre:BN_Fmt?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ RI | RP }"
+        }
+      ],
+      "examples": [
+        "WFMOUTPRE:BN_FMT RP",
+        "WFMOUTPRE:BN_FMT?"
+      ]
+    },
+    {
+      "name": "wfmoutpre_byt_nr",
+      "mnemonic": "WFMOutpre:BYT_Nr",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the data width for the outgoing waveform specified by the DATa:SOUrce command. (This command is synonymous withDATa:WIDTH.) Note that changing WFMOutpre:BYT_Nr also changes WFMOutpre:BIT_Nr and DATa:WIDth.",
+      "set": "WFMOutpre:BYT_Nr <NR1>",
+      "query": "WFMOutpre:BYT_Nr?",
+      "examples": [
+        "WFMOUTPRE:BYT_NR 1",
+        "WFMOUTPRE:BYT_NR?"
+      ]
+    },
+    {
+      "name": "wfmoutpre_byt_or",
+      "mnemonic": "WFMOutpre:BYT_Or",
+      "category": "Waveform Transfer",
+      "description": "This command specifies which byte of outgoing binary waveform data is transmitted first (the byte order). The byte order can either be MSB (most significant byte first) or LSB (least significant byte first, also known as IBM format). This specification only has meaning when WFMOutpre:ENCdg is set to BINary and WFMOutpre:BYT_Nr is 2.",
+      "set": "WFMOutpre:BYT_Or {LSB|MSB}",
+      "query": "WFMOutpre:BYT_Or?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ LSB | MSB }"
+        }
+      ],
+      "examples": [
+        "WFMOUTPRE:BYT_OR MSB",
+        "WFMOUTPRE:BYT_OR?"
+      ]
+    },
+    {
+      "name": "wfmoutpre_centerfrequency",
+      "mnemonic": "WFMOutpre:CENTERFREQuency?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the center frequency of an incoming waveform. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored, and the query always returns 0.0000.",
+      "query": "WFMOutpre:CENTERFREQuency?"
+    },
+    {
+      "name": "wfmoutpre_domain",
+      "mnemonic": "WFMOutpre:DOMain?",
+      "category": "Waveform Transfer",
+      "description": "This query is provided for waveform transfer compatibility with mixed domain oscilloscopes only and always returns TIMe.",
+      "query": "WFMOutpre:DOMain?"
+    },
+    {
+      "name": "wfmoutpre_encdg",
+      "mnemonic": "WFMOutpre:ENCdg",
+      "category": "Waveform Transfer",
+      "description": "This command specifies the type of encoding (BINary or ASCii) of the outgoing waveform data queried using the CURVe? query. (This can also be set using the DATa:ENCdg command, which provides the ability to set WFMOutpre:ENCdg, WFMOutpre:BN_Fmt, and WFMOutpre:BYT_Or using a single command.)",
+      "set": "WFMOutpre:ENCdg {ASCii|BINary}",
+      "query": "WFMOutpre:ENCdg?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ASCii | BINary }"
+        }
+      ],
+      "examples": [
+        "WFMOUTPRE:ENCDG?",
+        "WFMOUTPRE:ENCDG ASC"
+      ]
+    },
+    {
+      "name": "wfmoutpre_nr_pt",
+      "mnemonic": "WFMOutpre:NR_Pt?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the number of data points in the waveform record that will be transmitted in response to a CURVe? query. This value is the adjusted range specified by DATA:START and DATA:STOP commands. Note that the oscilloscope automatically adjusts the DATA:START and DATA:STOP values when the DATA:STOP value is less than the DATA:START value, and when the DATA:START and/or DATA:STOP value is greater than the record length of the source waveform. The adjusted DATA:START and DATA:STOP values determine WFMOUTPRE:NR_PT. (You can use DATa:STARt and DATa:STOP to transfer partial waveforms.) If the waveform specified by the DATa:SOUrce command is not turned on, an error will be generated.",
+      "query": "WFMOutpre:NR_Pt?"
+    },
+    {
+      "name": "wfmoutpre_pt_fmt",
+      "mnemonic": "WFMOutpre:PT_Fmt?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the point format of the data points in the outgoing waveform record transferred using the CURVe? query. The returned values can be Y, which indicates normal waveform points for YT format, or ENV, which indicates envelope mode format in which the data is returned as a series of min/max pairs. The minimum value precedes the maximum. The outgoing waveform is specified by the DATa:SOUrce command. The query command will time out and an error will be generated if the waveform specified by DATa:SOUrce is not turned on.",
+      "query": "WFMOutpre:PT_Fmt?"
+    },
+    {
+      "name": "wfmoutpre_pt_off",
+      "mnemonic": "WFMOutpre:PT_Off?",
+      "category": "Waveform Transfer",
+      "description": "This query always returns 0 if the outgoing waveform specified by DATA:SOUrce is on or displayed.",
+      "query": "WFMOutpre:PT_Off?"
+    },
+    {
+      "name": "wfmoutpre_pt_order",
+      "mnemonic": "WFMOutpre:PT_ORder?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the point ordering, which is always linear.",
+      "query": "WFMOutpre:PT_ORder?"
+    },
+    {
+      "name": "wfmoutpre_reflevel",
+      "mnemonic": "WFMOutpre:REFLEvel?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the Reference Level of an outgoing waveform. This query is provided for waveform transfer compatibility with mixed domain oscilloscopes only and always returns 0.0000.",
+      "query": "WFMOutpre:REFLEvel?"
+    },
+    {
+      "name": "wfmoutpre_span",
+      "mnemonic": "WFMOutpre:SPAN?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the frequency span of the outgoing waveform. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored, and the query always returns 0.0000.",
+      "query": "WFMOutpre:SPAN?"
+    },
+    {
+      "name": "wfmoutpre_wfid",
+      "mnemonic": "WFMOutpre:WFId?",
+      "category": "Waveform Transfer",
+      "description": "This query returns a string that describes several aspects of the acquisition parameters for the source waveform, including Source, Coupling, Vertical Scale, Horizontal Scale, Record Length and Acquisition Mode. If the waveform specified by DATa:SOUrce command is not turned on, an error will be generated.",
+      "query": "WFMOutpre:WFId?"
+    },
+    {
+      "name": "wfmoutpre_wfmtype",
+      "mnemonic": "WFMOutpre:WFMTYPe?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the type of the outgoing waveform. This command is provided for waveform transfer compatibility with mixed domain oscilloscopes only. The command form is ignored, and the query always returns ANALOG.",
+      "query": "WFMOutpre:WFMTYPe?"
+    },
+    {
+      "name": "wfmoutpre_xincr",
+      "mnemonic": "WFMOutpre:XINcr?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the horizontal point spacing in units of time (seconds), or frequency (hertz) between data points in the waveform record transferred using the CURVe? query. This value corresponds to the sampling interval.",
+      "query": "WFMOutpre:XINcr?"
+    },
+    {
+      "name": "wfmoutpre_xunit",
+      "mnemonic": "WFMOutpre:XUNit?",
+      "category": "Waveform Transfer",
+      "description": "This query indicates the horizontal units of the x-axis of the waveform record transferred using the CURVe? query. Typically, this value is \"s\" when the waveform source is displayed in the time domain, and \"Hz\" when the waveform source is displayed in the frequency domain. When the waveform source is Math or a reference waveform, the value can be \"s\" or \"Hz\".",
+      "query": "WFMOutpre:XUNit?"
+    },
+    {
+      "name": "wfmoutpre_xzero",
+      "mnemonic": "WFMOutpre:XZEro?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the time coordinate, in seconds, or frequency, in hertz, of the first data point in the outgoing waveform record transferred using the CURVe? query. This time or frequency is relative to the time of the trigger, which is always 0. Thus, the XZEro time or frequency can be negative.",
+      "query": "WFMOutpre:XZEro?"
+    },
+    {
+      "name": "wfmoutpre_ymult",
+      "mnemonic": "WFMOutpre:YMUlt?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the vertical scale multiplying factor used to convert the waveform data point values in the outgoing waveform record from digitizing levels to the YUNit units. You can determine the units by using the WFMOutpre:YUNit query. See the description of the WFMInpre:YMUlt command to see how this scale factor is used to convert waveform sample values to volts.",
+      "query": "WFMOutpre:YMUlt?"
+    },
+    {
+      "name": "wfmoutpre_yoff",
+      "mnemonic": "WFMOutpre:YOFf?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the vertical position of the source waveform in digitizing levels. There are 25 digitizing levels per vertical division for 1-byte data, and 6400 digitizing levels per vertical division for 2-byte data. See the description of WFMInpre:YOFf to see how this position is used to convert waveform sample values to volts.",
+      "query": "WFMOutpre:YOFf?"
+    },
+    {
+      "name": "wfmoutpre_yunit",
+      "mnemonic": "WFMOutpre:YUNit?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the units of data points in the outgoing waveform record transferred using the CURVe? query. This can be any of several string values, depending upon the vertical units of the source waveform (specified by the DATa:SOUrce command). Typically, this is “V” for volts.",
+      "query": "WFMOutpre:YUNit?"
+    },
+    {
+      "name": "wfmoutpre_yzero",
+      "mnemonic": "WFMOutpre:YZEro?",
+      "category": "Waveform Transfer",
+      "description": "This query returns the vertical offset of the source waveform. You can determine the units using the WFMOutpre:YUNit? query. See the description of WFMInpre:YZEro to see how this offset is used to convert waveform sample values to volts.",
+      "query": "WFMOutpre:YZEro?"
+    },
+    {
+      "name": "zoom",
+      "mnemonic": "ZOOm?",
+      "category": "Zoom",
+      "description": "Returns the current horizontal positioning and scaling of the zoom display",
+      "query": "ZOOm?"
+    },
+    {
+      "name": "zoom_mode",
+      "mnemonic": "ZOOm:MODe",
+      "category": "Zoom",
+      "description": "Sets or returns the zoom mode",
+      "set": "ZOOm:MODe",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ON | OFF | <NR1> }"
+        }
+      ],
+      "examples": [
+        "ZOOM:MODE OFF turns off Zoom mode",
+        "ZOOM:MODE?"
+      ]
+    },
+    {
+      "name": "zoom_zoomx",
+      "mnemonic": "ZOOm:ZOOM<x>?",
+      "category": "Zoom",
+      "description": "Returns the current horizontal positioning and scaling of the display. <x> can only be 1",
+      "query": "ZOOm:ZOOM<x>?"
+    },
+    {
+      "name": "zoom_zoomx_factor",
+      "mnemonic": "ZOOm:ZOOM<x>:FACtor?",
+      "category": "Zoom",
+      "description": "Returns the zoom factor of the zoom window. <x> can only be 1",
+      "query": "ZOOm:ZOOM<x>:FACtor?"
+    },
+    {
+      "name": "zoom_zoomx_position",
+      "mnemonic": "ZOOm:ZOOM<x>:POSition",
+      "category": "Zoom",
+      "description": "Sets or returns the horizontal position of the zoom window, in terms of 0 to 100.0% of the zoom window. <x> can only be 1",
+      "set": "ZOOm:ZOOM<x>:POSition <NR3>",
+      "query": "ZOOm:ZOOM<x>:POSition?"
+    },
+    {
+      "name": "zoom_zoomx_scale",
+      "mnemonic": "ZOOm:ZOOM<x>:SCAle",
+      "category": "Zoom",
+      "description": "Sets or returns the horizontal scale of the zoom window. <x> can only be 1",
+      "set": "ZOOm:ZOOM<x>:SCAle <NR3>",
+      "query": "ZOOm:ZOOM<x>:SCAle?"
+    },
+    {
+      "name": "zoom_zoomx_state",
+      "mnemonic": "ZOOm:ZOOM<x>:STATE",
+      "category": "Zoom",
+      "description": "Specifies or returns a trace as zoomed, on or off. <x> can only be 1",
+      "set": "ZOOm:ZOOM<x>:STATE {ON|OFF|<NR1>}",
+      "query": "ZOOm:ZOOM<x>:STATE?",
+      "parameters": [
+        {
+          "name": "value",
+          "range": "{ ON | OFF | <NR1> }"
+        }
+      ],
+      "examples": [
+        "ZOOM:ZOOM1:STATE ON turns Zoom1 on",
+        "ZOOM:ZOOM1:STATE?"
+      ]
+    }
+  ]
+}

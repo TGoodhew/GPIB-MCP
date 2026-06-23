@@ -1,0 +1,983 @@
+{
+  "model": "N9320A",
+  "manufacturer": "Agilent",
+  "category": "Spectrum Analyzer",
+  "description": "Agilent (Keysight) N9320A spectrum analyzer. Frequency range 9 kHz to 3.0 GHz; resolution bandwidth 10 Hz to 1 MHz. Controlled by SCPI commands over a USB (USBTMC) connection. The N9320B is the direct successor and shares essentially the same SCPI command set.",
+  "source": "Agilent N9320A Spectrum Analyzer Programmer's Guide (bitsavers.org N9320AProgrammerGuide.pdf) + N9320A User Guide.pdf",
+  "aliases": [
+    "Agilent N9320A",
+    "Keysight N9320A"
+  ],
+  "termination": {
+    "write": "\n",
+    "read": "\n"
+  },
+  "identity": {
+    "command": "*IDN?",
+    "matchRegex": "N9320A",
+    "supported": true,
+    "description": "Standard SCPI identification query; returns manufacturer (Agilent Technologies), model (N9320A), serial number and firmware version."
+  },
+  "commands": [
+    {
+      "name": "idn",
+      "mnemonic": "*IDN?",
+      "category": "System",
+      "description": "Query the instrument identification string (manufacturer, model, serial number, firmware version).",
+      "query": "*IDN?",
+      "examples": [
+        "*IDN?"
+      ]
+    },
+    {
+      "name": "rst",
+      "mnemonic": "*RST",
+      "category": "System",
+      "description": "Reset the analyzer to its factory default (preset) state and clear pending operations.",
+      "set": "*RST",
+      "examples": [
+        "*RST"
+      ]
+    },
+    {
+      "name": "cls",
+      "mnemonic": "*CLS",
+      "category": "System",
+      "description": "Clear the status byte, the standard event status register and the error queue.",
+      "set": "*CLS",
+      "examples": [
+        "*CLS"
+      ]
+    },
+    {
+      "name": "opc",
+      "mnemonic": "*OPC?",
+      "category": "System",
+      "description": "Operation complete query; returns 1 when all pending overlapped operations have finished. Used to synchronise after a sweep.",
+      "query": "*OPC?",
+      "examples": [
+        "*OPC?"
+      ]
+    },
+    {
+      "name": "ese",
+      "mnemonic": "*ESE <value>",
+      "category": "System",
+      "description": "Set or query the Standard Event Status Enable register mask.",
+      "set": "*ESE <value>",
+      "query": "*ESE?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [],
+          "range": "0 to 255"
+        }
+      ],
+      "examples": [
+        "*ESE 1",
+        "*ESE?"
+      ]
+    },
+    {
+      "name": "sre",
+      "mnemonic": "*SRE <value>",
+      "category": "System",
+      "description": "Set or query the Service Request Enable register mask.",
+      "set": "*SRE <value>",
+      "query": "*SRE?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [],
+          "range": "0 to 255"
+        }
+      ],
+      "examples": [
+        "*SRE 0",
+        "*SRE?"
+      ]
+    },
+    {
+      "name": "stb",
+      "mnemonic": "*STB?",
+      "category": "System",
+      "description": "Read the Status Byte register.",
+      "query": "*STB?",
+      "examples": [
+        "*STB?"
+      ]
+    },
+    {
+      "name": "system_preset",
+      "mnemonic": ":SYSTem:PRESet",
+      "category": "System",
+      "description": "Restore the analyzer to its preset state (equivalent to the front-panel Preset key).",
+      "set": ":SYSTem:PRESet",
+      "examples": [
+        ":SYSTem:PRESet"
+      ]
+    },
+    {
+      "name": "system_error",
+      "mnemonic": ":SYSTem:ERRor?",
+      "category": "System",
+      "description": "Query and remove the oldest entry from the error queue (returns error number and message).",
+      "query": ":SYSTem:ERRor?",
+      "examples": [
+        ":SYSTem:ERRor?"
+      ]
+    },
+    {
+      "name": "system_version",
+      "mnemonic": ":SYSTem:VERSion?",
+      "category": "System",
+      "description": "Query the SCPI version to which the analyzer conforms.",
+      "query": ":SYSTem:VERSion?",
+      "examples": [
+        ":SYSTem:VERSion?"
+      ]
+    },
+    {
+      "name": "frequency_center",
+      "mnemonic": "[:SENSe]:FREQuency:CENTer <freq>",
+      "category": "FREQuency",
+      "description": "Set or query the center frequency of the analyzer.",
+      "set": ":FREQuency:CENTer <freq>",
+      "query": ":FREQuency:CENTer?",
+      "parameters": [
+        {
+          "name": "<freq>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "9 kHz to 3.0 GHz. Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":FREQuency:CENTer 100000000",
+        ":FREQuency:CENTer?"
+      ]
+    },
+    {
+      "name": "frequency_span",
+      "mnemonic": "[:SENSe]:FREQuency:SPAN <span>",
+      "category": "FREQuency",
+      "description": "Set or query the frequency span of the analyzer. Setting the span to 0 Hz selects zero-span (time domain) mode.",
+      "set": ":FREQuency:SPAN <span>",
+      "query": ":FREQuency:SPAN?",
+      "parameters": [
+        {
+          "name": "<span>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "0 Hz (zero span), or 100 Hz to 3.0 GHz (full span). Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":FREQuency:SPAN 10000000",
+        ":FREQuency:SPAN?"
+      ]
+    },
+    {
+      "name": "frequency_span_full",
+      "mnemonic": "[:SENSe]:FREQuency:SPAN:FULL",
+      "category": "FREQuency",
+      "description": "Set the analyzer to the full frequency span (9 kHz to 3.0 GHz).",
+      "set": ":FREQuency:SPAN:FULL",
+      "examples": [
+        ":FREQuency:SPAN:FULL"
+      ]
+    },
+    {
+      "name": "frequency_start",
+      "mnemonic": "[:SENSe]:FREQuency:STARt <freq>",
+      "category": "FREQuency",
+      "description": "Set or query the start frequency of the analyzer (left edge of the display).",
+      "set": ":FREQuency:STARt <freq>",
+      "query": ":FREQuency:STARt?",
+      "parameters": [
+        {
+          "name": "<freq>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "9 kHz to 3.0 GHz. Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":FREQuency:STARt 9000",
+        ":FREQuency:STARt?"
+      ]
+    },
+    {
+      "name": "frequency_stop",
+      "mnemonic": "[:SENSe]:FREQuency:STOP <freq>",
+      "category": "FREQuency",
+      "description": "Set or query the stop frequency of the analyzer (right edge of the display).",
+      "set": ":FREQuency:STOP <freq>",
+      "query": ":FREQuency:STOP?",
+      "parameters": [
+        {
+          "name": "<freq>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "9 kHz to 3.0 GHz. Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":FREQuency:STOP 3000000000",
+        ":FREQuency:STOP?"
+      ]
+    },
+    {
+      "name": "frequency_center_step",
+      "mnemonic": "[:SENSe]:FREQuency:CENTer:STEP[:INCRement] <freq>",
+      "category": "FREQuency",
+      "description": "Set or query the center frequency step size used by UP/DOWN tuning.",
+      "set": ":FREQuency:CENTer:STEP <freq>",
+      "query": ":FREQuency:CENTer:STEP?",
+      "parameters": [
+        {
+          "name": "<freq>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "1 Hz to 3.0 GHz."
+        }
+      ],
+      "examples": [
+        ":FREQuency:CENTer:STEP 1000000",
+        ":FREQuency:CENTer:STEP?"
+      ]
+    },
+    {
+      "name": "frequency_center_step_auto",
+      "mnemonic": "[:SENSe]:FREQuency:CENTer:STEP:AUTO <bool>",
+      "category": "FREQuency",
+      "description": "Enable or disable automatic coupling of the center frequency step size, or query its status.",
+      "set": ":FREQuency:CENTer:STEP:AUTO <bool>",
+      "query": ":FREQuency:CENTer:STEP:AUTO?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":FREQuency:CENTer:STEP:AUTO ON",
+        ":FREQuency:CENTer:STEP:AUTO?"
+      ]
+    },
+    {
+      "name": "power_rlevel",
+      "mnemonic": ":DISPlay:WINDow:TRACe:Y[:SCALe]:RLEVel <ampl>",
+      "category": "AMPLitude",
+      "description": "Set or query the reference level (the amplitude shown at the top graticule line).",
+      "set": ":DISPlay:WINDow:TRACe:Y:RLEVel <ampl>",
+      "query": ":DISPlay:WINDow:TRACe:Y:RLEVel?",
+      "parameters": [
+        {
+          "name": "<ampl>",
+          "units": [
+            {
+              "unit": "dBm"
+            }
+          ],
+          "range": "-100 dBm to 30 dBm (depends on the selected amplitude units). Default 0 dBm."
+        }
+      ],
+      "examples": [
+        ":DISPlay:WINDow:TRACe:Y:RLEVel -10",
+        ":DISPlay:WINDow:TRACe:Y:RLEVel?"
+      ]
+    },
+    {
+      "name": "power_rlevel_offset",
+      "mnemonic": ":DISPlay:WINDow:TRACe:Y[:SCALe]:RLEVel:OFFSet <value>",
+      "category": "AMPLitude",
+      "description": "Set or query the reference level offset, compensating for gain or loss between the device under test and the analyzer input.",
+      "set": ":DISPlay:WINDow:TRACe:Y:RLEVel:OFFSet <value>",
+      "query": ":DISPlay:WINDow:TRACe:Y:RLEVel:OFFSet?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [
+            {
+              "unit": "dB"
+            }
+          ],
+          "range": "-300 dB to 300 dB. Default 0 dB."
+        }
+      ],
+      "examples": [
+        ":DISPlay:WINDow:TRACe:Y:RLEVel:OFFSet 10",
+        ":DISPlay:WINDow:TRACe:Y:RLEVel:OFFSet?"
+      ]
+    },
+    {
+      "name": "power_pdivision",
+      "mnemonic": ":DISPlay:WINDow:TRACe:Y[:SCALe]:PDIVision <value>",
+      "category": "AMPLitude",
+      "description": "Set or query the vertical scale per division (logarithmic amplitude scale).",
+      "set": ":DISPlay:WINDow:TRACe:Y:PDIVision <value>",
+      "query": ":DISPlay:WINDow:TRACe:Y:PDIVision?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [
+            {
+              "unit": "dB"
+            }
+          ],
+          "range": "1 dB to 10 dB per division (log scale). Default 10 dB."
+        }
+      ],
+      "examples": [
+        ":DISPlay:WINDow:TRACe:Y:PDIVision 10",
+        ":DISPlay:WINDow:TRACe:Y:PDIVision?"
+      ]
+    },
+    {
+      "name": "power_spacing",
+      "mnemonic": ":DISPlay:WINDow:TRACe:Y[:SCALe]:SPACing <type>",
+      "category": "AMPLitude",
+      "description": "Set or query the vertical scale type (logarithmic or linear).",
+      "set": ":DISPlay:WINDow:TRACe:Y:SPACing <type>",
+      "query": ":DISPlay:WINDow:TRACe:Y:SPACing?",
+      "parameters": [
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{LOGarithmic|LINear}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:WINDow:TRACe:Y:SPACing LOGarithmic",
+        ":DISPlay:WINDow:TRACe:Y:SPACing?"
+      ]
+    },
+    {
+      "name": "amplitude_units",
+      "mnemonic": ":UNIT:POWer <type>",
+      "category": "AMPLitude",
+      "description": "Set or query the amplitude units used for the reference level and marker readouts.",
+      "set": ":UNIT:POWer <type>",
+      "query": ":UNIT:POWer?",
+      "parameters": [
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{DBM|DBMV|DBUV|V|W}"
+        }
+      ],
+      "examples": [
+        ":UNIT:POWer DBM",
+        ":UNIT:POWer?"
+      ]
+    },
+    {
+      "name": "power_attenuation",
+      "mnemonic": "[:SENSe]:POWer[:RF]:ATTenuation <value>",
+      "category": "AMPLitude",
+      "description": "Set or query the input RF attenuation.",
+      "set": ":POWer:ATTenuation <value>",
+      "query": ":POWer:ATTenuation?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [
+            {
+              "unit": "dB"
+            }
+          ],
+          "range": "0 dB to 50 dB in 5 dB steps. Default coupled (auto)."
+        }
+      ],
+      "examples": [
+        ":POWer:ATTenuation 10",
+        ":POWer:ATTenuation?"
+      ]
+    },
+    {
+      "name": "power_attenuation_auto",
+      "mnemonic": "[:SENSe]:POWer[:RF]:ATTenuation:AUTO <bool>",
+      "category": "AMPLitude",
+      "description": "Enable or disable automatic coupling of the input attenuation to the reference level, or query its status.",
+      "set": ":POWer:ATTenuation:AUTO <bool>",
+      "query": ":POWer:ATTenuation:AUTO?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":POWer:ATTenuation:AUTO ON",
+        ":POWer:ATTenuation:AUTO?"
+      ]
+    },
+    {
+      "name": "power_gain_state",
+      "mnemonic": "[:SENSe]:POWer[:RF]:GAIN[:STATe] <bool>",
+      "category": "AMPLitude",
+      "description": "Turn the internal preamplifier (if fitted) on or off, or query its status.",
+      "set": ":POWer:GAIN:STATe <bool>",
+      "query": ":POWer:GAIN:STATe?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":POWer:GAIN:STATe OFF",
+        ":POWer:GAIN:STATe?"
+      ]
+    },
+    {
+      "name": "bandwidth_resolution",
+      "mnemonic": "[:SENSe]:BANDwidth[:RESolution] <bandwidth>",
+      "category": "BANDwidth",
+      "description": "Set or query the resolution bandwidth (RBW).",
+      "set": ":BANDwidth:RESolution <bandwidth>",
+      "query": ":BANDwidth:RESolution?",
+      "parameters": [
+        {
+          "name": "<bandwidth>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "10 Hz to 1 MHz in 1-3-10 sequence (plus a 3 MHz wide-open setting). Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":BANDwidth:RESolution 100000",
+        ":BANDwidth:RESolution?"
+      ]
+    },
+    {
+      "name": "bandwidth_resolution_auto",
+      "mnemonic": "[:SENSe]:BANDwidth[:RESolution]:AUTO <bool>",
+      "category": "BANDwidth",
+      "description": "Enable or disable automatic coupling of the resolution bandwidth to the span, or query its status.",
+      "set": ":BANDwidth:RESolution:AUTO <bool>",
+      "query": ":BANDwidth:RESolution:AUTO?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":BANDwidth:RESolution:AUTO ON",
+        ":BANDwidth:RESolution:AUTO?"
+      ]
+    },
+    {
+      "name": "bandwidth_video",
+      "mnemonic": "[:SENSe]:BANDwidth:VIDeo <bandwidth>",
+      "category": "BANDwidth",
+      "description": "Set or query the video bandwidth (VBW).",
+      "set": ":BANDwidth:VIDeo <bandwidth>",
+      "query": ":BANDwidth:VIDeo?",
+      "parameters": [
+        {
+          "name": "<bandwidth>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "1 Hz to 1 MHz in 1-3-10 sequence (plus a 3 MHz wide-open setting). Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":BANDwidth:VIDeo 30000",
+        ":BANDwidth:VIDeo?"
+      ]
+    },
+    {
+      "name": "bandwidth_video_auto",
+      "mnemonic": "[:SENSe]:BANDwidth:VIDeo:AUTO <bool>",
+      "category": "BANDwidth",
+      "description": "Enable or disable automatic coupling of the video bandwidth to the resolution bandwidth, or query its status.",
+      "set": ":BANDwidth:VIDeo:AUTO <bool>",
+      "query": ":BANDwidth:VIDeo:AUTO?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":BANDwidth:VIDeo:AUTO ON",
+        ":BANDwidth:VIDeo:AUTO?"
+      ]
+    },
+    {
+      "name": "bandwidth_video_ratio",
+      "mnemonic": "[:SENSe]:BANDwidth:VIDeo:RATio <value>",
+      "category": "BANDwidth",
+      "description": "Set or query the ratio of the video bandwidth to the resolution bandwidth (VBW/RBW) used when video bandwidth is coupled.",
+      "set": ":BANDwidth:VIDeo:RATio <value>",
+      "query": ":BANDwidth:VIDeo:RATio?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [],
+          "range": "0.00001 to 3000000 (VBW/RBW ratio). Default 1."
+        }
+      ],
+      "examples": [
+        ":BANDwidth:VIDeo:RATio 1",
+        ":BANDwidth:VIDeo:RATio?"
+      ]
+    },
+    {
+      "name": "sweep_time",
+      "mnemonic": "[:SENSe]:SWEep:TIME <time>",
+      "category": "SWEep",
+      "description": "Set or query the sweep time across the displayed frequency span.",
+      "set": ":SWEep:TIME <time>",
+      "query": ":SWEep:TIME?",
+      "parameters": [
+        {
+          "name": "<time>",
+          "units": [
+            {
+              "unit": "s"
+            }
+          ],
+          "range": "1 ms to 4000 s (minimum depends on span and RBW). Accepts MIN/MAX/UP/DOWN."
+        }
+      ],
+      "examples": [
+        ":SWEep:TIME 0.1",
+        ":SWEep:TIME?"
+      ]
+    },
+    {
+      "name": "sweep_time_auto",
+      "mnemonic": "[:SENSe]:SWEep:TIME:AUTO <bool>",
+      "category": "SWEep",
+      "description": "Enable or disable automatic coupling of the sweep time to span, RBW and VBW, or query its status.",
+      "set": ":SWEep:TIME:AUTO <bool>",
+      "query": ":SWEep:TIME:AUTO?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":SWEep:TIME:AUTO ON",
+        ":SWEep:TIME:AUTO?"
+      ]
+    },
+    {
+      "name": "sweep_points",
+      "mnemonic": "[:SENSe]:SWEep:POINts <value>",
+      "category": "SWEep",
+      "description": "Set or query the number of sweep (trace) points across the display.",
+      "set": ":SWEep:POINts <value>",
+      "query": ":SWEep:POINts?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [],
+          "range": "Number of trace points (typically 461). Accepts MIN/MAX."
+        }
+      ],
+      "examples": [
+        ":SWEep:POINts 461",
+        ":SWEep:POINts?"
+      ]
+    },
+    {
+      "name": "initiate_continuous",
+      "mnemonic": ":INITiate:CONTinuous <bool>",
+      "category": "INITiate",
+      "description": "Set or query the sweep mode: ON for continuous sweeping, OFF for single sweep.",
+      "set": ":INITiate:CONTinuous <bool>",
+      "query": ":INITiate:CONTinuous?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":INITiate:CONTinuous OFF",
+        ":INITiate:CONTinuous?"
+      ]
+    },
+    {
+      "name": "initiate_immediate",
+      "mnemonic": ":INITiate[:IMMediate]",
+      "category": "INITiate",
+      "description": "Trigger (initiate) a sweep. In single-sweep mode this starts one sweep; pair with *OPC? or *WAI to wait for completion.",
+      "set": ":INITiate:IMMediate",
+      "examples": [
+        ":INITiate:IMMediate"
+      ]
+    },
+    {
+      "name": "initiate_restart",
+      "mnemonic": ":INITiate:RESTart",
+      "category": "INITiate",
+      "description": "Restart the current sweep from the beginning.",
+      "set": ":INITiate:RESTart",
+      "examples": [
+        ":INITiate:RESTart"
+      ]
+    },
+    {
+      "name": "abort",
+      "mnemonic": ":ABORt",
+      "category": "INITiate",
+      "description": "Abort the current sweep or measurement in progress.",
+      "set": ":ABORt",
+      "examples": [
+        ":ABORt"
+      ]
+    },
+    {
+      "name": "detector_function",
+      "mnemonic": "[:SENSe]:DETector[:FUNCtion] <type>",
+      "category": "DETector",
+      "description": "Set or query the detector type used to process the captured data of each trace point.",
+      "set": ":DETector:FUNCtion <type>",
+      "query": ":DETector:FUNCtion?",
+      "parameters": [
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{NORMal|POSitive|NEGative|SAMPle|AVERage|RMS} (Normal, Pos Peak, Neg Peak, Sample, Average, RMS)."
+        }
+      ],
+      "examples": [
+        ":DETector:FUNCtion POSitive",
+        ":DETector:FUNCtion?"
+      ]
+    },
+    {
+      "name": "average_state",
+      "mnemonic": "[:SENSe]:AVERage[:STATe] <bool>",
+      "category": "AVERage",
+      "description": "Turn trace averaging on or off, or query its status.",
+      "set": ":AVERage:STATe <bool>",
+      "query": ":AVERage:STATe?",
+      "parameters": [
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":AVERage:STATe ON",
+        ":AVERage:STATe?"
+      ]
+    },
+    {
+      "name": "average_count",
+      "mnemonic": "[:SENSe]:AVERage:COUNt <value>",
+      "category": "AVERage",
+      "description": "Set or query the number of sweeps averaged together.",
+      "set": ":AVERage:COUNt <value>",
+      "query": ":AVERage:COUNt?",
+      "parameters": [
+        {
+          "name": "<value>",
+          "units": [],
+          "range": "1 to 8192. Default 100."
+        }
+      ],
+      "examples": [
+        ":AVERage:COUNt 100",
+        ":AVERage:COUNt?"
+      ]
+    },
+    {
+      "name": "average_clear",
+      "mnemonic": "[:SENSe]:AVERage:CLEar",
+      "category": "AVERage",
+      "description": "Clear (restart) trace averaging, resetting the accumulated average.",
+      "set": ":AVERage:CLEar",
+      "examples": [
+        ":AVERage:CLEar"
+      ]
+    },
+    {
+      "name": "trace_mode",
+      "mnemonic": ":TRACe<n>:MODE <type>",
+      "category": "TRACe",
+      "description": "Set or query the update mode of the specified trace.",
+      "set": ":TRACe<n>:MODE <type>",
+      "query": ":TRACe<n>:MODE?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3} (trace number)"
+        },
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{WRITe|MAXHold|MINHold|VIEW|BLANk}"
+        }
+      ],
+      "examples": [
+        ":TRACe1:MODE MAXHold",
+        ":TRACe1:MODE?"
+      ]
+    },
+    {
+      "name": "trace_data",
+      "mnemonic": ":TRACe[:DATA]? <trace>",
+      "category": "TRACe",
+      "description": "Query the amplitude data of the specified trace (returns the comma-separated trace point values).",
+      "query": ":TRACe:DATA? <trace>",
+      "parameters": [
+        {
+          "name": "<trace>",
+          "units": [],
+          "range": "{TRACE1|TRACE2|TRACE3}"
+        }
+      ],
+      "examples": [
+        ":TRACe:DATA? TRACE1"
+      ]
+    },
+    {
+      "name": "format_data",
+      "mnemonic": ":FORMat[:TRACe][:DATA] <type>",
+      "category": "TRACe",
+      "description": "Set or query the data format used when transferring trace data (ASCII or binary).",
+      "set": ":FORMat:DATA <type>",
+      "query": ":FORMat:DATA?",
+      "parameters": [
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{ASCii|INTeger,32|REAL,32|REAL,64}"
+        }
+      ],
+      "examples": [
+        ":FORMat:DATA ASCii",
+        ":FORMat:DATA?"
+      ]
+    },
+    {
+      "name": "calculate_marker_state",
+      "mnemonic": ":CALCulate:MARKer<n>:STATe <bool>",
+      "category": "CALCulate:MARKer",
+      "description": "Turn the specified marker on or off, or query its status.",
+      "set": ":CALCulate:MARKer<n>:STATe <bool>",
+      "query": ":CALCulate:MARKer<n>:STATe?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        },
+        {
+          "name": "<bool>",
+          "units": [],
+          "range": "{1|ON|0|OFF}"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:STATe ON",
+        ":CALCulate:MARKer1:STATe?"
+      ]
+    },
+    {
+      "name": "calculate_marker_mode",
+      "mnemonic": ":CALCulate:MARKer<n>:MODE <type>",
+      "category": "CALCulate:MARKer",
+      "description": "Set or query the type of the specified marker.",
+      "set": ":CALCulate:MARKer<n>:MODE <type>",
+      "query": ":CALCulate:MARKer<n>:MODE?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        },
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{POSition|DELTa|FIXed|OFF} (Normal, Delta, Fixed, Off)"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:MODE POSition",
+        ":CALCulate:MARKer1:MODE?"
+      ]
+    },
+    {
+      "name": "calculate_marker_x",
+      "mnemonic": ":CALCulate:MARKer<n>:X <freq>",
+      "category": "CALCulate:MARKer",
+      "description": "Set or query the X-axis position (frequency, or time in zero span) of the specified marker.",
+      "set": ":CALCulate:MARKer<n>:X <freq>",
+      "query": ":CALCulate:MARKer<n>:X?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        },
+        {
+          "name": "<freq>",
+          "units": [
+            {
+              "unit": "Hz"
+            }
+          ],
+          "range": "Within the current X-axis range (9 kHz to 3.0 GHz in the frequency domain)."
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:X 100000000",
+        ":CALCulate:MARKer1:X?"
+      ]
+    },
+    {
+      "name": "calculate_marker_y",
+      "mnemonic": ":CALCulate:MARKer<n>:Y?",
+      "category": "CALCulate:MARKer",
+      "description": "Query the Y-axis value (amplitude) of the specified marker.",
+      "query": ":CALCulate:MARKer<n>:Y?",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:Y?"
+      ]
+    },
+    {
+      "name": "calculate_marker_maximum",
+      "mnemonic": ":CALCulate:MARKer<n>:MAXimum",
+      "category": "CALCulate:MARKer",
+      "description": "Perform a peak search, placing the specified marker on the maximum amplitude point of the trace.",
+      "set": ":CALCulate:MARKer<n>:MAXimum",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:MAXimum"
+      ]
+    },
+    {
+      "name": "calculate_marker_max_next",
+      "mnemonic": ":CALCulate:MARKer<n>:MAXimum:NEXT",
+      "category": "CALCulate:MARKer",
+      "description": "Place the specified marker on the next peak (next highest amplitude) of the trace.",
+      "set": ":CALCulate:MARKer<n>:MAXimum:NEXT",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:MAXimum:NEXT"
+      ]
+    },
+    {
+      "name": "calculate_marker_set_center",
+      "mnemonic": ":CALCulate:MARKer<n>:SET:CENTer",
+      "category": "CALCulate:MARKer",
+      "description": "Set the analyzer center frequency to the frequency of the specified marker (marker-to-center).",
+      "set": ":CALCulate:MARKer<n>:SET:CENTer",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:SET:CENTer"
+      ]
+    },
+    {
+      "name": "calculate_marker_set_rlevel",
+      "mnemonic": ":CALCulate:MARKer<n>:SET:RLEVel",
+      "category": "CALCulate:MARKer",
+      "description": "Set the analyzer reference level to the amplitude of the specified marker (marker-to-reference-level).",
+      "set": ":CALCulate:MARKer<n>:SET:RLEVel",
+      "parameters": [
+        {
+          "name": "<n>",
+          "units": [],
+          "range": "{1|2|3|4} (marker number)"
+        }
+      ],
+      "examples": [
+        ":CALCulate:MARKer1:SET:RLEVel"
+      ]
+    },
+    {
+      "name": "calculate_marker_all_off",
+      "mnemonic": ":CALCulate:MARKer:AOFF",
+      "category": "CALCulate:MARKer",
+      "description": "Turn off all the markers.",
+      "set": ":CALCulate:MARKer:AOFF",
+      "examples": [
+        ":CALCulate:MARKer:AOFF"
+      ]
+    },
+    {
+      "name": "trigger_source",
+      "mnemonic": ":TRIGger[:SEQuence]:SOURce <type>",
+      "category": "TRIGger",
+      "description": "Set or query the trigger source of the analyzer.",
+      "set": ":TRIGger:SEQuence:SOURce <type>",
+      "query": ":TRIGger:SEQuence:SOURce?",
+      "parameters": [
+        {
+          "name": "<type>",
+          "units": [],
+          "range": "{IMMediate|VIDeo|EXTernal} (Free Run, Video, External)"
+        }
+      ],
+      "examples": [
+        ":TRIGger:SEQuence:SOURce IMMediate",
+        ":TRIGger:SEQuence:SOURce?"
+      ]
+    }
+  ]
+}
