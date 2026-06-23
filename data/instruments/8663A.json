@@ -29,7 +29,7 @@
       "description": "RF output amplitude function entry. Follow with a numeric value (leading sign allowed under HP-IB only, e.g. +13 DM) and an amplitude unit code; otherwise the sign must be carried in the unit code (+D or -D). Range +16 to -129.9 dBm (999 mV to 0.072 uV), 0.1 dB resolution.",
       "set": "AP <value> <unit>",
       "parameters": [
-        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DB", "unit": "dB"}, "+D", "-D", {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+16 to -129.9 dBm (DM=dBm w/sign on data, +D=+dBm, -D=-dBm, DB=dB, MV=mV, UV=uV)" }
+        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DB", "unit": "dB"}, {"token": "+D", "unit": "dBm"}, {"token": "-D", "unit": "dBm"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+16 to -129.9 dBm (DM=dBm w/sign on data, +D=+dBm, -D=-dBm, DB=dB, MV=mV, UV=uV)" }
       ],
       "examples": ["AP 12.7 -D", "AP -12.7 DM"]
     },

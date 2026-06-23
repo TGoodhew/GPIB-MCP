@@ -29,7 +29,7 @@
       "description": "Carrier output amplitude function entry. Follow with a numeric value (up to 9 digits, decimal point and minus sign allowed) and one or more amplitude unit codes. dBm/dBf are logarithmic terminators; DB and EM (EMF) may be combined with a linear unit. Default after Clear: -127.0 dBm.",
       "set": "AP <value> <unit>",
       "parameters": [
-        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, "DF", {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+13 dBm to -127 dBm (+1.00 V to +0.100 uV); DM=dBm, DF=dBf, DB=dB, EM=EMF, VL=Volts, MV=mV, UV=microvolts" }
+        { "name": "amplitude", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DF", "unit": "dBf"}, {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}], "range": "+13 dBm to -127 dBm (+1.00 V to +0.100 uV); DM=dBm, DF=dBf, DB=dB, EM=EMF, VL=Volts, MV=mV, UV=microvolts" }
       ],
       "examples": ["AP -12.3 DM", "AP -2.0 DB EM UV"]
     },
@@ -40,7 +40,7 @@
       "description": "Re-displays the current amplitude in a different unit configuration without changing the actual output. With the Amplitude function selected, send one or more units codes. Does not affect the RF output level.",
       "set": "<unit>",
       "parameters": [
-        { "name": "units", "units": [{"token": "DM", "unit": "dBm"}, "DF", {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}] }
+        { "name": "units", "units": [{"token": "DM", "unit": "dBm"}, {"token": "DF", "unit": "dBf"}, {"token": "DB", "unit": "dB"}, "EM", {"token": "VL", "unit": "V"}, {"token": "MV", "unit": "mV"}, {"token": "UV", "unit": "uV"}] }
       ],
       "examples": ["DB UV"]
     },

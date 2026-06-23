@@ -89,7 +89,7 @@
       "description": "Reference level (log amplitude). Up to 3 digits plus decimal, from 10 dB above range to 100 dB below range. Terminate with DM (dBm) or DV (dBV), or use UP/DN to step. Up to two decimal places allowed.",
       "set": "RL <value> <suffix>",
       "parameters": [
-        { "name": "level", "units": [{ "token": "DM", "unit": "dBm" }, "DV"], "range": "10 dB above range to 100 dB below range" }
+        { "name": "level", "units": [{ "token": "DM", "unit": "dBm" }, { "token": "DV", "unit": "dBV" }], "range": "10 dB above range to 100 dB below range" }
       ],
       "examples": ["RL 0 DM", "RL -10 DM"]
     },

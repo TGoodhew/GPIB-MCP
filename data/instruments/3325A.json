@@ -59,7 +59,7 @@
       "set": "AM <value> <unit>",
       "query": "AM?",
       "parameters": [
-        { "name": "amplitude", "units": ["VO", "MV", "VR", "MR", { "token": "DB", "unit": "dBm" }], "description": "VO=Vpp, MV=mVpp, VR=Vrms, MR=mVrms, DB=dBm" }
+        { "name": "amplitude", "units": [{ "token": "VO", "unit": "Vpp" }, { "token": "MV", "unit": "mVpp" }, { "token": "VR", "unit": "Vrms" }, { "token": "MR", "unit": "mVrms" }, { "token": "DB", "unit": "dBm" }], "description": "VO=Vpp, MV=mVpp, VR=Vrms, MR=mVrms, DB=dBm" }
       ],
       "examples": ["AM 1.2 VO", "AM 0 DB", "AM?"]
     },
@@ -70,7 +70,7 @@
       "description": "Sets or queries the DC offset voltage.",
       "set": "OF <value> <unit>",
       "query": "OF?",
-      "parameters": [ { "name": "offset", "units": ["VO", "MV"] } ],
+      "parameters": [ { "name": "offset", "units": [{ "token": "VO", "unit": "V" }, { "token": "MV", "unit": "mV" }] } ],
       "examples": ["OF 1 VO", "OF?"]
     },
     {

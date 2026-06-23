@@ -52,8 +52,28 @@ namespace GpibMcp.Tests
         [Fact]
         public void NewUnits_AreCanonical()
         {
-            foreach (var u in new[] { "Vpp", "mVpp", "Vrms", "Vpeak", "W", "mW", "dBW", "dBmV", "dBc", "rad", "s/div", "V/div", "sps", "Mbps", "PLC" })
+            foreach (var u in new[] { "Vpp", "mVpp", "Vrms", "Vpeak", "W", "mW", "dBW", "dBmV", "dBc", "rad", "s/div", "V/div", "sps", "Mbps", "PLC", "pirad", "dBf" })
                 Assert.Equal(u, UnitResolver.Canonical(u));
+        }
+
+        [Fact]
+        public void PiRadians_ConvertToAndFromDegrees()
+        {
+            // HP ESG phase unit: 1 PIRAD = 180 deg = pi rad.
+            var pirad = new List<UnitToken> { new UnitToken("PIRAD", "pirad") };
+            var r = UnitResolver.Resolve(90, "deg", pirad);
+            Assert.True(r.Ok);
+            Assert.Equal("0.5 PIRAD", r.Formatted);   // 90 deg -> 0.5 pi-rad
+        }
+
+        [Fact]
+        public void DbF_IsExactMatchOnly()
+        {
+            var dbf = new List<UnitToken> { new UnitToken("DF", "dBf") };
+            Assert.Equal("3 DF", UnitResolver.Resolve(3, "dBf", dbf).Formatted);   // exact match
+            // dBf is a log unit: never numerically converts to dBm or a voltage.
+            var dbm = new List<UnitToken> { new UnitToken("DM", "dBm") };
+            Assert.False(UnitResolver.Resolve(3, "dBf", dbm).Ok);
         }
 
         [Fact]

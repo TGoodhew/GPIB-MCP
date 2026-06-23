@@ -240,7 +240,7 @@
       "description": "Specifies the amplitude value of the reference level. Default unit is the current amplitude unit. Preset 0 dBm.",
       "set": "RL <number><unit>",
       "query": "RL?",
-      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, "DBMV", { "token": "DBUV", "unit": "dBuV" }, { "token": "DB", "unit": "dB" }, { "token": "V", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "UV", "unit": "uV" }, "W", "MW", "UW"], "range": "amplitude range of the spectrum analyzer" } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "DB", "unit": "dB" }, { "token": "V", "unit": "V" }, { "token": "MV", "unit": "mV" }, { "token": "UV", "unit": "uV" }, { "token": "W", "unit": "W" }, { "token": "MW", "unit": "mW" }, { "token": "UW", "unit": "uW" }], "range": "amplitude range of the spectrum analyzer" } ],
       "examples": ["RL -10DBM", "RL?"]
     },
     {
@@ -993,7 +993,7 @@
       "description": "Defines the level of the display line in the active amplitude units and displays the display line on the screen. Accepts ON/OFF.",
       "set": "DL <number><unit>",
       "query": "DL?",
-      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, "DBMV", { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }] } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }] } ],
       "examples": ["DL -50DBM", "DL OFF", "DL?"]
     },
     {
@@ -1003,7 +1003,7 @@
       "description": "Clips signal responses below the threshold level. Accepts ON/OFF.",
       "set": "TH <number><unit>",
       "query": "TH?",
-      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, "DBMV", { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }] } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }] } ],
       "examples": ["TH -90DBM", "TH OFF", "TH?"]
     },
     {

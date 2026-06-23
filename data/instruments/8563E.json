@@ -115,7 +115,7 @@
       "description": "Sets or queries the reference level (amplitude at the top graticule line).",
       "set": "RL <number><unit>",
       "query": "RL?",
-      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, "DBMV", { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }, "W"], "range": "instrument dependent" } ],
+      "parameters": [ { "name": "level", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "DBUV", "unit": "dBuV" }, { "token": "V", "unit": "V" }, { "token": "W", "unit": "W" }], "range": "instrument dependent" } ],
       "examples": ["RL -10DBM", "RL?"]
     },
     {

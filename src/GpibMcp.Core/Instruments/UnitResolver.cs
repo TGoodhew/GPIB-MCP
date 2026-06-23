@@ -82,9 +82,10 @@ namespace GpibMcp.Instruments
             ["dbuv"] = new UnitInfo(Quantity.Power, 1, false),
             ["db"]   = new UnitInfo(Quantity.Ratio, 1, false),
 
-            ["deg"] = new UnitInfo(Quantity.Angle, 1, true),
-            ["rad"] = new UnitInfo(Quantity.Angle, 180.0 / Math.PI, true),   // radians convert to/from degrees
-            ["%"]   = new UnitInfo(Quantity.Percent, 1, true),
+            ["deg"]   = new UnitInfo(Quantity.Angle, 1, true),
+            ["rad"]   = new UnitInfo(Quantity.Angle, 180.0 / Math.PI, true),   // radians convert to/from degrees
+            ["pirad"] = new UnitInfo(Quantity.Angle, 180.0, true),            // multiples of pi radians (HP ESG): 1 PIRAD = 180 deg
+            ["%"]     = new UnitInfo(Quantity.Percent, 1, true),
 
             // Peak-to-peak / RMS / peak are distinct MEASURES of voltage (waveform-shape dependent), so they
             // convert only within their own family - never to/from plain V (#46 vocab extension).
@@ -111,6 +112,7 @@ namespace GpibMcp.Instruments
             ["dbw"]  = new UnitInfo(Quantity.Power, 1, false),
             ["dbmv"] = new UnitInfo(Quantity.Power, 1, false),
             ["dbv"]  = new UnitInfo(Quantity.Power, 1, false),
+            ["dbf"]  = new UnitInfo(Quantity.Power, 1, false),   // dB relative to 1 fW (FM receiver sensitivity)
             ["dbc"]  = new UnitInfo(Quantity.Ratio, 1, false),
 
             // Per-division scope scale (timebase / vertical) - convert within the family.
@@ -152,13 +154,13 @@ namespace GpibMcp.Instruments
             ["a"] = "A", ["ma"] = "mA", ["ua"] = "uA", ["na"] = "nA",
             ["ohm"] = "Ohm", ["kohm"] = "kOhm", ["mohm"] = "MOhm",
             ["dbm"] = "dBm", ["dbuv"] = "dBuV", ["db"] = "dB",
-            ["deg"] = "deg", ["rad"] = "rad", ["%"] = "%",
+            ["deg"] = "deg", ["rad"] = "rad", ["pirad"] = "pirad", ["%"] = "%",
             ["vpp"] = "Vpp", ["mvpp"] = "mVpp", ["uvpp"] = "uVpp", ["kvpp"] = "kVpp",
             ["vrms"] = "Vrms", ["mvrms"] = "mVrms", ["uvrms"] = "uVrms",
             ["vpeak"] = "Vpeak", ["mvpeak"] = "mVpeak",
             ["app"] = "App", ["mapp"] = "mApp",
             ["w"] = "W", ["mw"] = "mW", ["uw"] = "uW", ["nw"] = "nW", ["kw"] = "kW",
-            ["dbw"] = "dBW", ["dbmv"] = "dBmV", ["dbv"] = "dBV", ["dbc"] = "dBc",
+            ["dbw"] = "dBW", ["dbmv"] = "dBmV", ["dbv"] = "dBV", ["dbf"] = "dBf", ["dbc"] = "dBc",
             ["s/div"] = "s/div", ["ms/div"] = "ms/div", ["us/div"] = "us/div", ["ns/div"] = "ns/div", ["ps/div"] = "ps/div",
             ["v/div"] = "V/div", ["mv/div"] = "mV/div", ["uv/div"] = "uV/div",
             ["sps"] = "sps", ["ksps"] = "ksps", ["msps"] = "Msps", ["gsps"] = "Gsps",
@@ -258,6 +260,7 @@ namespace GpibMcp.Instruments
                 case "kohms": return "kohm";
                 case "degree": case "degrees": case "deg.": case "°": return "deg";
                 case "radian": case "radians": return "rad";
+                case "πrad": case "pi-rad": case "pirads": case "pi*rad": return "pirad";
                 case "volt": case "volts": case "vdc": return "v";
                 case "vpk": case "vp": return "vpeak";          // peak volts (distinct from V/Vpp/Vrms)
                 case "vp-p": case "vpkpk": return "vpp";

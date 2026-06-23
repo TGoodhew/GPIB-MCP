@@ -289,7 +289,7 @@
       "description": "Adjusts the phase of the output signal relative to the phase reference.",
       "set": ":PHASe <val><unit>",
       "query": ":PHASe?",
-      "parameters": [{ "name": "phase", "units": ["RAD", { "token": "DEG", "unit": "deg" }] }],
+      "parameters": [{ "name": "phase", "units": [{ "token": "RAD", "unit": "rad" }, { "token": "DEG", "unit": "deg" }] }],
       "examples": [":PHAS 0.5 RAD"]
     },
     {
@@ -642,7 +642,7 @@
       "description": "Sets the phase modulation peak deviation for the selected PhiM path.",
       "set": ":PM <val><unit>",
       "query": ":PM?",
-      "parameters": [{ "name": "deviation", "units": ["RAD", { "token": "DEG", "unit": "deg" }, "PIRAD"] }],
+      "parameters": [{ "name": "deviation", "units": [{ "token": "RAD", "unit": "rad" }, { "token": "DEG", "unit": "deg" }, { "token": "PIRAD", "unit": "pirad" }] }],
       "examples": [":PM 1 RAD", ":PM2 90DEG"]
     },
     {
@@ -764,7 +764,7 @@
       "description": "Sets the amplitude of the LF output signal.",
       "set": ":LFOutput:AMPLitude <val>VP",
       "query": ":LFOutput:AMPLitude?",
-      "parameters": [{ "name": "amplitude", "units": ["VP", { "token": "V", "unit": "V" }] }],
+      "parameters": [{ "name": "amplitude", "units": [{ "token": "VP", "unit": "Vpeak" }, { "token": "V", "unit": "V" }] }],
       "examples": [":LFO:AMPL 1 VP"]
     },
     {

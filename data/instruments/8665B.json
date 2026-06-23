@@ -466,7 +466,7 @@
           "name": "amplitude",
           "units": [
             {"token": "DBM", "unit": "dBm"},
-            "DBMW",
+            {"token": "DBMW", "unit": "dBm"},
             {"token": "DBUV", "unit": "dBuV"},
             {"token": "V", "unit": "V"},
             {"token": "MV", "unit": "mV"},
@@ -552,7 +552,7 @@
           "name": "unit",
           "units": [
             {"token": "DBM", "unit": "dBm"},
-            "DBMW",
+            {"token": "DBMW", "unit": "dBm"},
             {"token": "V", "unit": "V"},
             {"token": "DBUV", "unit": "dBuV"}
           ],
@@ -575,7 +575,7 @@
           "name": "limit",
           "units": [
             {"token": "DBM", "unit": "dBm"},
-            "DBMW",
+            {"token": "DBMW", "unit": "dBm"},
             {"token": "DBUV", "unit": "dBuV"},
             {"token": "V", "unit": "V"},
             {"token": "MV", "unit": "mV"},
@@ -957,7 +957,7 @@
           "name": "deviation",
           "units": [
             {"token": "DEG", "unit": "deg"},
-            "RAD"
+            {"token": "RAD", "unit": "rad"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default radians"
         }
@@ -1465,7 +1465,7 @@
           "name": "phase",
           "units": [
             {"token": "DEG", "unit": "deg"},
-            "RAD"
+            {"token": "RAD", "unit": "rad"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default radians"
         }
@@ -1538,7 +1538,7 @@
           "name": "phase",
           "units": [
             {"token": "DEG", "unit": "deg"},
-            "RAD"
+            {"token": "RAD", "unit": "rad"}
           ],
           "range": "UP|DOWN|MIN|MAX accepted; default radians"
         }
@@ -1560,7 +1560,7 @@
           "name": "step",
           "units": [
             {"token": "DEG", "unit": "deg"},
-            "RAD"
+            {"token": "RAD", "unit": "rad"}
           ],
           "range": "MIN|MAX accepted"
         }

@@ -304,7 +304,7 @@
       "set": "SENSe:POWer:IQ:RANGe[:UPPer] <power> [DBM]|DBMV|W",
       "query": "SENSe:POWer:IQ:RANGe[:UPPer]?",
       "parameters": [
-        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }, "DBMV", "W"], "range": "maximum expected total power" }
+        { "name": "power", "units": [{ "token": "DBM", "unit": "dBm" }, { "token": "DBMV", "unit": "dBmV" }, { "token": "W", "unit": "W" }], "range": "maximum expected total power" }
       ],
       "examples": ["SENSe:POWer:IQ:RANGe:UPPer 0DBM", "SENSe:POWer:IQ:RANGe:UPPer?"]
     },
