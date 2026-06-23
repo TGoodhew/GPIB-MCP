@@ -5,6 +5,7 @@ using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
 using Newtonsoft.Json.Linq;
+using Srq.Completion;
 using Xunit;
 
 namespace GpibMcp.Tests
@@ -129,6 +130,15 @@ namespace GpibMcp.Tests
                     Parameters = new List<CommandParameter> { new CommandParameter { Name = "off",
                         Units = new List<UnitToken> { new UnitToken(null, "V") } } } },   // tokenless
                 new InstrumentCommand { Name = "preset", Mnemonic = "IP", Description = "Instrument preset.", Set = "IP" },
+            },
+            StatusModel = new StatusModel
+            {
+                SrqSupported = true,
+                Bits = new Dictionary<string, int> { ["endOfSweep"] = 4 },
+                Operations = new Dictionary<string, StatusOperation>
+                {
+                    ["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "endOfSweep", Restore = "CONTS;" }
+                }
             }
         };
 
@@ -170,6 +180,23 @@ namespace GpibMcp.Tests
             // A literal action ("IP") is given as an exact send string, not a template to fill.
             Assert.Equal("IP", (string)json["write"]["send"]);
             Assert.Null(json["read"]);
+        }
+
+        [Fact]
+        public void Reference_Model_IncludesTriggeringContract()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { RecipeModel() });
+            var text = Tool("instrument_reference", db, AssignmentStore.InMemory(), new FakeInstrumentManager())
+                .InvokeText(new JObject { ["model"] = "REC1" });   // model-level (no command)
+            var json = JObject.Parse(text);
+            var trig = json["triggering"];
+            Assert.NotNull(trig);
+            Assert.Contains("ARM", (string)trig["contract"]);   // the arm -> wait -> read contract
+            var op = trig["operations"]["sweepComplete"];
+            Assert.Equal("SNGLS;TS;", (string)op["arm"]);
+            Assert.Contains("instrument_wait_complete", (string)op["wait"]);
+            Assert.Contains("endOfSweep", (string)op["wait"]);   // names the confirming bit
+            Assert.Equal("CONTS;", (string)op["restore"]);
         }
 
         [Fact]

@@ -67,10 +67,11 @@ namespace GpibMcp.Tools
             registry.Add(new McpTool(
                 "instrument_reference",
                 "Get a model's command reference from the database so you can work out what it can do. " +
-                "With no command/search, returns metadata plus a compact command index; pass command=<name " +
-                "or mnemonic> for a READ/WRITE RECIPE for that command - 'read.send' is the EXACT string to put " +
-                "on the wire to query it, and 'write' tells you the template + how to fill it (use resolve_setting " +
-                "for value+unit so you never guess the suffix). Or use search=/category= to filter.",
+                "With no command/search, returns metadata, a compact command index, and a 'triggering' contract " +
+                "(arm -> wait -> read for swept/triggered measurements) when the model has a completion model. " +
+                "Pass command=<name or mnemonic> for a READ/WRITE RECIPE for that command - 'read.send' is the " +
+                "EXACT string to put on the wire to query it, and 'write' tells you the template + how to fill it " +
+                "(use resolve_setting for value+unit so you never guess the suffix). Or use search=/category= to filter.",
                 Schema(
                     Required("model", "string", "Model name or alias, e.g. '8563E'."),
                     Prop("command", "string", "Return full detail for this command (name or mnemonic)."),
@@ -112,6 +113,9 @@ namespace GpibMcp.Tools
                         ["identity"] = def.Identity == null ? null : JObject.FromObject(def.Identity, Serializer()),
                         ["commandCount"] = def.Commands != null ? def.Commands.Count : 0
                     };
+
+                    var triggering = BuildTriggering(def);
+                    if (triggering != null) result["triggering"] = triggering;
 
                     bool filtered = !string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(category);
                     if (filtered && list.Count > 0 && list.Count <= 30)
@@ -620,6 +624,51 @@ namespace GpibMcp.Tools
             return def.Commands.FirstOrDefault(c =>
                 string.Equals(c.Name, key, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(c.Mnemonic, key, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Surfaces the trigger/measurement contract for the model (#47, ambiguities 3-4): for a swept or
+        /// triggered read the model must ARM the operation, WAIT for completion (instrument_wait_complete),
+        /// THEN read - never read before the sweep finishes. Derived from the model's statusModel.operations
+        /// so the one authoritative arm/expect/restore definition is presented in a single place. Returns
+        /// null when the model has no completion model at all.
+        /// </summary>
+        private static JObject BuildTriggering(InstrumentDefinition def)
+        {
+            var sm = def.StatusModel;
+            if (sm == null) return null;
+
+            var t = new JObject();
+            if (sm.SrqSupported && sm.Operations != null && sm.Operations.Count > 0)
+            {
+                t["contract"] = "For a triggered measurement (a sweep or single acquisition), do NOT read the " +
+                    "result until the operation completes: ARM the operation, WAIT for completion via " +
+                    "instrument_wait_complete, THEN read. Reading before completion returns stale or partial data.";
+                var ops = new JObject();
+                foreach (var kv in sm.Operations)
+                {
+                    var op = kv.Value;
+                    var o = new JObject
+                    {
+                        ["arm"] = op.Arm,
+                        ["wait"] = "instrument_wait_complete(resource=<your resource>, operation='" + kv.Key +
+                            "') - arms the SRQ mask and waits for the '" + (op.ExpectBit ?? "?") +
+                            "' status bit. Do not read or poll before it returns.",
+                        ["thenRead"] = "After it returns, send the value query (instrument_reference " +
+                            "command=<name> -> read.send) and read the response."
+                    };
+                    if (!string.IsNullOrEmpty(op.Restore)) o["restore"] = op.Restore;
+                    ops[kv.Key] = o;
+                }
+                t["operations"] = ops;
+            }
+            else
+            {
+                t["contract"] = "This model reports no usable SRQ completion. Send the documented trigger/sweep " +
+                    "command, allow it to finish (a brief settling delay), THEN read - there is no completion " +
+                    "interrupt to wait on.";
+            }
+            return t;
         }
 
         /// <summary>

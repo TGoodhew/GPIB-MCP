@@ -57,11 +57,11 @@ namespace GpibMcp.Tools
                           "built-in database (" + Stats() + "); capture an instrument's screen as an inline SVG " +
                           "(HP-GL emulation); wait for an operation to truly finish via SRQ; and report exact " +
                           "decoded VISA errors with a command history.");
-            sb.AppendLine("Sending the right string: call instrument_reference(model, command=<name>) for a " +
-                          "read/write recipe - 'read.send' is the EXACT string to query; for a write, use " +
-                          "resolve_setting(model, command, value, unit) to get the exact set string (it picks the " +
-                          "device's wire suffix and converts units) rather than guessing. The mnemonic alone is " +
-                          "rarely the right thing to put on the wire.");
+            sb.AppendLine("Right string on the wire: instrument_reference(model, command=<name>) returns a read/write " +
+                          "recipe - 'read.send' is the exact query string; for a write use resolve_setting(model, command, " +
+                          "value, unit) (it picks the device's suffix and converts units), as the mnemonic alone is rarely " +
+                          "right. For a triggered measurement (sweep/acquire): ARM, then instrument_wait_complete(resource, " +
+                          "operation) to wait via SRQ, then READ - never read before completion.");
             sb.AppendLine("When the user asks what this tool can do, or which instruments/commands are supported, " +
                           "call the gpib_overview tool for a detailed, structured answer with example asks rather " +
                           "than guessing from individual tool descriptions.");
@@ -119,10 +119,13 @@ namespace GpibMcp.Tools
                 "in the chat as an artifact) plus a saved PNG. Fidelity is selectable (exact stroke font vs. fast labels).",
                 new[] { "\"Capture the analyzer's screen.\"", "\"Grab a screenshot of GPIB0::18.\"" });
 
-            Section(sb, "SRQ operation completion",
-                "Wait for an operation to ACTUALLY finish via SRQ - driven by the model's data-driven statusModel, not a " +
-                "fixed-timeout guess. Also exposes the primitives: serial-poll the status byte (decoded to named bits) and " +
-                "wait for SRQ. A missing statusModel can be defined and persisted in one confirm-to-save step.",
+            Section(sb, "SRQ operation completion (ARM -> WAIT -> READ)",
+                "Triggered measurements follow one contract: ARM the operation, WAIT for true completion via SRQ, then " +
+                "READ - never read before the sweep/acquisition finishes. instrument_wait_complete waits via the model's " +
+                "data-driven statusModel (not a fixed-timeout guess); instrument_reference's 'triggering' block lists each " +
+                "model's operations (arm string, which status bit confirms, optional restore). Also exposes the primitives: " +
+                "serial-poll the status byte (decoded to named bits) and wait for SRQ. A missing statusModel can be defined " +
+                "and persisted in one confirm-to-save step.",
                 new[] { "\"Wait for the sweep to finish, then read the marker.\"", "\"Serial-poll GPIB0::18.\"" });
 
             Section(sb, "Error reporting & diagnostics",
