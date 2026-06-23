@@ -39,9 +39,11 @@ namespace Hpgl.Rendering
             options = options ?? new HpglRenderOptions();
             var instructions = HpglParser.Parse(hpgl ?? string.Empty);
 
-            // Pass 1: measure the drawn extent so the transform can auto-fit it.
+            // Pass 1: measure the drawn extent so the transform can auto-fit it. Make the extent robust to
+            // a single corrupted coordinate so it can't collapse the whole plot (#52).
             var measure = new MeasureSink();
             Execute(instructions, measure);
+            measure.ApplyRobustExtent(out _);
 
             var bmp = new Bitmap(options.Width, options.Height, PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(bmp))
@@ -87,6 +89,7 @@ namespace Hpgl.Rendering
 
             var measure = new MeasureSink();
             Execute(instructions, measure);
+            measure.ApplyRobustExtent(out _);   // robust to a single corrupted coordinate (#52)
 
             var sb = new StringBuilder();
             // Pure responsive root: a viewBox (the coordinate system) + preserveAspectRatio, and NO fixed
@@ -117,6 +120,20 @@ namespace Hpgl.Rendering
 
         private static string DecodeLatin1(byte[] bytes) =>
             bytes == null ? string.Empty : Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
+
+        /// <summary>
+        /// #52: returns true if this plot contains a coordinate so far outside the rest of the geometry
+        /// that it would otherwise dominate the auto-fit and collapse the image (a transient corrupted /
+        /// concatenated coordinate from the GPIB read). The renderer already ignores such points when
+        /// fitting; this lets the capture tool detect the glitch, retry the capture, and ultimately notify
+        /// the user. <paramref name="detail"/> carries the excluded value(s) for the log.
+        /// </summary>
+        public static bool HasCorruptCoordinate(string hpgl, out string detail)
+        {
+            var measure = new MeasureSink();
+            Execute(HpglParser.Parse(hpgl ?? string.Empty), measure);
+            return measure.ApplyRobustExtent(out detail);
+        }
 
         /// <summary>
         /// Typography diagnostic (#56): returns the distinct label characters / character sets in this
@@ -1182,6 +1199,10 @@ namespace Hpgl.Rendering
         public double MaxX = double.MinValue, MaxY = double.MinValue;
         public bool HasExtent => MaxX >= MinX && MaxY >= MinY;
 
+        // Every visited coordinate, kept so the extent can be made robust to a single corrupted value (#52).
+        private readonly List<double> _xs = new List<double>();
+        private readonly List<double> _ys = new List<double>();
+
         public void Line(double x1, double y1, double x2, double y2, int pen)
         {
             Include(x1, y1); Include(x2, y2);
@@ -1202,7 +1223,51 @@ namespace Hpgl.Rendering
             if (y < MinY) MinY = y;
             if (x > MaxX) MaxX = x;
             if (y > MaxY) MaxY = y;
+            _xs.Add(x); _ys.Add(y);
         }
+
+        /// <summary>
+        /// #52: clamp the extent so one corrupted coordinate (a transient GPIB digit run-on, e.g. a value
+        /// 30x the plotter frame) can't blow up the auto-fit and collapse the whole plot to a line. Peels
+        /// values that sit a large gap (> K x the data span) beyond the rest of the data, on either axis.
+        /// Returns true (with a human-readable detail) if any outlier was excluded; otherwise leaves the
+        /// extent untouched, so a clean plot is unaffected. The outlier geometry is still drawn (it simply
+        /// falls off-canvas), but it no longer dominates the fit.
+        /// </summary>
+        public bool ApplyRobustExtent(out string detail)
+        {
+            detail = null;
+            bool x = ClampAxis(_xs, ref MinX, ref MaxX, "X", ref detail);
+            bool y = ClampAxis(_ys, ref MinY, ref MaxY, "Y", ref detail);
+            return x | y;
+        }
+
+        private static bool ClampAxis(List<double> vals, ref double lo, ref double hi, string axis, ref string detail)
+        {
+            int n = vals.Count;
+            if (n < 8) return false;                 // too few points to tell signal from glitch
+            var s = new List<double>(vals); s.Sort();
+            const double K = 3.0;                    // an outlier sits > 3x the data span beyond the rest
+            int maxPeel = n / 4;                     // never discard more than a quarter of the points
+            int loIdx = 0, hiIdx = n - 1;
+            for (int p = 0; hiIdx > loIdx && p < maxPeel; p++)
+            {
+                double rMin = s[loIdx], rMax = s[hiIdx - 1], span = rMax - rMin;
+                if (span > 0 && s[hiIdx] > rMax + K * span) hiIdx--; else break;
+            }
+            for (int p = 0; loIdx < hiIdx && p < maxPeel; p++)
+            {
+                double rMin = s[loIdx + 1], rMax = s[hiIdx], span = rMax - rMin;
+                if (span > 0 && s[loIdx] < rMin - K * span) loIdx++; else break;
+            }
+            bool any = false;
+            if (hiIdx < n - 1) { detail = Append(detail, axis + " max " + Fmt(hi) + " (excluded; kept " + Fmt(s[hiIdx]) + ")"); hi = s[hiIdx]; any = true; }
+            if (loIdx > 0)     { detail = Append(detail, axis + " min " + Fmt(lo) + " (excluded; kept " + Fmt(s[loIdx]) + ")"); lo = s[loIdx]; any = true; }
+            return any;
+        }
+
+        private static string Append(string d, string m) => string.IsNullOrEmpty(d) ? m : d + "; " + m;
+        private static string Fmt(double v) => v.ToString("0", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     internal sealed class PlotTransform
