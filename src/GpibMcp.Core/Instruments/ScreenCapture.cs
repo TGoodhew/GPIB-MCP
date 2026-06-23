@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace GpibMcp.Instruments
@@ -46,6 +47,78 @@ namespace GpibMcp.Instruments
         PrinterStream
     }
 
+    /// <summary>One <see cref="ICaptureChannel.Read"/> call's timing, for the capture-loop breakdown (#53).</summary>
+    public sealed class CaptureReadRecord
+    {
+        public int Index { get; set; }
+        /// <summary>Elapsed since capture start when this read returned (ms).</summary>
+        public long AtMs { get; set; }
+        /// <summary>Time spent inside this Read() call (ms).</summary>
+        public long ElapsedMs { get; set; }
+        /// <summary>Idle time between the previous read returning and this one starting (ms).</summary>
+        public long GapMs { get; set; }
+        public int Bytes { get; set; }
+        public bool TimedOut { get; set; }
+    }
+
+    /// <summary>
+    /// Where a capture spent its time (#53): the per-read trace plus aggregates separating the instrument's
+    /// warm-up (preRoll -&gt; first byte), the raw streaming window, and the completion tail. All times are from
+    /// the capture loop's monotonic clock, so this is pure data with no hardware/IO dependency.
+    /// </summary>
+    public sealed class CaptureDiagnostics
+    {
+        public IReadOnlyList<CaptureReadRecord> Reads { get; private set; }
+        public int TotalReads { get; private set; }
+        public int DataReads { get; private set; }
+        public int TimedOutReads { get; private set; }
+        public int TotalBytes { get; private set; }
+        public int MinBytesPerDataRead { get; private set; }
+        public int MaxBytesPerDataRead { get; private set; }
+        public double AvgBytesPerDataRead { get; private set; }
+        /// <summary>Command sent -&gt; first data byte: the instrument "thinking"/sweeping before it streams.</summary>
+        public long PreRollToFirstByteMs { get; private set; }
+        /// <summary>First data byte -&gt; last data byte: the raw transfer window.</summary>
+        public long StreamMs { get; private set; }
+        /// <summary>Last data byte -&gt; completion: time spent confirming the capture finished.</summary>
+        public long TailMs { get; private set; }
+        /// <summary>Sum of time blocked inside Read() calls (vs. processing between them).</summary>
+        public long TotalTimeInReadsMs { get; private set; }
+        public long TotalMs { get; private set; }
+
+        internal static CaptureDiagnostics From(IReadOnlyList<CaptureReadRecord> reads, long start, long end,
+                                                long firstByteAt, long lastByteAt)
+        {
+            var data = reads.Where(r => r.Bytes > 0).ToList();
+            return new CaptureDiagnostics
+            {
+                Reads = reads,
+                TotalReads = reads.Count,
+                DataReads = data.Count,
+                TimedOutReads = reads.Count(r => r.TimedOut),
+                TotalBytes = data.Sum(r => r.Bytes),
+                MinBytesPerDataRead = data.Count > 0 ? data.Min(r => r.Bytes) : 0,
+                MaxBytesPerDataRead = data.Count > 0 ? data.Max(r => r.Bytes) : 0,
+                AvgBytesPerDataRead = data.Count > 0 ? data.Average(r => r.Bytes) : 0,
+                PreRollToFirstByteMs = firstByteAt < 0 ? end - start : firstByteAt - start,
+                StreamMs = firstByteAt < 0 ? 0 : lastByteAt - firstByteAt,
+                TailMs = firstByteAt < 0 ? 0 : end - lastByteAt,
+                TotalTimeInReadsMs = reads.Sum(r => r.ElapsedMs),
+                TotalMs = end - start,
+            };
+        }
+
+        /// <summary>The one-line summary (issue #53), e.g. "plot: preRoll->first 1.2s, stream 5.8s over 9 reads ...".</summary>
+        public string SummaryLine(string label) =>
+            label + ": preRoll->first " + Secs(PreRollToFirstByteMs) + ", stream " + Secs(StreamMs) +
+            " over " + DataReads + " reads (avg " + AvgBytesPerDataRead.ToString("0", CultureInfo.InvariantCulture) +
+            " B/read, min " + MinBytesPerDataRead + " max " + MaxBytesPerDataRead + "), tail " + Secs(TailMs) +
+            ", " + TimedOutReads + " timeouts, " + TotalBytes + " bytes, " + TotalReads + " reads total, " +
+            TotalTimeInReadsMs + "ms in reads, total " + Secs(TotalMs);
+
+        private static string Secs(long ms) => (ms / 1000.0).ToString("0.0", CultureInfo.InvariantCulture) + "s";
+    }
+
     /// <summary>Result of a screen capture: the raw HP-GL plus metadata.</summary>
     public sealed class CaptureResult
     {
@@ -54,12 +127,17 @@ namespace GpibMcp.Instruments
         public long ElapsedMs { get; }
         public CaptureCompletion Completion { get; }
 
-        public CaptureResult(string hpgl, int byteCount, long elapsedMs, CaptureCompletion completion)
+        /// <summary>Per-read timing breakdown (#53). Null on paths that do not run the capture loop.</summary>
+        public CaptureDiagnostics Diagnostics { get; }
+
+        public CaptureResult(string hpgl, int byteCount, long elapsedMs, CaptureCompletion completion,
+                             CaptureDiagnostics diagnostics = null)
         {
             Hpgl = hpgl;
             ByteCount = byteCount;
             ElapsedMs = elapsedMs;
             Completion = completion;
+            Diagnostics = diagnostics;
         }
     }
 
@@ -110,14 +188,32 @@ namespace GpibMcp.Instruments
             long start = nowMs();
             long lastData = start;
 
+            // Per-read timing trace for the #53 capture-loop breakdown.
+            var reads = new List<CaptureReadRecord>();
+            long prevReadEnd = start;
+            long firstByteAt = -1;
+            long lastByteAt = start;
+
             while (true)
             {
+                long t0 = nowMs();
                 CaptureRead read = channel.Read();
+                long t1 = nowMs();
 
-                if (read.Data != null && read.Data.Length > 0)
+                int n = read.Data != null ? read.Data.Length : 0;
+                reads.Add(new CaptureReadRecord
+                {
+                    Index = reads.Count, AtMs = t1 - start, ElapsedMs = t1 - t0,
+                    GapMs = t0 - prevReadEnd, Bytes = n, TimedOut = read.TimedOut
+                });
+                prevReadEnd = t1;
+
+                if (n > 0)
                 {
                     Append(buffer, read.Data);
-                    lastData = nowMs();
+                    lastData = t1;
+                    lastByteAt = t1;
+                    if (firstByteAt < 0) firstByteAt = t1;
                 }
 
                 if (!read.TimedOut)
@@ -131,18 +227,18 @@ namespace GpibMcp.Instruments
                         continue;
 
                     if (buffer.Length >= o.MinPlotBytes && PenUpInTail(buffer, o.ReadChunkSize))
-                        return Result(buffer, start, nowMs(), CaptureCompletion.PenUp);
+                        return Result(buffer, start, nowMs(), CaptureCompletion.PenUp, reads, firstByteAt, lastByteAt);
                 }
                 else if (buffer.Length >= o.MinPlotBytes && EndOfPrintInTail(buffer, o.ReadChunkSize))
                 {
-                    return Result(buffer, start, nowMs(), CaptureCompletion.EndMarker);
+                    return Result(buffer, start, nowMs(), CaptureCompletion.EndMarker, reads, firstByteAt, lastByteAt);
                 }
 
                 if (buffer.Length >= o.MinPlotBytes && (nowMs() - lastData) >= o.InactivityTimeoutMs)
-                    return Result(buffer, start, nowMs(), CaptureCompletion.Inactivity);
+                    return Result(buffer, start, nowMs(), CaptureCompletion.Inactivity, reads, firstByteAt, lastByteAt);
 
                 if ((nowMs() - start) >= o.OverallTimeoutMs)
-                    return Result(buffer, start, nowMs(), CaptureCompletion.Backstop);
+                    return Result(buffer, start, nowMs(), CaptureCompletion.Backstop, reads, firstByteAt, lastByteAt);
 
                 // Otherwise: sub-threshold buffer (preamble noise) or not idle long enough.
                 // Keep waiting - bounded by the overall backstop above.
@@ -208,7 +304,9 @@ namespace GpibMcp.Instruments
             foreach (byte b in data) buffer.Append((char)b);
         }
 
-        private static CaptureResult Result(StringBuilder buffer, long start, long end, CaptureCompletion reason)
-            => new CaptureResult(buffer.ToString(), buffer.Length, end - start, reason);
+        private static CaptureResult Result(StringBuilder buffer, long start, long end, CaptureCompletion reason,
+                                            List<CaptureReadRecord> reads, long firstByteAt, long lastByteAt)
+            => new CaptureResult(buffer.ToString(), buffer.Length, end - start, reason,
+                                 CaptureDiagnostics.From(reads, start, end, firstByteAt, lastByteAt));
     }
 }

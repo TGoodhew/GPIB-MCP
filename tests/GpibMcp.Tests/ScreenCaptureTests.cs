@@ -170,5 +170,59 @@ namespace GpibMcp.Tests
             Run(configured, options);
             Assert.Contains(reply + "\r\n", configured.Sent);
         }
+
+        // ---- #53 capture-loop diagnostics --------------------------------------
+
+        [Fact]
+        public void Diagnostics_SplitWarmupStreamAndTail_AndTraceEveryRead()
+        {
+            // read0: 100ms to first data; read1: +50ms more data (ends with pen-up); read2: 200ms timeout -> done.
+            var ch = new FakeChannel(new[]
+            {
+                Step.Data_(Bytes(130, ""), adv: 100),
+                Step.Data_("PD2,2;SP0;", adv: 50),
+                Step.Timeout(adv: 200),
+            });
+            var d = Run(ch).Diagnostics;
+
+            Assert.NotNull(d);
+            Assert.Equal(3, d.TotalReads);
+            Assert.Equal(2, d.DataReads);
+            Assert.Equal(1, d.TimedOutReads);
+            Assert.Equal(100, d.PreRollToFirstByteMs);   // command -> first byte (warm-up)
+            Assert.Equal(50, d.StreamMs);                // first byte -> last byte
+            Assert.Equal(200, d.TailMs);                 // last byte -> completion
+            Assert.Equal(350, d.TotalMs);
+            Assert.Equal(350, d.TotalTimeInReadsMs);     // all time was inside Read() here
+            Assert.Equal(Bytes(130, "").Length + "PD2,2;SP0;".Length, d.TotalBytes);
+
+            Assert.Equal(3, d.Reads.Count);              // every read is traced
+            Assert.Equal(100, d.Reads[0].ElapsedMs);
+            Assert.True(d.Reads[2].TimedOut);
+            Assert.Contains("over 2 reads", d.SummaryLine("plot"));
+            Assert.Contains("1 timeouts", d.SummaryLine("plot"));
+        }
+
+        [Fact]
+        public void TimingLog_Format_HasSummaryAndPerReadTrace()
+        {
+            var ch = new FakeChannel(new[]
+            {
+                Step.Data_(Bytes(130, ""), adv: 100),
+                Step.Data_("PD2,2;SP0;", adv: 50),
+                Step.Timeout(adv: 200),
+            });
+            var result = Run(ch);
+
+            string entry = CaptureTimingLog.Format("GPIB0::18::INSTR", "8563E", "plot",
+                "PLOT 550,279,9750,7479;", result, renderMs: 6, saveMs: 3, timestamp: "TEST-TS");
+
+            Assert.Contains("==== capture TEST-TS  8563E (plot)  GPIB0::18::INSTR ====", entry);
+            Assert.Contains("command: PLOT 550,279,9750,7479;", entry);
+            Assert.Contains("render 6ms, save 3ms", entry);
+            Assert.Contains("per-read trace", entry);
+            Assert.Contains("#0", entry);          // first read traced
+            Assert.Contains("[timeout]", entry);   // the terminating read flagged
+        }
     }
 }

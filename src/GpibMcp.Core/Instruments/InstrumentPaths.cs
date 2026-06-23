@@ -40,6 +40,9 @@ namespace GpibMcp.Instruments
             return Path.Combine(AppDataDir(), "bindings.json");
         }
 
+        /// <summary>Where the screen-capture timing breakdown is appended (issue #53 instrumentation).</summary>
+        public static string CaptureTimingLogPath() => Path.Combine(AppDataDir(), "capture-timing.log");
+
         /// <summary>
         /// On first run, copies the bundled definitions into the user database directory so the
         /// user has an editable, prepopulated database. Never overwrites existing user files.

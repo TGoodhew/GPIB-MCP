@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using GpibMcp.Diagnostics;
@@ -175,6 +176,7 @@ namespace GpibMcp.Tools
 
             byte[] png;
             string svg = null;
+            var renderWatch = Stopwatch.StartNew();
             try
             {
                 if (isPrint)
@@ -192,9 +194,23 @@ namespace GpibMcp.Tools
             {
                 return Error("Captured " + capture.ByteCount + " bytes but rendering failed: " + ex.Message);
             }
+            renderWatch.Stop();
 
             // Always save the PNG so the user has a durable copy (default: their Pictures folder).
+            var saveWatch = Stopwatch.StartNew();
             string savedTo = SaveCapture(args, def.Model + (isPrint ? "-print" : ""), png);
+            saveWatch.Stop();
+
+            // Append the per-capture timing breakdown to %LOCALAPPDATA%\GpibMcp\capture-timing.log (#53):
+            // where the seconds went - instrument warm-up vs. streaming vs. tail, plus every read - so we
+            // can see it after a bench capture and confirm render/save really are negligible.
+            CaptureTimingLog.Write(resource, def.Model,
+                isOutpplot ? "outpplot" : (isPrint ? "print" : "plot"), command, capture,
+                renderWatch.ElapsedMilliseconds, saveWatch.ElapsedMilliseconds);
+            Log.Info(capture.Diagnostics != null
+                ? capture.Diagnostics.SummaryLine("capture " + (isPrint ? "print" : "plot")) +
+                  ", render " + renderWatch.ElapsedMilliseconds + "ms, save " + saveWatch.ElapsedMilliseconds + "ms"
+                : "capture " + capture.ByteCount + " bytes, " + capture.Completion + ", " + capture.ElapsedMs + "ms");
 
             string meta = def.Model + " screen - " + capture.ByteCount + " bytes " + kind + ", " +
                           capture.Completion + ", " + capture.ElapsedMs + " ms";
