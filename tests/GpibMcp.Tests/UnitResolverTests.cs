@@ -20,6 +20,42 @@ namespace GpibMcp.Tests
             Assert.Equal("1 MZ", r.Formatted);
         }
 
+        // ---- extended vocabulary (#46 wave: scope/DMM/SMU/PSU units) ----
+
+        [Fact]
+        public void Vpp_ConvertsWithinFamily_ButNeverToPlainVolts()
+        {
+            var mvppOnly = new List<UnitToken> { new UnitToken("MVPP", "mVpp") };
+            Assert.Equal("1000 MVPP", UnitResolver.Resolve(1, "Vpp", mvppOnly).Formatted);   // 1 Vpp -> 1000 mVpp
+            var v = new List<UnitToken> { new UnitToken("V", "V") };
+            Assert.False(UnitResolver.Resolve(1, "Vpp", v).Ok);   // peak-to-peak != plain volts
+            Assert.False(UnitResolver.Resolve(1, "V", mvppOnly).Ok);
+        }
+
+        [Fact]
+        public void Watts_ConvertWithinFamily_AndDoNotMixWithDbm()
+        {
+            var mwOnly = new List<UnitToken> { new UnitToken("MW", "mW") };
+            Assert.Equal("1000 MW", UnitResolver.Resolve(1, "W", mwOnly).Formatted);
+            Assert.False(UnitResolver.Resolve(1, "dBm", mwOnly).Ok);   // dBm is log; never converts to W
+        }
+
+        [Fact]
+        public void Radians_ConvertToAndFromDegrees()
+        {
+            var rad = new List<UnitToken> { new UnitToken("RAD", "rad") };
+            var r = UnitResolver.Resolve(180, "deg", rad);
+            Assert.True(r.Ok);
+            Assert.StartsWith("3.14159", r.Formatted);   // 180 deg -> pi rad
+        }
+
+        [Fact]
+        public void NewUnits_AreCanonical()
+        {
+            foreach (var u in new[] { "Vpp", "mVpp", "Vrms", "Vpeak", "W", "mW", "dBW", "dBmV", "dBc", "rad", "s/div", "V/div", "sps", "Mbps", "PLC" })
+                Assert.Equal(u, UnitResolver.Canonical(u));
+        }
+
         [Fact]
         public void Converts_GHz_To_MZ_WhenNoGhzToken()
         {

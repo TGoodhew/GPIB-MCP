@@ -33,7 +33,12 @@ namespace GpibMcp.Instruments
     /// </summary>
     public static class UnitResolver
     {
-        private enum Quantity { Frequency, Time, Voltage, Current, Resistance, Power, Ratio, Angle, Percent, Other }
+        private enum Quantity
+        {
+            Frequency, Time, Voltage, Current, Resistance, Power, Ratio, Angle, Percent,
+            VoltagePP, VoltageRMS, VoltagePeak, CurrentPP, PowerW, TimePerDiv, VoltPerDiv, SampleRate, BitRate,
+            Other
+        }
 
         private struct UnitInfo
         {
@@ -78,7 +83,60 @@ namespace GpibMcp.Instruments
             ["db"]   = new UnitInfo(Quantity.Ratio, 1, false),
 
             ["deg"] = new UnitInfo(Quantity.Angle, 1, true),
+            ["rad"] = new UnitInfo(Quantity.Angle, 180.0 / Math.PI, true),   // radians convert to/from degrees
             ["%"]   = new UnitInfo(Quantity.Percent, 1, true),
+
+            // Peak-to-peak / RMS / peak are distinct MEASURES of voltage (waveform-shape dependent), so they
+            // convert only within their own family - never to/from plain V (#46 vocab extension).
+            ["vpp"]  = new UnitInfo(Quantity.VoltagePP, 1,    true),
+            ["mvpp"] = new UnitInfo(Quantity.VoltagePP, 1e-3, true),
+            ["uvpp"] = new UnitInfo(Quantity.VoltagePP, 1e-6, true),
+            ["kvpp"] = new UnitInfo(Quantity.VoltagePP, 1e3,  true),
+            ["vrms"]  = new UnitInfo(Quantity.VoltageRMS, 1,    true),
+            ["mvrms"] = new UnitInfo(Quantity.VoltageRMS, 1e-3, true),
+            ["uvrms"] = new UnitInfo(Quantity.VoltageRMS, 1e-6, true),
+            ["vpeak"]  = new UnitInfo(Quantity.VoltagePeak, 1,    true),
+            ["mvpeak"] = new UnitInfo(Quantity.VoltagePeak, 1e-3, true),
+            ["app"]  = new UnitInfo(Quantity.CurrentPP, 1,    true),   // amps peak-to-peak
+            ["mapp"] = new UnitInfo(Quantity.CurrentPP, 1e-3, true),
+
+            // Linear power (watts) - distinct from dBm/dBuV (log).
+            ["w"]  = new UnitInfo(Quantity.PowerW, 1,    true),
+            ["mw"] = new UnitInfo(Quantity.PowerW, 1e-3, true),
+            ["uw"] = new UnitInfo(Quantity.PowerW, 1e-6, true),
+            ["nw"] = new UnitInfo(Quantity.PowerW, 1e-9, true),
+            ["kw"] = new UnitInfo(Quantity.PowerW, 1e3,  true),
+
+            // Log level / ratio variants - exact match only, never converted.
+            ["dbw"]  = new UnitInfo(Quantity.Power, 1, false),
+            ["dbmv"] = new UnitInfo(Quantity.Power, 1, false),
+            ["dbv"]  = new UnitInfo(Quantity.Power, 1, false),
+            ["dbc"]  = new UnitInfo(Quantity.Ratio, 1, false),
+
+            // Per-division scope scale (timebase / vertical) - convert within the family.
+            ["s/div"]  = new UnitInfo(Quantity.TimePerDiv, 1,     true),
+            ["ms/div"] = new UnitInfo(Quantity.TimePerDiv, 1e-3,  true),
+            ["us/div"] = new UnitInfo(Quantity.TimePerDiv, 1e-6,  true),
+            ["ns/div"] = new UnitInfo(Quantity.TimePerDiv, 1e-9,  true),
+            ["ps/div"] = new UnitInfo(Quantity.TimePerDiv, 1e-12, true),
+            ["v/div"]  = new UnitInfo(Quantity.VoltPerDiv, 1,    true),
+            ["mv/div"] = new UnitInfo(Quantity.VoltPerDiv, 1e-3, true),
+            ["uv/div"] = new UnitInfo(Quantity.VoltPerDiv, 1e-6, true),
+
+            // Sample / bit rate - convert within the family.
+            ["sps"]  = new UnitInfo(Quantity.SampleRate, 1,   true),
+            ["ksps"] = new UnitInfo(Quantity.SampleRate, 1e3, true),
+            ["msps"] = new UnitInfo(Quantity.SampleRate, 1e6, true),
+            ["gsps"] = new UnitInfo(Quantity.SampleRate, 1e9, true),
+            ["bps"]  = new UnitInfo(Quantity.BitRate, 1,   true),
+            ["kbps"] = new UnitInfo(Quantity.BitRate, 1e3, true),
+            ["mbps"] = new UnitInfo(Quantity.BitRate, 1e6, true),
+
+            // Standalone units that are matched exactly and never converted.
+            ["db/div"] = new UnitInfo(Quantity.Other, 1, false),
+            ["db/ghz"] = new UnitInfo(Quantity.Other, 1, false),
+            ["baud"]   = new UnitInfo(Quantity.Other, 1, false),
+            ["plc"]    = new UnitInfo(Quantity.Other, 1, false),   // DMM integration time (power-line cycles)
         };
 
         /// <summary>
@@ -94,7 +152,18 @@ namespace GpibMcp.Instruments
             ["a"] = "A", ["ma"] = "mA", ["ua"] = "uA", ["na"] = "nA",
             ["ohm"] = "Ohm", ["kohm"] = "kOhm", ["mohm"] = "MOhm",
             ["dbm"] = "dBm", ["dbuv"] = "dBuV", ["db"] = "dB",
-            ["deg"] = "deg", ["%"] = "%",
+            ["deg"] = "deg", ["rad"] = "rad", ["%"] = "%",
+            ["vpp"] = "Vpp", ["mvpp"] = "mVpp", ["uvpp"] = "uVpp", ["kvpp"] = "kVpp",
+            ["vrms"] = "Vrms", ["mvrms"] = "mVrms", ["uvrms"] = "uVrms",
+            ["vpeak"] = "Vpeak", ["mvpeak"] = "mVpeak",
+            ["app"] = "App", ["mapp"] = "mApp",
+            ["w"] = "W", ["mw"] = "mW", ["uw"] = "uW", ["nw"] = "nW", ["kw"] = "kW",
+            ["dbw"] = "dBW", ["dbmv"] = "dBmV", ["dbv"] = "dBV", ["dbc"] = "dBc",
+            ["s/div"] = "s/div", ["ms/div"] = "ms/div", ["us/div"] = "us/div", ["ns/div"] = "ns/div", ["ps/div"] = "ps/div",
+            ["v/div"] = "V/div", ["mv/div"] = "mV/div", ["uv/div"] = "uV/div",
+            ["sps"] = "sps", ["ksps"] = "ksps", ["msps"] = "Msps", ["gsps"] = "Gsps",
+            ["bps"] = "bps", ["kbps"] = "kbps", ["mbps"] = "Mbps",
+            ["db/div"] = "dB/div", ["db/ghz"] = "dB/GHz", ["baud"] = "baud", ["plc"] = "PLC",
         };
 
         /// <summary>The canonical unit vocabulary the DB's <c>unit</c> fields must draw from (#46).</summary>
@@ -188,8 +257,14 @@ namespace GpibMcp.Instruments
                 case "ohms": case "Ω": return "ohm";
                 case "kohms": return "kohm";
                 case "degree": case "degrees": case "deg.": case "°": return "deg";
-                case "volt": case "volts": case "vdc": case "vrms": case "vpk": return "v";
+                case "radian": case "radians": return "rad";
+                case "volt": case "volts": case "vdc": return "v";
+                case "vpk": case "vp": return "vpeak";          // peak volts (distinct from V/Vpp/Vrms)
+                case "vp-p": case "vpkpk": return "vpp";
                 case "amp": case "amps": case "adc": return "a";
+                case "watt": case "watts": return "w";
+                case "sa/s": case "samples/s": case "sample/s": return "sps";
+                case "bit/s": case "bits/s": return "bps";
                 default: return u;
             }
         }
