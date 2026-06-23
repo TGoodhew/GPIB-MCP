@@ -118,6 +118,49 @@ namespace Hpgl.Rendering
         private static string DecodeLatin1(byte[] bytes) =>
             bytes == null ? string.Empty : Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
 
+        /// <summary>
+        /// Typography diagnostic (#56): returns the distinct label characters / character sets in this
+        /// HP-GL that the renderer cannot draw faithfully - a printable code with no glyph in its active
+        /// set, or a non-zero (non-ASCII) character set we have no table for (so its text is drawn with the
+        /// ASCII fallback). Tracks CS/CA (designate), SS/SA and in-label shift-out/in (0x0E/0x0F) exactly as
+        /// the renderer does. Empty when everything renders correctly - so a capture self-reports the gap
+        /// before any alternate-set work is built out.
+        /// </summary>
+        public static IReadOnlyList<string> UnsupportedTypography(string hpgl)
+        {
+            var gaps = new SortedSet<string>(StringComparer.Ordinal);
+            int stdSet = 0, altSet = 0;
+            bool alt = false;
+            foreach (var ins in HpglParser.Parse(hpgl ?? string.Empty))
+            {
+                switch (ins.Mnemonic)
+                {
+                    case "IN":
+                    case "DF": stdSet = 0; altSet = 0; alt = false; break;
+                    case "CS": stdSet = ins.Parameters.Count > 0 ? (int)ins.Parameters[0] : 0; break;
+                    case "CA": altSet = ins.Parameters.Count > 0 ? (int)ins.Parameters[0] : 0; break;
+                    case "SS": alt = false; break;
+                    case "SA": alt = true; break;
+                    case "LB":
+                        bool localAlt = alt;
+                        foreach (char ch in ins.Text ?? string.Empty)
+                        {
+                            if (ch == '') { localAlt = true; continue; }   // shift-out -> alternate
+                            if (ch == '') { localAlt = false; continue; }  // shift-in  -> standard
+                            if (ch < ' ') continue;                              // CR/LF/other controls: not glyphs
+                            int set = localAlt ? altSet : stdSet;
+                            if (!StrokeFont.IsImplemented(set))
+                                gaps.Add("charset " + set + " (rendered as ASCII Set 0)");
+                            else if (StrokeFont.Get(ch, set) == null)
+                                gaps.Add("U+" + ((int)ch).ToString("X4") + " (no glyph)");
+                        }
+                        alt = localAlt;
+                        break;
+                }
+            }
+            return new List<string>(gaps);
+        }
+
         // ---------------------------------------------------------------------
         // Execution: replay the instruction list against a sink (measure or draw).
         // Everything is funnelled through a ClipSink so the IW soft-clip window
@@ -260,7 +303,10 @@ namespace Hpgl.Rendering
                 if (ch == '') { activeAlt = true; continue; }   // shift-out -> alternate set
                 if (ch == '') { activeAlt = false; continue; }  // shift-in  -> standard set
 
-                int[][] glyph = StrokeFont.Get(ch);
+                // Resolve the active character set (CS/CA designate, SS/SA + shift select). Only Set 0
+                // (ASCII) has a table today; other sets fall back to it - the typography analyzer reports
+                // when that happens so a capture self-reports the gap (#56).
+                int[][] glyph = StrokeFont.Get(ch, activeAlt ? s.AlternateSet : s.StandardSet);
                 if (glyph != null)
                 {
                     foreach (var stroke in glyph)
@@ -285,7 +331,7 @@ namespace Hpgl.Rendering
         /// <summary>SM: draws the symbol glyph centred on a plotted point (no cursor advance).</summary>
         private static void DrawSymbol(PlotterState s, int chCode, double px, double py, IPlotSink sink)
         {
-            int[][] glyph = StrokeFont.Get((char)chCode);
+            int[][] glyph = StrokeFont.Get((char)chCode, s.StandardSet);
             if (glyph == null) return;
             double ax, ay, ux, uy; RotatedDir(s, out ax, out ay, out ux, out uy);
             double sx = s.CharWidthUnits / StrokeFont.Em;

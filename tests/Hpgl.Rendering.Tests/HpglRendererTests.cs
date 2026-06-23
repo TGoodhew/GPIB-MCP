@@ -43,6 +43,43 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
+        // ---- #56 typography: set-aware glyph lookup + gap self-report ------------
+
+        [Fact]
+        public void StrokeFont_OnlySet0Implemented_FallsBackToAsciiGlyph()
+        {
+            Assert.True(StrokeFont.IsImplemented(0));
+            Assert.False(StrokeFont.IsImplemented(4));
+            // Until alternate-set tables land, any set reuses the Set-0 (ASCII) glyph object.
+            Assert.Same(StrokeFont.Get('A', 0), StrokeFont.Get('A', 4));
+        }
+
+        [Fact]
+        public void UnsupportedTypography_EmptyForPlainAsciiSet0()
+        {
+            var hpgl = "IN;SP1;PU0,0;LBlog MAG 10 dB/" + (char)3 + ";";
+            Assert.Empty(HpglRenderer.UnsupportedTypography(hpgl));
+        }
+
+        [Fact]
+        public void UnsupportedTypography_FlagsHighByteSymbolWithNoGlyph()
+        {
+            // 0xB0 (degree) has no Set-0 glyph - it would be silently dropped, so it must be reported.
+            var hpgl = "IN;SP1;PU0,0;LB45" + (char)0xB0 + (char)3 + ";";
+            var gaps = HpglRenderer.UnsupportedTypography(hpgl);
+            Assert.Contains(gaps, g => g.Contains("U+00B0"));
+        }
+
+        [Fact]
+        public void UnsupportedTypography_FlagsAlternateCharacterSetUsage()
+        {
+            // Designate alternate set 4 (CA4), shift to it (SA), then draw a label -> the set is reported
+            // because its text is drawn with the ASCII fallback.
+            var hpgl = "IN;CA4;SA;PU0,0;LBx" + (char)3 + ";";
+            var gaps = HpglRenderer.UnsupportedTypography(hpgl);
+            Assert.Contains(gaps, g => g.Contains("charset 4"));
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;

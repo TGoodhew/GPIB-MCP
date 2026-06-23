@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using GpibMcp.Diagnostics;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Hpgl.Rendering;
@@ -125,6 +126,17 @@ namespace GpibMcp.Tools
                 return Error("No complete " + (isPrint ? "print" : "plot") + " captured from " + resource +
                              " (" + capture.ByteCount + " bytes, " + capture.Completion + "). Check the " +
                              "address/model and that the instrument supports " + (isPrint ? "printing" : "plotting") + ".");
+
+            // Typography self-report (#56): flag any label characters / character sets this plot uses that
+            // the renderer can't draw faithfully (codes >= 0x80 with no glyph, or a non-ASCII set). Lets a
+            // real capture tell us when symbol/alternate-set work is actually needed. Plot (HP-GL) only.
+            if (!isPrint)
+            {
+                var typoGaps = HpglRenderer.UnsupportedTypography(capture.Hpgl);
+                if (typoGaps.Count > 0)
+                    Log.Warn("Typography (#56): " + def.Model + " plot uses characters/sets not rendered " +
+                             "faithfully (ASCII Set 0 only): " + string.Join(", ", typoGaps));
+            }
 
             var renderOptions = new HpglRenderOptions
             {
