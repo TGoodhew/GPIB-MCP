@@ -134,8 +134,9 @@ namespace GpibMcp.Tools
             {
                 var typoGaps = HpglRenderer.UnsupportedTypography(capture.Hpgl);
                 if (typoGaps.Count > 0)
-                    Log.Warn("Typography (#56): " + def.Model + " plot uses characters/sets not rendered " +
-                             "faithfully (ASCII Set 0 only): " + string.Join(", ", typoGaps));
+                    Log.Warn("Typography: " + def.Model + " plot uses characters/sets not rendered " +
+                             "faithfully (ASCII Set 0 only): " + string.Join(", ", typoGaps) +
+                             ". Refer to Issue 56 on the GitHub Repository.");
             }
 
             var renderOptions = new HpglRenderOptions
