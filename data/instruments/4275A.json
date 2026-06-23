@@ -193,7 +193,7 @@
       "description": "Sets the internal DC bias voltage (requires Option 001 or 002). Format is 'BI<mantissa>E<exponent>V' with 3 digits of mantissa and 2 digits of exponent. If polarity of the mantissa or exponent is not specified it defaults to plus (+).",
       "set": "BI",
       "parameters": [
-        { "name": "voltage", "units": ["V"], "range": "BI<3-digit mantissa>E<2-digit exponent>V" }
+        { "name": "voltage", "units": [{ "token": "V", "unit": "V" }], "range": "BI<3-digit mantissa>E<2-digit exponent>V" }
       ],
       "examples": ["BI100E-01V", "BI+200E+00V"]
     }

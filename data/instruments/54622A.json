@@ -880,7 +880,10 @@
         {
           "name": "offset",
           "units": [
-            "V"
+            {
+              "token": "V",
+              "unit": "V"
+            }
           ],
           "range": "vertical offset value (NR3)"
         },
@@ -978,7 +981,10 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {
+              "token": "V",
+              "unit": "V"
+            }
           ],
           "range": "vertical full-scale range value (NR3)"
         },
@@ -1007,7 +1013,10 @@
         {
           "name": "scale",
           "units": [
-            "V/div"
+            {
+              "token": "V",
+              "unit": "V/div"
+            }
           ],
           "range": "vertical units per division (NR3)"
         },
@@ -1124,7 +1133,10 @@
         {
           "name": "value",
           "units": [
-            "V"
+            {
+              "token": "V",
+              "unit": "V"
+            }
           ],
           "range": "{CMOS | ECL | TTL | user value -8.00 to +8.00 (NR3)}"
         },
@@ -1345,7 +1357,10 @@
         {
           "name": "range",
           "units": [
-            "V"
+            {
+              "token": "V",
+              "unit": "V"
+            }
           ],
           "range": "vertical full-scale range value (NR3)"
         },
@@ -2563,7 +2578,10 @@
         {
           "name": "type",
           "units": [
-            "V"
+            {
+              "token": "V",
+              "unit": "V"
+            }
           ],
           "range": "{CMOS | ECL | TTL | <user defined value> (NR3)}"
         },
@@ -3042,7 +3060,10 @@
         {
           "name": "greater than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "5 ns to 10 s (NR3)"
         },
@@ -3066,7 +3087,10 @@
         {
           "name": "less than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "5 ns to 10 s (NR3)"
         },
@@ -3128,14 +3152,20 @@
         {
           "name": "greater than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "min duration 10 ns to 9.99 s (NR3)"
         },
         {
           "name": "less than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "max duration 15 ns to 10 s (NR3)"
         },
@@ -3256,7 +3286,10 @@
         {
           "name": "greater than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "5 ns to 10 s (NR3)"
         },
@@ -3280,7 +3313,10 @@
         {
           "name": "less than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "5 ns to 10 s (NR3)"
         },
@@ -3362,14 +3398,20 @@
         {
           "name": "greater than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "start time 10 ns to 9.99 s (NR3)"
         },
         {
           "name": "less than time",
           "units": [
-            "s"
+            {
+              "token": "s",
+              "unit": "s"
+            }
           ],
           "range": "stop time 15 ns to 10 s (NR3)"
         },
