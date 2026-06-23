@@ -170,5 +170,84 @@ namespace GpibMcp.Tests
             Run(configured, options);
             Assert.Contains(reply + "\r\n", configured.Sent);
         }
+
+        // ---- #53 capture-loop diagnostics --------------------------------------
+
+        [Fact]
+        public void Diagnostics_SplitWarmupStreamAndTail_AndTraceEveryRead()
+        {
+            // read0: 100ms to first data; read1: a full-chunk burst at +50ms whose tail holds the pen-up
+            // (a full read looks mid-burst, so it is NOT early-completed); read2: 200ms empty timeout
+            // detects the pen-up -> done. This exercises the warm-up / stream / tail split with a real tail.
+            string fullChunk = new string('A', 4092) + "SP0;";  // exactly ReadChunkSize (4096)
+            var ch = new FakeChannel(new[]
+            {
+                Step.Data_(Bytes(130, ""), adv: 100),
+                Step.Data_(fullChunk, adv: 50),
+                Step.Timeout(adv: 200),
+            });
+            var d = Run(ch).Diagnostics;
+
+            Assert.NotNull(d);
+            Assert.Equal(3, d.TotalReads);
+            Assert.Equal(2, d.DataReads);
+            Assert.Equal(1, d.TimedOutReads);
+            Assert.Equal(100, d.PreRollToFirstByteMs);   // command -> first byte (warm-up)
+            Assert.Equal(50, d.StreamMs);                // first byte -> last byte
+            Assert.Equal(200, d.TailMs);                 // last byte -> completion
+            Assert.Equal(350, d.TotalMs);
+            Assert.Equal(350, d.TotalTimeInReadsMs);     // all time was inside Read() here
+            Assert.Equal(Bytes(130, "").Length + fullChunk.Length, d.TotalBytes);
+
+            Assert.Equal(3, d.Reads.Count);              // every read is traced
+            Assert.Equal(100, d.Reads[0].ElapsedMs);
+            Assert.True(d.Reads[2].TimedOut);
+            Assert.Contains("over 2 reads", d.SummaryLine("plot"));
+            Assert.Contains("1 timeouts", d.SummaryLine("plot"));
+        }
+
+        [Fact]
+        public void Plot_FinishesImmediately_WhenShortEoiReadShowsPenUp()
+        {
+            // The #53 tail fix: a short, EOI-terminated (non-timeout) read carrying the pen-up completes
+            // at once - we do NOT wait for a following empty read to time out.
+            var ch = new FakeChannel(new[]
+            {
+                Step.Data_(Bytes(130, ""), adv: 50),   // bulk data (not a timeout, but a full block)
+                Step.Data_("SP0;", adv: 20),           // short EOI read with pen-up -> complete now
+            });
+            var r = Run(ch);
+            Assert.Equal(CaptureCompletion.PenUp, r.Completion);
+            Assert.Equal(2, r.Diagnostics.TotalReads);   // finished on read #1 - no extra timeout read
+            Assert.Equal(70, r.Diagnostics.TotalMs);     // 50 + 20, no ~PerReadTimeout tail
+        }
+
+        [Fact]
+        public void DefaultPerReadTimeout_IsTrimmedForFasterWarmupAndTail()
+        {
+            Assert.Equal(250, new CaptureOptions().PerReadTimeoutMs);   // was 1000 (#53)
+        }
+
+        [Fact]
+        public void TimingLog_Format_HasSummaryAndPerReadTrace()
+        {
+            var ch = new FakeChannel(new[]
+            {
+                Step.Data_(Bytes(130, ""), adv: 100),
+                Step.Data_("PD2,2;SP0;", adv: 50),
+                Step.Timeout(adv: 200),
+            });
+            var result = Run(ch);
+
+            string entry = CaptureTimingLog.Format("GPIB0::18::INSTR", "8563E", "plot",
+                "PLOT 550,279,9750,7479;", result, renderMs: 6, saveMs: 3, timestamp: "TEST-TS");
+
+            Assert.Contains("==== capture TEST-TS  8563E (plot)  GPIB0::18::INSTR ====", entry);
+            Assert.Contains("command: PLOT 550,279,9750,7479;", entry);
+            Assert.Contains("render 6ms, save 3ms", entry);
+            Assert.Contains("per-read trace", entry);
+            Assert.Contains("#0", entry);          // first read traced
+            Assert.Contains("[timeout]", entry);   // the terminating read flagged
+        }
     }
 }

@@ -17,6 +17,9 @@ namespace GpibMcp.Tests
             // Keep default-path captures out of %LOCALAPPDATA% during tests.
             Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR",
                 Path.Combine(Path.GetTempPath(), "gpibmcp_captures_test"));
+            // Likewise the #53 capture-timing log - don't pollute the real %LOCALAPPDATA% file.
+            Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURE_TIMING_LOG",
+                Path.Combine(Path.GetTempPath(), "gpibmcp_captures_test", "capture-timing.log"));
         }
 
         private static InstrumentDefinition WithCaptureProfile() => new InstrumentDefinition
