@@ -405,6 +405,38 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Capture_Outpplot_CorruptCoordinate_RetriesThenNotifiesUser()
+        {
+            // A transient corrupted coordinate trips re-capture up to 3x; when every attempt glitches, the
+            // user is told and prompted to acquire the screen image again. (#52)
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithOutpplotProfile() });
+            var visa = new FakeInstrumentManager
+            {
+                CaptureHpgl = "IN;SP1;PU0,0;PD100,90;PD200,150;PD300,120;PD400,180;PD500,160;PD600,200;" +
+                              "PD700,170;PD800,210;PD900,190;PD1000,205;PD250,140;PD750,160;PD500,9999999;PU0,0;SP0;"
+            };
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::16::INSTR", ["model"] = "8720C" });
+
+            Assert.False(output.IsError);
+            Assert.Equal(3, visa.RecordCaptures.Count);                       // retried to the cap
+            Assert.Contains("acquiring the screen image again", output.AsText());
+        }
+
+        [Fact]
+        public void Capture_Outpplot_CleanPlot_CapturesOnceNoNotice()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithOutpplotProfile() });
+            var visa = new FakeInstrumentManager();   // default canned plot is clean
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::16::INSTR", ["model"] = "8720C" });
+
+            Assert.False(output.IsError);
+            Assert.Single(visa.RecordCaptures);                              // no retry
+            Assert.DoesNotContain("acquiring the screen image again", output.AsText());
+        }
+
+        [Fact]
         public void Capture_ScpiBlock_InlineSvgFalse_FallsBackToImageBlock()
         {
             var db = InstrumentDatabase.FromDefinitions(new[] { WithScpiProfile() });

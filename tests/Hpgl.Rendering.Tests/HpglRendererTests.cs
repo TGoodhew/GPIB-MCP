@@ -80,6 +80,37 @@ namespace Hpgl.Rendering.Tests
             Assert.Contains(gaps, g => g.Contains("charset 4"));
         }
 
+        // ---- #52 corrupted-coordinate robustness ---------------------------------
+
+        // A normal plot (bulk within [0,1000]) plus one wild Y value, as a transient GPIB glitch produces.
+        private const string OutlierPlot =
+            "IN;SP1;PU0,0;PD100,90;PD200,150;PD300,120;PD400,180;PD500,160;PD600,200;PD700,170;" +
+            "PD800,210;PD900,190;PD1000,205;PD500,250;PD250,140;PD750,160;PD500,9999999;PU0,0;SP0;";
+
+        [Fact]
+        public void HasCorruptCoordinate_DetectsWildOutlier_ButNotACleanPlot()
+        {
+            Assert.True(HpglRenderer.HasCorruptCoordinate(OutlierPlot, out var detail));
+            Assert.Contains("9999999", detail);
+            var clean = OutlierPlot.Replace("PD500,9999999;", "PD500,200;");
+            Assert.False(HpglRenderer.HasCorruptCoordinate(clean, out _));
+        }
+
+        [Fact]
+        public void OutlierCoordinate_DoesNotCollapseTheRender()
+        {
+            // Without the robust extent the lone 9999999 blows up the fit and squashes the bulk to ~0 px.
+            var opt = new HpglRenderOptions { Width = 200, Height = 200, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(OutlierPlot, opt))
+            {
+                int minX = bmp.Width, maxX = -1;
+                for (int y = 0; y < bmp.Height; y++)
+                    for (int x = 0; x < bmp.Width; x++)
+                        if (bmp.GetPixel(x, y).ToArgb() != Color.Black.ToArgb()) { if (x < minX) minX = x; if (x > maxX) maxX = x; }
+                Assert.True(maxX - minX > 100, $"the bulk plot should still fill the canvas; inked width={maxX - minX}");
+            }
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;

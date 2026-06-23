@@ -102,17 +102,33 @@ namespace GpibMcp.Tools
                 Mode = isPrint ? CaptureMode.PrinterStream : CaptureMode.PlotterEmulation
             };
 
+            // A transient corrupted coordinate in the HP-GL read (a GPIB digit run-on) would otherwise wreck
+            // the rendered plot. Detect it and just re-capture, up to maxAttempts; only surface it to the
+            // user if every attempt in a row glitched. PCL print is byte-raster and immune. (#52)
+            const int maxAttempts = 3;
             CaptureResult capture;
-            try
+            bool corruptCoordinate = false;
+            string corruptDetail = null;
+            int attempt = 0;
+            while (true)
             {
-                capture = isOutpplot
-                    ? visa.CaptureRecordStream(resource, profile.PreRoll,
-                          string.IsNullOrEmpty(profile.DumpCommand) ? "OUTPPLOT" : profile.DumpCommand, captureOptions)
-                    : visa.CaptureScreen(resource, profile.PreRoll, command, captureOptions);
-            }
-            catch (Exception ex)
-            {
-                return Error("Capture failed for " + resource + ": " + ex.Message);
+                attempt++;
+                try
+                {
+                    capture = isOutpplot
+                        ? visa.CaptureRecordStream(resource, profile.PreRoll,
+                              string.IsNullOrEmpty(profile.DumpCommand) ? "OUTPPLOT" : profile.DumpCommand, captureOptions)
+                        : visa.CaptureScreen(resource, profile.PreRoll, command, captureOptions);
+                }
+                catch (Exception ex)
+                {
+                    return Error("Capture failed for " + resource + ": " + ex.Message);
+                }
+
+                corruptCoordinate = !isPrint && HpglRenderer.HasCorruptCoordinate(capture.Hpgl, out corruptDetail);
+                if (!corruptCoordinate || attempt >= maxAttempts) break;
+                Log.Warn("Capture attempt " + attempt + "/" + maxAttempts + " for " + resource +
+                         " had a corrupted coordinate (" + corruptDetail + "); re-capturing.");
             }
 
             if (!string.IsNullOrEmpty(profile.PostRoll))
@@ -214,6 +230,20 @@ namespace GpibMcp.Tools
                 output.AddText(meta);
                 output.AddImage(png, "image/png");
             }
+
+            // #52: every one of the maxAttempts captures came back with a corrupted coordinate. We rendered
+            // the best effort (the renderer ignores the bad point), but the user should know and re-try.
+            if (corruptCoordinate)
+            {
+                Log.Warn(def.Model + " capture corrupted on all " + maxAttempts + " attempts (" + corruptDetail + ").");
+                output.AddText(
+                    "NOTE TO USER: this screen capture came back with a corrupted coordinate on all " +
+                    maxAttempts + " attempts in a row - a transient glitch in the GPIB read, not an instrument " +
+                    "or setup problem. The image was still rendered by ignoring the bad point, so it may be " +
+                    "slightly incomplete or show a stray line. Tell the user this and suggest acquiring the " +
+                    "screen image again; if it keeps happening, check the GPIB cabling/connection.");
+            }
+
             if (Bool(args, "return_hpgl", false)) output.AddText(capture.Hpgl);
             return output;
         }
