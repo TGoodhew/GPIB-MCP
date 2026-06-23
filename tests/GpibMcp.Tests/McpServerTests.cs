@@ -83,7 +83,8 @@ namespace GpibMcp.Tests
             var tools = (JArray)responses.Single()["result"]["tools"];
 
             var names = tools.Select(t => (string)t["name"]).ToList();
-            Assert.Equal(25, names.Count);
+            Assert.Equal(26, names.Count);
+            Assert.Contains("resolve_setting", names);
             Assert.Contains("gpib_overview", names);
             Assert.Contains("visa_list_resources", names);
             Assert.Contains("instrument_db_refresh", names);

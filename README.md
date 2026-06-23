@@ -294,6 +294,7 @@ tool blurbs.
 | `gpib488_query` | `primary_address`, `command` | `board`, `secondary_address` | Native NI-488.2 query by board / primary / secondary |
 | `instrument_list_models` | — | — | List models in the command database ("what instruments do you know about?") |
 | `instrument_reference` | `model` | `command`, `search`, `category` | Get a model's command reference / a specific command's detail |
+| `resolve_setting` | `model`, `command`, `value` | `unit` | Map a human value+unit (e.g. 1 GHz) to the exact wire string to send, converting to a token the box accepts (→ `FR 1000 MZ`); see [unit tokens](docs/instrument-unit-tokens.md) |
 | `instrument_identify` | `resource` | `read_bytes` | Query identity and match against the database |
 | `set_termination` | — (`model` or `resource`) | `read_terminator`, `write_terminator`, `max_read_bytes`, `confirm` | Set a model's read/write terminators and an optional bounded read for free-running instruments (persists on `confirm=true`) |
 | `assign_instrument` | `resource`, `model` | `confirm`, `verify` | Record that a model sits at a resource (persists on `confirm=true`) |
@@ -514,6 +515,10 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 - Only models with a `capture` profile in the database are supported. HP-GL: `{ "method": "hpgl",
   "plotCommand": "...", "printCommand": "...", "preRoll": "...", "postRoll": "..." }` (omit
   `printCommand` for plot-only). SCPI image: `{ "method": "scpi_block", "dumpCommand": ":DISP:DATA?" }`.
+  VNA record-loop (8720/8753): `{ "method": "outpplot", "dumpCommand": "OUTPPLOT" }` — the dump command is
+  sent once and the instrument streams its whole plot as many EOI-bounded HP-GL records (its IP/SC scale
+  header first, then geometry), read until the bus goes quiet. The native header gives the correct
+  landscape aspect and text, exactly as KE5FX does.
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`

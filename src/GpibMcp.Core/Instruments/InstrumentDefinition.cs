@@ -146,10 +146,35 @@ namespace GpibMcp.Instruments
         [JsonProperty("name")] public string Name { get; set; }
         [JsonProperty("description")] public string Description { get; set; }
 
+        /// <summary>
+        /// The literal value-suffix tokens this parameter accepts on the wire, each paired with the
+        /// physical unit it means - so a human value can be resolved to the exact token, converting where
+        /// needed (e.g. tokens HZ/KZ/MZ; "1 GHz" -&gt; "1000 MZ"). Read forgivingly: a bare string item is
+        /// an unaudited token (<see cref="UnitToken.Unit"/> null) until #46 fills in its meaning.
+        /// </summary>
         [JsonProperty("units")]
-        [JsonConverter(typeof(FlexibleStringListConverter))]
-        public List<string> Units { get; set; }
+        [JsonConverter(typeof(UnitTokenListConverter))]
+        public List<UnitToken> Units { get; set; }
 
         [JsonProperty("range")] public string Range { get; set; }
+    }
+
+    /// <summary>
+    /// A settable parameter's literal wire suffix token and the physical unit it means, e.g.
+    /// <c>{ token: "MZ", unit: "MHz" }</c>. The <see cref="Token"/> is what goes on the bus (case as
+    /// documented); <see cref="Unit"/> is the standard unit it represents, which lets the resolver convert
+    /// a human value to this token (issue #46). <see cref="Unit"/> is null for not-yet-audited tokens.
+    /// </summary>
+    public sealed class UnitToken
+    {
+        [JsonProperty("token")] public string Token { get; set; }
+        [JsonProperty("unit")] public string Unit { get; set; }
+
+        public UnitToken() { }
+        public UnitToken(string token, string unit = null) { Token = token; Unit = unit; }
+
+        /// <summary>True once the token's physical unit is known (so the resolver can use/convert it).</summary>
+        [JsonIgnore]
+        public bool IsAudited => !string.IsNullOrEmpty(Unit);
     }
 }

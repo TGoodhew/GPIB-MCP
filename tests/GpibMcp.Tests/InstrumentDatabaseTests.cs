@@ -147,7 +147,10 @@ namespace GpibMcp.Tests
                 Assert.True(db.TryGet("S", out var s));
                 Assert.True(db.TryGet("S1", out _)); // scalar alias coerced + indexed
                 var p = s.Commands[0].Parameters[0];
-                Assert.Equal(new[] { "Hz" }, p.Units);
+                // A bare-string unit coerces to a single unaudited token (Unit null) - legacy compat (#46).
+                Assert.Single(p.Units);
+                Assert.Equal("Hz", p.Units[0].Token);
+                Assert.False(p.Units[0].IsAudited);
                 Assert.Equal(new[] { "FREQ 1" }, s.Commands[0].Examples.ToArray());
             }
             finally { Directory.Delete(dir, true); }

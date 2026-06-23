@@ -17,6 +17,10 @@
     "matchRegex": "8719",
     "description": "Outputs the identification string \"HEWLETT PACKARD, 87aam,0,X.XX\" where aam is the rest of the model number and X.XX is the firmware revision. Also accessible via IDN? and *IDN?."
   },
+  "capture": {
+    "method": "outpplot",
+    "dumpCommand": "OUTPPLOT"
+  },
   "commands": [
     {
       "name": "address_controller",

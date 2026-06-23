@@ -22,6 +22,64 @@ namespace Hpgl.Rendering.Tests
             "SP1;PU500,6700;LBCF 300 MHz" + ((char)3) + ";" +     // label (ETX-terminated)
             "PU0,0;SP0;";                                           // pen up / done
 
+        [Fact]
+        public void PenDownBeforeFirstCoordinate_DoesNotStreakFromOrigin()
+        {
+            // The 8720/8753 emit PD before their first PA. The first coordinate must only position the
+            // pen (no line drawn to it from the default origin), else a line streaks from the corner to
+            // the first trace point. Here the only real geometry is a vertical line; a streak would
+            // widen the inked region into a triangle. (#55)
+            var hpgl = "IN;PD;PA8000,2000;PA8000,6000;";
+            var opt = new HpglRenderOptions { Width = 200, Height = 200, Background = HpglBackground.Black, Antialias = false };
+            using (var bmp = HpglRenderer.RenderToBitmap(hpgl, opt))
+            {
+                int minX = bmp.Width, maxX = -1, minY = bmp.Height, maxY = -1;
+                for (int y = 0; y < bmp.Height; y++)
+                    for (int x = 0; x < bmp.Width; x++)
+                        if (bmp.GetPixel(x, y).ToArgb() != Color.Black.ToArgb())
+                        { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+                Assert.True(maxY - minY > 100, "the vertical line should span most of the height");
+                Assert.True(maxX - minX < 20, $"a streak from the origin would widen the ink; width={maxX - minX}");
+            }
+        }
+
+        // ---- #56 typography: set-aware glyph lookup + gap self-report ------------
+
+        [Fact]
+        public void StrokeFont_OnlySet0Implemented_FallsBackToAsciiGlyph()
+        {
+            Assert.True(StrokeFont.IsImplemented(0));
+            Assert.False(StrokeFont.IsImplemented(4));
+            // Until alternate-set tables land, any set reuses the Set-0 (ASCII) glyph object.
+            Assert.Same(StrokeFont.Get('A', 0), StrokeFont.Get('A', 4));
+        }
+
+        [Fact]
+        public void UnsupportedTypography_EmptyForPlainAsciiSet0()
+        {
+            var hpgl = "IN;SP1;PU0,0;LBlog MAG 10 dB/" + (char)3 + ";";
+            Assert.Empty(HpglRenderer.UnsupportedTypography(hpgl));
+        }
+
+        [Fact]
+        public void UnsupportedTypography_FlagsHighByteSymbolWithNoGlyph()
+        {
+            // 0xB0 (degree) has no Set-0 glyph - it would be silently dropped, so it must be reported.
+            var hpgl = "IN;SP1;PU0,0;LB45" + (char)0xB0 + (char)3 + ";";
+            var gaps = HpglRenderer.UnsupportedTypography(hpgl);
+            Assert.Contains(gaps, g => g.Contains("U+00B0"));
+        }
+
+        [Fact]
+        public void UnsupportedTypography_FlagsAlternateCharacterSetUsage()
+        {
+            // Designate alternate set 4 (CA4), shift to it (SA), then draw a label -> the set is reported
+            // because its text is drawn with the ASCII fallback.
+            var hpgl = "IN;CA4;SA;PU0,0;LBx" + (char)3 + ";";
+            var gaps = HpglRenderer.UnsupportedTypography(hpgl);
+            Assert.Contains(gaps, g => g.Contains("charset 4"));
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;

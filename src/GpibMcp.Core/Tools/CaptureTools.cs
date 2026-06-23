@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using GpibMcp.Diagnostics;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Hpgl.Rendering;
@@ -76,14 +77,20 @@ namespace GpibMcp.Tools
             if (string.Equals(profile.Method, "scpi_block", StringComparison.OrdinalIgnoreCase))
                 return CaptureScpiBlock(args, def, profile, visa);
 
-            if (!string.Equals(profile.Method, "hpgl", StringComparison.OrdinalIgnoreCase) ||
-                string.IsNullOrEmpty(profile.PlotCommand))
+            // OUTPPLOT record-loop method (8720/8753 VNAs): HP-GL streamed as many small records, looped
+            // and assembled, then rendered as a normal plot. No print/format choice (issue #55).
+            bool isOutpplot = string.Equals(profile.Method, "outpplot", StringComparison.OrdinalIgnoreCase);
+
+            if (!isOutpplot &&
+                (!string.Equals(profile.Method, "hpgl", StringComparison.OrdinalIgnoreCase) ||
+                 string.IsNullOrEmpty(profile.PlotCommand)))
                 return Error("Model '" + def.Model + "' has no HP-GL capture profile.");
 
             // Format selection: plot (HP-GL, default) or print (PCL). Print needs a profile print command.
             string format = (Str(args, "format", null) ?? "").Trim().ToLowerInvariant();
             bool formatChosen = format == "plot" || format == "print" || format == "pcl";
             bool isPrint = format == "print" || format == "pcl";
+            if (isOutpplot) { isPrint = false; formatChosen = true; }   // OUTPPLOT is always a vector plot
             if (isPrint && !profile.CanPrint)
                 return Error("Model '" + def.Model + "' has no PCL print profile - it can only plot. " +
                              "Capture it with format=\"plot\".");
@@ -98,7 +105,10 @@ namespace GpibMcp.Tools
             CaptureResult capture;
             try
             {
-                capture = visa.CaptureScreen(resource, profile.PreRoll, command, captureOptions);
+                capture = isOutpplot
+                    ? visa.CaptureRecordStream(resource, profile.PreRoll,
+                          string.IsNullOrEmpty(profile.DumpCommand) ? "OUTPPLOT" : profile.DumpCommand, captureOptions)
+                    : visa.CaptureScreen(resource, profile.PreRoll, command, captureOptions);
             }
             catch (Exception ex)
             {
@@ -116,6 +126,17 @@ namespace GpibMcp.Tools
                 return Error("No complete " + (isPrint ? "print" : "plot") + " captured from " + resource +
                              " (" + capture.ByteCount + " bytes, " + capture.Completion + "). Check the " +
                              "address/model and that the instrument supports " + (isPrint ? "printing" : "plotting") + ".");
+
+            // Typography self-report (#56): flag any label characters / character sets this plot uses that
+            // the renderer can't draw faithfully (codes >= 0x80 with no glyph, or a non-ASCII set). Lets a
+            // real capture tell us when symbol/alternate-set work is actually needed. Plot (HP-GL) only.
+            if (!isPrint)
+            {
+                var typoGaps = HpglRenderer.UnsupportedTypography(capture.Hpgl);
+                if (typoGaps.Count > 0)
+                    Log.Warn("Typography (#56): " + def.Model + " plot uses characters/sets not rendered " +
+                             "faithfully (ASCII Set 0 only): " + string.Join(", ", typoGaps));
+            }
 
             var renderOptions = new HpglRenderOptions
             {

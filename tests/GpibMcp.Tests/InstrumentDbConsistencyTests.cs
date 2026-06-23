@@ -49,6 +49,31 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void AuditedUnitTokens_UseTheCanonicalUnitVocabulary()
+        {
+            // A token's `unit` (once audited) must be one canonical spelling everywhere, so the resolver can
+            // map a human value to it (#46). Unaudited bare-string tokens (unit null) are skipped - they are
+            // the migration backlog, flagged elsewhere. This guard keeps the audited entries consistent.
+            var offenders = new List<string>();
+            foreach (var (file, json) in AllDefinitions())
+            {
+                var def = json.ToObject<InstrumentDefinition>();
+                foreach (var cmd in def.Commands ?? Enumerable.Empty<InstrumentCommand>())
+                    foreach (var p in cmd.Parameters ?? Enumerable.Empty<CommandParameter>())
+                        foreach (var t in p.Units ?? Enumerable.Empty<UnitToken>())
+                        {
+                            if (!t.IsAudited) continue;
+                            string canon = UnitResolver.Canonical(t.Unit);
+                            if (canon != t.Unit)
+                                offenders.Add(file + ": " + cmd.Mnemonic + "/" + p.Name + " token '" + t.Token +
+                                    "' unit '" + t.Unit + "' -> " + (canon == null ? "UNKNOWN unit" : "should be '" + canon + "'"));
+                        }
+            }
+            Assert.True(offenders.Count == 0,
+                "Audited unit tokens must use the canonical unit vocabulary (#46):\n  " + string.Join("\n  ", offenders));
+        }
+
+        [Fact]
         public void NoTwoFiles_ClaimTheSameModelOrAlias()
         {
             // Maps each lower-cased model/alias to the file(s) that claim it. Any name claimed by more

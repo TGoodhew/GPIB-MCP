@@ -31,12 +31,20 @@ namespace Hpgl.Rendering
         /// character width - the instrument-derived character-cell grid from #29/#30.</summary>
         public const double Advance = 8.25;
 
-        /// <summary>Returns the glyph as a list of pen-down polylines (grid units), or null if undrawn.</summary>
-        public static int[][] Get(char c)
+        /// <summary>
+        /// Returns the glyph for character <paramref name="c"/> in HP-GL character set <paramref name="set"/>
+        /// as a list of pen-down polylines (grid units), or null if undrawn. Only Set 0 (ASCII) is
+        /// implemented; any other set currently falls back to the Set-0 glyph (see <see cref="IsImplemented"/>
+        /// - the typography analyzer flags those so a capture self-reports the gap, #56).
+        /// </summary>
+        public static int[][] Get(char c, int set = 0)
         {
             int[][] g;
-            return Glyphs.TryGetValue(c, out g) ? g : null;
+            return Glyphs.TryGetValue(c, out g) ? g : null;   // set is ignored until non-ASCII sets land (#56)
         }
+
+        /// <summary>True if a glyph table exists for this HP-GL character set. Only Set 0 (ASCII) so far.</summary>
+        public static bool IsImplemented(int set) => set == 0;
 
         // Each entry: an array of strokes; each stroke is a flat {x0,y0,x1,y1,...} polyline.
         private static readonly Dictionary<char, int[][]> Glyphs = new Dictionary<char, int[][]>

@@ -81,29 +81,103 @@ namespace GpibMcp.Instruments
 
         public byte[] QueryBlock(string resource, string command, int timeoutMs)
         {
+            lock (_gate) return QueryBlockNoLock(resource, command, timeoutMs);
+        }
+
+        /// <summary>QueryBlock body without taking the gate, for callers (e.g. the record loop) already holding it.</summary>
+        private byte[] QueryBlockNoLock(string resource, string command, int timeoutMs)
+        {
             var io = new IoSpec(timeoutMs);
+            string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
+            try
+            {
+                _transport.Open(resource, Timeout(io.TimeoutMs));
+                _history.Record(resource, CommandDirection.Sent, payload);
+                _transport.Write(resource, Latin1.GetBytes(payload), Timeout(io.TimeoutMs));
+
+                // Read the whole record as raw bytes via the bounded raw path: no termination char (data
+                // may contain 0x0A and some records carry no trailing \n) and a large cap so a single read
+                // returns the full record at EOI. A timed-out read returns empty (no throw).
+                var req = new TransportReadRequest { TimeoutMs = Timeout(io.TimeoutMs), TermChar = null, MaxBytes = MaxImageBlockBytes };
+                byte[] data = _transport.Read(resource, req).Data;
+                _history.Record(resource, CommandDirection.Received, "<" + data.Length + " bytes>");
+                return data;
+            }
+            catch (Exception ex) when (!(ex is GpibOperationException))
+            {
+                throw Fail(GpibOperation.Query, resource, command, ex);
+            }
+        }
+
+        /// <summary>Reads one EOI-bounded record without sending a command (for the record stream, which
+        /// issues its dump command once and then reads). A timed-out read returns empty (no throw).</summary>
+        private byte[] ReadBlockNoLock(string resource, int timeoutMs)
+        {
+            try
+            {
+                _transport.Open(resource, Timeout(timeoutMs));
+                var req = new TransportReadRequest { TimeoutMs = Timeout(timeoutMs), TermChar = null, MaxBytes = MaxImageBlockBytes };
+                byte[] data = _transport.Read(resource, req).Data;
+                _history.Record(resource, CommandDirection.Received, "<" + data.Length + " bytes>");
+                return data;
+            }
+            catch (Exception ex) when (!(ex is GpibOperationException))
+            {
+                throw Fail(GpibOperation.Query, resource, "<read>", ex);
+            }
+        }
+
+        /// <summary>
+        /// Captures HP-GL from a record-output query (e.g. <c>OUTPPLOT</c> on the 8720/8753 VNAs). The
+        /// dump command is sent ONCE; the instrument then streams its whole plot as many EOI-bounded HP-GL
+        /// records (its IP/SC scale header first, then geometry), which we read to EOI and append until a
+        /// read returns empty (the bus goes quiet) or the backstop fires. Re-sending the command per record
+        /// makes the analyzer skip past the header records - confirmed against a 7440-app NI I/O trace, which
+        /// writes OUTPPLOT once and then only reads. The assembled HP-GL renders through the normal plot
+        /// path. Issue #55.
+        /// </summary>
+        public CaptureResult CaptureRecordStream(string resource, string preRoll, string command, CaptureOptions options)
+        {
+            options = options ?? new CaptureOptions();
+            if (string.IsNullOrWhiteSpace(command)) command = "OUTPPLOT";
+            int perRecordMs = options.PerReadTimeoutMs > 0 ? Math.Max(options.PerReadTimeoutMs, 2000) : 2000;
+
             lock (_gate)
             {
-                string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
+                _transport.Open(resource, perRecordMs);
+                var watch = Stopwatch.StartNew();
                 try
                 {
-                    _transport.Open(resource, Timeout(io.TimeoutMs));
-                    Log.Debug("VISA " + resource + " <- " + CommandText.ForLog(payload) + " (binary block)");
-                    _history.Record(resource, CommandDirection.Sent, payload);
-                    _transport.Write(resource, Latin1.GetBytes(payload), Timeout(io.TimeoutMs));
+                    if (!string.IsNullOrEmpty(preRoll))
+                        _transport.Write(resource, Latin1.GetBytes(CommandText.EnsureTerminated(preRoll)), DefaultTimeoutMs);
 
-                    // Read the whole block as raw bytes via the bounded raw path: no termination char
-                    // (binary image data contains 0x0A etc.) and a large cap so a single read returns the
-                    // full image at EOI. (The unbounded path text-decodes and breaks on binary.)
-                    var req = new TransportReadRequest { TimeoutMs = Timeout(io.TimeoutMs), TermChar = null, MaxBytes = MaxImageBlockBytes };
-                    byte[] data = _transport.Read(resource, req).Data;
-                    _history.Record(resource, CommandDirection.Received, "<" + data.Length + " bytes binary block>");
-                    Log.Debug("VISA " + resource + " -> " + data.Length + " bytes binary block");
-                    return data;
+                    Log.Info("Record-stream capture start: " + resource + " cmd='" + command + "'");
+
+                    // Send the dump command ONCE, then read records until the stream is exhausted.
+                    string payload = CommandText.EnsureTerminated(command);
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    _transport.Write(resource, Latin1.GetBytes(payload), perRecordMs);
+
+                    var buffer = new StringBuilder();
+                    int records = 0;
+                    const int maxRecords = 4000; // runaway guard
+                    for (int i = 0; i < maxRecords; i++)
+                    {
+                        byte[] rec = ReadBlockNoLock(resource, perRecordMs);
+                        if (rec == null || rec.Length == 0) break;   // empty record -> plot exhausted
+                        foreach (byte b in rec) buffer.Append((char)b);
+                        records++;
+                        if (watch.ElapsedMilliseconds >= options.OverallTimeoutMs) break;
+                    }
+                    var completion = records > 0 && watch.ElapsedMilliseconds < options.OverallTimeoutMs
+                        ? CaptureCompletion.Inactivity : CaptureCompletion.Backstop;
+                    Log.Info("Record-stream capture done: " + records + " records, " + buffer.Length +
+                             " bytes, " + completion + ", " + watch.ElapsedMilliseconds + "ms");
+                    return new CaptureResult(buffer.ToString(), buffer.Length, watch.ElapsedMilliseconds, completion);
                 }
-                catch (Exception ex) when (!(ex is GpibOperationException))
+                finally
                 {
-                    throw Fail(GpibOperation.Query, resource, command, ex);
+                    _transport.ReturnToLocal(resource);
                 }
             }
         }

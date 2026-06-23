@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -131,6 +132,59 @@ namespace GpibMcp.Tools
                                          "for full detail, or search=/category= to filter.";
                     }
                     return result.ToString(Formatting.Indented);
+                }));
+
+            // ---- Resolve a human value+unit to the exact wire string ------------
+            registry.Add(new McpTool(
+                "resolve_setting",
+                "Map a human value+unit (e.g. 1 GHz) to the EXACT literal string to send for a settable " +
+                "command on a model, converting to a unit the instrument actually accepts - e.g. a box whose " +
+                "highest frequency token is MHz turns '1 GHz' into 'FR 1000 MZ'. ALWAYS use this to build a " +
+                "set-value command rather than guessing the suffix token; it returns the command string to send.",
+                Schema(
+                    Required("model", "string", "Model name or alias, e.g. '8657B'."),
+                    Required("command", "string", "The settable command (name or mnemonic), e.g. 'frequency' or 'FR'."),
+                    Required("value", "number", "The numeric value, e.g. 1."),
+                    Prop("unit", "string", "The human unit, e.g. 'GHz' or 'dBm'. Omit only when the command takes one unit.")),
+                args =>
+                {
+                    string model = ReqStr(args, "model");
+                    InstrumentDefinition def;
+                    if (!db.TryGet(model, out def))
+                        return "Unknown model '" + model + "'. Use instrument_list_models to see known models.";
+
+                    string command = ReqStr(args, "command");
+                    var cmd = FindCommand(def, command);
+                    if (cmd == null)
+                        return "Model '" + def.Model + "' has no command matching '" + command + "'.";
+
+                    double value;
+                    try { value = args["value"] == null ? double.NaN : args["value"].Value<double>(); }
+                    catch { value = double.NaN; }
+                    if (double.IsNaN(value)) return "A numeric 'value' is required.";
+                    string unit = Str(args, "unit", null);
+
+                    // The settable parameter is the one carrying unit tokens (prefer one already audited).
+                    var param = (cmd.Parameters ?? new List<CommandParameter>())
+                        .Where(p => p.Units != null && p.Units.Count > 0)
+                        .OrderByDescending(p => p.Units.Any(u => u.IsAudited))
+                        .FirstOrDefault();
+                    if (param == null)
+                        return "Command '" + cmd.Name + "' on " + def.Model +
+                               "' has no parameter with unit tokens to set against.";
+                    if (!param.Units.Any(u => u.IsAudited))
+                        return "The unit tokens for '" + cmd.Name + "' on " + def.Model + " are not audited yet " +
+                               "(issue #46), so the wire token can't be resolved. Documented set form: " +
+                               (cmd.Set ?? cmd.Mnemonic ?? "?") + ".";
+
+                    var res = UnitResolver.Resolve(value, unit, param.Units);
+                    if (!res.Ok)
+                        return "Cannot set " + cmd.Name + " to " + UnitResolver.FormatNumber(value) +
+                               (string.IsNullOrEmpty(unit) ? "" : " " + unit) + ": " + res.Error;
+
+                    return "Send: " + AssembleSet(cmd, res) + "\n(resolved " + UnitResolver.FormatNumber(value) +
+                           (string.IsNullOrEmpty(unit) ? "" : " " + unit) + " -> " + res.Formatted + " for " +
+                           cmd.Name + " [" + cmd.Mnemonic + "] on " + def.Model + ")";
                 }));
 
             // ---- Identify an instrument and match the DB ------------------------
@@ -564,6 +618,21 @@ namespace GpibMcp.Tools
             return def.Commands.FirstOrDefault(c =>
                 string.Equals(c.Name, key, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(c.Mnemonic, key, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>Builds the literal set string from the command's <c>set</c> template (unit placeholder -&gt;
+        /// token, value placeholder -&gt; number), falling back to "MNEMONIC value token".</summary>
+        private static string AssembleSet(InstrumentCommand cmd, UnitResolution res)
+        {
+            string num = UnitResolver.FormatNumber(res.Value);
+            if (!string.IsNullOrEmpty(cmd.Set) && cmd.Set.IndexOf('<') >= 0)
+            {
+                string s = Regex.Replace(cmd.Set, "<[^>]*unit[^>]*>", res.Token, RegexOptions.IgnoreCase);
+                s = Regex.Replace(s, "<[^>]*>", num, RegexOptions.IgnoreCase); // remaining placeholder = the value
+                return s.Trim();
+            }
+            string mnem = cmd.Mnemonic ?? cmd.Name ?? "";
+            return (mnem + " " + num + " " + res.Token).Trim();
         }
 
         private static bool ContainsCI(string haystack, string needle) =>
