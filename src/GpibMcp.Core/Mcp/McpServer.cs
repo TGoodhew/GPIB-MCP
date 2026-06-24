@@ -173,9 +173,14 @@ namespace GpibMcp.Mcp
                 throw McpError.InvalidParams("unknown tool: " + name);
 
             Log.Debug("tools/call '" + name + "' args=" + arguments.ToString(Formatting.None));
+            // One always-on audit line per call (level-independent), so a whole turn can be reconstructed
+            // afterwards - e.g. count single-op calls vs one gpib_batch, total non-batched time (#74 insight).
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 ToolOutput output = tool.Invoke(arguments);
+                watch.Stop();
+                ToolCallLog.Write(name, arguments, !output.IsError, watch.ElapsedMilliseconds);
                 return ToToolResult(output);
             }
             catch (Exception ex)
@@ -184,6 +189,8 @@ namespace GpibMcp.Mcp
                 // per the MCP spec, so the model can see and react to the error text. When the
                 // exception carries richer detail (e.g. a GPIB/VISA failure with decoded status
                 // and the command chain), surface that so the model can explain it to the user.
+                watch.Stop();
+                ToolCallLog.Write(name, arguments, false, watch.ElapsedMilliseconds);
                 Log.Warn("Tool '" + name + "' failed: " + ex.Message);
                 string text = (ex is IDetailedError detailed) ? detailed.Detail : ex.Message;
                 return ToToolResult(ToolOutput.Text("Error: " + text).AsError());
