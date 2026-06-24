@@ -49,6 +49,11 @@ namespace GpibMcp.Instruments
         public int MaxTotalOps = 5000;
         public int MaxRows = 500;
         public int DefaultStepTimeoutMs = 5000;
+
+        /// <summary>Plans whose total GPIB ops exceed this are gated for confirmation before touching the
+        /// bus: the tool returns a preview and runs only when re-called with confirm:true (#59 Phase 2).
+        /// A small plan stays frictionless. Not a hard ceiling - confirm:true overrides it.</summary>
+        public int ConfirmAboveOps = 50;
     }
 
     // ---- execution boundary (real impl wraps the bus; a fake drives tests) ------
