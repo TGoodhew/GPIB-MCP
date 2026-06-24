@@ -43,7 +43,12 @@ namespace GpibMcp.Tools
                     Prop("width", "integer", "Output image width in pixels (default 1024)."),
                     Prop("height", "integer", "Output image height in pixels (default 768)."),
                     Prop("background", "string", "'black' (default) or 'white'."),
-                    Prop("return_hpgl", "boolean", "Also return the raw HP-GL/2 (plot) or PCL (print) source (default false)."),
+                    Prop("return_hpgl", "boolean", "Also return the raw HP-GL/2 (plot) or PCL (print) source as TEXT (default false). " +
+                        "Note: a text result strips non-printing control bytes (e.g. HP-GL ETX 0x03 label terminators) - for a " +
+                        "byte-for-byte copy to send to a plotter/printer, use return_hpgl_base64 instead."),
+                    Prop("return_hpgl_base64", "boolean", "Also return the raw plot/print source as BASE64 (default false): the EXACT " +
+                        "captured bytes, control bytes and all (HP-GL ETX 0x03, PCL binary), intact across the tool boundary. Pass this " +
+                        "to visa_write_raw to forward the plot to a plotter/printer byte-for-byte (e.g. an 8563E screen to a 7090A at addr 6)."),
                     Prop("inline_svg", "boolean", "Return an SVG to display inline as an artifact (default true). Set false to fall back to image-block + saved-file only."),
                     Prop("fidelity", "string", "Plot only: inline-SVG label fidelity: 'high' = exact HP single-stroke plotter font " +
                         "(faithful, larger/slower to display); 'low' = simple text labels (renders noticeably faster). " +
@@ -261,6 +266,12 @@ namespace GpibMcp.Tools
             }
 
             if (Bool(args, "return_hpgl", false)) output.AddText(capture.Hpgl);
+            if (Bool(args, "return_hpgl_base64", false))
+                // The verbatim captured bytes as base64 (#70): survives the tool boundary intact, so a plotter/printer
+                // gets the exact stream - including HP-GL ETX (0x03) label terminators - via visa_write_raw.
+                output.AddText("RAW " + kind + " BYTES (base64, " + sourceBytes.Length + " bytes). To send this plot/print " +
+                               "VERBATIM to a plotter/printer, call visa_write_raw(resource=<target address>, data=<the base64 " +
+                               "below>) - pass it unchanged, do not edit or re-encode it:\n" + Convert.ToBase64String(sourceBytes));
             return output;
         }
 

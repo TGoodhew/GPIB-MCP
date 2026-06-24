@@ -46,6 +46,11 @@ namespace GpibMcp.Instruments
         /// <summary>Writes a command (no response) using the given per-instrument write terminator.</summary>
         void Write(string resource, string command, IoSpec io);
 
+        /// <summary>Writes raw bytes VERBATIM - no terminator added, no encoding/normalization - for passing
+        /// control-byte-bearing payloads (e.g. HP-GL with ETX label terminators, binary PCL) to an instrument
+        /// intact (#70). The bytes go straight to the transport's raw write.</summary>
+        void WriteRaw(string resource, byte[] data, int timeoutMs);
+
         /// <summary>Reads a pending response from a previously written command.</summary>
         string Read(string resource, int timeoutMs);
 

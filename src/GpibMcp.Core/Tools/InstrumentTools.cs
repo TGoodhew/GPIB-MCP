@@ -112,6 +112,32 @@ namespace GpibMcp.Tools
                     return "OK (wrote: " + command + ")";
                 }));
 
+            // ---- VISA: write raw bytes (verbatim, base64-carried) ----------------
+            registry.Add(new McpTool(
+                "visa_write_raw",
+                "Write RAW BYTES to a VISA instrument VERBATIM - the bytes are sent exactly, with no terminator " +
+                "added and no encoding/normalization. Use this (not visa_write) for payloads that carry " +
+                "non-printing control bytes which a text/string boundary would strip: e.g. an HP-GL plot whose " +
+                "labels end in ETX (0x03), or a binary PCL print stream. Provide the bytes as BASE64 in 'data' " +
+                "(base64 keeps them intact across the tool boundary); the server decodes and writes them. " +
+                "Pair with instrument_capture_screen's return_hpgl_base64 to forward a captured plot to a plotter " +
+                "byte-for-byte (e.g. an 8563E screen to a 7090A).",
+                Schema(
+                    Required("resource", "string", "VISA resource string of the target (e.g. the plotter), e.g. 'GPIB0::6::INSTR'."),
+                    Required("data", "string", "The bytes to write, BASE64-encoded. Decoded server-side and written verbatim."),
+                    Prop("timeout_ms", "integer", "I/O timeout in milliseconds (default 5000).")),
+                args =>
+                {
+                    string resource = ReqStr(args, "resource");
+                    string b64 = ReqStr(args, "data");
+                    int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
+                    byte[] bytes;
+                    try { bytes = Convert.FromBase64String(b64.Trim()); }
+                    catch (FormatException ex) { throw new ArgumentException("'data' is not valid base64: " + ex.Message); }
+                    visa.WriteRaw(resource, bytes, timeout);
+                    return "OK (wrote " + bytes.Length + " raw bytes verbatim to " + resource + ")";
+                }));
+
             // ---- VISA: read pending ---------------------------------------------
             registry.Add(new McpTool(
                 "visa_read",

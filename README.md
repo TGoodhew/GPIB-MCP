@@ -282,6 +282,7 @@ tool blurbs.
 | `gpib_batch` | `steps` | `sweep`, `on_error`, `preview`, `confirm` | Run a whole multi-step / swept measurement in **one call**: a compact `sweep` (`var`, `from`/`to`/`step`\|`count`) + ordered per-point ops (`set`/`write`/`query`+`as`/`complete`/`wait`, with `{{var}}`/`{{capture}}` interpolation across instruments). The server runs every point and returns one table `{ran, columns, rows, errors}` plus a ready-to-show `summary` line and markdown `table`. Collapses a ~200-call sweep into a single call. `preview:true` reports the plan size without touching the bus; a **large** plan (> ~50 GPIB ops) returns `needs_confirm` with a preview and runs nothing until re-called with `confirm:true` |
 | `visa_query` | `resource`, `command` | `timeout_ms`, `read_bytes` | Write a command and read the response (e.g. `*IDN?`) |
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
+| `visa_write_raw` | `resource`, `data` | `timeout_ms` | Write **raw bytes verbatim** (no terminator, no encoding) — `data` is base64. For control-byte-bearing payloads a text boundary would strip (HP-GL with ETX `0x03` label terminators, binary PCL). Pair with `instrument_capture_screen`'s `return_hpgl_base64` to forward a captured plot/print to a plotter/printer byte-for-byte |
 | `visa_read` | `resource` | `timeout_ms`, `read_bytes` | Read a pending response |
 | `visa_identify` | `resource` | `read_bytes` | Convenience `*IDN?` query |
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
@@ -303,7 +304,7 @@ tool blurbs.
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 | `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes); returns an SVG to show inline + saves a PNG to Pictures |
+| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `return_hpgl_base64`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes); returns an SVG to show inline + saves a PNG to Pictures. `return_hpgl_base64` returns the verbatim plot/print bytes (base64) to forward to a plotter/printer via `visa_write_raw` |
 
 Argument notes:
 
@@ -524,8 +525,11 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`
   (`CONTS;`) resumes continuous sweeping, so the display isn't left frozen.
-- `return_hpgl=true` also returns the raw source (HP-GL/2 for a plot, PCL for a print); `background`,
-  `width`, `height` tune the image.
+- `return_hpgl=true` also returns the raw source as **text** (HP-GL/2 for a plot, PCL for a print); `background`,
+  `width`, `height` tune the image. **`return_hpgl_base64=true`** returns the same source as **base64** — the
+  exact bytes, control characters and all (HP-GL ETX `0x03` label terminators, binary PCL). Feed that to
+  `visa_write_raw` to forward the plot/print to a plotter/printer **byte-for-byte** (e.g. an 8563E screen to a
+  7090A plotter at addr 6). A text round-trip would strip those control bytes and run the labels together.
 - Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
   (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
   (`save_dir`), or pass `save_path` for a full filename. The saved path is reported in the result.
