@@ -766,6 +766,31 @@ namespace GpibMcp.Tools
             return ("bareNumber", string.Join(", ", audited.Select(u => u.Unit).Distinct()));
         }
 
+        /// <summary>
+        /// Resolves a human value+unit to the exact wire string for a settable command on a model (the
+        /// shared core of <c>resolve_setting</c>, reused by the batch <c>set</c> op, #59). Returns false
+        /// with a reason when the command isn't found, has no settable tokens, isn't audited (#46), or the
+        /// value can't be represented.
+        /// </summary>
+        public static bool TryResolveSettingWire(InstrumentDefinition def, string command, double value, string unit,
+                                                 out string wire, out string error)
+        {
+            wire = null; error = null;
+            var cmd = FindCommand(def, command);
+            if (cmd == null) { error = "no command matching '" + command + "' on " + def.Model + "."; return false; }
+            var param = (cmd.Parameters ?? new List<CommandParameter>())
+                .Where(p => p.Units != null && p.Units.Count > 0)
+                .OrderByDescending(p => p.Units.Any(u => u.IsAudited))
+                .FirstOrDefault();
+            if (param == null) { error = "command '" + command + "' on " + def.Model + " has no parameter with unit tokens."; return false; }
+            if (!param.Units.Any(u => u.IsAudited))
+            { error = "unit tokens for '" + command + "' on " + def.Model + " are not audited yet (#46)."; return false; }
+            var res = UnitResolver.Resolve(value, unit, param.Units);
+            if (!res.Ok) { error = res.Error; return false; }
+            wire = AssembleSet(cmd, res);
+            return true;
+        }
+
         /// <summary>Builds the literal set string from the command's <c>set</c> template (unit placeholder -&gt;
         /// token, value placeholder -&gt; number), falling back to "MNEMONIC value token".</summary>
         private static string AssembleSet(InstrumentCommand cmd, UnitResolution res)
