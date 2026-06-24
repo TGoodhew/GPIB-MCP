@@ -83,6 +83,32 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Instructions_SteerMultiInstrumentLoopsToBatch()
+        {
+            // #74: a per-point measurement loop spanning several instruments must steer to ONE gpib_batch,
+            // not single-op calls per point - in the always-loaded instructions.
+            var (registry, db) = Build();
+            string text = new ServerOverview(registry, db).Instructions();
+
+            Assert.Contains("gpib_batch", text);
+            Assert.Contains("SEVERAL instruments per point", text);    // the multi-device signal
+            Assert.Contains("preamble", text);                         // identify/reset doesn't preclude batching
+        }
+
+        [Fact]
+        public void Detailed_BatchSection_ShowsAMultiInstrumentExample()
+        {
+            // #74: the detailed batch section must demonstrate the three-device "configure on B, measure on C"
+            // shape and reconcile the SRQ wait with the batch 'complete' step.
+            var (registry, db) = Build();
+            string text = new ServerOverview(registry, db).Detailed();
+
+            Assert.Contains("SEVERAL instruments at each point", text);
+            Assert.Contains("5351A", text);                            // the three-device worked example
+            Assert.Contains("'complete' step", text);                  // SRQ wait inside a loop -> batch complete
+        }
+
+        [Fact]
         public void OverviewTool_IsRegistered_AndReturnsTheDetailedText()
         {
             var (registry, db) = Build();

@@ -73,7 +73,9 @@ namespace GpibMcp.Tools
                 "Use for SCPI queries ending in '?', e.g. '*IDN?' or 'MEAS:VOLT:DC?'. " +
                 "Uses the assigned model's read/write terminators automatically. If a FREE-RUNNING " +
                 "instrument (one that streams output continuously) makes a query time out, pass " +
-                "read_bytes to cap the read so it returns promptly.",
+                "read_bytes to cap the read so it returns promptly. " +
+                "DON'T call this once per point in a sweep or repeated measurement (especially one touching " +
+                "several instruments) - use gpib_batch, which runs the whole per-point loop in ONE call.",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::5::INSTR'."),
                     Required("command", "string", "Command/query to send. A newline terminator is added if absent."),
@@ -94,7 +96,9 @@ namespace GpibMcp.Tools
             // ---- VISA: write-only ------------------------------------------------
             registry.Add(new McpTool(
                 "visa_write",
-                "Send a command to a VISA instrument with no expected response, e.g. 'OUTP ON' or '*RST'.",
+                "Send a command to a VISA instrument with no expected response, e.g. 'OUTP ON' or '*RST'. " +
+                "DON'T call this once per point in a sweep or repeated measurement (especially one touching " +
+                "several instruments) - use gpib_batch, which runs the whole per-point loop in ONE call.",
                 Schema(
                     Required("resource", "string", "VISA resource string."),
                     Required("command", "string", "Command to send."),

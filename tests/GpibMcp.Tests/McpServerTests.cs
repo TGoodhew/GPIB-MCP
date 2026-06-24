@@ -195,6 +195,26 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void RepeatedSingleOpCalls_AppendABatchNudge_ToTheResult()
+        {
+            // #74: soft steering didn't move tool selection; the server nudges in the result the model reads.
+            var registry = InstrumentTools.BuildRegistry(new FakeInstrumentManager());
+            string write(int id) => "{\"jsonrpc\":\"2.0\",\"id\":" + id + ",\"method\":\"tools/call\"," +
+                "\"params\":{\"name\":\"visa_write\",\"arguments\":{\"resource\":\"GPIB0::5::INSTR\",\"command\":\"FR" + id + "MH\"}}}";
+            var input = new StringReader(write(1) + "\n" + write(2) + "\n");
+            var output = new StringWriter();
+            new McpServer(registry, input, output, null, new GpibMcp.Tools.BatchLoopNudge(threshold: 2)).Run();
+
+            var responses = output.ToString()
+                .Split(new[] { '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
+                .Select(JObject.Parse).ToList();
+
+            string ResultText(int i) => string.Concat(responses[i]["result"]["content"].Select(c => (string)c["text"]));
+            Assert.DoesNotContain("gpib_batch", ResultText(0));   // first call: below threshold, no nudge
+            Assert.Contains("gpib_batch", ResultText(1));         // second call hits the threshold: nudge appended
+        }
+
+        [Fact]
         public void ToolsCall_MissingRequiredArgument_ReturnsIsErrorResult()
         {
             // Missing "command" => handler throws => MCP reports a result with isError=true,
