@@ -58,6 +58,16 @@ namespace GpibMcp.Instruments
             return Path.Combine(AppDataDir(), "batch-timing.log");
         }
 
+        /// <summary>Where the per-tool-call audit line is appended (one line per MCP tool call): the always-on
+        /// record of what was called, with timing, so a run can be reconstructed afterwards regardless of log
+        /// level or client log retention. Overridable via <c>GPIB_MCP_TOOL_CALL_LOG</c> (tests redirect it).</summary>
+        public static string ToolCallLogPath()
+        {
+            string env = Environment.GetEnvironmentVariable("GPIB_MCP_TOOL_CALL_LOG");
+            if (!string.IsNullOrWhiteSpace(env)) return env.Trim();
+            return Path.Combine(AppDataDir(), "tool-calls.log");
+        }
+
         /// <summary>
         /// On first run, copies the bundled definitions into the user database directory so the
         /// user has an editable, prepopulated database. Never overwrites existing user files.

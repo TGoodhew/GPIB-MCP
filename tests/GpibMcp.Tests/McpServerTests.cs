@@ -13,6 +13,14 @@ namespace GpibMcp.Tests
 {
     public class McpServerTests
     {
+        static McpServerTests()
+        {
+            // The always-on tool-call audit log fires for every tools/call through the server; keep it out
+            // of the real %LOCALAPPDATA% during tests.
+            Environment.SetEnvironmentVariable("GPIB_MCP_TOOL_CALL_LOG",
+                Path.Combine(Path.GetTempPath(), "gpibmcp-test-tool-calls.log"));
+        }
+
         /// <summary>Runs the server over an in-memory transport and returns the response frames.</summary>
         private static List<JObject> Run(IInstrumentManager manager, params string[] requests)
         {
@@ -156,6 +164,34 @@ namespace GpibMcp.Tests
 
             Assert.Null(result["isError"]);
             Assert.Equal("ACME,Model5,SN1,1.0", (string)result["content"][0]["text"]);
+        }
+
+        [Fact]
+        public void ToolsCall_WritesOneAuditLineToTheToolCallLog()
+        {
+            var fake = new FakeInstrumentManager();
+            fake.QueryResponses["*IDN?"] = "ACME,Model5,SN1,1.0";
+
+            string logPath = Path.Combine(Path.GetTempPath(), "gpibmcp_audit_" + Path.GetRandomFileName() + ".log");
+            string prev = Environment.GetEnvironmentVariable("GPIB_MCP_TOOL_CALL_LOG");
+            Environment.SetEnvironmentVariable("GPIB_MCP_TOOL_CALL_LOG", logPath);
+            try
+            {
+                var request = "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\"," +
+                              "\"params\":{\"name\":\"visa_identify\",\"arguments\":{\"resource\":\"GPIB0::5::INSTR\"}}}";
+                Run(fake, request);
+
+                string[] lines = File.ReadAllLines(logPath);
+                Assert.Single(lines);                                  // exactly one audit line for one tools/call
+                Assert.Contains("visa_identify", lines[0]);
+                Assert.Contains("ok", lines[0]);
+                Assert.Contains("resource=GPIB0::5::INSTR", lines[0]); // args digest is captured
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_TOOL_CALL_LOG", prev);
+                try { File.Delete(logPath); } catch { /* best effort */ }
+            }
         }
 
         [Fact]

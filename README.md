@@ -709,16 +709,21 @@ When configured in an MCP client, set it alongside the command, e.g. for Claude 
 }
 ```
 
-### Timing logs
+### Diagnostic logs
 
-Two best-effort timing breakdowns are appended under `%LOCALAPPDATA%\GpibMcp\` for after-the-fact
-performance inspection (independent of the log level):
+Three best-effort logs are appended under `%LOCALAPPDATA%\GpibMcp\` for after-the-fact inspection,
+**independent of `GPIB_MCP_LOG_LEVEL`** (they are always written, not gated by the stderr log level):
 
-- **`capture-timing.log`** — per screen-capture: instrument warm-up vs. streaming vs. tail, and every read (#53).
+- **`tool-calls.log`** — one audit line per MCP tool call: timestamp, status (`ok`/`ERR`), elapsed ms, tool
+  name, and a compact digest of the arguments. The always-on record of *what was called*, so a whole turn can
+  be reconstructed afterwards — e.g. to count single-op calls versus one `gpib_batch`, and to total the
+  non-batched time against a batched run. Overridable with `GPIB_MCP_TOOL_CALL_LOG`.
 - **`batch-timing.log`** — per `gpib_batch` run: a per-op-type breakdown (`write`/`query`/`set`/`complete`/`wait`
   counts, total/mean/max ms, and each op type's share of the wall-clock), hotspot first — so a slow sweep shows
-  where the time actually went (typically the SRQ completion wait, an unavoidable instrument cost) (#58). The path
-  is overridable with `GPIB_MCP_BATCH_TIMING_LOG`.
+  where the time actually went (typically the SRQ completion wait, an unavoidable instrument cost) (#58).
+  Overridable with `GPIB_MCP_BATCH_TIMING_LOG`.
+- **`capture-timing.log`** — per screen-capture: instrument warm-up vs. streaming vs. tail, and every read (#53).
+  Overridable with `GPIB_MCP_CAPTURE_TIMING_LOG`.
 
 ## GPIB backends
 
