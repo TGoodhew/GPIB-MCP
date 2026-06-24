@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using GpibMcp.Diagnostics;
+using GpibMcp.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -27,14 +28,17 @@ namespace GpibMcp.Mcp
         private readonly TextReader _input;
         private readonly TextWriter _output;
         private readonly string _instructions;
+        private readonly BatchLoopNudge _loopNudge;
         private readonly object _writeGate = new object();
 
-        public McpServer(ToolRegistry tools, TextReader input, TextWriter output, string instructions = null)
+        public McpServer(ToolRegistry tools, TextReader input, TextWriter output, string instructions = null,
+                         BatchLoopNudge loopNudge = null)
         {
             _tools = tools ?? throw new ArgumentNullException(nameof(tools));
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _output = output ?? throw new ArgumentNullException(nameof(output));
             _instructions = instructions;
+            _loopNudge = loopNudge ?? new BatchLoopNudge();
         }
 
         /// <summary>Blocking read loop. Returns when stdin reaches EOF (client disconnected).</summary>
@@ -181,6 +185,10 @@ namespace GpibMcp.Mcp
                 ToolOutput output = tool.Invoke(arguments);
                 watch.Stop();
                 ToolCallLog.Write(name, arguments, !output.IsError, watch.ElapsedMilliseconds);
+                // #74: if the model is grinding through a per-point loop single-op, append a nudge to switch
+                // to gpib_batch - here, in the result it actually reads (soft steering alone didn't land).
+                string nudge = _loopNudge.Observe(name);
+                if (nudge != null) output.AddText(nudge);
                 return ToToolResult(output);
             }
             catch (Exception ex)
@@ -191,6 +199,7 @@ namespace GpibMcp.Mcp
                 // and the command chain), surface that so the model can explain it to the user.
                 watch.Stop();
                 ToolCallLog.Write(name, arguments, false, watch.ElapsedMilliseconds);
+                _loopNudge.Observe(name);   // count the (failed) single-op call so the run length stays accurate
                 Log.Warn("Tool '" + name + "' failed: " + ex.Message);
                 string text = (ex is IDetailedError detailed) ? detailed.Detail : ex.Message;
                 return ToToolResult(ToolOutput.Text("Error: " + text).AsError());
