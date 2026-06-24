@@ -54,6 +54,24 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void VisaWriteRaw_StreamsPaced_PassingChunkBytesThrough_Losslessly()
+        {
+            var visa = new FakeInstrumentManager();
+            byte[] payload = { 0x1B, 0x03, 0x00, 0x0E, 0x0F, (byte)'A', 0x7E };
+
+            var output = Tool(visa, "visa_write_raw").Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::6::INSTR",
+                ["data"] = Convert.ToBase64String(payload),
+                ["chunk_bytes"] = 128
+            });
+
+            Assert.False(output.IsError);
+            Assert.Equal(128, visa.LastStreamChunkBytes);           // the paced chunk size reached the manager
+            Assert.Equal(payload, Assert.Single(visa.RawWrites).Data); // still byte-for-byte
+        }
+
+        [Fact]
         public void VisaWriteRaw_RejectsInvalidBase64()
         {
             var visa = new FakeInstrumentManager();

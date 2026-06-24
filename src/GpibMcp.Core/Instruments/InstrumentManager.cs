@@ -227,6 +227,31 @@ namespace GpibMcp.Instruments
             }
         }
 
+        public int WriteRawStreamed(string resource, byte[] data, RawWriteOptions options)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            options = options ?? new RawWriteOptions();
+            int perChunk = Timeout(options.PerChunkTimeoutMs);
+            lock (_gate)
+            {
+                string note = "<raw stream " + data.Length + " bytes, chunk " + options.ChunkBytes + ">";
+                try
+                {
+                    // Open once and hold the bus for the whole paced stream (one server-side operation, #77).
+                    _transport.Open(resource, perChunk);
+                    Log.Debug("VISA " + resource + " <- " + note);
+                    _history.Record(resource, CommandDirection.Sent, note);
+                    return RawStreamWriter.Stream(data, options,
+                        chunk => _transport.Write(resource, chunk, perChunk),
+                        ms => System.Threading.Thread.Sleep(ms));
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.Write, resource, note, ex);
+                }
+            }
+        }
+
         public string Read(string resource, int timeoutMs) =>
             Read(resource, new IoSpec(timeoutMs));
 

@@ -121,21 +121,31 @@ namespace GpibMcp.Tools
                 "labels end in ETX (0x03), or a binary PCL print stream. Provide the bytes as BASE64 in 'data' " +
                 "(base64 keeps them intact across the tool boundary); the server decodes and writes them. " +
                 "Pair with instrument_capture_screen's return_hpgl_base64 to forward a captured plot to a plotter " +
-                "byte-for-byte (e.g. an 8563E screen to a 7090A).",
+                "byte-for-byte (e.g. an 8563E screen to a 7090A). The send is PACED in bounded chunks server-side " +
+                "(the whole stream is one tool call) so a large plot doesn't overrun/time out a slow plotter/printer.",
                 Schema(
                     Required("resource", "string", "VISA resource string of the target (e.g. the plotter), e.g. 'GPIB0::6::INSTR'."),
                     Required("data", "string", "The bytes to write, BASE64-encoded. Decoded server-side and written verbatim."),
-                    Prop("timeout_ms", "integer", "I/O timeout in milliseconds (default 5000).")),
+                    Prop("chunk_bytes", "integer", "Max bytes per paced chunk (default 256; keep <= the device's input buffer). " +
+                        "Lower it if a slow plotter still overruns; 0 sends it all in one write."),
+                    Prop("settle_ms", "integer", "Optional pause between chunks in ms (default 0) - a margin for devices that drop the handshake while moving."),
+                    Prop("timeout_ms", "integer", "PER-CHUNK I/O timeout in milliseconds (default 5000) - it only needs to cover freeing one chunk of buffer, not the whole plot.")),
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
                     string b64 = ReqStr(args, "data");
-                    int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
                     byte[] bytes;
                     try { bytes = Convert.FromBase64String(b64.Trim()); }
                     catch (FormatException ex) { throw new ArgumentException("'data' is not valid base64: " + ex.Message); }
-                    visa.WriteRaw(resource, bytes, timeout);
-                    return "OK (wrote " + bytes.Length + " raw bytes verbatim to " + resource + ")";
+                    var opts = new RawWriteOptions
+                    {
+                        ChunkBytes = Int(args, "chunk_bytes", 256),
+                        InterChunkDelayMs = Int(args, "settle_ms", 0),
+                        PerChunkTimeoutMs = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs)
+                    };
+                    int chunks = visa.WriteRawStreamed(resource, bytes, opts);
+                    return "OK (streamed " + bytes.Length + " raw bytes verbatim to " + resource + " in " + chunks +
+                           " chunk" + (chunks == 1 ? "" : "s") + " of <=" + opts.ChunkBytes + ")";
                 }));
 
             // ---- VISA: read pending ---------------------------------------------

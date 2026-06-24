@@ -48,8 +48,14 @@ namespace GpibMcp.Instruments
 
         /// <summary>Writes raw bytes VERBATIM - no terminator added, no encoding/normalization - for passing
         /// control-byte-bearing payloads (e.g. HP-GL with ETX label terminators, binary PCL) to an instrument
-        /// intact (#70). The bytes go straight to the transport's raw write.</summary>
+        /// intact (#70). The bytes go straight to the transport's raw write, in one shot.</summary>
         void WriteRaw(string resource, byte[] data, int timeoutMs);
+
+        /// <summary>Writes raw bytes VERBATIM but PACED in bounded chunks (#77), so a large plot/print does not
+        /// time out in a single blocking write while the device slowly draws/prints. The bus handshake paces
+        /// each chunk; the per-chunk timeout need only cover freeing one chunk of buffer. Returns the chunk
+        /// count. The whole loop is one server-side operation (no model roundtrip per chunk).</summary>
+        int WriteRawStreamed(string resource, byte[] data, RawWriteOptions options);
 
         /// <summary>Reads a pending response from a previously written command.</summary>
         string Read(string resource, int timeoutMs);
