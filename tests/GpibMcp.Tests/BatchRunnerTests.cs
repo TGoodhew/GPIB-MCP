@@ -88,6 +88,34 @@ namespace GpibMcp.Tests
             Assert.Equal(3, fake.Log.Count(l => l == "C 8563E sweepComplete"));
         }
 
+        [Fact]
+        public void Timing_AggregatesWallClockPerOpType()
+        {
+            var plan = new BatchPlan
+            {
+                Sweep = new BatchSweep { Var = "f", From = 1, To = 3, Step = 1 },   // 3 pts
+                Steps = new List<BatchStep>
+                {
+                    new BatchStep { Op = "set",      Resource = "A", Command = "frequency", Value = "{{f}}", Unit = "Hz" },
+                    new BatchStep { Op = "write",    Resource = "A", Command = "CF {{f}}HZ;" },
+                    new BatchStep { Op = "complete", Resource = "A", Operation = "sweepComplete" },
+                    new BatchStep { Op = "query",    Resource = "A", Command = "MKA?", As = "amp" }
+                }
+            };
+            // A clock that advances 10ms per read, so per-op deltas are deterministic and non-zero.
+            long t = 0;
+            var res = BatchRunner.Run(plan, new FakeExec { OnQuery = (r, c) => "-1" }, new BatchCaps(), () => t += 10);
+
+            // one bucket per distinct op type (first-seen order), each run once per point (3 points).
+            Assert.Equal(new[] { "set", "write", "complete", "query" }, res.Timing.Select(x => x.Op));
+            foreach (var op in res.Timing)
+            {
+                Assert.Equal(3, op.Count);                 // ran at all 3 sweep points
+                Assert.True(op.TotalMs > 0);               // wall-clock attributed
+                Assert.True(op.MaxMs >= op.MeanMs);
+            }
+        }
+
         // ---- capture feeds a later step -----------------------------------------
 
         [Fact]

@@ -108,6 +108,17 @@ namespace GpibMcp.Instruments
         public long ElapsedMs;
     }
 
+    /// <summary>Wall-clock spent in one op type across the whole run (#58 instrumentation): how many of
+    /// that op ran and the total/mean/max time, so a sweep's hotspots (e.g. completion waits) are visible.</summary>
+    public sealed class BatchOpTiming
+    {
+        public string Op;
+        public int Count;
+        public long TotalMs;
+        public long MaxMs;
+        public double MeanMs => Count > 0 ? (double)TotalMs / Count : 0;
+    }
+
     public sealed class BatchResult
     {
         public bool Ok;
@@ -116,6 +127,7 @@ namespace GpibMcp.Instruments
         public List<List<object>> Rows = new List<List<object>>();
         public List<BatchError> Errors = new List<BatchError>();
         public BatchTruncation Truncated;   // null unless rows were capped
+        public List<BatchOpTiming> Timing = new List<BatchOpTiming>();   // per-op-type wall-clock (#58)
     }
 
     /// <summary>
@@ -205,6 +217,7 @@ namespace GpibMcp.Instruments
                     var step = plan.Steps[si];
                     int timeout = step.TimeoutMs ?? caps.DefaultStepTimeoutMs;
                     gpibOps++;
+                    long opStart = nowMs();
                     try
                     {
                         string cmd = Interpolate(step.Command, bindings);
@@ -239,6 +252,7 @@ namespace GpibMcp.Instruments
                         }
                         if (step.SettleMs > 0 && !string.Equals(step.Op, "wait", StringComparison.OrdinalIgnoreCase))
                             exec.Sleep(step.SettleMs);
+                        AddTiming(result.Timing, step.Op, nowMs() - opStart);   // attribute this step's wall-clock (#58)
                     }
                     catch (Exception ex)
                     {
@@ -294,6 +308,19 @@ namespace GpibMcp.Instruments
                 if (pts.Count > 100000) { error = "sweep produced too many points."; break; }
             }
             return pts;
+        }
+
+        /// <summary>Folds one executed step's wall-clock into the per-op-type aggregate (first-seen order).</summary>
+        private static void AddTiming(List<BatchOpTiming> timing, string op, long ms)
+        {
+            if (ms < 0) ms = 0;
+            string key = (op ?? "").ToLowerInvariant();
+            BatchOpTiming t = null;
+            for (int i = 0; i < timing.Count; i++) if (timing[i].Op == key) { t = timing[i]; break; }
+            if (t == null) { t = new BatchOpTiming { Op = key }; timing.Add(t); }
+            t.Count++;
+            t.TotalMs += ms;
+            if (ms > t.MaxMs) t.MaxMs = ms;
         }
 
         private static string DescribeSweep(BatchSweep s)

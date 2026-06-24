@@ -9,6 +9,13 @@ namespace GpibMcp.Tests
 {
     public class BatchToolsTests
     {
+        static BatchToolsTests()
+        {
+            // gpib_batch writes a per-run breakdown to batch-timing.log; keep it out of the real %LOCALAPPDATA%.
+            System.Environment.SetEnvironmentVariable("GPIB_MCP_BATCH_TIMING_LOG",
+                System.IO.Path.Combine(System.IO.Path.GetTempPath(), "gpibmcp-test-batch-timing.log"));
+        }
+
         private static (InstrumentDatabase, AssignmentStore, FakeInstrumentManager) Fixture()
         {
             var def = new InstrumentDefinition { Model = "8563E", Category = "Spectrum Analyzer" };
