@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using GpibMcp.Diagnostics;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Newtonsoft.Json;
@@ -81,6 +82,12 @@ namespace GpibMcp.Tools
                     var exec = new BatchExecutor(db, assignments, visa);
                     var watch = Stopwatch.StartNew();
                     BatchResult result = BatchRunner.Run(plan, exec, caps, () => watch.ElapsedMilliseconds);
+
+                    // #58 instrumentation: append the per-op timing breakdown to batch-timing.log so a bench
+                    // sweep can be inspected afterwards (where the wall-clock went per op type).
+                    BatchTimingLog.Write(result);
+                    Log.Info("batch run: " + Summarize(result) + " (timing -> " + BatchTimingLog.Path + ")");
+
                     return ToolOutput.Text(Serialize(result));
                 })));
         }

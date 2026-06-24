@@ -709,6 +709,17 @@ When configured in an MCP client, set it alongside the command, e.g. for Claude 
 }
 ```
 
+### Timing logs
+
+Two best-effort timing breakdowns are appended under `%LOCALAPPDATA%\GpibMcp\` for after-the-fact
+performance inspection (independent of the log level):
+
+- **`capture-timing.log`** — per screen-capture: instrument warm-up vs. streaming vs. tail, and every read (#53).
+- **`batch-timing.log`** — per `gpib_batch` run: a per-op-type breakdown (`write`/`query`/`set`/`complete`/`wait`
+  counts, total/mean/max ms, and each op type's share of the wall-clock), hotspot first — so a slow sweep shows
+  where the time actually went (typically the SRQ completion wait, an unavoidable instrument cost) (#58). The path
+  is overridable with `GPIB_MCP_BATCH_TIMING_LOG`.
+
 ## GPIB backends
 
 Wire-level I/O sits behind a single abstraction, **`IGpibTransport`**, so the adapter is pluggable.

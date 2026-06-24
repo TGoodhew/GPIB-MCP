@@ -49,6 +49,15 @@ namespace GpibMcp.Instruments
             return Path.Combine(AppDataDir(), "capture-timing.log");
         }
 
+        /// <summary>Where the per-batch timing breakdown is appended (issue #58 instrumentation).
+        /// Overridable via <c>GPIB_MCP_BATCH_TIMING_LOG</c> (tests redirect it out of %LOCALAPPDATA%).</summary>
+        public static string BatchTimingLogPath()
+        {
+            string env = Environment.GetEnvironmentVariable("GPIB_MCP_BATCH_TIMING_LOG");
+            if (!string.IsNullOrWhiteSpace(env)) return env.Trim();
+            return Path.Combine(AppDataDir(), "batch-timing.log");
+        }
+
         /// <summary>
         /// On first run, copies the bundled definitions into the user database directory so the
         /// user has an editable, prepopulated database. Never overwrites existing user files.
