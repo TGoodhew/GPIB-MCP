@@ -69,7 +69,59 @@ namespace GpibMcp.Tests
             Assert.True((bool)json["preview"]);
             Assert.Equal(3, (int)json["ran"]["points"]);
             Assert.Equal(6, (int)json["ran"]["gpib_ops"]);
+            Assert.Null(json["needs_confirm"]);                                 // small plan, not gated
             Assert.Empty(visa.Writes);                                          // nothing was sent
+        }
+
+        [Fact]
+        public void Batch_Result_IncludesSummaryAndMarkdownTable()
+        {
+            var (db, store, visa) = Fixture();
+            visa.QueryResponses["MKA?"] = "-12.3";
+
+            var json = JObject.Parse(Tool(db, store, visa).InvokeText(SweepArgs()));
+
+            string summary = (string)json["summary"];
+            Assert.StartsWith("3 points, 6 ops, ", summary);                    // points + ops
+            Assert.EndsWith(", 0 errors", summary);                            // error count (elapsed in between)
+            string table = (string)json["table"];
+            Assert.Contains("| f_hz (Hz) | amp_dbm |", table);                  // header carries the unit
+            Assert.Contains("| ---: | ---: |", table);                         // both columns numeric -> right-aligned
+            Assert.Contains("| 500000 | -12.3 |", table);                      // a real data row, numbers formatted
+            Assert.Equal(3, table.Split('\n').Length - 2);                      // 3 data rows (minus header + divider)
+        }
+
+        // A plan above the confirm threshold (~50 GPIB ops) must not touch the bus until confirm:true.
+        private static JObject LargeSweepArgs() => new JObject
+        {
+            ["sweep"] = new JObject { ["var"] = "f_hz", ["from"] = 1000000, ["to"] = 40000000, ["step"] = 1000000 },
+            ["steps"] = new JArray
+            {
+                new JObject { ["op"] = "write", ["resource"] = "8563E", ["command"] = "CF {{f_hz}}HZ;" },
+                new JObject { ["op"] = "query", ["resource"] = "8563E", ["command"] = "MKA?", ["as"] = "amp_dbm" }
+            }
+        };
+
+        [Fact]
+        public void Batch_LargePlan_IsGated_AndSendsNothing_UntilConfirmed()
+        {
+            var (db, store, visa) = Fixture();
+            visa.QueryResponses["MKA?"] = "-12.3";
+
+            // 40 points x 2 ops = 80 GPIB ops, over the ConfirmAboveOps=50 threshold.
+            var gated = JObject.Parse(Tool(db, store, visa).InvokeText(LargeSweepArgs()));
+            Assert.True((bool)gated["needs_confirm"]);
+            Assert.True((bool)gated["preview"]);
+            Assert.Equal(80, (int)gated["ran"]["gpib_ops"]);
+            Assert.Empty(visa.Writes);                                          // gated: nothing sent
+
+            // Re-call with confirm:true -> it actually runs.
+            var args = LargeSweepArgs();
+            args["confirm"] = true;
+            var ran = JObject.Parse(Tool(db, store, visa).InvokeText(args));
+            Assert.Null(ran["needs_confirm"]);
+            Assert.Equal(40, (int)ran["ran"]["points"]);
+            Assert.NotEmpty(visa.Writes);                                       // confirmed: ran on the bus
         }
     }
 }

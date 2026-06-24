@@ -132,7 +132,10 @@ namespace GpibMcp.Tools
                 "a compact sweep (var, from/to/step|count) + the ordered ops to run at each point - set/write/query " +
                 "(capture with 'as'), complete (wait for the sweep to finish via SRQ before reading), wait - with " +
                 "{{var}}/{{capture}} interpolation across instruments. The server runs every point and returns one " +
-                "table {ran, columns, rows, errors}. Collapses a ~200-call measurement into a single tool call.",
+                "result {ran, columns, rows, errors} with a ready-to-show 'summary' line and a markdown 'table' to " +
+                "relay to the user. Collapses a ~200-call measurement into a single tool call. A LARGE plan (more " +
+                "than ~50 GPIB ops) comes back as needs_confirm with a preview and touches nothing - show the user " +
+                "what will run and re-call with confirm:true once they approve.",
                 new[] { "\"Take a reading every 500 kHz up to 20 MHz.\"",
                         "\"Step the 3325B 1-20 MHz; at each point center the 8563E, peak-search, read freq and amplitude.\"" });
 

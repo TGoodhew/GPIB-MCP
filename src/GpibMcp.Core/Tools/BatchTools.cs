@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Newtonsoft.Json;
@@ -32,8 +33,11 @@ namespace GpibMcp.Tools
             "instrument to truly finish a sweep via SRQ before you read; use it between setting CF and a peak " +
             "search), or 'wait' ({op:'wait', settle_ms}). Interpolate the sweep var and captures with {{name}}. " +
             "'resource' may be a VISA string or an assigned model name. 'on_error':'stop'|'continue'. Returns a " +
-            "JSON envelope {ran, columns, rows (array-of-arrays), errors, truncated}. Pass preview:true to get the " +
-            "plan size without touching the bus.";
+            "JSON envelope {ran, columns, rows (array-of-arrays), errors, truncated} plus a ready-to-show 'summary' " +
+            "line and a markdown 'table' - relay those to the user. Pass preview:true to get the plan size without " +
+            "touching the bus. LARGE plans (more than ~50 GPIB ops) are gated: the call returns needs_confirm with a " +
+            "preview and sends NOTHING to the bus - show the user what will run, and only if they approve, call again " +
+            "with confirm:true to execute. Small plans run immediately.";
 
         public static void Register(ToolRegistry registry, InstrumentDatabase db, AssignmentStore assignments,
                                     IInstrumentManager visa)
@@ -46,7 +50,9 @@ namespace GpibMcp.Tools
                     Prop("sweep", "object", "Optional swept dimension: {var, from, to, step} or {var, from, to, count} (+ optional unit). " +
                         "Omit to run the steps once."),
                     Prop("on_error", "string", "'stop' (default) or 'continue' (record the error, keep going)."),
-                    Prop("preview", "boolean", "If true, return the plan size (points/ops) WITHOUT running anything.")),
+                    Prop("preview", "boolean", "If true, return the plan size (points/ops) WITHOUT running anything."),
+                    Prop("confirm", "boolean", "Set true to execute a LARGE plan that was gated for confirmation " +
+                        "(more than ~50 GPIB ops). Small plans run without it; ignored when preview:true.")),
                 (Func<JObject, ToolOutput>)(args =>
                 {
                     BatchPlan plan;
@@ -57,17 +63,20 @@ namespace GpibMcp.Tools
                     string invalid = BatchRunner.Validate(plan, caps);
                     if (invalid != null) return ToolOutput.Text("Batch rejected: " + invalid).AsError();
 
+                    var pv = BatchRunner.Preview(plan, caps);
+
+                    // Explicit preview: report the plan size, touch nothing.
                     if (Bool(args, "preview", false))
-                    {
-                        var pv = BatchRunner.Preview(plan, caps);
-                        return ToolOutput.Text(new JObject
-                        {
-                            ["ok"] = true, ["preview"] = true,
-                            ["ran"] = new JObject { ["sweep"] = pv.Sweep, ["points"] = pv.Points,
-                                ["ops_per_point"] = pv.OpsPerPoint, ["gpib_ops"] = pv.GpibOps },
-                            ["note"] = "Nothing was sent to the bus. Call again without preview to execute."
-                        }.ToString(Formatting.None));
-                    }
+                        return ToolOutput.Text(PreviewEnvelope(pv, needsConfirm: false,
+                            "Nothing was sent to the bus. Call again without preview to execute.").ToString(Formatting.None));
+
+                    // Confirm gate (#59 Phase 2): a large plan returns a preview and runs nothing until the caller
+                    // re-submits with confirm:true. Small plans run straight through - no friction.
+                    if (pv.GpibOps > caps.ConfirmAboveOps && !Bool(args, "confirm", false))
+                        return ToolOutput.Text(PreviewEnvelope(pv, needsConfirm: true,
+                            "This is a large batch (" + pv.GpibOps + " GPIB ops over " + pv.Points + " points). Nothing " +
+                            "was sent to the bus. Show the user what will run; if they approve, call again with " +
+                            "confirm:true to execute.").ToString(Formatting.None));
 
                     var exec = new BatchExecutor(db, assignments, visa);
                     var watch = Stopwatch.StartNew();
@@ -116,6 +125,21 @@ namespace GpibMcp.Tools
             return plan;
         }
 
+        /// <summary>The preview/confirm envelope: the plan size with nothing sent to the bus.</summary>
+        private static JObject PreviewEnvelope(BatchRanInfo pv, bool needsConfirm, string note)
+        {
+            var jo = new JObject
+            {
+                ["ok"] = true,
+                ["preview"] = true,
+                ["ran"] = new JObject { ["sweep"] = pv.Sweep, ["points"] = pv.Points,
+                    ["ops_per_point"] = pv.OpsPerPoint, ["gpib_ops"] = pv.GpibOps },
+                ["note"] = note
+            };
+            if (needsConfirm) jo["needs_confirm"] = true;
+            return jo;
+        }
+
         private static double Dbl(JToken t) =>
             t == null ? 0 : double.Parse(Convert.ToString(((JValue)t).Value, CultureInfo.InvariantCulture),
                                          NumberStyles.Float, CultureInfo.InvariantCulture);
@@ -142,7 +166,11 @@ namespace GpibMcp.Tools
                     if (c.From != null) o["from"] = c.From;
                     return (JToken)o;
                 })),
-                ["rows"] = new JArray(r.Rows.Select(row => (JToken)new JArray(row.Select(Cell))))
+                ["rows"] = new JArray(r.Rows.Select(row => (JToken)new JArray(row.Select(Cell)))),
+                // Ready-to-show renderings (#59 Phase 2): a one-line summary and a markdown table the model can
+                // relay to the user verbatim, without having to rebuild them from the array-of-arrays rows.
+                ["summary"] = Summarize(r),
+                ["table"] = MarkdownTable(r)
             };
             if (r.Errors.Count > 0)
                 jo["errors"] = new JArray(r.Errors.Select(e => (JToken)new JObject
@@ -160,6 +188,68 @@ namespace GpibMcp.Tools
             if (v == null) return JValue.CreateNull();
             if (v is double d) return new JValue(d);
             return new JValue(Convert.ToString(v, CultureInfo.InvariantCulture));
+        }
+
+        // ---- human-readable renderings (#59 Phase 2) ----------------------------
+
+        /// <summary>A one-line plan/run summary: "39 points, 156 ops, 8.2 s, 0 errors".</summary>
+        private static string Summarize(BatchResult r)
+        {
+            string pts = r.Ran.Points + (r.Ran.Points == 1 ? " point" : " points");
+            string secs = (r.Ran.ElapsedMs / 1000.0).ToString("0.0", CultureInfo.InvariantCulture) + " s";
+            string errs = r.Errors.Count + (r.Errors.Count == 1 ? " error" : " errors");
+            string summary = pts + ", " + r.Ran.GpibOps + " ops, " + secs + ", " + errs;
+            if (r.Truncated != null)
+                summary += " (table truncated to " + r.Truncated.Returned + " of " + r.Truncated.Total + " rows)";
+            return summary;
+        }
+
+        /// <summary>Renders the result as a GitHub-flavoured markdown table: header (name + unit), numeric
+        /// columns right-aligned. Returns an empty string when there are no columns to show.</summary>
+        private static string MarkdownTable(BatchResult r)
+        {
+            if (r.Columns.Count == 0 || r.Rows.Count == 0) return "";
+
+            // A column is numeric if every non-null cell in it is a number; numeric columns are right-aligned.
+            int n = r.Columns.Count;
+            var numeric = new bool[n];
+            for (int c = 0; c < n; c++)
+            {
+                bool any = false, allNum = true;
+                foreach (var row in r.Rows)
+                {
+                    object cell = c < row.Count ? row[c] : null;
+                    if (cell == null) continue;
+                    any = true;
+                    if (!(cell is double)) { allNum = false; break; }
+                }
+                numeric[c] = any && allNum;
+            }
+
+            var sb = new StringBuilder();
+            sb.Append("| ");
+            for (int c = 0; c < n; c++)
+            {
+                var col = r.Columns[c];
+                sb.Append(string.IsNullOrEmpty(col.Unit) ? col.Name : col.Name + " (" + col.Unit + ")");
+                sb.Append(c == n - 1 ? " |" : " | ");
+            }
+            sb.Append('\n').Append("|");
+            for (int c = 0; c < n; c++) sb.Append(numeric[c] ? " ---: |" : " --- |");
+            foreach (var row in r.Rows)
+            {
+                sb.Append('\n').Append("| ");
+                for (int c = 0; c < n; c++)
+                {
+                    object cell = c < row.Count ? row[c] : null;
+                    string text = cell == null ? ""
+                        : cell is double d ? BatchRunner.FormatNumber(d)
+                        : Convert.ToString(cell, CultureInfo.InvariantCulture);
+                    sb.Append(text);
+                    sb.Append(c == n - 1 ? " |" : " | ");
+                }
+            }
+            return sb.ToString();
         }
 
         // ---- the bus executor ---------------------------------------------------
