@@ -335,6 +335,9 @@ namespace GpibMcp.Tools
             // ---- Screen capture (HP-GL plotter emulation -> image) --------------
             CaptureTools.Register(registry, db, assignments, visa);
 
+            // ---- Batch / sweep execution (#59): one call runs a whole sweep -----
+            BatchTools.Register(registry, db, assignments, visa);
+
             return registry;
         }
 
@@ -401,6 +404,25 @@ namespace GpibMcp.Tools
                 default:
                     return Txt(result.Message + DefineHint(operation));
             }
+        }
+
+        /// <summary>
+        /// Runs the model's statusModel completion wait for a resource and returns the raw result (the
+        /// shared core of <c>instrument_wait_complete</c>, reused by the batch <c>complete</c> op, #59):
+        /// resolves the model from the assignment, builds the serial-poll channel, and waits via the
+        /// data-driven <see cref="CompletionWaiter"/>.
+        /// </summary>
+        internal static CompletionResult RunCompletion(InstrumentDatabase db, AssignmentStore assignments,
+                                                       IInstrumentManager visa, string resource, string operation, int timeoutMs)
+        {
+            string model = assignments.Get(resource);
+            StatusModel sm = null;
+            InstrumentDefinition def;
+            if (!string.IsNullOrEmpty(model) && db.TryGet(model, out def)) sm = def.StatusModel;
+            var channel = new VisaStatusChannel(visa, resource);
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            return CompletionWaiter.Wait(sm, model ?? resource, operation, timeoutMs, channel,
+                                         () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep);
         }
 
         /// <summary>Tool affordance appended to a NeedsDefinition prompt: the one-step define-and-persist path.</summary>

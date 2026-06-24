@@ -62,9 +62,8 @@ namespace GpibMcp.Tools
                           "value, unit) (it picks the device's suffix and converts units), as the mnemonic alone is rarely " +
                           "right. For a triggered measurement (sweep/acquire): ARM, then instrument_wait_complete(resource, " +
                           "operation) to wait via SRQ, then READ - never read before completion.");
-            sb.AppendLine("When the user asks what this tool can do, or which instruments/commands are supported, " +
-                          "call the gpib_overview tool for a detailed, structured answer with example asks rather " +
-                          "than guessing from individual tool descriptions.");
+            sb.AppendLine("When asked what this tool can do or which instruments are supported, call gpib_overview.");
+            sb.AppendLine("For a sweep / repeated measurement, use gpib_batch (one call runs the whole sweep, returns one table).");
             sb.Append("Notes: 32-bit (x86) and the NI driver must be installed; GPIB bus extenders " +
                       "(e.g. HP 37204A) make every address look occupied - the server flags this.");
             return sb.ToString();
@@ -127,6 +126,15 @@ namespace GpibMcp.Tools
                 "serial-poll the status byte (decoded to named bits) and wait for SRQ. A missing statusModel can be defined " +
                 "and persisted in one confirm-to-save step.",
                 new[] { "\"Wait for the sweep to finish, then read the marker.\"", "\"Serial-poll GPIB0::18.\"" });
+
+            Section(sb, "Batch / sweep execution (one call, not 200)",
+                "For a sweep or repeated per-point measurement, author ONE gpib_batch instead of many single-op calls: " +
+                "a compact sweep (var, from/to/step|count) + the ordered ops to run at each point - set/write/query " +
+                "(capture with 'as'), complete (wait for the sweep to finish via SRQ before reading), wait - with " +
+                "{{var}}/{{capture}} interpolation across instruments. The server runs every point and returns one " +
+                "table {ran, columns, rows, errors}. Collapses a ~200-call measurement into a single tool call.",
+                new[] { "\"Take a reading every 500 kHz up to 20 MHz.\"",
+                        "\"Step the 3325B 1-20 MHz; at each point center the 8563E, peak-search, read freq and amplitude.\"" });
 
             Section(sb, "Error reporting & diagnostics",
                 "Tool errors come back as friendly decoded VISA failures; ask for the exact codes to get the raw VISA " +
