@@ -4,6 +4,9 @@
 *.user
 *.suo
 
+# Generated deployment packages (packaging/Generate-Packages.ps1)
+dist/
+
 # VS / Rider
 .vs/
 .idea/

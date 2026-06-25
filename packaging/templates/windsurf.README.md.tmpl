@@ -1,0 +1,25 @@
+# GPIB MCP — Windsurf install (#91)
+
+Windsurf (Cascade) runs local **stdio** MCP servers, so this uses the same `GpibMcp.exe` directly.
+Windsurf has no install deeplink, so add it via the config file (or the Cascade MCP UI).
+
+## 1. Get the server
+Download `__ZIP__` from the GitHub Release and unzip it to:
+
+```
+__INSTALLDIR__
+```
+
+(so the server is at `__EXE__`). NI-VISA / NI-488.2 must be installed on the machine.
+
+## 2. Config
+Add to `%USERPROFILE%\.codeium\windsurf\mcp_config.json` (merge into any existing `mcpServers`):
+
+```json
+__CONFIG__
+```
+
+Then in Windsurf: **Cascade → MCP / Manage plugins → Refresh**.
+
+## 3. Use it
+Confirm `gpib` appears in Cascade's MCP tool list, then ask it to talk to your instruments.

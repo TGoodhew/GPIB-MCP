@@ -1,0 +1,37 @@
+# GPIB MCP — VS Code install (#89)
+
+VS Code (GitHub Copilot **agent mode**) runs local **stdio** MCP servers, so this uses the same
+`GpibMcp.exe` directly.
+
+## 1. Get the server
+Download `__ZIP__` from the GitHub Release and unzip it to:
+
+```
+__INSTALLDIR__
+```
+
+(so the server is at `__EXE__`). NI-VISA / NI-488.2 must be installed on the machine.
+
+## 2a. One-click
+Click an **Install in VS Code** link/badge, or open this URL:
+
+```
+__VSCODE_URL__
+```
+
+## 2b. Command line
+```
+__VSCODE_ADDCMD__
+```
+
+## 2c. Manual config
+Add to your user `mcp.json` (Command Palette → **MCP: Open User Configuration**) or a workspace
+`.vscode/mcp.json`:
+
+```json
+__CONFIG__
+```
+
+## 3. Use it
+Open Copilot **Agent mode**, confirm the `gpib` server is started (Tools picker), then ask it to talk to
+your instruments. Manage it via **MCP: List Servers**.
