@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using GpibMcp.Diagnostics;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using Srq.Completion;
@@ -129,6 +130,8 @@ namespace GpibMcp.Tools
                     Prop("chunk_bytes", "integer", "Max bytes per paced chunk (default 256; keep <= the device's input buffer). " +
                         "Lower it if a slow plotter still overruns; 0 sends it all in one write."),
                     Prop("settle_ms", "integer", "Optional pause between chunks in ms (default 0) - a margin for devices that drop the handshake while moving."),
+                    Prop("debug", "boolean", "If true, ALSO save the exact bytes being written to a debug file (for troubleshooting). " +
+                        "Set this when the user asks to send 'with debug'."),
                     Prop("timeout_ms", "integer", "PER-CHUNK I/O timeout in milliseconds (default 5000) - it only needs to cover freeing one chunk of buffer, not the whole plot.")),
                 args =>
                 {
@@ -137,6 +140,9 @@ namespace GpibMcp.Tools
                     byte[] bytes;
                     try { bytes = Convert.FromBase64String(b64.Trim()); }
                     catch (FormatException ex) { throw new ArgumentException("'data' is not valid base64: " + ex.Message); }
+                    string dbg = null;
+                    if (Bool(args, "debug", false))
+                        dbg = RawDebugDump.Save("writeraw-" + resource, "hpgl", bytes);
                     var opts = new RawWriteOptions
                     {
                         ChunkBytes = Int(args, "chunk_bytes", 256),
@@ -145,7 +151,8 @@ namespace GpibMcp.Tools
                     };
                     int chunks = visa.WriteRawStreamed(resource, bytes, opts);
                     return "OK (streamed " + bytes.Length + " raw bytes verbatim to " + resource + " in " + chunks +
-                           " chunk" + (chunks == 1 ? "" : "s") + " of <=" + opts.ChunkBytes + ")";
+                           " chunk" + (chunks == 1 ? "" : "s") + " of <=" + opts.ChunkBytes + ")" +
+                           (dbg != null ? "  |  debug raw saved: " + dbg : "");
                 }));
 
             // ---- VISA: read pending ---------------------------------------------

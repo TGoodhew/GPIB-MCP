@@ -55,6 +55,8 @@ namespace GpibMcp.Tools
                         "If the user has stated a preference, pass it on EVERY plot capture. Omit only until they've chosen."),
                     Prop("save_dir", "string", "Folder to save the PNG into (e.g. 'C:\\\\Users\\\\me\\\\Pictures\\\\captures'). Defaults to the user's Pictures folder. Use this for 'capture the screen and store it in <folder>'."),
                     Prop("save_path", "string", "Full path (including filename) to save the PNG to. Overrides save_dir."),
+                    Prop("debug", "boolean", "If true, ALSO save the verbatim captured HP-GL/PCL bytes to a debug file (for " +
+                        "troubleshooting plot/render glitches). Set this when the user asks to capture or send 'with debug'."),
                     Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000).")),
                 (Func<JObject, ToolOutput>)(args => Capture(args, db, assignments, visa))));
         }
@@ -222,6 +224,14 @@ namespace GpibMcp.Tools
             if (isPrint) meta += "  |  print (PCL)";
             else if (fidelityChosen) meta += "  |  " + fidelity + " fidelity";
             if (savedTo != null) meta += "  |  saved to: " + savedTo;
+
+            // Debug: dump the verbatim captured bytes so the exact stream can be inspected off-disk (#79 slice).
+            if (Bool(args, "debug", false))
+            {
+                string rawPath = RawDebugDump.Save(def.Model + (isPrint ? "-print" : "") + "-capture",
+                    isPrint ? "pcl" : "hpgl", sourceBytes);
+                if (rawPath != null) meta += "  |  debug raw saved: " + rawPath;
+            }
 
             var output = new ToolOutput();
             if (inlineSvg && svg != null)

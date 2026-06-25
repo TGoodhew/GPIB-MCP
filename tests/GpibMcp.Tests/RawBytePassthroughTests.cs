@@ -72,6 +72,34 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void VisaWriteRaw_Debug_SavesTheExactBytesToDisk()
+        {
+            var visa = new FakeInstrumentManager();
+            byte[] payload = { (byte)'P', (byte)'D', 0x03, 0x00, 0x0E };
+            string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "gpibmcp_dbg_" + System.IO.Path.GetRandomFileName());
+            string prev = Environment.GetEnvironmentVariable("GPIB_MCP_DEBUG_DIR");
+            Environment.SetEnvironmentVariable("GPIB_MCP_DEBUG_DIR", dir);
+            try
+            {
+                Tool(visa, "visa_write_raw").Invoke(new JObject
+                {
+                    ["resource"] = "GPIB0::6::INSTR",
+                    ["data"] = Convert.ToBase64String(payload),
+                    ["debug"] = true
+                });
+
+                var dumped = System.IO.Directory.GetFiles(dir, "*.hpgl");
+                Assert.Single(dumped);
+                Assert.Equal(payload, System.IO.File.ReadAllBytes(dumped[0]));   // exact bytes on disk
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("GPIB_MCP_DEBUG_DIR", prev);
+                try { System.IO.Directory.Delete(dir, recursive: true); } catch { /* best effort */ }
+            }
+        }
+
+        [Fact]
         public void VisaWriteRaw_RejectsInvalidBase64()
         {
             var visa = new FakeInstrumentManager();
