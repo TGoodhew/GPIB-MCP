@@ -68,10 +68,17 @@ namespace GpibMcp.Instruments
             return _sessions[resource];
         }
 
-        public void Write(string resource, byte[] payload, int timeoutMs)
+        public void Write(string resource, byte[] payload, int timeoutMs) =>
+            Write(resource, payload, timeoutMs, sendEnd: true);
+
+        public void Write(string resource, byte[] payload, int timeoutMs, bool sendEnd)
         {
             var session = Session(resource, timeoutMs);
-            session.RawIO.Write(payload);
+            // EOI on the last byte: on for a normal/whole write, OFF for an intermediate stream chunk so a
+            // mid-message EOI doesn't make a plotter mis-parse a coordinate split across a chunk boundary (#77).
+            session.SendEndEnabled = sendEnd;
+            try { session.RawIO.Write(payload); }
+            finally { if (!sendEnd) session.SendEndEnabled = true; }   // leave the session in the default state
         }
 
         public TransportReadResult Read(string resource, TransportReadRequest request)

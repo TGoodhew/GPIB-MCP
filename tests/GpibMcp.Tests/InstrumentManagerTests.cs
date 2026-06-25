@@ -22,6 +22,20 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void WriteRawStreamed_ChunksVerbatim_AndAssertsEoiOnlyOnTheLastChunk()
+        {
+            var t = new FakeTransport();
+            var mgr = new InstrumentManager(t);
+            byte[] data = System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes("ABCDEFG");   // 7 bytes
+
+            int chunks = mgr.WriteRawStreamed("GPIB0::6::INSTR", data, new RawWriteOptions { ChunkBytes = 3 });
+
+            Assert.Equal(3, chunks);
+            Assert.Equal(new[] { "ABC", "DEF", "G" }, t.Writes);            // chunked, byte-for-byte, in order
+            Assert.Equal(new[] { false, false, true }, t.WriteSendEnds);   // EOI only on the final chunk (#77)
+        }
+
+        [Fact]
         public void Query_MapsIoSpecToReadRequest()
         {
             var t = new FakeTransport();
@@ -142,6 +156,8 @@ namespace GpibMcp.Tests
             public bool Close(string resource) => true;
             public System.Collections.Generic.IList<string> ListOpen() => new System.Collections.Generic.List<string>();
             public virtual void Write(string resource, byte[] payload, int timeoutMs) { }
+            public virtual void Write(string resource, byte[] payload, int timeoutMs, bool sendEnd) =>
+                Write(resource, payload, timeoutMs);
             public virtual TransportReadResult Read(string resource, TransportReadRequest request) =>
                 new TransportReadResult(System.Array.Empty<byte>(), true);
             public int SerialPoll(string resource) => 0;

@@ -80,6 +80,20 @@ namespace GpibMcp.Tests
             _history.Record(resource, CommandDirection.Sent, "<raw " + (data?.Length ?? 0) + " bytes>");
         }
 
+        /// <summary>The chunk size requested on the last streamed write (for asserting it was passed through).</summary>
+        public int LastStreamChunkBytes = -1;
+
+        public int WriteRawStreamed(string resource, byte[] data, RawWriteOptions options)
+        {
+            // Stand-in: record the FULL payload verbatim (the chunking is the real manager's concern, exercised
+            // via RawStreamWriter's own tests). Captures the requested chunk size for pass-through assertions.
+            RawWrites.Add((resource, data));
+            LastStreamChunkBytes = options?.ChunkBytes ?? -1;
+            _history.Record(resource, CommandDirection.Sent, "<raw " + (data?.Length ?? 0) + " bytes, streamed>");
+            int chunk = options == null || options.ChunkBytes <= 0 ? Math.Max(1, data?.Length ?? 0) : options.ChunkBytes;
+            return data == null || data.Length == 0 ? 0 : (data.Length + chunk - 1) / chunk;
+        }
+
         public string Read(string resource, int timeoutMs) =>
             Read(resource, new IoSpec(timeoutMs));
 
