@@ -241,8 +241,10 @@ namespace GpibMcp.Instruments
                     _transport.Open(resource, perChunk);
                     Log.Debug("VISA " + resource + " <- " + note);
                     _history.Record(resource, CommandDirection.Sent, note);
+                    // EOI only on the final chunk (#77): a mid-stream EOI would make a plotter mis-parse a
+                    // coordinate that straddles a chunk boundary (seen as stray pen excursions on the page).
                     return RawStreamWriter.Stream(data, options,
-                        chunk => _transport.Write(resource, chunk, perChunk),
+                        (chunk, isLast) => _transport.Write(resource, chunk, perChunk, sendEnd: isLast),
                         ms => System.Threading.Thread.Sleep(ms));
                 }
                 catch (Exception ex) when (!(ex is GpibOperationException))

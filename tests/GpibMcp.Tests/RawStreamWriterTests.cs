@@ -13,7 +13,7 @@ namespace GpibMcp.Tests
         {
             var chunks = new List<byte[]>();
             var sleeps = new List<int>();
-            int count = RawStreamWriter.Stream(data, opts, chunks.Add, sleeps.Add);
+            int count = RawStreamWriter.Stream(data, opts, (c, _) => chunks.Add(c), sleeps.Add);
             return (chunks, sleeps, count);
         }
 
@@ -58,6 +58,19 @@ namespace GpibMcp.Tests
 
             Assert.Equal(3, count);
             Assert.Equal(new[] { 20, 20 }, sleeps);   // settles = chunks - 1, never after the final chunk
+        }
+
+        [Fact]
+        public void IsLast_IsTrueOnlyForTheFinalChunk()
+        {
+            // The manager uses isLast to assert EOI on the last chunk only (#77) - so a mid-stream EOI can't
+            // fragment a coordinate across a chunk boundary and make the plotter draw a stray excursion.
+            byte[] data = { 1, 2, 3, 4, 5, 6, 7 };   // 3 chunks of 3,3,1
+            var flags = new List<bool>();
+
+            RawStreamWriter.Stream(data, new RawWriteOptions { ChunkBytes = 3 }, (_, isLast) => flags.Add(isLast));
+
+            Assert.Equal(new[] { false, false, true }, flags);
         }
 
         [Fact]

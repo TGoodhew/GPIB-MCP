@@ -15,6 +15,7 @@ namespace GpibMcp.Tests
         private static readonly Encoding Latin1 = Encoding.GetEncoding("ISO-8859-1");
 
         public readonly List<string> Writes = new List<string>();
+        public readonly List<bool> WriteSendEnds = new List<bool>();   // EOI flag per write (#77)
         public readonly List<TransportReadRequest> Reads = new List<TransportReadRequest>();
         public readonly List<string> Opened = new List<string>();
         public string NextRead = "RESPONSE\n";
@@ -29,7 +30,13 @@ namespace GpibMcp.Tests
         public IList<string> ListOpen() => new List<string>();
 
         public void Write(string resource, byte[] payload, int timeoutMs) =>
+            Write(resource, payload, timeoutMs, sendEnd: true);
+
+        public void Write(string resource, byte[] payload, int timeoutMs, bool sendEnd)
+        {
             Writes.Add(Latin1.GetString(payload));
+            WriteSendEnds.Add(sendEnd);
+        }
 
         public TransportReadResult Read(string resource, TransportReadRequest request)
         {

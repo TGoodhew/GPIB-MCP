@@ -102,8 +102,14 @@ namespace GpibMcp.Instruments
         /// <summary>Resource strings of all connections currently held open.</summary>
         IList<string> ListOpen();
 
-        /// <summary>Writes raw bytes to a resource.</summary>
+        /// <summary>Writes raw bytes to a resource (asserts EOI on the last byte).</summary>
         void Write(string resource, byte[] payload, int timeoutMs);
+
+        /// <summary>Writes raw bytes, controlling whether EOI is asserted on the final byte. For a chunked
+        /// stream (#77), intermediate chunks pass <paramref name="sendEnd"/>=false so a mid-message EOI doesn't
+        /// fragment the stream (which would make a plotter mis-parse a coordinate split across a chunk
+        /// boundary); only the last chunk asserts EOI.</summary>
+        void Write(string resource, byte[] payload, int timeoutMs, bool sendEnd);
 
         /// <summary>Reads from a resource per the request (see <see cref="TransportReadRequest"/>).</summary>
         TransportReadResult Read(string resource, TransportReadRequest request);

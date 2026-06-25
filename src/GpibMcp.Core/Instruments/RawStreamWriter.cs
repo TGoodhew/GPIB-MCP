@@ -29,10 +29,11 @@ namespace GpibMcp.Instruments
     {
         /// <summary>
         /// Streams <paramref name="data"/> in chunks of <see cref="RawWriteOptions.ChunkBytes"/> via
-        /// <paramref name="writeChunk"/>, calling <paramref name="sleep"/> between chunks when a settle is set.
-        /// Returns the number of chunks written.
+        /// <paramref name="writeChunk"/> (the bool is <c>isLast</c> - true only for the final chunk, so the
+        /// caller can assert EOI only there), calling <paramref name="sleep"/> between chunks when a settle is
+        /// set. Returns the number of chunks written.
         /// </summary>
-        public static int Stream(byte[] data, RawWriteOptions options, Action<byte[]> writeChunk, Action<int> sleep = null)
+        public static int Stream(byte[] data, RawWriteOptions options, Action<byte[], bool> writeChunk, Action<int> sleep = null)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (writeChunk == null) throw new ArgumentNullException(nameof(writeChunk));
@@ -45,11 +46,11 @@ namespace GpibMcp.Instruments
                 int n = Math.Min(chunkSize, data.Length - offset);
                 var slice = new byte[n];
                 Array.Copy(data, offset, slice, 0, n);
-                writeChunk(slice);
+                bool isLast = offset + n >= data.Length;
+                writeChunk(slice, isLast);
                 chunks++;
 
-                bool more = offset + n < data.Length;
-                if (more && options.InterChunkDelayMs > 0) sleep?.Invoke(options.InterChunkDelayMs);
+                if (!isLast && options.InterChunkDelayMs > 0) sleep?.Invoke(options.InterChunkDelayMs);
             }
             return chunks;
         }
