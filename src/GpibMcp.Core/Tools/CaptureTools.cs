@@ -222,6 +222,12 @@ namespace GpibMcp.Tools
             string savedTo = SaveCapture(args, def.Model + (isPrint ? "-print" : ""), png);
             saveWatch.Stop();
 
+            // #79: retain the exact forwardable bytes server-side so the plot/print can be sent to a plotter
+            // BY REFERENCE - visa_write_raw(path=<handle>) - instead of the model re-emitting tens of KB of
+            // base64 (the dominant forwarding delay). Pruned to the most recent CaptureStore.KeepLast files.
+            string captureHandle = CaptureStore.Save(def.Model + (isPrint ? "-print" : ""),
+                isPrint ? "pcl" : "hpgl", sourceBytes);
+
             // Append the per-capture timing breakdown to %LOCALAPPDATA%\GpibMcp\capture-timing.log (#53):
             // where the seconds went - instrument warm-up vs. streaming vs. tail, plus every read - so we
             // can see it after a bench capture and confirm render/save really are negligible.
@@ -238,6 +244,7 @@ namespace GpibMcp.Tools
             if (isPrint) meta += "  |  print (PCL)";
             else if (fidelityChosen) meta += "  |  " + fidelity + " fidelity";
             if (savedTo != null) meta += "  |  saved to: " + savedTo;
+            if (captureHandle != null) meta += "  |  raw " + kind + " saved (send-by-reference handle): " + captureHandle;
 
             // Debug: dump the verbatim captured bytes (BEFORE the #79 trace repair) so the exact stream off
             // the GPIB read can be inspected off-disk - that is what makes a read drop-out diagnosable.
@@ -278,6 +285,17 @@ namespace GpibMcp.Tools
                 output.AddImage(png, "image/png");
             }
 
+            // #79: surface the send-by-reference path so forwarding a plot passes only the small handle, not
+            // the bytes - the model never re-emits tens of KB of base64 (the multi-minute delay this removes).
+            if (captureHandle != null)
+                output.AddText(
+                    "TO FORWARD this " + (isPrint ? "print" : "plot") + " to a plotter/printer: call " +
+                    "visa_write_raw(resource=<target address>, path=\"" + captureHandle + "\"). It streams the " +
+                    "exact captured bytes server-side BY REFERENCE (paced, verbatim, control bytes intact) - pass " +
+                    "the PATH, not the bytes. Do NOT request return_hpgl_base64 or paste the data for forwarding " +
+                    "(that round-trips tens of KB through you and is the slow path). Only do this if the user " +
+                    "wants the screen sent to a plotter/printer (e.g. an 8563E screen to a 7090A at GPIB0::6::INSTR).");
+
             // #52: every one of the maxAttempts captures came back with a corrupted coordinate. We rendered
             // the best effort (the renderer ignores the bad point), but the user should know and re-try.
             if (corruptCoordinate)
@@ -293,12 +311,14 @@ namespace GpibMcp.Tools
 
             if (Bool(args, "return_hpgl", false)) output.AddText(plotHpgl);
             if (Bool(args, "return_hpgl_base64", false))
-                // The captured bytes as base64 (#70): survives the tool boundary intact, so a plotter/printer gets
-                // the stream - including HP-GL ETX (0x03) label terminators - via visa_write_raw. A transient trace
-                // coordinate corrupted by a GPIB read drop-out is repaired first (#79) so the forwarded plot is clean.
-                output.AddText("RAW " + kind + " BYTES (base64, " + sourceBytes.Length + " bytes). To send this plot/print " +
-                               "VERBATIM to a plotter/printer, call visa_write_raw(resource=<target address>, data=<the base64 " +
-                               "below>) - pass it unchanged, do not edit or re-encode it:\n" + Convert.ToBase64String(sourceBytes));
+                // The captured bytes as base64 (#70): survives the tool boundary intact for the rare case the model
+                // genuinely needs the bytes. To FORWARD a plot to a plotter, prefer the send-by-reference handle
+                // above (visa_write_raw path=) - it avoids re-emitting this whole blob. A transient trace coordinate
+                // corrupted by a GPIB read drop-out is repaired first (#79) so the forwarded plot is clean.
+                output.AddText("RAW " + kind + " BYTES (base64, " + sourceBytes.Length + " bytes). Prefer forwarding by " +
+                               "reference (the path handle above). If you must pass the bytes, call " +
+                               "visa_write_raw(resource=<target address>, data=<the base64 below>) unchanged:\n" +
+                               Convert.ToBase64String(sourceBytes));
             return output;
         }
 

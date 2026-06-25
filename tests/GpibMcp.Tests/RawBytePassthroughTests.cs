@@ -14,16 +14,19 @@ namespace GpibMcp.Tests
     /// non-printing control bytes (HP-GL ETX 0x03, SO/SI 0x0E/0x0F, NUL) - by carrying them as base64 across
     /// the tool boundary and writing them verbatim, never through a string/terminator path.
     /// </summary>
+    [Collection("CaptureFiles")]
     public class RawBytePassthroughTests
     {
         static RawBytePassthroughTests()
         {
-            // The round-trip test runs a real capture (renders + saves a PNG, appends capture-timing.log);
-            // keep both out of the real %LOCALAPPDATA%/Pictures during tests.
+            // The round-trip test runs a real capture (renders + saves a PNG, appends capture-timing.log,
+            // retains the forwardable bytes #79); keep them all out of the real %LOCALAPPDATA%/Pictures.
             Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR",
                 System.IO.Path.Combine(System.IO.Path.GetTempPath(), "gpibmcp_captures_test"));
             Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURE_TIMING_LOG",
                 System.IO.Path.Combine(System.IO.Path.GetTempPath(), "gpibmcp_captures_test", "capture-timing.log"));
+            Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURES_DIR",
+                System.IO.Path.Combine(System.IO.Path.GetTempPath(), "gpibmcp_captures_test", "handles"));
         }
 
         private static readonly Encoding Latin1 = Encoding.GetEncoding("ISO-8859-1");
@@ -146,7 +149,98 @@ namespace GpibMcp.Tests
             Assert.Contains((byte)0x03, written);                       // including the ETX label terminator
         }
 
+        // ---- #79: send by reference (handle), not base64 through the model ----
+
+        [Fact]
+        public void VisaWriteRaw_FromPath_StreamsTheExactFileBytes()
+        {
+            var visa = new FakeInstrumentManager();
+            byte[] payload = { 0x1B, 0x03, 0x00, 0x0E, 0x0F, (byte)'A', 0x7E };
+            string file = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wr_" + System.IO.Path.GetRandomFileName() + ".hpgl");
+            System.IO.File.WriteAllBytes(file, payload);
+            try
+            {
+                var output = Tool(visa, "visa_write_raw").Invoke(new JObject
+                {
+                    ["resource"] = "GPIB0::6::INSTR",
+                    ["path"] = file              // by reference - no base64 in the args
+                });
+
+                Assert.False(output.IsError);
+                Assert.Equal(payload, Assert.Single(visa.RawWrites).Data);   // exact file bytes reached the plotter
+            }
+            finally { try { System.IO.File.Delete(file); } catch { } }
+        }
+
+        [Fact]
+        public void VisaWriteRaw_RequiresExactlyOneOfDataOrPath()
+        {
+            var visa = new FakeInstrumentManager();
+            // Neither supplied.
+            Assert.Throws<ArgumentException>(() => Tool(visa, "visa_write_raw")
+                .Invoke(new JObject { ["resource"] = "GPIB0::6::INSTR" }));
+            // Both supplied.
+            Assert.Throws<ArgumentException>(() => Tool(visa, "visa_write_raw").Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::6::INSTR",
+                ["data"] = Convert.ToBase64String(new byte[] { 1, 2, 3 }),
+                ["path"] = "C:\\nope.hpgl"
+            }));
+            Assert.Empty(visa.RawWrites);
+        }
+
+        [Fact]
+        public void VisaWriteRaw_Path_DoesNotExist_Throws()
+        {
+            var visa = new FakeInstrumentManager();
+            var args = new JObject
+            {
+                ["resource"] = "GPIB0::6::INSTR",
+                ["path"] = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "no_such_" + System.IO.Path.GetRandomFileName() + ".hpgl")
+            };
+            Assert.Throws<ArgumentException>(() => Tool(visa, "visa_write_raw").Invoke(args));
+            Assert.Empty(visa.RawWrites);
+        }
+
+        [Fact]
+        public void RoundTrip_CaptureHandle_ToVisaWriteRawByReference_PreservesEveryByte()
+        {
+            // The #79 headline: forwarding is driven by the capture HANDLE (a short path), never the bytes -
+            // yet the plotter still receives the exact captured plot, ETX intact.
+            var (db, store, visa) = CaptureFixture();
+            var registry = InstrumentTools.BuildRegistry(visa, db, store);
+
+            registry.TryGet("instrument_capture_screen", out var capture);
+            var captured = capture.Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR" });   // no return_hpgl_base64
+            string handle = ExtractHandle(captured);
+            Assert.True(System.IO.File.Exists(handle));
+
+            registry.TryGet("visa_write_raw", out var writeRaw);
+            var sent = writeRaw.Invoke(new JObject { ["resource"] = "GPIB0::6::INSTR", ["path"] = handle });
+
+            Assert.False(sent.IsError);
+            var (plotter, written) = Assert.Single(visa.RawWrites);
+            Assert.Equal("GPIB0::6::INSTR", plotter);
+            Assert.Equal(Latin1.GetBytes(visa.CaptureHpgl), written);   // exact captured plot, by reference
+            Assert.Contains((byte)0x03, written);                       // ETX label terminator survived
+        }
+
         // ---- helpers ----
+
+        /// <summary>Pulls the send-by-reference handle path out of a capture result's forwarding hint.</summary>
+        private static string ExtractHandle(ToolOutput output)
+        {
+            foreach (var b in output.Content)
+            {
+                if (b.Kind != ToolContentKind.Text || b.Text == null) continue;
+                int i = b.Text.IndexOf("path=\"", StringComparison.Ordinal);
+                if (i < 0) continue;
+                i += "path=\"".Length;
+                int j = b.Text.IndexOf('"', i);
+                if (j > i) return b.Text.Substring(i, j - i);
+            }
+            throw new Xunit.Sdk.XunitException("no send-by-reference handle in capture output");
+        }
 
         private static (InstrumentDatabase, AssignmentStore, FakeInstrumentManager) CaptureFixture()
         {

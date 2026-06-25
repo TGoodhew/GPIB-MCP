@@ -10,6 +10,7 @@ using Xunit;
 
 namespace GpibMcp.Tests
 {
+    [Collection("CaptureFiles")]
     public class CaptureToolsTests
     {
         static CaptureToolsTests()
@@ -20,6 +21,9 @@ namespace GpibMcp.Tests
             // Likewise the #53 capture-timing log - don't pollute the real %LOCALAPPDATA% file.
             Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURE_TIMING_LOG",
                 Path.Combine(Path.GetTempPath(), "gpibmcp_captures_test", "capture-timing.log"));
+            // And the #79 retained-capture (send-by-reference handle) dir.
+            Environment.SetEnvironmentVariable("GPIB_MCP_CAPTURES_DIR",
+                Path.Combine(Path.GetTempPath(), "gpibmcp_captures_test", "handles"));
         }
 
         private static InstrumentDefinition WithCaptureProfile() => new InstrumentDefinition
@@ -137,6 +141,31 @@ namespace GpibMcp.Tests
                 Assert.True(bytes.Length > 8 && bytes[0] == 0x89 && bytes[1] == 0x50); // PNG
             }
             finally { if (File.Exists(path)) File.Delete(path); }
+        }
+
+        [Fact]
+        public void Capture_RetainsForwardableBytes_AndOffersSendByReferenceHandle()
+        {
+            // #79: every plot capture writes its forwardable bytes server-side and surfaces a handle the
+            // model can forward to a plotter by reference (no base64 round-trip).
+            var db = InstrumentDatabase.FromDefinitions(new[] { WithCaptureProfile() });
+            var visa = new FakeInstrumentManager();
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = "8563E" });
+
+            Assert.False(output.IsError);
+            string text = output.AsText();
+            Assert.Contains("send-by-reference handle", text);
+            Assert.Contains("visa_write_raw(resource=<target address>, path=", text);
+
+            // Pull the handle out of the forwarding hint and confirm it holds the exact captured bytes.
+            int i = text.IndexOf("path=\"", StringComparison.Ordinal) + "path=\"".Length;
+            int j = text.IndexOf('"', i);
+            string handle = text.Substring(i, j - i);
+            Assert.True(File.Exists(handle));
+            Assert.EndsWith(".hpgl", handle);
+            var latin1 = System.Text.Encoding.GetEncoding("ISO-8859-1");
+            Assert.Equal(latin1.GetBytes(visa.CaptureHpgl), File.ReadAllBytes(handle));
         }
 
         [Fact]

@@ -533,6 +533,13 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 - Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
   (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
   (`save_dir`), or pass `save_path` for a full filename. The saved path is reported in the result.
+- **Forwarding a plot is by *reference*, not by re-sending the bytes (#79).** Every plot/print capture also
+  retains its exact forwardable bytes server-side under `%LOCALAPPDATA%\GpibMcp\captures\` (overridable via
+  `GPIB_MCP_CAPTURES_DIR`, pruned to the most recent 50) and returns that path as a small **handle**. To send
+  the plot to a plotter, `visa_write_raw` takes that handle as **`path=`** (mutually exclusive with `data=`):
+  the server reads the file and streams it verbatim — so the plot **never round-trips through the model** as
+  tens of KB of base64, which was the dominant multi-minute forwarding delay. `return_hpgl_base64` is still
+  there for the rare case the model genuinely needs the bytes, but is no longer the way to drive a plotter.
 - **Read-glitch robust.** A plot streams in timeout-bounded chunks, and a byte occasionally dropped at a
   chunk seam (the NI driver / a GPIB bus extender) shortens one trace coordinate — e.g. `995` → `95` —
   which would otherwise draw a stray pen excursion to the page edge. Two defences (#79): the capture reads
@@ -740,6 +747,10 @@ Three best-effort logs are appended under `%LOCALAPPDATA%\GpibMcp\` for after-th
 Opt-in raw dumps: passing `debug:true` to `instrument_capture_screen` or `visa_write_raw` (e.g. when you say
 "capture/send … **with debug**") writes the **verbatim** HP-GL/PCL bytes to `%LOCALAPPDATA%\GpibMcp\debug\`
 (override `GPIB_MCP_DEBUG_DIR`) so the exact stream can be inspected to diagnose plot/render glitches.
+
+Retained captures: every plot/print capture also keeps its forwardable bytes under `%LOCALAPPDATA%\GpibMcp\captures\`
+(override `GPIB_MCP_CAPTURES_DIR`, pruned to the most recent 50) so a plot can be forwarded to a plotter
+**by reference** via `visa_write_raw(path=…)` — see the screen-capture section (#79).
 
 ## GPIB backends
 

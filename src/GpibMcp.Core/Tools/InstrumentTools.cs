@@ -119,14 +119,21 @@ namespace GpibMcp.Tools
                 "Write RAW BYTES to a VISA instrument VERBATIM - the bytes are sent exactly, with no terminator " +
                 "added and no encoding/normalization. Use this (not visa_write) for payloads that carry " +
                 "non-printing control bytes which a text/string boundary would strip: e.g. an HP-GL plot whose " +
-                "labels end in ETX (0x03), or a binary PCL print stream. Provide the bytes as BASE64 in 'data' " +
-                "(base64 keeps them intact across the tool boundary); the server decodes and writes them. " +
-                "Pair with instrument_capture_screen's return_hpgl_base64 to forward a captured plot to a plotter " +
-                "byte-for-byte (e.g. an 8563E screen to a 7090A). The send is PACED in bounded chunks server-side " +
-                "(the whole stream is one tool call) so a large plot doesn't overrun/time out a slow plotter/printer.",
+                "labels end in ETX (0x03), or a binary PCL print stream. Two ways to supply the bytes: pass a " +
+                "server-side capture 'path' (PREFERRED for forwarding a captured plot - the send-by-reference " +
+                "handle that instrument_capture_screen returns), so the bytes never round-trip through you; or " +
+                "pass them as BASE64 in 'data' for an arbitrary payload. Exactly one of 'path'/'data'. Forward a " +
+                "captured plot to a plotter byte-for-byte (e.g. an 8563E screen to a 7090A) by passing the capture " +
+                "path. The send is PACED in bounded chunks server-side (the whole stream is one tool call) so a " +
+                "large plot doesn't overrun/time out a slow plotter/printer.",
                 Schema(
                     Required("resource", "string", "VISA resource string of the target (e.g. the plotter), e.g. 'GPIB0::6::INSTR'."),
-                    Required("data", "string", "The bytes to write, BASE64-encoded. Decoded server-side and written verbatim."),
+                    Prop("path", "string", "Server-side file to stream the bytes FROM - a capture handle returned by " +
+                        "instrument_capture_screen (its 'raw … saved (send-by-reference handle)' path). PREFERRED for forwarding a " +
+                        "captured plot: the bytes are read from disk and streamed verbatim, never re-emitted through you. Mutually " +
+                        "exclusive with 'data'."),
+                    Prop("data", "string", "The bytes to write, BASE64-encoded (for an arbitrary payload). Decoded server-side and " +
+                        "written verbatim. Mutually exclusive with 'path' - to forward a captured plot, use 'path' instead."),
                     Prop("chunk_bytes", "integer", "Max bytes per paced chunk (default 256; keep <= the device's input buffer). " +
                         "Lower it if a slow plotter still overruns; 0 sends it all in one write."),
                     Prop("settle_ms", "integer", "Optional pause between chunks in ms (default 0) - a margin for devices that drop the handshake while moving."),
@@ -136,10 +143,28 @@ namespace GpibMcp.Tools
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
-                    string b64 = ReqStr(args, "data");
+                    string b64 = Str(args, "data", null);
+                    string path = Str(args, "path", null);
+                    bool hasData = !string.IsNullOrWhiteSpace(b64);
+                    bool hasPath = !string.IsNullOrWhiteSpace(path);
+                    if (hasData == hasPath)
+                        throw new ArgumentException("Provide exactly one of 'path' (a server-side capture handle) or " +
+                                                    "'data' (base64 bytes).");
                     byte[] bytes;
-                    try { bytes = Convert.FromBase64String(b64.Trim()); }
-                    catch (FormatException ex) { throw new ArgumentException("'data' is not valid base64: " + ex.Message); }
+                    if (hasPath)
+                    {
+                        string p = path.Trim();
+                        if (!File.Exists(p))
+                            throw new ArgumentException("No file at path '" + p + "'. Pass a capture handle returned by " +
+                                                        "instrument_capture_screen, or use 'data' for inline bytes.");
+                        try { bytes = File.ReadAllBytes(p); }
+                        catch (Exception ex) { throw new ArgumentException("Could not read '" + p + "': " + ex.Message); }
+                    }
+                    else
+                    {
+                        try { bytes = Convert.FromBase64String(b64.Trim()); }
+                        catch (FormatException ex) { throw new ArgumentException("'data' is not valid base64: " + ex.Message); }
+                    }
                     string dbg = null;
                     if (Bool(args, "debug", false))
                         dbg = RawDebugDump.Save("writeraw-" + resource, "hpgl", bytes);
@@ -151,7 +176,8 @@ namespace GpibMcp.Tools
                     };
                     int chunks = visa.WriteRawStreamed(resource, bytes, opts);
                     return "OK (streamed " + bytes.Length + " raw bytes verbatim to " + resource + " in " + chunks +
-                           " chunk" + (chunks == 1 ? "" : "s") + " of <=" + opts.ChunkBytes + ")" +
+                           " chunk" + (chunks == 1 ? "" : "s") + " of <=" + opts.ChunkBytes +
+                           (hasPath ? ", by reference from " + path.Trim() : "") + ")" +
                            (dbg != null ? "  |  debug raw saved: " + dbg : "");
                 }));
 
