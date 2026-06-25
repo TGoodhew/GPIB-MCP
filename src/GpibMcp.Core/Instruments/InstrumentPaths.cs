@@ -68,6 +68,27 @@ namespace GpibMcp.Instruments
             return Path.Combine(AppDataDir(), "tool-calls.log");
         }
 
+        /// <summary>Folder for opt-in debug dumps of verbatim raw bytes (captured HP-GL/PCL, or bytes written
+        /// to a plotter) saved when a tool is called with debug=true - a predictable place so they're easy to
+        /// find. Overridable via <c>GPIB_MCP_DEBUG_DIR</c> (tests redirect it out of %LOCALAPPDATA%).</summary>
+        public static string DebugDir()
+        {
+            string env = Environment.GetEnvironmentVariable("GPIB_MCP_DEBUG_DIR");
+            if (!string.IsNullOrWhiteSpace(env)) return env.Trim();
+            return Path.Combine(AppDataDir(), "debug");
+        }
+
+        /// <summary>Folder where every screen capture's verbatim forwardable bytes are retained server-side
+        /// (#79), so a plot can be sent to a plotter BY REFERENCE - <c>visa_write_raw(path=...)</c> - instead
+        /// of the model re-emitting tens of KB of base64 (the dominant forwarding delay). Pruned to the most
+        /// recent N files. Overridable via <c>GPIB_MCP_CAPTURES_DIR</c> (tests redirect it out of %LOCALAPPDATA%).</summary>
+        public static string CapturesDir()
+        {
+            string env = Environment.GetEnvironmentVariable("GPIB_MCP_CAPTURES_DIR");
+            if (!string.IsNullOrWhiteSpace(env)) return env.Trim();
+            return Path.Combine(AppDataDir(), "captures");
+        }
+
         /// <summary>
         /// On first run, copies the bundled definitions into the user database directory so the
         /// user has an editable, prepopulated database. Never overwrites existing user files.

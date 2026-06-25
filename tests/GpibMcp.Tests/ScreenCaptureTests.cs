@@ -223,9 +223,12 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void DefaultPerReadTimeout_IsTrimmedForFasterWarmupAndTail()
+        public void DefaultPerReadTimeout_FavoursFewerReadSeams()
         {
-            Assert.Equal(250, new CaptureOptions().PerReadTimeoutMs);   // was 1000 (#53)
+            // #79: raised back to 1000 ms so the trace is stitched from fewer chunk seams (each a place a
+            // byte can drop on the GPIB read). Trimmed to 250 ms under #53 for warm-up/tail latency, but
+            // the seam-drop risk outweighs the latency; completion is still caught via the pen-up tail.
+            Assert.Equal(1000, new CaptureOptions().PerReadTimeoutMs);
         }
 
         [Fact]

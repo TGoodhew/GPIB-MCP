@@ -282,7 +282,7 @@ tool blurbs.
 | `gpib_batch` | `steps` | `sweep`, `on_error`, `preview`, `confirm` | Run a whole multi-step / swept measurement in **one call**: a compact `sweep` (`var`, `from`/`to`/`step`\|`count`) + ordered per-point ops (`set`/`write`/`query`+`as`/`complete`/`wait`, with `{{var}}`/`{{capture}}` interpolation across instruments). The server runs every point and returns one table `{ran, columns, rows, errors}` plus a ready-to-show `summary` line and markdown `table`. Collapses a ~200-call sweep into a single call. `preview:true` reports the plan size without touching the bus; a **large** plan (> ~50 GPIB ops) returns `needs_confirm` with a preview and runs nothing until re-called with `confirm:true` |
 | `visa_query` | `resource`, `command` | `timeout_ms`, `read_bytes` | Write a command and read the response (e.g. `*IDN?`) |
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
-| `visa_write_raw` | `resource`, `data` | `chunk_bytes`, `settle_ms`, `timeout_ms` | Write **raw bytes verbatim** (no terminator, no encoding) — `data` is base64. For control-byte-bearing payloads a text boundary would strip (HP-GL with ETX `0x03` label terminators, binary PCL). Pair with `instrument_capture_screen`'s `return_hpgl_base64` to forward a captured plot/print to a plotter/printer byte-for-byte. The send is **paced in bounded chunks** server-side (default 256 B; `timeout_ms` is **per-chunk**) so a large plot doesn't overrun/time out a slow plotter/printer |
+| `visa_write_raw` | `resource`, `data` | `chunk_bytes`, `settle_ms`, `timeout_ms`, `debug` | Write **raw bytes verbatim** (no terminator, no encoding) — `data` is base64. For control-byte-bearing payloads a text boundary would strip (HP-GL with ETX `0x03` label terminators, binary PCL). Pair with `instrument_capture_screen`'s `return_hpgl_base64` to forward a captured plot/print to a plotter/printer byte-for-byte. The send is **paced in bounded chunks** server-side (default 256 B; `timeout_ms` is **per-chunk**) so a large plot doesn't overrun/time out a slow plotter/printer |
 | `visa_read` | `resource` | `timeout_ms`, `read_bytes` | Read a pending response |
 | `visa_identify` | `resource` | `read_bytes` | Convenience `*IDN?` query |
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
@@ -304,7 +304,7 @@ tool blurbs.
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 | `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `return_hpgl_base64`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes); returns an SVG to show inline + saves a PNG to Pictures. `return_hpgl_base64` returns the verbatim plot/print bytes (base64) to forward to a plotter/printer via `visa_write_raw` |
+| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`), `width`, `height`, `background`, `return_hpgl`, `return_hpgl_base64`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `debug`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes); returns an SVG to show inline + saves a PNG to Pictures. `return_hpgl_base64` returns the verbatim plot/print bytes (base64) to forward to a plotter/printer via `visa_write_raw` |
 
 Argument notes:
 
@@ -533,6 +533,21 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 - Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
   (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
   (`save_dir`), or pass `save_path` for a full filename. The saved path is reported in the result.
+- **Forwarding a plot is by *reference*, not by re-sending the bytes (#79).** Every plot/print capture also
+  retains its exact forwardable bytes server-side under `%LOCALAPPDATA%\GpibMcp\captures\` (overridable via
+  `GPIB_MCP_CAPTURES_DIR`, pruned to the most recent 50) and returns that path as a small **handle**. To send
+  the plot to a plotter, `visa_write_raw` takes that handle as **`path=`** (mutually exclusive with `data=`):
+  the server reads the file and streams it verbatim — so the plot **never round-trips through the model** as
+  tens of KB of base64, which was the dominant multi-minute forwarding delay. `return_hpgl_base64` is still
+  there for the rare case the model genuinely needs the bytes, but is no longer the way to drive a plotter.
+- **Read-glitch robust.** A plot streams in timeout-bounded chunks, and a byte occasionally dropped at a
+  chunk seam (the NI driver / a GPIB bus extender) shortens one trace coordinate — e.g. `995` → `95` —
+  which would otherwise draw a stray pen excursion to the page edge. Two defences (#79): the capture reads
+  in **fewer, larger chunks** to minimise seams, and a **repair pass** restores any single corrupted trace
+  X from its neighbours (a trace's X is a strictly increasing regular grid, so an out-of-order point is
+  unambiguous) — keeping the genuine amplitude sample — before the image is rendered **and** before the
+  bytes are handed back, so a plot forwarded to a real plotter is clean too. Graticule lines and amplitude
+  peaks are never touched. The verbatim `debug:true` dump keeps the *unrepaired* capture for diagnosis.
 
 #### Showing it inline in the chat
 
@@ -728,6 +743,14 @@ Three best-effort logs are appended under `%LOCALAPPDATA%\GpibMcp\` for after-th
   Overridable with `GPIB_MCP_BATCH_TIMING_LOG`.
 - **`capture-timing.log`** — per screen-capture: instrument warm-up vs. streaming vs. tail, and every read (#53).
   Overridable with `GPIB_MCP_CAPTURE_TIMING_LOG`.
+
+Opt-in raw dumps: passing `debug:true` to `instrument_capture_screen` or `visa_write_raw` (e.g. when you say
+"capture/send … **with debug**") writes the **verbatim** HP-GL/PCL bytes to `%LOCALAPPDATA%\GpibMcp\debug\`
+(override `GPIB_MCP_DEBUG_DIR`) so the exact stream can be inspected to diagnose plot/render glitches.
+
+Retained captures: every plot/print capture also keeps its forwardable bytes under `%LOCALAPPDATA%\GpibMcp\captures\`
+(override `GPIB_MCP_CAPTURES_DIR`, pruned to the most recent 50) so a plot can be forwarded to a plotter
+**by reference** via `visa_write_raw(path=…)` — see the screen-capture section (#79).
 
 ## GPIB backends
 
