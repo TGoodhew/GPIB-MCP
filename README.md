@@ -91,6 +91,30 @@ You need the following installed on a **Windows** machine:
 
 ## Install
 
+### Quick install (prebuilt release) — recommended
+
+If you just want to *run* the server (not develop it), install a built release instead of building from
+source. **Prerequisite:** NI-VISA / NI-488.2 (the GPIB driver) must be installed first — it can't be bundled.
+
+One PowerShell command downloads the latest release, unzips it to `%LOCALAPPDATA%\Programs\GpibMcp`, and
+optionally wires it into your AI client:
+
+```powershell
+# Install only (prints next steps):
+irm https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 | iex
+
+# Install AND register with a client — download first so you can pass options:
+iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
+./Install-GpibMcp.ps1 -Client all        # vscode | cursor | windsurf | all
+```
+
+Or download `GpibMcp-<version>-win-x86.zip` from the
+[Releases](https://github.com/TGoodhew/GPIB-MCP/releases) page, unzip it yourself, and configure your client
+(see [Configure an MCP client](#configure-an-mcp-client)). The installer backs up any existing client config
+before editing it.
+
+To **build from source** instead, follow the steps below.
+
 ### 1. Clone the repository
 
 ```bash
@@ -258,6 +282,30 @@ Claude Desktop only re-reads the config on a **full restart**: quit it from the 
 tray (right-click → Quit — closing the window is not enough), then relaunch. The `gpib`
 tools then appear and you can ask things like
 *"List my instruments, then identify the one at GPIB0::9."*
+
+### VS Code, Cursor, Windsurf
+
+All three run the same local stdio `GpibMcp.exe`. Easiest is to let the installer wire them up (it writes
+the correct absolute path and backs up any existing config first):
+
+```powershell
+iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
+./Install-GpibMcp.ps1 -Client all        # or: vscode | cursor | windsurf
+```
+
+To configure manually, point each client's MCP config at your `GpibMcp.exe`. **Note:** VS Code and Cursor do
+**not** expand `${env:…}` environment variables in `command`, so use a literal path (VS Code also accepts the
+predefined `${userHome}`):
+
+- **VS Code** — user `mcp.json` (Command Palette → *MCP: Open User Configuration*) or workspace `.vscode/mcp.json`:
+  ```json
+  { "servers": { "gpib": { "type": "stdio", "command": "${userHome}\\AppData\\Local\\Programs\\GpibMcp\\GpibMcp.exe", "args": [] } } }
+  ```
+- **Cursor** — `~/.cursor/mcp.json` (use your real absolute path):
+  ```json
+  { "mcpServers": { "gpib": { "command": "C:\\Users\\<you>\\AppData\\Local\\Programs\\GpibMcp\\GpibMcp.exe", "args": [] } } }
+  ```
+- **Windsurf** — `%USERPROFILE%\.codeium\windsurf\mcp_config.json` (same `mcpServers` shape as Cursor).
 
 ### Other MCP clients
 
