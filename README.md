@@ -541,15 +541,20 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
   as tens of KB of base64, which was the dominant multi-minute forwarding delay. This carries a binary **PCL**
   print byte-for-byte too — NUL (`0x00`), ESC framing and 8-bit raster intact — which a text boundary can't
   (#71). `return_hpgl_base64` is still there for the rare bytes-needed case, but isn't how you drive a device.
-- **Print a capture to a Windows printer (#83).** `print_capture_to_windows` spools a capture handle (typically a
-  `format="print"` PCL hardcopy) to a printer the PC already knows about — a local/network print queue — using
-  Windows **RAW** spooling (`winspool`), so the printer's own interpreter renders it. Call it with `list=true`
-  (or no `path`) to enumerate the installed printers and the default, then pass `path=<handle>` and
-  `printer=<name>` (omit `printer` for the default). The bytes go disk → spooler, never through the model.
-  *Caveat:* RAW needs the queue to understand the instrument's page language (older **PCL**); a modern PCL laser
-  usually works, but a non-PCL / host-based (GDI-only) printer prints blank or garbled — for those, internal
-  render-then-print is the route (#85, planned). To send to a plotter/printer **on the GPIB bus** instead, use
-  `visa_write_raw(path=…)`.
+- **Print a capture to a Windows printer (#83/#85).** `print_capture_to_windows` sends a capture handle (a `.hpgl`
+  plot or `.pcl` print) to a printer the PC already knows about — a local/network print queue. Call it with
+  `list=true` (or no `path`) to enumerate the installed printers and the default, then pass `path=<handle>` and
+  `printer=<name>` (omit `printer` for the default). Two modes:
+  - **`mode="render"` (default, any printer).** The server renders the capture itself — clean, **landscape**,
+    **fit-to-page**, our fonts — and prints it through the Windows **GDI driver** (`PrintDocument`), which scales
+    for the device. Works on **any** printer (laser, inkjet, even *Microsoft Print to PDF*) regardless of its page
+    language (#85).
+  - **`mode="raw"` (native fidelity, PCL printers only).** Spools the captured bytes verbatim via Windows **RAW**
+    (`winspool`) so the printer's own interpreter renders them. Use only for a `format="print"` **PCL** capture to a
+    PCL-capable printer; a non-PCL / host-based (GDI-only) queue prints blank or garbled — retry with `mode="render"`.
+
+  The bytes go disk → printer, never through the model. To send to a plotter/printer **on the GPIB bus** instead,
+  use `visa_write_raw(path=…)`.
 - **Read-glitch robust.** A plot streams in timeout-bounded chunks, and a byte occasionally dropped at a
   chunk seam (the NI driver / a GPIB bus extender) shortens one trace coordinate — e.g. `995` → `95` —
   which would otherwise draw a stray pen excursion to the page edge. Two defences (#79): the capture reads
