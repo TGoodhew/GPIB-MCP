@@ -8,6 +8,20 @@ and are not stdio packages.
 All three clients run the **same** `GpibMcp.exe` over stdio, so there is **one** binary artifact (a
 versioned GitHub Release zip) and a small per-client config + one-click link generated from it.
 
+## Two scripts
+
+- **`Generate-Packages.ps1`** — *maintainer* side. Builds the server, makes the versioned zip (the Release
+  asset), emits the local per-client snippets/links, and (with `-PublishRelease`) publishes the GitHub
+  Release with the zip **and** the installer attached.
+- **`Install-GpibMcp.ps1`** — *end-user* side. Downloads the latest release (or a local `-FromZip`), unzips
+  to `%LOCALAPPDATA%\Programs\GpibMcp`, and registers it with `-Client vscode|cursor|windsurf|all` by
+  writing each client's config with the **resolved absolute path** (backing up any existing config first).
+
+  Why an installer rather than a copy-paste config: VS Code and Cursor do **not** expand `${env:…}` in an
+  MCP `command`, so a portable hand-written path isn't possible across clients — having the installer write
+  the real per-user path is the only reliable cross-client approach. (VS Code also accepts the predefined
+  `${userHome}`; the committed README documents the manual fallback.)
+
 ## Generate everything
 
 ```powershell

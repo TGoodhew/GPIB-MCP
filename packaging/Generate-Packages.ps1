@@ -118,12 +118,24 @@ New-ClientPackage "cursor" "mcp.json" $cursorConfig ($common + @{
     "__CURSOR_DEEPLINK__" = $cursorDeeplink; "__CONFIG__" = $cursorConfig })
 New-ClientPackage "windsurf" "mcp_config.json" $windsurfConfig ($common + @{ "__CONFIG__" = $windsurfConfig })
 
-# ---- 6. Optional: publish a GitHub Release with the zip -------------------------------------------
+# ---- 6. Optional: publish a GitHub Release with the zip + installer -------------------------------
 if ($PublishRelease) {
     Write-Step "Publishing GitHub Release v$Version"
-    $notes = "GPIB MCP server $Version (Windows x86). Unzip to ``$InstallDir`` and add it to your MCP client " +
-             "using the per-client config in dist/packaging/ (VS Code #89, Cursor #90, Windsurf #91)."
-    & gh release create "v$Version" $zipPath --title "GPIB MCP $Version" --notes $notes
+    $installer = Join-Path $PSScriptRoot "Install-GpibMcp.ps1"
+    $notes = @"
+GPIB MCP server $Version (Windows x86). **Requires NI-VISA / NI-488.2** installed.
+
+**Install (recommended):**
+``````powershell
+iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
+./Install-GpibMcp.ps1 -Client all   # vscode | cursor | windsurf | all
+``````
+Or download ``$stageName.zip`` below, unzip to ``$InstallDir``, and configure your MCP client
+(Claude Desktop, VS Code #89, Cursor #90, Windsurf #91 - see the README).
+"@
+    $assets = @($zipPath)
+    if (Test-Path $installer) { $assets += $installer }
+    & gh release create "v$Version" $assets --title "GPIB MCP $Version" --notes $notes
     if ($LASTEXITCODE -ne 0) { throw "gh release create failed (exit $LASTEXITCODE)" }
 }
 
