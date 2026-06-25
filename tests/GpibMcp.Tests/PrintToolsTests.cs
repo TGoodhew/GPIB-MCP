@@ -71,5 +71,45 @@ namespace GpibMcp.Tests
             }
             finally { try { File.Delete(file); } catch { } }
         }
+
+        [Fact]
+        public void Tool_InvalidMode_Throws()
+        {
+            // Mode is validated right after the file check, before any printer/print work.
+            string file = Path.Combine(Path.GetTempPath(), "pt_" + Path.GetRandomFileName() + ".hpgl");
+            File.WriteAllBytes(file, new byte[] { (byte)'I', (byte)'N', (byte)';' });
+            try
+            {
+                var args = new JObject { ["path"] = file, ["mode"] = "sideways", ["printer"] = "__nope__" };
+                var ex = Assert.Throws<ArgumentException>(() => Tool().Invoke(args));
+                Assert.Contains("Unknown mode", ex.Message);
+            }
+            finally { try { File.Delete(file); } catch { } }
+        }
+
+        [Fact]
+        public void Tool_RenderMode_UnknownPrinter_Throws_WithoutPrinting()
+        {
+            string file = Path.Combine(Path.GetTempPath(), "pt_" + Path.GetRandomFileName() + ".hpgl");
+            File.WriteAllBytes(file, System.Text.Encoding.ASCII.GetBytes("IN;SP1;PU0,0;PD100,100;PU;"));
+            try
+            {
+                var args = new JObject { ["path"] = file, ["mode"] = "render", ["printer"] = "__definitely_not_a_real_printer__" };
+                var ex = Assert.Throws<ArgumentException>(() => Tool().Invoke(args));
+                Assert.Contains("No Windows printer named", ex.Message);
+            }
+            finally { try { File.Delete(file); } catch { } }
+        }
+
+        [Fact]
+        public void RenderedPrinter_InvalidPrinter_Throws_AfterRendering_WithoutPrinting()
+        {
+            // Exercises the render path (HP-GL -> bitmap) but bails on the invalid printer before doc.Print(),
+            // so it never reaches a real spooler.
+            byte[] hpgl = System.Text.Encoding.ASCII.GetBytes("IN;SP1;PU0,0;PD1000,800;PU;");
+            Assert.ThrowsAny<Exception>(() =>
+                WindowsRenderedPrinter.Print(hpgl, isPcl: false, printerName: "__definitely_not_a_real_printer__",
+                                             landscape: true, docName: "test"));
+        }
     }
 }
