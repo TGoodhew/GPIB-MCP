@@ -27,6 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Windows raw printing (#83): PrinterSettings enumeration (the winspool RAW spool is P/Invoke). -->
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <!-- Lets `dotnet build` compile net472 without a full VS install. -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">

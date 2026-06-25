@@ -411,6 +411,9 @@ namespace GpibMcp.Tools
             // ---- Batch / sweep execution (#59): one call runs a whole sweep -----
             BatchTools.Register(registry, db, assignments, visa);
 
+            // ---- Send a captured hardcopy to a Windows printer (#83) ------------
+            PrintTools.Register(registry);
+
             return registry;
         }
 

@@ -91,9 +91,10 @@ namespace GpibMcp.Tests
             var tools = (JArray)responses.Single()["result"]["tools"];
 
             var names = tools.Select(t => (string)t["name"]).ToList();
-            Assert.Equal(28, names.Count);
+            Assert.Equal(29, names.Count);
             Assert.Contains("gpib_batch", names);
             Assert.Contains("visa_write_raw", names);
+            Assert.Contains("print_capture_to_windows", names);
             Assert.Contains("resolve_setting", names);
             Assert.Contains("gpib_overview", names);
             Assert.Contains("visa_list_resources", names);
