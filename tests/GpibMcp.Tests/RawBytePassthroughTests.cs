@@ -225,7 +225,48 @@ namespace GpibMcp.Tests
             Assert.Contains((byte)0x03, written);                       // ETX label terminator survived
         }
 
+        [Fact]
+        public void RoundTrip_CapturePrintHandle_ToVisaWriteRaw_PreservesEveryPclByte()
+        {
+            // #71: the print path is binary PCL (ESC framing + arbitrary 8-bit raster, incl. NUL). Forwarding
+            // it to a printer by reference must preserve every byte - the thing a text boundary cannot do.
+            var db = InstrumentDatabase.FromDefinitions(new[] { PrintDef() });
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::18::INSTR", "8563E");
+            var visa = new FakeInstrumentManager();
+            var registry = InstrumentTools.BuildRegistry(visa, db, store);
+
+            registry.TryGet("instrument_capture_screen", out var capture);
+            var captured = capture.Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["format"] = "print" });
+            string handle = ExtractHandle(captured);
+            Assert.EndsWith(".pcl", handle);                    // print captures retain a .pcl handle
+
+            registry.TryGet("visa_write_raw", out var writeRaw);
+            var sent = writeRaw.Invoke(new JObject { ["resource"] = "GPIB0::9::INSTR", ["path"] = handle });
+
+            Assert.False(sent.IsError);
+            var (printer, written) = Assert.Single(visa.RawWrites);
+            Assert.Equal("GPIB0::9::INSTR", printer);
+            Assert.Equal(Latin1.GetBytes(visa.CapturePcl), written);   // exact PCL, by reference
+            Assert.Contains((byte)0x00, written);                      // NUL survived (text would truncate here)
+            Assert.Contains((byte)0x1B, written);                      // ESC framing intact
+            Assert.Contains((byte)0xAA, written);                      // high 8-bit raster byte intact
+        }
+
         // ---- helpers ----
+
+        /// <summary>A print-capable (PCL) definition for the print pass-through round-trip.</summary>
+        private static InstrumentDefinition PrintDef() => new InstrumentDefinition
+        {
+            Model = "8563E",
+            Category = "Spectrum Analyzer",
+            Capture = new CaptureProfile
+            {
+                Method = "hpgl",
+                PlotCommand = "PLOT 0,0,9000,7000;",
+                PrintCommand = "PRINT 0;"
+            }
+        };
 
         /// <summary>Pulls the send-by-reference handle path out of a capture result's forwarding hint.</summary>
         private static string ExtractHandle(ToolOutput output)

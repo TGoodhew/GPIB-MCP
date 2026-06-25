@@ -167,7 +167,10 @@ namespace GpibMcp.Tests
             for (int i = 0; i < 48; i++)
             {
                 sb.Append((char)0x1B).Append("*b0m8W");
-                for (int k = 0; k < 8; k++) sb.Append((char)0xAA); // alternating dots
+                // Unencoded 8-bit raster: a NUL (0x00) and a high byte (0xAA) per row - the exact bytes a
+                // text/JSON boundary would truncate-at-NUL or mangle, so a byte-for-byte round-trip proves
+                // the binary PCL path (#71).
+                for (int k = 0; k < 8; k++) sb.Append((char)(k == 0 ? 0x00 : 0xAA));
             }
             sb.Append((char)0x1B).Append("*rC");     // end raster
             sb.Append((char)0x1B).Append("E");       // reset
