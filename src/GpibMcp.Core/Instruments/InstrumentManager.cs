@@ -205,6 +205,28 @@ namespace GpibMcp.Instruments
             }
         }
 
+        public void WriteRaw(string resource, byte[] data, int timeoutMs)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            lock (_gate)
+            {
+                string note = "<raw " + data.Length + " bytes>";
+                try
+                {
+                    _transport.Open(resource, Timeout(timeoutMs));
+                    Log.Debug("VISA " + resource + " <- " + note);
+                    _history.Record(resource, CommandDirection.Sent, note);
+                    // Verbatim: no EnsureTerminated, no Latin1 round-trip - the exact bytes hit the wire so
+                    // control bytes (HP-GL ETX 0x03, PCL NUL/ESC) survive (#70).
+                    _transport.Write(resource, data, Timeout(timeoutMs));
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.Write, resource, note, ex);
+                }
+            }
+        }
+
         public string Read(string resource, int timeoutMs) =>
             Read(resource, new IoSpec(timeoutMs));
 

@@ -71,6 +71,15 @@ namespace GpibMcp.Tests
             _history.Record(resource, CommandDirection.Sent, command ?? string.Empty);
         }
 
+        /// <summary>Captures the exact bytes written verbatim (#70), keyed by resource, for round-trip assertions.</summary>
+        public readonly List<(string Resource, byte[] Data)> RawWrites = new List<(string, byte[])>();
+
+        public void WriteRaw(string resource, byte[] data, int timeoutMs)
+        {
+            RawWrites.Add((resource, data));
+            _history.Record(resource, CommandDirection.Sent, "<raw " + (data?.Length ?? 0) + " bytes>");
+        }
+
         public string Read(string resource, int timeoutMs) =>
             Read(resource, new IoSpec(timeoutMs));
 
