@@ -533,6 +533,14 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 - Every capture is also **saved to a PNG file** — by default in your **Pictures** folder
   (`…\Pictures\GpibMcp Captures`). Say *"…and store it in `C:\path\to\folder`"* to choose where
   (`save_dir`), or pass `save_path` for a full filename. The saved path is reported in the result.
+- **Read-glitch robust.** A plot streams in timeout-bounded chunks, and a byte occasionally dropped at a
+  chunk seam (the NI driver / a GPIB bus extender) shortens one trace coordinate — e.g. `995` → `95` —
+  which would otherwise draw a stray pen excursion to the page edge. Two defences (#79): the capture reads
+  in **fewer, larger chunks** to minimise seams, and a **repair pass** restores any single corrupted trace
+  X from its neighbours (a trace's X is a strictly increasing regular grid, so an out-of-order point is
+  unambiguous) — keeping the genuine amplitude sample — before the image is rendered **and** before the
+  bytes are handed back, so a plot forwarded to a real plotter is clean too. Graticule lines and amplitude
+  peaks are never touched. The verbatim `debug:true` dump keeps the *unrepaired* capture for diagnosis.
 
 #### Showing it inline in the chat
 

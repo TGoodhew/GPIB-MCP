@@ -172,7 +172,21 @@ namespace GpibMcp.Tools
                     ? HpglBackground.White : HpglBackground.Black
             };
 
-            byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);
+            // #79: a byte dropped at a GPIB read seam can shorten one trace X coordinate (e.g. "995"->"95"),
+            // drawing a stray pen excursion to the page edge. Repair it - restore the grid X from its
+            // neighbours, keeping the genuine Y - for the rendered image and the bytes handed back/forwarded.
+            // PCL print is byte-raster and immune; the verbatim debug dump below keeps the unrepaired capture.
+            string plotHpgl = capture.Hpgl;
+            if (!isPrint)
+            {
+                int repairedPts;
+                plotHpgl = HpglTraceRepair.Repair(capture.Hpgl, out repairedPts);
+                if (repairedPts > 0)
+                    Log.Info(def.Model + " plot: repaired " + repairedPts +
+                             " corrupted trace coordinate(s) from the GPIB read (#79).");
+            }
+
+            byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(plotHpgl);
             bool inlineSvg = Bool(args, "inline_svg", true);
 
             // Inline-SVG label fidelity (plot only): 'low' = compact <text> labels (fast); 'high' = exact
@@ -225,11 +239,13 @@ namespace GpibMcp.Tools
             else if (fidelityChosen) meta += "  |  " + fidelity + " fidelity";
             if (savedTo != null) meta += "  |  saved to: " + savedTo;
 
-            // Debug: dump the verbatim captured bytes so the exact stream can be inspected off-disk (#79 slice).
+            // Debug: dump the verbatim captured bytes (BEFORE the #79 trace repair) so the exact stream off
+            // the GPIB read can be inspected off-disk - that is what makes a read drop-out diagnosable.
             if (Bool(args, "debug", false))
             {
+                byte[] verbatim = Encoding.GetEncoding("ISO-8859-1").GetBytes(capture.Hpgl);
                 string rawPath = RawDebugDump.Save(def.Model + (isPrint ? "-print" : "") + "-capture",
-                    isPrint ? "pcl" : "hpgl", sourceBytes);
+                    isPrint ? "pcl" : "hpgl", verbatim);
                 if (rawPath != null) meta += "  |  debug raw saved: " + rawPath;
             }
 
@@ -275,10 +291,11 @@ namespace GpibMcp.Tools
                     "screen image again; if it keeps happening, check the GPIB cabling/connection.");
             }
 
-            if (Bool(args, "return_hpgl", false)) output.AddText(capture.Hpgl);
+            if (Bool(args, "return_hpgl", false)) output.AddText(plotHpgl);
             if (Bool(args, "return_hpgl_base64", false))
-                // The verbatim captured bytes as base64 (#70): survives the tool boundary intact, so a plotter/printer
-                // gets the exact stream - including HP-GL ETX (0x03) label terminators - via visa_write_raw.
+                // The captured bytes as base64 (#70): survives the tool boundary intact, so a plotter/printer gets
+                // the stream - including HP-GL ETX (0x03) label terminators - via visa_write_raw. A transient trace
+                // coordinate corrupted by a GPIB read drop-out is repaired first (#79) so the forwarded plot is clean.
                 output.AddText("RAW " + kind + " BYTES (base64, " + sourceBytes.Length + " bytes). To send this plot/print " +
                                "VERBATIM to a plotter/printer, call visa_write_raw(resource=<target address>, data=<the base64 " +
                                "below>) - pass it unchanged, do not edit or re-encode it:\n" + Convert.ToBase64String(sourceBytes));

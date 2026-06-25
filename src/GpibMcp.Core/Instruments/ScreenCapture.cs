@@ -148,11 +148,18 @@ namespace GpibMcp.Instruments
         /// How long each read blocks waiting for data before returning (and, when empty, letting the loop
         /// poll again). The streaming phase is bounded by the instrument's HP-GL plotter output rate
         /// (~2 KB/s on an 8563E - confirmed against the KE5FX reference), so this does NOT speed up the
-        /// transfer; it sets how promptly we catch the first byte and notice the plot has finished. KE5FX
-        /// uses 1000 ms; we use a shorter poll to trim the warm-up and tail (#53), bounded by
+        /// transfer; it sets how promptly we catch the first byte and notice the plot has finished.
+        ///
+        /// The 8563E never sends a terminator/EOI mid-stream, so every streaming read ends by timing out -
+        /// each timeout is a chunk seam where the NI driver/bus-extender can drop a byte (#79: a dropped
+        /// digit in a trace X draws a stray pen excursion). A longer timeout collects more bytes per read,
+        /// so the ~8 KB trace is stitched from ~4 seams instead of ~16 (at 250 ms), cutting the drop
+        /// opportunities ~4x. KE5FX uses 1000 ms; we match it. The cost is coarser warm-up/tail polling
+        /// (the #53 trim), but completion is still caught promptly via the pen-up tail check, and the
+        /// residual risk is covered by the trace repair (HpglTraceRepair). Bounded by
         /// <see cref="InactivityTimeoutMs"/>/<see cref="OverallTimeoutMs"/>.
         /// </summary>
-        public int PerReadTimeoutMs { get; set; } = 250;
+        public int PerReadTimeoutMs { get; set; } = 1000;
         public int InactivityTimeoutMs { get; set; } = 3500;
         public int OverallTimeoutMs { get; set; } = 30000;
         public int MinPlotBytes { get; set; } = 128;
