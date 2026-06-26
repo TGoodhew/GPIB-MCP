@@ -14,7 +14,7 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
 | **Platform** | `x86` — see [Why x86?](#why-x86) |
 | **Primary path** | NI-VISA (`Ivi.Visa` + `NationalInstruments.Visa`) — works across every bus |
 | **Native path** | NI-488.2 (`NationalInstruments.NI4882`) — address GPIB board/primary/secondary directly |
-| **Transport** | JSON-RPC 2.0 over newline-delimited stdio |
+| **Transports** | JSON-RPC 2.0 over newline-delimited stdio (default) or Streamable HTTP |
 | **License** | [MIT](LICENSE) |
 
 ---
@@ -815,6 +815,38 @@ Retained captures: every plot/print capture also keeps its forwardable bytes und
 (override `GPIB_MCP_CAPTURES_DIR`, pruned to the most recent 50) so a plot can be forwarded to a plotter
 **by reference** via `visa_write_raw(path=…)` — see the screen-capture section (#79).
 
+## MCP transports (stdio & HTTP)
+
+The MCP wire is also pluggable. The transport-agnostic core (`McpDispatcher`) turns a JSON-RPC message into
+a response and knows nothing about how bytes move; each transport is its own module implementing
+`IMcpTransport` (`GpibMcp.Stdio`, `GpibMcp.Http`). The exe picks one at runtime via `GPIB_MCP_TRANSPORT`:
+
+| `GPIB_MCP_TRANSPORT` | Transport |
+|----------------------|-----------|
+| *(unset)* / `stdio` | newline-delimited JSON-RPC on stdin/stdout (default — what desktop clients launch) |
+| `http` | **Streamable HTTP** — an HttpListener `/mcp` endpoint for clients that can't spawn a local child |
+
+The **HTTP** transport (#68) is for Microsoft Copilot (#88) and ChatGPT (#92), which connect to a URL rather
+than launching a process. Configuration:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `GPIB_MCP_HTTP_HOST` | `127.0.0.1` | bind address (keep loopback unless tunnelling) |
+| `GPIB_MCP_HTTP_PORT` | `3001` | listen port (`/mcp`) |
+| `GPIB_MCP_HTTP_TOKEN` | *(none)* | if set, every request must send `Authorization: Bearer <token>` |
+
+`POST /mcp` carries one JSON-RPC message or a batch and returns the response as `application/json` (202 when
+the POST held only notifications). The server initiates no messages, so the `GET` SSE stream is not offered.
+Security: it binds loopback and rejects non-loopback `Origin` headers (DNS-rebinding guard). Since the server
+must run next to the GPIB hardware, reaching it from a cloud assistant means **tunnelling** it (dev tunnel /
+ngrok) — set `GPIB_MCP_HTTP_TOKEN` (and ideally your tunnel's own auth) when you do. Requests are serialized,
+so the single-threaded instrument access is preserved regardless of transport.
+
+```powershell
+# Serve over HTTP on localhost:3001 with a bearer token:
+$env:GPIB_MCP_TRANSPORT = "http"; $env:GPIB_MCP_HTTP_TOKEN = "<secret>"; .\GpibMcp.exe
+```
+
 ## GPIB backends
 
 Wire-level I/O sits behind a single abstraction, **`IGpibTransport`**, so the adapter is pluggable.
@@ -847,14 +879,18 @@ GPIB-MCP.sln
 LICENSE
 README.md
 .editorconfig                      shared code-style settings
-src/GpibMcp/                       the server EXE - entry point + stdio only (no backend ref)
-  GpibMcp.csproj                   net472 / x86; references GpibMcp.Core, no NI
-  Program.cs                       entry point + stdio/UTF-8 setup
+src/GpibMcp/                       the server EXE - composition root (picks a transport)
+  GpibMcp.csproj                   net472 / x86; references Core + both transport modules, no NI
+  Program.cs                       build dispatcher + select transport (GPIB_MCP_TRANSPORT)
+src/GpibMcp.Stdio/                 stdio transport module (default) - IMcpTransport
+src/GpibMcp.Http/                  Streamable HTTP transport module (#68) - IMcpTransport
 src/GpibMcp.Core/                  backend-neutral core (no driver dependency; builds without NI)
   Diagnostics/
     Log.cs                         leveled stderr logger (GPIB_MCP_LOG_LEVEL)
   Mcp/
-    McpServer.cs                   JSON-RPC 2.0 dispatch (initialize / tools / ping)
+    McpDispatcher.cs               transport-agnostic JSON-RPC 2.0 dispatch (initialize / tools / ping)
+    IMcpDispatcher.cs              the dispatch seam (message -> response)
+    IMcpTransport.cs               the transport seam (stdio / HTTP are separate modules)
     McpTool.cs                     tool + registry + error types
   Instruments/
     IInstrumentManager.cs          tool-facing instrument abstraction (enables testing)

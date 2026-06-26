@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The Streamable HTTP MCP transport (#68): a localhost HttpListener endpoint at /mcp for clients that
+    don't launch a local stdio child (Microsoft Copilot, ChatGPT - typically reached via a tunnel). A
+    self-contained module depending only on GpibMcp.Core's IMcpDispatcher/IMcpTransport. Uses the framework's
+    System.Net.HttpListener, so no extra HTTP dependency.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>GpibMcp.Http</AssemblyName>
+    <RootNamespace>GpibMcp.Http</RootNamespace>
+    <PlatformTarget>x86</PlatformTarget>
+    <Platforms>x86</Platforms>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GpibMcp.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibMcp.Core\GpibMcp.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

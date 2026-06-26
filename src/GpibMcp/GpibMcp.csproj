@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    The server executable: entry point + stdio transport only. It references GpibMcp.Core and has
-    NO reference to any backend (no NI). The GPIB backend is loaded dynamically at runtime
-    (TransportFactory); GpibMcp.NiVisa copies its DLL next to this exe when the solution is built.
-    Build the SOLUTION (GPIB-MCP.sln) so the default NI backend is deployed alongside the exe.
+    The server executable: the composition root. It references GpibMcp.Core and the transport modules
+    (GpibMcp.Stdio, GpibMcp.Http), and picks one at runtime (GPIB_MCP_TRANSPORT). It has NO reference to
+    any GPIB backend (no NI) - that is loaded dynamically at runtime (TransportFactory); GpibMcp.NiVisa
+    copies its DLL next to this exe when the solution is built. Build the SOLUTION (GPIB-MCP.sln) so the
+    default NI backend is deployed alongside the exe.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -28,6 +29,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GpibMcp.Core\GpibMcp.Core.csproj" />
+    <ProjectReference Include="..\GpibMcp.Stdio\GpibMcp.Stdio.csproj" />
+    <ProjectReference Include="..\GpibMcp.Http\GpibMcp.Http.csproj" />
   </ItemGroup>
 
   <!-- Bundled instrument command database, deployed next to the exe so it is available at install

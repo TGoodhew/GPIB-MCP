@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The stdio MCP transport (newline-delimited JSON-RPC over stdin/stdout) - the default transport, and
+    the one MCP desktop clients (Claude Desktop, VS Code, Cursor, Windsurf) launch. A self-contained module:
+    it depends only on GpibMcp.Core's IMcpDispatcher/IMcpTransport, never the reverse (#68).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>GpibMcp.Stdio</AssemblyName>
+    <RootNamespace>GpibMcp.Stdio</RootNamespace>
+    <PlatformTarget>x86</PlatformTarget>
+    <Platforms>x86</Platforms>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GpibMcp.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibMcp.Core\GpibMcp.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using GpibMcp.Diagnostics;
 using GpibMcp.Tools;
 using Newtonsoft.Json;
@@ -8,12 +7,16 @@ using Newtonsoft.Json.Linq;
 namespace GpibMcp.Mcp
 {
     /// <summary>
-    /// Minimal Model Context Protocol server speaking JSON-RPC 2.0 over a
-    /// newline-delimited stdio transport (one JSON object per line).
+    /// The transport-agnostic core of the Model Context Protocol server. Turns one JSON-RPC 2.0 message into
+    /// the response to send back; it never touches stdin/stdout/sockets - a <see cref="IMcpTransport"/>
+    /// carries the bytes. The instrument layer (and the rest of the codebase) sits behind the tool registry
+    /// and is likewise unaware of the transport.
     ///
-    /// stdout carries protocol traffic ONLY; all diagnostics go to stderr.
+    /// The server is single-threaded by design: tool calls run synchronously and the instrument backend
+    /// serializes hardware access. <see cref="Dispatch"/> takes a lock so a concurrent transport (e.g. HTTP)
+    /// cannot interleave two requests - the synchronous guarantee lives here, once, for every transport.
     /// </summary>
-    public sealed class McpServer
+    public sealed class McpDispatcher : IMcpDispatcher
     {
         /// <summary>MCP revision this server implements (echoed back if the client requests it).</summary>
         public const string ProtocolVersion = "2025-06-18";
@@ -25,52 +28,32 @@ namespace GpibMcp.Mcp
         public const string ServerVersion = "0.1.0";
 
         private readonly ToolRegistry _tools;
-        private readonly TextReader _input;
-        private readonly TextWriter _output;
         private readonly string _instructions;
         private readonly BatchLoopNudge _loopNudge;
-        private readonly object _writeGate = new object();
+        private readonly object _gate = new object();
 
-        public McpServer(ToolRegistry tools, TextReader input, TextWriter output, string instructions = null,
-                         BatchLoopNudge loopNudge = null)
+        public McpDispatcher(ToolRegistry tools, string instructions = null, BatchLoopNudge loopNudge = null)
         {
             _tools = tools ?? throw new ArgumentNullException(nameof(tools));
-            _input = input ?? throw new ArgumentNullException(nameof(input));
-            _output = output ?? throw new ArgumentNullException(nameof(output));
             _instructions = instructions;
             _loopNudge = loopNudge ?? new BatchLoopNudge();
         }
 
-        /// <summary>Blocking read loop. Returns when stdin reaches EOF (client disconnected).</summary>
-        public void Run()
+        /// <inheritdoc/>
+        public JObject Dispatch(JObject message)
         {
-            string line;
-            while ((line = _input.ReadLine()) != null)
-            {
-                if (line.Length == 0) continue;
-                Log.Debug("<- " + line);
-                JObject message;
-                try
-                {
-                    message = JObject.Parse(line);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warn("Ignoring unparseable line: " + ex.Message);
-                    continue;
-                }
-                Dispatch(message);
-            }
-            Log.Info("stdin closed; shutting down.");
+            // Serialize: preserve the single-threaded model regardless of how many requests a transport
+            // delivers concurrently (the instrument bus and the loop-nudge counter are not re-entrant).
+            lock (_gate) { return DispatchCore(message); }
         }
 
-        private void Dispatch(JObject message)
+        private JObject DispatchCore(JObject message)
         {
             JToken id = message["id"];
             string method = (string)message["method"];
 
-            // No method => this is a response to a server-initiated request. We send none, so ignore.
-            if (method == null) return;
+            // No method => this is a response to a server-initiated request. We send none, so ignore it.
+            if (method == null) return null;
 
             bool isNotification = (id == null);
             var prms = message["params"] as JObject;
@@ -80,22 +63,29 @@ namespace GpibMcp.Mcp
                 if (isNotification)
                 {
                     HandleNotification(method, prms);
-                    return;
+                    return null;
                 }
 
                 JToken result = HandleRequest(method, prms);
-                SendResult(id, result);
+                return new JObject { ["jsonrpc"] = "2.0", ["id"] = id, ["result"] = result ?? new JObject() };
             }
             catch (McpError mcp)
             {
                 Log.Warn("Request '" + method + "' failed: " + mcp.Message);
-                SendError(id, mcp.Code, mcp.Message, mcp.ErrorData);
+                return ErrorEnvelope(id, mcp.Code, mcp.Message, mcp.ErrorData);
             }
             catch (Exception ex)
             {
                 Log.Error("Unhandled error in '" + method + "'", ex);
-                SendError(id, -32603, "Internal error: " + ex.Message, null);
+                return ErrorEnvelope(id, -32603, "Internal error: " + ex.Message, null);
             }
+        }
+
+        private static JObject ErrorEnvelope(JToken id, int code, string message, JToken data)
+        {
+            var error = new JObject { ["code"] = code, ["message"] = message };
+            if (data != null) error["data"] = data;
+            return new JObject { ["jsonrpc"] = "2.0", ["id"] = id, ["error"] = error };
         }
 
         private JToken HandleRequest(string method, JObject prms)
@@ -225,40 +215,6 @@ namespace GpibMcp.Mcp
             var result = new JObject { ["content"] = content };
             if (output.IsError) result["isError"] = true;
             return result;
-        }
-
-        private void SendResult(JToken id, JToken result)
-        {
-            Write(new JObject
-            {
-                ["jsonrpc"] = "2.0",
-                ["id"] = id,
-                ["result"] = result ?? new JObject()
-            });
-        }
-
-        private void SendError(JToken id, int code, string message, JToken data)
-        {
-            var error = new JObject { ["code"] = code, ["message"] = message };
-            if (data != null) error["data"] = data;
-            Write(new JObject
-            {
-                ["jsonrpc"] = "2.0",
-                ["id"] = id,
-                ["error"] = error
-            });
-        }
-
-        private void Write(JObject payload)
-        {
-            string json = payload.ToString(Formatting.None);
-            Log.Debug("-> " + json);
-            lock (_writeGate)
-            {
-                _output.Write(json);
-                _output.Write('\n');
-                _output.Flush();
-            }
         }
     }
 }
