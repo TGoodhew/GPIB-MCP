@@ -6,7 +6,7 @@ local stdio process or `localhost`. So you run the GPIB MCP server in HTTP mode 
 ## 1. Install + run in HTTP mode
 ```powershell
 iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
-./Install-GpibMcp.ps1                  # unzips v__VERSION__ to __INSTALLDIR__ (needs NI-VISA)
+./Install-GpibMcp.ps1                  # unzips v__VERSION__ to %LOCALAPPDATA%\Programs\GpibMcp (needs NI-VISA)
 ./Start-GpibMcpHttp.ps1                # http://127.0.0.1:__PORT__/mcp + a bearer token
 ```
 

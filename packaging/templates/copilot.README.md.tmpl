@@ -7,7 +7,7 @@ expose it to Copilot via a tunnel.
 ## 1. Install the server (once)
 ```powershell
 iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
-./Install-GpibMcp.ps1                  # unzips v__VERSION__ to __INSTALLDIR__ (needs NI-VISA)
+./Install-GpibMcp.ps1                  # unzips v__VERSION__ to %LOCALAPPDATA%\Programs\GpibMcp (needs NI-VISA)
 ```
 
 ## 2. Run it in HTTP mode
