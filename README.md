@@ -234,7 +234,13 @@ $env:GPIB_MCP_LOG_LEVEL = "Debug"   # then re-run; logs appear on stderr
 
 ### Claude Desktop
 
-Add a `gpib` server entry to Claude Desktop's `claude_desktop_config.json`. Use the
+**One-click (recommended):** download **`GpibMcp-<version>.mcpb`** from the
+[Releases](https://github.com/TGoodhew/GPIB-MCP/releases) page and open it in Claude Desktop — *Settings →
+Extensions* (or drag it onto the window). It's a Claude Desktop Extension ([MCP Bundle](https://github.com/modelcontextprotocol/mcpb))
+that bundles the server and installs in one click, no config-file editing. NI-VISA / NI-488.2 must still be
+installed (#67).
+
+**Manual:** add a `gpib` server entry to Claude Desktop's `claude_desktop_config.json`. Use the
 **absolute path** to `GpibMcp.exe` on your machine, with **escaped backslashes**:
 
 ```json

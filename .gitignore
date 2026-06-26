@@ -7,6 +7,10 @@
 # Generated deployment packages (packaging/Generate-Packages.ps1)
 dist/
 
+# Python tooling caches (tools/ke5fx_font)
+__pycache__/
+*.pyc
+
 # VS / Rider
 .vs/
 .idea/
