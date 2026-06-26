@@ -25,7 +25,7 @@ namespace GpibMcp.Mcp
         public const string ServerName = "gpib-mcp";
 
         /// <summary>Server version reported to clients during initialize.</summary>
-        public const string ServerVersion = "0.1.0";
+        public const string ServerVersion = "0.2.0";
 
         private readonly ToolRegistry _tools;
         private readonly string _instructions;

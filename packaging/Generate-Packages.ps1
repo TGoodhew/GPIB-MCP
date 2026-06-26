@@ -1,12 +1,13 @@
 <#
 .SYNOPSIS
-    Generate all MCP-client deployment packages for the GPIB MCP server (#89 VS Code, #90 Cursor,
-    #91 Windsurf) from a single Release x86 build.
+    Generate all MCP-client deployment packages for the GPIB MCP server from a single Release x86 build -
+    stdio clients (#89 VS Code, #90 Cursor, #91 Windsurf) and HTTP clients (#88 Copilot, #92 ChatGPT).
 
 .DESCRIPTION
-    The three target clients all run the SAME local stdio server (GpibMcp.exe); only a small config
-    snippet and a one-click install link differ per client. So this builds the server once, stages it as
-    a versioned zip (the GitHub Release asset), and emits per-client install assets:
+    All clients run the SAME server (GpibMcp.exe). The stdio clients launch it locally and differ only by a
+    config snippet / one-click link; the HTTP clients connect to a tunnelled URL and need connector docs + the
+    HTTP launcher. This builds the server once, stages it as a versioned zip (the GitHub Release asset), and
+    emits per-client install assets:
 
         dist/
           GpibMcp-<version>-win-x86/         staged build (the server + data)
@@ -15,9 +16,11 @@
             vscode/    mcp.json   + README.md   (code --add-mcp, vscode:mcp/install link)
             cursor/    mcp.json   + README.md   (cursor:// "Add to Cursor" deeplink)
             windsurf/  mcp_config.json + README.md
+            copilot/   gpib-mcp-connector.swagger.json + README.md + Start-GpibMcpHttp.ps1
+            chatgpt/   README.md + Start-GpibMcpHttp.ps1
 
-    The generated configs/deeplinks point at <InstallDir>\GpibMcp.exe - the canonical place a user (or you)
-    unzips the release to - so the one-click links work once the zip is extracted there.
+    The stdio configs/deeplinks point at <InstallDir>\GpibMcp.exe - the canonical place a user (or you) unzips
+    the release to - so the one-click links work once the zip is extracted there.
 
     Nothing is published unless you pass -PublishRelease (which calls `gh release create`).
 
@@ -35,7 +38,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.1.0",
+    [string]$Version = "0.2.0",
     # Canonical install location the generated configs/deeplinks reference (where the release is unzipped).
     [string]$InstallDir = "$env:LOCALAPPDATA\Programs\GpibMcp",
     [string]$Configuration = "Release",
@@ -118,23 +121,58 @@ New-ClientPackage "cursor" "mcp.json" $cursorConfig ($common + @{
     "__CURSOR_DEEPLINK__" = $cursorDeeplink; "__CONFIG__" = $cursorConfig })
 New-ClientPackage "windsurf" "mcp_config.json" $windsurfConfig ($common + @{ "__CONFIG__" = $windsurfConfig })
 
+# HTTP clients (#88 Copilot, #92 ChatGPT): remote - they connect to a URL over a tunnel, so the package is
+# connector docs + the HTTP launcher, not a local config path.
+function Write-Template($tmplName, $destPath, $tokens) {
+    $t = Get-Content (Join-Path $tmplDir $tmplName) -Raw
+    foreach ($k in $tokens.Keys) { $t = $t.Replace($k, [string]$tokens[$k]) }
+    Set-Content -Path $destPath -Value $t -Encoding UTF8
+}
+$httpTokens = $common + @{ "__PORT__" = "3001" }
+$httpLauncher = Join-Path $PSScriptRoot "Start-GpibMcpHttp.ps1"
+
+$copilotDir = Join-Path $pkgRoot "copilot"
+if (Test-Path $copilotDir) { Remove-Item $copilotDir -Recurse -Force }
+New-Item -ItemType Directory -Force -Path $copilotDir | Out-Null
+Write-Template "copilot.connector.swagger.json.tmpl" (Join-Path $copilotDir "gpib-mcp-connector.swagger.json") @{ "__VERSION__" = $Version }
+Write-Template "copilot.README.md.tmpl" (Join-Path $copilotDir "README.md") $httpTokens
+if (Test-Path $httpLauncher) { Copy-Item $httpLauncher $copilotDir -Force }
+Write-Host "    copilot -> $copilotDir"
+
+$chatgptDir = Join-Path $pkgRoot "chatgpt"
+if (Test-Path $chatgptDir) { Remove-Item $chatgptDir -Recurse -Force }
+New-Item -ItemType Directory -Force -Path $chatgptDir | Out-Null
+Write-Template "chatgpt.README.md.tmpl" (Join-Path $chatgptDir "README.md") $httpTokens
+if (Test-Path $httpLauncher) { Copy-Item $httpLauncher $chatgptDir -Force }
+Write-Host "    chatgpt -> $chatgptDir"
+
 # ---- 6. Optional: publish a GitHub Release with the zip + installer -------------------------------
 if ($PublishRelease) {
     Write-Step "Publishing GitHub Release v$Version"
     $installer = Join-Path $PSScriptRoot "Install-GpibMcp.ps1"
+    $launcher = Join-Path $PSScriptRoot "Start-GpibMcpHttp.ps1"
     $notes = @"
 GPIB MCP server $Version (Windows x86). **Requires NI-VISA / NI-488.2** installed.
 
-**Install (recommended):**
+**Desktop / local clients (stdio):**
 ``````powershell
 iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
 ./Install-GpibMcp.ps1 -Client all   # vscode | cursor | windsurf | all
 ``````
-Or download ``$stageName.zip`` below, unzip to ``$InstallDir``, and configure your MCP client
-(Claude Desktop, VS Code #89, Cursor #90, Windsurf #91 - see the README).
+Claude Desktop, VS Code #89, Cursor #90, Windsurf #91.
+
+**Cloud clients (Streamable HTTP, this release adds the HTTP transport #68):** run the server in HTTP mode and
+tunnel it, then register the connector. Microsoft Copilot #88 / ChatGPT #92:
+``````powershell
+./Start-GpibMcpHttp.ps1             # http://127.0.0.1:3001/mcp + a bearer token; prints next steps
+``````
+See ``packaging/copilot`` and ``packaging/chatgpt`` for the connector docs.
+
+Or download ``$stageName.zip`` below and unzip to ``$InstallDir``.
 "@
     $assets = @($zipPath)
     if (Test-Path $installer) { $assets += $installer }
+    if (Test-Path $launcher)  { $assets += $launcher }
     & gh release create "v$Version" $assets --title "GPIB MCP $Version" --notes $notes
     if ($LASTEXITCODE -ne 0) { throw "gh release create failed (exit $LASTEXITCODE)" }
 }

@@ -24,7 +24,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Company>Tony</Company>
     <Product>GPIB-MCP</Product>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
