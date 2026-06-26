@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
+using GpibMcp.Stdio;
 using GpibMcp.Tools;
 using Ivi.Visa;
 using Newtonsoft.Json.Linq;
@@ -27,7 +28,7 @@ namespace GpibMcp.Tests
             var registry = InstrumentTools.BuildRegistry(manager ?? new FakeInstrumentManager());
             var input = new StringReader(string.Join("\n", requests) + "\n");
             var output = new StringWriter();
-            new McpServer(registry, input, output).Run();
+            new StdioTransport(input, output).Run(new McpDispatcher(registry));
 
             return output.ToString()
                 .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
@@ -45,8 +46,8 @@ namespace GpibMcp.Tests
             var responses = Run(null, Init());
             var result = responses.Single()["result"];
 
-            Assert.Equal(McpServer.ServerName, (string)result["serverInfo"]["name"]);
-            Assert.Equal(McpServer.ServerVersion, (string)result["serverInfo"]["version"]);
+            Assert.Equal(McpDispatcher.ServerName, (string)result["serverInfo"]["name"]);
+            Assert.Equal(McpDispatcher.ServerVersion, (string)result["serverInfo"]["version"]);
             Assert.NotNull(result["capabilities"]["tools"]);
         }
 
@@ -63,7 +64,7 @@ namespace GpibMcp.Tests
             var registry = InstrumentTools.BuildRegistry(new FakeInstrumentManager());
             var input = new StringReader(Init() + "\n");
             var output = new StringWriter();
-            new McpServer(registry, input, output, "CAPABILITY SUMMARY HERE").Run();
+            new StdioTransport(input, output).Run(new McpDispatcher(registry, "CAPABILITY SUMMARY HERE"));
 
             var result = JObject.Parse(output.ToString().Trim())["result"];
             Assert.Equal("CAPABILITY SUMMARY HERE", (string)result["instructions"]);
@@ -81,7 +82,7 @@ namespace GpibMcp.Tests
         {
             var request = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"capabilities\":{}}}";
             var responses = Run(null, request);
-            Assert.Equal(McpServer.ProtocolVersion, (string)responses.Single()["result"]["protocolVersion"]);
+            Assert.Equal(McpDispatcher.ProtocolVersion, (string)responses.Single()["result"]["protocolVersion"]);
         }
 
         [Fact]
@@ -205,7 +206,7 @@ namespace GpibMcp.Tests
                 "\"params\":{\"name\":\"visa_write\",\"arguments\":{\"resource\":\"GPIB0::5::INSTR\",\"command\":\"FR" + id + "MH\"}}}";
             var input = new StringReader(write(1) + "\n" + write(2) + "\n");
             var output = new StringWriter();
-            new McpServer(registry, input, output, null, new GpibMcp.Tools.BatchLoopNudge(threshold: 2)).Run();
+            new StdioTransport(input, output).Run(new McpDispatcher(registry, null, new GpibMcp.Tools.BatchLoopNudge(threshold: 2)));
 
             var responses = output.ToString()
                 .Split(new[] { '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
@@ -296,7 +297,7 @@ namespace GpibMcp.Tests
         {
             var input = new StringReader(string.Join("\n", requests) + "\n");
             var output = new StringWriter();
-            new McpServer(registry, input, output).Run();
+            new StdioTransport(input, output).Run(new McpDispatcher(registry));
             return output.ToString()
                 .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(JObject.Parse)

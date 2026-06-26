@@ -29,6 +29,13 @@
     <ProjectReference Include="..\..\src\GpibMcp.Core\GpibMcp.Core.csproj" />
     <ProjectReference Include="..\..\src\GpibMcp.NiVisa\GpibMcp.NiVisa.csproj" />
     <ProjectReference Include="..\..\src\Srq.Completion\Srq.Completion.csproj" />
+    <ProjectReference Include="..\..\src\GpibMcp.Stdio\GpibMcp.Stdio.csproj" />
+    <ProjectReference Include="..\..\src\GpibMcp.Http\GpibMcp.Http.csproj" />
+  </ItemGroup>
+
+  <!-- HttpClient for the #68 HTTP transport integration tests. -->
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <!-- Lets tests construct real VISA exceptions to exercise the error-decoding path (issue #11). -->
