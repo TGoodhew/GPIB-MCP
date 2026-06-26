@@ -1,0 +1,41 @@
+# GPIB MCP — Microsoft Copilot install (#88)
+
+Microsoft Copilot (Copilot Studio agents) connects to an MCP server by **URL** over **Streamable HTTP** — it
+does *not* launch a local process. So unlike the desktop clients, you run the GPIB MCP server in HTTP mode and
+expose it to Copilot via a tunnel.
+
+## 1. Install the server (once)
+```powershell
+iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
+./Install-GpibMcp.ps1                  # unzips v__VERSION__ to __INSTALLDIR__ (needs NI-VISA)
+```
+
+## 2. Run it in HTTP mode
+```powershell
+./Start-GpibMcpHttp.ps1                 # prints the local URL (http://127.0.0.1:__PORT__/mcp) + a bearer token
+```
+
+## 3. Tunnel it to a public HTTPS URL
+Copilot is in the cloud, so it needs a public URL that forwards to your machine:
+```powershell
+devtunnel host -p __PORT__               # Microsoft dev tunnels  -> https://<id>.devtunnels.ms
+# or:  ngrok http __PORT__
+```
+Your MCP URL is then `https://<public-host>/mcp`.
+
+## 4. Add it to your Copilot Studio agent
+**Easiest (native):** open your agent → **Tools → Add tool → New tool → Model Context Protocol** → paste
+`https://<public-host>/mcp`. For auth, add a **custom header** `Authorization: Bearer <token>` (the token from
+step 2). Copilot creates the custom connector for you and lists the `gpib_*` tools.
+
+**Or import the connector:** Power Apps/Automate → **Custom connectors → New → Import an OpenAPI file** → use
+`gpib-mcp-connector.swagger.json` (in this folder) after replacing `YOUR-TUNNEL-HOST` with `<public-host>`.
+
+## Notes
+- Copilot Studio supports **Streamable HTTP only** (SSE was dropped Aug 2025) — which is exactly what this
+  server speaks.
+- Keep `Start-GpibMcpHttp.ps1` running while you use the agent. The bearer token guards the public tunnel —
+  don't share it.
+- Security: the server binds loopback and only the tunnel exposes it; still, treat the token as a secret.
+
+Sources: Microsoft Learn — Copilot Studio "Connect your agent to an existing MCP server".

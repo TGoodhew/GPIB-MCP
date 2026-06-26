@@ -1,0 +1,26 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "GPIB MCP",
+    "description": "Control GPIB / VISA test-and-measurement instruments via the GPIB MCP server (Streamable HTTP). v__VERSION__",
+    "version": "1.0.0"
+  },
+  "host": "YOUR-TUNNEL-HOST",
+  "basePath": "/",
+  "schemes": [ "https" ],
+  "consumes": [ "application/json" ],
+  "produces": [ "application/json" ],
+  "paths": {
+    "/mcp": {
+      "post": {
+        "summary": "GPIB MCP",
+        "description": "Streamable HTTP MCP endpoint.",
+        "operationId": "InvokeMCP",
+        "x-ms-agentic-protocol": "mcp-streamable-1.0",
+        "responses": {
+          "200": { "description": "Success" }
+        }
+      }
+    }
+  }
+}

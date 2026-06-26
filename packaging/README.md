@@ -1,21 +1,26 @@
 # MCP-client deployment packages
 
-Generates the install packages for the local-stdio MCP clients that consume the GPIB MCP server:
-**VS Code** (#89), **Cursor** (#90), **Windsurf** (#91). Claude Desktop is packaged separately as a
-`.dxt` (#67); remote-HTTP clients (Copilot #88, ChatGPT #92) need the Streamable HTTP transport (#68)
-and are not stdio packages.
+Generates the install packages for every MCP client that consumes the GPIB MCP server. They all run the
+**same** `GpibMcp.exe`, so there is **one** binary artifact (a versioned GitHub Release zip); the per-client
+package differs only in how the client reaches the server:
 
-All three clients run the **same** `GpibMcp.exe` over stdio, so there is **one** binary artifact (a
-versioned GitHub Release zip) and a small per-client config + one-click link generated from it.
+- **Local stdio clients** — launch the server as a child process: **VS Code** (#89), **Cursor** (#90),
+  **Windsurf** (#91), and Claude Desktop (`.dxt`, #67). Package = a small config snippet + one-click link.
+- **Cloud / HTTP clients** — connect to a tunnelled URL over **Streamable HTTP** (#68): **Microsoft Copilot**
+  (#88), **ChatGPT** (#92). Package = the HTTP launcher + connector docs (and, for Copilot, an OpenAPI
+  custom-connector template).
 
-## Two scripts
+## Scripts
 
-- **`Generate-Packages.ps1`** — *maintainer* side. Builds the server, makes the versioned zip (the Release
-  asset), emits the local per-client snippets/links, and (with `-PublishRelease`) publishes the GitHub
-  Release with the zip **and** the installer attached.
-- **`Install-GpibMcp.ps1`** — *end-user* side. Downloads the latest release (or a local `-FromZip`), unzips
-  to `%LOCALAPPDATA%\Programs\GpibMcp`, and registers it with `-Client vscode|cursor|windsurf|all` by
-  writing each client's config with the **resolved absolute path** (backing up any existing config first).
+- **`Generate-Packages.ps1`** — *maintainer*. Builds the server, makes the versioned zip (the Release asset),
+  emits every client package, and (with `-PublishRelease`) publishes the GitHub Release with the zip, the
+  installer, **and** the HTTP launcher attached.
+- **`Install-GpibMcp.ps1`** — *end-user, stdio*. Downloads the latest release (or a local `-FromZip`), unzips
+  to `%LOCALAPPDATA%\Programs\GpibMcp`, and registers it with `-Client vscode|cursor|windsurf|all` by writing
+  each client's config with the **resolved absolute path** (backing up any existing config first).
+- **`Start-GpibMcpHttp.ps1`** — *end-user, cloud*. Runs the installed server in HTTP mode
+  (`GPIB_MCP_TRANSPORT=http`) with a generated bearer token, and prints the local URL + the tunnel +
+  connector-registration steps for Copilot / ChatGPT.
 
   Why an installer rather than a copy-paste config: VS Code and Cursor do **not** expand `${env:…}` in an
   MCP `command`, so a portable hand-written path isn't possible across clients — having the installer write

@@ -1,0 +1,38 @@
+# GPIB MCP — ChatGPT install (#92)
+
+ChatGPT (Developer Mode → full MCP connectors) connects to a **remote HTTPS** MCP server — it cannot reach a
+local stdio process or `localhost`. So you run the GPIB MCP server in HTTP mode and expose it via a tunnel.
+
+## 1. Install + run in HTTP mode
+```powershell
+iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
+./Install-GpibMcp.ps1                  # unzips v__VERSION__ to __INSTALLDIR__ (needs NI-VISA)
+./Start-GpibMcpHttp.ps1                # http://127.0.0.1:__PORT__/mcp + a bearer token
+```
+
+## 2. Tunnel to a public HTTPS URL
+```powershell
+devtunnel host -p __PORT__              # or: ngrok http __PORT__
+```
+Your MCP URL is `https://<public-host>/mcp`.
+
+## 3. Add the connector in ChatGPT
+1. Enable **Developer mode**: Settings → **Connectors** → **Advanced** → toggle *Developer mode* on
+   (workspace admin may need to allow it).
+2. **Connectors → Create** → name it, set the URL to `https://<public-host>/mcp`.
+3. Connect; ChatGPT lists the `gpib_*` tools.
+
+## Authentication — read this
+ChatGPT's connector auth is built around **OAuth** (Authorization Code + PKCE, discovered via
+`/.well-known/oauth-protected-resource`). This server's MVP HTTP transport (#68) uses a simpler **static
+bearer token**, which ChatGPT's connector UI does not drive end-to-end. Practical options today:
+
+- **Testing:** run **without** a token (omit it / `Start-GpibMcpHttp.ps1 -Token ""` is not supported, so set
+  `GPIB_MCP_HTTP_TOKEN=` empty and start the exe directly) behind a **private** tunnel you control, and add the
+  connector with no auth.
+- **Production:** OAuth support is a planned enhancement on the same HTTP module; until then, prefer Copilot
+  (which accepts the static bearer via a custom header) or keep the tunnel private.
+
+Only connect MCP servers you trust (prompt-injection risk applies to any connector).
+
+Sources: OpenAI — "Building MCP servers for ChatGPT"; OpenAI Help — "Developer mode and MCP connectors".
