@@ -23,18 +23,9 @@ namespace GpibMcp.Printing
         private const int RenderHeight = 2250;
 
         // Bold stroke so lines land dark on paper (a 1px line washes out when the driver scales the bitmap).
+        // Weight - not desaturation - is what darkens the print; the renderer's true white-paper colours are
+        // kept (a colour printer shows the blue trace / green annotation; a mono printer renders them grey).
         private const float PrintLineWidthPx = 4f;
-
-        // A deeper palette than the on-screen white-background one: on paper, faint blue/green read poorly,
-        // so the trace/annotation pens are darkened for contrast.
-        private static readonly Color[] PrintPalette =
-        {
-            Color.Black, Color.Black,
-            Color.FromArgb(0, 0, 150),    // deep blue (trace)
-            Color.FromArgb(0, 110, 0),    // deep green (annotation)
-            Color.FromArgb(150, 90, 0),   // deep amber
-            Color.DarkRed, Color.DarkMagenta, Color.Navy
-        };
 
         /// <summary>
         /// Renders <paramref name="bytes"/> (a PCL print capture when <paramref name="isPcl"/>, else an HP-GL
@@ -52,8 +43,7 @@ namespace GpibMcp.Printing
                 Width = RenderWidth,
                 Height = RenderHeight,
                 Antialias = true,
-                LineWidthPx = PrintLineWidthPx,      // bold, so lines print dark
-                PenColors = PrintPalette             // deeper colours for paper contrast
+                LineWidthPx = PrintLineWidthPx       // bold, so lines print dark (keep the true colours)
             };
 
             Bitmap bmp = isPcl
