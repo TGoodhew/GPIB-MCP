@@ -111,6 +111,30 @@ namespace Hpgl.Rendering.Tests
             }
         }
 
+        // ---- line width (print darkness, #85) ------------------------------------
+
+        [Fact]
+        public void LineWidthPx_DefaultsToOne()
+        {
+            Assert.Equal(1f, new HpglRenderOptions().LineWidthPx);
+        }
+
+        [Fact]
+        public void LineWidthPx_BolderStroke_InksMorePixels()
+        {
+            // A bolder pen must lay down substantially more ink - this is what darkens the printed page.
+            var hpgl = "IN;SP1;PU100,400;PD900,400;";   // one horizontal line
+            var thin = new HpglRenderOptions { Width = 300, Height = 200, Background = HpglBackground.White, Antialias = false, LineWidthPx = 1f };
+            var bold = new HpglRenderOptions { Width = 300, Height = 200, Background = HpglBackground.White, Antialias = false, LineWidthPx = 5f };
+            using (var b1 = HpglRenderer.RenderToBitmap(hpgl, thin))
+            using (var b5 = HpglRenderer.RenderToBitmap(hpgl, bold))
+            {
+                int thinInk = CountNonBackgroundPixels(b1, Color.White);
+                int boldInk = CountNonBackgroundPixels(b5, Color.White);
+                Assert.True(boldInk > thinInk * 2, $"bold stroke should ink far more pixels (thin={thinInk}, bold={boldInk})");
+            }
+        }
+
         private static int CountNonBackgroundPixels(Bitmap bmp, Color background)
         {
             int count = 0;
