@@ -12,9 +12,9 @@ using Xunit;
 
 namespace GpibMcp.Tests
 {
-    public class McpServerTests
+    public class McpDispatcherTests
     {
-        static McpServerTests()
+        static McpDispatcherTests()
         {
             // The always-on tool-call audit log fires for every tools/call through the server; keep it out
             // of the real %LOCALAPPDATA% during tests.
