@@ -5,8 +5,8 @@ connects Claude — or any MCP client — directly to your test-and-measurement
 instruments over **GPIB, USB-TMC, LXI/TCPIP, and serial**, using the **NI-VISA**
 and **NI-488.2** .NET libraries.
 
-It speaks JSON-RPC 2.0 over a stdio transport and exposes a set of tools the model
-can call to discover instruments and exchange SCPI / IEEE-488.2 commands with them.
+It speaks JSON-RPC 2.0 over stdio (default) or Streamable HTTP, and exposes a set of
+tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 commands with them.
 
 | | |
 |---|---|
@@ -30,9 +30,11 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [4. Verify the build](#4-verify-the-build)
 - [Configure an MCP client](#configure-an-mcp-client)
   - [Claude Desktop](#claude-desktop)
+  - [VS Code, Cursor, Windsurf](#vs-code-cursor-windsurf)
   - [Other MCP clients](#other-mcp-clients)
 - [Usage](#usage)
   - [Tool reference](#tool-reference)
+  - [Free-running instruments and read termination](#free-running-instruments-and-read-termination)
   - [Typical workflow](#typical-workflow)
   - [Error reporting](#error-reporting)
   - [Discovery and bus extenders (HP 37204A)](#discovery-and-bus-extenders-hp-37204a)
@@ -41,6 +43,8 @@ can call to discover instruments and exchange SCPI / IEEE-488.2 commands with th
   - [Waiting for operations to complete (SRQ)](#waiting-for-operations-to-complete-srq)
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
+- [MCP transports (stdio & HTTP)](#mcp-transports-stdio--http)
+- [GPIB backends](#gpib-backends)
 - [Why x86?](#why-x86)
 - [Project layout](#project-layout)
 - [Troubleshooting](#troubleshooting)
@@ -457,7 +461,7 @@ The server ships with a **user-extensible database of instrument command referen
 you can tell Claude *"an 8563E is at GPIB 18"* and it can look up what that instrument
 understands, confirm its identity, and drive it — instead of you supplying raw commands.
 
-It comes prepopulated with **165 instrument models** (HP/Agilent, Keithley, Tektronix, Rigol,
+It comes prepopulated with **188 instrument models** (HP/Agilent, Keithley, Tektronix, Rigol,
 Rohde & Schwarz, Datron), each carrying its full documented command set — see the
 [catalog](data/instruments/README.md). Each model is one JSON file describing its identity
 query, command mnemonics, parameters, units, and examples (see
@@ -929,7 +933,7 @@ src/Hpgl.Rendering/                standalone HP-GL/2 + PCL + image -> Bitmap/PN
 src/Srq.Completion/                headless SRQ completion state machine (no VISA/MCP deps)
   CompletionWaiter.cs              SRQ-edge / direct-bit waiter
   StatusModel.cs / IStatusChannel.cs  data model + transport abstraction
-data/instruments/*.json            bundled instrument command database (165 models)
+data/instruments/*.json            bundled instrument command database (188 models)
   README.md                        auto-generated catalog (tools/gen_instrument_catalog.py)
 tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
 tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
