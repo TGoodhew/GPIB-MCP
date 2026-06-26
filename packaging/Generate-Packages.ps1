@@ -113,7 +113,7 @@ function New-ClientPackage($client, $configFileName, $configText, $tokens) {
 }
 
 Write-Step "Emitting client packages -> $pkgRoot"
-$common = @{ "__VERSION__" = $Version; "__EXE__" = $exePath; "__INSTALLDIR__" = $InstallDir; "__ZIP__" = "$stageName.zip" }
+$common = @{ "__VERSION__" = $Version; "__EXE__" = $exePath; "__ZIP__" = "$stageName.zip" }
 
 New-ClientPackage "vscode" "mcp.json" $vscodeConfig ($common + @{
     "__VSCODE_ADDCMD__" = $vscodeAddCmd; "__VSCODE_URL__" = $vscodeUrl; "__CONFIG__" = $vscodeConfig })
@@ -168,7 +168,7 @@ tunnel it, then register the connector. Microsoft Copilot #88 / ChatGPT #92:
 ``````
 See ``packaging/copilot`` and ``packaging/chatgpt`` for the connector docs.
 
-Or download ``$stageName.zip`` below and unzip to ``$InstallDir``.
+Or download ``$stageName.zip`` below and unzip to ``%LOCALAPPDATA%\Programs\GpibMcp``.
 "@
     $assets = @($zipPath)
     if (Test-Path $installer) { $assets += $installer }
