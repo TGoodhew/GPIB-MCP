@@ -9,10 +9,17 @@ Adopts the KE5FX glyph shapes wholesale (issue #31), mapped into our grid:
 Metrics: Em = 6 (KE5FX ink width => on-screen char width unchanged), Cap = 6,
 Advance = 8.25 (= 1.375 x Em, the instrument-derived pitch from #29/#30).
 """
+import os
 import re
+import sys
 
-RENDERER = r"C:\Program Files (x86)\KE5FX\GPIB\renderer.cpp"
-OUT = r"C:\Users\Tony\source\GPIBMCP\src\Hpgl.Rendering\StrokeFont.cs"
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Input: the KE5FX GPIB Toolkit's renderer.cpp (its default install location); override as argv[1].
+RENDERER = sys.argv[1] if len(sys.argv) > 1 else r"C:\Program Files (x86)\KE5FX\GPIB\renderer.cpp"
+# Output: src/Hpgl.Rendering/StrokeFont.cs in this repo, resolved relative to this script; override as argv[2].
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.normpath(
+    os.path.join(_HERE, "..", "..", "src", "Hpgl.Rendering", "StrokeFont.cs"))
 BASELINE_ROW = 6   # KE5FX row that is the text baseline
 
 def load_tables(path):
