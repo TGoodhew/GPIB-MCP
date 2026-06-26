@@ -1339,7 +1339,7 @@ namespace Hpgl.Rendering
             Pen p;
             if (!_pens.TryGetValue(pen, out p))
             {
-                p = new Pen(_opt.ResolvePen(pen), 1f);
+                p = new Pen(_opt.ResolvePen(pen), _opt.LineWidthPx > 0 ? _opt.LineWidthPx : 1f);
                 _pens[pen] = p;
             }
             // Apply the current line type. (Cached pen mutated per draw - safe single-threaded.)

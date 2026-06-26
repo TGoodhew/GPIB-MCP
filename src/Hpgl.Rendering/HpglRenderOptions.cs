@@ -43,6 +43,14 @@ namespace Hpgl.Rendering
         public bool Antialias { get; set; } = true;
 
         /// <summary>
+        /// Stroke width in pixels for the raster (GDI) path (default 1). Screen/PNG captures use 1px - thin,
+        /// crisp on a display. Printing renders to a bitmap that the driver then scales up to the page, where
+        /// a 1px antialiased line washes out to faint grey; the print path raises this (and renders larger)
+        /// so lines land bold and dark on paper. Does not affect the SVG path.
+        /// </summary>
+        public float LineWidthPx { get; set; } = 1f;
+
+        /// <summary>
         /// SVG only: Ramer-Douglas-Peucker tolerance in pixels for simplifying LONG stroke runs
         /// (e.g. a spectrum trace) when emitting SVG. The default 0.5 is sub-pixel - visually lossless
         /// at the render resolution - and roughly halves trace size; short runs (font glyphs, graticule,

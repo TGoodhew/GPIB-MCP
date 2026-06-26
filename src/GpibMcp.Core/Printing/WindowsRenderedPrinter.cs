@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Printing;
 using System.Text;
 using Hpgl.Rendering;
@@ -16,10 +17,15 @@ namespace GpibMcp.Printing
     /// </summary>
     public static class WindowsRenderedPrinter
     {
-        // Render resolution for the intermediate bitmap. Landscape 4:3, high enough that fit-to-page on an
-        // A4/Letter sheet stays crisp; the driver does the final scale to the device's DPI.
-        private const int RenderWidth = 2200;
-        private const int RenderHeight = 1650;
+        // Render resolution for the intermediate bitmap. Landscape 4:3 at ~300 DPI for an A4/Letter sheet, so
+        // the driver barely rescales it and lines stay crisp.
+        private const int RenderWidth = 3000;
+        private const int RenderHeight = 2250;
+
+        // Bold stroke so lines land dark on paper (a 1px line washes out when the driver scales the bitmap).
+        // Weight - not desaturation - is what darkens the print; the renderer's true white-paper colours are
+        // kept (a colour printer shows the blue trace / green annotation; a mono printer renders them grey).
+        private const float PrintLineWidthPx = 4f;
 
         /// <summary>
         /// Renders <paramref name="bytes"/> (a PCL print capture when <paramref name="isPcl"/>, else an HP-GL
@@ -36,7 +42,8 @@ namespace GpibMcp.Printing
                 Background = HpglBackground.White,   // dark ink on white paper
                 Width = RenderWidth,
                 Height = RenderHeight,
-                Antialias = true
+                Antialias = true,
+                LineWidthPx = PrintLineWidthPx       // bold, so lines print dark (keep the true colours)
             };
 
             Bitmap bmp = isPcl
@@ -54,6 +61,11 @@ namespace GpibMcp.Printing
 
                     doc.PrintPage += (s, e) =>
                     {
+                        // High-quality scaling so the bold lines stay solid when mapped to device pixels.
+                        e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+                        e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
                         // Fit the bitmap into the printable area, preserving aspect ratio, centered.
                         Rectangle area = e.MarginBounds;
                         double scale = Math.Min((double)area.Width / bmp.Width, (double)area.Height / bmp.Height);
