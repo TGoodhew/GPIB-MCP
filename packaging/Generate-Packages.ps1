@@ -80,6 +80,10 @@ Write-Step "Zipping -> $zipPath"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 Compress-Archive -Path "$stageDir\*" -DestinationPath $zipPath
 
+# Claude Desktop Extension bundle (.mcpb) for one-click install (#67), built from the same staged server.
+$mcpbPath = Join-Path $OutputDir "GpibMcp-$Version.mcpb"
+& (Join-Path $PSScriptRoot "Build-Mcpb.ps1") -SourceDir $stageDir -Version $Version -OutFile $mcpbPath
+
 # ---- 3. Per-client config JSON (built with ConvertTo-Json so paths are escaped correctly) ----------
 # The stdio server object every client wraps.
 $serverObj = [ordered]@{ command = $exePath; args = @() }
@@ -154,12 +158,15 @@ if ($PublishRelease) {
     $notes = @"
 GPIB MCP server $Version (Windows x86). **Requires NI-VISA / NI-488.2** installed.
 
-**Desktop / local clients (stdio):**
+**Claude Desktop (one-click):** download ``GpibMcp-$Version.mcpb`` below and open it in Claude Desktop
+(Settings -> Extensions), or drag it onto the window. Requires NI-VISA / NI-488.2 (#67).
+
+**Other local clients (stdio):**
 ``````powershell
 iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
 ./Install-GpibMcp.ps1 -Client all   # vscode | cursor | windsurf | all
 ``````
-Claude Desktop, VS Code #89, Cursor #90, Windsurf #91.
+VS Code #89, Cursor #90, Windsurf #91 (or Claude Desktop manually).
 
 **Cloud clients (Streamable HTTP, this release adds the HTTP transport #68):** run the server in HTTP mode and
 tunnel it, then register the connector. Microsoft Copilot #88 / ChatGPT #92:
@@ -171,6 +178,7 @@ See ``packaging/copilot`` and ``packaging/chatgpt`` for the connector docs.
 Or download ``$stageName.zip`` below and unzip to ``%LOCALAPPDATA%\Programs\GpibMcp``.
 "@
     $assets = @($zipPath)
+    if (Test-Path $mcpbPath)  { $assets += $mcpbPath }
     if (Test-Path $installer) { $assets += $installer }
     if (Test-Path $launcher)  { $assets += $launcher }
     & gh release create "v$Version" $assets --title "GPIB MCP $Version" --notes $notes

@@ -21,6 +21,10 @@ package differs only in how the client reaches the server:
 - **`Start-GpibMcpHttp.ps1`** — *end-user, cloud*. Runs the installed server in HTTP mode
   (`GPIB_MCP_TRANSPORT=http`) with a generated bearer token, and prints the local URL + the tunnel +
   connector-registration steps for Copilot / ChatGPT.
+- **`Build-Mcpb.ps1`** — builds the **Claude Desktop Extension** bundle (`.mcpb`, #67): writes a manifest
+  (spec v0.3, binary server) over the staged build and packs it (prefers the official `@anthropic-ai/mcpb`
+  CLI, which validates the manifest; falls back to a plain zip). `Generate-Packages.ps1` calls it and
+  attaches the `.mcpb` to the release. End users just open the `.mcpb` in Claude Desktop → Extensions.
 
   Why an installer rather than a copy-paste config: VS Code and Cursor do **not** expand `${env:…}` in an
   MCP `command`, so a portable hand-written path isn't possible across clients — having the installer write
