@@ -620,7 +620,12 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
   X from its neighbours (a trace's X is a strictly increasing regular grid, so an out-of-order point is
   unambiguous) — keeping the genuine amplitude sample — before the image is rendered **and** before the
   bytes are handed back, so a plot forwarded to a real plotter is clean too. Graticule lines and amplitude
-  peaks are never touched. The verbatim `debug:true` dump keeps the *unrepaired* capture for diagnosis.
+  peaks are never touched. A **PCL print** capture has the matching defence (#82): each raster row declares
+  an exact byte count (`ESC*b<n>W`), so a dropped byte leaves one row short and a printer reads the next
+  row's escape as raster data — then prints the following `*b<n>W…` as **literal text** on the page. A
+  re-framing pass restores every row to its declared length (zero-padding a short row, trimming a long one)
+  so the forwarded/rendered bytes stay aligned. The verbatim `debug:true` dump keeps the *unrepaired*
+  capture for diagnosis.
 
 #### Showing it inline in the chat
 
