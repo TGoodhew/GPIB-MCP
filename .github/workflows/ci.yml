@@ -20,6 +20,9 @@ concurrency:
 
 jobs:
   build-test:
+    # SECURITY (public repo + self-hosted runner): never execute a forked PR's code on the bench runner.
+    # Run on push to main (write-gated) and on PRs ONLY when the head branch lives in THIS repo, not a fork.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, Windows]
     steps:
       - name: Checkout
