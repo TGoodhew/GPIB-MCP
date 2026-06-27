@@ -175,7 +175,7 @@ namespace GpibMcp.Tools
             // #79: a byte dropped at a GPIB read seam can shorten one trace X coordinate (e.g. "995"->"95"),
             // drawing a stray pen excursion to the page edge. Repair it - restore the grid X from its
             // neighbours, keeping the genuine Y - for the rendered image and the bytes handed back/forwarded.
-            // PCL print is byte-raster and immune; the verbatim debug dump below keeps the unrepaired capture.
+            // PCL print has its own re-framing repair (below, #82); the verbatim debug dump keeps the raw capture.
             string plotHpgl = capture.Hpgl;
             if (!isPrint)
             {
@@ -187,6 +187,21 @@ namespace GpibMcp.Tools
             }
 
             byte[] sourceBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(plotHpgl);
+
+            // #82: the PCL print stream is read in the same timeout-bounded chunks as a plot, so a read seam
+            // can drop a byte here too. PCL is less forgiving than HP-GL: each ESC*b<n>W raster row declares an
+            // exact byte count, so one dropped byte leaves a row short and a printer reads the next row's ESC as
+            // raster data - then prints the following "*b<n>W..." as literal text on the page. Re-frame every row
+            // to its declared length so the bytes we render AND forward to a printer stay aligned. The verbatim
+            // debug dump below keeps the unrepaired capture for diagnosis.
+            if (isPrint)
+            {
+                sourceBytes = PclRasterRepair.Repair(sourceBytes, out int reframedRows);
+                if (reframedRows > 0)
+                    Log.Info(def.Model + " print: re-framed " + reframedRows +
+                             " PCL raster row(s) shifted by a GPIB read drop-out (#82).");
+            }
+
             bool inlineSvg = Bool(args, "inline_svg", true);
 
             // Inline-SVG label fidelity (plot only): 'low' = compact <text> labels (fast); 'high' = exact
