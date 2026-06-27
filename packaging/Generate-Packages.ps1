@@ -181,8 +181,22 @@ Or download ``$stageName.zip`` below and unzip to ``%LOCALAPPDATA%\Programs\Gpib
     if (Test-Path $mcpbPath)  { $assets += $mcpbPath }
     if (Test-Path $installer) { $assets += $installer }
     if (Test-Path $launcher)  { $assets += $launcher }
-    & gh release create "v$Version" $assets --title "GPIB MCP $Version" --notes $notes
-    if ($LASTEXITCODE -ne 0) { throw "gh release create failed (exit $LASTEXITCODE)" }
+
+    # Idempotent publish: create the release if the tag has none yet, otherwise refresh its notes and
+    # re-upload the assets (--clobber). This lets a CI re-run - or a re-tag - update an existing release
+    # instead of failing with "release already exists".
+    & gh release view "v$Version" *> $null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Step "Release v$Version already exists - updating notes and re-uploading assets"
+        & gh release edit "v$Version" --title "GPIB MCP $Version" --notes $notes
+        if ($LASTEXITCODE -ne 0) { throw "gh release edit failed (exit $LASTEXITCODE)" }
+        & gh release upload "v$Version" $assets --clobber
+        if ($LASTEXITCODE -ne 0) { throw "gh release upload failed (exit $LASTEXITCODE)" }
+    }
+    else {
+        & gh release create "v$Version" $assets --title "GPIB MCP $Version" --notes $notes
+        if ($LASTEXITCODE -ne 0) { throw "gh release create failed (exit $LASTEXITCODE)" }
+    }
 }
 
 Write-Host ""
