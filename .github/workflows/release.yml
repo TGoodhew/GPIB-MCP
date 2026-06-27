@@ -1,0 +1,68 @@
+name: Release
+
+# Build the COMPLETE set of release artifacts and publish them to a GitHub Release:
+#   - GpibMcp-<version>-win-x86.zip   portable binary distribution (the server + data)
+#   - GpibMcp-<version>.mcpb          Claude Desktop one-click extension bundle (#67)
+#   - Install-GpibMcp.ps1             end-user installer (stdio clients)
+#   - Start-GpibMcpHttp.ps1           HTTP-mode launcher (cloud clients: Copilot #88 / ChatGPT #92)
+# plus the per-client config/connector packages staged under dist/packaging/.
+#
+# Runs on a SELF-HOSTED Windows runner: the build links the NI-VISA / NI-488.2 assemblies,
+# which only exist on a machine with the NI drivers installed, so a GitHub-hosted runner
+# cannot compile the GpibMcp.NiVisa backend. Register a self-hosted runner (Settings ->
+# Actions -> Runners) on the bench PC that has NI-VISA, the .NET SDK, and the gh CLI.
+
+on:
+  push:
+    tags:
+      - 'v*'            # pushing tag v0.3.0 publishes GitHub Release "v0.3.0"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build and publish, e.g. 0.3.0 (no leading v). Creates/updates tag v<version>.'
+        required: true
+        type: string
+
+permissions:
+  contents: write       # gh release create/edit/upload authenticates with the workflow GITHUB_TOKEN
+
+concurrency:
+  group: release        # never run two publishes at once
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: [self-hosted, Windows]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.version }}' } else { '${{ github.ref_name }}' }
+          $v = $v.TrimStart('v','V')
+          if ($v -notmatch '^\d+\.\d+\.\d+([-.].+)?$') { throw "Version '$v' is not a X.Y.Z version" }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Release version: $v"
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore GPIB-MCP.sln
+
+      - name: Build (Release x86)
+        shell: pwsh
+        run: dotnet build GPIB-MCP.sln -c Release -p:Platform=x86 --no-restore -clp:ErrorsOnly
+
+      - name: Test (hardware-free suite)
+        shell: pwsh
+        run: dotnet test GPIB-MCP.sln -c Release -p:Platform=x86 --no-build --logger "console;verbosity=minimal"
+
+      - name: Build + publish all release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # -SkipBuild reuses the Release x86 build above; -PublishRelease stages every artifact and
+        # creates/updates the GitHub Release with the full asset set.
+        run: ./packaging/Generate-Packages.ps1 -Version '${{ steps.ver.outputs.version }}' -SkipBuild -PublishRelease

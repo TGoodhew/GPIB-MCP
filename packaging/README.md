@@ -62,11 +62,29 @@ dist/
 | `-PublishRelease` | off | publish a GitHub Release (`v<Version>`) with the zip via `gh` |
 | `-OutputDir` | `dist` | output root |
 
+## Continuous integration (GitHub Actions)
+
+Two workflows under [`.github/workflows/`](../.github/workflows/) drive build/test and releases. Both run on
+a **self-hosted Windows runner** because the `GpibMcp.NiVisa` backend links the NI-VISA / NI-488.2 assemblies,
+which only exist on a machine with the NI drivers installed — a stock GitHub-hosted runner can't compile it.
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| **`ci.yml`** | push to `main`, PRs into `main` | `dotnet build` + `dotnet test` (the hardware-free suite) — catches regressions before a release. |
+| **`release.yml`** | push a `v*` tag (or manual **Run workflow** with a version) | builds + tests, then runs `Generate-Packages.ps1 -SkipBuild -PublishRelease` to build and **post the complete asset set** to the GitHub Release: the **zip**, the **`.mcpb`**, **`Install-GpibMcp.ps1`**, and **`Start-GpibMcpHttp.ps1`**. |
+
+**Cut a release:** tag the commit and push — e.g. `git tag v0.3.0 && git push origin v0.3.0` — or use
+**Actions → Release → Run workflow** and enter the version. Publishing is **idempotent**: re-running an
+existing tag refreshes that release's notes and re-uploads the assets (`gh release ... --clobber`) instead of
+failing. The release step authenticates `gh` with the workflow's `GITHUB_TOKEN` (`permissions: contents: write`).
+
+**One-time runner setup:** register a self-hosted runner (repo **Settings → Actions → Runners → New runner**)
+on the bench PC, with the default `self-hosted` + `Windows` labels, and ensure **NI-VISA/NI-488.2**, the
+**.NET SDK**, and the **`gh` CLI** are installed (they already are on the machine that builds locally today).
+
 ## Notes
-- **NI-VISA build dependency:** the server is built **locally** (the `GpibMcp.NiVisa` backend needs the NI
-  SDK to compile), so packaging runs on a dev machine with the NI tooling — not on a stock CI runner. A
-  tag-driven GitHub Actions release would need a self-hosted/NI-equipped runner or a build split first
-  (tracked separately if/when wanted).
+- **NI-VISA build dependency:** the server is built on a machine with the NI tooling (locally, or the
+  self-hosted CI runner above) because the `GpibMcp.NiVisa` backend needs the NI assemblies to compile.
 - The generated configs point at `<InstallDir>\GpibMcp.exe`, so the one-click links work once the release
   is unzipped there. NI-VISA / NI-488.2 must be installed on the target machine at runtime.
 - `Generate-Packages.ps1` never publishes unless you pass `-PublishRelease`.

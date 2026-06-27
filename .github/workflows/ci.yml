@@ -1,0 +1,38 @@
+name: CI
+
+# Build and run the (hardware-free) test suite on every push to main and every PR into it,
+# so a regression is caught before it reaches a release. Same self-hosted Windows runner as
+# the release workflow, because building the GpibMcp.NiVisa backend needs the NI-VISA /
+# NI-488.2 assemblies that only exist on a machine with the NI drivers installed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: [self-hosted, Windows]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore GPIB-MCP.sln
+
+      - name: Build (Release x86)
+        shell: pwsh
+        run: dotnet build GPIB-MCP.sln -c Release -p:Platform=x86 --no-restore -clp:ErrorsOnly
+
+      - name: Test
+        shell: pwsh
+        run: dotnet test GPIB-MCP.sln -c Release -p:Platform=x86 --no-build --logger "console;verbosity=minimal"
