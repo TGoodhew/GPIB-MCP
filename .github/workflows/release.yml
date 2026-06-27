@@ -32,6 +32,10 @@ concurrency:
 
 jobs:
   release:
+    # Gated by the protected 'release' environment: the run pauses for a required reviewer's approval
+    # before any build/publish step executes, so only an authorised maintainer can cut a release
+    # (on top of the trigger already needing push/write access to tag or dispatch).
+    environment: release
     runs-on: [self-hosted, Windows]
     steps:
       - name: Checkout
