@@ -191,6 +191,50 @@ namespace GpibMcp.Tests
             Assert.Equal(expected, MeasurementValue.UnitForQuery(Analyzer(), command));
         }
 
+        /// <summary>A SCPI instrument as the database documents one: short/long form and optional nodes.</summary>
+        private static InstrumentDefinition ScpiGenerator() => new InstrumentDefinition
+        {
+            Model = "E4438C",
+            Commands = new List<InstrumentCommand>
+            {
+                new InstrumentCommand
+                {
+                    Name = "frequency_cw", Mnemonic = "[:SOURce]:FREQuency[:CW]", Query = ":FREQuency?",
+                    Parameters = new List<CommandParameter>
+                    {
+                        new CommandParameter { Name = "frequency", Units = new List<UnitToken>
+                            { new UnitToken("Hz", "Hz"), new UnitToken("GHz", "GHz") } }
+                    }
+                },
+                new InstrumentCommand
+                {
+                    Name = "power_amplitude", Mnemonic = "[:SOURce]:POWer[:LEVel]", Query = ":POWer?",
+                    Parameters = new List<CommandParameter>
+                    {
+                        new CommandParameter { Name = "amplitude", Units = new List<UnitToken>
+                            { new UnitToken("dBm", "dBm") } }
+                    }
+                }
+            }
+        };
+
+        [Theory]
+        [InlineData(":FREQ?", "Hz")]            // the short form - what an instrument is actually sent
+        [InlineData(":FREQUENCY?", "Hz")]       // the long form
+        [InlineData(":freq?", "Hz")]            // case-insensitive
+        [InlineData(":SOUR:FREQ:CW?", "Hz")]    // optional nodes spelled out
+        [InlineData(":POW?", "dBm")]
+        [InlineData(":POWER?", "dBm")]
+        [InlineData(":FREQ:STEP?", null)]       // a different command, not this one
+        [InlineData(":FRE?", null)]             // shorter than the short form is not an abbreviation
+        public void MeasurementValue_UnderstandsScpiShortAndLongForm(string command, string expected)
+        {
+            // The database documents SCPI in the specification's own notation - ":FREQuency?" - while the
+            // wire carries ":FREQ?". Comparing those literally, as the first cut did, meant the unit never
+            // resolved for a SCPI instrument. Found on real hardware, not in a test.
+            Assert.Equal(expected, MeasurementValue.UnitForQuery(ScpiGenerator(), command));
+        }
+
         // ---------------------------------------------------------------- gpib_batch
 
         [Fact]
