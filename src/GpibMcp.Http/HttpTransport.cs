@@ -193,7 +193,7 @@ namespace GpibMcp.Http
             }
 
             JToken payload = parsed is JArray ? (JToken)responses : responses[0];
-            int status = statusCodes ? StatusForResponse((JObject)responses[0]) : 200;
+            int status = single ? StatusForResponse((JObject)responses[0], mapMethodNotFound: statusCodes) : 200;
             Respond(res, status, "application/json", payload.ToString(Formatting.None));
         }
 
@@ -214,14 +214,19 @@ namespace GpibMcp.Http
         /// still in the body, which is exactly what lets a client tell a modern server saying "I do not have
         /// that method" from a legacy server that does not host this endpoint at all. Everything else,
         /// including a tool that failed, is a perfectly good <c>200</c>: the request was served.
+        ///
+        /// The version refusal is <b>not</b> gated on the revision the request declared. Only a request that
+        /// named a version can be refused for it, so its client is version-aware by definition - and the
+        /// <c>400</c> is the signal that tells it to read the supported list and pick again. Mapping an
+        /// unknown method to <c>404</c> stays gated: a legacy client may only read the body on <c>200</c>.
         /// </summary>
-        private static int StatusForResponse(JObject response)
+        private static int StatusForResponse(JObject response, bool mapMethodNotFound)
         {
             var error = response != null ? response["error"] as JObject : null;
             if (error == null) return 200;
 
             int code = (int?)error["code"] ?? 0;
-            if (code == -32601) return 404;
+            if (code == -32601) return mapMethodNotFound ? 404 : 200;
             if (code == McpError.UnsupportedProtocolVersionCode ||
                 code == McpError.HeaderMismatchCode ||
                 code == McpError.MissingRequiredClientCapabilityCode) return 400;

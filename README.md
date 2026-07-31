@@ -81,10 +81,10 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   `notifications/progress`, and a client that supports the `io.modelcontextprotocol/tasks` extension can
   take a task handle and poll instead of blocking for 7–24 s.
 - **Single, self-contained executable** — no external MCP SDK dependency; protocol
-  handling is implemented directly so it runs cleanly on .NET Framework. The server
-  implements MCP revision **2025-06-18** and negotiates honestly: it answers `initialize`
-  with the client's revision only when that revision is one it can actually speak
-  (`2025-06-18`, `2025-03-26`, `2024-11-05`), and otherwise names its own.
+  handling is implemented directly so it runs cleanly on .NET Framework. It implements MCP
+  **2026-07-28** and still speaks `2025-06-18`, `2025-03-26` and `2024-11-05`, deciding per
+  request which revision to answer in — so a modern client gets the modern shape without
+  anything changing for the clients you already use.
 
 ## Prerequisites
 
@@ -918,12 +918,22 @@ $env:GPIB_MCP_TRANSPORT = "http"; $env:GPIB_MCP_HTTP_TOKEN = "<secret>"; .\GpibM
 
 ## Protocol revisions
 
-The server implements MCP **2025-06-18** and negotiates honestly: `initialize` is answered with the client's
-revision only when that revision is one it can actually speak (`2025-06-18`, `2025-03-26`, `2024-11-05`),
-otherwise with its own.
+The server implements MCP **2026-07-28** and speaks **`2026-07-28`, `2025-06-18`, `2025-03-26` and
+`2024-11-05`**. Negotiation is honest in both directions: a revision joins that list when the code implements
+it, and a request naming anything else — including a real revision we haven't reviewed, like `2025-11-25` — is
+refused with `UnsupportedProtocolVersionError` carrying the list, so the client can pick one and retry.
 
-It also accepts the **stateless shape** MCP 2026-07-28 moves to (SEP-2575), which drops the handshake and has
-every request carry its own context in `_meta`:
+Which revision a request is answered in is decided per request. A request declaring its own revision decides
+for itself; one that declares none falls back to whatever `initialize` agreed. The legacy handshake still
+answers `2025-06-18` by default when the client names nothing, because using `initialize` at all predates the
+revision that removed it.
+
+> **On MRTR.** 2026-07-28 replaces server-initiated requests with Multi Round-Trip Requests, and this server
+> implements none of it — deliberately. Every server obligation there is conditional on choosing to return an
+> `InputRequiredResult` ("servers **MAY** respond…"), and this server initiates no sampling, elicitation or
+> roots requests, so it never returns one. Every result it produces is `resultType: "complete"`.
+
+The **stateless shape** (SEP-2575) drops the handshake and has every request carry its own context in `_meta`:
 
 | `_meta` key | Effect |
 |---|---|
@@ -939,8 +949,7 @@ without a handshake a client would otherwise never learn it. A tool call needs n
 **`server/discover`** is implemented (2026-07-28 makes it a MUST) and answers without a handshake: the
 protocol versions the server actually speaks, its capabilities, its identity, and the same `instructions`
 `initialize` returns — one request instead of probing. On stdio it doubles as the backward-compatibility
-probe, so it is served whatever revision the caller is on. Implementing it is *not* a claim to 2026-07-28:
-`supportedVersions` lists only what is implemented, and a revision joins that list when the code does.
+probe, so it is served whatever revision the caller is on.
 
 A request that declares **2026-07-28 or later** also gets the fields that revision adds: `resultType`
 (`"complete"` on an ordinary result; a task handle stays `"task"`), and on `tools/list` the `ttlMs` /
