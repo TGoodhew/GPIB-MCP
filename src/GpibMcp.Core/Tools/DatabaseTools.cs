@@ -77,20 +77,22 @@ namespace GpibMcp.Tools
                     Prop("command", "string", "Return full detail for this command (name or mnemonic)."),
                     Prop("search", "string", "Filter commands by text in name/mnemonic/description."),
                     Prop("category", "string", "Filter commands by category.")),
-                args =>
+                (Func<JObject, ToolOutput>)(args =>
                 {
                     string model = ReqStr(args, "model");
                     InstrumentDefinition def;
                     if (!db.TryGet(model, out def))
-                        return "Unknown model '" + model + "'. Use instrument_list_models to see known models.";
+                        return ReferenceFailed("Unknown model '" + model + "'. Use instrument_list_models to see known models.");
 
                     string command = Str(args, "command", null);
                     if (!string.IsNullOrEmpty(command))
                     {
                         var cmd = FindCommand(def, command);
                         if (cmd == null)
-                            return "Model '" + def.Model + "' has no command matching '" + command + "'.";
-                        return BuildRecipe(def, cmd).ToString(Formatting.Indented);
+                            return ReferenceFailed("Model '" + def.Model + "' has no command matching '" + command + "'.");
+                        var recipe = BuildRecipe(def, cmd);
+                        recipe["ok"] = true;
+                        return ReferenceOutput(recipe);
                     }
 
                     IEnumerable<InstrumentCommand> cmds = def.Commands ?? new List<InstrumentCommand>();
@@ -105,6 +107,7 @@ namespace GpibMcp.Tools
 
                     var result = new JObject
                     {
+                        ["ok"] = true,
                         ["model"] = def.Model,
                         ["manufacturer"] = def.Manufacturer,
                         ["category"] = def.Category,
@@ -137,7 +140,43 @@ namespace GpibMcp.Tools
                         result["note"] = "Compact index. Call instrument_reference with command=<name|mnemonic> " +
                                          "for full detail, or search=/category= to filter.";
                     }
-                    return result.ToString(Formatting.Indented);
+                    return ReferenceOutput(result);
+                }))
+                .WithOutputSchema(new JObject
+                {
+                    ["type"] = "object",
+                    ["description"] = "A model reference (metadata + command index + triggering contract) or, with " +
+                                      "command=, that command's read/write recipe.",
+                    ["properties"] = new JObject
+                    {
+                        ["ok"] = new JObject { ["type"] = "boolean", ["description"] = "False when the model or command is unknown; see `error`." },
+                        ["model"] = new JObject { ["type"] = "string" },
+                        ["error"] = new JObject { ["type"] = "string" },
+                        ["read"] = new JObject
+                        {
+                            ["type"] = "object",
+                            ["description"] = "Recipe only: how to query the command. `send` is the exact wire string.",
+                            ["additionalProperties"] = true
+                        },
+                        ["write"] = new JObject
+                        {
+                            ["type"] = "object",
+                            ["description"] = "Recipe only: how to set it - the template and how to fill it in.",
+                            ["additionalProperties"] = true
+                        },
+                        ["triggering"] = new JObject
+                        {
+                            ["type"] = "object",
+                            ["description"] = "The arm -> wait -> read contract, when the model has a completion model.",
+                            ["additionalProperties"] = true
+                        },
+                        ["commandIndex"] = new JObject { ["type"] = "array", ["description"] = "Compact name/mnemonic/category index." },
+                        ["commands"] = new JObject { ["type"] = "array", ["description"] = "Full command detail, when a filter narrowed it enough." }
+                    },
+                    ["required"] = new JArray("ok"),
+                    // Two shapes behind one tool (reference and recipe), and the recipe carries the model's own
+                    // documented fields - so the schema pins what a caller keys off and lets the rest through.
+                    ["additionalProperties"] = true
                 }));
 
             // ---- Resolve a human value+unit to the exact wire string ------------
@@ -152,22 +191,22 @@ namespace GpibMcp.Tools
                     Required("command", "string", "The settable command (name or mnemonic), e.g. 'frequency' or 'FR'."),
                     Required("value", "number", "The numeric value, e.g. 1."),
                     Prop("unit", "string", "The human unit, e.g. 'GHz' or 'dBm'. Omit only when the command takes one unit.")),
-                args =>
+                (Func<JObject, ToolOutput>)(args =>
                 {
                     string model = ReqStr(args, "model");
                     InstrumentDefinition def;
                     if (!db.TryGet(model, out def))
-                        return "Unknown model '" + model + "'. Use instrument_list_models to see known models.";
+                        return ResolveFailed("Unknown model '" + model + "'. Use instrument_list_models to see known models.");
 
                     string command = ReqStr(args, "command");
                     var cmd = FindCommand(def, command);
                     if (cmd == null)
-                        return "Model '" + def.Model + "' has no command matching '" + command + "'.";
+                        return ResolveFailed("Model '" + def.Model + "' has no command matching '" + command + "'.");
 
                     double value;
                     try { value = args["value"] == null ? double.NaN : args["value"].Value<double>(); }
                     catch { value = double.NaN; }
-                    if (double.IsNaN(value)) return "A numeric 'value' is required.";
+                    if (double.IsNaN(value)) return ResolveFailed("A numeric 'value' is required.");
                     string unit = Str(args, "unit", null);
 
                     // The settable parameter is the one carrying unit tokens (prefer one already audited).
@@ -176,21 +215,84 @@ namespace GpibMcp.Tools
                         .OrderByDescending(p => p.Units.Any(u => u.IsAudited))
                         .FirstOrDefault();
                     if (param == null)
-                        return "Command '" + cmd.Name + "' on " + def.Model +
-                               "' has no parameter with unit tokens to set against.";
+                        return ResolveFailed("Command '" + cmd.Name + "' on " + def.Model +
+                               "' has no parameter with unit tokens to set against.");
                     if (!param.Units.Any(u => u.IsAudited))
-                        return "The unit tokens for '" + cmd.Name + "' on " + def.Model + " are not audited yet " +
+                        return ResolveFailed("The unit tokens for '" + cmd.Name + "' on " + def.Model + " are not audited yet " +
                                "(issue #46), so the wire token can't be resolved. Documented set form: " +
-                               (cmd.Set ?? cmd.Mnemonic ?? "?") + ".";
+                               (cmd.Set ?? cmd.Mnemonic ?? "?") + ".");
 
                     var res = UnitResolver.Resolve(value, unit, param.Units);
                     if (!res.Ok)
-                        return "Cannot set " + cmd.Name + " to " + UnitResolver.FormatNumber(value) +
-                               (string.IsNullOrEmpty(unit) ? "" : " " + unit) + ": " + res.Error;
+                        return ResolveFailed("Cannot set " + cmd.Name + " to " + UnitResolver.FormatNumber(value) +
+                               (string.IsNullOrEmpty(unit) ? "" : " " + unit) + ": " + res.Error);
 
-                    return "Send: " + AssembleSet(cmd, res) + "\n(resolved " + UnitResolver.FormatNumber(value) +
+                    string send = AssembleSet(cmd, res);
+                    string text = "Send: " + send + "\n(resolved " + UnitResolver.FormatNumber(value) +
                            (string.IsNullOrEmpty(unit) ? "" : " " + unit) + " -> " + res.Formatted + " for " +
                            cmd.Name + " [" + cmd.Mnemonic + "] on " + def.Model + ")";
+
+                    // `send` as a field, not a sentence to slice a command out of (#113).
+                    var structured = new JObject
+                    {
+                        ["ok"] = true,
+                        ["send"] = send,
+                        ["model"] = def.Model,
+                        ["command"] = cmd.Name,
+                        ["mnemonic"] = cmd.Mnemonic,
+                        ["requested"] = new JObject
+                        {
+                            ["value"] = value,
+                            ["unit"] = string.IsNullOrEmpty(unit) ? null : unit
+                        },
+                        ["resolved"] = new JObject
+                        {
+                            ["formatted"] = res.Formatted,
+                            ["value"] = res.Value,
+                            ["token"] = res.Token,
+                            // What that token means, straight from the audited tokens (#46).
+                            ["unit"] = param.Units.FirstOrDefault(u => u.Token == res.Token && u.IsAudited)?.Unit
+                        }
+                    };
+                    return ToolOutput.Text(text).WithStructured(structured);
+                }))
+                .WithOutputSchema(new JObject
+                {
+                    ["type"] = "object",
+                    ["description"] = "The exact string to send, and how the value+unit resolved to it.",
+                    ["properties"] = new JObject
+                    {
+                        ["ok"] = new JObject { ["type"] = "boolean", ["description"] = "False when the value could not be resolved; see `error`." },
+                        ["send"] = new JObject { ["type"] = "string", ["description"] = "The literal string to put on the wire, e.g. 'FR 1000 MZ'." },
+                        ["model"] = new JObject { ["type"] = "string" },
+                        ["command"] = new JObject { ["type"] = "string", ["description"] = "The documented command name." },
+                        ["mnemonic"] = new JObject { ["type"] = "string" },
+                        ["requested"] = new JObject
+                        {
+                            ["type"] = "object",
+                            ["description"] = "What the caller asked for.",
+                            ["properties"] = new JObject
+                            {
+                                ["value"] = new JObject { ["type"] = "number" },
+                                ["unit"] = new JObject { ["type"] = new JArray("string", "null") }
+                            }
+                        },
+                        ["resolved"] = new JObject
+                        {
+                            ["type"] = "object",
+                            ["description"] = "What it became on the instrument's terms, after any unit conversion.",
+                            ["properties"] = new JObject
+                            {
+                                ["formatted"] = new JObject { ["type"] = "string", ["description"] = "Value and token as sent, e.g. '1000 MZ'." },
+                            ["value"] = new JObject { ["type"] = "number", ["description"] = "The value after conversion into the token's unit." },
+                                ["token"] = new JObject { ["type"] = new JArray("string", "null"), ["description"] = "The wire suffix token; null when the command takes a bare number." },
+                                ["unit"] = new JObject { ["type"] = new JArray("string", "null"), ["description"] = "The physical unit that token means." }
+                            }
+                        },
+                        ["error"] = new JObject { ["type"] = "string", ["description"] = "Why it could not be resolved (ok:false)." }
+                    },
+                    ["required"] = new JArray("ok"),
+                    ["additionalProperties"] = false
                 }));
 
             // ---- Identify an instrument and match the DB ------------------------
@@ -617,6 +719,22 @@ namespace GpibMcp.Tools
             }
             return false;
         }
+
+        // ---- structured results (#113) ------------------------------------------
+        //
+        // Both of these tools already produced JSON and then handed it over as text for the model to parse
+        // back. Now the same object goes out as structuredContent as well, and every path - including the
+        // refusals - carries `ok`, so a caller has one field to check instead of matching on prose.
+
+        /// <summary>The reference/recipe object, delivered as indented text and as structured content.</summary>
+        private static ToolOutput ReferenceOutput(JObject reference) =>
+            ToolOutput.Text(reference.ToString(Formatting.Indented)).WithStructured(reference);
+
+        private static ToolOutput ReferenceFailed(string message) =>
+            ToolOutput.Text(message).WithStructured(new JObject { ["ok"] = false, ["error"] = message });
+
+        private static ToolOutput ResolveFailed(string message) =>
+            ToolOutput.Text(message).WithStructured(new JObject { ["ok"] = false, ["error"] = message });
 
         private static InstrumentCommand FindCommand(InstrumentDefinition def, string key)
         {

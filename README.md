@@ -45,6 +45,7 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
 - [Logging](#logging)
 - [MCP transports (stdio & HTTP)](#mcp-transports-stdio--http)
 - [Long-running calls: progress and tasks](#long-running-calls-progress-and-tasks)
+- [Structured results](#structured-results)
 - [GPIB backends](#gpib-backends)
 - [Why x86?](#why-x86)
 - [Project layout](#project-layout)
@@ -72,6 +73,9 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
 - **SRQ-based operation completion** — wait for an operation to *truly* finish via the bus
   service-request event (data-driven from the model's `statusModel`), instead of guessing with
   a fixed timeout.
+- **Measurements come back as data, not prose** — the query, sweep and setting tools declare an
+  `outputSchema` and return `structuredContent`, so a reading arrives as a number and a unit (the unit
+  taken from the database's audited tokens, never guessed off the wire).
 - **Progress and task handles for the slow calls** — a capture or a sweep reports its milestones as
   `notifications/progress`, and a client that supports the `io.modelcontextprotocol/tasks` extension can
   take a task handle and poll instead of blocking for 7–24 s.
@@ -908,6 +912,37 @@ same lock a foreground call does, so the GPIB bus still sees one operation at a 
 cooperative, as the extension allows: a task still queued is cancelled before it touches the bus, but one
 already mid-capture runs to completion, because a blocking GPIB read cannot be interrupted.
 
+## Structured results
+
+Four tools return their result twice: once as the text a human reads in the transcript, and once as
+`structuredContent` — a JSON object matching the `outputSchema` the tool declares in `tools/list` (issue
+#113). The model reads named fields instead of parsing a measurement back out of a sentence:
+
+```jsonc
+// resolve_setting(model:"8657B", command:"FR", value:1, unit:"GHz")
+{
+  "content": [{ "type": "text", "text": "Send: FR 1000 MZ\n(resolved 1 GHz -> 1000 MZ …)" }],
+  "structuredContent": {
+    "ok": true, "send": "FR 1000 MZ", "model": "8657B", "command": "frequency", "mnemonic": "FR",
+    "requested": { "value": 1, "unit": "GHz" },
+    "resolved":  { "formatted": "1000 MZ", "value": 1000, "token": "MZ", "unit": "MHz" }
+  }
+}
+```
+
+| Tool | What comes back as data |
+|---|---|
+| `visa_query` | `resource`, `command`, `response`, plus `value` when the reply is a single number and `unit` when the model's tokens are audited |
+| `gpib_batch` | the whole run envelope — `ran`, `columns`, `rows` (numbers stay numbers), `summary`, `table`, `errors` |
+| `resolve_setting` | `send` (the exact wire string) and the requested → resolved value/token/unit |
+| `instrument_reference` | the model reference, or a command's read/write recipe, marked with `ok` |
+
+Two things are worth knowing. **The unit is not guessed from the wire** — a bare `1.5E+9` says nothing about
+hertz, so the unit comes from the audited unit tokens in the command database (#46) and is simply absent when
+the command was never audited. **Every path fills `ok`**, including the tools' own refusals ("unknown model",
+"batch rejected"), so a caller checks one field rather than matching on prose. The text block is always there
+too — nothing is taken away from a client that ignores structured content.
+
 ## GPIB backends
 
 Wire-level I/O sits behind a single abstraction, **`IGpibTransport`**, so the adapter is pluggable.
@@ -954,7 +989,8 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
     IMcpTransport.cs               the transport seam (stdio / HTTP are separate modules)
     IMcpMessageSink.cs             the outbound seam - server->client notifications (#112)
     ToolCallContext.cs             per-call progress reporting + cancellation flag (#112)
-    McpTool.cs                     tool + registry + error types
+    ToolOutput.cs                  content blocks + the structuredContent payload (#113)
+    McpTool.cs                     tool + registry + error types (incl. outputSchema)
     Tasks/                         io.modelcontextprotocol/tasks extension (#112)
       ServerTask.cs                one task's state + its CreateTaskResult / tasks/get shapes
       TaskStore.cs                 the live tasks, TTL-bounded
@@ -975,6 +1011,7 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
     Ieee4882Block.cs               strips the #<n><len> header off a SCPI binary block (#10)
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
+    MeasurementValue.cs            reply -> number, and its unit from the audited DB tokens (#113)
     InstrumentIo.cs                resolves a model's IoSpec (terminators + bounded read)
     InstrumentTools.cs             VISA / native-GPIB + serial-poll / wait-SRQ tools
     DatabaseTools.cs               command-database + assignment + set_termination tools

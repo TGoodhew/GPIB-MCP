@@ -34,8 +34,10 @@ namespace GpibMcp.Tests
             {
                 return new McpTool(name, "blocks until released", null, (args, ctx) =>
                 {
-                    Started.Set();
+                    // Report first, then signal: a test that polls the moment Started fires must be certain
+                    // the milestone is already recorded, or it races the worker's own status line.
                     ctx.Progress(1, 2, "halfway");
+                    Started.Set();
                     Release.Wait(TimeSpan.FromSeconds(20));
                     ctx.Progress(2, 2, "done");
                     return ToolOutput.Text("finished " + name);

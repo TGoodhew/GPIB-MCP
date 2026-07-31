@@ -23,6 +23,20 @@ namespace GpibMcp.Mcp
         /// </summary>
         public bool LongRunning { get; }
 
+        /// <summary>
+        /// Optional JSON Schema for the tool's <c>structuredContent</c> (#113). Declaring one is a promise:
+        /// a successful call returns a payload that conforms, so the model reads named fields instead of
+        /// re-parsing prose. Tools that only ever return prose leave it null and nothing changes for them.
+        /// </summary>
+        public JObject OutputSchema { get; private set; }
+
+        /// <summary>Declares the result schema. Returns this, so it chains onto the constructor call.</summary>
+        public McpTool WithOutputSchema(JObject outputSchema)
+        {
+            OutputSchema = outputSchema;
+            return this;
+        }
+
         private readonly Func<JObject, ToolCallContext, ToolOutput> _handler;
 
         /// <summary>Text-returning tool: the string becomes a single text content block.</summary>
@@ -72,12 +86,14 @@ namespace GpibMcp.Mcp
         /// <summary>Serializes this tool into the shape expected by tools/list.</summary>
         public JObject ToDescriptor()
         {
-            return new JObject
+            var descriptor = new JObject
             {
                 ["name"] = Name,
                 ["description"] = Description,
                 ["inputSchema"] = InputSchema
             };
+            if (OutputSchema != null) descriptor["outputSchema"] = OutputSchema;
+            return descriptor;
         }
     }
 
