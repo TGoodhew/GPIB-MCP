@@ -930,6 +930,15 @@ This is additive. `initialize`, `notifications/initialized` and `ping` all keep 
 shipped for today — Claude Desktop, the `.mcpb` bundle, the Copilot and ChatGPT connectors — speaks
 2025-06-18, and a server has to serve both revisions for the whole deprecation window.
 
+**`subscriptions/listen`** — the long-lived change-notification stream that replaced the HTTP GET endpoint —
+is answered rather than refused, but it agrees to nothing and closes cleanly. There is genuinely nothing here
+to subscribe to: the tool list is fixed at start-up (`listChanged: false`) and the server exposes no resources
+or prompts. The acknowledgement's `notifications` field is the subset the server agreed to honour, so it comes
+back empty, and the empty result that follows is the spec's graceful closure — the difference between "ended
+cleanly" and a dropped connection. The stream worth having here is `notifications/progress` during a long
+capture, and that one is request-scoped, so it rides its own request's response (see
+[above](#long-running-calls-progress-and-tasks)).
+
 On the deprecated **Logging** feature the server is already on the right side of the migration: it emits no
 `notifications/message` at all and never has. Every diagnostic goes to stderr (or the
 [log files](#diagnostic-logs)), which is exactly what the spec recommends instead. A request may state a
