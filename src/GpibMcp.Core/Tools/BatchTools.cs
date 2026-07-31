@@ -54,7 +54,7 @@ namespace GpibMcp.Tools
                     Prop("preview", "boolean", "If true, return the plan size (points/ops) WITHOUT running anything."),
                     Prop("confirm", "boolean", "Set true to execute a LARGE plan that was gated for confirmation " +
                         "(more than ~50 GPIB ops). Small plans run without it; ignored when preview:true.")),
-                (Func<JObject, ToolOutput>)(args =>
+                (Func<JObject, ToolCallContext, ToolOutput>)((args, ctx) =>
                 {
                     BatchPlan plan;
                     try { plan = ParsePlan(args); }
@@ -81,7 +81,10 @@ namespace GpibMcp.Tools
 
                     var exec = new BatchExecutor(db, assignments, visa);
                     var watch = Stopwatch.StartNew();
-                    BatchResult result = BatchRunner.Run(plan, exec, caps, () => watch.ElapsedMilliseconds);
+                    // A sweep is the one tool where progress is exact: we know the point count up front, so
+                    // report each point as it starts rather than leaving the caller silent for minutes (#112).
+                    BatchResult result = BatchRunner.Run(plan, exec, caps, () => watch.ElapsedMilliseconds,
+                        (point, total) => ctx.Progress(point, total, "Sweep point " + (point + 1) + " of " + total + "."));
 
                     // #58 instrumentation: append the per-op timing breakdown to batch-timing.log so a bench
                     // sweep can be inspected afterwards (where the wall-clock went per op type).
