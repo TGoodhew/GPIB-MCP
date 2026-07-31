@@ -200,7 +200,7 @@ namespace GpibMcp.Mcp
                     return BuildDiscoverResult();
 
                 case "tools/list":
-                    return new JObject { ["tools"] = _tools.ToListJson() };
+                    return BuildToolsListResult(context);
 
                 case "tools/call":
                     return CallTool(prms, context);
@@ -299,6 +299,24 @@ namespace GpibMcp.Mcp
             if (!string.IsNullOrEmpty(_instructions)) result["instructions"] = _instructions;
             // The identity goes in _meta here, not a top-level serverInfo - every result gets that already.
             return CacheableResult.ApplyTo(result);
+        }
+
+        /// <summary>
+        /// The tool catalogue (#108). Order is the registry's registration order and is deliberately stable:
+        /// clients cache the list, and a model's prompt cache only hits if the descriptors arrive the same
+        /// way every time - reordering 29 tools would invalidate it for no reason.
+        ///
+        /// The <c>ttlMs</c>/<c>cacheScope</c> hints go only to a client on the revision that defines them,
+        /// for the same reason <c>resultType</c> does: an older client gains nothing from fields it does not
+        /// implement, and might validate strictly against a schema without them. Both are safe to offer here
+        /// because the registry is built once at start-up - which is also what <c>listChanged: false</c> says.
+        /// </summary>
+        private JObject BuildToolsListResult(RequestContext context)
+        {
+            var result = new JObject { ["tools"] = _tools.ToListJson() };
+            return context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision)
+                ? CacheableResult.ApplyTo(result)
+                : result;
         }
 
         /// <summary>
