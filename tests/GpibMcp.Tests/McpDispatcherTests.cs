@@ -71,10 +71,31 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void Initialize_EchoesClientProtocolVersion()
+        public void Initialize_EchoesClientProtocolVersion_WhenSupported()
         {
             var responses = Run(null, Init("2024-11-05"));
             Assert.Equal("2024-11-05", (string)responses.Single()["result"]["protocolVersion"]);
+        }
+
+        [Fact]
+        public void Initialize_AnswersWithOwnProtocol_WhenClientAsksForOneWeDoNotSpeak()
+        {
+            // Claiming a revision we do not implement (e.g. the 2026-07-28 wire format) would produce
+            // responses the client is entitled to reject - name ours instead and let it decide (#104).
+            foreach (var unsupported in new[] { "2026-07-28", "9999-01-01", "not-a-version" })
+            {
+                var result = Run(null, Init(unsupported)).Single()["result"];
+                Assert.Equal(McpDispatcher.ProtocolVersion, (string)result["protocolVersion"]);
+            }
+        }
+
+        [Fact]
+        public void SupportedProtocolVersions_LeadsWithTheRevisionWeImplement()
+        {
+            Assert.Equal(McpDispatcher.ProtocolVersion, McpDispatcher.SupportedProtocolVersions[0]);
+            Assert.True(McpDispatcher.IsSupportedProtocolVersion(McpDispatcher.ProtocolVersion));
+            Assert.False(McpDispatcher.IsSupportedProtocolVersion(null));
+            Assert.False(McpDispatcher.IsSupportedProtocolVersion(""));
         }
 
         [Fact]
