@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using GpibMcp.Diagnostics;
 using GpibMcp.Instruments;
+using GpibMcp.Manuals;
 using GpibMcp.Mcp;
 using Srq.Completion;
 using Newtonsoft.Json;
@@ -454,6 +455,11 @@ namespace GpibMcp.Tools
 
             // ---- Send a captured hardcopy to a Windows printer (#83) ------------
             PrintTools.Register(registry);
+
+            // ---- Search the user's own manual library (#120) --------------------
+            // Registered only when GPIB_MCP_MANUALS names a real folder: a server with no library must not
+            // advertise a tool that can only ever answer "nothing configured".
+            ManualTools.Register(registry, ManualLibrary.FromEnvironment());
 
             return registry;
         }

@@ -44,6 +44,7 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [MCP transports (stdio & HTTP)](#mcp-transports-stdio--http)
+- [Your own manual library](#your-own-manual-library)
 - [Protocol revisions](#protocol-revisions)
 - [Long-running calls: progress and tasks](#long-running-calls-progress-and-tasks)
 - [Structured results](#structured-results)
@@ -74,6 +75,9 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
 - **SRQ-based operation completion** — wait for an operation to *truly* finish via the bus
   service-request event (data-driven from the model's `statusModel`), instead of guessing with
   a fixed timeout.
+- **Reads your own manuals** — point `GPIB_MCP_MANUALS` at a folder of instrument manuals and the server
+  can search them when the command database falls short, returning the passage with the file and page to
+  cite (PDFs via `pdftotext` or a text sidecar).
 - **Measurements come back as data, not prose** — the query, sweep and setting tools declare an
   `outputSchema` and return `structuredContent`, so a reading arrives as a number and a unit (the unit
   taken from the database's audited tokens, never guessed off the wire).
@@ -916,6 +920,50 @@ so the single-threaded instrument access is preserved regardless of transport.
 $env:GPIB_MCP_TRANSPORT = "http"; $env:GPIB_MCP_HTTP_TOKEN = "<secret>"; .\GpibMcp.exe
 ```
 
+## Your own manual library
+
+Point the server at a folder of instrument manuals and it can read them when the command database falls
+short (issue #120):
+
+```powershell
+$env:GPIB_MCP_MANUALS = "C:\Users\me\Documents\Manuals"
+```
+
+That registers one tool, **`manual_search`**, which returns the matching **passages with the file and page
+they came from** — not an answer. Deriving "the command is `CF`" from a page of prose is the model's job,
+done in front of you, with the quoted text visible. A server that synthesised commands out of manuals would
+be guessing with far more confidence than the evidence supports, and the thing on the other end of a wrong
+guess is your hardware.
+
+Resolution order is unchanged: **`instrument_reference` first** (instant, structured, already carries the
+audited unit tokens), then the manuals, then whatever the client can do on its own. When a manual yields a
+command the database lacks, the result says to offer `instrument_db_save` — so the catalogue grows from your
+own documents, and the next lookup is instant.
+
+| Variable | Purpose |
+|---|---|
+| `GPIB_MCP_MANUALS` | folder of manuals (searched recursively). Unset = the tool isn't registered at all |
+| `GPIB_MCP_PDFTOTEXT` | full path to `pdftotext`, if it isn't on `PATH` |
+| `GPIB_MCP_MANUAL_CACHE` | where extracted text is cached (default `%LOCALAPPDATA%\GpibMcp\manual-text`) |
+
+**Reading PDFs.** .NET Framework can't, and bundling a PDF engine into a server whose whole shape is "no
+external dependencies" is a poor trade for a feature that's off by default. So there are three routes, tried
+in order: the file is already `.txt`/`.md`; a sidecar `<name>.txt` sits beside the PDF; or **`pdftotext`**
+(Poppler/xpdf) is on `PATH`, run with `-layout` so command tables keep their columns. If none applies, the
+result says *which* file couldn't be read and how to fix it — a manual that can't be extracted must never
+look like a manual with no match. Extracted text is cached, keyed by path, size and modification time.
+
+**How it finds the right manual.** By filename first — a library is hundreds of large PDFs and extracting
+them all would take minutes and return noise. Pass `model=` and it reads only that instrument's manuals.
+Two behaviours worth knowing, both found by running it against a real 570-PDF library:
+
+- **Series manuals count.** An 8563E's programming manual is often filed as `8560E Programming Guide.pdf`. A
+  human would reach for it, so the search does too — at a much lower rank, and the result is flagged
+  `familyMatchOnly` so the substitution gets stated rather than hidden.
+- **If nothing is named for the model, nothing is searched.** It reports that, and lists the closest names it
+  does have. Reading whichever files happened to be smallest would produce "searched 12 files, no match",
+  which reads as *your library doesn't have this* when the truth is *I never opened the right file*.
+
 ## Protocol revisions
 
 The server implements MCP **2026-07-28** and speaks **`2026-07-28`, `2025-06-18`, `2025-03-26` and
@@ -1102,6 +1150,10 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
       ServerTask.cs                one task's state + its CreateTaskResult / tasks/get shapes
       TaskStore.cs                 the live tasks, TTL-bounded
       TaskRunner.cs                single worker thread - keeps the GPIB bus serial
+  Manuals/                         the user's own manual folder (#120)
+    ManualLibrary.cs               which files in it match a question (filename-first)
+    ManualText.cs                  text extraction (sidecar / pdftotext) + on-disk cache
+    ManualSearch.cs                passage search with page-numbered citations
   Instruments/
     IInstrumentManager.cs          tool-facing instrument abstraction (enables testing)
     InstrumentManager.cs           backend-neutral manager (history, errors, capture, the bus lock)
@@ -1119,6 +1171,7 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
   Tools/
     ToolArgs.cs                    shared JSON-Schema + argument helpers
     MeasurementValue.cs            reply -> number, and its unit from the audited DB tokens (#113)
+    ManualTools.cs                 manual_search over the user's own manual folder (#120)
     InstrumentIo.cs                resolves a model's IoSpec (terminators + bounded read)
     InstrumentTools.cs             VISA / native-GPIB + serial-poll / wait-SRQ tools
     DatabaseTools.cs               command-database + assignment + set_termination tools

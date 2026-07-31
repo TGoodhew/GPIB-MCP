@@ -119,7 +119,8 @@ namespace GpibMcp.Instruments
             }
         }
 
-        private static string AppDataDir() =>
+        /// <summary>The server's per-user data folder: %LOCALAPPDATA%\GpibMcp.</summary>
+        public static string AppDataDir() =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GpibMcp");
     }
 }
