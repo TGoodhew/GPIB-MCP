@@ -869,6 +869,21 @@ than launching a process. Configuration:
 | `GPIB_MCP_HTTP_PORT` | `3001` | listen port (`/mcp`) |
 | `GPIB_MCP_HTTP_TOKEN` | *(none)* | if set, every request must send `Authorization: Bearer <token>` |
 
+**Authentication is a static bearer token, deliberately** (issue #114). MCP's OAuth authorization spec is
+optional, and it is the wrong size for this: becoming a resource server means an authorization server, a JWT
+stack, and a *stable* public hostname — OAuth binds a token to the server's canonical URI, so a tunnel name
+that changes on every restart breaks it. One bench, one bus, a tunnel opened deliberately, one shared secret.
+The consequence, stated plainly: **ChatGPT's connector cannot drive this**, because its UI expects OAuth
+discovery. Copilot can. If you need real identity, expiry and revocation, put authentication at the edge
+(Cloudflare Access or similar) rather than waiting for OAuth here.
+
+Two rules follow from what is behind the endpoint — physical control of your instruments:
+
+- The server **refuses to start** if it is bound to a non-loopback address with no token. A warning is not a
+  control, and the remedy is one environment variable.
+- Binding loopback is *not* protection once you tunnel the port. The tunnel is what makes it public, and the
+  server cannot see that — so set a token whenever you tunnel.
+
 `POST /mcp` carries one JSON-RPC message or a batch and returns the response as `application/json` (202 when
 the POST held only notifications). `GET` and `DELETE` both return **405**: the standalone SSE stream became
 `subscriptions/listen`, and session teardown no longer exists in the protocol — this server never minted a
@@ -886,7 +901,12 @@ For a request on that revision, protocol errors also map onto **HTTP status code
 distinguishes a modern server saying "I don't have that method" from a legacy server that doesn't host this
 endpoint at all. A tool that *fails* is still `200`: the request was served. Older clients keep the
 `200`-with-a-JSON-RPC-error shape they were written against.
-Security: it binds loopback and rejects non-loopback `Origin` headers (DNS-rebinding guard). Since the server
+Security: it binds loopback and rejects any request carrying a non-loopback `Origin` (DNS-rebinding guard).
+Worth knowing exactly what that means for a tunnel: a **server-side** caller — which is how the cloud
+connectors reach you — sends no `Origin` and passes, while a **browser-based** MCP client on the tunnel's own
+domain would send one and be rejected. That is the correct default and the reason the guard exists; browser
+clients are unsupported by construction, and the fix if one is ever needed is an explicit origin allow-list,
+not a looser guard. Since the server
 must run next to the GPIB hardware, reaching it from a cloud assistant means **tunnelling** it (dev tunnel /
 ngrok) — set `GPIB_MCP_HTTP_TOKEN` (and ideally your tunnel's own auth) when you do. Requests are serialized,
 so the single-threaded instrument access is preserved regardless of transport.

@@ -9,7 +9,13 @@
     the connector). Stop with Ctrl+C.
 
     The server still binds to 127.0.0.1; expose it to a cloud client by tunnelling that port (Microsoft dev
-    tunnels, ngrok, Cloudflare, …) and registering the PUBLIC https URL. Keep the token (the tunnel is public).
+    tunnels, ngrok, Cloudflare, …) and registering the PUBLIC https URL.
+
+    KEEP THE TOKEN. Binding loopback is not protection once the port is tunnelled - the tunnel is what makes
+    it public, and the server cannot see that. Behind this endpoint is physical control of your instruments:
+    anyone who finds the URL and has no token to beat can drive them. Authentication here is a static bearer
+    token by design (issue #114); if you need identity, expiry or revocation, put an authenticating proxy in
+    front of the tunnel.
 
 .EXAMPLE
     ./Start-GpibMcpHttp.ps1

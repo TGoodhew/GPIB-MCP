@@ -389,6 +389,50 @@ namespace GpibMcp.Tests
             }
         }
 
+        // ---- authentication (#114: static bearer, chosen deliberately) ----------
+
+        [Fact]
+        public void ANetworkBindWithNoTokenRefusesToStart()
+        {
+            // A warning is not a control: behind this endpoint is physical instrument control, and the
+            // remedy is one environment variable.
+            using (var transport = new HttpTransport("0.0.0.0", 3999, token: null))
+            {
+                var ex = Assert.Throws<InvalidOperationException>(
+                    () => transport.Run(new McpDispatcher(InstrumentTools.BuildRegistry(new FakeInstrumentManager()))));
+                Assert.Contains("GPIB_MCP_HTTP_TOKEN", ex.Message);
+            }
+        }
+
+        [Fact]
+        public async Task LoopbackWithNoTokenStillServes()
+        {
+            // The local development case, and the one the tunnel workflow builds on - the tunnel, not the
+            // bind address, is what makes the port public, and the server cannot see that.
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}");
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            }
+        }
+
+        [Theory]
+        [InlineData("s3cret", true)]
+        [InlineData("s3cre", false)]      // a prefix of the real token
+        [InlineData("s3cretx", false)]    // the real token plus more
+        [InlineData("S3CRET", false)]     // case matters
+        [InlineData("", false)]
+        public async Task TheTokenMustMatchExactly(string presented, bool accepted)
+        {
+            using (var h = new Harness(token: "s3cret"))
+            {
+                var resp = await Post(h.Url, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}",
+                    m => m.Headers.TryAddWithoutValidation("Authorization", "Bearer " + presented));
+
+                Assert.Equal(accepted ? HttpStatusCode.OK : HttpStatusCode.Unauthorized, resp.StatusCode);
+            }
+        }
+
         [Fact]
         public async Task ForbiddenOrigin_Returns403()
         {
