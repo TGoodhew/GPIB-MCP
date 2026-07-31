@@ -870,7 +870,16 @@ than launching a process. Configuration:
 | `GPIB_MCP_HTTP_TOKEN` | *(none)* | if set, every request must send `Authorization: Bearer <token>` |
 
 `POST /mcp` carries one JSON-RPC message or a batch and returns the response as `application/json` (202 when
-the POST held only notifications). The server initiates no messages, so the `GET` SSE stream is not offered.
+the POST held only notifications). `GET` and `DELETE` both return **405**: the standalone SSE stream became
+`subscriptions/listen`, and session teardown no longer exists in the protocol — this server never minted a
+session id, so there was never anything to tear down. `Mcp-Session-Id` and `Last-Event-ID` are ignored.
+
+The **request-metadata headers** (`Mcp-Method`, `Mcp-Name`, `MCP-Protocol-Version`) are validated against the
+body: they exist so an intermediary can route without parsing JSON, which only holds if the two agree, so a
+disagreement is rejected with `400` and `HeaderMismatch` (-32020). Enforcement is two-speed, like the rest of
+the 2026-07-28 work — a request declaring that revision **must** carry them; a 2025-06-18 client, which is
+every HTTP client today, never sent them and isn't asked to start. A header that *is* present must be true
+either way. `Mcp-Name` is decoded from the `=?base64?…?=` sentinel before comparison.
 Security: it binds loopback and rejects non-loopback `Origin` headers (DNS-rebinding guard). Since the server
 must run next to the GPIB hardware, reaching it from a cloud assistant means **tunnelling** it (dev tunnel /
 ngrok) — set `GPIB_MCP_HTTP_TOKEN` (and ideally your tunnel's own auth) when you do. Requests are serialized,

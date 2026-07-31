@@ -86,6 +86,171 @@ namespace GpibMcp.Tests
             }
         }
 
+        // ---- request metadata headers (#110, SEP-2243) --------------------------
+
+        private const string StatelessCall =
+            "{\"jsonrpc\":\"2.0\",\"id\":9,\"method\":\"tools/call\",\"params\":{\"name\":\"visa_list_resources\"," +
+            "\"arguments\":{},\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\"}}}";
+
+        private const string LegacyCall =
+            "{\"jsonrpc\":\"2.0\",\"id\":9,\"method\":\"tools/call\",\"params\":{\"name\":\"visa_list_resources\",\"arguments\":{}}}";
+
+        private static Action<HttpRequestMessage> Headers(params string[] nameValuePairs) => msg =>
+        {
+            for (int i = 0; i + 1 < nameValuePairs.Length; i += 2)
+                msg.Headers.TryAddWithoutValidation(nameValuePairs[i], nameValuePairs[i + 1]);
+        };
+
+        [Fact]
+        public async Task Headers_ThatDisagreeWithTheBody_AreRejected()
+        {
+            // The headers exist so an intermediary can route without parsing the body. If the two disagree,
+            // a load balancer and this server would be acting on different requests.
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, LegacyCall, Headers("Mcp-Method", "tools/list"));
+                Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+
+                var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                Assert.Equal(McpError.HeaderMismatchCode, (int)json["error"]["code"]);
+                Assert.Equal(9, (int)json["id"]);
+            }
+        }
+
+        [Fact]
+        public async Task McpName_ThatDisagreesWithTheToolBeingCalled_IsRejected()
+        {
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, LegacyCall,
+                    Headers("Mcp-Method", "tools/call", "Mcp-Name", "some_other_tool"));
+                Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+                var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                Assert.Equal(McpError.HeaderMismatchCode, (int)json["error"]["code"]);
+            }
+        }
+
+        [Fact]
+        public async Task McpName_IsDecodedFromTheBase64Sentinel_BeforeComparing()
+        {
+            // A name that cannot travel as plain ASCII arrives encoded; comparing it raw would reject a
+            // request that is perfectly correct.
+            string encoded = "=?base64?" +
+                Convert.ToBase64String(Encoding.UTF8.GetBytes("visa_list_resources")) + "?=";
+
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, LegacyCall, Headers("Mcp-Method", "tools/call", "Mcp-Name", encoded));
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task HeadersThatAgree_AreAccepted()
+        {
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, LegacyCall,
+                    Headers("Mcp-Method", "tools/call", "Mcp-Name", "visa_list_resources"));
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task AClientOnTheOlderRevision_IsNotAskedForHeadersItNeverSent()
+        {
+            // Every client we serve over HTTP today speaks 2025-06-18 and sends none of these.
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, LegacyCall);
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task AClientOnTheNewRevision_MustSendTheRequiredHeaders()
+        {
+            using (var h = new Harness())
+            {
+                var missing = await Post(h.Url, StatelessCall);
+                Assert.Equal(HttpStatusCode.BadRequest, missing.StatusCode);
+                Assert.Equal(McpError.HeaderMismatchCode,
+                    (int)JObject.Parse(await missing.Content.ReadAsStringAsync())["error"]["code"]);
+
+                var complete = await Post(h.Url, StatelessCall, Headers(
+                    "MCP-Protocol-Version", "2026-07-28",
+                    "Mcp-Method", "tools/call",
+                    "Mcp-Name", "visa_list_resources"));
+                Assert.Equal(HttpStatusCode.OK, complete.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task AProtocolVersionHeaderThatContradictsTheBody_IsRejected()
+        {
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, StatelessCall, Headers(
+                    "MCP-Protocol-Version", "2025-06-18",
+                    "Mcp-Method", "tools/call",
+                    "Mcp-Name", "visa_list_resources"));
+
+                Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+                var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                Assert.Equal(McpError.HeaderMismatchCode, (int)json["error"]["code"]);
+                Assert.Equal("MCP-Protocol-Version", (string)json["error"]["data"]["header"]);
+            }
+        }
+
+        [Fact]
+        public async Task StaleSessionHeaders_AreIgnoredRatherThanHonoured()
+        {
+            // Sessions and stream resumability are both gone: neither header may change anything, and we
+            // must never mint or echo a session id.
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, LegacyCall,
+                    Headers("Mcp-Session-Id", "stale-session", "Last-Event-ID", "42"));
+
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+                Assert.False(resp.Headers.Contains("Mcp-Session-Id"));
+            }
+        }
+
+        [Fact]
+        public async Task GetAndDelete_AreBothMethodNotAllowed()
+        {
+            // The GET stream became subscriptions/listen and DELETE tore down a session that no longer
+            // exists - and never did here, since no session id was ever issued.
+            using (var h = new Harness())
+            using (var client = new HttpClient())
+            {
+                await Post(h.Url, LegacyCall);   // wait for the listener
+
+                var get = await client.GetAsync(h.Url);
+                var del = await client.DeleteAsync(h.Url);
+
+                Assert.Equal(HttpStatusCode.MethodNotAllowed, get.StatusCode);
+                Assert.Equal(HttpStatusCode.MethodNotAllowed, del.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task ABatchIsStillAccepted_AndSkipsHeaderValidation()
+        {
+            // Batching left MCP in 2025-06-18; accepting one costs nothing. The metadata headers describe a
+            // single message, so there is nothing meaningful to validate them against here.
+            using (var h = new Harness())
+            {
+                var batch = "[" + LegacyCall + "," +
+                    "{\"jsonrpc\":\"2.0\",\"id\":10,\"method\":\"tools/list\"}]";
+                var resp = await Post(h.Url, batch, Headers("Mcp-Method", "tools/call"));
+
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+                Assert.Equal(2, JArray.Parse(await resp.Content.ReadAsStringAsync()).Count);
+            }
+        }
+
         [Fact]
         public async Task Post_ToolsCall_RunsTheTool()
         {

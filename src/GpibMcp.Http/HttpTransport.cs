@@ -101,12 +101,15 @@ namespace GpibMcp.Http
                         HandlePost(req, res, dispatcher);
                         break;
                     case "GET":
-                        // No server-initiated messages, so no SSE stream to open.
-                        Respond(res, 405, "text/plain", "the GET event stream is not supported");
-                        break;
                     case "DELETE":
-                        // Sessionless: nothing to terminate.
-                        Respond(res, 200, "text/plain", "ok");
+                        // Both belonged to mechanisms 2026-07-28 removed: the standalone SSE stream (now
+                        // subscriptions/listen) and session teardown (there are no sessions). 405 is what the
+                        // spec tells a server to answer, and it is equally right for an older client here -
+                        // we have never minted a session id, so there was never anything to tear down (#110).
+                        Respond(res, 405, "text/plain",
+                            req.HttpMethod == "GET"
+                                ? "the GET event stream is not supported; use subscriptions/listen"
+                                : "sessionless: there is nothing to terminate");
                         break;
                     default:
                         Respond(res, 405, "text/plain", "method not allowed");
@@ -138,9 +141,24 @@ namespace GpibMcp.Http
                 return;
             }
 
-            // A single JSON-RPC message or a batch array.
+            // A single JSON-RPC message, or a batch array. Batching left MCP in 2025-06-18 and no client we
+            // serve sends one; accepting it anyway costs nothing and refusing it would help nobody. The
+            // request-metadata headers describe ONE message, so they are only checked for a single body -
+            // there is no meaningful Mcp-Method for an array of different methods (#110).
+            bool isBatch = parsed is JArray;
             var messages = parsed is JArray arr ? arr.OfType<JObject>().ToList()
                                                 : new System.Collections.Generic.List<JObject> { parsed as JObject };
+
+            if (!isBatch && messages.Count == 1 && messages[0] != null)
+            {
+                JObject headerError = ValidateRequestMetadata(req, messages[0]);
+                if (headerError != null)
+                {
+                    Respond(res, 400, "application/json", headerError.ToString(Formatting.None));
+                    return;
+                }
+            }
+
             var responses = new JArray();
             foreach (var m in messages)
             {
@@ -158,6 +176,93 @@ namespace GpibMcp.Http
 
             JToken payload = parsed is JArray ? (JToken)responses : responses[0];
             Respond(res, 200, "application/json", payload.ToString(Formatting.None));
+        }
+
+        /// <summary>
+        /// Checks the request-metadata headers against the body (#110, SEP-2243). The transport mirrors a few
+        /// body fields into headers so an intermediary can route without parsing JSON - which only holds if
+        /// the two agree. Where they disagree, a load balancer and the server would be acting on different
+        /// requests, so the spec makes that <c>HeaderMismatch</c> (-32020) with a 400.
+        ///
+        /// Two-speed enforcement, for the same reason the rest of this revision is gated: the headers are
+        /// REQUIRED from 2026-07-28, so a request declaring that revision must carry them, while a
+        /// 2025-06-18 client - which is every client we serve over HTTP today - never sent them and is not
+        /// asked to start. What is checked in both cases is agreement: a header that is present must be true.
+        /// </summary>
+        /// <returns>A JSON-RPC error response to send with 400, or null when the request is acceptable.</returns>
+        internal static JObject ValidateRequestMetadata(HttpListenerRequest req, JObject message)
+        {
+            string method = (string)message["method"];
+            if (method == null) return null;   // a response, not a request: no metadata to mirror
+
+            var prms = message["params"] as JObject;
+            var meta = prms != null ? prms["_meta"] as JObject : null;
+            string declaredVersion = meta != null ? (string)meta[RequestContext.ProtocolVersionKey] : null;
+            bool required = declaredVersion != null &&
+                            string.CompareOrdinal(declaredVersion, RequestContext.StatelessRevision) >= 0;
+
+            JToken id = message["id"];
+
+            // MCP-Protocol-Version: must agree with what the body declares.
+            string versionHeader = req.Headers["MCP-Protocol-Version"];
+            if (versionHeader != null && declaredVersion != null && versionHeader != declaredVersion)
+                return Mismatch(id, "MCP-Protocol-Version", declaredVersion, versionHeader);
+            if (required && versionHeader == null)
+                return Missing(id, "MCP-Protocol-Version");
+
+            // Mcp-Method: the body's method, on every request.
+            string methodHeader = req.Headers["Mcp-Method"];
+            if (methodHeader != null && methodHeader != method)
+                return Mismatch(id, "Mcp-Method", method, methodHeader);
+            if (required && methodHeader == null)
+                return Missing(id, "Mcp-Method");
+
+            // Mcp-Name: params.name (tools/call) or params.uri (resources/read, prompts/get).
+            string expectedName = prms == null ? null : ((string)prms["name"] ?? (string)prms["uri"]);
+            string nameHeader = DecodeHeaderValue(req.Headers["Mcp-Name"]);
+            if (nameHeader != null && expectedName != null && nameHeader != expectedName)
+                return Mismatch(id, "Mcp-Name", expectedName, nameHeader);
+            if (required && expectedName != null && nameHeader == null)
+                return Missing(id, "Mcp-Name");
+
+            return null;
+        }
+
+        /// <summary>
+        /// Undoes the <c>=?base64?…?=</c> sentinel a client uses for a value that cannot travel as plain
+        /// ASCII. Servers MUST decode before comparing, or a tool named in anything but ASCII would look
+        /// like a mismatch against its own body.
+        /// </summary>
+        private static string DecodeHeaderValue(string value)
+        {
+            const string prefix = "=?base64?", suffix = "?=";
+            if (value == null || !value.StartsWith(prefix, StringComparison.Ordinal) ||
+                !value.EndsWith(suffix, StringComparison.Ordinal))
+                return value;
+
+            string encoded = value.Substring(prefix.Length, value.Length - prefix.Length - suffix.Length);
+            try { return Encoding.UTF8.GetString(Convert.FromBase64String(encoded)); }
+            catch (FormatException) { return value; }   // not decodable: compare it as-is and let it mismatch
+        }
+
+        private static JObject Mismatch(JToken id, string header, string expected, string actual) =>
+            ErrorResponse(id, McpError.HeaderMismatch(header, expected, actual));
+
+        private static JObject Missing(JToken id, string header) =>
+            ErrorResponse(id, new McpError(McpError.HeaderMismatchCode,
+                "Missing required header '" + header + "'",
+                new JObject { ["header"] = header }));
+
+        private static JObject ErrorResponse(JToken id, McpError error)
+        {
+            var body = new JObject { ["code"] = error.Code, ["message"] = error.Message };
+            if (error.ErrorData != null) body["data"] = error.ErrorData;
+            return new JObject
+            {
+                ["jsonrpc"] = "2.0",
+                ["id"] = id ?? JValue.CreateNull(),
+                ["error"] = body
+            };
         }
 
         private bool IsAuthorized(HttpListenerRequest req)
@@ -178,8 +283,12 @@ namespace GpibMcp.Http
         {
             string origin = req.Headers["Origin"];
             res.AddHeader("Access-Control-Allow-Origin", string.IsNullOrEmpty(origin) ? "*" : origin);
-            res.AddHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
-            res.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version, Accept");
+            res.AddHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+            // Mcp-Session-Id is gone with sessions; Mcp-Method/Mcp-Name are the request metadata a
+            // 2026-07-28 client mirrors from the body, so a browser-origin client must be allowed to send
+            // them (#110).
+            res.AddHeader("Access-Control-Allow-Headers",
+                "Content-Type, Authorization, MCP-Protocol-Version, Mcp-Method, Mcp-Name, Accept");
         }
 
         private static void Respond(HttpListenerResponse res, int status, string contentType, string body)
