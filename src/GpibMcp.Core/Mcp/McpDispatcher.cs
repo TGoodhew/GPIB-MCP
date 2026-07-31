@@ -18,8 +18,32 @@ namespace GpibMcp.Mcp
     /// </summary>
     public sealed class McpDispatcher : IMcpDispatcher
     {
-        /// <summary>MCP revision this server implements (echoed back if the client requests it).</summary>
+        /// <summary>MCP revision this server implements, and the one it answers with by default.</summary>
         public const string ProtocolVersion = "2025-06-18";
+
+        /// <summary>
+        /// Revisions this server can actually speak, newest first. We negotiate against this set rather than
+        /// echoing whatever the client asks for: from 2026-07-28 the wire format changes substantially
+        /// (stateless dispatch, a required <c>resultType</c> on every result, no sessions), so agreeing to a
+        /// revision we do not implement would produce responses the client is entitled to reject (#104).
+        ///
+        /// The older entries are here because our surface is tools-only - no roots, sampling, logging or
+        /// elicitation - and that subset is unchanged across these revisions, so a client on one of them gets
+        /// exactly the protocol it expects. New revisions join the set only once the code implements them.
+        /// </summary>
+        public static readonly string[] SupportedProtocolVersions =
+        {
+            "2025-06-18",
+            "2025-03-26",
+            "2024-11-05"
+        };
+
+        /// <summary>True when <paramref name="version"/> is a revision this server can speak.</summary>
+        public static bool IsSupportedProtocolVersion(string version)
+        {
+            return !string.IsNullOrEmpty(version) &&
+                   Array.IndexOf(SupportedProtocolVersions, version) >= 0;
+        }
 
         /// <summary>Server name reported to clients during initialize.</summary>
         public const string ServerName = "gpib-mcp";
@@ -127,7 +151,6 @@ namespace GpibMcp.Mcp
 
         private JObject BuildInitializeResult(JObject prms)
         {
-            // Echo the client's protocol version when present for best compatibility.
             string clientProtocol = prms != null ? (string)prms["protocolVersion"] : null;
 
             var clientInfo = prms != null ? prms["clientInfo"] as JObject : null;
@@ -135,9 +158,24 @@ namespace GpibMcp.Mcp
             Log.Info("initialize from client '" + clientName + "' (protocol " +
                      (clientProtocol ?? "unspecified") + ")");
 
+            // Answer with the client's revision only when we implement it; otherwise name the newest one we
+            // do, which is what the spec asks of a server that cannot meet the request. The client then
+            // decides whether to continue or disconnect - far better than us claiming a revision we cannot
+            // speak (#104).
+            string negotiated = ProtocolVersion;
+            if (IsSupportedProtocolVersion(clientProtocol))
+            {
+                negotiated = clientProtocol;
+            }
+            else if (!string.IsNullOrEmpty(clientProtocol))
+            {
+                Log.Warn("Client requested unsupported MCP protocol '" + clientProtocol +
+                         "'; answering with " + ProtocolVersion + ".");
+            }
+
             var result = new JObject
             {
-                ["protocolVersion"] = string.IsNullOrEmpty(clientProtocol) ? ProtocolVersion : clientProtocol,
+                ["protocolVersion"] = negotiated,
                 ["capabilities"] = new JObject
                 {
                     ["tools"] = new JObject { ["listChanged"] = false }

@@ -72,7 +72,10 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   service-request event (data-driven from the model's `statusModel`), instead of guessing with
   a fixed timeout.
 - **Single, self-contained executable** — no external MCP SDK dependency; protocol
-  handling is implemented directly so it runs cleanly on .NET Framework.
+  handling is implemented directly so it runs cleanly on .NET Framework. The server
+  implements MCP revision **2025-06-18** and negotiates honestly: it answers `initialize`
+  with the client's revision only when that revision is one it can actually speak
+  (`2025-06-18`, `2025-03-26`, `2024-11-05`), and otherwise names its own.
 
 ## Prerequisites
 
