@@ -907,10 +907,15 @@ protocol versions the server actually speaks, its capabilities, its identity, an
 probe, so it is served whatever revision the caller is on. Implementing it is *not* a claim to 2026-07-28:
 `supportedVersions` lists only what is implemented, and a revision joins that list when the code does.
 
-A request that declares **2026-07-28 or later** also gets the `resultType` that revision requires
-(`"complete"` on an ordinary result; a task handle stays `"task"`). Older clients don't: they are told to
-read an absent field as `"complete"`, and may schema-validate strictly, so adding it would be risk without
-meaning.
+A request that declares **2026-07-28 or later** also gets the fields that revision adds: `resultType`
+(`"complete"` on an ordinary result; a task handle stays `"task"`), and on `tools/list` the `ttlMs` /
+`cacheScope` caching hints. Older clients get none of them — they gain nothing from fields they don't
+implement and may schema-validate strictly, so sending them would be risk without meaning.
+
+**`tools/list` is cacheable and stably ordered.** The registry is built once at start-up and cannot change
+without a restart — which is what `listChanged: false` already says — so the list is offered with a one-hour
+TTL and `cacheScope: "private"`, and the descriptors always come back in the same order. That order is what
+lets a model's prompt cache hit; a regression test pins it.
 
 This is additive. `initialize`, `notifications/initialized` and `ping` all keep working, because every client
 shipped for today — Claude Desktop, the `.mcpb` bundle, the Copilot and ChatGPT connectors — speaks
