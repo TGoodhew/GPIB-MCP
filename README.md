@@ -901,6 +901,11 @@ every request carry its own context in `_meta`:
 Every **result** carries `_meta.io.modelcontextprotocol/serverInfo` naming the server that produced it —
 without a handshake a client would otherwise never learn it. A tool call needs no `initialize` first.
 
+A request that declares **2026-07-28 or later** also gets the `resultType` that revision requires
+(`"complete"` on an ordinary result; a task handle stays `"task"`). Older clients don't: they are told to
+read an absent field as `"complete"`, and may schema-validate strictly, so adding it would be risk without
+meaning.
+
 This is additive. `initialize`, `notifications/initialized` and `ping` all keep working, because every client
 shipped for today — Claude Desktop, the `.mcpb` bundle, the Copilot and ChatGPT connectors — speaks
 2025-06-18, and a server has to serve both revisions for the whole deprecation window.

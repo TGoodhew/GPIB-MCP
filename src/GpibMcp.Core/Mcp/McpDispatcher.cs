@@ -127,7 +127,8 @@ namespace GpibMcp.Mcp
                 {
                     ["jsonrpc"] = "2.0",
                     ["id"] = id,
-                    ["result"] = WithServerInfo(result as JObject ?? new JObject())
+                    ["result"] = WithResultType(WithServerInfo(result as JObject ?? new JObject()),
+                                                context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision))
                 };
             }
             catch (McpError mcp)
@@ -167,6 +168,21 @@ namespace GpibMcp.Mcp
                 ["name"] = ServerName,
                 ["version"] = ServerVersion
             };
+            return result;
+        }
+
+        /// <summary>
+        /// Marks an ordinary result <c>complete</c> (#107, SEP-2322), which 2026-07-28 requires on every
+        /// result. Only for a request that declares that revision: a client on an older one may validate
+        /// strictly against a schema with no such field, and it is told to read an absent field as
+        /// "complete" anyway, so adding it there would be risk without meaning.
+        ///
+        /// An existing value is never overwritten - a <c>CreateTaskResult</c> is <c>"task"</c>, and saying
+        /// "complete" over the top of it would tell the client the work had finished when it has not (#112).
+        /// </summary>
+        private static JObject WithResultType(JObject result, bool wanted)
+        {
+            if (wanted && result["resultType"] == null) result["resultType"] = "complete";
             return result;
         }
 
@@ -292,7 +308,8 @@ namespace GpibMcp.Mcp
             // A slow tool becomes a task only when the client has said it can handle one. Everything else -
             // every fast tool, and every client that has not opted in - runs exactly as it always has (#112).
             if (tool.LongRunning && ClientSupportsTasks(context))
-                return StartTaskCall(tool, name, arguments);
+                return StartTaskCall(tool, name, arguments,
+                                     context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision));
 
             return ExecuteTool(tool, name, arguments, ProgressContext(context));
         }
@@ -343,7 +360,7 @@ namespace GpibMcp.Mcp
         /// Hands the call to the task runner and answers immediately with a <c>CreateTaskResult</c>. The task
         /// is registered before we reply, so a client that polls the instant it sees the id always finds it.
         /// </summary>
-        private JObject StartTaskCall(McpTool tool, string name, JObject arguments)
+        private JObject StartTaskCall(McpTool tool, string name, JObject arguments, bool wantsResultType)
         {
             ServerTask task = _taskStore.Create("tools/call " + name);
             task.SetStatusMessage("Queued: " + name + ".");
@@ -355,7 +372,9 @@ namespace GpibMcp.Mcp
             _taskRunner.Value.Enqueue(task, () =>
             {
                 task.SetStatusMessage("Running " + name + ".");
-                return ExecuteTool(tool, name, arguments, context);
+                // The tool result ends up nested inside a later tasks/get, whose own request context is not
+                // this one - so the revision the CALLER asked in decides its shape, decided here (#107).
+                return WithResultType(ExecuteTool(tool, name, arguments, context), wantsResultType);
             });
 
             Log.Info("tools/call '" + name + "' running as task " + task.TaskId + ".");

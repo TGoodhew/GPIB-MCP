@@ -35,6 +35,12 @@ namespace GpibMcp.Mcp
         /// <summary>Where a result names the server that produced it.</summary>
         public const string ServerInfoKey = "io.modelcontextprotocol/serverInfo";
 
+        /// <summary>
+        /// The revision that dropped the handshake and made <c>resultType</c> required. Behaviour that only
+        /// applies from there is gated on the request declaring this revision or later.
+        /// </summary>
+        public const string StatelessRevision = "2026-07-28";
+
         /// <summary>Context for a request that carried no <c>_meta</c> at all.</summary>
         public static readonly RequestContext None = new RequestContext(null);
 
@@ -68,6 +74,18 @@ namespace GpibMcp.Mcp
                 JToken token = _meta?["progressToken"];
                 return token == null || token.Type == JTokenType.Null ? null : token;
             }
+        }
+
+        /// <summary>
+        /// True when this request declares <paramref name="revision"/> or a later one. Revisions are dated
+        /// names, so ordinal comparison orders them and a future revision inherits the newer behaviour.
+        /// A request that declares nothing is treated as older - the safe direction, since an old client may
+        /// validate strictly against a schema that has no field for what a newer one expects.
+        /// </summary>
+        public bool DeclaresRevisionAtLeast(string revision)
+        {
+            string declared = ProtocolVersion;
+            return declared != null && string.CompareOrdinal(declared, revision) >= 0;
         }
 
         /// <summary>True when this request's capabilities declare <paramref name="extension"/>.</summary>
