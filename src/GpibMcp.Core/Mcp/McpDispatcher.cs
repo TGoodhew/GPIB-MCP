@@ -163,11 +163,7 @@ namespace GpibMcp.Mcp
                 meta = new JObject();
                 result["_meta"] = meta;
             }
-            meta[RequestContext.ServerInfoKey] = new JObject
-            {
-                ["name"] = ServerName,
-                ["version"] = ServerVersion
-            };
+            meta[RequestContext.ServerInfoKey] = ServerIdentity();
             return result;
         }
 
@@ -198,6 +194,10 @@ namespace GpibMcp.Mcp
 
                 case "ping":
                     return new JObject();
+
+                // Required from 2026-07-28, and the one method a client may call before anything else (#105).
+                case "server/discover":
+                    return BuildDiscoverResult();
 
                 case "tools/list":
                     return new JObject { ["tools"] = _tools.ToListJson() };
@@ -271,25 +271,53 @@ namespace GpibMcp.Mcp
             var result = new JObject
             {
                 ["protocolVersion"] = negotiated,
-                ["capabilities"] = new JObject
-                {
-                    ["tools"] = new JObject { ["listChanged"] = false },
-                    // ServerCapabilities.extensions (2026-07-28 minor change 1). Advertised to every client:
-                    // one that predates the field ignores it, and it is how a client learns we can do this
-                    // before server/discover exists here (#105).
-                    ["extensions"] = new JObject { [TasksExtension] = new JObject() }
-                },
-                ["serverInfo"] = new JObject
-                {
-                    ["name"] = ServerName,
-                    ["version"] = ServerVersion
-                }
+                ["capabilities"] = BuildCapabilities(),
+                ["serverInfo"] = ServerIdentity()
             };
             // MCP spec: optional high-level guidance the client loads up front so the model can answer
             // capability questions accurately (issue #36).
             if (!string.IsNullOrEmpty(_instructions)) result["instructions"] = _instructions;
             return result;
         }
+
+        /// <summary>
+        /// Answers <c>server/discover</c> (#105), which 2026-07-28 makes a MUST: the versions we speak, what
+        /// we can do, and who we are, in one request and without a handshake. It doubles as the stdio
+        /// backward-compatibility probe, which is why it is served whatever revision the caller is on.
+        ///
+        /// <c>supportedVersions</c> is the honest set from <see cref="SupportedProtocolVersions"/> - which
+        /// does not include 2026-07-28, because we do not implement all of it yet. Implementing this method
+        /// is not a claim to the revision that introduced it; a client reads the list and picks.
+        /// </summary>
+        private JObject BuildDiscoverResult()
+        {
+            var result = new JObject
+            {
+                ["supportedVersions"] = new JArray(SupportedProtocolVersions),
+                ["capabilities"] = BuildCapabilities()
+            };
+            if (!string.IsNullOrEmpty(_instructions)) result["instructions"] = _instructions;
+            // The identity goes in _meta here, not a top-level serverInfo - every result gets that already.
+            return CacheableResult.ApplyTo(result);
+        }
+
+        /// <summary>
+        /// What this server can do. One builder for <c>initialize</c> and <c>server/discover</c> so the two
+        /// answers cannot drift apart - a client is entitled to get the same picture from either.
+        /// </summary>
+        private JObject BuildCapabilities()
+        {
+            return new JObject
+            {
+                ["tools"] = new JObject { ["listChanged"] = false },
+                // ServerCapabilities.extensions (2026-07-28 minor change 1). Advertised to every client:
+                // one that predates the field ignores it.
+                ["extensions"] = new JObject { [TasksExtension] = new JObject() }
+            };
+        }
+
+        private static JObject ServerIdentity() =>
+            new JObject { ["name"] = ServerName, ["version"] = ServerVersion };
 
         private JObject CallTool(JObject prms, RequestContext context)
         {
