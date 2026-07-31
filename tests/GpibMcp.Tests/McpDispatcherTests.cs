@@ -158,7 +158,11 @@ namespace GpibMcp.Tests
             var response = responses.Single();
             Assert.Equal(7, (int)response["id"]);
             Assert.NotNull(response["result"]);
-            Assert.Empty((JObject)response["result"]);
+
+            // Empty of payload: the only member is the _meta every result now carries to name the
+            // server that answered (#106), which the spec allows on any result.
+            var result = (JObject)response["result"];
+            Assert.Equal(new[] { "_meta" }, result.Properties().Select(p => p.Name).ToArray());
         }
 
         [Fact]

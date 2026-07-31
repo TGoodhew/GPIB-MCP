@@ -60,9 +60,6 @@ namespace GpibMcp.Mcp
         /// </summary>
         public const string TasksExtension = "io.modelcontextprotocol/tasks";
 
-        /// <summary>The <c>_meta</c> key carrying per-request client capabilities from MCP 2026-07-28.</summary>
-        private const string ClientCapabilitiesMeta = "io.modelcontextprotocol/clientCapabilities";
-
         private readonly ToolRegistry _tools;
         private readonly string _instructions;
         private readonly BatchLoopNudge _loopNudge;
@@ -103,6 +100,20 @@ namespace GpibMcp.Mcp
             bool isNotification = (id == null);
             var prms = message["params"] as JObject;
 
+            // Read the request's own context once (#106). From 2026-07-28 there is no handshake, so this is
+            // where the client says what revision it speaks, what it supports and who it is; a 2025-06-18
+            // client sends none of it and the values it gave at initialize still stand.
+            var context = new RequestContext(prms != null ? prms["_meta"] as JObject : null);
+            if (context.ProtocolVersion != null && !IsSupportedProtocolVersion(context.ProtocolVersion))
+                Log.Warn("Request '" + method + "' declares MCP protocol '" + context.ProtocolVersion +
+                         "', which this server does not implement; answering as " + ProtocolVersion + ".");
+            if (context.ClientName != null)
+                Log.Debug("Request '" + method + "' from client '" + context.ClientName + "'.");
+            if (context.LogLevel != null)
+                // Honouring this would mean notifications/message, which we deliberately never emit: every
+                // diagnostic goes to stderr instead - the migration the spec recommends for deprecated Logging.
+                Log.Debug("Client asked for log level '" + context.LogLevel + "'; diagnostics go to stderr.");
+
             try
             {
                 if (isNotification)
@@ -111,8 +122,13 @@ namespace GpibMcp.Mcp
                     return null;
                 }
 
-                JToken result = HandleRequest(method, prms);
-                return new JObject { ["jsonrpc"] = "2.0", ["id"] = id, ["result"] = result ?? new JObject() };
+                JToken result = HandleRequest(method, prms, context);
+                return new JObject
+                {
+                    ["jsonrpc"] = "2.0",
+                    ["id"] = id,
+                    ["result"] = WithServerInfo(result as JObject ?? new JObject())
+                };
             }
             catch (McpError mcp)
             {
@@ -133,10 +149,34 @@ namespace GpibMcp.Mcp
             return new JObject { ["jsonrpc"] = "2.0", ["id"] = id, ["error"] = error };
         }
 
-        private JToken HandleRequest(string method, JObject prms)
+        /// <summary>
+        /// Names this server in the result's <c>_meta</c> (#106). Without a handshake a client would
+        /// otherwise never learn who answered, so every result says so - and it is additive, which is why it
+        /// can go to a 2025-06-18 client too: <c>_meta</c> has always been the ignorable extension point.
+        /// </summary>
+        private static JObject WithServerInfo(JObject result)
+        {
+            var meta = result["_meta"] as JObject;
+            if (meta == null)
+            {
+                meta = new JObject();
+                result["_meta"] = meta;
+            }
+            meta[RequestContext.ServerInfoKey] = new JObject
+            {
+                ["name"] = ServerName,
+                ["version"] = ServerVersion
+            };
+            return result;
+        }
+
+        private JToken HandleRequest(string method, JObject prms, RequestContext context)
         {
             switch (method)
             {
+                // initialize / notifications/initialized / ping are the 2025-06-18 handshake, which
+                // 2026-07-28 removes. They stay: every client we ship for still speaks that revision, and a
+                // server has to serve both for the whole deprecation window (#106).
                 case "initialize":
                     return BuildInitializeResult(prms);
 
@@ -147,7 +187,7 @@ namespace GpibMcp.Mcp
                     return new JObject { ["tools"] = _tools.ToListJson() };
 
                 case "tools/call":
-                    return CallTool(prms);
+                    return CallTool(prms, context);
 
                 // io.modelcontextprotocol/tasks (#112). Served unconditionally: a client only ever holds a
                 // task id because we gave it one, and answering a poll is never the wrong thing to do.
@@ -235,7 +275,7 @@ namespace GpibMcp.Mcp
             return result;
         }
 
-        private JObject CallTool(JObject prms)
+        private JObject CallTool(JObject prms, RequestContext context)
         {
             if (prms == null) throw McpError.InvalidParams("missing params");
             string name = (string)prms["name"];
@@ -251,10 +291,10 @@ namespace GpibMcp.Mcp
 
             // A slow tool becomes a task only when the client has said it can handle one. Everything else -
             // every fast tool, and every client that has not opted in - runs exactly as it always has (#112).
-            if (tool.LongRunning && ClientSupportsTasks(prms))
-                return StartTaskCall(tool, name, arguments, prms);
+            if (tool.LongRunning && ClientSupportsTasks(context))
+                return StartTaskCall(tool, name, arguments);
 
-            return ExecuteTool(tool, name, arguments, ProgressContext(prms));
+            return ExecuteTool(tool, name, arguments, ProgressContext(context));
         }
 
         /// <summary>
@@ -303,7 +343,7 @@ namespace GpibMcp.Mcp
         /// Hands the call to the task runner and answers immediately with a <c>CreateTaskResult</c>. The task
         /// is registered before we reply, so a client that polls the instant it sees the id always finds it.
         /// </summary>
-        private JObject StartTaskCall(McpTool tool, string name, JObject arguments, JObject prms)
+        private JObject StartTaskCall(McpTool tool, string name, JObject arguments)
         {
             ServerTask task = _taskStore.Create("tools/call " + name);
             task.SetStatusMessage("Queued: " + name + ".");
@@ -326,12 +366,11 @@ namespace GpibMcp.Mcp
         /// Builds the context for a synchronous call: progress goes out as <c>notifications/progress</c> when
         /// the client asked for it with a <c>_meta.progressToken</c> and the transport can carry one.
         /// </summary>
-        private ToolCallContext ProgressContext(JObject prms)
+        private ToolCallContext ProgressContext(RequestContext context)
         {
-            var meta = prms != null ? prms["_meta"] as JObject : null;
-            JToken token = meta != null ? meta["progressToken"] : null;
+            JToken token = context.ProgressToken;
             IMcpMessageSink sink = Notifications;
-            if (token == null || token.Type == JTokenType.Null || sink == null) return ToolCallContext.None;
+            if (token == null || sink == null) return ToolCallContext.None;
 
             return new ToolCallContext((progress, total, message) =>
             {
@@ -357,11 +396,9 @@ namespace GpibMcp.Mcp
         /// (2025-06-18 style) or it carried the declaration in this request's <c>_meta</c>, which is how
         /// 2026-07-28 negotiates now that there is no handshake.
         /// </summary>
-        private bool ClientSupportsTasks(JObject prms)
+        private bool ClientSupportsTasks(RequestContext context)
         {
-            if (_clientDeclaredTasks) return true;
-            var meta = prms != null ? prms["_meta"] as JObject : null;
-            return DeclaresTasks(meta != null ? meta[ClientCapabilitiesMeta] as JObject : null);
+            return _clientDeclaredTasks || context.DeclaresExtension(TasksExtension);
         }
 
         private static bool DeclaresTasks(JObject capabilities)
