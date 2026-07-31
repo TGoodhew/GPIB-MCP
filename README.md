@@ -44,6 +44,7 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [MCP transports (stdio & HTTP)](#mcp-transports-stdio--http)
+- [Protocol revisions](#protocol-revisions)
 - [Long-running calls: progress and tasks](#long-running-calls-progress-and-tasks)
 - [Structured results](#structured-results)
 - [GPIB backends](#gpib-backends)
@@ -880,6 +881,35 @@ so the single-threaded instrument access is preserved regardless of transport.
 $env:GPIB_MCP_TRANSPORT = "http"; $env:GPIB_MCP_HTTP_TOKEN = "<secret>"; .\GpibMcp.exe
 ```
 
+## Protocol revisions
+
+The server implements MCP **2025-06-18** and negotiates honestly: `initialize` is answered with the client's
+revision only when that revision is one it can actually speak (`2025-06-18`, `2025-03-26`, `2024-11-05`),
+otherwise with its own.
+
+It also accepts the **stateless shape** MCP 2026-07-28 moves to (SEP-2575), which drops the handshake and has
+every request carry its own context in `_meta`:
+
+| `_meta` key | Effect |
+|---|---|
+| `io.modelcontextprotocol/protocolVersion` | the revision this request is written in |
+| `io.modelcontextprotocol/clientCapabilities` | what the client supports, including `extensions` (e.g. tasks) |
+| `io.modelcontextprotocol/clientInfo` | who the client is — logged per request |
+| `io.modelcontextprotocol/logLevel` | recorded only; see below |
+| `progressToken` | opts this call into `notifications/progress` |
+
+Every **result** carries `_meta.io.modelcontextprotocol/serverInfo` naming the server that produced it —
+without a handshake a client would otherwise never learn it. A tool call needs no `initialize` first.
+
+This is additive. `initialize`, `notifications/initialized` and `ping` all keep working, because every client
+shipped for today — Claude Desktop, the `.mcpb` bundle, the Copilot and ChatGPT connectors — speaks
+2025-06-18, and a server has to serve both revisions for the whole deprecation window.
+
+On the deprecated **Logging** feature the server is already on the right side of the migration: it emits no
+`notifications/message` at all and never has. Every diagnostic goes to stderr (or the
+[log files](#diagnostic-logs)), which is exactly what the spec recommends instead. A request may state a
+`logLevel`; it is recorded and nothing is emitted in response to it.
+
 ## Long-running calls: progress and tasks
 
 Two of these tools are genuinely slow — a screen capture takes ~7 s to plot and ~24 s to print, and a
@@ -994,6 +1024,7 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
     McpDispatcher.cs               transport-agnostic JSON-RPC 2.0 dispatch (initialize / tools / tasks / ping)
     IMcpDispatcher.cs              the dispatch seam (message -> response)
     IMcpTransport.cs               the transport seam (stdio / HTTP are separate modules)
+    RequestContext.cs              per-request _meta context: version, capabilities, identity (#106)
     IMcpMessageSink.cs             the outbound seam - server->client notifications (#112)
     ToolCallContext.cs             per-call progress reporting + cancellation flag (#112)
     ToolOutput.cs                  content blocks + the structuredContent payload (#113)
