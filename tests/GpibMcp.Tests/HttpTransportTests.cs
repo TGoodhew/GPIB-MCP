@@ -235,6 +235,81 @@ namespace GpibMcp.Tests
             }
         }
 
+        // ---- protocol errors mapped onto HTTP status codes ----------------------
+
+        private static string Unknown(string meta) =>
+            "{\"jsonrpc\":\"2.0\",\"id\":11,\"method\":\"no/such/method\",\"params\":{" + meta + "}}";
+
+        private const string StatelessMeta =
+            "\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\"}";
+
+        [Fact]
+        public async Task AnUnknownMethod_Is404WithTheJsonRpcErrorStillInTheBody()
+        {
+            // The body is the point: it is what distinguishes a modern server saying "I do not have that
+            // method" from a legacy server that does not host this endpoint at all.
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, Unknown(StatelessMeta), Headers(
+                    "MCP-Protocol-Version", "2026-07-28", "Mcp-Method", "no/such/method"));
+
+                Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+                var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                Assert.Equal(-32601, (int)json["error"]["code"]);
+                Assert.Equal(11, (int)json["id"]);
+            }
+        }
+
+        [Fact]
+        public async Task AnUnknownMethod_StaysA200_ForAClientOnTheOlderRevision()
+        {
+            // 2025-06-18 has no such mapping, and a client written against it may only read the body on 200.
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, Unknown(""));
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+                Assert.Equal(-32601, (int)JObject.Parse(await resp.Content.ReadAsStringAsync())["error"]["code"]);
+            }
+        }
+
+        [Fact]
+        public async Task AnUnsupportedProtocolVersion_Is400WithTheSupportedList()
+        {
+            // "latest" is not a revision at all, so it cannot be served on any reading.
+            string body = "{\"jsonrpc\":\"2.0\",\"id\":12,\"method\":\"tools/list\",\"params\":{" +
+                          "\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"latest\"}}}";
+
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, body, Headers("MCP-Protocol-Version", "latest", "Mcp-Method", "tools/list"));
+
+                var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                Assert.Equal(McpError.UnsupportedProtocolVersionCode, (int)json["error"]["code"]);
+                Assert.NotEmpty((JArray)json["error"]["data"]["supported"]);
+                // A garbage version must not read as "newer than every dated revision" and so demand the
+                // 2026-07-28 headers; it is refused for what it is.
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task AFailedToolIsStillA200()
+        {
+            // The request was served; the tool's failure is in the result, not the transport.
+            string body = "{\"jsonrpc\":\"2.0\",\"id\":13,\"method\":\"tools/call\",\"params\":{" +
+                          "\"name\":\"visa_query\",\"arguments\":{}," + StatelessMeta + "}}";
+
+            using (var h = new Harness())
+            {
+                var resp = await Post(h.Url, body, Headers(
+                    "MCP-Protocol-Version", "2026-07-28", "Mcp-Method", "tools/call", "Mcp-Name", "visa_query"));
+
+                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+                var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
+                Assert.True((bool)json["result"]["isError"]);
+            }
+        }
+
         [Fact]
         public async Task ABatchIsStillAccepted_AndSkipsHeaderValidation()
         {

@@ -222,6 +222,17 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void ANonRevisionIsNeverTreatedAsNewerThanADatedOne()
+        {
+            // Ordinal comparison alone would rank "latest" above every dated revision, because 'l' sorts
+            // after '2' - so the shape has to be checked before the order.
+            Assert.False(new RequestContext(Meta("latest")).DeclaresRevisionAtLeast(RequestContext.StatelessRevision));
+            Assert.False(RequestContext.IsRevisionName("latest"));
+            Assert.False(RequestContext.IsRevisionName("2026-7-28"));
+            Assert.True(RequestContext.IsRevisionName(RequestContext.StatelessRevision));
+        }
+
+        [Fact]
         public void ResultType_AppliesToARevisionNewerThanTheOneWeKnowAbout()
         {
             // Revisions are dated names, so a later one inherits the newer behaviour rather than the older.
