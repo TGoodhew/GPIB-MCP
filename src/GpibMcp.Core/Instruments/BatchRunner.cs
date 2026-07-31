@@ -170,7 +170,13 @@ namespace GpibMcp.Instruments
             };
         }
 
-        public static BatchResult Run(BatchPlan plan, IBatchExecutor exec, BatchCaps caps, Func<long> nowMs)
+        /// <param name="onPoint">
+        /// Optional progress callback invoked as each sweep point starts, with (0-based point, total points).
+        /// A sweep can run for minutes, so this is what lets the caller report progress instead of going
+        /// silent (#112). Omit it and the run behaves exactly as before.
+        /// </param>
+        public static BatchResult Run(BatchPlan plan, IBatchExecutor exec, BatchCaps caps, Func<long> nowMs,
+                                      Action<int, int> onPoint = null)
         {
             caps = caps ?? new BatchCaps();
             var result = new BatchResult { Ok = true };
@@ -201,6 +207,8 @@ namespace GpibMcp.Instruments
 
             for (int pi = 0; pi < points.Count && !aborted; pi++)
             {
+                if (onPoint != null) onPoint(pi, points.Count);
+
                 var bindings = new Dictionary<string, string>(StringComparer.Ordinal);
                 var numeric = new Dictionary<string, object>(StringComparer.Ordinal);
                 if (plan.Sweep != null)

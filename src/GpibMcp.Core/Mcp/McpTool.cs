@@ -14,30 +14,60 @@ namespace GpibMcp.Mcp
         public string Name { get; }
         public string Description { get; }
         public JObject InputSchema { get; }
-        private readonly Func<JObject, ToolOutput> _handler;
+
+        /// <summary>
+        /// Marks a tool whose calls routinely take seconds rather than milliseconds - a screen capture, a
+        /// batch sweep. Two things key off it (#112): the dispatcher may run the call as a task instead of
+        /// blocking, and the handler is given a <see cref="ToolCallContext"/> worth reporting progress to.
+        /// Fast tools stay exactly as they were.
+        /// </summary>
+        public bool LongRunning { get; }
+
+        private readonly Func<JObject, ToolCallContext, ToolOutput> _handler;
 
         /// <summary>Text-returning tool: the string becomes a single text content block.</summary>
         public McpTool(string name, string description, JObject inputSchema, Func<JObject, string> handler)
-            : this(name, description, inputSchema, Wrap(handler))
+            : this(name, description, inputSchema, Wrap(handler), false)
         {
         }
 
         /// <summary>Rich tool: returns one or more content blocks (text and/or images).</summary>
         public McpTool(string name, string description, JObject inputSchema, Func<JObject, ToolOutput> handler)
+            : this(name, description, inputSchema, Ignore(handler), false)
+        {
+        }
+
+        /// <summary>
+        /// Slow tool: additionally receives the call context, so it can report progress as it goes and see a
+        /// cancellation request. Pass <paramref name="longRunning"/> as false for a context-aware tool that
+        /// should still always run synchronously.
+        /// </summary>
+        public McpTool(string name, string description, JObject inputSchema,
+                       Func<JObject, ToolCallContext, ToolOutput> handler, bool longRunning = true)
         {
             Name = name;
             Description = description;
             InputSchema = inputSchema ?? new JObject { ["type"] = "object" };
+            LongRunning = longRunning;
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        private static Func<JObject, ToolOutput> Wrap(Func<JObject, string> handler)
+        private static Func<JObject, ToolCallContext, ToolOutput> Wrap(Func<JObject, string> handler)
         {
             if (handler == null) throw new ArgumentNullException(nameof(handler));
-            return args => ToolOutput.Text(handler(args));
+            return (args, ctx) => ToolOutput.Text(handler(args));
         }
 
-        public ToolOutput Invoke(JObject arguments) => _handler(arguments ?? new JObject());
+        private static Func<JObject, ToolCallContext, ToolOutput> Ignore(Func<JObject, ToolOutput> handler)
+        {
+            if (handler == null) throw new ArgumentNullException(nameof(handler));
+            return (args, ctx) => handler(args);
+        }
+
+        public ToolOutput Invoke(JObject arguments) => Invoke(arguments, ToolCallContext.None);
+
+        public ToolOutput Invoke(JObject arguments, ToolCallContext context) =>
+            _handler(arguments ?? new JObject(), context ?? ToolCallContext.None);
 
         /// <summary>Serializes this tool into the shape expected by tools/list.</summary>
         public JObject ToDescriptor()

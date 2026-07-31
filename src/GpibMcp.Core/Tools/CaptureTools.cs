@@ -58,10 +58,10 @@ namespace GpibMcp.Tools
                     Prop("debug", "boolean", "If true, ALSO save the verbatim captured HP-GL/PCL bytes to a debug file (for " +
                         "troubleshooting plot/render glitches). Set this when the user asks to capture or send 'with debug'."),
                     Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000).")),
-                (Func<JObject, ToolOutput>)(args => Capture(args, db, assignments, visa))));
+                (Func<JObject, ToolCallContext, ToolOutput>)((args, ctx) => Capture(args, ctx, db, assignments, visa))));
         }
 
-        private static ToolOutput Capture(JObject args, InstrumentDatabase db,
+        private static ToolOutput Capture(JObject args, ToolCallContext ctx, InstrumentDatabase db,
                                           AssignmentStore assignments, IInstrumentManager visa)
         {
             string resource = ReqStr(args, "resource");
@@ -83,7 +83,7 @@ namespace GpibMcp.Tools
             // SCPI boxes return the screen as a binary image block - a separate path, selected by the
             // profile's method, with no HP-GL/PCL rendering and no plot/print choice (issue #10).
             if (string.Equals(profile.Method, "scpi_block", StringComparison.OrdinalIgnoreCase))
-                return CaptureScpiBlock(args, def, profile, visa);
+                return CaptureScpiBlock(args, ctx, def, profile, visa);
 
             // OUTPPLOT record-loop method (8720/8753 VNAs): HP-GL streamed as many small records, looped
             // and assembled, then rendered as a normal plot. No print/format choice (issue #55).
@@ -118,9 +118,15 @@ namespace GpibMcp.Tools
             bool corruptCoordinate = false;
             string corruptDetail = null;
             int attempt = 0;
+
+            // Progress milestones (#112) on a 0-100 scale. Reading the hardcopy off the instrument dominates
+            // the 7-24 s this tool takes (#53), so the interesting reports bracket that read.
+            ctx.Progress(5, 100, "Asking " + def.Model + " for a " + (isPrint ? "print" : "plot") + " hardcopy.");
+
             while (true)
             {
                 attempt++;
+                if (attempt > 1) ctx.Progress(5 + attempt, 100, "Re-capturing (attempt " + attempt + " of " + maxAttempts + ").");
                 try
                 {
                     capture = isOutpplot
@@ -146,6 +152,8 @@ namespace GpibMcp.Tools
             }
 
             string kind = isPrint ? "PCL" : "HP-GL";
+            ctx.Progress(60, 100, "Read " + capture.ByteCount + " bytes of " + kind + " in " + capture.ElapsedMs + " ms.");
+
             if (capture.ByteCount < new CaptureOptions().MinPlotBytes)
                 return Error("No complete " + (isPrint ? "print" : "plot") + " captured from " + resource +
                              " (" + capture.ByteCount + " bytes, " + capture.Completion + "). Check the " +
@@ -212,6 +220,7 @@ namespace GpibMcp.Tools
 
             byte[] png;
             string svg = null;
+            ctx.Progress(75, 100, "Rendering the " + (isPrint ? "raster" : "vector") + " hardcopy.");
             var renderWatch = Stopwatch.StartNew();
             try
             {
@@ -233,6 +242,7 @@ namespace GpibMcp.Tools
             renderWatch.Stop();
 
             // Always save the PNG so the user has a durable copy (default: their Pictures folder).
+            ctx.Progress(90, 100, "Saving the image.");
             var saveWatch = Stopwatch.StartNew();
             string savedTo = SaveCapture(args, def.Model + (isPrint ? "-print" : ""), png);
             saveWatch.Stop();
@@ -334,6 +344,8 @@ namespace GpibMcp.Tools
                                "reference (the path handle above). If you must pass the bytes, call " +
                                "visa_write_raw(resource=<target address>, data=<the base64 below>) unchanged:\n" +
                                Convert.ToBase64String(sourceBytes));
+
+            ctx.Progress(100, 100, "Capture complete.");
             return output;
         }
 
@@ -350,7 +362,7 @@ namespace GpibMcp.Tools
         /// strip the IEEE 488.2 header, and return the screenshot - saved full-res, shown inline as a
         /// bounded downscaled thumbnail (a full-colour screenshot can't be pasted verbatim at full size).
         /// </summary>
-        private static ToolOutput CaptureScpiBlock(JObject args, InstrumentDefinition def,
+        private static ToolOutput CaptureScpiBlock(JObject args, ToolCallContext ctx, InstrumentDefinition def,
                                                    CaptureProfile profile, IInstrumentManager visa)
         {
             if (string.IsNullOrEmpty(profile.DumpCommand))
@@ -358,6 +370,7 @@ namespace GpibMcp.Tools
 
             string resource = ReqStr(args, "resource");
             int timeout = Int(args, "timeout_ms", 30000);
+            ctx.Progress(5, 100, "Asking " + def.Model + " for its screen image.");
 
             if (!string.IsNullOrEmpty(profile.PreRoll))
             {
@@ -376,6 +389,8 @@ namespace GpibMcp.Tools
             }
 
             byte[] imageBytes = Ieee4882Block.ExtractDefiniteLength(block);
+            ctx.Progress(70, 100, "Read " + block.Length + " bytes; decoding the image.");
+
             if (imageBytes == null || imageBytes.Length < 64)
                 return Error("No image returned from " + resource + " (" + (imageBytes?.Length ?? 0) +
                              " bytes). Check the dump command and that the model returns a screen image.");
@@ -436,6 +451,8 @@ namespace GpibMcp.Tools
                     "image/svg+xml artifact from it.\n\n" + meta);
                 output.AddImage(png, "image/png");
             }
+
+            ctx.Progress(100, 100, "Capture complete.");
             return output;
         }
 

@@ -44,6 +44,7 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   - [Manual test from a terminal](#manual-test-from-a-terminal)
 - [Logging](#logging)
 - [MCP transports (stdio & HTTP)](#mcp-transports-stdio--http)
+- [Long-running calls: progress and tasks](#long-running-calls-progress-and-tasks)
 - [GPIB backends](#gpib-backends)
 - [Why x86?](#why-x86)
 - [Project layout](#project-layout)
@@ -71,6 +72,9 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
 - **SRQ-based operation completion** — wait for an operation to *truly* finish via the bus
   service-request event (data-driven from the model's `statusModel`), instead of guessing with
   a fixed timeout.
+- **Progress and task handles for the slow calls** — a capture or a sweep reports its milestones as
+  `notifications/progress`, and a client that supports the `io.modelcontextprotocol/tasks` extension can
+  take a task handle and poll instead of blocking for 7–24 s.
 - **Single, self-contained executable** — no external MCP SDK dependency; protocol
   handling is implemented directly so it runs cleanly on .NET Framework. The server
   implements MCP revision **2025-06-18** and negotiates honestly: it answers `initialize`
@@ -865,6 +869,45 @@ so the single-threaded instrument access is preserved regardless of transport.
 $env:GPIB_MCP_TRANSPORT = "http"; $env:GPIB_MCP_HTTP_TOKEN = "<secret>"; .\GpibMcp.exe
 ```
 
+## Long-running calls: progress and tasks
+
+Two of these tools are genuinely slow — a screen capture takes ~7 s to plot and ~24 s to print, and a
+`gpib_batch` sweep runs as long as the sweep does. Rather than leave the client staring at nothing, the server
+supports both ways MCP has of saying "still working" (issue #112):
+
+**Progress notifications** — send a `_meta.progressToken` with a `tools/call` and the server emits
+`notifications/progress` at each milestone (`Asking 8563E for a plot hardcopy` → `Read 41830 bytes of HP-GL in
+7204 ms` → `Rendering` → `Saving` → `Capture complete`; a sweep reports each point as `point n of N`). This
+works on **stdio** only: the HTTP transport answers a POST with exactly one response and offers no
+server→client stream, so progress there has nowhere to go until `subscriptions/listen` lands (#111).
+
+**Tasks** (`io.modelcontextprotocol/tasks`, SEP-2663) — instead of blocking, the server can answer a slow call
+immediately with a task handle the client polls:
+
+```jsonc
+// tools/call →
+{ "resultType": "task", "taskId": "task-0001-b1fe4adb", "status": "working",
+  "createdAt": "…", "lastUpdatedAt": "…", "ttlMs": 600000, "pollIntervalMs": 1000 }
+// tasks/get { "taskId": "…" } → status working | completed | failed | cancelled,
+// with the original result inlined once it is completed.
+```
+
+`tasks/get`, `tasks/cancel` and `tasks/update` are all served. Two rules keep this safe for existing clients:
+
+- **Both sides must opt in.** A task handle is only ever returned to a client that declared the extension —
+  either in `initialize` capabilities (`capabilities.extensions`) or in the request's own `_meta`
+  (`io.modelcontextprotocol/clientCapabilities`), which is how MCP 2026-07-28 negotiates without a handshake.
+  Every client that has not opted in — Claude Desktop today included — gets exactly the blocking call it
+  always got.
+- **Only slow tools qualify.** `instrument_capture_screen` and `gpib_batch` are marked long-running; every
+  other tool answers synchronously either way.
+
+Returning a handle does not make the hardware any more parallel: tasks run on one worker thread and take the
+same lock a foreground call does, so the GPIB bus still sees one operation at a time. What changes is that
+`tasks/get` is answerable *while* a capture is on the bus — the poll never queues behind it. Cancellation is
+cooperative, as the extension allows: a task still queued is cancelled before it touches the bus, but one
+already mid-capture runs to completion, because a blocking GPIB read cannot be interrupted.
+
 ## GPIB backends
 
 Wire-level I/O sits behind a single abstraction, **`IGpibTransport`**, so the adapter is pluggable.
@@ -906,10 +949,16 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
   Diagnostics/
     Log.cs                         leveled stderr logger (GPIB_MCP_LOG_LEVEL)
   Mcp/
-    McpDispatcher.cs               transport-agnostic JSON-RPC 2.0 dispatch (initialize / tools / ping)
+    McpDispatcher.cs               transport-agnostic JSON-RPC 2.0 dispatch (initialize / tools / tasks / ping)
     IMcpDispatcher.cs              the dispatch seam (message -> response)
     IMcpTransport.cs               the transport seam (stdio / HTTP are separate modules)
+    IMcpMessageSink.cs             the outbound seam - server->client notifications (#112)
+    ToolCallContext.cs             per-call progress reporting + cancellation flag (#112)
     McpTool.cs                     tool + registry + error types
+    Tasks/                         io.modelcontextprotocol/tasks extension (#112)
+      ServerTask.cs                one task's state + its CreateTaskResult / tasks/get shapes
+      TaskStore.cs                 the live tasks, TTL-bounded
+      TaskRunner.cs                single worker thread - keeps the GPIB bus serial
   Instruments/
     IInstrumentManager.cs          tool-facing instrument abstraction (enables testing)
     InstrumentManager.cs           backend-neutral manager (history, errors, capture, the bus lock)

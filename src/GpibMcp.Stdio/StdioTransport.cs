@@ -12,8 +12,12 @@ namespace GpibMcp.Stdio
     /// transport MCP desktop clients launch as a child process. stdout carries protocol traffic ONLY; all
     /// diagnostics go to stderr (via <see cref="Log"/>). The module owns no protocol logic - it just frames
     /// bytes and defers to an <see cref="IMcpDispatcher"/>.
+    ///
+    /// It is also an <see cref="IMcpMessageSink"/>: the output stream stays open between responses, so the
+    /// dispatcher can interleave <c>notifications/progress</c> while a slow tool call is still running (#112).
+    /// Writes are gated, so a notification from the task runner cannot cut into a response mid-line.
     /// </summary>
-    public sealed class StdioTransport : IMcpTransport
+    public sealed class StdioTransport : IMcpTransport, IMcpMessageSink
     {
         private readonly TextReader _input;
         private readonly TextWriter _output;
@@ -29,6 +33,7 @@ namespace GpibMcp.Stdio
         public void Run(IMcpDispatcher dispatcher)
         {
             if (dispatcher == null) throw new ArgumentNullException(nameof(dispatcher));
+            dispatcher.Notifications = this;   // stdout can carry server→client messages; offer it
 
             string line;
             while ((line = _input.ReadLine()) != null)
@@ -51,6 +56,12 @@ namespace GpibMcp.Stdio
                 if (response != null) Write(response);
             }
             Log.Info("stdin closed; shutting down.");
+        }
+
+        /// <inheritdoc/>
+        public void Send(JObject message)
+        {
+            if (message != null) Write(message);
         }
 
         private void Write(JObject payload)

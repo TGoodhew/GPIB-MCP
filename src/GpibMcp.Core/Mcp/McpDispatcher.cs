@@ -1,5 +1,6 @@
 using System;
 using GpibMcp.Diagnostics;
+using GpibMcp.Mcp.Tasks;
 using GpibMcp.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,11 +13,13 @@ namespace GpibMcp.Mcp
     /// carries the bytes. The instrument layer (and the rest of the codebase) sits behind the tool registry
     /// and is likewise unaware of the transport.
     ///
-    /// The server is single-threaded by design: tool calls run synchronously and the instrument backend
-    /// serializes hardware access. <see cref="Dispatch"/> takes a lock so a concurrent transport (e.g. HTTP)
-    /// cannot interleave two requests - the synchronous guarantee lives here, once, for every transport.
+    /// The server is single-threaded where it matters: every tool invocation - foreground or task-backed -
+    /// takes one lock, so a concurrent transport (e.g. HTTP) can never put two requests on the GPIB bus at
+    /// once. The lock deliberately does <b>not</b> cover the whole of <see cref="Dispatch"/>: a
+    /// <c>tasks/get</c> poll must be answerable while a 24-second capture is still on the hardware, which is
+    /// the entire point of the tasks extension (#112). Everything outside tool execution is read-only state.
     /// </summary>
-    public sealed class McpDispatcher : IMcpDispatcher
+    public sealed class McpDispatcher : IMcpDispatcher, IDisposable
     {
         /// <summary>MCP revision this server implements, and the one it answers with by default.</summary>
         public const string ProtocolVersion = "2025-06-18";
@@ -51,10 +54,24 @@ namespace GpibMcp.Mcp
         /// <summary>Server version reported to clients during initialize.</summary>
         public const string ServerVersion = "0.2.0";
 
+        /// <summary>
+        /// Identifier of the tasks extension (SEP-2663). A client declares support for it in its capabilities
+        /// and the server advertises the same key; only then may we answer a request with a task handle.
+        /// </summary>
+        public const string TasksExtension = "io.modelcontextprotocol/tasks";
+
+        /// <summary>The <c>_meta</c> key carrying per-request client capabilities from MCP 2026-07-28.</summary>
+        private const string ClientCapabilitiesMeta = "io.modelcontextprotocol/clientCapabilities";
+
         private readonly ToolRegistry _tools;
         private readonly string _instructions;
         private readonly BatchLoopNudge _loopNudge;
-        private readonly object _gate = new object();
+        private readonly object _toolGate = new object();
+        private readonly TaskStore _taskStore = new TaskStore();
+        private readonly Lazy<TaskRunner> _taskRunner = new Lazy<TaskRunner>(() => new TaskRunner());
+
+        /// <summary>Set at initialize when the client declares the tasks extension (the 2025-06-18 route).</summary>
+        private volatile bool _clientDeclaredTasks;
 
         public McpDispatcher(ToolRegistry tools, string instructions = null, BatchLoopNudge loopNudge = null)
         {
@@ -64,11 +81,15 @@ namespace GpibMcp.Mcp
         }
 
         /// <inheritdoc/>
+        public IMcpMessageSink Notifications { get; set; }
+
+        /// <summary>The live tasks this server has handed out (exposed for diagnostics and tests).</summary>
+        public TaskStore Tasks => _taskStore;
+
+        /// <inheritdoc/>
         public JObject Dispatch(JObject message)
         {
-            // Serialize: preserve the single-threaded model regardless of how many requests a transport
-            // delivers concurrently (the instrument bus and the loop-nudge counter are not re-entrant).
-            lock (_gate) { return DispatchCore(message); }
+            return DispatchCore(message);
         }
 
         private JObject DispatchCore(JObject message)
@@ -128,6 +149,17 @@ namespace GpibMcp.Mcp
                 case "tools/call":
                     return CallTool(prms);
 
+                // io.modelcontextprotocol/tasks (#112). Served unconditionally: a client only ever holds a
+                // task id because we gave it one, and answering a poll is never the wrong thing to do.
+                case "tasks/get":
+                    return FindTask(prms).ToDetailedResult();
+
+                case "tasks/cancel":
+                    return CancelTask(prms);
+
+                case "tasks/update":
+                    return UpdateTask(prms);
+
                 default:
                     throw McpError.MethodNotFound(method);
             }
@@ -173,12 +205,23 @@ namespace GpibMcp.Mcp
                          "'; answering with " + ProtocolVersion + ".");
             }
 
+            // Tasks are opt-in from both sides: remember whether this client declared the extension, because
+            // the spec is explicit that a server must never hand a task to a client that did not (#112).
+            var clientCaps = prms != null ? prms["capabilities"] as JObject : null;
+            _clientDeclaredTasks = DeclaresTasks(clientCaps);
+            if (_clientDeclaredTasks)
+                Log.Info("Client supports " + TasksExtension + "; long-running calls may return a task handle.");
+
             var result = new JObject
             {
                 ["protocolVersion"] = negotiated,
                 ["capabilities"] = new JObject
                 {
-                    ["tools"] = new JObject { ["listChanged"] = false }
+                    ["tools"] = new JObject { ["listChanged"] = false },
+                    // ServerCapabilities.extensions (2026-07-28 minor change 1). Advertised to every client:
+                    // one that predates the field ignores it, and it is how a client learns we can do this
+                    // before server/discover exists here (#105).
+                    ["extensions"] = new JObject { [TasksExtension] = new JObject() }
                 },
                 ["serverInfo"] = new JObject
                 {
@@ -205,12 +248,34 @@ namespace GpibMcp.Mcp
                 throw McpError.InvalidParams("unknown tool: " + name);
 
             Log.Debug("tools/call '" + name + "' args=" + arguments.ToString(Formatting.None));
+
+            // A slow tool becomes a task only when the client has said it can handle one. Everything else -
+            // every fast tool, and every client that has not opted in - runs exactly as it always has (#112).
+            if (tool.LongRunning && ClientSupportsTasks(prms))
+                return StartTaskCall(tool, name, arguments, prms);
+
+            return ExecuteTool(tool, name, arguments, ProgressContext(prms));
+        }
+
+        /// <summary>
+        /// Runs a tool to completion and shapes the <c>tools/call</c> result. Holds the tool lock throughout,
+        /// so this is the single point where hardware access is serialized - foreground calls and the task
+        /// runner alike. The lock covers the audit log and loop-nudge counter too, neither of which is
+        /// re-entrant; polling a task takes no lock at all, which is what keeps it answerable meanwhile.
+        /// </summary>
+        private JObject ExecuteTool(McpTool tool, string name, JObject arguments, ToolCallContext context)
+        {
+            lock (_toolGate) { return ExecuteToolCore(tool, name, arguments, context); }
+        }
+
+        private JObject ExecuteToolCore(McpTool tool, string name, JObject arguments, ToolCallContext context)
+        {
             // One always-on audit line per call (level-independent), so a whole turn can be reconstructed
             // afterwards - e.g. count single-op calls vs one gpib_batch, total non-batched time (#74 insight).
             var watch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
-                ToolOutput output = tool.Invoke(arguments);
+                ToolOutput output = tool.Invoke(arguments, context);
                 watch.Stop();
                 ToolCallLog.Write(name, arguments, !output.IsError, watch.ElapsedMilliseconds);
                 // #74: if the model is grinding through a per-point loop single-op, append a nudge to switch
@@ -232,6 +297,114 @@ namespace GpibMcp.Mcp
                 string text = (ex is IDetailedError detailed) ? detailed.Detail : ex.Message;
                 return ToToolResult(ToolOutput.Text("Error: " + text).AsError());
             }
+        }
+
+        /// <summary>
+        /// Hands the call to the task runner and answers immediately with a <c>CreateTaskResult</c>. The task
+        /// is registered before we reply, so a client that polls the instant it sees the id always finds it.
+        /// </summary>
+        private JObject StartTaskCall(McpTool tool, string name, JObject arguments, JObject prms)
+        {
+            ServerTask task = _taskStore.Create("tools/call " + name);
+            task.SetStatusMessage("Queued: " + name + ".");
+
+            // While a task runs there is no open request to attach progress to, so the milestones a tool
+            // reports become the task's statusMessage - which is exactly what the client's next poll reads.
+            var context = new ToolCallContext((progress, total, message) => task.SetStatusMessage(message));
+
+            _taskRunner.Value.Enqueue(task, () =>
+            {
+                task.SetStatusMessage("Running " + name + ".");
+                return ExecuteTool(tool, name, arguments, context);
+            });
+
+            Log.Info("tools/call '" + name + "' running as task " + task.TaskId + ".");
+            return task.ToCreateResult();
+        }
+
+        /// <summary>
+        /// Builds the context for a synchronous call: progress goes out as <c>notifications/progress</c> when
+        /// the client asked for it with a <c>_meta.progressToken</c> and the transport can carry one.
+        /// </summary>
+        private ToolCallContext ProgressContext(JObject prms)
+        {
+            var meta = prms != null ? prms["_meta"] as JObject : null;
+            JToken token = meta != null ? meta["progressToken"] : null;
+            IMcpMessageSink sink = Notifications;
+            if (token == null || token.Type == JTokenType.Null || sink == null) return ToolCallContext.None;
+
+            return new ToolCallContext((progress, total, message) =>
+            {
+                var notificationParams = new JObject
+                {
+                    ["progressToken"] = token.DeepClone(),
+                    ["progress"] = progress
+                };
+                if (total.HasValue) notificationParams["total"] = total.Value;
+                if (!string.IsNullOrEmpty(message)) notificationParams["message"] = message;
+
+                sink.Send(new JObject
+                {
+                    ["jsonrpc"] = "2.0",
+                    ["method"] = "notifications/progress",
+                    ["params"] = notificationParams
+                });
+            });
+        }
+
+        /// <summary>
+        /// True when this client can be handed a task: either it declared the extension at initialize
+        /// (2025-06-18 style) or it carried the declaration in this request's <c>_meta</c>, which is how
+        /// 2026-07-28 negotiates now that there is no handshake.
+        /// </summary>
+        private bool ClientSupportsTasks(JObject prms)
+        {
+            if (_clientDeclaredTasks) return true;
+            var meta = prms != null ? prms["_meta"] as JObject : null;
+            return DeclaresTasks(meta != null ? meta[ClientCapabilitiesMeta] as JObject : null);
+        }
+
+        private static bool DeclaresTasks(JObject capabilities)
+        {
+            var extensions = capabilities != null ? capabilities["extensions"] as JObject : null;
+            return extensions != null && extensions[TasksExtension] != null;
+        }
+
+        private ServerTask FindTask(JObject prms)
+        {
+            string taskId = prms != null ? (string)prms["taskId"] : null;
+            if (string.IsNullOrEmpty(taskId)) throw McpError.InvalidParams("missing taskId");
+
+            ServerTask task;
+            if (!_taskStore.TryGet(taskId, out task))
+                throw McpError.InvalidParams("unknown task: " + taskId);
+            return task;
+        }
+
+        private JObject CancelTask(JObject prms)
+        {
+            ServerTask task = FindTask(prms);
+            task.RequestCancel();
+            // Cooperative, and honest about it: a task still queued is cancelled by the runner before it
+            // touches the bus, but one already mid-capture will finish - a blocking GPIB read cannot be
+            // interrupted, and the extension allows a cancelled-but-completed outcome.
+            Log.Info("tasks/cancel requested for " + task.TaskId + " (status " + task.Status + ").");
+            return new JObject { ["resultType"] = "complete" };
+        }
+
+        private JObject UpdateTask(JObject prms)
+        {
+            ServerTask task = FindTask(prms);
+            // We never move a task to input_required - no sampling, no elicitation - so there is nothing
+            // outstanding for responses to satisfy. The extension says to acknowledge and ignore them.
+            Log.Debug("tasks/update for " + task.TaskId + " ignored: no outstanding input requests.");
+            return new JObject { ["resultType"] = "complete" };
+        }
+
+        /// <summary>Stops the task runner. Any queued work is settled rather than left pending.</summary>
+        public void Dispose()
+        {
+            if (_taskRunner.IsValueCreated) _taskRunner.Value.Dispose();
         }
 
         private static JObject ToToolResult(ToolOutput output)

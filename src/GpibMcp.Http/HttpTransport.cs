@@ -43,6 +43,11 @@ namespace GpibMcp.Http
         {
             if (dispatcher == null) throw new ArgumentNullException(nameof(dispatcher));
 
+            // No outbound sink is attached: a POST here gets exactly one JSON response and there is no
+            // server→client stream, so progress notifications have nowhere to go and the dispatcher skips
+            // them (#112). Task handles still work over HTTP - polling is just another POST - and restoring
+            // request-scoped notifications is subscriptions/listen (#111).
+
             _listener = new HttpListener();
             _listener.Prefixes.Add("http://" + _host + ":" + _port + "/");
             _listener.Start();
