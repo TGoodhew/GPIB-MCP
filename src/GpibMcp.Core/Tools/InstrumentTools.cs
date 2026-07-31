@@ -84,14 +84,55 @@ namespace GpibMcp.Tools
                     Prop("read_bytes", "integer", "Optional: read at most this many bytes instead of reading to the " +
                         "terminator/EOI. Leave unset for normal reads; use it only to stop a free-running instrument " +
                         "from timing out (e.g. 512 for an identity read).")),
-                args =>
+                (Func<JObject, ToolOutput>)(args =>
                 {
                     string resource = ReqStr(args, "resource");
                     string command = ReqStr(args, "command");
                     int timeout = Int(args, "timeout_ms", InstrumentManager.DefaultTimeoutMs);
                     int readBytes = Int(args, "read_bytes", 0);
                     var io = InstrumentIo.Resolve(db, assignments, resource, timeout, readBytes);
-                    return Clean(visa.Query(resource, command, io));
+                    string response = Clean(visa.Query(resource, command, io));
+
+                    // The reply, and what it means (#113). The text block still carries the raw response and
+                    // nothing else - that is what a human reads - while structuredContent adds the number and
+                    // its unit, so the model stops re-parsing measurements out of prose.
+                    var structured = new JObject
+                    {
+                        ["resource"] = resource,
+                        ["command"] = command,
+                        ["response"] = response
+                    };
+
+                    string model = assignments.Get(resource);
+                    if (!string.IsNullOrEmpty(model)) structured["model"] = model;
+
+                    double value;
+                    if (MeasurementValue.TryParseNumber(response, out value)) structured["value"] = value;
+
+                    InstrumentDefinition def;
+                    if (!string.IsNullOrEmpty(model) && db.TryGet(model, out def))
+                    {
+                        string unit = MeasurementValue.UnitForQuery(def, command);
+                        if (unit != null) structured["unit"] = unit;
+                    }
+
+                    return ToolOutput.Text(response).WithStructured(structured);
+                }))
+                .WithOutputSchema(new JObject
+                {
+                    ["type"] = "object",
+                    ["description"] = "The instrument's reply, plus the reading as a number and unit when they are known.",
+                    ["properties"] = new JObject
+                    {
+                        ["resource"] = new JObject { ["type"] = "string", ["description"] = "The instrument queried." },
+                        ["command"] = new JObject { ["type"] = "string", ["description"] = "The query as sent." },
+                        ["response"] = new JObject { ["type"] = "string", ["description"] = "The raw reply, trimmed of its terminator." },
+                        ["value"] = new JObject { ["type"] = "number", ["description"] = "The reply parsed as a number. Absent when the reply is not a single number." },
+                        ["unit"] = new JObject { ["type"] = "string", ["description"] = "The physical unit of `value`, from the model's audited unit tokens. Absent when the command's units are unknown." },
+                        ["model"] = new JObject { ["type"] = "string", ["description"] = "The model assigned to this resource, if any." }
+                    },
+                    ["required"] = new JArray("resource", "command", "response"),
+                    ["additionalProperties"] = false
                 }));
 
             // ---- VISA: write-only ------------------------------------------------

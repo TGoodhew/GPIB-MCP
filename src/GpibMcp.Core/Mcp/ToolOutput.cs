@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace GpibMcp.Mcp
 {
@@ -47,6 +48,18 @@ namespace GpibMcp.Mcp
     {
         public List<ToolContentBlock> Content { get; } = new List<ToolContentBlock>();
         public bool IsError { get; set; }
+
+        /// <summary>
+        /// The machine-readable form of this result, emitted as <c>structuredContent</c> (#113). A tool that
+        /// sets it declares a matching <see cref="McpTool.OutputSchema"/>, and the model reads the fields
+        /// instead of re-parsing the prose - a measurement arrives as a number and a unit, not a sentence.
+        /// The text blocks stay: they are what a human reads in the transcript, and what a client that
+        /// ignores structured content falls back to.
+        /// </summary>
+        public JToken Structured { get; private set; }
+
+        /// <summary>Attaches the structured payload. Returns this, so it chains off a builder.</summary>
+        public ToolOutput WithStructured(JToken structured) { Structured = structured; return this; }
 
         public static ToolOutput Text(string text)
         {

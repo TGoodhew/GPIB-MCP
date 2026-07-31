@@ -58,26 +58,26 @@ namespace GpibMcp.Tools
                 {
                     BatchPlan plan;
                     try { plan = ParsePlan(args); }
-                    catch (Exception ex) { return ToolOutput.Text("Invalid batch: " + ex.Message).AsError(); }
+                    catch (Exception ex) { return Rejected("Invalid batch: " + ex.Message); }
 
                     var caps = new BatchCaps();
                     string invalid = BatchRunner.Validate(plan, caps);
-                    if (invalid != null) return ToolOutput.Text("Batch rejected: " + invalid).AsError();
+                    if (invalid != null) return Rejected("Batch rejected: " + invalid);
 
                     var pv = BatchRunner.Preview(plan, caps);
 
                     // Explicit preview: report the plan size, touch nothing.
                     if (Bool(args, "preview", false))
-                        return ToolOutput.Text(PreviewEnvelope(pv, needsConfirm: false,
-                            "Nothing was sent to the bus. Call again without preview to execute.").ToString(Formatting.None));
+                        return Deliver(PreviewEnvelope(pv, needsConfirm: false,
+                            "Nothing was sent to the bus. Call again without preview to execute."));
 
                     // Confirm gate (#59 Phase 2): a large plan returns a preview and runs nothing until the caller
                     // re-submits with confirm:true. Small plans run straight through - no friction.
                     if (pv.GpibOps > caps.ConfirmAboveOps && !Bool(args, "confirm", false))
-                        return ToolOutput.Text(PreviewEnvelope(pv, needsConfirm: true,
+                        return Deliver(PreviewEnvelope(pv, needsConfirm: true,
                             "This is a large batch (" + pv.GpibOps + " GPIB ops over " + pv.Points + " points). Nothing " +
                             "was sent to the bus. Show the user what will run; if they approve, call again with " +
-                            "confirm:true to execute.").ToString(Formatting.None));
+                            "confirm:true to execute."));
 
                     var exec = new BatchExecutor(db, assignments, visa);
                     var watch = Stopwatch.StartNew();
@@ -91,9 +91,109 @@ namespace GpibMcp.Tools
                     BatchTimingLog.Write(result);
                     Log.Info("batch run: " + Summarize(result) + " (timing -> " + BatchTimingLog.Path + ")");
 
-                    return ToolOutput.Text(Serialize(result));
-                })));
+                    return Deliver(ResultEnvelope(result));
+                }))
+                .WithOutputSchema(OutputSchema));
         }
+
+        /// <summary>
+        /// Returns the run envelope both ways (#113): serialized into the text block, and verbatim as
+        /// <c>structuredContent</c>. A sweep is the worst case for prose - the model would otherwise have to
+        /// pull every point back out of a JSON string it was handed as text.
+        /// </summary>
+        private static ToolOutput Deliver(JObject envelope) =>
+            ToolOutput.Text(envelope.ToString(Formatting.None)).WithStructured(envelope);
+
+        /// <summary>A refusal that still conforms to the output schema, so `ok` is always the thing to check.</summary>
+        private static ToolOutput Rejected(string message) =>
+            Deliver(new JObject { ["ok"] = false, ["error"] = message }).AsError();
+
+        /// <summary>
+        /// The result schema. Deliberately open (<c>additionalProperties</c>) - a run carries optional blocks
+        /// (errors, truncation, timing) and the shape grows; what is pinned is the part a caller reads:
+        /// <c>ok</c>, the run metadata, and the column/row table.
+        /// </summary>
+        private static JObject OutputSchema => new JObject
+        {
+            ["type"] = "object",
+            ["description"] = "The batch run envelope: what ran, the measured table, and any errors.",
+            ["properties"] = new JObject
+            {
+                ["ok"] = new JObject { ["type"] = "boolean", ["description"] = "False if the batch was rejected or aborted." },
+                ["preview"] = new JObject { ["type"] = "boolean", ["description"] = "True when nothing was sent to the bus." },
+                ["needs_confirm"] = new JObject { ["type"] = "boolean", ["description"] = "True when the plan is large and awaits confirm:true." },
+                ["ran"] = new JObject
+                {
+                    ["type"] = "object",
+                    ["description"] = "Plan size and wall-clock.",
+                    ["properties"] = new JObject
+                    {
+                        ["sweep"] = new JObject { ["type"] = new JArray("string", "null") },
+                        ["points"] = new JObject { ["type"] = "integer" },
+                        ["ops_per_point"] = new JObject { ["type"] = "integer" },
+                        ["gpib_ops"] = new JObject { ["type"] = "integer" },
+                        ["elapsed_ms"] = new JObject { ["type"] = "integer" }
+                    }
+                },
+                ["columns"] = new JObject
+                {
+                    ["type"] = "array",
+                    ["description"] = "Column headers, in row order: the swept variable first, then each captured value.",
+                    ["items"] = new JObject
+                    {
+                        ["type"] = "object",
+                        ["properties"] = new JObject
+                        {
+                            ["name"] = new JObject { ["type"] = "string" },
+                            ["unit"] = new JObject { ["type"] = "string", ["description"] = "Physical unit, when known." },
+                            ["from"] = new JObject { ["type"] = "string", ["description"] = "Which instrument produced it." }
+                        },
+                        ["required"] = new JArray("name")
+                    }
+                },
+                ["rows"] = new JObject
+                {
+                    ["type"] = "array",
+                    ["description"] = "One array per sweep point, positionally matching `columns`. Numbers stay numbers.",
+                    ["items"] = new JObject { ["type"] = "array", ["items"] = new JObject { ["type"] = new JArray("number", "string", "null") } }
+                },
+                ["summary"] = new JObject { ["type"] = "string", ["description"] = "One-line run summary, ready to relay." },
+                ["table"] = new JObject { ["type"] = "string", ["description"] = "The rows as a markdown table, ready to relay." },
+                ["errors"] = new JObject
+                {
+                    ["type"] = "array",
+                    ["description"] = "Per-step failures, present only when something failed.",
+                    ["items"] = new JObject
+                    {
+                        ["type"] = "object",
+                        ["properties"] = new JObject
+                        {
+                            ["point"] = new JObject { ["type"] = "integer" },
+                            ["step"] = new JObject { ["type"] = "integer" },
+                            ["op"] = new JObject { ["type"] = "string" },
+                            ["resource"] = new JObject { ["type"] = "string" },
+                            ["command"] = new JObject { ["type"] = "string" },
+                            ["error"] = new JObject { ["type"] = "string" }
+                        }
+                    }
+                },
+                ["truncated"] = new JObject
+                {
+                    ["type"] = "object",
+                    ["description"] = "Present when the returned table is shorter than the run.",
+                    ["properties"] = new JObject
+                    {
+                        ["returned"] = new JObject { ["type"] = "integer" },
+                        ["total"] = new JObject { ["type"] = "integer" },
+                        ["reason"] = new JObject { ["type"] = "string" }
+                    }
+                },
+                ["error"] = new JObject { ["type"] = "string", ["description"] = "Why the batch was refused (ok:false)." },
+                ["note"] = new JObject { ["type"] = "string" }
+            },
+            ["required"] = new JArray("ok"),
+            ["additionalProperties"] = true
+        };
 
         // ---- parse the tool args into a plan ------------------------------------
 
@@ -156,7 +256,12 @@ namespace GpibMcp.Tools
 
         // ---- serialise the result envelope (compact, array-of-arrays rows) ------
 
-        private static string Serialize(BatchResult r)
+        /// <summary>
+        /// The run envelope. Returned twice over (#113): serialized into the text block a human reads, and
+        /// verbatim as <c>structuredContent</c>, so the model reads the sweep rows as data rather than
+        /// re-parsing them out of a JSON string.
+        /// </summary>
+        private static JObject ResultEnvelope(BatchResult r)
         {
             var jo = new JObject
             {
@@ -190,7 +295,7 @@ namespace GpibMcp.Tools
                 }));
             if (r.Truncated != null)
                 jo["truncated"] = new JObject { ["returned"] = r.Truncated.Returned, ["total"] = r.Truncated.Total, ["reason"] = r.Truncated.Reason };
-            return jo.ToString(Formatting.None);
+            return jo;
         }
 
         private static JToken Cell(object v)

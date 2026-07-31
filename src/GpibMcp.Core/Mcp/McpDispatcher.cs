@@ -424,6 +424,11 @@ namespace GpibMcp.Mcp
             }
 
             var result = new JObject { ["content"] = content };
+            // The machine-readable twin of the text above (#113). Tools that declare an outputSchema set it
+            // on every path they can - including their own failure envelopes - so a client validating against
+            // the schema always has something to validate. A crash out of the handler is the exception: that
+            // returns isError, which the spec exempts from output validation.
+            if (output.Structured != null) result["structuredContent"] = output.Structured;
             if (output.IsError) result["isError"] = true;
             return result;
         }
