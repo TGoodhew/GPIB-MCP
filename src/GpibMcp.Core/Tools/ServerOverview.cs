@@ -101,7 +101,7 @@ namespace GpibMcp.Tools
                 "Query *IDN? (or a model's identity command), match the answer against the database, and assign a model " +
                 "to a resource so later calls use its terminators, commands and statusModel. Assignment is confirm-to-save. " +
                 "Instruments with no remote identification are reported as such instead of guessed.",
-                new[] { "\"What is the instrument at GPIB0::5?\"", "\"Assign the 8563E to GPIB0::18.\"" });
+                new[] { "\"What is the instrument at GPIB0::5?\"", "\"Assign the 34401A to GPIB0::22.\"" });
 
             Section(sb, "Instrument command database",
                 "A built-in reference of " + ModelCount + " models and " + CommandCount.ToString("N0") + " documented " +
@@ -111,13 +111,15 @@ namespace GpibMcp.Tools
                 "maps the human value to the EXACT string, picking the device's wire suffix token and converting units " +
                 "(e.g. 1 GHz -> 'FR 1000 MZ'), so you never guess. Extend the DB too: add/refresh a model and override " +
                 "bundled entries (user copies win and persist).",
-                new[] { "\"Show the commands for an HP 3458A.\"", "\"List the spectrum analyzers you know.\"",
-                        "\"How do I set the resolution bandwidth on the 8563E?\"" });
+                new[] { "\"Show the commands for an HP 3458A.\"", "\"Which oscilloscopes do you know?\"",
+                        "\"How do I set the output voltage on the power supply?\"",
+                        "\"How do I set the resolution bandwidth on the analyzer?\"" });
 
             Section(sb, "Screen capture",
                 "Capture an instrument's screen by HP-GL plotter emulation and return it as a compact inline SVG (shown " +
                 "in the chat as an artifact) plus a saved PNG. Fidelity is selectable (exact stroke font vs. fast labels).",
-                new[] { "\"Capture the analyzer's screen.\"", "\"Grab a screenshot of GPIB0::18.\"" });
+                new[] { "\"Capture the scope's screen.\"", "\"Grab a screenshot of GPIB0::18.\"",
+                        "\"Show me what the analyzer is displaying.\"" });
 
             Section(sb, "SRQ operation completion (ARM -> WAIT -> READ)",
                 "Triggered measurements follow one contract: ARM the operation, WAIT for true completion via SRQ, then " +
@@ -127,7 +129,9 @@ namespace GpibMcp.Tools
                 "serial-poll the status byte (decoded to named bits) and wait for SRQ. A missing statusModel can be defined " +
                 "and persisted in one confirm-to-save step. Inside a sweep or repeated measurement, don't inline ARM/WAIT/READ " +
                 "per point - use gpib_batch with a 'complete' step (below), which runs the wait at every point in a single call.",
-                new[] { "\"Wait for the sweep to finish, then read the marker.\"", "\"Serial-poll GPIB0::18.\"" });
+                new[] { "\"Wait for the sweep to finish, then read the marker.\"",
+                        "\"Wait for the acquisition to complete before reading the measurement.\"",
+                        "\"Serial-poll GPIB0::18.\"" });
 
             Section(sb, "Batch / sweep execution (one call, not 200)",
                 "For a sweep or repeated per-point measurement - INCLUDING one spanning SEVERAL instruments at each point " +
@@ -144,9 +148,12 @@ namespace GpibMcp.Tools
                 "(more than ~50 GPIB ops) comes back as needs_confirm with a preview and touches nothing - show the user " +
                 "what will run and re-call with confirm:true once they approve.",
                 new[] { "\"Take a reading every 500 kHz up to 20 MHz.\"",
-                        "\"Step the 3325B 1-20 MHz; at each point center the 8563E, peak-search, read freq and amplitude.\"",
-                        "\"Step the 3325B 500 kHz-10 MHz; at each point measure the 5351A frequency (input 2, HIGHZ), then " +
-                        "on the 8563E set CF+span, peak-search, center-to-marker, peak-search, and read frequency and amplitude.\"" });
+                        "\"Step the supply 0-5 V in 100 mV steps and log the DMM current at each point.\"",
+                        "\"For each load setting, wait for the scope to finish acquiring, then read Vpp and rise time.\"",
+                        // The three-device shape (#74): source on one box, measure on a second, configure a
+                        // third from that reading. Phrased by role, so it teaches the pattern rather than a bench.
+                        "\"Sweep the generator 500 kHz-10 MHz; at each point read the counter's frequency, then set " +
+                        "the analyzer's centre frequency to it, peak-search and read frequency and amplitude.\"" });
 
             Section(sb, "Error reporting & diagnostics",
                 "Tool errors come back as friendly decoded VISA failures; ask for the exact codes to get the raw VISA " +

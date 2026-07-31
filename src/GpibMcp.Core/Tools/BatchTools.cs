@@ -26,7 +26,8 @@ namespace GpibMcp.Tools
         private const string Description =
             "Run a whole multi-step / swept GPIB measurement in ONE call instead of many. Use this whenever " +
             "the user asks for a sweep or a repeated per-point measurement (e.g. 'step the source 1-20 MHz and " +
-            "read the analyzer at each point'). Provide a 'sweep' {var, from, to, step|count, unit?} and an " +
+            "read the receiving instrument at each point', or 'ramp the supply 0-5 V and log the DMM current'). " +
+            "Provide a 'sweep' {var, from, to, step|count, unit?} and an " +
             "ordered 'steps' list run at every point. Each step has an 'op': 'set' (value+unit via the resolver: " +
             "{op:'set', resource, command:<name>, value, unit}), 'write' (literal command), 'query'/'read' (read " +
             "a value; add 'as':<name> to capture it into a result column and reuse it as {{name}} in later steps), " +

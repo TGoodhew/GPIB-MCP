@@ -46,7 +46,10 @@ namespace GpibMcp.Instruments
     /// <summary>How to capture this instrument's screen (e.g. HP-GL plotter emulation).</summary>
     public sealed class CaptureProfile
     {
-        /// <summary>Capture method: "hpgl" (HP-GL/PCL plotter emulation) or "scpi_block" (binary image query).</summary>
+        /// <summary>
+        /// Capture method: "hpgl" (HP-GL/PCL plotter emulation), "outpplot" (looped record-output query,
+        /// see <see cref="DumpCommand"/>), or "scpi_block" (binary image query).
+        /// </summary>
         [JsonProperty("method")] public string Method { get; set; }
 
         /// <summary>Command that makes the instrument plot (HP-GL "show"/vector), e.g. "PLOT 550,279,9750,7479;".</summary>
@@ -71,6 +74,30 @@ namespace GpibMcp.Instruments
 
         /// <summary>Optional commands to send after capturing, e.g. "CONTS;" to resume continuous sweep.</summary>
         [JsonProperty("postRoll")] public string PostRoll { get; set; }
+
+        /// <summary>
+        /// Optional per-model capture timing. The defaults in <see cref="CaptureOptions"/> were measured on
+        /// one instrument (an 8563E, against the KE5FX reference), and a box that streams its hardcopy more
+        /// slowly - or pauses longer mid-plot - would be cut short by them. Rather than tune the server for
+        /// whatever sits on the bench, a model that needs different numbers says so in its own profile.
+        /// Null means "use the default".
+        /// </summary>
+        [JsonProperty("perReadTimeoutMs")] public int? PerReadTimeoutMs { get; set; }
+
+        /// <summary>How long the plot may go quiet before the capture is considered finished. See <see cref="PerReadTimeoutMs"/>.</summary>
+        [JsonProperty("inactivityTimeoutMs")] public int? InactivityTimeoutMs { get; set; }
+
+        /// <summary>Smallest byte count that counts as a real hardcopy rather than a false start. See <see cref="PerReadTimeoutMs"/>.</summary>
+        [JsonProperty("minPlotBytes")] public int? MinPlotBytes { get; set; }
+
+        /// <summary>Applies whichever timings this profile overrides, leaving the rest at their defaults.</summary>
+        public void ApplyTimingTo(CaptureOptions options)
+        {
+            if (options == null) return;
+            if (PerReadTimeoutMs.GetValueOrDefault() > 0) options.PerReadTimeoutMs = PerReadTimeoutMs.Value;
+            if (InactivityTimeoutMs.GetValueOrDefault() > 0) options.InactivityTimeoutMs = InactivityTimeoutMs.Value;
+            if (MinPlotBytes.GetValueOrDefault() > 0) options.MinPlotBytes = MinPlotBytes.Value;
+        }
 
         /// <summary>True when this profile can produce a PCL "print" hardcopy in addition to an HP-GL "plot".</summary>
         [JsonIgnore]

@@ -139,7 +139,11 @@ namespace GpibMcp.Instruments
         public CaptureResult CaptureRecordStream(string resource, string preRoll, string command, CaptureOptions options)
         {
             options = options ?? new CaptureOptions();
-            if (string.IsNullOrWhiteSpace(command)) command = "OUTPPLOT";
+            // The dump command belongs to the instrument, so it comes from its capture profile - this layer
+            // knows the record-stream protocol, not any particular analyzer's vocabulary.
+            if (string.IsNullOrWhiteSpace(command))
+                throw new ArgumentException("a record-output dump command is required (the model's capture " +
+                                            "profile must set dumpCommand).", nameof(command));
             int perRecordMs = options.PerReadTimeoutMs > 0 ? Math.Max(options.PerReadTimeoutMs, 2000) : 2000;
 
             lock (_gate)

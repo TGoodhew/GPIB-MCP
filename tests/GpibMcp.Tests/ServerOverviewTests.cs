@@ -104,8 +104,24 @@ namespace GpibMcp.Tests
             string text = new ServerOverview(registry, db).Detailed();
 
             Assert.Contains("SEVERAL instruments at each point", text);
-            Assert.Contains("5351A", text);                            // the three-device worked example
             Assert.Contains("'complete' step", text);                  // SRQ wait inside a loop -> batch complete
+
+            // The three-device worked example, asserted by ROLE not by model: pinning it to a particular
+            // box taught the shape through one bench's instruments, which is the bias this guards against.
+            foreach (string role in new[] { "generator", "counter", "analyzer" })
+                Assert.Contains(role, text);
+        }
+
+        [Fact]
+        public void Detailed_ExamplesSpanTheInstrumentClassesTheDatabaseCovers()
+        {
+            // The catalogue is broadest in oscilloscopes and power supplies, yet every worked example used to
+            // be a spectrum analyzer and a signal generator - the bench, not the database. Keep them spread.
+            var (registry, db) = Build();
+            string text = new ServerOverview(registry, db).Detailed();
+
+            foreach (string kind in new[] { "scope", "supply", "DMM" })
+                Assert.Contains(kind, text);
         }
 
         [Fact]
