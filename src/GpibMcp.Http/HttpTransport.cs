@@ -39,9 +39,23 @@ namespace GpibMcp.Http
             _token = string.IsNullOrWhiteSpace(token) ? null : token.Trim();
         }
 
+        /// <summary>True for a host that only this machine can reach.</summary>
+        private bool BindsLoopbackOnly =>
+            _host == "127.0.0.1" || _host == "localhost" || _host == "::1";
+
         public void Run(IMcpDispatcher dispatcher)
         {
             if (dispatcher == null) throw new ArgumentNullException(nameof(dispatcher));
+
+            // Refuse to serve the bus to a network with no authentication at all (#114). This used to be a
+            // warning, which is not a control: what is behind this endpoint is physical instrument control,
+            // and the remedy is one environment variable. Loopback is still allowed without a token - that is
+            // the local development case - but see the warning below about tunnels.
+            if (!BindsLoopbackOnly && _token == null)
+                throw new InvalidOperationException(
+                    "Refusing to start: the HTTP transport is bound to " + _host + ", which is reachable from " +
+                    "the network, with no bearer token. Anyone who can reach it could drive the instruments " +
+                    "on the bus. Set GPIB_MCP_HTTP_TOKEN, or bind 127.0.0.1 and tunnel the port instead.");
 
             // No outbound sink is attached: a POST here gets exactly one JSON response and there is no
             // server→client stream, so progress notifications have nowhere to go and the dispatcher skips
@@ -52,11 +66,12 @@ namespace GpibMcp.Http
             _listener.Prefixes.Add("http://" + _host + ":" + _port + "/");
             _listener.Start();
 
-            bool loopback = _host == "127.0.0.1" || _host == "localhost" || _host == "::1";
             Log.Info("MCP HTTP transport listening on http://" + _host + ":" + _port + "/mcp" +
                      (_token != null ? " (bearer-token auth)" : ""));
-            if (_token == null && !loopback)
-                Log.Warn("HTTP transport is bound to a non-loopback host with NO token - set GPIB_MCP_HTTP_TOKEN.");
+            if (_token == null)
+                Log.Warn("No bearer token configured. Anyone who can reach this port can drive the " +
+                         "instruments on the bus - set GPIB_MCP_HTTP_TOKEN, and note that a tunnel makes " +
+                         "this port public even though it is bound to loopback.");
 
             while (_listener.IsListening)
             {
@@ -303,9 +318,27 @@ namespace GpibMcp.Http
         private bool IsAuthorized(HttpListenerRequest req)
         {
             string auth = req.Headers["Authorization"];
-            return auth != null &&
-                   auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(auth.Substring("Bearer ".Length).Trim(), _token, StringComparison.Ordinal);
+            if (auth == null || !auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)) return false;
+            return FixedTimeEquals(auth.Substring("Bearer ".Length).Trim(), _token);
+        }
+
+        /// <summary>
+        /// Compares two secrets without returning early on the first difference (#114). An ordinary string
+        /// comparison leaks how much of the token was right through how long it took to say no; over a tunnel
+        /// that is a poor attack, but a comparison that does not leak costs nothing.
+        /// </summary>
+        private static bool FixedTimeEquals(string presented, string expected)
+        {
+            if (presented == null || expected == null) return false;
+
+            byte[] a = Encoding.UTF8.GetBytes(presented);
+            byte[] b = Encoding.UTF8.GetBytes(expected);
+
+            // The lengths themselves are not secret, but keep the loop over a fixed span either way so the
+            // work done does not vary with how much of the value matched.
+            int diff = a.Length ^ b.Length;
+            for (int i = 0; i < a.Length; i++) diff |= a[i] ^ b[i % Math.Max(b.Length, 1)];
+            return diff == 0;
         }
 
         private static bool IsLoopbackOrigin(string origin)

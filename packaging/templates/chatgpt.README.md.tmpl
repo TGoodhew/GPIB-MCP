@@ -23,15 +23,27 @@ Your MCP URL is `https://<public-host>/mcp`.
 3. Connect; ChatGPT lists the `gpib_*` tools.
 
 ## Authentication — read this
-ChatGPT's connector auth is built around **OAuth** (Authorization Code + PKCE, discovered via
-`/.well-known/oauth-protected-resource`). This server's MVP HTTP transport (#68) uses a simpler **static
-bearer token**, which ChatGPT's connector UI does not drive end-to-end. Practical options today:
 
-- **Testing:** run **without** a token (omit it / `Start-GpibMcpHttp.ps1 -Token ""` is not supported, so set
-  `GPIB_MCP_HTTP_TOKEN=` empty and start the exe directly) behind a **private** tunnel you control, and add the
-  connector with no auth.
-- **Production:** OAuth support is a planned enhancement on the same HTTP module; until then, prefer Copilot
-  (which accepts the static bearer via a custom header) or keep the tunnel private.
+**ChatGPT is not supported today, and this is why.** Its connector auth is built around **OAuth**
+(Authorization Code + PKCE, discovered via `/.well-known/oauth-protected-resource`). This server
+authenticates with a **static bearer token**, which the connector UI does not drive end-to-end. That is a
+deliberate decision, not an oversight — see issue #114 for the full reasoning.
+
+The short version: MCP authorization is *optional*, and becoming a real OAuth resource server would mean
+standing up an authorization server, adding a JWT stack, and — the part that actually blocks it — running on
+a **stable public hostname**, because OAuth binds a token to the server's canonical URI and publishes
+metadata beneath it. A tunnel hostname that changes on every restart breaks both. The static token is the
+right size for what this is: one bench, one bus, a tunnel opened deliberately.
+
+**What to do instead:**
+
+- **Use Copilot** (see `packaging/copilot`) — it accepts the static bearer token and works today.
+- **Do not run this without a token on a public tunnel.** Behind this endpoint is physical control of your
+  instruments: anyone who finds the URL can drive them. `Start-GpibMcpHttp.ps1` generates a token for you,
+  and the server refuses to start if you bind it to the network without one.
+- **If you need real identity, put it at the edge** — Cloudflare Access, or a tunnel with its own
+  authentication, in front of the server. That gets you expiry and revocation, which a static token cannot
+  do, without waiting for OAuth support here.
 
 Only connect MCP servers you trust (prompt-injection risk applies to any connector).
 
