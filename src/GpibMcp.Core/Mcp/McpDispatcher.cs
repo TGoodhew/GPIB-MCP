@@ -121,7 +121,7 @@ namespace GpibMcp.Mcp
 
                 CheckDeclaredProtocol(method, context);
 
-                JToken result = HandleRequest(method, prms, context);
+                JToken result = HandleRequest(method, prms, context, id);
                 return new JObject
                 {
                     ["jsonrpc"] = "2.0",
@@ -216,7 +216,7 @@ namespace GpibMcp.Mcp
             return result;
         }
 
-        private JToken HandleRequest(string method, JObject prms, RequestContext context)
+        private JToken HandleRequest(string method, JObject prms, RequestContext context, JToken id)
         {
             switch (method)
             {
@@ -232,6 +232,10 @@ namespace GpibMcp.Mcp
                 // Required from 2026-07-28, and the one method a client may call before anything else (#105).
                 case "server/discover":
                     return BuildDiscoverResult();
+
+                // The long-lived change-notification stream that replaced the HTTP GET endpoint (#111).
+                case "subscriptions/listen":
+                    return OpenAndCloseSubscription(id);
 
                 case "tools/list":
                     return BuildToolsListResult(context);
@@ -333,6 +337,49 @@ namespace GpibMcp.Mcp
             if (!string.IsNullOrEmpty(_instructions)) result["instructions"] = _instructions;
             // The identity goes in _meta here, not a top-level serverInfo - every result gets that already.
             return CacheableResult.ApplyTo(result);
+        }
+
+        /// <summary>
+        /// Answers <c>subscriptions/listen</c> (#111): acknowledge, agreeing to nothing, then close the
+        /// subscription gracefully.
+        ///
+        /// This server has nothing to subscribe to. The tool list is fixed at start-up - which is what
+        /// <c>listChanged: false</c> says - and there are no resources or prompts to change. The
+        /// acknowledgement's <c>notifications</c> field is the subset the server agreed to honour, so ours is
+        /// empty, and a client reading it learns exactly that. Holding a stream open afterwards would promise
+        /// a message that can never come, so the empty result follows immediately: that is the spec's
+        /// graceful closure, and it is the difference between "ended cleanly" and a dropped connection.
+        ///
+        /// The acknowledgement needs an outbound channel. Stdio has one; the HTTP transport does not - a POST
+        /// there gets one JSON response - so an HTTP caller receives the closure alone. Nothing is lost:
+        /// with no notification types agreed, the two messages carry the same information.
+        /// </summary>
+        private JObject OpenAndCloseSubscription(JToken id)
+        {
+            JToken subscriptionId = id != null ? id.DeepClone() : JValue.CreateNull();
+
+            IMcpMessageSink sink = Notifications;
+            if (sink != null)
+            {
+                // MUST be the first message on the subscription - so it goes before the response below.
+                sink.Send(new JObject
+                {
+                    ["jsonrpc"] = "2.0",
+                    ["method"] = "notifications/subscriptions/acknowledged",
+                    ["params"] = new JObject
+                    {
+                        ["_meta"] = new JObject { [RequestContext.SubscriptionIdKey] = subscriptionId.DeepClone() },
+                        // Empty: we agreed to none of the types asked for, because we support none.
+                        ["notifications"] = new JObject()
+                    }
+                });
+            }
+
+            Log.Debug("subscriptions/listen: nothing is subscribable here; acknowledged and closed.");
+            return new JObject
+            {
+                ["_meta"] = new JObject { [RequestContext.SubscriptionIdKey] = subscriptionId }
+            };
         }
 
         /// <summary>

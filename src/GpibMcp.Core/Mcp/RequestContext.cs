@@ -36,6 +36,12 @@ namespace GpibMcp.Mcp
         public const string ServerInfoKey = "io.modelcontextprotocol/serverInfo";
 
         /// <summary>
+        /// Identifies which <c>subscriptions/listen</c> request a message belongs to - its JSON-RPC id. On
+        /// stdio every subscription shares one channel, so this is how a client demultiplexes them.
+        /// </summary>
+        public const string SubscriptionIdKey = "io.modelcontextprotocol/subscriptionId";
+
+        /// <summary>
         /// The revision that dropped the handshake and made <c>resultType</c> required. Behaviour that only
         /// applies from there is gated on the request declaring this revision or later.
         /// </summary>
