@@ -437,6 +437,59 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Capture_Outpplot_WithoutADumpCommand_SaysSoRatherThanAssumingOne()
+        {
+            // Which query streams the records is the instrument's business: the code used to fall back to
+            // the 8720/8753's OUTPPLOT, quietly sending one analyzer family's vocabulary to anything else.
+            var profile = WithOutpplotProfile();
+            profile.Capture.DumpCommand = null;
+            var db = InstrumentDatabase.FromDefinitions(new[] { profile });
+            var visa = new FakeInstrumentManager();
+
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::16::INSTR", ["model"] = "8720C" });
+
+            Assert.True(output.IsError);
+            Assert.Contains("no dumpCommand", output.AsText());
+            Assert.Empty(visa.RecordCaptures);   // nothing was sent to the bus on a guess
+        }
+
+        [Fact]
+        public void CaptureProfile_TimingOverridesTheDefaultsItSets_AndLeavesTheRest()
+        {
+            // The defaults were measured on one analyzer; a slower instrument tunes them in its own profile
+            // rather than having the server retuned around whatever sits on the bench.
+            var defaults = new CaptureOptions();
+            var options = new CaptureOptions();
+            new CaptureProfile { PerReadTimeoutMs = 2500, MinPlotBytes = 64 }.ApplyTimingTo(options);
+
+            Assert.Equal(2500, options.PerReadTimeoutMs);
+            Assert.Equal(64, options.MinPlotBytes);
+            Assert.Equal(defaults.InactivityTimeoutMs, options.InactivityTimeoutMs);   // untouched
+
+            var untouched = new CaptureOptions();
+            new CaptureProfile().ApplyTimingTo(untouched);
+            Assert.Equal(defaults.PerReadTimeoutMs, untouched.PerReadTimeoutMs);
+            Assert.Equal(defaults.InactivityTimeoutMs, untouched.InactivityTimeoutMs);
+            Assert.Equal(defaults.MinPlotBytes, untouched.MinPlotBytes);
+        }
+
+        [Fact]
+        public void Capture_HonoursTheProfilesMinPlotBytes()
+        {
+            // A model whose hardcopy is legitimately tiny would fail the shared floor; its profile lowers it.
+            var def = WithCaptureProfile();
+            def.Capture.MinPlotBytes = 4;
+            var db = InstrumentDatabase.FromDefinitions(new[] { def });
+            var visa = new FakeInstrumentManager { CaptureHpgl = "IN;SP1;PU0,0;PD10,10;SP0;" };
+
+            var output = Tool(db, AssignmentStore.InMemory(), visa)
+                .Invoke(new JObject { ["resource"] = "GPIB0::18::INSTR", ["model"] = def.Model });
+
+            Assert.False(output.IsError);   // 25 bytes: under the 128-byte default, over this profile's floor
+        }
+
+        [Fact]
         public void Capture_Outpplot_CorruptCoordinate_RetriesThenNotifiesUser()
         {
             // A transient corrupted coordinate trips re-capture up to 3x; when every attempt glitches, the

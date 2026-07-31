@@ -85,14 +85,20 @@ namespace GpibMcp.Tools
             if (string.Equals(profile.Method, "scpi_block", StringComparison.OrdinalIgnoreCase))
                 return CaptureScpiBlock(args, ctx, def, profile, visa);
 
-            // OUTPPLOT record-loop method (8720/8753 VNAs): HP-GL streamed as many small records, looped
-            // and assembled, then rendered as a normal plot. No print/format choice (issue #55).
+            // Record-output method (e.g. OUTPPLOT on the 8720/8753 VNAs): HP-GL streamed as many small
+            // records, looped and assembled, then rendered as a normal plot. No print/format choice (#55).
             bool isOutpplot = string.Equals(profile.Method, "outpplot", StringComparison.OrdinalIgnoreCase);
 
             if (!isOutpplot &&
                 (!string.Equals(profile.Method, "hpgl", StringComparison.OrdinalIgnoreCase) ||
                  string.IsNullOrEmpty(profile.PlotCommand)))
                 return Error("Model '" + def.Model + "' has no HP-GL capture profile.");
+
+            // Which query streams the records is the instrument's business, not ours - it must be declared,
+            // the same way the hpgl method declares its plotCommand.
+            if (isOutpplot && string.IsNullOrEmpty(profile.DumpCommand))
+                return Error("Model '" + def.Model + "' uses the record-output capture method but its profile " +
+                             "has no dumpCommand (the query that streams the plot records, e.g. 'OUTPPLOT').");
 
             // Format selection: plot (HP-GL, default) or print (PCL). Print needs a profile print command.
             string format = (Str(args, "format", null) ?? "").Trim().ToLowerInvariant();
@@ -109,6 +115,7 @@ namespace GpibMcp.Tools
                 OverallTimeoutMs = Int(args, "timeout_ms", 30000),
                 Mode = isPrint ? CaptureMode.PrinterStream : CaptureMode.PlotterEmulation
             };
+            profile.ApplyTimingTo(captureOptions);
 
             // A transient corrupted coordinate in the HP-GL read (a GPIB digit run-on) would otherwise wreck
             // the rendered plot. Detect it and just re-capture, up to maxAttempts; only surface it to the
@@ -154,7 +161,7 @@ namespace GpibMcp.Tools
             string kind = isPrint ? "PCL" : "HP-GL";
             ctx.Progress(60, 100, "Read " + capture.ByteCount + " bytes of " + kind + " in " + capture.ElapsedMs + " ms.");
 
-            if (capture.ByteCount < new CaptureOptions().MinPlotBytes)
+            if (capture.ByteCount < captureOptions.MinPlotBytes)
                 return Error("No complete " + (isPrint ? "print" : "plot") + " captured from " + resource +
                              " (" + capture.ByteCount + " bytes, " + capture.Completion + "). Check the " +
                              "address/model and that the instrument supports " + (isPrint ? "printing" : "plotting") + ".");
