@@ -104,9 +104,6 @@ namespace GpibMcp.Mcp
             // where the client says what revision it speaks, what it supports and who it is; a 2025-06-18
             // client sends none of it and the values it gave at initialize still stand.
             var context = new RequestContext(prms != null ? prms["_meta"] as JObject : null);
-            if (context.ProtocolVersion != null && !IsSupportedProtocolVersion(context.ProtocolVersion))
-                Log.Warn("Request '" + method + "' declares MCP protocol '" + context.ProtocolVersion +
-                         "', which this server does not implement; answering as " + ProtocolVersion + ".");
             if (context.ClientName != null)
                 Log.Debug("Request '" + method + "' from client '" + context.ClientName + "'.");
             if (context.LogLevel != null)
@@ -121,6 +118,8 @@ namespace GpibMcp.Mcp
                     HandleNotification(method, prms);
                     return null;
                 }
+
+                CheckDeclaredProtocol(method, context);
 
                 JToken result = HandleRequest(method, prms, context);
                 return new JObject
@@ -141,6 +140,41 @@ namespace GpibMcp.Mcp
                 Log.Error("Unhandled error in '" + method + "'", ex);
                 return ErrorEnvelope(id, -32603, "Internal error: " + ex.Message, null);
             }
+        }
+
+        /// <summary>
+        /// Checks the revision a request declares (#109). A dated revision we do not fully implement is
+        /// still served, best-effort, and logged: we already answer much of 2026-07-28's shape
+        /// (<c>resultType</c>, per-result <c>serverInfo</c>, <c>server/discover</c>, cache hints), and
+        /// refusing it outright would put those features out of reach of the only clients that want them.
+        /// Something that is not a revision at all we cannot serve on any reading, so it gets the
+        /// specification's <c>UnsupportedProtocolVersionError</c> with the list we do speak.
+        ///
+        /// When 2026-07-28 is either finished or ruled out, this is where the best-effort branch turns into
+        /// a refusal - the last step of the epic, not a step inside it.
+        /// </summary>
+        private static void CheckDeclaredProtocol(string method, RequestContext context)
+        {
+            string declared = context.ProtocolVersion;
+            if (declared == null || IsSupportedProtocolVersion(declared)) return;
+
+            if (!LooksLikeRevision(declared))
+                throw McpError.UnsupportedProtocolVersion(declared, SupportedProtocolVersions);
+
+            Log.Warn("Request '" + method + "' declares MCP protocol '" + declared +
+                     "', which this server does not fully implement; answering as " + ProtocolVersion + ".");
+        }
+
+        /// <summary>True for a revision name shaped like the dated ones the protocol uses (YYYY-MM-DD).</summary>
+        private static bool LooksLikeRevision(string version)
+        {
+            if (version == null || version.Length != 10) return false;
+            for (int i = 0; i < version.Length; i++)
+            {
+                bool separator = i == 4 || i == 7;
+                if (separator ? version[i] != '-' : !char.IsDigit(version[i])) return false;
+            }
+            return true;
         }
 
         private static JObject ErrorEnvelope(JToken id, int code, string message, JToken data)
