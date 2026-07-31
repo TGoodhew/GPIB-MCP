@@ -91,7 +91,21 @@ namespace GpibMcp.Mcp
         public bool DeclaresRevisionAtLeast(string revision)
         {
             string declared = ProtocolVersion;
-            return declared != null && string.CompareOrdinal(declared, revision) >= 0;
+            // The shape check is not pedantry: ordinal comparison would rank "latest" above every dated
+            // revision, so a request declaring nonsense would be treated as newer than anything real.
+            return IsRevisionName(declared) && string.CompareOrdinal(declared, revision) >= 0;
+        }
+
+        /// <summary>True for a revision name shaped like the dated ones the protocol uses (YYYY-MM-DD).</summary>
+        public static bool IsRevisionName(string version)
+        {
+            if (version == null || version.Length != 10) return false;
+            for (int i = 0; i < version.Length; i++)
+            {
+                bool separator = i == 4 || i == 7;
+                if (separator ? version[i] != '-' : !char.IsDigit(version[i])) return false;
+            }
+            return true;
         }
 
         /// <summary>True when this request's capabilities declare <paramref name="extension"/>.</summary>

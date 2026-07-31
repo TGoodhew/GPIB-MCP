@@ -158,23 +158,11 @@ namespace GpibMcp.Mcp
             string declared = context.ProtocolVersion;
             if (declared == null || IsSupportedProtocolVersion(declared)) return;
 
-            if (!LooksLikeRevision(declared))
+            if (!RequestContext.IsRevisionName(declared))
                 throw McpError.UnsupportedProtocolVersion(declared, SupportedProtocolVersions);
 
             Log.Warn("Request '" + method + "' declares MCP protocol '" + declared +
                      "', which this server does not fully implement; answering as " + ProtocolVersion + ".");
-        }
-
-        /// <summary>True for a revision name shaped like the dated ones the protocol uses (YYYY-MM-DD).</summary>
-        private static bool LooksLikeRevision(string version)
-        {
-            if (version == null || version.Length != 10) return false;
-            for (int i = 0; i < version.Length; i++)
-            {
-                bool separator = i == 4 || i == 7;
-                if (separator ? version[i] != '-' : !char.IsDigit(version[i])) return false;
-            }
-            return true;
         }
 
         private static JObject ErrorEnvelope(JToken id, int code, string message, JToken data)

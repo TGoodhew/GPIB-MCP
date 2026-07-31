@@ -880,6 +880,12 @@ disagreement is rejected with `400` and `HeaderMismatch` (-32020). Enforcement i
 the 2026-07-28 work — a request declaring that revision **must** carry them; a 2025-06-18 client, which is
 every HTTP client today, never sent them and isn't asked to start. A header that *is* present must be true
 either way. `Mcp-Name` is decoded from the `=?base64?…?=` sentinel before comparison.
+
+For a request on that revision, protocol errors also map onto **HTTP status codes**: an unknown method is
+`404` and an unsupported protocol version is `400` — with the JSON-RPC error still in the body, which is what
+distinguishes a modern server saying "I don't have that method" from a legacy server that doesn't host this
+endpoint at all. A tool that *fails* is still `200`: the request was served. Older clients keep the
+`200`-with-a-JSON-RPC-error shape they were written against.
 Security: it binds loopback and rejects non-loopback `Origin` headers (DNS-rebinding guard). Since the server
 must run next to the GPIB hardware, reaching it from a cloud assistant means **tunnelling** it (dev tunnel /
 ngrok) — set `GPIB_MCP_HTTP_TOKEN` (and ideally your tunnel's own auth) when you do. Requests are serialized,

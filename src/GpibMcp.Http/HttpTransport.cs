@@ -149,7 +149,10 @@ namespace GpibMcp.Http
             var messages = parsed is JArray arr ? arr.OfType<JObject>().ToList()
                                                 : new System.Collections.Generic.List<JObject> { parsed as JObject };
 
-            if (!isBatch && messages.Count == 1 && messages[0] != null)
+            bool single = !isBatch && messages.Count == 1 && messages[0] != null;
+            bool statusCodes = single && DeclaresStatelessRevision(messages[0]);
+
+            if (single)
             {
                 JObject headerError = ValidateRequestMetadata(req, messages[0]);
                 if (headerError != null)
@@ -175,7 +178,39 @@ namespace GpibMcp.Http
             }
 
             JToken payload = parsed is JArray ? (JToken)responses : responses[0];
-            Respond(res, 200, "application/json", payload.ToString(Formatting.None));
+            int status = statusCodes ? StatusForResponse((JObject)responses[0]) : 200;
+            Respond(res, status, "application/json", payload.ToString(Formatting.None));
+        }
+
+        /// <summary>
+        /// True when the request declares the revision whose transport rules map protocol errors onto HTTP
+        /// status codes. Older clients keep the 200-with-a-JSON-RPC-error shape they were written against.
+        /// </summary>
+        private static bool DeclaresStatelessRevision(JObject message)
+        {
+            var prms = message["params"] as JObject;
+            return new RequestContext(prms != null ? prms["_meta"] as JObject : null)
+                .DeclaresRevisionAtLeast(RequestContext.StatelessRevision);
+        }
+
+        /// <summary>
+        /// The HTTP status for a JSON-RPC response, per the 2026-07-28 transport rules (#110). An unknown
+        /// method is <c>404</c> and an unsupported protocol version is <c>400</c> - with the JSON-RPC error
+        /// still in the body, which is exactly what lets a client tell a modern server saying "I do not have
+        /// that method" from a legacy server that does not host this endpoint at all. Everything else,
+        /// including a tool that failed, is a perfectly good <c>200</c>: the request was served.
+        /// </summary>
+        private static int StatusForResponse(JObject response)
+        {
+            var error = response != null ? response["error"] as JObject : null;
+            if (error == null) return 200;
+
+            int code = (int?)error["code"] ?? 0;
+            if (code == -32601) return 404;
+            if (code == McpError.UnsupportedProtocolVersionCode ||
+                code == McpError.HeaderMismatchCode ||
+                code == McpError.MissingRequiredClientCapabilityCode) return 400;
+            return 200;
         }
 
         /// <summary>
