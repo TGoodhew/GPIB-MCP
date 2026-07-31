@@ -901,6 +901,12 @@ every request carry its own context in `_meta`:
 Every **result** carries `_meta.io.modelcontextprotocol/serverInfo` naming the server that produced it —
 without a handshake a client would otherwise never learn it. A tool call needs no `initialize` first.
 
+**`server/discover`** is implemented (2026-07-28 makes it a MUST) and answers without a handshake: the
+protocol versions the server actually speaks, its capabilities, its identity, and the same `instructions`
+`initialize` returns — one request instead of probing. On stdio it doubles as the backward-compatibility
+probe, so it is served whatever revision the caller is on. Implementing it is *not* a claim to 2026-07-28:
+`supportedVersions` lists only what is implemented, and a revision joins that list when the code does.
+
 A request that declares **2026-07-28 or later** also gets the `resultType` that revision requires
 (`"complete"` on an ordinary result; a task handle stays `"task"`). Older clients don't: they are told to
 read an absent field as `"complete"`, and may schema-validate strictly, so adding it would be risk without
