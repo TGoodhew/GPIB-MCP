@@ -185,6 +185,89 @@ namespace GpibMcp.Tests
             }
         }
 
+        // ---------------------------------------------------------------- resultType (#107)
+
+        [Fact]
+        public void ResultType_IsSetForARequestOnTheRevisionThatRequiresIt()
+        {
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
+            {
+                foreach (var request in new[]
+                {
+                    Request("ping", new JObject { ["_meta"] = Meta(RequestContext.StatelessRevision) }),
+                    Request("tools/list", new JObject { ["_meta"] = Meta(RequestContext.StatelessRevision) }),
+                    Request("tools/call", new JObject
+                    {
+                        ["name"] = "echo", ["arguments"] = new JObject(),
+                        ["_meta"] = Meta(RequestContext.StatelessRevision)
+                    })
+                })
+                {
+                    Assert.Equal("complete", (string)dispatcher.Dispatch(request)["result"]["resultType"]);
+                }
+            }
+        }
+
+        [Fact]
+        public void ResultType_IsLeftOffForAClientOnAnOlderRevision()
+        {
+            // Such a client is told to read an absent field as "complete", and may validate strictly against
+            // a schema that has no field for it - so adding it would be risk without meaning.
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
+            {
+                Assert.Null(dispatcher.Dispatch(Request("tools/list"))["result"]["resultType"]);
+                Assert.Null(dispatcher.Dispatch(Request("tools/list",
+                    new JObject { ["_meta"] = Meta("2025-06-18") }))["result"]["resultType"]);
+            }
+        }
+
+        [Fact]
+        public void ResultType_AppliesToARevisionNewerThanTheOneWeKnowAbout()
+        {
+            // Revisions are dated names, so a later one inherits the newer behaviour rather than the older.
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
+            {
+                Assert.Equal("complete", (string)dispatcher.Dispatch(Request("tools/list",
+                    new JObject { ["_meta"] = Meta("2027-01-01") }))["result"]["resultType"]);
+            }
+        }
+
+        [Fact]
+        public void ResultType_NeverOverwritesATaskHandle()
+        {
+            // A CreateTaskResult is "task". Stamping "complete" over it would tell the client the work had
+            // finished when it has not even started.
+            var meta = Meta(RequestContext.StatelessRevision,
+                extensions: new JObject { [McpDispatcher.TasksExtension] = new JObject() });
+
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(
+                new McpTool("slow", "long-running", null, (args, ctx) => ToolOutput.Text("done")))))
+            {
+                JObject result = (JObject)dispatcher.Dispatch(Request("tools/call", new JObject
+                {
+                    ["name"] = "slow", ["arguments"] = new JObject(), ["_meta"] = meta
+                }))["result"];
+
+                Assert.Equal("task", (string)result["resultType"]);
+
+                // The poll itself completed, whatever the task's own state; the nested tool result carries
+                // the shape the request that created it asked for.
+                string taskId = (string)result["taskId"];
+                JObject polled = null;
+                for (int attempt = 0; attempt < 200; attempt++)
+                {
+                    polled = (JObject)dispatcher.Dispatch(TaskGet(taskId))["result"];
+                    if ((string)polled["status"] != "working") break;
+                    System.Threading.Thread.Sleep(15);
+                }
+                Assert.Equal("complete", (string)polled["resultType"]);
+                Assert.Equal("complete", (string)polled["result"]["resultType"]);
+            }
+        }
+
+        private static JObject TaskGet(string taskId) =>
+            Request("tasks/get", new JObject { ["taskId"] = taskId }, 5);
+
         // ---------------------------------------------------------------- logging deprecation
 
         [Fact]
