@@ -940,6 +940,10 @@ audited unit tokens), then the manuals, then whatever the client can do on its o
 command the database lacks, the result says to offer `instrument_db_save` — so the catalogue grows from your
 own documents, and the next lookup is instant.
 
+In **Claude Desktop** this is an extension setting rather than an environment variable: the `.mcpb` bundle
+declares *Instrument manual folder*, and Desktop asks for it at install (Settings → Extensions). Leave it
+empty and the server logs one warning and doesn't register the tool — the other tools are unaffected.
+
 | Variable | Purpose |
 |---|---|
 | `GPIB_MCP_MANUALS` | folder of manuals (searched recursively). Unset = the tool isn't registered at all |
