@@ -26,6 +26,11 @@ package differs only in how the client reaches the server:
   CLI, which validates the manifest; falls back to a plain zip). `Generate-Packages.ps1` calls it and
   attaches the `.mcpb` to the release. End users just open the `.mcpb` in Claude Desktop → Extensions.
 
+  The manifest declares one **`user_config`** setting — *Instrument manual folder* (`directory`, optional) —
+  substituted into `GPIB_MCP_MANUALS` for the server process, so the [manual library](../README.md#your-own-manual-library)
+  is configured in the Extensions UI rather than via a machine-wide environment variable. Left empty, the
+  server logs one warning and doesn't register `manual_search`; the other 29 tools are unaffected.
+
   Why an installer rather than a copy-paste config: VS Code and Cursor do **not** expand `${env:…}` in an
   MCP `command`, so a portable hand-written path isn't possible across clients — having the installer write
   the real per-user path is the only reliable cross-client approach. (VS Code also accepts the predefined

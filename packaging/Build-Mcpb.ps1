@@ -44,13 +44,32 @@ $manifest = [ordered]@{
     repository        = [ordered]@{ type = "git"; url = "https://github.com/TGoodhew/GPIB-MCP" }
     license          = "MIT"
     keywords         = @("gpib", "visa", "scpi", "ieee-488", "ni-visa", "instrument", "test-and-measurement")
+    # Settings Claude Desktop prompts for at install time and substitutes into env below (#120). A machine
+    # -wide environment variable would work too, but this makes the manuals folder a property of the
+    # extension - visible, editable in the UI, and gone when the extension is removed.
+    user_config      = [ordered]@{
+        manuals_folder = [ordered]@{
+            type        = "directory"
+            title       = "Instrument manual folder"
+            description = "Optional. A folder of instrument manuals (PDF, or text) to search when the " +
+                          "built-in command database does not cover a command. PDFs need 'pdftotext' " +
+                          "(Poppler/xpdf) on PATH, or an extracted .txt beside each file. Leave empty to " +
+                          "disable manual lookup."
+            required    = $false
+            multiple    = $false
+        }
+    }
     server           = [ordered]@{
         type        = "binary"
         entry_point = "GpibMcp.exe"
         mcp_config  = [ordered]@{
             command = "`${__dirname}/GpibMcp.exe"   # ${__dirname} = the installed extension dir (literal in the manifest)
             args    = @()
-            env     = [ordered]@{}
+            env     = [ordered]@{
+                # Left unset by the user this arrives empty (or unsubstituted); either way the server treats
+                # it as "no library configured", warns once on stderr, and simply does not register the tool.
+                GPIB_MCP_MANUALS = "`${user_config.manuals_folder}"
+            }
         }
     }
     compatibility    = [ordered]@{
@@ -67,6 +86,7 @@ $manifest = [ordered]@{
         [ordered]@{ name = "instrument_capture_screen"; description = "Capture the instrument screen (HP-GL plot or PCL print) as an image" }
         [ordered]@{ name = "gpib_batch";                description = "Run a whole measurement sweep in one call" }
         [ordered]@{ name = "instrument_wait_complete";  description = "Wait for an operation to truly finish (SRQ)" }
+        [ordered]@{ name = "manual_search";             description = "Search your own instrument manuals and quote the passage (needs the folder configured)" }
     )
 }
 
