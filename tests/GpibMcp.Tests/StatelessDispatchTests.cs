@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GpibMcp.Mcp;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -171,17 +172,31 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void AnUnsupportedPerRequestProtocolVersion_IsAnsweredRatherThanRefused()
+        public void ARequestOnTheNewestRevisionIsServed()
         {
-            // #104 governs what we claim; here the point is only that an unknown revision does not break
-            // dispatch. Refusing it outright waits on the error-code allocation policy (#109).
             using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
             {
                 JObject response = dispatcher.Dispatch(Request("tools/list",
-                    new JObject { ["_meta"] = Meta(protocolVersion: "2026-07-28") }));
+                    new JObject { ["_meta"] = Meta(RequestContext.StatelessRevision) }));
 
                 Assert.Null(response["error"]);
                 Assert.NotNull(response["result"]["tools"]);
+            }
+        }
+
+        [Fact]
+        public void ARealRevisionWeHaveNotImplementedIsRefusedWithTheList()
+        {
+            // 2025-11-25 exists and we have not reviewed it. Serving it best-effort would be the dishonesty
+            // the supported list exists to prevent; the client reads the list and picks one we do speak.
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
+            {
+                JObject response = dispatcher.Dispatch(Request("tools/list",
+                    new JObject { ["_meta"] = Meta("2025-11-25") }));
+
+                Assert.Equal(McpError.UnsupportedProtocolVersionCode, (int)response["error"]["code"]);
+                Assert.Contains(McpDispatcher.ProtocolVersion,
+                    ((JArray)response["error"]["data"]["supported"]).Select(v => (string)v));
             }
         }
 
@@ -233,13 +248,61 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void ResultType_AppliesToARevisionNewerThanTheOneWeKnowAbout()
+        public void AFutureRevisionWouldInheritTheNewerBehaviour_ButIsRefusedUntilImplemented()
         {
-            // Revisions are dated names, so a later one inherits the newer behaviour rather than the older.
+            // Revisions are dated names, so the comparison puts a later one on the newer side of the line.
+            Assert.True(new RequestContext(Meta("2027-01-01"))
+                .DeclaresRevisionAtLeast(RequestContext.StatelessRevision));
+
+            // Which does not mean we serve it: it is not in the supported list, so it is refused with that
+            // list attached. The comparison decides shape; the list decides whether we answer at all (#115).
             using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
             {
-                Assert.Equal("complete", (string)dispatcher.Dispatch(Request("tools/list",
-                    new JObject { ["_meta"] = Meta("2027-01-01") }))["result"]["resultType"]);
+                JObject response = dispatcher.Dispatch(Request("tools/list",
+                    new JObject { ["_meta"] = Meta("2027-01-01") }));
+
+                Assert.Equal(McpError.UnsupportedProtocolVersionCode, (int)response["error"]["code"]);
+            }
+        }
+
+        [Fact]
+        public void TheHandshakeNegotiatedRevisionShapesLaterRequestsThatNameNone()
+        {
+            // A client that negotiated 2026-07-28 through initialize and then got older-shaped results back
+            // would have been misled by us, not by the protocol.
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
+            {
+                dispatcher.Dispatch(new JObject
+                {
+                    ["jsonrpc"] = "2.0", ["id"] = 1, ["method"] = "initialize",
+                    ["params"] = new JObject
+                    {
+                        ["protocolVersion"] = RequestContext.StatelessRevision,
+                        ["capabilities"] = new JObject()
+                    }
+                });
+
+                // No _meta on this one: the handshake is the only thing that says which revision we are on.
+                JObject result = (JObject)dispatcher.Dispatch(Request("tools/list"))["result"];
+                Assert.Equal("complete", (string)result["resultType"]);
+                Assert.Equal(CacheableResult.DefaultTtlMs, (int)result["ttlMs"]);
+            }
+        }
+
+        [Fact]
+        public void AHandshakeOnTheOlderRevisionKeepsTheOlderShape()
+        {
+            using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
+            {
+                dispatcher.Dispatch(Request("initialize", new JObject
+                {
+                    ["protocolVersion"] = "2025-06-18",
+                    ["capabilities"] = new JObject()
+                }));
+
+                JObject result = (JObject)dispatcher.Dispatch(Request("tools/list"))["result"];
+                Assert.Null(result["resultType"]);
+                Assert.Null(result["ttlMs"]);
             }
         }
 

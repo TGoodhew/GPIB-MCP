@@ -21,7 +21,8 @@ namespace GpibMcp
         private static int Main(string[] args)
         {
             Log.Info("starting " + McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion +
-                     " (MCP " + McpDispatcher.ProtocolVersion + ", log level " + Log.MinimumLevel + ")");
+                     " (MCP " + string.Join(", ", McpDispatcher.SupportedProtocolVersions) +
+                     ", log level " + Log.MinimumLevel + ")");
 
             InstrumentManager visa = null;
             try

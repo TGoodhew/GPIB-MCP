@@ -96,11 +96,16 @@ namespace GpibMcp.Tests
             }
         }
 
-        [Fact]
-        public void ADatedRevisionWeDoNotFullyImplementIsStillServed()
+        [Theory]
+        [InlineData("2026-07-28", false)]   // implemented, so served
+        [InlineData("2025-06-18", false)]
+        [InlineData("2025-11-25", true)]    // a real revision we have not reviewed
+        [InlineData("9999-01-01", true)]    // dated, but nothing we could implement
+        [InlineData("latest", true)]        // not a revision at all
+        public void ARequestIsServedOrRefusedByTheSupportedList(string declared, bool refused)
         {
-            // We already answer much of 2026-07-28's shape; refusing it would put those very features out of
-            // reach of the only clients that ask for them. The refusal comes when the epic finishes.
+            // One rule now: a revision is either implemented and served properly, or it is not and the client
+            // is told so with the list. Best-effort had a job while 2026-07-28 was half-built; it has none now.
             using (var dispatcher = new McpDispatcher(new ToolRegistry().Add(Echo())))
             {
                 JObject response = dispatcher.Dispatch(new JObject
@@ -108,15 +113,14 @@ namespace GpibMcp.Tests
                     ["jsonrpc"] = "2.0", ["id"] = 2, ["method"] = "tools/list",
                     ["params"] = new JObject
                     {
-                        ["_meta"] = new JObject
-                        {
-                            [RequestContext.ProtocolVersionKey] = RequestContext.StatelessRevision
-                        }
+                        ["_meta"] = new JObject { [RequestContext.ProtocolVersionKey] = declared }
                     }
                 });
 
-                Assert.Null(response["error"]);
-                Assert.NotNull(response["result"]["tools"]);
+                if (refused)
+                    Assert.Equal(McpError.UnsupportedProtocolVersionCode, (int)response["error"]["code"]);
+                else
+                    Assert.NotNull(response["result"]["tools"]);
             }
         }
 

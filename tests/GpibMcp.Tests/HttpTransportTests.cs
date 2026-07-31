@@ -286,9 +286,12 @@ namespace GpibMcp.Tests
                 var json = JObject.Parse(await resp.Content.ReadAsStringAsync());
                 Assert.Equal(McpError.UnsupportedProtocolVersionCode, (int)json["error"]["code"]);
                 Assert.NotEmpty((JArray)json["error"]["data"]["supported"]);
-                // A garbage version must not read as "newer than every dated revision" and so demand the
-                // 2026-07-28 headers; it is refused for what it is.
-                Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+
+                // 400 regardless of what was declared: only a request that named a version can be refused
+                // for it, so its client is version-aware by definition and the status is the signal that
+                // tells it to read the list and pick again. A garbage version is still refused for what it
+                // is - it must not read as "newer than every dated revision" and demand the new headers.
+                Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
             }
         }
 

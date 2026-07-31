@@ -88,13 +88,15 @@ namespace GpibMcp.Mcp
         /// A request that declares nothing is treated as older - the safe direction, since an old client may
         /// validate strictly against a schema that has no field for what a newer one expects.
         /// </summary>
-        public bool DeclaresRevisionAtLeast(string revision)
-        {
-            string declared = ProtocolVersion;
-            // The shape check is not pedantry: ordinal comparison would rank "latest" above every dated
-            // revision, so a request declaring nonsense would be treated as newer than anything real.
-            return IsRevisionName(declared) && string.CompareOrdinal(declared, revision) >= 0;
-        }
+        public bool DeclaresRevisionAtLeast(string revision) => RevisionAtLeast(ProtocolVersion, revision);
+
+        /// <summary>
+        /// True when <paramref name="declared"/> is a revision name at or after <paramref name="revision"/>.
+        /// The shape check is not pedantry: ordinal comparison would rank "latest" above every dated
+        /// revision, so nonsense would otherwise be treated as newer than anything real.
+        /// </summary>
+        public static bool RevisionAtLeast(string declared, string revision) =>
+            IsRevisionName(declared) && string.CompareOrdinal(declared, revision) >= 0;
 
         /// <summary>True for a revision name shaped like the dated ones the protocol uses (YYYY-MM-DD).</summary>
         public static bool IsRevisionName(string version)

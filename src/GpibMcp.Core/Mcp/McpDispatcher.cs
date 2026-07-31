@@ -21,21 +21,37 @@ namespace GpibMcp.Mcp
     /// </summary>
     public sealed class McpDispatcher : IMcpDispatcher, IDisposable
     {
-        /// <summary>MCP revision this server implements, and the one it answers with by default.</summary>
+        /// <summary>
+        /// The revision answered by default at the legacy <c>initialize</c> handshake when the client names
+        /// none. Deliberately not the newest: a client using <c>initialize</c> at all predates 2026-07-28,
+        /// which removed the handshake, so the last revision that had one is the safe answer.
+        /// </summary>
         public const string ProtocolVersion = "2025-06-18";
+
+        /// <summary>The newest revision this server implements.</summary>
+        public const string LatestProtocolVersion = "2026-07-28";
 
         /// <summary>
         /// Revisions this server can actually speak, newest first. We negotiate against this set rather than
-        /// echoing whatever the client asks for: from 2026-07-28 the wire format changes substantially
-        /// (stateless dispatch, a required <c>resultType</c> on every result, no sessions), so agreeing to a
-        /// revision we do not implement would produce responses the client is entitled to reject (#104).
+        /// echoing whatever the client asks for: agreeing to a revision we do not implement would produce
+        /// responses the client is entitled to reject (#104). A revision joins the set when the code
+        /// implements it, and a request naming anything else is refused with the list.
         ///
-        /// The older entries are here because our surface is tools-only - no roots, sampling, logging or
-        /// elicitation - and that subset is unchanged across these revisions, so a client on one of them gets
-        /// exactly the protocol it expects. New revisions join the set only once the code implements them.
+        /// 2026-07-28 is here as of the #115 epic: stateless dispatch, <c>server/discover</c>,
+        /// <c>resultType</c>, cacheable <c>tools/list</c>, the error-code policy, the transport metadata
+        /// headers and <c>subscriptions/listen</c> are all implemented. MRTR is not - and does not need to
+        /// be: every server obligation in it is conditional on choosing to return an
+        /// <c>InputRequiredResult</c>, and this server initiates no sampling, elicitation or roots requests,
+        /// so it never does.
+        ///
+        /// The older entries remain because our surface is tools-only, and that subset is unchanged across
+        /// them, so a client on one gets exactly the protocol it expects. 2025-11-25 is absent on purpose:
+        /// its changes have not been reviewed here, and claiming a revision we have not read would be the
+        /// exact dishonesty this list exists to prevent.
         /// </summary>
         public static readonly string[] SupportedProtocolVersions =
         {
+            LatestProtocolVersion,
             "2025-06-18",
             "2025-03-26",
             "2024-11-05"
@@ -69,6 +85,12 @@ namespace GpibMcp.Mcp
 
         /// <summary>Set at initialize when the client declares the tasks extension (the 2025-06-18 route).</summary>
         private volatile bool _clientDeclaredTasks;
+
+        /// <summary>
+        /// The revision agreed at the legacy <c>initialize</c> handshake, for requests that name none of
+        /// their own. A 2026-07-28 client carries its revision on every request and never reads this.
+        /// </summary>
+        private volatile string _negotiatedProtocol;
 
         public McpDispatcher(ToolRegistry tools, string instructions = null, BatchLoopNudge loopNudge = null)
         {
@@ -127,7 +149,7 @@ namespace GpibMcp.Mcp
                     ["jsonrpc"] = "2.0",
                     ["id"] = id,
                     ["result"] = WithResultType(WithServerInfo(result as JObject ?? new JObject()),
-                                                context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision))
+                                                WantsStatelessShape(context))
                 };
             }
             catch (McpError mcp)
@@ -143,26 +165,39 @@ namespace GpibMcp.Mcp
         }
 
         /// <summary>
-        /// Checks the revision a request declares (#109). A dated revision we do not fully implement is
-        /// still served, best-effort, and logged: we already answer much of 2026-07-28's shape
-        /// (<c>resultType</c>, per-result <c>serverInfo</c>, <c>server/discover</c>, cache hints), and
-        /// refusing it outright would put those features out of reach of the only clients that want them.
-        /// Something that is not a revision at all we cannot serve on any reading, so it gets the
-        /// specification's <c>UnsupportedProtocolVersionError</c> with the list we do speak.
+        /// Checks the revision a request declares. Anything not in <see cref="SupportedProtocolVersions"/> is
+        /// refused with the specification's <c>UnsupportedProtocolVersionError</c>, carrying the list we do
+        /// speak so the client can pick one and retry rather than guess twice.
         ///
-        /// When 2026-07-28 is either finished or ruled out, this is where the best-effort branch turns into
-        /// a refusal - the last step of the epic, not a step inside it.
+        /// This used to serve an unimplemented-but-dated revision best-effort, because 2026-07-28 was not yet
+        /// in the list and refusing would have put its own features out of reach. Now that it is in the list,
+        /// best-effort has nothing left to do: a revision is either implemented and served properly, or it is
+        /// not and the client is told so. That is the version negotiation working as designed (#115).
         /// </summary>
         private static void CheckDeclaredProtocol(string method, RequestContext context)
         {
             string declared = context.ProtocolVersion;
             if (declared == null || IsSupportedProtocolVersion(declared)) return;
 
-            if (!RequestContext.IsRevisionName(declared))
-                throw McpError.UnsupportedProtocolVersion(declared, SupportedProtocolVersions);
-
             Log.Warn("Request '" + method + "' declares MCP protocol '" + declared +
-                     "', which this server does not fully implement; answering as " + ProtocolVersion + ".");
+                     "', which this server does not implement; refusing with the supported list.");
+            throw McpError.UnsupportedProtocolVersion(declared, SupportedProtocolVersions);
+        }
+
+        /// <summary>
+        /// True when this request should be answered in the 2026-07-28 shape - <c>resultType</c>, the
+        /// <c>tools/list</c> cache hints, and the rest of what that revision adds.
+        ///
+        /// A request that names its own revision decides for itself, which is the stateless model. A request
+        /// that names none falls back to whatever was agreed at <c>initialize</c>, because a client that
+        /// negotiated the newer revision through the handshake and then got older-shaped results back would
+        /// have been misled by us, not by the protocol.
+        /// </summary>
+        private bool WantsStatelessShape(RequestContext context)
+        {
+            return context.ProtocolVersion != null
+                ? context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision)
+                : RequestContext.RevisionAtLeast(_negotiatedProtocol, RequestContext.StatelessRevision);
         }
 
         private static JObject ErrorEnvelope(JToken id, int code, string message, JToken data)
@@ -287,6 +322,8 @@ namespace GpibMcp.Mcp
                          "'; answering with " + ProtocolVersion + ".");
             }
 
+            _negotiatedProtocol = negotiated;
+
             // Tasks are opt-in from both sides: remember whether this client declared the extension, because
             // the spec is explicit that a server must never hand a task to a client that did not (#112).
             var clientCaps = prms != null ? prms["capabilities"] as JObject : null;
@@ -383,7 +420,7 @@ namespace GpibMcp.Mcp
         private JObject BuildToolsListResult(RequestContext context)
         {
             var result = new JObject { ["tools"] = _tools.ToListJson() };
-            return context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision)
+            return WantsStatelessShape(context)
                 ? CacheableResult.ApplyTo(result)
                 : result;
         }
@@ -424,7 +461,7 @@ namespace GpibMcp.Mcp
             // every fast tool, and every client that has not opted in - runs exactly as it always has (#112).
             if (tool.LongRunning && ClientSupportsTasks(context))
                 return StartTaskCall(tool, name, arguments,
-                                     context.DeclaresRevisionAtLeast(RequestContext.StatelessRevision));
+                                     WantsStatelessShape(context));
 
             return ExecuteTool(tool, name, arguments, ProgressContext(context));
         }

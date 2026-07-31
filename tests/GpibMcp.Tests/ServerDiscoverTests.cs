@@ -34,9 +34,11 @@ namespace GpibMcp.Tests
                 var versions = ((JArray)Discover(dispatcher)["supportedVersions"]).Select(v => (string)v).ToArray();
 
                 Assert.Equal(McpDispatcher.SupportedProtocolVersions, versions);
-                // Implementing the method that 2026-07-28 introduced is not a claim to that revision: we do
-                // not implement all of it, so it must not appear here (#104's rule).
-                Assert.DoesNotContain(RequestContext.StatelessRevision, versions);
+                Assert.Equal(RequestContext.StatelessRevision, versions.First());   // newest first
+
+                // The list is what we implement, not what we have heard of: 2025-11-25 is a real revision
+                // whose changes have not been reviewed here, so it stays off (#104's rule, still holding).
+                Assert.DoesNotContain("2025-11-25", versions);
             }
         }
 

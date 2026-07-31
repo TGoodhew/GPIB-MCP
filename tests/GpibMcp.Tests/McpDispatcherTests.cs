@@ -80,9 +80,10 @@ namespace GpibMcp.Tests
         [Fact]
         public void Initialize_AnswersWithOwnProtocol_WhenClientAsksForOneWeDoNotSpeak()
         {
-            // Claiming a revision we do not implement (e.g. the 2026-07-28 wire format) would produce
-            // responses the client is entitled to reject - name ours instead and let it decide (#104).
-            foreach (var unsupported in new[] { "2026-07-28", "9999-01-01", "not-a-version" })
+            // Claiming a revision we do not implement would produce responses the client is entitled to
+            // reject - name ours instead and let it decide (#104). 2025-11-25 is the interesting case: a
+            // real revision, deliberately not on our list because its changes have not been reviewed here.
+            foreach (var unsupported in new[] { "2025-11-25", "9999-01-01", "not-a-version" })
             {
                 var result = Run(null, Init(unsupported)).Single()["result"];
                 Assert.Equal(McpDispatcher.ProtocolVersion, (string)result["protocolVersion"]);
@@ -90,10 +91,25 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void SupportedProtocolVersions_LeadsWithTheRevisionWeImplement()
+        public void Initialize_EchoesTheNewestRevision_WhenAClientAsksForIt()
         {
-            Assert.Equal(McpDispatcher.ProtocolVersion, McpDispatcher.SupportedProtocolVersions[0]);
+            // The handshake predates 2026-07-28, but a hybrid client may still ask for it here - and now
+            // that we implement it, the honest answer is yes (#115).
+            var result = Run(null, Init(McpDispatcher.LatestProtocolVersion)).Single()["result"];
+            Assert.Equal(McpDispatcher.LatestProtocolVersion, (string)result["protocolVersion"]);
+        }
+
+        [Fact]
+        public void SupportedProtocolVersions_LeadsWithTheNewestAndIncludesTheHandshakeDefault()
+        {
+            // Newest first, because that is the order a client reads to pick one.
+            Assert.Equal(McpDispatcher.LatestProtocolVersion, McpDispatcher.SupportedProtocolVersions[0]);
+
+            // The handshake default is deliberately NOT the newest: a client using initialize at all predates
+            // the revision that removed it, so the last revision that had one is the safe answer.
+            Assert.NotEqual(McpDispatcher.LatestProtocolVersion, McpDispatcher.ProtocolVersion);
             Assert.True(McpDispatcher.IsSupportedProtocolVersion(McpDispatcher.ProtocolVersion));
+            Assert.True(McpDispatcher.IsSupportedProtocolVersion(McpDispatcher.LatestProtocolVersion));
             Assert.False(McpDispatcher.IsSupportedProtocolVersion(null));
             Assert.False(McpDispatcher.IsSupportedProtocolVersion(""));
         }
