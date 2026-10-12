@@ -42,11 +42,36 @@
       <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components 8.0.2\Ivi.Visa.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- HintPath is set by FindNiVisaNet below: its folder is named for the driver version. -->
     <Reference Include="NationalInstruments.Visa">
-      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET 26.5\NationalInstruments.Visa.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
+
+  <!--
+    NI VISA.NET installs to "NI VISA.NET <driver version>", so every NI update renamed the folder this
+    reference pointed at and broke the build - and the dev machine and the CI runner are rarely on the
+    same release. Find whichever is installed instead. The SDK does not search the GAC, so a HintPath
+    that names a missing folder is not rescued by the copy registered there.
+  -->
+  <PropertyGroup>
+    <NiVisaNetDir Condition="'$(NiVisaNetDir)' == ''">C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319</NiVisaNetDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <_NiVisaNetAssembly Include="$(NiVisaNetDir)\NI VISA.NET *\NationalInstruments.Visa.dll" />
+  </ItemGroup>
+  <Target Name="FindNiVisaNet" BeforeTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <!-- Batching keeps the last match, should more than one version be installed side by side. -->
+      <_NiVisaNetPath>%(_NiVisaNetAssembly.FullPath)</_NiVisaNetPath>
+    </PropertyGroup>
+    <Error Condition="'$(_NiVisaNetPath)' == ''"
+           Text="NI VISA.NET was not found under '$(NiVisaNetDir)\NI VISA.NET *'. Install NI-VISA with .NET support, or pass -p:NiVisaNetDir=&lt;folder holding the 'NI VISA.NET x.y' folders&gt;." />
+    <ItemGroup>
+      <Reference Condition="'%(Identity)' == 'NationalInstruments.Visa'" HintPath="$(_NiVisaNetPath)" />
+    </ItemGroup>
+    <Message Importance="low" Text="NI VISA.NET: $(_NiVisaNetPath)" />
+  </Target>
 
   <ItemGroup Label="NI-488.2 .NET">
     <Reference Include="NationalInstruments.Common">

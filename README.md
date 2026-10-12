@@ -147,12 +147,13 @@ cd GPIB-MCP
 The project references four NI driver assemblies by path. Because NI installs them
 to versioned folders that differ between machines and driver releases, **verify the
 `HintPath` for each reference** in
-[`src/GpibMcp/GpibMcp.csproj`](src/GpibMcp/GpibMcp.csproj) and adjust if needed.
+[`src/GpibMcp.NiVisa/GpibMcp.NiVisa.csproj`](src/GpibMcp.NiVisa/GpibMcp.NiVisa.csproj) and adjust if
+needed. `NationalInstruments.Visa`, whose folder changes with every NI-VISA release, is found automatically.
 
 | Reference | Typical location |
 |-----------|------------------|
 | `Ivi.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components <ver>\Ivi.Visa.dll` |
-| `NationalInstruments.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET <ver>\NationalInstruments.Visa.dll` |
+| `NationalInstruments.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET <ver>\NationalInstruments.Visa.dll` — **found automatically**, whatever `<ver>` is installed; if NI VISA.NET lives elsewhere, build with `-p:NiVisaNetDir=<folder holding the "NI VISA.NET x.y" folders>` |
 | `NationalInstruments.Common` | `C:\Program Files (x86)\National Instruments\Measurement Studio\DotNET\v4.0\AnyCPU\NationalInstruments.Common <ver>\NationalInstruments.Common.dll` |
 | `NationalInstruments.NI4882` | `C:\Program Files (x86)\National Instruments\MeasurementStudioVS2012\DotNET\Assemblies\Current\NationalInstruments.NI4882.dll` |
 
