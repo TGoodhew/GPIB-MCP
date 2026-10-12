@@ -43,7 +43,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="NationalInstruments.Visa">
-      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET 26.0\NationalInstruments.Visa.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET 26.5\NationalInstruments.Visa.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
