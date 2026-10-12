@@ -61,6 +61,7 @@ namespace GpibMcp.Tools
             int contextChars = Math.Min(Math.Max(Int(args, "context_chars", ManualSearch.DefaultContextChars), 100), 4000);
 
             IReadOnlyList<ManualFile> candidates;
+            CandidateSelection selection = null;
             if (!string.IsNullOrWhiteSpace(file))
             {
                 ManualFile one = library.Resolve(file);
@@ -70,10 +71,12 @@ namespace GpibMcp.Tools
             }
             else
             {
-                candidates = library.Candidates(model, query);
+                selection = library.Choose(model, query);
+                candidates = selection.Files;
             }
 
-            if (candidates.Count == 0) return NothingMatched(library, query, model);
+            if (candidates.Count == 0)
+                return NothingMatched(library, query, model, selection != null && selection.IndexFoundNothing);
 
             ctx.Progress(1, candidates.Count + 1, "Searching " + candidates.Count + " manual(s).");
             ManualSearch.Results results = ManualSearch.Run(candidates, query, maxResults, contextChars,
@@ -86,7 +89,7 @@ namespace GpibMcp.Tools
             bool familyOnly = !string.IsNullOrEmpty(model) &&
                               !candidates.Any(c => ManualLibrary.MatchesModel(c, model)) &&
                               candidates.Any(c => ManualLibrary.IsFamilyMatchOnly(c, model));
-            return Deliver(library, query, model, results, familyOnly);
+            return Deliver(library, query, model, results, familyOnly, selection);
         }
 
         /// <summary>
@@ -94,7 +97,8 @@ namespace GpibMcp.Tools
         /// happened to be smallest would be worse than useless - it reads as "your library does not have
         /// this". Say what actually happened, and show what is there so the next call can aim.
         /// </summary>
-        private static ToolOutput NothingMatched(ManualLibrary library, string query, string model)
+        private static ToolOutput NothingMatched(ManualLibrary library, string query, string model,
+                                                 bool indexFoundNothing)
         {
             IReadOnlyList<string> sample = library.SampleNames(model);
             int total = library.Count();
@@ -115,6 +119,8 @@ namespace GpibMcp.Tools
             text.AppendLine("No manual in " + library.Root + " is named for " +
                             (string.IsNullOrEmpty(model) ? "this query" : "'" + model + "'") +
                             ", so nothing was searched (" + total + " manual(s) in the library).");
+            if (indexFoundNothing)
+                text.AppendLine("ManualForge's full-text index was asked too, and no page in the library matched.");
             if (sample.Count > 0)
             {
                 text.AppendLine();
@@ -131,7 +137,8 @@ namespace GpibMcp.Tools
         }
 
         private static ToolOutput Deliver(ManualLibrary library, string query, string model,
-                                          ManualSearch.Results results, bool familyOnly)
+                                          ManualSearch.Results results, bool familyOnly,
+                                          CandidateSelection selection)
         {
             var structured = new JObject
             {
@@ -153,6 +160,10 @@ namespace GpibMcp.Tools
             };
             if (!string.IsNullOrEmpty(model)) structured["model"] = model;
             if (familyOnly) structured["familyMatchOnly"] = true;
+
+            // Only said when the index was used: without ManualForge the result is exactly what it always was.
+            bool byContent = selection != null && selection.Route == CandidateRoute.Content;
+            if (byContent) structured["candidatesBy"] = "content";
 
             var text = new StringBuilder();
             if (familyOnly)
@@ -196,6 +207,15 @@ namespace GpibMcp.Tools
                 foreach (ManualSearch.FileNote note in results.Unreadable.Take(5))
                     text.AppendLine("  " + note.File + " - " + note.Problem);
                 text.AppendLine("Tell the user this: the answer may be in a manual that could not be searched.");
+            }
+
+            if (byContent)
+            {
+                text.AppendLine();
+                text.AppendLine("Manuals chosen by content: ManualForge's full-text index ranked every page of the " +
+                                "library for this query and picked " + selection.FromIndex + " of the " +
+                                selection.Files.Count + " opened" +
+                                (selection.FromIndex < selection.Files.Count ? "; the rest matched by filename." : "."));
             }
 
             return ToolOutput.Text(text.ToString().TrimEnd()).WithStructured(structured);
@@ -243,6 +263,13 @@ namespace GpibMcp.Tools
                     ["type"] = "array",
                     ["description"] = "Present only when no manual matched: names in the library to aim a retry at.",
                     ["items"] = new JObject { ["type"] = "string" }
+                },
+                ["candidatesBy"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["enum"] = new JArray("content"),
+                    ["description"] = "Present when ManualForge's full-text index chose which manuals to open, by " +
+                                      "what their pages say. Absent means they were chosen by filename and model."
                 },
                 ["familyMatchOnly"] = new JObject
                 {

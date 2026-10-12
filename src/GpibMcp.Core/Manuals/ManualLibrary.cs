@@ -65,11 +65,28 @@ namespace GpibMcp.Manuals
         /// whose name or folder mentions it come first and nothing else is opened unless there are none;
         /// otherwise the query's own words are matched against filenames.
         /// </summary>
-        public IReadOnlyList<ManualFile> Candidates(string model, string query, int limit = MaxFilesPerSearch)
+        public IReadOnlyList<ManualFile> Candidates(string model, string query, int limit = MaxFilesPerSearch) =>
+            Choose(model, query, limit).Files;
+
+        /// <summary>
+        /// <see cref="Candidates"/>, and how they were chosen (#134). Filenames always; ManualForge's full-text
+        /// index as well when this library has one, but only where filenames cannot do the job alone:
+        ///
+        /// <list type="bullet">
+        /// <item>no model was given - the case a filename cannot serve, since it cannot name a topic;</item>
+        /// <item>a model was given and more of its manuals match than the cap allows - the index then picks
+        ///       which of THAT instrument's manuals to open, and never displaces them with another's.</item>
+        /// </list>
+        ///
+        /// Everywhere else - which is the common "what is the command for X on a model Y" query - nothing
+        /// changes and no process is started. Without an index, nothing changes anywhere.
+        /// </summary>
+        public CandidateSelection Choose(string model, string query, int limit = MaxFilesPerSearch)
         {
             bool haveModel = !string.IsNullOrWhiteSpace(model);
+            limit = Math.Max(1, limit);
 
-            return Enumerate()
+            List<ManualFile> byName = Enumerate()
                 .Select(f => new { File = f, Score = NameScore(f, model, query) })
                 // With a model in hand, a file must be related to THAT instrument. Otherwise one shared word
                 // in a filename - "frequency" appears in half a library - drags in application notes for
@@ -78,7 +95,6 @@ namespace GpibMcp.Manuals
                 .OrderByDescending(x => x.Score)
                 .ThenBy(x => x.File.SizeBytes)      // a short manual is likelier to be the relevant one
                 .Select(x => x.File)
-                .Take(Math.Max(1, limit))
                 .ToList();
 
             // Deliberately no fallback to "read some files anyway". Reading arbitrary manuals to answer a
@@ -86,6 +102,38 @@ namespace GpibMcp.Manuals
             // it reports "searched 12 files, no match", which reads as "your library does not have this"
             // when the truth is "I never looked at the right file". Better to say nothing matched and show
             // what is there.
+
+            bool worthAsking = !haveModel || byName.Count > limit;
+            if (!worthAsking || !ManualForgeIndex.IsAvailable(_root))
+                return CandidateSelection.ByFilename(byName.Take(limit).ToList(), indexFoundNothing: false);
+
+            // Ask for more than the cap: the model filter below can discard some, and the extra paths cost
+            // nothing measurable (limit 5 and limit 30 differ by ~7 ms).
+            ManualForgeIndex.Result answer = ManualForgeIndex.Search(_root, query, model, limit * 4);
+
+            var byContent = new List<ManualFile>();
+            foreach (string path in answer.Paths)
+            {
+                // Resolve keeps an index pointing elsewhere - a moved library, a stale entry - from opening
+                // anything outside this root, and drops files that have since gone.
+                ManualFile file = Resolve(path);
+                if (file == null || file.SizeBytes == 0) continue;
+                if (haveModel && ModelScore(file, model) == 0) continue;   // the caller's model still wins
+                byContent.Add(file);
+            }
+
+            if (byContent.Count == 0)
+                return CandidateSelection.ByFilename(byName.Take(limit).ToList(),
+                    indexFoundNothing: answer.Outcome == ManualForgeIndex.Outcome.NothingMatched);
+
+            List<ManualFile> merged = byContent
+                .Concat(byName)
+                .GroupBy(f => f.FullPath, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .Take(limit)
+                .ToList();
+
+            return CandidateSelection.ByContent(merged, merged.Count(f => byContent.Contains(f)));
         }
 
         /// <summary>A sample of what the library holds, so a caller told "nothing matched" can retry usefully.</summary>
@@ -241,6 +289,47 @@ namespace GpibMcp.Manuals
                 if (word.Length > 0) yield return word;
             }
         }
+    }
+
+    /// <summary>How a search's candidate manuals were chosen.</summary>
+    public enum CandidateRoute
+    {
+        /// <summary>By filename and model - the only route without ManualForge, and still the usual one.</summary>
+        Filename,
+
+        /// <summary>By ManualForge's full-text index first, topped up by filename.</summary>
+        Content
+    }
+
+    /// <summary>
+    /// The manuals a search will open, and how they were picked - the difference between "chosen by content
+    /// across every page" and "chosen from filenames" is the difference between "no match" and "did not look".
+    /// </summary>
+    public sealed class CandidateSelection
+    {
+        private CandidateSelection(IReadOnlyList<ManualFile> files, CandidateRoute route, int fromIndex,
+                                   bool indexFoundNothing)
+        {
+            Files = files;
+            Route = route;
+            FromIndex = fromIndex;
+            IndexFoundNothing = indexFoundNothing;
+        }
+
+        internal static CandidateSelection ByFilename(IReadOnlyList<ManualFile> files, bool indexFoundNothing) =>
+            new CandidateSelection(files, CandidateRoute.Filename, 0, indexFoundNothing);
+
+        internal static CandidateSelection ByContent(IReadOnlyList<ManualFile> files, int fromIndex) =>
+            new CandidateSelection(files, CandidateRoute.Content, fromIndex, false);
+
+        public IReadOnlyList<ManualFile> Files { get; }
+        public CandidateRoute Route { get; }
+
+        /// <summary>How many of <see cref="Files"/> the index chose; the rest came from filenames.</summary>
+        public int FromIndex { get; }
+
+        /// <summary>The index was asked and no page in the library matched - stronger than "no filename did".</summary>
+        public bool IndexFoundNothing { get; }
     }
 
     /// <summary>One file in the manual library.</summary>
