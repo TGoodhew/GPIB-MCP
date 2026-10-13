@@ -500,6 +500,7 @@ namespace GpibMcp.Tools
 
             // ---- Binary replies (#139): a block read as bytes, saved, described --
             BinaryTools.Register(registry, visa);
+            ScreenViewTools.Register(registry);   // view-only: the screen view fetches saved images (#157)
 
             // ---- Batch / sweep execution (#59): one call runs a whole sweep -----
             BatchTools.Register(registry, db, assignments, visa);

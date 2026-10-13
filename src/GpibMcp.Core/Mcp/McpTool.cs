@@ -93,7 +93,39 @@ namespace GpibMcp.Mcp
                 ["inputSchema"] = InputSchema
             };
             if (OutputSchema != null) descriptor["outputSchema"] = OutputSchema;
+            if (ViewUri != null || ViewOnly)
+            {
+                var ui = new JObject();
+                if (ViewUri != null) ui["resourceUri"] = ViewUri;
+                if (ViewOnly) ui["visibility"] = new JArray("app");
+                var meta = new JObject { ["ui"] = ui };
+                if (ViewUri != null) meta["ui/resourceUri"] = ViewUri;   // the older flat key, for hosts that still read it
+                descriptor["_meta"] = meta;
+            }
             return descriptor;
+        }
+
+        /// <summary>
+        /// The MCP Apps view (<see cref="McpAppViews"/>) a host that supports MCP Apps draws this tool's result
+        /// with, inline under the call (#157); null for none.
+        /// </summary>
+        public string ViewUri { get; private set; }
+
+        /// <summary>True for a tool only a view may call: hidden from the model and from clients without views.</summary>
+        public bool ViewOnly { get; private set; }
+
+        /// <summary>Draws this tool's result with a view, in hosts that support MCP Apps. Returns this.</summary>
+        public McpTool WithView(string viewUri)
+        {
+            ViewUri = viewUri;
+            return this;
+        }
+
+        /// <summary>Makes this a tool only a view may call. Returns this.</summary>
+        public McpTool ForViewsOnly()
+        {
+            ViewOnly = true;
+            return this;
         }
     }
 
@@ -121,10 +153,14 @@ namespace GpibMcp.Mcp
         /// <summary>Number of registered tools.</summary>
         public int Count => _ordered.Count;
 
-        public JArray ToListJson()
+        /// <param name="includeViewOnly">
+        /// Whether to list the tools only a view may call - true only for a client that can draw views.
+        /// </param>
+        public JArray ToListJson(bool includeViewOnly = false)
         {
             var arr = new JArray();
-            foreach (var t in _ordered) arr.Add(t.ToDescriptor());
+            foreach (var t in _ordered)
+                if (includeViewOnly || !t.ViewOnly) arr.Add(t.ToDescriptor());
             return arr;
         }
     }

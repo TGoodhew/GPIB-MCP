@@ -16,8 +16,12 @@ namespace GpibMcp.Tools
     /// </summary>
     public static class BinaryTools
     {
-        /// <summary>An image returned as MCP content is downscaled to stay under this.</summary>
-        public const long MaxImageContentBytes = 1000 * 1000;
+        /// <summary>
+        /// An image returned as MCP content is downscaled to stay under this. Claude Desktop moves a tool result over
+        /// about 150,000 characters out of the conversation, and a screen view then receives nothing (#157); 90 KB is
+        /// 120,000 characters of base64, leaving room for the text. Saved files are always full size.
+        /// </summary>
+        public const long MaxImageContentBytes = 90 * 1000;
 
         public const int DefaultTimeoutMs = 30000;
 
@@ -30,7 +34,8 @@ namespace GpibMcp.Tools
                 "as text. The bytes are saved to a file (Pictures\\GpibMcp Captures unless save_path/save_dir say " +
                 "otherwise); the result gives the path, byte count, type (from the first bytes: GIF, PNG, BMP, " +
                 "JPEG, WMF, EMF or unknown), SHA-256 and first bytes. An image is also returned as a PNG you can " +
-                "see, saved next to the original. Use this when visa_query says a reply is binary.",
+                "see, saved next to the original, and in Claude Desktop it is shown to the user inline. Use this when " +
+                "visa_query says a reply is binary.",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::17::INSTR'."),
                     Required("command", "string", "The query, e.g. ':HCOP:SDUM:DATA? GIF'."),
@@ -39,7 +44,8 @@ namespace GpibMcp.Tools
                         "read until the instrument ends its message."),
                     Prop("save_path", "string", "Full path (with filename) to save the bytes to."),
                     Prop("save_dir", "string", "Folder to save into; a timestamped name with the resource is used.")),
-                (args, ctx) => Run(args, ctx, visa)));   // long-running: a slow GPIB transfer can take 30 s
+                (args, ctx) => Run(args, ctx, visa))     // long-running: a slow GPIB transfer can take 30 s
+                .WithView(McpAppViews.ScreenViewUri));   // an image is shown to the user in the screen view (#157)
         }
 
         private static ToolOutput Run(JObject args, ToolCallContext ctx, IInstrumentManager visa)
@@ -99,7 +105,11 @@ namespace GpibMcp.Tools
                           (pngSaved != null && pngSaved != saved ? "\nAs PNG: " + pngSaved : "") +
                           "\nSHA-256: " + sha + "\nFirst bytes: " + first +
                           (imageNote != null ? "\nNote: " + imageNote : "") +
-                          (png != null ? "\nThe image is attached below as PNG." : "");
+                          (png != null
+                              ? ctx.ShowsViews
+                                  ? "\nThe user can see this image in full colour, inline under this tool call; it is also attached below for you."
+                                  : "\nThe image is attached below as PNG."
+                              : "");
 
             var output = ToolOutput.Text(text).WithStructured(structured);
             if (png != null) output.AddImage(png, "image/png");

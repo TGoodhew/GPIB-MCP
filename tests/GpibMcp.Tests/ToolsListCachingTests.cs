@@ -93,8 +93,12 @@ namespace GpibMcp.Tests
             var names = registry.ToListJson().Select(t => (string)t["name"]).ToArray();
 
             Assert.Equal("gpib_overview", names.First());
-            Assert.Equal(registry.Tools.Select(t => t.Name).ToArray(), names);
+            Assert.Equal(registry.Tools.Where(t => !t.ViewOnly).Select(t => t.Name).ToArray(), names);
             Assert.Equal(names.Length, names.Distinct(StringComparer.Ordinal).Count());
+
+            // A client that draws views (#157) gets the same order, with the view-only tools in their places.
+            var withViews = registry.ToListJson(includeViewOnly: true).Select(t => (string)t["name"]).ToArray();
+            Assert.Equal(registry.Tools.Select(t => t.Name).ToArray(), withViews);
         }
 
         [Fact]
