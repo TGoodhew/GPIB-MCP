@@ -23,11 +23,11 @@ namespace GpibMcp.Tools
         {
             registry.Add(new McpTool(
                 "instrument_capture_screen",
-                "Capture the instrument's screen and return it so it can be shown INLINE in the chat. The " +
-                "result includes an SVG you should display by creating an image/svg+xml artifact (Claude " +
-                "Desktop does not render tool-result image blocks inline). The PNG is also saved to the " +
-                "user's Pictures folder; pass save_dir to store it elsewhere. The model is taken from the " +
-                "resource's assignment unless given.\n" +
+                "Capture the instrument's screen and return it so it can be shown INLINE in the chat. In a " +
+                "client that draws MCP Apps views (Claude Desktop) the user sees the screen in full colour under the " +
+                "tool call, and the result says so. Otherwise the result includes an SVG you should display by " +
+                "creating an image/svg+xml artifact. The PNG is also saved to the user's Pictures folder; pass " +
+                "save_dir to store it elsewhere. The model is taken from the resource's assignment unless given.\n" +
                 "FORMAT - 'plot' (HP-GL plotter emulation, vector) or 'print' (PCL raster hardcopy). Decide " +
                 "as follows: if the user says SHOW the screen, use plot. If the user says CAPTURE the screen " +
                 "(or is otherwise ambiguous) and the model supports printing, ASK them whether they want " +
@@ -62,7 +62,8 @@ namespace GpibMcp.Tools
                     Prop("debug", "boolean", "If true, ALSO save the verbatim captured HP-GL/PCL bytes to a debug file (for " +
                         "troubleshooting plot/render glitches). Set this when the user asks to capture or send 'with debug'."),
                     Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000).")),
-                (Func<JObject, ToolCallContext, ToolOutput>)((args, ctx) => Capture(args, ctx, db, assignments, visa))));
+                (Func<JObject, ToolCallContext, ToolOutput>)((args, ctx) => Capture(args, ctx, db, assignments, visa)))
+                .WithView(McpAppViews.ScreenViewUri));   // the screen, in full colour, in clients that draw views (#157)
         }
 
         private static ToolOutput Capture(JObject args, ToolCallContext ctx, InstrumentDatabase db,
@@ -221,7 +222,8 @@ namespace GpibMcp.Tools
                              " PCL raster row(s) shifted by a GPIB read drop-out (#82).");
             }
 
-            bool inlineSvg = Bool(args, "inline_svg", true);
+            // A client that draws views shows the PNG itself (#157): no SVG to render or for the model to paste.
+            bool inlineSvg = !ctx.ShowsViews && Bool(args, "inline_svg", true);
 
             // Inline-SVG label fidelity (plot only): 'low' = compact <text> labels (fast); 'high' = exact
             // stroke font. PCL print output is raster, so fidelity does not apply to it.
@@ -293,7 +295,16 @@ namespace GpibMcp.Tools
             }
 
             var output = new ToolOutput();
-            if (inlineSvg && svg != null)
+            byte[] attached = Attachable(png);
+            if (ctx.ShowsViews)
+            {
+                // #157: the screen view under this call shows the user the PNG in full colour.
+                output.AddText(ShownInViewText(isPrint ? "print" : "plot") + meta);
+                output.AddImage(attached, "image/png");
+                output.WithStructured(ViewStructured(savedTo));
+                if (!formatChosen && profile.CanPrint) output.AddText(FormatPrompt());
+            }
+            else if (inlineSvg && svg != null)
             {
                 // Claude Desktop renders artifacts inline, not tool-result image blocks. Lead with an
                 // unmistakable directive: the user can ONLY see this via an artifact, and the image
@@ -311,14 +322,14 @@ namespace GpibMcp.Tools
                     "file is not shown inline in the chat and does NOT satisfy this. Do this before saying " +
                     "anything else.\n\n" +
                     meta + "\n\n" + svg);
-                output.AddImage(png, "image/png"); // also the raster, for vision / clients that render image blocks
+                output.AddImage(attached, "image/png"); // also the raster, for vision / clients that render image blocks
                 if (!isPrint && !fidelityChosen) output.AddText(FidelityPrompt());
                 if (!formatChosen && profile.CanPrint) output.AddText(FormatPrompt());
             }
             else
             {
                 output.AddText(meta);
-                output.AddImage(png, "image/png");
+                output.AddImage(attached, "image/png");
             }
 
             // #79: surface the send-by-reference path so forwarding a plot passes only the small handle, not
@@ -443,7 +454,7 @@ namespace GpibMcp.Tools
             try
             {
                 fullPng = ScreenImage.ToPng(imageBytes);
-                png = fullPng.Length <= BinaryTools.MaxImageContentBytes ? fullPng : ScreenImage.ToPng(imageBytes, BinaryTools.MaxImageContentBytes);
+                png = Attachable(fullPng);
                 ScreenImage.Dimensions(imageBytes, out w, out h);
             }
             catch (Exception ex)
@@ -464,16 +475,20 @@ namespace GpibMcp.Tools
             if (format == "file")
             {
                 ctx.Progress(100, 100, "Capture complete.");
-                return ToolOutput.Text(def.Model + " screen saved (" + imageBytes.Length + " bytes " + kind + ", " + w + "x" + h +
-                                       ").\n" + files + (invertNote != null ? "\n" + invertNote : ""));
+                var saved = ToolOutput.Text(def.Model + " screen saved (" + imageBytes.Length + " bytes " + kind + ", " + w + "x" + h +
+                                            ").\n" + files + (invertNote != null ? "\n" + invertNote : "") +
+                                            (ctx.ShowsViews ? "\nThe user can also see it inline under this tool call." : ""));
+                return ctx.ShowsViews ? saved.WithStructured(ViewStructured(savedTo)) : saved;
             }
-            if (format == "image")
+            // 'image', and every capture in a client that draws views (#157): the PNG, which the view shows the user.
+            if (format == "image" || ctx.ShowsViews)
             {
                 ctx.Progress(100, 100, "Capture complete.");
-                var plain = ToolOutput.Text(def.Model + " screen (" + w + "x" + h + ", " + kind + " converted to PNG), attached " +
+                var plain = ToolOutput.Text((ctx.ShowsViews ? ShownInViewText("screen") : "") +
+                                            def.Model + " screen (" + w + "x" + h + ", " + kind + " converted to PNG), attached " +
                                             "below.\n" + files + (invertNote != null ? "\n" + invertNote : ""));
                 plain.AddImage(png, "image/png");
-                return plain;
+                return ctx.ShowsViews ? plain.WithStructured(ViewStructured(savedTo)) : plain;
             }
 
             bool inlineSvg = Bool(args, "inline_svg", true);
@@ -526,6 +541,19 @@ namespace GpibMcp.Tools
 
         private static ToolOutput Error(string message) => ToolOutput.Text(message).AsError();
 
+        /// <summary>The PNG to attach to a result: downscaled if needed to fit <see cref="BinaryTools.MaxImageContentBytes"/>.</summary>
+        internal static byte[] Attachable(byte[] png) =>
+            png.Length <= BinaryTools.MaxImageContentBytes ? png : ScreenImage.ToPng(png, BinaryTools.MaxImageContentBytes);
+
+        /// <summary>Leads a capture result in a client that draws views (#157): the user already sees the screen.</summary>
+        private static string ShownInViewText(string what) =>
+            "The user can see this " + what + " in full colour, inline under this tool call, so there is nothing " +
+            "to show them: do NOT create an artifact or paste an image. It is also attached below for you.\n\n";
+
+        /// <summary>What the screen view reads: the saved PNG, which it fetches if the image block doesn't reach it.</summary>
+        private static JObject ViewStructured(string savedTo) =>
+            savedTo != null ? new JObject { ["png_saved_to"] = savedTo } : new JObject();
+
         /// <summary>Appended to a plot capture when the user hasn't chosen a fidelity yet: asks them to pick.</summary>
         private static string FidelityPrompt() =>
             "\n---\n" +
@@ -574,12 +602,7 @@ namespace GpibMcp.Tools
                 if (string.IsNullOrEmpty(path))
                 {
                     string dir = Str(args, "save_dir", null);
-                    if (string.IsNullOrWhiteSpace(dir))
-                        dir = Environment.GetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR");
-                    if (string.IsNullOrWhiteSpace(dir))
-                        dir = Path.Combine(
-                            Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
-                            "GpibMcp Captures");
+                    if (string.IsNullOrWhiteSpace(dir)) dir = DefaultCaptureFolder();
                     Directory.CreateDirectory(dir);
                     path = Path.Combine(dir, SanitizeFileName(baseName) + "-" +
                                              DateTime.Now.ToString("yyyyMMdd-HHmmss") + extension);
@@ -590,12 +613,22 @@ namespace GpibMcp.Tools
                     if (!string.IsNullOrEmpty(parent)) Directory.CreateDirectory(parent);
                 }
                 File.WriteAllBytes(path, bytes);
+                ScreenViewTools.Remember(path);   // the screen view may fetch it (#157)
                 return path;
             }
             catch (Exception)
             {
                 return null; // saving is a convenience; never fail the capture over it
             }
+        }
+
+        /// <summary>Where captures go without save_path/save_dir: GPIB_MCP_CAPTURE_DIR, else Pictures\GpibMcp Captures.</summary>
+        internal static string DefaultCaptureFolder()
+        {
+            string dir = Environment.GetEnvironmentVariable("GPIB_MCP_CAPTURE_DIR");
+            return string.IsNullOrWhiteSpace(dir)
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "GpibMcp Captures")
+                : dir;
         }
 
         private static string SanitizeFileName(string name)

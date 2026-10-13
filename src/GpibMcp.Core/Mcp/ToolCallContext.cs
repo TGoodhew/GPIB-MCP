@@ -31,10 +31,18 @@ namespace GpibMcp.Mcp
         /// <param name="report">
         /// Receives (progress, total, message), or <c>null</c> to discard progress entirely.
         /// </param>
-        public ToolCallContext(Action<double, double?, string> report)
+        /// <param name="showsViews">Whether the client draws MCP Apps views (<see cref="ShowsViews"/>).</param>
+        public ToolCallContext(Action<double, double?, string> report, bool showsViews = false)
         {
             _report = report;
+            ShowsViews = showsViews;
         }
+
+        /// <summary>
+        /// True when the client draws MCP Apps views (#157): a tool with a view can then show the user its
+        /// result there - e.g. a screen capture in full colour - instead of asking the model for an artifact.
+        /// </summary>
+        public bool ShowsViews { get; }
 
         /// <summary>True when progress actually goes somewhere - lets a tool skip work it only does to report.</summary>
         public bool ProgressWanted => _report != null;

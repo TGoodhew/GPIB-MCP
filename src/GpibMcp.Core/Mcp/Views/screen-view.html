@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="color-scheme" content="light dark"><title>Instrument screen</title>
+<!--
+  The screen view (#157): an MCP Apps view that Claude Desktop draws inline under instrument_capture_screen
+  and visa_query_binary, showing the screen image to the user in full colour.
+
+  The image normally arrives in the tool result as an image block. Claude Desktop doesn't always pass that
+  block on (and strips the result's _meta), so when it is missing the view fetches the saved PNG itself
+  through screen_view_image, a tool only views can call. Save PNG fetches the full-size file the same way.
+
+  The MCP Apps client is inlined by McpAppViews.cs where the SDK marker is, so nothing is fetched from the
+  network.
+-->
+<style>
+  [hidden] { display: none !important; }
+  body { font: 13px system-ui, sans-serif; margin: 0; padding: 8px; }
+  img { display: block; max-width: 100%; height: auto; border: 1px solid #8886; }
+  #path { margin-top: 6px; opacity: .75; word-break: break-all; }
+  button { margin-top: 6px; }
+</style></head>
+<body>
+<div id="status" role="status" aria-live="polite">Waiting for the screen image...</div>
+<img id="screen" alt="Instrument screen" hidden>
+<div id="path"></div>
+<button id="save" hidden>Save PNG...</button>
+<script type="module">
+/*@@MCP_APPS_SDK@@*/
+</script>
+<script type="module">
+  const App = window.__gpibMcpApp;
+  const $ = (id) => document.getElementById(id);
+  const app = new App({ name: "GPIB MCP screen view", version: "1.0.0" });
+  let shown = null, savedPath = "";
+
+  const show = (data, mimeType) => {
+    shown = { data, mimeType: mimeType || "image/png" };
+    $("screen").src = "data:" + shown.mimeType + ";base64," + data;
+    $("screen").hidden = false;
+    $("status").textContent = "";
+    $("path").textContent = savedPath;
+    // Only where the host said at the handshake that it saves files (ui/download-file).
+    $("save").hidden = !(app.getHostCapabilities() || {}).downloadFile;
+  };
+
+  // The saved PNG at full size, through the view-only tool; null if it can't be had.
+  const fetchSaved = async () => {
+    if (!savedPath) return null;
+    try {
+      const r = await app.callServerTool({ name: "screen_view_image", arguments: { path: savedPath } });
+      const d = r && !r.isError ? r.structuredContent : null;
+      return d && d.data ? d : null;
+    } catch (e) { return null; }
+  };
+
+  app.ontoolresult = async (result) => {
+    const sc = result.structuredContent || {};
+    savedPath = sc.png_saved_to || "";
+    const block = (result.content || []).find((c) => c.type === "image");
+    if (block) return show(block.data, block.mimeType);
+    const saved = await fetchSaved();
+    if (saved) return show(saved.data, saved.mimeType);
+    $("status").textContent = result.isError ? "The tool reported an error: see its result."
+      : savedPath ? "The screen image couldn't be loaded here. It is saved at " + savedPath
+      : "No screen image in this result.";
+  };
+
+  $("save").onclick = async () => {
+    const full = (await fetchSaved()) || shown;
+    const name = (savedPath.split(/[\\/]/).pop() || "screen.png").replace(/\.[^.]*$/, "") + ".png";
+    try {
+      const r = await app.downloadFile({ contents: [{ type: "resource",
+        resource: { uri: "file:///" + name, mimeType: full.mimeType || "image/png", blob: full.data } }] });
+      if (r && r.isError) $("path").textContent = "Save was cancelled.";
+    } catch (e) { $("path").textContent = "Save failed: " + e.message; }
+  };
+
+  await app.connect();
+</script>
+</body></html>

@@ -110,6 +110,9 @@ namespace GpibMcp.Mcp
         /// <summary>Set at initialize when the client declares the tasks extension (the 2025-06-18 route).</summary>
         private volatile bool _clientDeclaredTasks;
 
+        /// <summary>Set at initialize when the client declares it draws MCP Apps views (#157).</summary>
+        private volatile bool _clientDeclaredViews;
+
         /// <summary>
         /// The revision agreed at the legacy <c>initialize</c> handshake, for requests that name none of
         /// their own. A 2026-07-28 client carries its revision on every request and never reads this.
@@ -290,6 +293,16 @@ namespace GpibMcp.Mcp
                 case "tools/call":
                     return CallTool(prms, context);
 
+                // io.modelcontextprotocol/ui (#157): the views a host draws tool results with.
+                case "resources/list":
+                    return new JObject { ["resources"] = McpAppViews.List() };
+
+                case "resources/read":
+                {
+                    string uri = prms != null ? (string)prms["uri"] : null;
+                    return McpAppViews.Read(uri) ?? throw McpError.InvalidParams("unknown resource: " + uri);
+                }
+
                 // io.modelcontextprotocol/tasks (#112). Served unconditionally: a client only ever holds a
                 // task id because we gave it one, and answering a poll is never the wrong thing to do.
                 case "tasks/get":
@@ -354,6 +367,9 @@ namespace GpibMcp.Mcp
             _clientDeclaredTasks = DeclaresTasks(clientCaps);
             if (_clientDeclaredTasks)
                 Log.Info("Client supports " + TasksExtension + "; long-running calls may return a task handle.");
+            _clientDeclaredViews = McpAppViews.Declared(clientCaps);
+            if (_clientDeclaredViews)
+                Log.Info("Client supports " + McpAppViews.Extension + "; screen images are shown in a view.");
 
             var result = new JObject
             {
@@ -443,7 +459,7 @@ namespace GpibMcp.Mcp
         /// </summary>
         private JObject BuildToolsListResult(RequestContext context)
         {
-            var result = new JObject { ["tools"] = _tools.ToListJson() };
+            var result = new JObject { ["tools"] = _tools.ToListJson(ClientShowsViews(context)) };
             return WantsStatelessShape(context)
                 ? CacheableResult.ApplyTo(result)
                 : result;
@@ -458,9 +474,14 @@ namespace GpibMcp.Mcp
             return new JObject
             {
                 ["tools"] = new JObject { ["listChanged"] = false },
+                ["resources"] = new JObject { ["listChanged"] = false },
                 // ServerCapabilities.extensions (2026-07-28 minor change 1). Advertised to every client:
                 // one that predates the field ignores it.
-                ["extensions"] = new JObject { [TasksExtension] = new JObject() }
+                ["extensions"] = new JObject
+                {
+                    [TasksExtension] = new JObject(),
+                    [McpAppViews.Extension] = McpAppViews.ServerCapability()
+                }
             };
         }
 
@@ -476,18 +497,20 @@ namespace GpibMcp.Mcp
             var arguments = prms["arguments"] as JObject ?? new JObject();
 
             McpTool tool;
-            if (!_tools.TryGet(name, out tool))
+            // A view-only tool doesn't exist for a client that can't draw views (it was never listed to it).
+            if (!_tools.TryGet(name, out tool) || (tool.ViewOnly && !ClientShowsViews(context)))
                 throw McpError.InvalidParams("unknown tool: " + name);
 
             Log.Debug("tools/call '" + name + "' args=" + arguments.ToString(Formatting.None));
 
             // A slow tool becomes a task only when the client has said it can handle one. Everything else -
             // every fast tool, and every client that has not opted in - runs exactly as it always has (#112).
+            bool views = ClientShowsViews(context);
             if (tool.LongRunning && ClientSupportsTasks(context))
                 return StartTaskCall(tool, name, arguments,
-                                     WantsStatelessShape(context));
+                                     WantsStatelessShape(context), views);
 
-            return ExecuteTool(tool, name, arguments, ProgressContext(context));
+            return ExecuteTool(tool, name, arguments, ProgressContext(context, views));
         }
 
         /// <summary>
@@ -538,14 +561,14 @@ namespace GpibMcp.Mcp
         /// Hands the call to the task runner and answers immediately with a <c>CreateTaskResult</c>. The task
         /// is registered before we reply, so a client that polls the instant it sees the id always finds it.
         /// </summary>
-        private JObject StartTaskCall(McpTool tool, string name, JObject arguments, bool wantsResultType)
+        private JObject StartTaskCall(McpTool tool, string name, JObject arguments, bool wantsResultType, bool views)
         {
             ServerTask task = _taskStore.Create("tools/call " + name);
             task.SetStatusMessage("Queued: " + name + ".");
 
             // While a task runs there is no open request to attach progress to, so the milestones a tool
             // reports become the task's statusMessage - which is exactly what the client's next poll reads.
-            var context = new ToolCallContext((progress, total, message) => task.SetStatusMessage(message));
+            var context = new ToolCallContext((progress, total, message) => task.SetStatusMessage(message), views);
 
             _taskRunner.Value.Enqueue(task, () =>
             {
@@ -563,11 +586,11 @@ namespace GpibMcp.Mcp
         /// Builds the context for a synchronous call: progress goes out as <c>notifications/progress</c> when
         /// the client asked for it with a <c>_meta.progressToken</c> and the transport can carry one.
         /// </summary>
-        private ToolCallContext ProgressContext(RequestContext context)
+        private ToolCallContext ProgressContext(RequestContext context, bool views)
         {
             JToken token = context.ProgressToken;
             IMcpMessageSink sink = Notifications;
-            if (token == null || sink == null) return ToolCallContext.None;
+            if (token == null || sink == null) return views ? new ToolCallContext(null, true) : ToolCallContext.None;
 
             return new ToolCallContext((progress, total, message) =>
             {
@@ -585,7 +608,16 @@ namespace GpibMcp.Mcp
                     ["method"] = "notifications/progress",
                     ["params"] = notificationParams
                 });
-            });
+            }, views);
+        }
+
+        /// <summary>
+        /// True when this client draws MCP Apps views (#157), declared at initialize or, from 2026-07-28, in
+        /// this request's capabilities - the same two routes as <see cref="ClientSupportsTasks"/>.
+        /// </summary>
+        private bool ClientShowsViews(RequestContext context)
+        {
+            return _clientDeclaredViews || McpAppViews.Declared(context.ClientCapabilities);
         }
 
         /// <summary>

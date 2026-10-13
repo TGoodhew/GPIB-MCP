@@ -32,6 +32,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The MCP Apps screen view (#157) and the client library inlined into it (Mcp/Views/vendor/README.md). -->
+    <EmbeddedResource Include="Mcp\Views\screen-view.html" LogicalName="GpibMcp.Mcp.Views.screen-view.html" />
+    <EmbeddedResource Include="Mcp\Views\vendor\ext-apps-1.7.5-app-with-deps.js" LogicalName="GpibMcp.Mcp.Views.ext-apps-1.7.5-app-with-deps.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <!-- Lets `dotnet build` compile net472 without a full VS install. -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">

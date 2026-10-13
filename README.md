@@ -69,7 +69,8 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   address and it looks up the command reference, confirms identity, and drives it.
 - **Screen capture — plot or print** — grab an instrument's actual screen (graticule, trace,
   markers, annotation) as an HP-GL **plot** (vector plotter emulation) or an HP **PCL print**
-  (raster printer hardcopy), and show it inline in the chat as an SVG, with a PNG saved to disk.
+  (raster printer hardcopy), and show it inline in the chat — in full colour in Claude Desktop, or as an SVG
+  in other clients — with a PNG saved to disk.
   Rendering is a standalone, reusable [`Hpgl.Rendering`](src/Hpgl.Rendering/) library (HP-GL/2 **and**
   PCL).
 - **SRQ-based operation completion** — wait for an operation to *truly* finish via the bus
@@ -402,7 +403,7 @@ tool blurbs.
 | `visa_query` | `resource`, `command` | `timeout_ms`, `read_bytes` | Write a command and read the response (e.g. `*IDN?`) |
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
 | `visa_write_raw` | `resource`, `data` | `chunk_bytes`, `settle_ms`, `timeout_ms`, `debug` | Write **raw bytes verbatim** (no terminator, no encoding) — `data` is base64. For control-byte-bearing payloads a text boundary would strip (HP-GL with ETX `0x03` label terminators, binary PCL). Pair with `instrument_capture_screen`'s `return_hpgl_base64` to forward a captured plot/print to a plotter/printer byte-for-byte. The send is **paced in bounded chunks** server-side (default 256 B; `timeout_ms` is **per-chunk**) so a large plot doesn't overrun/time out a slow plotter/printer |
-| `visa_query_binary` | `resource`, `command` | `timeout_ms`, `block_format` (`ieee488.2`\|`raw`), `save_path`, `save_dir` | Query whose reply is **binary** (e.g. `:HCOP:SDUM:DATA? GIF`): read as bytes, never text. The header is parsed and exactly the declared length is read over as many reads as it takes, with nothing left on the instrument. The bytes are saved to a file, and the result gives the path, byte count, type from the first bytes (GIF/PNG/BMP/JPEG/WMF/EMF), SHA-256 and first bytes. An image also comes back as PNG content, saved beside the original. `visa_query` points here when a reply is binary |
+| `visa_query_binary` | `resource`, `command` | `timeout_ms`, `block_format` (`ieee488.2`\|`raw`), `save_path`, `save_dir` | Query whose reply is **binary** (e.g. `:HCOP:SDUM:DATA? GIF`): read as bytes, never text. The header is parsed and exactly the declared length is read over as many reads as it takes, with nothing left on the instrument. The bytes are saved to a file, and the result gives the path, byte count, type from the first bytes (GIF/PNG/BMP/JPEG/WMF/EMF), SHA-256 and first bytes. An image also comes back as PNG content, saved beside the original, and Claude Desktop shows it in the screen view. `visa_query` points here when a reply is binary |
 | `visa_read` | `resource` | `timeout_ms`, `read_bytes` | Read a pending response |
 | `visa_identify` | `resource` | `read_bytes` | Convenience `*IDN?` query |
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
@@ -425,7 +426,7 @@ tool blurbs.
 | `unassign_instrument` | `resource` | `confirm` | Remove an assignment (on `confirm=true`) |
 | `instrument_db_save` | `definition` | `confirm` | Add/update a model definition (on `confirm=true`) |
 | `instrument_db_refresh` | `model` | `confirm` | Reset a model's user copy to the bundled definition, backing up to `*.bak` (on `confirm=true`) |
-| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`; `image`\|`file` for SCPI dumps), `invert`, `width`, `height`, `background`, `return_hpgl`, `return_hpgl_base64`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `debug`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes, e.g. the E4406A's GIF); returns an SVG to show inline + saves a PNG to Pictures (and the instrument's own file beside it). For SCPI dumps, `format:image` returns just the PNG and `format:file` only saves; `invert` sets an inverted background where the profile supports it, putting the instrument's setting back after. `return_hpgl_base64` returns the verbatim plot/print bytes (base64) to forward to a plotter/printer via `visa_write_raw` |
+| `instrument_capture_screen` | `resource` | `model`, `format` (`plot`\|`print`; `image`\|`file` for SCPI dumps), `invert`, `width`, `height`, `background`, `return_hpgl`, `return_hpgl_base64`, `inline_svg`, `fidelity` (`high`\|`low`), `save_dir`, `save_path`, `debug`, `timeout_ms` | Capture the instrument's screen — HP-GL `plot` (vector), PCL `print` (raster), or a direct SCPI image dump (`scpi_block` boxes, e.g. the E4406A's GIF); in Claude Desktop the screen view shows it in full colour under the call, otherwise it returns an SVG to show inline; it saves a PNG to Pictures (and the instrument's own file beside it). For SCPI dumps, `format:image` returns just the PNG and `format:file` only saves; `invert` sets an inverted background where the profile supports it, putting the instrument's setting back after. `return_hpgl_base64` returns the verbatim plot/print bytes (base64) to forward to a plotter/printer via `visa_write_raw` |
 
 Argument notes:
 
@@ -706,7 +707,19 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
 
 #### Showing it inline in the chat
 
-Claude Desktop does **not** render MCP tool-result *image* blocks inline in the conversation — a
+**In Claude Desktop (MCP Apps, #157).** Desktop draws [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview)
+views, and declares it when it connects. `instrument_capture_screen` and `visa_query_binary` name a view,
+`ui://gpib-mcp/screen-view`, which Desktop draws under the tool call: the screen in **full colour**, its saved
+path, and a **Save PNG…** button for the full-size file. The view is one self-contained HTML page served by
+the server; the MCP Apps client library is built in ([`Views/vendor`](src/GpibMcp.Core/Mcp/Views/vendor/)), so it
+needs no internet access. The image normally reaches the view in the tool result; when Desktop doesn't pass it
+on, the view fetches the saved PNG through `screen_view_image`, a tool only views can call (hidden from the
+model, listed only to clients with views, and serving only images this server saved or that sit in the
+capture folder). The result then tells Claude the user can already see the screen, so there is no SVG to
+make or paste. An image attached to a result is kept under 90 KB, because Desktop moves a result over about
+150,000 characters out of the conversation, where the view can't get it; saved files are always full size.
+
+**Without views.** A client that doesn't declare MCP Apps gets the earlier approach, built for Claude Desktop before it drew views. Desktop does **not** render MCP tool-result *image* blocks inline in the conversation — a
 [known client limitation](https://github.com/anthropics/claude-ai-mcp/issues/238) (the image is
 visible to the model and, at best, buried inside the expandable tool-call block). It **does**,
 however, render **artifacts** inline. So the tool returns the capture as an SVG and asks Claude to

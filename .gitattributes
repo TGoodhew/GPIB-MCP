@@ -1,0 +1,2 @@
+# Vendored third-party files stay byte-for-byte as published (their SHA-256 is recorded beside them).
+src/GpibMcp.Core/Mcp/Views/vendor/* -text
