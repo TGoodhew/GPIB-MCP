@@ -104,9 +104,83 @@ namespace GpibMcp.Tests
         [Fact]
         public void Close_UnknownSession_ReportsNoOpenSession()
         {
-            var text = Get(new FakeInstrumentManager(), "visa_close")
-                .InvokeText(new JObject { ["resource"] = "GPIB0::5::INSTR" });
+            var fake = new FakeInstrumentManager();
+            var text = Get(fake, "visa_close").InvokeText(new JObject { ["resource"] = "GPIB0::5::INSTR" });
             Assert.Contains("No open session", text);
+            Assert.Empty(fake.Locals);   // nothing to hand back, so nothing sent
+        }
+
+        [Fact]
+        public void Close_ReturnsTheInstrumentToLocalFirst_ByDefault()
+        {
+            // #140: closing used to leave the instrument in remote, its front panel locked.
+            var fake = new FakeInstrumentManager();
+            fake.OpenSessions.Add("GPIB0::17::INSTR");
+
+            var text = Get(fake, "visa_close").InvokeText(new JObject { ["resource"] = "GPIB0::17::INSTR" });
+
+            Assert.Equal("GPIB0::17::INSTR", Assert.Single(fake.Locals));
+            Assert.Equal("GPIB0::17::INSTR", Assert.Single(fake.Closes));
+            Assert.Contains("Go To Local", text);
+        }
+
+        [Fact]
+        public void Close_WithoutReturnToLocal_LeavesItInRemote()
+        {
+            var fake = new FakeInstrumentManager();
+            fake.OpenSessions.Add("GPIB0::17::INSTR");
+
+            var text = Get(fake, "visa_close").InvokeText(new JObject { ["resource"] = "GPIB0::17::INSTR", ["return_to_local"] = false });
+
+            Assert.Empty(fake.Locals);
+            Assert.Equal("Closed GPIB0::17::INSTR", text);
+        }
+
+        [Fact]
+        public void Close_StillCloses_WhenTheInterfaceHasNoLocal()
+        {
+            var fake = new FakeInstrumentManager { LocalUnsupported = true };
+            fake.OpenSessions.Add("ASRL3::INSTR");
+
+            var text = Get(fake, "visa_close").InvokeText(new JObject { ["resource"] = "ASRL3::INSTR" });
+
+            Assert.Equal("ASRL3::INSTR", Assert.Single(fake.Closes));
+            Assert.Contains("not returned to local", text);
+        }
+
+        [Fact]
+        public void Local_SendsGoToLocal_AndSaysWhatItSent()
+        {
+            var fake = new FakeInstrumentManager();
+            var output = Get(fake, "visa_local").Invoke(new JObject { ["resource"] = "GPIB0::17::INSTR" });
+
+            Assert.False(output.IsError);
+            Assert.Equal("GPIB0::17::INSTR", Assert.Single(fake.Locals));
+            Assert.Contains("GPIB Go To Local (GTL)", output.AsText());
+            Assert.Empty(fake.Closes);   // the session stays open unless asked
+            Assert.Empty(fake.Clears);   // and it is never a device clear
+        }
+
+        [Fact]
+        public void Local_CanAlsoCloseTheSession()
+        {
+            var fake = new FakeInstrumentManager();
+            fake.OpenSessions.Add("GPIB0::17::INSTR");
+
+            var text = Get(fake, "visa_local").InvokeText(new JObject { ["resource"] = "GPIB0::17::INSTR", ["close_session"] = true });
+
+            Assert.Equal("GPIB0::17::INSTR", Assert.Single(fake.Closes));
+            Assert.Contains("session closed", text);
+        }
+
+        [Fact]
+        public void Local_OnAnInterfaceWithoutIt_IsAnError_NotASilentSuccess()
+        {
+            var fake = new FakeInstrumentManager { LocalUnsupported = true };
+            var output = Get(fake, "visa_local").Invoke(new JObject { ["resource"] = "ASRL3::INSTR" });
+
+            Assert.True(output.IsError);
+            Assert.Contains("no remote/local control", output.AsText());
         }
 
         [Fact]

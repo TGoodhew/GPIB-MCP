@@ -156,16 +156,32 @@ namespace GpibMcp.Instruments
             session.Clear();
         }
 
-        public void ReturnToLocal(string resource)
+        public string ReturnToLocal(string resource, int timeoutMs)
         {
-            MessageBasedSession session;
-            if (!_sessions.TryGetValue(resource, out session)) return;
-            try
+            // Opens the session if needed: after visa_close, or on a fresh server, there is none cached.
+            var session = Session(resource, timeoutMs);
+            string sent;
+            switch (session)
             {
-                var gpib = session as GpibSession;
-                if (gpib != null) gpib.SendRemoteLocalCommand(GpibInstrumentRemoteLocalMode.GoToLocal);
+                case GpibSession gpib:
+                    // GTL to this device only; REN stays asserted, so other instruments on the bus are untouched.
+                    gpib.SendRemoteLocalCommand(GpibInstrumentRemoteLocalMode.GoToLocal);
+                    sent = "GPIB Go To Local (GTL)";
+                    break;
+                case TcpipSession tcpip:
+                    tcpip.SendRemoteLocalCommand(RemoteLocalMode.Local);   // VXI-11 device_local / HiSLIP
+                    sent = "LAN go-to-local (VXI-11 / HiSLIP)";
+                    break;
+                case UsbSession usb:
+                    usb.SendRemoteLocalCommand(RemoteLocalMode.Local);     // USBTMC USB488 go-to-local
+                    sent = "USB-TMC go-to-local";
+                    break;
+                default:
+                    throw new NotSupportedException(resource + " is a " + session.GetType().Name + ", which has no " +
+                        "remote/local control, so it cannot be returned to local over this interface.");
             }
-            catch (Exception ex) { Log.Warn("return-to-local failed: " + ex.Message); }
+            Log.Debug("VISA " + resource + " -> " + sent);
+            return sent;
         }
 
         public GpibStatus DescribeError(Exception ex) => VisaErrorInfo.Describe(ex);

@@ -181,7 +181,7 @@ namespace GpibMcp.Instruments
                 }
                 finally
                 {
-                    _transport.ReturnToLocal(resource);
+                    ReturnToLocalAfterCapture(resource);
                 }
             }
         }
@@ -311,6 +311,38 @@ namespace GpibMcp.Instruments
             }
         }
 
+        public string ReturnToLocal(string resource, int timeoutMs)
+        {
+            lock (_gate)
+            {
+                if (!_transport.Capabilities.ReturnToLocal)
+                    throw new NotSupportedException("The " + _transport.Capabilities.Name + " backend cannot return an instrument to local.");
+                try
+                {
+                    _history.Record(resource, CommandDirection.Sent, "<go to local>");
+                    string sent = _transport.ReturnToLocal(resource, Timeout(timeoutMs));
+                    Log.Debug("VISA " + resource + " returned to local: " + sent);
+                    return sent;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException) && !(ex is NotSupportedException))
+                {
+                    throw Fail(GpibOperation.ReturnToLocal, resource, "<go to local>", ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// After a capture, hand the front panel back - best effort, called from a finally (the caller
+        /// already holds the gate). NOT a device clear: on HP 8560-series analyzers DCL/SDC also executes
+        /// an instrument preset, wiping the user's setup.
+        /// </summary>
+        private void ReturnToLocalAfterCapture(string resource)
+        {
+            if (!_transport.Capabilities.ReturnToLocal) return;
+            try { _transport.ReturnToLocal(resource, DefaultTimeoutMs); }
+            catch (Exception ex) { Log.Warn("Could not return " + resource + " to local after the capture: " + ex.Message); }
+        }
+
         public int SerialPoll(string resource)
         {
             lock (_gate)
@@ -396,7 +428,7 @@ namespace GpibMcp.Instruments
                 {
                     // Leave the bus usable and the box in local. NOT a device clear: on HP 8560-series
                     // analyzers DCL/SDC also executes an instrument preset, wiping the user's setup.
-                    _transport.ReturnToLocal(resource);
+                    ReturnToLocalAfterCapture(resource);
                 }
             }
         }

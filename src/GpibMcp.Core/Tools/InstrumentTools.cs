@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using GpibMcp.Diagnostics;
 using GpibMcp.Instruments;
@@ -290,13 +291,47 @@ namespace GpibMcp.Tools
 
             registry.Add(new McpTool(
                 "visa_close",
-                "Close a VISA session held open by this server (frees the instrument).",
+                "Close a VISA session held open by this server (frees the instrument). By default it first " +
+                "returns the instrument to local, so its front panel works again.",
                 Schema(
-                    Required("resource", "string", "VISA resource string.")),
+                    Required("resource", "string", "VISA resource string."),
+                    Prop("return_to_local", "boolean", "Send go-to-local before closing (default true). False closes " +
+                         "the session and leaves the instrument in remote, with its front panel locked.")),
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
-                    return visa.Close(resource) ? "Closed " + resource : "No open session for " + resource;
+                    if (!visa.ListOpen().Contains(resource, StringComparer.OrdinalIgnoreCase))
+                        return "No open session for " + resource;
+
+                    string local = "";
+                    if (Bool(args, "return_to_local", true))
+                    {
+                        try { local = " after " + visa.ReturnToLocal(resource, InstrumentManager.DefaultTimeoutMs) + "; front panel released"; }
+                        catch (NotSupportedException ex) { local = " (not returned to local: " + ex.Message + ")"; }
+                        catch (GpibOperationException ex) { local = " (returning it to local failed: " + ex.Message + ")"; }
+                    }
+                    return visa.Close(resource) ? "Closed " + resource + local : "No open session for " + resource;
+                }));
+
+            // ---- VISA: return to local (#140) -----------------------------------
+            registry.Add(new McpTool(
+                "visa_local",
+                "Return an instrument to LOCAL control so its front panel works again (GPIB Go To Local; the LAN " +
+                "and USB-TMC equivalents). Once any command is sent, an instrument goes to remote and locks its " +
+                "front panel except the Local key. Use when the user asks to return an instrument to local, give " +
+                "them the front panel back, unlock its keys, or says its buttons do nothing. Not a device clear: " +
+                "the instrument's settings are untouched. It goes back to remote the next time it is sent a command.",
+                Schema(
+                    Required("resource", "string", "VISA resource string, e.g. 'GPIB0::17::INSTR'."),
+                    Prop("close_session", "boolean", "Also close the server's session to it afterwards (default false).")),
+                args =>
+                {
+                    string resource = ReqStr(args, "resource");
+                    string sent;
+                    try { sent = visa.ReturnToLocal(resource, InstrumentManager.DefaultTimeoutMs); }
+                    catch (NotSupportedException ex) { return Err(ex.Message); }
+                    string closed = Bool(args, "close_session", false) && visa.Close(resource) ? "; session closed" : "";
+                    return Txt(resource + " returned to local: sent " + sent + closed + ". Its front panel works again.");
                 }));
 
             // ---- Diagnostics: recent command chain ------------------------------
