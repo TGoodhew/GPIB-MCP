@@ -147,12 +147,13 @@ cd GPIB-MCP
 The project references four NI driver assemblies by path. Because NI installs them
 to versioned folders that differ between machines and driver releases, **verify the
 `HintPath` for each reference** in
-[`src/GpibMcp/GpibMcp.csproj`](src/GpibMcp/GpibMcp.csproj) and adjust if needed.
+[`src/GpibMcp.NiVisa/GpibMcp.NiVisa.csproj`](src/GpibMcp.NiVisa/GpibMcp.NiVisa.csproj) and adjust if
+needed. `NationalInstruments.Visa`, whose folder changes with every NI-VISA release, is found automatically.
 
 | Reference | Typical location |
 |-----------|------------------|
 | `Ivi.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\VISA.NET Shared Components <ver>\Ivi.Visa.dll` |
-| `NationalInstruments.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET <ver>\NationalInstruments.Visa.dll` |
+| `NationalInstruments.Visa` | `C:\Program Files (x86)\IVI Foundation\VISA\Microsoft.NET\Framework32\v4.0.30319\NI VISA.NET <ver>\NationalInstruments.Visa.dll` — **found automatically**, whatever `<ver>` is installed; if NI VISA.NET lives elsewhere, build with `-p:NiVisaNetDir=<folder holding the "NI VISA.NET x.y" folders>` |
 | `NationalInstruments.Common` | `C:\Program Files (x86)\National Instruments\Measurement Studio\DotNET\v4.0\AnyCPU\NationalInstruments.Common <ver>\NationalInstruments.Common.dll` |
 | `NationalInstruments.NI4882` | `C:\Program Files (x86)\National Instruments\MeasurementStudioVS2012\DotNET\Assemblies\Current\NationalInstruments.NI4882.dll` |
 
@@ -968,6 +969,47 @@ Two behaviours worth knowing, both found by running it against a real 570-PDF li
   does have. Reading whichever files happened to be smallest would produce "searched 12 files, no match",
   which reads as *your library doesn't have this* when the truth is *I never opened the right file*.
 
+### Working alongside ManualForge
+
+[ManualForge](https://github.com/TGoodhew/ManualForge) OCRs scanned manuals that have no text layer and builds
+a full-text index over every page of a library. **It is entirely optional.** Manual lookup works exactly as
+described above without it.
+
+A filename can't name a topic. Ask for *crystal oscillator troubleshooting* with no model, and filenames find
+a book about analogue circuit design, while the service manuals that cover it go unopened. When ManualForge
+has indexed the same folder (`_Originals\manualforge-index.db` exists) and `manualforge` is on `PATH`, this
+server detects that and asks the index which manuals to open (issue #134):
+
+| | without ManualForge | with it |
+|---|---|---|
+| Candidate files chosen by | filename and model | content across every page, then filename |
+| Finds a topic no filename mentions | no | yes |
+| Files opened per search | up to 12 | up to 12 |
+| Passages returned | unchanged | unchanged |
+
+It is consulted only where filenames can't do the job alone: when **no model** is given, or when a model's
+own manuals number **more than the 12** a search opens. The usual query, *the center frequency command
+for an 8563E*, never starts the process. When the index does pick a model's manuals, it chooses among
+**that model's** manuals only. A content hit in another instrument's manual doesn't displace them.
+
+The index is asked through ManualForge's command line (`manualforge search … --files-only`), the same way
+`pdftotext` is used, so no SQLite driver or other new dependency comes with it. A warm query costs ~150 ms.
+If anything fails (the tool exits with an error, takes longer than 20 s, or names files that are no longer in
+the library), the search falls back to filenames silently and logs a warning. When the index was used, the
+result says so (`candidatesBy: "content"`). When no page matched either, the result says the index was asked.
+
+Manuals that are scanned images with no text layer can't be searched by either tool until something adds
+one. Running ManualForge over the library does that, so those manuals start extracting here like any other
+file, with no configuration.
+
+The two point at the same folder through parallel variables, `GPIB_MCP_MANUALS` and `MANUALFORGE_LIBRARY`,
+and are registered as separate MCP servers. Prefer `manual_search` when you know the instrument model, and
+ManualForge's `library_search` when you don't.
+
+| Variable | Purpose |
+|---|---|
+| `GPIB_MCP_MANUALFORGE` | full path to `manualforge.exe` if it isn't on `PATH`, or `off` to never consult the index |
+
 ## Protocol revisions
 
 The server implements MCP **2026-07-28** and speaks **`2026-07-28`, `2025-06-18`, `2025-03-26` and
@@ -1156,6 +1198,7 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
       TaskRunner.cs                single worker thread - keeps the GPIB bus serial
   Manuals/                         the user's own manual folder (#120)
     ManualLibrary.cs               which files in it match a question (filename-first)
+    ManualForgeIndex.cs            ManualForge's full-text index, when installed (#134)
     ManualText.cs                  text extraction (sidecar / pdftotext) + on-disk cache
     ManualSearch.cs                passage search with page-numbered citations
   Instruments/
