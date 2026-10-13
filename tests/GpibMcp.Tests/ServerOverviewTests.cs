@@ -125,6 +125,28 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void OverviewAndInstructions_SayWhichVersionIsRunning()
+        {
+            // #146: the client keeps serverInfo.version to itself, so asked "which version is running?" the
+            // model had nothing to read. Both texts now carry the version the build was stamped with.
+            var (registry, db) = Build();
+            var overview = new ServerOverview(registry, db);
+
+            Assert.Contains("Version: " + McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion, overview.Detailed());
+            Assert.StartsWith(McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion, overview.Instructions());
+        }
+
+        [Fact]
+        public void VersionLine_ShowsTheReleaseAndAShortCommit()
+        {
+            string line = ServerOverview.VersionLine();
+            Assert.StartsWith(McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion, line);
+            Assert.DoesNotContain("+", line);
+            if (McpDispatcher.BuildVersion.Contains("+"))
+                Assert.Matches(@"\(build [0-9a-f]{7}\)$", line);
+        }
+
+        [Fact]
         public void OverviewTool_IsRegistered_AndReturnsTheDetailedText()
         {
             var (registry, db) = Build();

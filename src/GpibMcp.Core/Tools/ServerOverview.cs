@@ -44,13 +44,27 @@ namespace GpibMcp.Tools
             CommandCount.ToString("N0") + " documented commands across " + CategoryCount + " categories)";
 
         /// <summary>
+        /// Which build this is, e.g. "gpib-mcp 1.0.1 (build 9dd5461)". The client keeps the handshake's
+        /// serverInfo.version to itself, so this is how the model can say which version is running (#146).
+        /// </summary>
+        internal static string VersionLine()
+        {
+            string build = McpDispatcher.BuildVersion;
+            int plus = build.IndexOf('+');
+            string commit = plus < 0 ? null : build.Substring(plus + 1);
+            if (commit != null && commit.Length > 7) commit = commit.Substring(0, 7);
+            return McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion +
+                   (string.IsNullOrEmpty(commit) ? "" : " (build " + commit + ")");
+        }
+
+        /// <summary>
         /// Concise capability summary for the always-loaded <c>initialize.instructions</c> field.
         /// Kept short - it is in context for the whole session; the depth lives in <see cref="Detailed"/>.
         /// </summary>
         public string Instructions()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("gpib-mcp controls GPIB / VISA test-and-measurement instruments (spectrum analyzers, " +
+            sb.AppendLine(VersionLine() + " controls GPIB / VISA test-and-measurement instruments (spectrum analyzers, " +
                           "counters, DMMs, signal generators, power supplies, switches) over NI-VISA / NI-488.2.");
             sb.AppendLine("Capabilities: discover instruments on the bus; query/write/read with per-model " +
                           "terminators; identify and assign a model to a resource; look up commands from a " +
@@ -78,6 +92,8 @@ namespace GpibMcp.Tools
         {
             var sb = new StringBuilder();
             sb.AppendLine("# GPIB-MCP server overview");
+            sb.AppendLine();
+            sb.AppendLine("Version: " + VersionLine() + ". (In a terminal, GpibMcp.exe --version gives the full build.)");
             sb.AppendLine();
             sb.AppendLine("Controls GPIB / VISA test-and-measurement instruments from natural language. " + Stats() + ".");
             sb.AppendLine("Backend: NI-VISA / NI-488.2 by default (set GPIB_MCP_BACKEND to choose another when available). " +
