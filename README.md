@@ -586,6 +586,13 @@ Keep the database honest:
   cannot report what they are. Mark these with `"identity": { "supported": false, "description":
   "…" }`. The server then reports identity as unavailable and **skips verification with a clear
   note** instead of guessing or timing out, rather than leaving the block silently absent.
+- **Instruments that reject `*IDN?`.** On an unassigned resource, `instrument_identify` tries
+  `*IDN?` first, since most instruments answer it. A pre-488.2 instrument (e.g. an 8563E, which
+  answers `ID?`) logs an error for it, and that error stays on its display and sets its status
+  byte's error bit. Give the model an `"errorQuery"` in its identity block (`"ERR?"` on the 8560
+  family). Once its own ID command has identified it, the tool reads the error queue until it's
+  empty and says what it cleared. Add `"clearStatusQuery"` if the status byte's error bit stays
+  latched afterwards (`"STB?"` on the 8560 family).
 - **Override, don't edit the bundled file.** A `<model>.json` in your **user** directory
   overrides the bundled one of the same name. Fix a wrong command, add a missing one, or
   correct an identity pattern there (or via `instrument_db_save`) and your version wins —

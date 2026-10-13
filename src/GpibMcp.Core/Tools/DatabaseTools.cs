@@ -333,6 +333,7 @@ namespace GpibMcp.Tools
                         if (!attempts.Contains(c)) attempts.Add(c);
 
                     string response = null, used = null, lastError = null;
+                    var unanswered = new List<string>();   // tried before the one that answered (#144)
                     foreach (var cmd in attempts)
                     {
                         try
@@ -342,6 +343,7 @@ namespace GpibMcp.Tools
                             if (!string.IsNullOrWhiteSpace(response)) break;
                         }
                         catch (Exception ex) { lastError = ex.Message; }
+                        unanswered.Add(cmd);
                     }
 
                     if (string.IsNullOrWhiteSpace(response))
@@ -351,12 +353,15 @@ namespace GpibMcp.Tools
                                "explicitly with assign_instrument.";
 
                     response = response.Trim();
-                    var matches = db.MatchIdentity(response).Select(d => d.Model).ToList();
+                    var matched = db.MatchIdentity(response).ToList();
+                    var matches = matched.Select(d => d.Model).ToList();
                     var sb = new StringBuilder();
                     sb.AppendLine("Identity (" + used + ") from " + resource + ": " + response);
                     sb.AppendLine(matches.Count == 0
                         ? "No database model matched this response."
                         : "Matched model(s): " + string.Join(", ", matches));
+                    string cleared = ClearErrorsFromUnansweredQueries(visa, resource, io, matched, unanswered);
+                    if (cleared != null) sb.AppendLine(cleared);
                     return sb.ToString().TrimEnd();
                 }));
 
@@ -672,6 +677,56 @@ namespace GpibMcp.Tools
         // ------------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------------
+
+        /// <summary>Most reads of an error queue to clear it, for instruments that report one error per read.</summary>
+        internal const int MaxErrorQueueReads = 5;
+
+        /// <summary>
+        /// #144: an instrument without IEEE 488.2 common commands (e.g. an 8563E) logs an error for the *IDN?
+        /// tried before its own ID command answered, and the error stays queued - on its display, and as its
+        /// status byte's error bit. When the matched model says how to read its error queue
+        /// (<see cref="IdentitySpec.ErrorQuery"/>), read it until empty and say what was cleared. Returns null
+        /// when there was nothing to clear.
+        /// </summary>
+        internal static string ClearErrorsFromUnansweredQueries(IInstrumentManager visa, string resource, IoSpec io,
+            IEnumerable<InstrumentDefinition> matched, IList<string> unanswered)
+        {
+            if (unanswered.Count == 0) return null;
+            var def = matched.FirstOrDefault(d => d.Identity != null && !string.IsNullOrEmpty(d.Identity.ErrorQuery));
+            if (def == null) return null;
+
+            string query = def.Identity.ErrorQuery;
+            string tried = string.Join(", ", unanswered);
+            var errors = new List<string>();
+            try
+            {
+                for (int i = 0; i < MaxErrorQueueReads; i++)
+                {
+                    string reply = (visa.Query(resource, query, io) ?? "").Trim();
+                    if (IsNoError(reply)) break;
+                    errors.Add(reply);
+                }
+                // The queue is empty, but the status byte's error bit can stay latched until it is read.
+                string statusQuery = def.Identity.ClearStatusQuery;
+                if (errors.Count > 0 && !string.IsNullOrEmpty(statusQuery))
+                {
+                    visa.Query(resource, statusQuery, io);
+                    query += " and " + statusQuery;
+                }
+            }
+            catch (Exception ex)
+            {
+                return "The " + def.Model + " didn't answer " + tried + ", tried first, and may have logged an error; " +
+                       "clearing it with " + query + " failed: " + ex.Message;
+            }
+            if (errors.Count == 0) return null;
+            return "The " + def.Model + " doesn't support " + tried + ", tried first: it logged error " +
+                   string.Join(", ", errors) + ", now cleared with " + query + ".";
+        }
+
+        /// <summary>An error-queue reply that means "no error": empty, or 0 / +0 (alone or before a message).</summary>
+        internal static bool IsNoError(string reply) =>
+            reply.Length == 0 || Regex.IsMatch(reply, @"^\+?0+(\s*,|\s*$)");
 
         private static string VerifyIdentity(IInstrumentManager visa, InstrumentDefinition def, bool verify,
                                              string resource, out bool ok)
