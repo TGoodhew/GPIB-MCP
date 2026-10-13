@@ -24,8 +24,31 @@ namespace GpibMcp.Tests
             if (Directory.Exists(_dir)) Directory.Delete(_dir, true);
         }
 
-        private static byte[] Block(byte[] payload) =>
-            Encoding.ASCII.GetBytes("#3" + payload.Length.ToString("000")).Concat(payload).Concat(new[] { (byte)'\n' }).ToArray();
+        private static byte[] Block(byte[] payload)
+        {
+            string length = payload.Length.ToString("000");
+            return Encoding.ASCII.GetBytes("#" + length.Length + length).Concat(payload).Concat(new[] { (byte)'\n' }).ToArray();
+        }
+
+        /// <summary>A 24-bit BMP of random noise: it doesn't compress, so its PNG is large (800x600 is ~1.4 MB).</summary>
+        private static byte[] NoiseBmp(int w, int h)
+        {
+            int row = (w * 3 + 3) & ~3, size = 54 + row * h;
+            var b = new byte[size];
+            b[0] = (byte)'B'; b[1] = (byte)'M';
+            BitConverter.GetBytes(size).CopyTo(b, 2);
+            BitConverter.GetBytes(54).CopyTo(b, 10);
+            BitConverter.GetBytes(40).CopyTo(b, 14);
+            BitConverter.GetBytes(w).CopyTo(b, 18);
+            BitConverter.GetBytes(h).CopyTo(b, 22);
+            BitConverter.GetBytes((short)1).CopyTo(b, 26);
+            BitConverter.GetBytes((short)24).CopyTo(b, 28);
+            var rng = new Random(1);
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w * 3; x++)
+                    b[54 + y * row + x] = (byte)rng.Next(256);
+            return b;
+        }
 
         private static McpTool Tool(string name, IInstrumentManager visa, InstrumentDatabase db = null, AssignmentStore store = null)
         {
@@ -63,6 +86,59 @@ namespace GpibMcp.Tests
             Assert.EndsWith(".png", (string)s["png_saved_to"]);                                         // PNG beside it
             Assert.True(File.Exists((string)s["png_saved_to"]));
             Assert.Contains(output.Content, c => c.Kind == ToolContentKind.Image && c.MimeType == "image/png");      // shown as PNG, not GIF
+        }
+
+        [Fact]
+        public void QueryBinary_IsLongRunning()
+        {
+            // A slow GPIB transfer can take 30 s: task-capable clients get a handle to poll, not a blocked call.
+            Assert.True(Tool("visa_query_binary", new FakeInstrumentManager()).LongRunning);
+        }
+
+        [Fact]
+        public void QueryBinary_APngReply_IsSavedAsSent_NotOverwrittenByItsConversion()
+        {
+            // A PNG with trailing bytes after IEND: re-encoding it gives a different file of a different length.
+            byte[] png = Hpgl.Rendering.ScreenImage.ToPng(Gif).Concat(new byte[100]).ToArray();
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(png) };
+
+            var s = (JObject)Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = ":DISP:DATA? PNG", ["save_dir"] = _dir
+            }).Structured;
+
+            Assert.Equal("PNG", (string)s["type"]);
+            Assert.Equal(png, File.ReadAllBytes((string)s["saved_to"]));
+            Assert.Equal((string)s["saved_to"], (string)s["png_saved_to"]);
+            Assert.Single(Directory.GetFiles(_dir));
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+                Assert.Equal(string.Concat(sha256.ComputeHash(File.ReadAllBytes((string)s["saved_to"])).Select(x => x.ToString("x2"))),
+                             (string)s["sha256"]);
+        }
+
+        [Fact]
+        public void QueryBinary_ALargeImage_IsSavedFullSize_AndOnlyTheAttachedCopyIsScaledDown()
+        {
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(NoiseBmp(800, 600)) };
+
+            ToolOutput output = Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = ":DISP:DATA? BMP", ["save_dir"] = _dir
+            });
+
+            byte[] savedPng = File.ReadAllBytes((string)((JObject)output.Structured)["png_saved_to"]);
+            Hpgl.Rendering.ScreenImage.Dimensions(savedPng, out int w, out _);
+            Assert.Equal(800, w);
+            Assert.True(savedPng.Length > BinaryTools.MaxImageContentBytes);
+            AssertAttachedImageIsScaledDown(output);
+        }
+
+        private static void AssertAttachedImageIsScaledDown(ToolOutput output)
+        {
+            byte[] attached = Convert.FromBase64String(output.Content.Single(c => c.Kind == ToolContentKind.Image).Data);
+            Assert.True(attached.Length <= BinaryTools.MaxImageContentBytes, "attached PNG is " + attached.Length + " bytes");
+            Hpgl.Rendering.ScreenImage.Dimensions(attached, out int w, out _);
+            Assert.True(w < 800);
         }
 
         [Fact]
@@ -173,6 +249,23 @@ namespace GpibMcp.Tests
             Assert.DoesNotContain("<svg", output.AsText());                                   // 'image': just the PNG
             Assert.Single(Directory.GetFiles(_dir, "*.gif"));                                // the original beside the PNG
             Assert.Single(Directory.GetFiles(_dir, "*.png"));
+        }
+
+        [Fact]
+        public void Capture_ALargeScreen_IsSavedFullSize_AndOnlyTheAttachedCopyIsScaledDown()
+        {
+            var (db, store) = E4406A();
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(NoiseBmp(800, 600)) };
+
+            ToolOutput output = Tool("instrument_capture_screen", visa, db, store).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["format"] = "image", ["save_dir"] = _dir
+            });
+
+            Assert.False(output.IsError, output.AsText());
+            Hpgl.Rendering.ScreenImage.Dimensions(File.ReadAllBytes(Directory.GetFiles(_dir, "*.png").Single()), out int w, out _);
+            Assert.Equal(800, w);
+            AssertAttachedImageIsScaledDown(output);
         }
 
         [Fact]

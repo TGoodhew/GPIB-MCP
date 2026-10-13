@@ -39,10 +39,10 @@ namespace GpibMcp.Tools
                         "read until the instrument ends its message."),
                     Prop("save_path", "string", "Full path (with filename) to save the bytes to."),
                     Prop("save_dir", "string", "Folder to save into; a timestamped name with the resource is used.")),
-                (Func<JObject, ToolOutput>)(args => Run(args, visa))));
+                (args, ctx) => Run(args, ctx, visa)));   // long-running: a slow GPIB transfer can take 30 s
         }
 
-        private static ToolOutput Run(JObject args, IInstrumentManager visa)
+        private static ToolOutput Run(JObject args, ToolCallContext ctx, IInstrumentManager visa)
         {
             string resource = ReqStr(args, "resource");
             string command = ReqStr(args, "command");
@@ -53,10 +53,14 @@ namespace GpibMcp.Tools
             else if (Regex.IsMatch(formatArg ?? "", @"^ieee[\s-]?488(\.2)?$", RegexOptions.IgnoreCase)) format = BlockFormat.Ieee4882;
             else return ToolOutput.Text("Unknown block_format '" + formatArg + "': use 'ieee488.2' or 'raw'.").AsError();
 
+            ctx.Progress(5, 100, "Reading the binary reply to " + command + ".");
             BinaryBlockResult block = visa.QueryBinary(resource, command, timeout, format);
             byte[] bytes = block.Payload;
             string kind = Kind(bytes);
+            ctx.Progress(80, 100, "Read " + bytes.Length + " bytes (" + kind + "); saving.");
 
+            // The bytes exactly as received. A non-PNG image also gets a full-size PNG beside it; a PNG reply
+            // already is one. Only the attached copy is downscaled to fit the content limit.
             string saved = CaptureTools.SaveFile(args, "binary-" + resource, Extension(kind), bytes);
             byte[] png = null;
             string pngSaved = null, imageNote = null;
@@ -64,9 +68,10 @@ namespace GpibMcp.Tools
             {
                 try
                 {
-                    png = ScreenImage.ToPng(bytes, MaxImageContentBytes);
-                    pngSaved = kind == "PNG" && png.Length == bytes.Length ? saved
-                        : saved != null ? CaptureTools.SaveFile(new JObject { ["save_path"] = System.IO.Path.ChangeExtension(saved, ".png") }, null, ".png", png) : null;
+                    if (kind == "PNG") pngSaved = saved;
+                    else if (saved != null)
+                        pngSaved = CaptureTools.SaveFile(new JObject { ["save_path"] = System.IO.Path.ChangeExtension(saved, ".png") }, null, ".png", ScreenImage.ToPng(bytes));
+                    png = kind == "PNG" && bytes.Length <= MaxImageContentBytes ? bytes : ScreenImage.ToPng(bytes, MaxImageContentBytes);
                 }
                 catch (Exception ex) { imageNote = "it looks like " + kind + " but didn't decode as an image: " + ex.Message; }
             }

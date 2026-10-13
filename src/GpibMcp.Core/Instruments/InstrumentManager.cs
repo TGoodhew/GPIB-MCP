@@ -98,16 +98,18 @@ namespace GpibMcp.Instruments
                     _transport.Write(resource, Latin1.GetBytes(payload), Timeout(timeoutMs));
 
                     // Raw bounded reads, no termination character: binary data can contain 0x0A. A read that
-                    // timed out means the instrument stopped sending, which the block reader reports as short.
+                    // timed out means the instrument fell silent, which the block reader reports as incomplete.
+                    bool timedOut = false;
                     ReplyReader.ReadChunk read = (int count, out bool more) =>
                     {
                         var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = Timeout(timeoutMs), TermChar = null, MaxBytes = count });
+                        timedOut = r.TimedOut;
                         more = !r.EndOfMessage && !r.TimedOut;
                         return r.Data;
                     };
 
                     BinaryBlockResult result;
-                    try { result = BinaryBlock.Read(read, format); }
+                    try { result = BinaryBlock.Read(read, format, BinaryBlock.MaxBytes, () => timedOut); }
                     catch (IOException) { DrainNoLock(resource); throw; }
 
                     _history.Record(resource, CommandDirection.Received,

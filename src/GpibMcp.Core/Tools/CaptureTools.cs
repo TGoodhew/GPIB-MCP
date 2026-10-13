@@ -437,11 +437,13 @@ namespace GpibMcp.Tools
                 return Error("No image returned from " + resource + " (" + imageBytes.Length +
                              " bytes). Check the dump command and that the model returns a screen image.");
 
-            byte[] png;
+            // Saved at full size; only the attached copy is downscaled to fit the content limit.
+            byte[] fullPng, png;
             int w, h;
             try
             {
-                png = ScreenImage.ToPng(imageBytes, BinaryTools.MaxImageContentBytes);
+                fullPng = ScreenImage.ToPng(imageBytes);
+                png = fullPng.Length <= BinaryTools.MaxImageContentBytes ? fullPng : ScreenImage.ToPng(imageBytes, BinaryTools.MaxImageContentBytes);
                 ScreenImage.Dimensions(imageBytes, out w, out h);
             }
             catch (Exception ex)
@@ -449,7 +451,7 @@ namespace GpibMcp.Tools
                 return Error("Captured " + imageBytes.Length + " bytes but it is not a decodable image: " + ex.Message);
             }
 
-            string savedTo = SaveCapture(args, def.Model + "-screen", png);
+            string savedTo = SaveCapture(args, def.Model + "-screen", fullPng);
             // The instrument's own file (e.g. the GIF) beside the PNG.
             string kind = BinaryTools.Kind(imageBytes);
             string originalTo = savedTo != null && kind != "PNG"

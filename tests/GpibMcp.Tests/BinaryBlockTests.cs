@@ -20,6 +20,10 @@ namespace GpibMcp.Tests
             private int _at;
             public int MaxPerRead = 7;   // small, so every block spans many reads
 
+            /// <summary>Never ends its message: once the output runs out, the next read times out.</summary>
+            public bool FallsSilent;
+            public bool TimedOut;
+
             public Instrument(byte[] output) { _out = output; }
             public int Left => _out.Length - _at;
 
@@ -28,9 +32,12 @@ namespace GpibMcp.Tests
                 int n = Math.Min(Math.Min(count, MaxPerRead), Left);
                 byte[] chunk = _out.Skip(_at).Take(n).ToArray();
                 _at += n;
-                more = Left > 0;
+                TimedOut = FallsSilent && n == 0;
+                more = FallsSilent ? !TimedOut : Left > 0;
                 return chunk;
             }
+
+            public BinaryBlockResult ReadBlock(BlockFormat format) => BinaryBlock.Read(Read, format, BinaryBlock.MaxBytes, () => TimedOut);
         }
 
         private static byte[] Bytes(string s) => Encoding.ASCII.GetBytes(s);
@@ -134,6 +141,68 @@ namespace GpibMcp.Tests
 
             Assert.Equal(Gif, block.Payload);
             Assert.Null(block.Header);
+        }
+
+        [Fact]
+        public void ACrLfTerminator_IsConsumed()
+        {
+            var instrument = new Instrument(Concat(Bytes(Header(2, Gif.Length)), Gif, Bytes("\r\n")));
+            Assert.Equal(Gif, BinaryBlock.Read(instrument.Read, BlockFormat.Ieee4882).Payload);
+            Assert.Equal(0, instrument.Left);
+        }
+
+        [Fact]
+        public void DataAfterTheDeclaredLength_IsReported_NotSilentlyDiscarded()
+        {
+            // The header understates the length: what follows isn't a terminator.
+            var instrument = new Instrument(Concat(Bytes(Header(2, Gif.Length)), Gif, Bytes("XYZ\n")));
+
+            var ex = Assert.Throws<BinaryBlockException>(() => BinaryBlock.Read(instrument.Read, BlockFormat.Ieee4882));
+
+            Assert.Contains("declared length is wrong", ex.Message);
+            Assert.Contains("58", ex.Message);   // 'X'
+        }
+
+        [Theory]
+        [InlineData(BlockFormat.Raw)]
+        [InlineData(BlockFormat.Ieee4882)]   // as "#0"
+        public void AReplyToEndThatTimesOut_IsAnError_NotAShortFile(BlockFormat format)
+        {
+            byte[] sent = format == BlockFormat.Raw ? Gif : Concat(Bytes("#0"), Gif);
+            var instrument = new Instrument(sent) { FallsSilent = true };
+
+            var ex = Assert.Throws<BinaryBlockException>(() => instrument.ReadBlock(format));
+
+            Assert.Contains("timed out", ex.Message);
+            Assert.Equal(Gif.Length, ex.BytesRead);
+        }
+
+        [Fact]
+        public void ADefiniteBlockThatTimesOutPartWay_SaysItTimedOut()
+        {
+            var instrument = new Instrument(Concat(Bytes("#3100"), Gif)) { FallsSilent = true };
+
+            var ex = Assert.Throws<BinaryBlockException>(() => instrument.ReadBlock(BlockFormat.Ieee4882));
+
+            Assert.Contains("timed out", ex.Message);
+            Assert.Equal(Gif.Length, ex.BytesRead);
+            Assert.Equal(100, ex.BytesExpected);
+        }
+
+        [Fact]
+        public void ADefiniteBlock_WhollyRead_ThenSilence_IsAccepted()
+        {
+            // Every declared byte arrived; only END never came. The length proves the payload complete.
+            var instrument = new Instrument(Concat(Bytes(Header(2, Gif.Length)), Gif)) { FallsSilent = true };
+            Assert.Equal(Gif, instrument.ReadBlock(BlockFormat.Ieee4882).Payload);
+        }
+
+        [Fact]
+        public void NoReplyAtAll_SaysItTimedOut()
+        {
+            var instrument = new Instrument(new byte[0]) { FallsSilent = true };
+            var ex = Assert.Throws<BinaryBlockException>(() => instrument.ReadBlock(BlockFormat.Ieee4882));
+            Assert.Contains("timed out", ex.Message);
         }
 
         [Fact]

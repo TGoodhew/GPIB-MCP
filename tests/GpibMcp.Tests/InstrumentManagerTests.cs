@@ -74,6 +74,8 @@ namespace GpibMcp.Tests
             public byte[] Output = new byte[0];
             public int At;
             public int MaxPerRead = 50;
+            /// <summary>Never asserts END: once the output runs out, reads time out.</summary>
+            public bool FallsSilent;
             public readonly System.Collections.Generic.List<TransportReadRequest> Requests = new System.Collections.Generic.List<TransportReadRequest>();
 
             public override TransportReadResult Read(string resource, TransportReadRequest request)
@@ -83,8 +85,21 @@ namespace GpibMcp.Tests
                 var chunk = new byte[n];
                 System.Array.Copy(Output, At, chunk, 0, n);
                 At += n;
+                if (FallsSilent) return new TransportReadResult(chunk, n == 0, false);
                 return new TransportReadResult(chunk, false, At >= Output.Length);
             }
+        }
+
+        [Fact]
+        public void QueryBinary_RawReplyCutOffByATimeout_FailsRatherThanReturningAShortFile()
+        {
+            var t = new BlockTransport { Output = new byte[300], FallsSilent = true };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() =>
+                mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 30000, BlockFormat.Raw));
+
+            Assert.Contains("timed out", ex.Message);
         }
 
         [Fact]

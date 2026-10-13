@@ -53,11 +53,25 @@ namespace GpibMcp.Instruments
         /// <summary>Most whitespace skipped before the '#'.</summary>
         private const int MaxLeadingWhitespace = 16;
 
-        /// <summary>Reads one binary reply through <paramref name="read"/> (see <see cref="ReplyReader.ReadChunk"/>).</summary>
-        public static BinaryBlockResult Read(ReplyReader.ReadChunk read, BlockFormat format, long maxBytes = MaxBytes)
+        /// <summary>Most bytes accepted after a definite-length block: its terminator, CR LF at most.</summary>
+        private const int MaxTerminatorBytes = 2;
+
+        /// <summary>
+        /// Reads one binary reply through <paramref name="read"/> (see <see cref="ReplyReader.ReadChunk"/>).
+        /// <paramref name="timedOut"/> says whether the last read stopped because the instrument fell silent
+        /// rather than ending its message: a reply cut off that way is an error, never a short payload.
+        /// </summary>
+        public static BinaryBlockResult Read(ReplyReader.ReadChunk read, BlockFormat format, long maxBytes = MaxBytes,
+                                             Func<bool> timedOut = null)
         {
+            Func<bool> silent = timedOut ?? (() => false);
+
             if (format == BlockFormat.Raw)
-                return new BinaryBlockResult(ReplyReader.ReadToEnd(read, maxBytes, ChunkBytes), null, null);
+            {
+                byte[] raw = ReplyReader.ReadToEnd(read, maxBytes, ChunkBytes);
+                if (silent()) throw Malformed(TimedOutWhy, new MemoryStream(), raw.Length, null, raw);
+                return new BinaryBlockResult(raw, null, null);
+            }
 
             var seen = new MemoryStream();   // everything read, for the error report
             bool more = true;
@@ -67,14 +81,14 @@ namespace GpibMcp.Instruments
             int skipped = 0;
             do
             {
-                b = ReadByte(read, seen, ref more, "the block header");
+                b = ReadByte(read, seen, ref more, "the block header", silent);
                 if (!IsWhitespace(b)) break;
                 if (++skipped > MaxLeadingWhitespace) throw Malformed("no '#' block header", seen, 0, null);
             } while (true);
             if (b != (byte)'#')
                 throw Malformed("the reply doesn't start with an IEEE 488.2 block header '#'", seen, 0, null);
 
-            byte digit = ReadByte(read, seen, ref more, "the block header");
+            byte digit = ReadByte(read, seen, ref more, "the block header", silent);
             if (digit < (byte)'0' || digit > (byte)'9')
                 throw Malformed("the block header '#' isn't followed by a digit", seen, 0, null);
             int n = digit - (byte)'0';
@@ -83,6 +97,7 @@ namespace GpibMcp.Instruments
             {
                 // Indefinite length: everything to END, less the terminating newline.
                 byte[] rest = more ? ReplyReader.ReadToEnd(read, maxBytes, ChunkBytes) : Array.Empty<byte>();
+                if (silent()) throw Malformed(TimedOutWhy, seen, rest.Length, null, rest);
                 int end = rest.Length;
                 if (end > 0 && rest[end - 1] == (byte)'\n') end--;
                 if (end > 0 && rest[end - 1] == (byte)'\r') end--;
@@ -92,7 +107,7 @@ namespace GpibMcp.Instruments
             long length = 0;
             for (int i = 0; i < n; i++)
             {
-                byte d = ReadByte(read, seen, ref more, "the block length");
+                byte d = ReadByte(read, seen, ref more, "the block length", silent);
                 if (d < (byte)'0' || d > (byte)'9')
                     throw Malformed("the block length isn't " + n + " digits", seen, 0, null);
                 length = length * 10 + (d - (byte)'0');
@@ -105,25 +120,36 @@ namespace GpibMcp.Instruments
             long got = 0;
             while (got < length)
             {
-                if (!more) throw Malformed("the instrument ended its message early", seen, got, length, payload);
+                if (!more) throw Malformed(silent() ? TimedOutWhy : "the instrument ended its message early", seen, got, length, payload);
                 byte[] chunk = read((int)Math.Min(ChunkBytes, length - got), out more) ?? Array.Empty<byte>();
-                if (chunk.Length == 0) throw Malformed("the read returned nothing", seen, got, length, payload);
+                if (chunk.Length == 0) throw Malformed(silent() ? TimedOutWhy : "the read returned nothing", seen, got, length, payload);
                 Array.Copy(chunk, 0, payload, got, Math.Min(chunk.Length, length - got));
                 got += chunk.Length;
             }
 
-            // The terminator after the block (usually LF with END), so nothing is left for the next command.
-            for (int i = 0; more && i < 4; i++)
-                read(16, out more);
+            // The terminator after the block (LF, or CR LF, usually with END), so nothing is left for the next
+            // command. Anything else means the declared length was wrong: reported, and the caller drains the
+            // rest. A timeout here is accepted: the whole declared payload has arrived.
+            int after = 0;
+            while (more)
+            {
+                byte[] tail = read(MaxTerminatorBytes + 1 - after, out more) ?? Array.Empty<byte>();
+                if (tail.Length == 0) break;
+                if (tail.Any(x => x != (byte)'\r' && x != (byte)'\n') || (after += tail.Length) > MaxTerminatorBytes)
+                    throw Malformed("more data followed the " + length + " bytes the header declared (" + Hex(tail.Take(16).ToArray()) +
+                                    "), so the declared length is wrong", seen, got, length, payload);
+            }
 
             return new BinaryBlockResult(payload, header, length);
         }
 
-        private static byte ReadByte(ReplyReader.ReadChunk read, MemoryStream seen, ref bool more, string what)
+        private const string TimedOutWhy = "the read timed out before the instrument ended its message, so the reply is incomplete";
+
+        private static byte ReadByte(ReplyReader.ReadChunk read, MemoryStream seen, ref bool more, string what, Func<bool> silent)
         {
-            if (!more) throw Malformed("the reply ended inside " + what, seen, 0, null);
+            if (!more) throw Malformed(silent() ? TimedOutWhy : "the reply ended inside " + what, seen, 0, null);
             byte[] one = read(1, out more) ?? Array.Empty<byte>();
-            if (one.Length == 0) throw Malformed("the reply ended inside " + what, seen, 0, null);
+            if (one.Length == 0) throw Malformed(silent() ? TimedOutWhy : "the reply ended inside " + what, seen, 0, null);
             seen.WriteByte(one[0]);
             return one[0];
         }
