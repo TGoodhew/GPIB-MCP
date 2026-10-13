@@ -5,13 +5,42 @@ Generates the install packages for every MCP client that consumes the GPIB MCP s
 package differs only in how the client reaches the server:
 
 - **Local stdio clients** — launch the server as a child process: **VS Code** (#89), **Cursor** (#90),
-  **Windsurf** (#91), and Claude Desktop (`.dxt`, #67). Package = a small config snippet + one-click link.
+  **Windsurf** (#91), and Claude Desktop (`.mcpb`, #67). Package = a small config snippet + one-click link.
 - **Cloud / HTTP clients** — connect to a tunnelled URL over **Streamable HTTP** (#68): **Microsoft Copilot**
   (#88), **ChatGPT** (#92). Package = the HTTP launcher + connector docs (and, for Copilot, an OpenAPI
   custom-connector template).
 
 ## Scripts
 
+- **`Build-Installer.ps1`** + **`GpibMcp.iss`** — *maintainer*. Builds **`GpibMcp-Setup-<version>.exe`**, the
+  recommended way to install, with [Inno Setup 6](https://jrsoftware.org/isinfo.php). It's modelled on
+  [ManualForge's installer](https://github.com/TGoodhew/ManualForge/tree/main/installer):
+  - It installs per user, with no administrator prompt.
+  - Before installing anything, it runs the program's own `GpibMcp.exe check` from a temporary folder, and stops
+    with NI's download links if NI-VISA or NI-488.2 is missing or older than this build references.
+  - It registers with every AI app it finds by running `GpibMcp.exe setup mcp`, and its uninstaller runs
+    `setup mcp --remove`, which puts back exactly what was there before.
+
+  `Generate-Packages.ps1` calls it and attaches the installer to the release. Inno Setup must be installed for
+  all users on the CI runner (`winget install JRSoftware.InnoSetup --scope machine`).
+
+  It also writes `dist\sandbox\`, for trying the installer in a clean
+  [Windows Sandbox](https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/).
+  **`Invoke-SandboxTest.ps1`** runs one of its two tests, waits for it, prints its checks, and makes sure the
+  sandbox is closed afterwards. Both tests run **`test-in-sandbox.ps1`** inside the sandbox.
+
+  | Command | What it tests | Takes |
+  |---|---|---|
+  | `Invoke-SandboxTest.ps1` | Without NI's drivers. Setup must stop, silently and in the wizard, say what's missing, and leave nothing behind. | ~1 min |
+  | `Invoke-SandboxTest.ps1 -Full` | Installs NI-VISA and NI-488.2, then GPIB MCP. Checks that Claude Desktop is registered, an MCP session works through NI-VISA, and uninstalling removes it all. | ~10 min |
+
+  Before the first `-Full` run, put NI's online installers (`ni-visa_*_online.exe`, `ni-488.2_*_online.exe`) in
+  `dist\sandbox\kit\ni\`; they're kept across builds. The full test makes two changes to its own throwaway
+  sandbox, never to the host:
+  - **It turns off Smart App Control.** In the sandbox, Smart App Control's reputation check never answers, so
+    each of NI's 100-plus MSIs would wait out a 2-minute timeout.
+  - **It creates `%APPDATA%\Claude`.** Claude Desktop isn't installed in the sandbox, and that folder is what
+    Setup looks for.
 - **`Generate-Packages.ps1`** — *maintainer*. Builds the server, makes the versioned zip (the Release asset),
   emits every client package, and (with `-PublishRelease`) publishes the GitHub Release with the zip, the
   installer, **and** the HTTP launcher attached.

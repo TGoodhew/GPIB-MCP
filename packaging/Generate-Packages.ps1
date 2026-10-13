@@ -63,7 +63,7 @@ function Write-Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 # ---- 1. Build (unless reusing an existing build) --------------------------------------------------
 if (-not $SkipBuild) {
     Write-Step "Building $Configuration x86"
-    & dotnet build (Join-Path $repo "GPIB-MCP.sln") -c $Configuration -p:Platform=x86 -clp:ErrorsOnly
+    & dotnet build (Join-Path $repo "GPIB-MCP.sln") -c $Configuration -p:Platform=x86 "-p:Version=$Version" -clp:ErrorsOnly
     if ($LASTEXITCODE -ne 0) { throw "build failed (exit $LASTEXITCODE)" }
 }
 if (-not (Test-Path (Join-Path $buildOut "GpibMcp.exe"))) {
@@ -83,6 +83,17 @@ Compress-Archive -Path "$stageDir\*" -DestinationPath $zipPath
 # Claude Desktop Extension bundle (.mcpb) for one-click install (#67), built from the same staged server.
 $mcpbPath = Join-Path $OutputDir "GpibMcp-$Version.mcpb"
 & (Join-Path $PSScriptRoot "Build-Mcpb.ps1") -SourceDir $stageDir -Version $Version -OutFile $mcpbPath
+
+# The installer (GpibMcp-Setup-<version>.exe), from the same build. Needs Inno Setup: a release must carry
+# it, so publishing without it is an error; a local run without it just skips it.
+$setupPath = Join-Path $OutputDir "GpibMcp-Setup-$Version.exe"
+try {
+    $null = & (Join-Path $PSScriptRoot "Build-Installer.ps1") -Version $Version -SkipBuild -Configuration $Configuration -OutputDir $OutputDir
+}
+catch {
+    if ($PublishRelease) { throw }
+    Write-Warning "Installer not built: $($_.Exception.Message)"
+}
 
 # ---- 3. Per-client config JSON (built with ConvertTo-Json so paths are escaped correctly) ----------
 # The stdio server object every client wraps.
@@ -156,7 +167,12 @@ if ($PublishRelease) {
     $installer = Join-Path $PSScriptRoot "Install-GpibMcp.ps1"
     $launcher = Join-Path $PSScriptRoot "Start-GpibMcpHttp.ps1"
     $notes = @"
-GPIB MCP server $Version (Windows x86). **Requires NI-VISA / NI-488.2** installed.
+GPIB MCP server $Version (Windows x86). **Requires NI-VISA and NI-488.2**, each with .NET support.
+
+**Install (recommended):** download ``GpibMcp-Setup-$Version.exe`` below and run it. It installs for you
+alone, with no administrator prompt, and connects GPIB MCP to the AI apps on this PC (Claude Desktop, Claude
+Code, VS Code, Cursor and others). It checks for NI's drivers first and says what to install if any are
+missing or too old. Uninstall from Settings -> Apps.
 
 **Claude Desktop (one-click):** download ``GpibMcp-$Version.mcpb`` below and open it in Claude Desktop
 (Settings -> Extensions), or drag it onto the window. Requires NI-VISA / NI-488.2 (#67).
@@ -178,6 +194,7 @@ See ``packaging/copilot`` and ``packaging/chatgpt`` for the connector docs.
 Or download ``$stageName.zip`` below and unzip to ``%LOCALAPPDATA%\Programs\GpibMcp``.
 "@
     $assets = @($zipPath)
+    if (Test-Path $setupPath) { $assets += $setupPath }
     if (Test-Path $mcpbPath)  { $assets += $mcpbPath }
     if (Test-Path $installer) { $assets += $installer }
     if (Test-Path $launcher)  { $assets += $launcher }
