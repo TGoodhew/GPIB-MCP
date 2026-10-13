@@ -84,7 +84,12 @@ namespace GpibMcp.Tests
             Assert.Equal(done, ((JArray)json["rows"]).Count);
             Assert.InRange(done, 1, 2);
             Assert.Equal(500000 + done * 500000, (double)stopped["continue_from"]);
-            Assert.Contains("Run the rest with the sweep starting at", (string)stopped["message"]);
+            var rest = (JObject)stopped["continue_sweep"];   // the same steps with this sweep run the remaining points
+            Assert.Equal("f_hz", (string)rest["var"]);
+            Assert.Equal(500000 + done * 500000, (double)rest["from"]);
+            Assert.Equal(1500000, (double)rest["to"]);
+            Assert.Equal(500000, (double)rest["step"]);
+            Assert.Contains("continue_sweep", (string)stopped["message"]);
             Assert.Contains("stopped at the 1 s time budget", (string)json["summary"]);
         }
 

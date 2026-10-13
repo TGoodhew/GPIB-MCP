@@ -43,9 +43,20 @@ namespace GpibMcp.Tests
             public readonly List<string> Log = new List<string>();
             public int LastCompleteTimeoutMs;
 
-            public void Write(string r, string c, int t) { Now += OpMs; Log.Add("W " + c); }
-            public string Query(string r, string c, int t) { Now += OpMs; Log.Add("Q " + c); return "-42.5"; }
-            public void Set(string r, string c, double v, string u, int t) { Now += OpMs; Log.Add("S " + v); }
+            public int LastIoTimeoutMs;
+
+            /// <summary>An I/O op takes OpMs, or times out at its timeout if that is shorter.</summary>
+            private void Io(int t)
+            {
+                LastIoTimeoutMs = t;
+                if (OpMs <= t) { Now += OpMs; return; }
+                Now += t;
+                throw new Exception("VI_ERROR_TMO after " + t + " ms");
+            }
+
+            public void Write(string r, string c, int t) { Log.Add("W " + c); Io(t); }
+            public string Query(string r, string c, int t) { Log.Add("Q " + c); Io(t); return "-42.5"; }
+            public void Set(string r, string c, double v, string u, int t) { Log.Add("S " + v); Io(t); }
             public void Sleep(int ms) { Now += ms; Log.Add("Z " + ms); }
             public void Complete(string r, string op, int t)
             {
@@ -69,16 +80,71 @@ namespace GpibMcp.Tests
                 Sweep = new BatchSweep { Var = "f", From = 1, To = 10, Step = 1 },
                 Steps = new List<BatchStep> { new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp" } }
             };
-            var exec = new ClockedExec { OpMs = 4000 };   // 10 points x 4 s = 40 s, against the default 25 s
+            var exec = new ClockedExec { OpMs = 4000, };   // 10 points x 4 s = 40 s, against the default 25 s
 
             var result = Run(plan, exec);
 
             Assert.False(result.Ok);
-            Assert.Equal(7, result.Rows.Count);           // points started before 25 s ran out: 0..6
-            Assert.Equal(7, result.Stopped.AtPoint);
-            Assert.Equal(8d, result.Stopped.AtValue);     // continue the sweep from f = 8
-            Assert.Null(result.Stopped.Waiting);
-            Assert.Empty(result.Errors);
+            Assert.Equal(6, result.Rows.Count);            // points 0..5 finished by 24 s
+            Assert.Equal(6, result.Stopped.AtPoint);
+            Assert.Equal(7d, result.Stopped.AtValue);
+            Assert.Equal(7d, result.Stopped.ContinueSweep.From);
+            Assert.Equal(10d, result.Stopped.ContinueSweep.To);
+            Assert.Equal(1d, result.Stopped.ContinueSweep.Step);
+            Assert.True(exec.Now <= 25000, "returned at " + exec.Now + " ms");
+        }
+
+        [Fact]
+        public void AnIoStepStartedJustBeforeTheBudget_IsCappedToIt_AndStopsThere()
+        {
+            // Copilot on #152: write/query/set kept their full timeout, so one started at 24 s could hold the
+            // call to 29 s - past the client's limit. Point 6's query starts at 24 s with 1 s left.
+            var plan = new BatchPlan
+            {
+                Sweep = new BatchSweep { Var = "f", From = 1, To = 10, Step = 1 },
+                Steps = new List<BatchStep> { new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp", TimeoutMs = 10000 } }
+            };
+            var exec = new ClockedExec { OpMs = 4000 };
+
+            var result = Run(plan, exec);
+
+            Assert.Equal(1000, exec.LastIoTimeoutMs);      // capped from 10 s to what was left
+            Assert.Equal(25000, exec.Now);
+            Assert.Equal("query MKA?", result.Stopped.Waiting);
+            Assert.Contains("time budget ran out while waiting for 'query MKA?'", Assert.Single(result.Errors).Error);
+        }
+
+        [Theory]
+        [InlineData(1, 10, 10, 7)]       // a count sweep stopped at point 7: the remaining 3 points, not 10 re-spaced
+        [InlineData(0, 1, 7, 2)]         // spacing 1/6, which a fresh 'count' over the rest must reproduce
+        [InlineData(500000, 1500000, 3, 2)]
+        public void TheContinuationOfACountSweep_RunsExactlyTheRemainingPoints(double from, double to, int count, int stoppedAt)
+        {
+            // Copilot on #152: reusing the original count with a new 'from' re-spaces the grid.
+            var sweep = new BatchSweep { Var = "f", From = from, To = to, Count = count };
+            var points = BatchRunner.ExpandSweep(sweep, out _);
+
+            var rest = BatchRunner.ExpandSweep(BatchRunner.RemainingSweep(sweep, points, stoppedAt), out string error);
+
+            Assert.Null(error);
+            Assert.Equal(points.Skip(stoppedAt).ToArray(), rest.ToArray(), new ToleranceComparer());
+        }
+
+        [Fact]
+        public void TheContinuationOfAStepSweep_KeepsTheStep()
+        {
+            var sweep = new BatchSweep { Var = "f", From = 0.5e6, To = 20e6, Step = 0.5e6 };
+            var points = BatchRunner.ExpandSweep(sweep, out _);
+
+            var rest = BatchRunner.ExpandSweep(BatchRunner.RemainingSweep(sweep, points, 12), out _);
+
+            Assert.Equal(points.Skip(12).ToArray(), rest.ToArray(), new ToleranceComparer());
+        }
+
+        private sealed class ToleranceComparer : IEqualityComparer<double>
+        {
+            public bool Equals(double a, double b) => Math.Abs(a - b) <= 1e-9 * Math.Max(1, Math.Abs(a));
+            public int GetHashCode(double d) => 0;
         }
 
         [Fact]

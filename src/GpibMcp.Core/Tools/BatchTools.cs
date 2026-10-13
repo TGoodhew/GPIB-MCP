@@ -41,7 +41,7 @@ namespace GpibMcp.Tools
             "preview and sends NOTHING to the bus - show the user what will run, and only if they approve, call again " +
             "with confirm:true to execute. Small plans run immediately. A batch runs for at most time_budget_s " +
             "(default 25 s) so it returns before the client gives up on the call; if it stops early, 'stopped' " +
-            "gives the point to continue from - call again with the sweep starting there. An operation longer " +
+            "gives continue_sweep - call again with the same steps and that sweep to run the remaining points. An operation longer " +
             "than the budget (e.g. a 60 s sweep) can't be waited for inside one call.";
 
         public static void Register(ToolRegistry registry, InstrumentDatabase db, AssignmentStore assignments,
@@ -58,7 +58,7 @@ namespace GpibMcp.Tools
                     Prop("time_budget_s", "number", "Seconds the batch may run before it stops and returns the rows it " +
                         "has (default 25, max 55). Clients give up on a tool call after a fixed time - about 30 s on " +
                         "Claude Desktop, 60 s over a link to a computer - and the whole result is then lost. If it stops, " +
-                        "'stopped' says which point to run again from."),
+                        "'stopped' gives continue_sweep: the sweep that runs the remaining points."),
                     Prop("preview", "boolean", "If true, return the plan size (points/ops) WITHOUT running anything."),
                     Prop("confirm", "boolean", "Set true to execute a LARGE plan that was gated for confirmation " +
                         "(more than ~50 GPIB ops). Small plans run without it; ignored when preview:true.")),
@@ -208,6 +208,7 @@ namespace GpibMcp.Tools
                         ["completed_points"] = new JObject { ["type"] = "integer" },
                         ["at_point"] = new JObject { ["type"] = "integer", ["description"] = "0-based index of the first point not completed." },
                         ["continue_from"] = new JObject { ["type"] = "number", ["description"] = "That point's sweep value." },
+                        ["continue_sweep"] = new JObject { ["type"] = "object", ["description"] = "The 'sweep' argument that runs exactly the remaining points - pass it back with the same steps." },
                         ["waiting_for"] = new JObject { ["type"] = "string", ["description"] = "The operation still running, if it stopped mid-wait." },
                         ["message"] = new JObject { ["type"] = "string" }
                     }
@@ -330,6 +331,7 @@ namespace GpibMcp.Tools
                     ["at_point"] = r.Stopped.AtPoint
                 };
                 if (r.Stopped.AtValue.HasValue) stop["continue_from"] = r.Stopped.AtValue.Value;
+                if (r.Stopped.ContinueSweep != null) stop["continue_sweep"] = SweepJson(r.Stopped.ContinueSweep);
                 if (r.Stopped.Waiting != null) stop["waiting_for"] = r.Stopped.Waiting;
                 stop["message"] = StopMessage(r);
                 jo["stopped"] = stop;
@@ -349,10 +351,19 @@ namespace GpibMcp.Tools
                   "other commands until it finishes (an 8563E queues them behind its sweep). An operation that takes " +
                   "longer than the budget can't be waited for inside one batch."
                 : ".";
-            if (s.AtValue.HasValue)
-                text += " Run the rest with the sweep starting at " + BatchRunner.FormatNumber(s.AtValue.Value) +
-                        " (point " + (s.AtPoint + 1) + ").";
+            if (s.ContinueSweep != null)
+                text += " Run the rest - point " + (s.AtPoint + 1) + " on - with the same steps and sweep " +
+                        SweepJson(s.ContinueSweep).ToString(Formatting.None) + " (continue_sweep).";
             return text;
+        }
+
+        /// <summary>A sweep as the tool's 'sweep' argument takes it, so a continuation can be passed straight back.</summary>
+        private static JObject SweepJson(BatchSweep s)
+        {
+            var jo = new JObject { ["var"] = s.Var, ["from"] = s.From, ["to"] = s.To };
+            if (s.Count.HasValue) jo["count"] = s.Count.Value; else jo["step"] = s.Step;
+            if (s.Unit != null) jo["unit"] = s.Unit;
+            return jo;
         }
 
         private static JToken Cell(object v)
@@ -376,7 +387,8 @@ namespace GpibMcp.Tools
             if (r.Stopped != null)
                 summary += "; stopped at the " + (r.Stopped.BudgetMs / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) +
                            " s time budget after " + r.Stopped.AtPoint + " of " + r.Ran.Points + " points" +
-                           (r.Stopped.AtValue.HasValue ? ", continue from " + BatchRunner.FormatNumber(r.Stopped.AtValue.Value) : "");
+                           (r.Stopped.AtValue.HasValue ? ", continue from " + BatchRunner.FormatNumber(r.Stopped.AtValue.Value) +
+                                                         " with continue_sweep" : "");
             return summary;
         }
 
