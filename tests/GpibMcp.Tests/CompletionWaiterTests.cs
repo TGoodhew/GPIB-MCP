@@ -92,17 +92,62 @@ namespace GpibMcp.Tests
             Assert.Contains("signalled an ERROR", result.Message);
         }
 
-        [Fact]
-        public void ErrorAlreadyQueuedBeforeTheOperation_IsNotReportedAsItsError()
+        /// <summary>The simulator, behind a channel that can also clear its error queue, as an 8563E's can (ERR?).</summary>
+        private sealed class ClearableInstrument : IStatusChannel, IErrorQueueChannel
         {
-            // #142 run 2: *IDN?, which the 8563E rejects, left an error queued; the error bit then read set at
-            // the end of a sweep that had worked, and was reported as the sweep's error.
+            public readonly SimulatedInstrument Sim;
+            public int Clears;
+            public ClearableInstrument(SimulatedInstrument sim) { Sim = sim; }
+            public void Send(string command) => Sim.Send(command);
+            public int SerialPoll() => Sim.SerialPoll();
+            public IReadOnlyList<string> ClearErrors()
+            {
+                Clears++;
+                if (!Sim.ErrorQueued) return new string[0];
+                Sim.ErrorQueued = false;
+                return new[] { "112" };
+            }
+        }
+
+        private static CompletionResult Run(StatusModel model, string op, int timeoutMs, ClearableInstrument channel, int poll = 50) =>
+            CompletionWaiter.Wait(model, "8563E", op, timeoutMs, channel, () => channel.Sim.Now, ms => channel.Sim.Advance(ms), poll);
+
+        [Fact]
+        public void ErrorQueuedBeforeTheOperation_IsClearedFirst_ThenTheOperationCompletes()
+        {
+            // #142 run 2: *IDN?, which the 8563E rejects, left an error queued, and the error bit read at the end
+            // of a sweep that had worked was reported as the sweep's error. Cleared before starting, it isn't.
+            var channel = new ClearableInstrument(new SimulatedInstrument { SweepDurationMs = 50, ErrorQueued = true });
+            var result = Run(Model8563(), "sweepComplete", 5000, channel, poll: 100);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.Equal(1, channel.Clears);
+            Assert.Equal(0, result.StatusByte & SimulatedInstrument.Error);
+            Assert.Contains("Cleared error 112", result.Message);
+        }
+
+        [Fact]
+        public void ErrorQueuedBeforeTheOperation_DoesNotHideANewErrorDuringIt()
+        {
+            // Copilot on #143: excusing an error bit that was already set would also hide a failure of the
+            // operation itself. Clearing the old error first leaves the new one to be reported.
+            var channel = new ClearableInstrument(new SimulatedInstrument { SweepDurationMs = 50, ErrorQueued = true, ErrorOnSweep = true });
+            var result = Run(Model8563(), "sweepComplete", 5000, channel, poll: 100);
+
+            Assert.Equal(CompletionOutcome.InstrumentError, result.Outcome);
+            Assert.Contains("Cleared error 112", result.Message);
+        }
+
+        [Fact]
+        public void ErrorQueuedBeforeTheOperation_ThatCannotBeCleared_IsAnErrorThatMayBeTheOldOne()
+        {
+            // No way to read the queue (no identity.errorQuery): one error bit can't tell old from new, so it is
+            // not passed off as success - it is an error, flagged as possibly the earlier one.
             var sim = new SimulatedInstrument { SweepDurationMs = 50, ErrorQueued = true };
             var result = Run(Model8563(), "sweepComplete", 5000, sim, poll: 100);
 
-            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
-            Assert.Equal(SimulatedInstrument.Error, result.StatusByte & SimulatedInstrument.Error);
-            Assert.Contains("already present before", result.Message);
+            Assert.Equal(CompletionOutcome.InstrumentError, result.Outcome);
+            Assert.Contains("may be that earlier error", result.Message);
         }
 
         [Fact]

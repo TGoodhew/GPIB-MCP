@@ -145,6 +145,23 @@ namespace Srq.Completion
             log("drain serial poll -> 0x" + drained.ToString("X2"));
             bool errorBefore = HasBit(drained, errorBit);
 
+            // One error bit can't say whether an error is old or new, so clear an old one before starting,
+            // when the instrument's error queue can be read; then an error at completion is the operation's.
+            string note = null;
+            if (errorBefore && channel is IErrorQueueChannel queue)
+            {
+                try
+                {
+                    IReadOnlyList<string> cleared = queue.ClearErrors();
+                    int after = channel.SerialPoll();
+                    log("cleared the error queue (" + string.Join(", ", cleared) + ") -> 0x" + after.ToString("X2"));
+                    errorBefore = HasBit(after, errorBit);
+                    if (!errorBefore && cleared.Count > 0)
+                        note = "Cleared error " + string.Join(", ", cleared) + ", already queued before '" + operationName + "' started.";
+                }
+                catch (Exception ex) { log("could not clear the error queue: " + ex.Message); }
+            }
+
             // Mode commands go before arming: they complete at once, and a command-complete they raise
             // with the mask armed would be indistinguishable from the operation's own.
             if (!string.IsNullOrEmpty(op.Prepare)) { channel.Send(op.Prepare); log("send (prepare): " + op.Prepare); }
@@ -183,13 +200,12 @@ namespace Srq.Completion
 
             bool serviced = (stb & rqsBit) != 0;
             bool err = HasBit(stb, errorBit);
-            string note = null;
-            if (err && errorBefore && (stb & expect) == expect)
+            if (err && errorBefore)
             {
-                // The operation completed; the error was there before it began.
-                err = false;
-                note = "An instrument error was already present before '" + operationName + "' started, so it is " +
-                       "not attributed to this operation - read and clear the instrument's error queue (e.g. ERR?).";
+                // Still an error, but possibly not a new one - say so rather than guess either way.
+                note = "The error bit was already set before '" + operationName + "' started and could not be " +
+                       "cleared, so this may be that earlier error rather than a new one - read the instrument's " +
+                       "error queue (e.g. ERR?) to tell.";
             }
             return Finish(model, operationName, op, stb, elapsed, timeoutMs, serviced, err, log, note, polls);
         }
@@ -252,7 +268,8 @@ namespace Srq.Completion
             if (err)
                 result = new CompletionResult(CompletionOutcome.InstrumentError,
                     "Instrument signalled an ERROR during '" + operationName + "' after " + elapsed + " ms - " + detail +
-                    (done ? " (the expected completion bit is also set)" : "") + ".", stb, elapsed, bits);
+                    (done ? " (the expected completion bit is also set)" : "") + "." +
+                    (note != null ? " " + note : ""), stb, elapsed, bits);
             else if (done)
                 result = new CompletionResult(CompletionOutcome.Completed,
                     "Completed '" + operationName + "' after " + elapsed + " ms - " + detail + "." +

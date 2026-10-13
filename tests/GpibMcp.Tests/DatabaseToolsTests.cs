@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
@@ -451,6 +452,70 @@ namespace GpibMcp.Tests
             Assert.Equal(new[] { "*IDN?", "ID?" }, visa.Queries);
         }
 
+        // Two scalar analyzers whose identity patterns both match "HP8757C".
+        private static InstrumentDefinition Analyzer8757(string model, string errorQuery) => new InstrumentDefinition
+        {
+            Model = model,
+            Identity = new IdentitySpec { Command = "OI", MatchRegex = "8757", ErrorQuery = errorQuery }
+        };
+
+        private static FakeInstrumentManager Bench8757()
+        {
+            var visa = new FakeInstrumentManager();
+            visa.UnansweredQueries.Add("*IDN?");
+            visa.UnansweredQueries.Add("ID?");
+            visa.UnansweredQueries.Add("ID");
+            visa.QueryResponses["OI"] = "HP8757C";
+            visa.QueryReplySequences["ERR?"] = new Queue<string>(new[] { "112" });
+            visa.QueryResponses["ERR?"] = "0";
+            return visa;
+        }
+
+        [Fact]
+        public void Identify_SeveralModelsMatch_AndReadTheirErrorsDifferently_SendsNoErrorQuery()
+        {
+            // Copilot on #149: the first match with an errorQuery depended on file order, so an ambiguous
+            // identity could send another model's command. Unless the matches agree, nothing is sent.
+            var db = InstrumentDatabase.FromDefinitions(new[] { Analyzer8757("8757C", "ERR?"), Analyzer8757("8757D", null) });
+            var visa = Bench8757();
+
+            var text = DatabaseTools.ClearErrorsFromUnansweredQueries(visa, "GPIB0::16::INSTR", new IoSpec(1000),
+                db.MatchIdentity("HP8757C").ToList(), new List<string> { "*IDN?" });
+
+            Assert.Empty(visa.Queries);
+            Assert.Contains("read their error queues differently", text);
+        }
+
+        [Fact]
+        public void Identify_SeveralModelsMatch_AndAgree_ClearsTheError()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { Analyzer8757("8757C", "ERR?"), Analyzer8757("8757D", "ERR?") });
+            var visa = Bench8757();
+
+            var text = DatabaseTools.ClearErrorsFromUnansweredQueries(visa, "GPIB0::16::INSTR", new IoSpec(1000),
+                db.MatchIdentity("HP8757C").ToList(), new List<string> { "*IDN?" });
+
+            Assert.Equal(new[] { "ERR?", "ERR?" }, visa.Queries);
+            Assert.Contains("now cleared with ERR?", text);
+        }
+
+        [Fact]
+        public void Identify_ErrorQueueThatNeverEmpties_IsNotReportedCleared()
+        {
+            // Copilot on #149: hitting the read limit was treated as success - "now cleared", and STB? sent -
+            // while errors remained.
+            var db = InstrumentDatabase.FromDefinitions(new[] { Analyzer8563E() });
+            var visa = Bench8563E();
+            visa.QueryReplySequences["ERR?"] = new Queue<string>(Enumerable.Repeat("112", 10));
+
+            var text = Tool("instrument_identify", db, AssignmentStore.InMemory(), visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+
+            Assert.Contains("couldn't be confirmed empty", text);   // not "still wasn't": the last read removed one too
+            Assert.DoesNotContain("now cleared", text);
+            Assert.DoesNotContain("STB?", visa.Queries);
+        }
+
         [Theory]
         [InlineData("0", true)]
         [InlineData("+0,\"No error\"", true)]
@@ -460,7 +525,7 @@ namespace GpibMcp.Tests
         [InlineData("-113,\"Undefined header\"", false)]
         public void ErrorQueueReply_ZeroMeansNoError(string reply, bool noError)
         {
-            Assert.Equal(noError, DatabaseTools.IsNoError(reply));
+            Assert.Equal(noError, ErrorQueue.IsNoError(reply));
         }
 
         [Fact]

@@ -327,10 +327,14 @@ namespace GpibMcp.Tools
                 args =>
                 {
                     string resource = ReqStr(args, "resource");
+                    bool close = Bool(args, "close_session", false);
                     string sent;
+                    // ReturnToLocal opens a session if there isn't one, so a failure must still honour
+                    // close_session rather than leave that session held.
                     try { sent = visa.ReturnToLocal(resource, InstrumentManager.DefaultTimeoutMs); }
-                    catch (NotSupportedException ex) { return Err(ex.Message); }
-                    string closed = Bool(args, "close_session", false) && visa.Close(resource) ? "; session closed" : "";
+                    catch (NotSupportedException ex) { return Err(ex.Message + (close && visa.Close(resource) ? " Session closed." : "")); }
+                    catch (Exception) when (close) { visa.Close(resource); throw; }
+                    string closed = close && visa.Close(resource) ? "; session closed" : "";
                     return Txt(resource + " returned to local: sent " + sent + closed + ". Its front panel works again.");
                 }));
 
@@ -537,7 +541,7 @@ namespace GpibMcp.Tools
                 if (proposalOrError != null) return proposalOrError;  // unconfirmed proposal, or a validation/save error
             }
 
-            var channel = new VisaStatusChannel(visa, resource);
+            var channel = StatusChannelFor(db, assignments, visa, resource, def);
             var watch = System.Diagnostics.Stopwatch.StartNew();
             CompletionResult result;
             try
@@ -575,10 +579,10 @@ namespace GpibMcp.Tools
                                                        IInstrumentManager visa, string resource, string operation, int timeoutMs)
         {
             string model = assignments.Get(resource);
-            StatusModel sm = null;
-            InstrumentDefinition def;
-            if (!string.IsNullOrEmpty(model) && db.TryGet(model, out def)) sm = def.StatusModel;
-            var channel = new VisaStatusChannel(visa, resource);
+            InstrumentDefinition def = null;
+            if (!string.IsNullOrEmpty(model)) db.TryGet(model, out def);
+            StatusModel sm = def?.StatusModel;
+            var channel = StatusChannelFor(db, assignments, visa, resource, def);
             var watch = System.Diagnostics.Stopwatch.StartNew();
             return CompletionWaiter.Wait(sm, model ?? resource, operation, timeoutMs, channel,
                                          () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep,
@@ -668,15 +672,45 @@ namespace GpibMcp.Tools
         private static ToolOutput Err(string message) => ToolOutput.Text(message).AsError();
         private static ToolOutput Txt(string message) => ToolOutput.Text(message);
 
-        /// <summary>Bridges the decoupled <see cref="IStatusChannel"/> to the instrument manager.</summary>
-        private sealed class VisaStatusChannel : IStatusChannel
+        /// <summary>
+        /// Bridges the decoupled <see cref="IStatusChannel"/> to the instrument manager, and - when the model
+        /// says how (identity.errorQuery) - lets the waiter clear an error already queued before an operation.
+        /// </summary>
+        private sealed class VisaStatusChannel : IStatusChannel, IErrorQueueChannel
         {
             private readonly IInstrumentManager _visa;
             private readonly string _resource;
-            public VisaStatusChannel(IInstrumentManager visa, string resource) { _visa = visa; _resource = resource; }
+            private readonly IdentitySpec _identity;
+            private readonly IoSpec _io;
+
+            public VisaStatusChannel(IInstrumentManager visa, string resource, IdentitySpec identity = null, IoSpec io = null)
+            {
+                _visa = visa;
+                _resource = resource;
+                _identity = identity;
+                _io = io ?? new IoSpec(InstrumentManager.DefaultTimeoutMs);
+            }
+
             public void Send(string command) => _visa.Write(_resource, command, InstrumentManager.DefaultTimeoutMs);
             public int SerialPoll() => _visa.SerialPoll(_resource);
+
+            public IReadOnlyList<string> ClearErrors()
+            {
+                if (_identity == null || string.IsNullOrEmpty(_identity.ErrorQuery))
+                    throw new NotSupportedException("the model defines no identity.errorQuery to read its error queue with");
+                ErrorQueue.Result result = ErrorQueue.Clear(_visa, _resource, _io, _identity);
+                if (!result.Emptied)
+                    throw new InvalidOperationException("its error queue couldn't be confirmed empty: " + ErrorQueue.MaxReads +
+                                                        " reads each returned an error (" + string.Join(", ", result.Errors) + ")");
+                return result.Errors;
+            }
         }
+
+        /// <summary>The waiter's channel to a resource, with its model's error-queue commands when it has them.</summary>
+        private static VisaStatusChannel StatusChannelFor(InstrumentDatabase db, AssignmentStore assignments,
+                                                          IInstrumentManager visa, string resource, InstrumentDefinition def) =>
+            new VisaStatusChannel(visa, resource, def?.Identity,
+                                  InstrumentIo.Resolve(db, assignments, resource, InstrumentManager.DefaultTimeoutMs));
 
         /// <summary>Resolves the statusModel for a resource via its assignment, or null if none is known.</summary>
         private static StatusModel ResolveStatusModel(InstrumentDatabase db, AssignmentStore assignments, string resource)
