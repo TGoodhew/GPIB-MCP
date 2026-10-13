@@ -281,6 +281,8 @@ namespace GpibMcp.Tests
             string ResultText(int i) => string.Concat(responses[i]["result"]["content"].Select(c => (string)c["text"]));
             Assert.DoesNotContain("gpib_batch", ResultText(0));   // first call: below threshold, no nudge
             Assert.Contains("gpib_batch", ResultText(1));         // second call hits the threshold: nudge appended
+            // #153: joined with no separator, as Claude Desktop does, the note still starts its own paragraph.
+            Assert.Contains("\n\nNOTE (gpib-mcp)", ResultText(1));
         }
 
         [Fact]
