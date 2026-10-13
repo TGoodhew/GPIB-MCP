@@ -513,8 +513,10 @@ namespace GpibMcp.Mcp
                 ToolCallLog.Write(name, arguments, !output.IsError, watch.ElapsedMilliseconds);
                 // #74: if the model is grinding through a per-point loop single-op, append a nudge to switch
                 // to gpib_batch - here, in the result it actually reads (soft steering alone didn't land).
+                // Its own paragraph: Claude Desktop joins text blocks with no separator, which ran the note
+                // into the result's last sentence ("...started.NOTE (gpib-mcp)...", #153).
                 string nudge = _loopNudge.Observe(name);
-                if (nudge != null) output.AddText(nudge);
+                if (nudge != null) output.AddText("\n\n" + nudge);
                 return ToToolResult(output);
             }
             catch (Exception ex)
