@@ -76,7 +76,7 @@ $manifest = [ordered]@{
         platforms      = @("win32")
         claude_desktop = ">=0.10.0"
     }
-    # A representative subset for the Extensions UI (the server advertises ~30 tools via tools/list).
+    # A representative subset for the Extensions UI (the server advertises ~31 tools via tools/list).
     tools            = @(
         [ordered]@{ name = "visa_list_resources";       description = "Discover connected GPIB / VISA / USB-TMC / LXI instruments" }
         [ordered]@{ name = "visa_identify";             description = "Identify an instrument (*IDN?)" }

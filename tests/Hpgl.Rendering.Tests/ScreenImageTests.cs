@@ -35,6 +35,82 @@ namespace Hpgl.Rendering.Tests
             using (var ms = new MemoryStream()) { b.Save(ms, fmt); return ms.ToArray(); }
         }
 
+        private static bool IsPng(byte[] b) => b.Length > 8 && b[0] == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G';
+
+        [Fact]
+        public void ToPng_ConvertsGif_AsTheE4406ASendsItsScreen()   // #139
+        {
+            using (var shot = MakeScreenshot(640, 480))
+            {
+                byte[] png = ScreenImage.ToPng(Encode(shot, ImageFormat.Gif));
+                Assert.True(IsPng(png));
+                ScreenImage.Dimensions(png, out int w, out int h);
+                Assert.Equal(640, w);
+                Assert.Equal(480, h);
+            }
+        }
+
+        [Fact]
+        public void ToPng_RasterisesAVectorMetafile()   // #139: WMF/EMF is vector, so it is drawn to pixels
+        {
+            byte[] emf;
+            using (var reference = new Bitmap(1, 1))
+            using (var refGraphics = Graphics.FromImage(reference))
+            {
+                System.IntPtr hdc = refGraphics.GetHdc();
+                try
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        using (var meta = new Metafile(ms, hdc, new Rectangle(0, 0, 400, 300), MetafileFrameUnit.Pixel))
+                        using (var g = Graphics.FromImage(meta))
+                        {
+                            g.Clear(Color.Black);
+                            g.DrawLine(Pens.Yellow, 0, 0, 400, 300);
+                        }
+                        emf = ms.ToArray();
+                    }
+                }
+                finally { refGraphics.ReleaseHdc(hdc); }
+            }
+
+            byte[] png = ScreenImage.ToPng(emf);
+
+            Assert.True(IsPng(png));
+            ScreenImage.Dimensions(png, out int w, out int h);
+            Assert.True(w > 0 && h > 0);
+        }
+
+        [Fact]
+        public void ToPng_OfAMultiFrameGif_UsesTheFirstFrame()
+        {
+            // System.Drawing writes one frame, which is what Load decodes; the guard is that it decodes at all.
+            using (var shot = MakeScreenshot(320, 240))
+                Assert.True(IsPng(ScreenImage.ToPng(Encode(shot, ImageFormat.Gif))));
+        }
+
+        [Fact]
+        public void ToPng_WithALimit_DownscalesUntilItFits()
+        {
+            // Noise doesn't compress, so the full-size PNG is well over the limit.
+            var rng = new System.Random(1);
+            using (var noise = new Bitmap(800, 600, PixelFormat.Format24bppRgb))
+            {
+                for (int y = 0; y < 600; y++)
+                    for (int x = 0; x < 800; x++)
+                        noise.SetPixel(x, y, Color.FromArgb(rng.Next(256), rng.Next(256), rng.Next(256)));
+                byte[] bmp = Encode(noise, ImageFormat.Bmp);
+
+                byte[] full = ScreenImage.ToPng(bmp);
+                byte[] limited = ScreenImage.ToPng(bmp, 200 * 1000);
+
+                Assert.True(full.Length > 200 * 1000);
+                Assert.True(limited.Length <= 200 * 1000, "PNG is " + limited.Length + " bytes");
+                ScreenImage.Dimensions(limited, out int w, out _);
+                Assert.True(w < 800);
+            }
+        }
+
         [Fact]
         public void ToPng_ConvertsBmp_ToPngAndShrinksIt()
         {

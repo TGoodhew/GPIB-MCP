@@ -35,6 +35,14 @@ namespace GpibMcp.Instruments
         byte[] QueryBlock(string resource, string command, int timeoutMs);
 
         /// <summary>
+        /// Writes a query and reads its reply as bytes, never as text (#139): an IEEE 488.2 block - header
+        /// parsed, exactly the declared length read over as many reads as it takes, trailing terminator
+        /// consumed - or raw bytes to END. A malformed or short block is a <see cref="GpibOperationException"/>
+        /// saying what arrived, after whatever was left has been read off the instrument.
+        /// </summary>
+        BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format);
+
+        /// <summary>
         /// Writes a command and reads the response using the given per-instrument I/O behaviour
         /// (terminators and an optional bounded read), e.g. for a free-running instrument (issue #35).
         /// </summary>

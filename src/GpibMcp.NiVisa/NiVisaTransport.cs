@@ -99,7 +99,8 @@ namespace GpibMcp.Instruments
             {
                 try
                 {
-                    return new TransportReadResult(session.RawIO.Read(request.MaxBytes), false);
+                    byte[] data = session.RawIO.Read(request.MaxBytes, out ReadStatus status);
+                    return new TransportReadResult(data, false, status != ReadStatus.MaximumCountReached);
                 }
                 catch (IOTimeoutException ex)
                 {

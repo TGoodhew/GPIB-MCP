@@ -27,17 +27,13 @@ namespace Hpgl.Rendering
         private static readonly int[] ThumbWidths = { 800, 640, 480, 360, 280, 240, 200, 160, 128, 100, 80 };
 
         /// <summary>
-        /// Decodes any supported instrument image (PNG, BMP, GIF, JPEG) and re-encodes it as PNG - so a
-        /// bulky uncompressed BMP (Rigol returns ~1.1&nbsp;MB) becomes a compact, universally-viewable PNG.
+        /// Decodes any supported instrument image (PNG, BMP, GIF - its first frame - JPEG, and WMF/EMF,
+        /// rasterised) and re-encodes it as PNG - so a bulky uncompressed BMP (Rigol returns ~1.1&nbsp;MB)
+        /// becomes a compact, universally-viewable PNG, and a GIF one every client can show.
         /// </summary>
         public static byte[] ToPng(byte[] imageBytes)
         {
-            using (var bmp = Load(imageBytes))
-            using (var ms = new MemoryStream())
-            {
-                bmp.Save(ms, ImageFormat.Png);
-                return ms.ToArray();
-            }
+            using (var bmp = Load(imageBytes)) return Encode(bmp);
         }
 
         /// <summary>Pixel dimensions of an instrument image, for reporting (out-params keep callers System.Drawing-free).</summary>
@@ -154,15 +150,67 @@ namespace Hpgl.Rendering
             }
         }
 
+        /// <summary>
+        /// As <see cref="ToPng(byte[])"/>, scaled down (by quarters) until the PNG is no more than
+        /// <paramref name="maxBytes"/>, so an image returned as MCP content stays a sensible size (#139).
+        /// </summary>
+        public static byte[] ToPng(byte[] imageBytes, long maxBytes)
+        {
+            using (var src = Load(imageBytes))
+            {
+                byte[] png = Encode(src);
+                int w = src.Width, h = src.Height;
+                while (png.Length > maxBytes && w > 64 && h > 64)
+                {
+                    w = w * 3 / 4;
+                    h = h * 3 / 4;
+                    using (var scaled = Scale(src, w, h)) png = Encode(scaled);
+                }
+                return png;
+            }
+        }
+
+        private static byte[] Encode(Bitmap bmp)
+        {
+            using (var ms = new MemoryStream())
+            {
+                bmp.Save(ms, ImageFormat.Png);
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>Widest a vector metafile (WMF/EMF) is rasterised.</summary>
+        private const int MaxMetafileWidth = 1600;
+
         private static Bitmap Load(byte[] imageBytes)
         {
             if (imageBytes == null || imageBytes.Length == 0)
                 throw new ArgumentException("no image data", nameof(imageBytes));
-            // Copy into an owned stream Bitmap can keep; new Bitmap(stream) requires the stream to stay open.
+            // Copy into an owned stream the image can keep; it must stay open for the image's lifetime.
             var ms = new MemoryStream();
             ms.Write(imageBytes, 0, imageBytes.Length);
             ms.Position = 0;
-            return new Bitmap(ms);
+
+            // PNG, BMP, GIF (its first frame, for an animated one), JPEG come back as a Bitmap; WMF/EMF -
+            // which an instrument can return as a screen dump (#139) - as a vector Metafile to rasterise.
+            Image image = Image.FromStream(ms);
+            var meta = image as Metafile;
+            if (meta == null) return (Bitmap)image;
+            using (meta) return Rasterize(meta);
+        }
+
+        private static Bitmap Rasterize(Metafile meta)
+        {
+            int w = Math.Max(1, meta.Width), h = Math.Max(1, meta.Height);
+            if (w > MaxMetafileWidth) { h = Math.Max(1, (int)((long)h * MaxMetafileWidth / w)); w = MaxMetafileWidth; }
+            var bmp = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.White);
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.DrawImage(meta, new Rectangle(0, 0, w, h));
+            }
+            return bmp;
         }
     }
 }

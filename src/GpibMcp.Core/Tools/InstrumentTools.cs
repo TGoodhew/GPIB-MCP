@@ -95,6 +95,15 @@ namespace GpibMcp.Tools
                     var io = InstrumentIo.Resolve(db, assignments, resource, timeout, readBytes);
                     string response = Clean(visa.Query(resource, command, io));
 
+                    // A binary reply - a screen image, say - read as text is mojibake. It was read to its
+                    // end, so nothing is left on the instrument; say what it is and where to read it (#139).
+                    if (BinaryTools.LooksBinary(response, out string blockHeader))
+                        return ToolOutput.Text("The reply to " + command + " is binary" +
+                            (blockHeader != null ? " - an IEEE 488.2 block, header " + blockHeader : "") +
+                            " (" + response.Length + " bytes) - so it can't be returned as text. Read it with " +
+                            "visa_query_binary, which saves the bytes and shows an image. The whole reply was read, " +
+                            "so nothing is left waiting on the instrument.").AsError();
+
                     // The reply, and what it means (#113). The text block still carries the raw response and
                     // nothing else - that is what a human reads - while structuredContent adds the number and
                     // its unit, so the model stops re-parsing measurements out of prose.
@@ -488,6 +497,9 @@ namespace GpibMcp.Tools
 
             // ---- Screen capture (HP-GL plotter emulation -> image) --------------
             CaptureTools.Register(registry, db, assignments, visa);
+
+            // ---- Binary replies (#139): a block read as bytes, saved, described --
+            BinaryTools.Register(registry, visa);
 
             // ---- Batch / sweep execution (#59): one call runs a whole sweep -----
             BatchTools.Register(registry, db, assignments, visa);

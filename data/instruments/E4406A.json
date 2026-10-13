@@ -11,6 +11,13 @@
     "matchRegex": "E4406A",
     "description": "Standard IEEE 488.2 identification query. Returns manufacturer, model (E4406A), serial number, and firmware revision."
   },
+  "capture": {
+    "method": "scpi_block",
+    "dumpCommand": ":HCOP:SDUM:DATA? GIF",
+    "timeoutMs": 30000,
+    "invert": { "query": ":HCOP:SDUM:IMAG?", "on": ":HCOP:SDUM:IMAG INV", "off": ":HCOP:SDUM:IMAG NORM", "onReply": "INV" },
+    "description": "Screen dump as a GIF in an IEEE 488.2 block (E4406A Programmer's Guide p.292, :HCOPy:SDUMp:DATA? [GIF]|BMP|WMF). :HCOPy:SDUMp:IMAGe NORMal|INVert (p.293) sets the trace background."
+  },
   "commands": [
     {
       "name": "select_instrument_mode",

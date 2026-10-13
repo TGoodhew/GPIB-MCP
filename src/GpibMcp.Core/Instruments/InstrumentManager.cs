@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using GpibMcp.Diagnostics;
 
@@ -82,6 +83,60 @@ namespace GpibMcp.Instruments
         public byte[] QueryBlock(string resource, string command, int timeoutMs)
         {
             lock (_gate) return QueryBlockNoLock(resource, command, timeoutMs);
+        }
+
+        public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format)
+        {
+            lock (_gate)
+            {
+                var io = new IoSpec(timeoutMs);
+                string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
+                try
+                {
+                    _transport.Open(resource, Timeout(timeoutMs));
+                    _history.Record(resource, CommandDirection.Sent, payload);
+                    _transport.Write(resource, Latin1.GetBytes(payload), Timeout(timeoutMs));
+
+                    // Raw bounded reads, no termination character: binary data can contain 0x0A. A read that
+                    // timed out means the instrument stopped sending, which the block reader reports as short.
+                    ReplyReader.ReadChunk read = (int count, out bool more) =>
+                    {
+                        var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = Timeout(timeoutMs), TermChar = null, MaxBytes = count });
+                        more = !r.EndOfMessage && !r.TimedOut;
+                        return r.Data;
+                    };
+
+                    BinaryBlockResult result;
+                    try { result = BinaryBlock.Read(read, format); }
+                    catch (IOException) { DrainNoLock(resource); throw; }
+
+                    _history.Record(resource, CommandDirection.Received,
+                        "<" + result.Payload.Length + "-byte binary " + (result.Header != null ? "block " + result.Header : "reply") + ">");
+                    return result;
+                }
+                catch (Exception ex) when (!(ex is GpibOperationException))
+                {
+                    throw Fail(GpibOperation.Query, resource, command, ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reads and discards whatever the instrument still has to send, so a failed binary read leaves nothing
+        /// to corrupt the next command. Not a device clear: on HP 8560-series analyzers that presets the
+        /// instrument. Short timeouts; best effort.
+        /// </summary>
+        private void DrainNoLock(string resource)
+        {
+            try
+            {
+                for (int i = 0; i < 1024; i++)
+                {
+                    var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = 500, TermChar = null, MaxBytes = BinaryBlock.ChunkBytes });
+                    if (r.EndOfMessage || r.TimedOut || r.Data.Length == 0) break;
+                }
+            }
+            catch (Exception ex) { Log.Debug("drain after a failed binary read on " + resource + ": " + ex.Message); }
         }
 
         /// <summary>QueryBlock body without taking the gate, for callers (e.g. the record loop) already holding it.</summary>

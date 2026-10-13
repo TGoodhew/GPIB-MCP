@@ -39,7 +39,11 @@ namespace GpibMcp.Tools
                     Prop("model", "string", "Model/profile to use if the resource isn't assigned."),
                     Prop("format", "string", "'plot' (HP-GL vector, default) or 'print' (PCL raster hardcopy). " +
                         "Use 'plot' for 'show the screen'; ask the user plot-vs-print for 'capture the screen' " +
-                        "when the model supports printing."),
+                        "when the model supports printing. For a model that dumps its screen as an image (SCPI): " +
+                        "'image' returns just the PNG image; 'file' only saves it (PNG plus the instrument's own " +
+                        "file, e.g. the GIF) and returns the paths. Otherwise an inline SVG preview as well."),
+                    Prop("invert", "boolean", "SCPI screen dumps whose profile supports it (e.g. the E4406A): true for " +
+                        "an inverted (light) background, false for normal. The instrument's own setting is put back after."),
                     Prop("width", "integer", "Output image width in pixels (default 1024)."),
                     Prop("height", "integer", "Output image height in pixels (default 768)."),
                     Prop("background", "string", "'black' (default) or 'white'."),
@@ -376,7 +380,8 @@ namespace GpibMcp.Tools
                 return Error("Model '" + def.Model + "' has a scpi_block profile but no dumpCommand.");
 
             string resource = ReqStr(args, "resource");
-            int timeout = Int(args, "timeout_ms", 30000);
+            int timeout = Int(args, "timeout_ms", profile.TimeoutMs ?? 30000);
+            string format = (Str(args, "format", null) ?? "").ToLowerInvariant();
             ctx.Progress(5, 100, "Asking " + def.Model + " for its screen image.");
 
             if (!string.IsNullOrEmpty(profile.PreRoll))
@@ -385,28 +390,58 @@ namespace GpibMcp.Tools
                 catch { /* best effort */ }
             }
 
-            byte[] block;
-            try { block = visa.QueryBlock(resource, profile.DumpCommand, timeout); }
-            catch (Exception ex) { return Error("Screen dump failed for " + resource + ": " + ex.Message); }
-
-            if (!string.IsNullOrEmpty(profile.PostRoll))
+            // Optional inverted background (#139): set it for this capture, then put back what the user had.
+            string invertNote = null, restoreInvert = null;
+            bool? invert = args["invert"] != null ? (bool?)Bool(args, "invert", false) : null;
+            if (invert.HasValue)
             {
-                try { visa.Write(resource, profile.PostRoll, InstrumentManager.DefaultTimeoutMs); }
-                catch { /* best effort */ }
+                if (profile.Invert == null) invertNote = def.Model + " has no invert setting in its capture profile; captured as is.";
+                else
+                {
+                    try
+                    {
+                        string current = Clean(visa.Query(resource, profile.Invert.Query, InstrumentManager.DefaultTimeoutMs)).Trim();
+                        bool wasOn = !string.IsNullOrEmpty(profile.Invert.OnReply) &&
+                                     current.StartsWith(profile.Invert.OnReply, StringComparison.OrdinalIgnoreCase);
+                        if (wasOn != invert.Value)
+                        {
+                            visa.Write(resource, invert.Value ? profile.Invert.On : profile.Invert.Off, InstrumentManager.DefaultTimeoutMs);
+                            restoreInvert = wasOn ? profile.Invert.On : profile.Invert.Off;
+                        }
+                    }
+                    catch (Exception ex) { invertNote = "Couldn't set the inverted background: " + ex.Message; }
+                }
             }
 
-            byte[] imageBytes = Ieee4882Block.ExtractDefiniteLength(block);
-            ctx.Progress(70, 100, "Read " + block.Length + " bytes; decoding the image.");
+            BinaryBlockResult block;
+            try { block = visa.QueryBinary(resource, profile.DumpCommand, timeout, BlockFormat.Ieee4882); }
+            catch (Exception ex) { return Error("Screen dump failed for " + resource + ": " + ex.Message); }
+            finally
+            {
+                if (restoreInvert != null)
+                {
+                    try { visa.Write(resource, restoreInvert, InstrumentManager.DefaultTimeoutMs); }
+                    catch { /* best effort */ }
+                }
+                if (!string.IsNullOrEmpty(profile.PostRoll))
+                {
+                    try { visa.Write(resource, profile.PostRoll, InstrumentManager.DefaultTimeoutMs); }
+                    catch { /* best effort */ }
+                }
+            }
 
-            if (imageBytes == null || imageBytes.Length < 64)
-                return Error("No image returned from " + resource + " (" + (imageBytes?.Length ?? 0) +
+            byte[] imageBytes = block.Payload;
+            ctx.Progress(70, 100, "Read " + imageBytes.Length + " bytes; decoding the image.");
+
+            if (imageBytes.Length < 64)
+                return Error("No image returned from " + resource + " (" + imageBytes.Length +
                              " bytes). Check the dump command and that the model returns a screen image.");
 
             byte[] png;
             int w, h;
             try
             {
-                png = ScreenImage.ToPng(imageBytes);
+                png = ScreenImage.ToPng(imageBytes, BinaryTools.MaxImageContentBytes);
                 ScreenImage.Dimensions(imageBytes, out w, out h);
             }
             catch (Exception ex)
@@ -415,7 +450,29 @@ namespace GpibMcp.Tools
             }
 
             string savedTo = SaveCapture(args, def.Model + "-screen", png);
+            // The instrument's own file (e.g. the GIF) beside the PNG.
+            string kind = BinaryTools.Kind(imageBytes);
+            string originalTo = savedTo != null && kind != "PNG"
+                ? SaveFile(new JObject { ["save_path"] = Path.ChangeExtension(savedTo, BinaryTools.Extension(kind)) }, null, null, imageBytes)
+                : null;
             string savedWhere = savedTo != null ? "at " + savedTo : "in the user's Pictures folder";
+            string files = (savedTo != null ? "PNG: " + savedTo : "PNG: (could not be saved)") +
+                           (originalTo != null ? "\nOriginal " + kind + ": " + originalTo : "");
+
+            if (format == "file")
+            {
+                ctx.Progress(100, 100, "Capture complete.");
+                return ToolOutput.Text(def.Model + " screen saved (" + imageBytes.Length + " bytes " + kind + ", " + w + "x" + h +
+                                       ").\n" + files + (invertNote != null ? "\n" + invertNote : ""));
+            }
+            if (format == "image")
+            {
+                ctx.Progress(100, 100, "Capture complete.");
+                var plain = ToolOutput.Text(def.Model + " screen (" + w + "x" + h + ", " + kind + " converted to PNG), attached " +
+                                            "below.\n" + files + (invertNote != null ? "\n" + invertNote : ""));
+                plain.AddImage(png, "image/png");
+                return plain;
+            }
 
             bool inlineSvg = Bool(args, "inline_svg", true);
             string svg = null;
@@ -425,9 +482,11 @@ namespace GpibMcp.Tools
                 catch { svg = null; }
             }
 
-            string meta = def.Model + " screen - " + imageBytes.Length + " bytes image (" + w + "x" + h +
+            string meta = def.Model + " screen - " + imageBytes.Length + " bytes " + kind + " image (" + w + "x" + h +
                           "), SCPI dump";
             if (savedTo != null) meta += "  |  saved to: " + savedTo;
+            if (originalTo != null) meta += "  |  original: " + originalTo;
+            if (invertNote != null) meta += "  |  " + invertNote;
 
             var output = new ToolOutput();
             if (svg != null)
@@ -496,7 +555,16 @@ namespace GpibMcp.Tools
         /// Destination precedence: save_path (full file) &gt; save_dir (folder) &gt;
         /// GPIB_MCP_CAPTURE_DIR env &gt; the user's Pictures folder (\GpibMcp Captures).
         /// </summary>
-        private static string SaveCapture(JObject args, string model, byte[] png)
+        private static string SaveCapture(JObject args, string model, byte[] png) =>
+            SaveFile(args, "capture-" + model, ".png", png);
+
+        /// <summary>
+        /// Saves bytes to disk (best effort) and returns the path, or null on failure. Destination precedence:
+        /// save_path (full file) &gt; save_dir (folder) &gt; GPIB_MCP_CAPTURE_DIR env &gt; the user's Pictures
+        /// folder (\GpibMcp Captures); a generated name is <paramref name="baseName"/>-yyyyMMdd-HHmmss plus
+        /// <paramref name="extension"/>.
+        /// </summary>
+        internal static string SaveFile(JObject args, string baseName, string extension, byte[] bytes)
         {
             try
             {
@@ -511,15 +579,15 @@ namespace GpibMcp.Tools
                             Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
                             "GpibMcp Captures");
                     Directory.CreateDirectory(dir);
-                    path = Path.Combine(dir, "capture-" + SanitizeFileName(model) + "-" +
-                                             DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".png");
+                    path = Path.Combine(dir, SanitizeFileName(baseName) + "-" +
+                                             DateTime.Now.ToString("yyyyMMdd-HHmmss") + extension);
                 }
                 else
                 {
                     string parent = Path.GetDirectoryName(path);
                     if (!string.IsNullOrEmpty(parent)) Directory.CreateDirectory(parent);
                 }
-                File.WriteAllBytes(path, png);
+                File.WriteAllBytes(path, bytes);
                 return path;
             }
             catch (Exception)
