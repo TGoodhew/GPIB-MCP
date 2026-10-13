@@ -39,7 +39,10 @@ namespace GpibMcp.Tools
             "line and a markdown 'table' - relay those to the user. Pass preview:true to get the plan size without " +
             "touching the bus. LARGE plans (more than ~50 GPIB ops) are gated: the call returns needs_confirm with a " +
             "preview and sends NOTHING to the bus - show the user what will run, and only if they approve, call again " +
-            "with confirm:true to execute. Small plans run immediately.";
+            "with confirm:true to execute. Small plans run immediately. A batch runs for at most time_budget_s " +
+            "(default 25 s) so it returns before the client gives up on the call; if it stops early, 'stopped' " +
+            "gives the point to continue from - call again with the sweep starting there. An operation longer " +
+            "than the budget (e.g. a 60 s sweep) can't be waited for inside one call.";
 
         public static void Register(ToolRegistry registry, InstrumentDatabase db, AssignmentStore assignments,
                                     IInstrumentManager visa)
@@ -52,6 +55,10 @@ namespace GpibMcp.Tools
                     Prop("sweep", "object", "Optional swept dimension: {var, from, to, step} or {var, from, to, count} (+ optional unit). " +
                         "Omit to run the steps once."),
                     Prop("on_error", "string", "'stop' (default) or 'continue' (record the error, keep going)."),
+                    Prop("time_budget_s", "number", "Seconds the batch may run before it stops and returns the rows it " +
+                        "has (default 25, max 55). Clients give up on a tool call after a fixed time - about 30 s on " +
+                        "Claude Desktop, 60 s over a link to a computer - and the whole result is then lost. If it stops, " +
+                        "'stopped' says which point to run again from."),
                     Prop("preview", "boolean", "If true, return the plan size (points/ops) WITHOUT running anything."),
                     Prop("confirm", "boolean", "Set true to execute a LARGE plan that was gated for confirmation " +
                         "(more than ~50 GPIB ops). Small plans run without it; ignored when preview:true.")),
@@ -189,6 +196,22 @@ namespace GpibMcp.Tools
                         ["reason"] = new JObject { ["type"] = "string" }
                     }
                 },
+                ["stopped"] = new JObject
+                {
+                    ["type"] = "object",
+                    ["description"] = "Present when the batch stopped at its time budget before every point ran. The rows " +
+                                      "are the points that completed; run the rest from continue_from.",
+                    ["properties"] = new JObject
+                    {
+                        ["reason"] = new JObject { ["type"] = "string" },
+                        ["budget_s"] = new JObject { ["type"] = "number" },
+                        ["completed_points"] = new JObject { ["type"] = "integer" },
+                        ["at_point"] = new JObject { ["type"] = "integer", ["description"] = "0-based index of the first point not completed." },
+                        ["continue_from"] = new JObject { ["type"] = "number", ["description"] = "That point's sweep value." },
+                        ["waiting_for"] = new JObject { ["type"] = "string", ["description"] = "The operation still running, if it stopped mid-wait." },
+                        ["message"] = new JObject { ["type"] = "string" }
+                    }
+                },
                 ["error"] = new JObject { ["type"] = "string", ["description"] = "Why the batch was refused (ok:false)." },
                 ["note"] = new JObject { ["type"] = "string" }
             },
@@ -201,6 +224,7 @@ namespace GpibMcp.Tools
         private static BatchPlan ParsePlan(JObject args)
         {
             var plan = new BatchPlan { OnError = Str(args, "on_error", "stop") };
+            if (args["time_budget_s"] != null) plan.TimeBudgetMs = (int)Math.Round(Dbl(args["time_budget_s"]) * 1000);
 
             if (args["sweep"] is JObject sw)
             {
@@ -296,7 +320,39 @@ namespace GpibMcp.Tools
                 }));
             if (r.Truncated != null)
                 jo["truncated"] = new JObject { ["returned"] = r.Truncated.Returned, ["total"] = r.Truncated.Total, ["reason"] = r.Truncated.Reason };
+            if (r.Stopped != null)
+            {
+                var stop = new JObject
+                {
+                    ["reason"] = r.Stopped.Reason,
+                    ["budget_s"] = r.Stopped.BudgetMs / 1000.0,
+                    ["completed_points"] = r.Stopped.AtPoint,
+                    ["at_point"] = r.Stopped.AtPoint
+                };
+                if (r.Stopped.AtValue.HasValue) stop["continue_from"] = r.Stopped.AtValue.Value;
+                if (r.Stopped.Waiting != null) stop["waiting_for"] = r.Stopped.Waiting;
+                stop["message"] = StopMessage(r);
+                jo["stopped"] = stop;
+            }
             return jo;
+        }
+
+        /// <summary>What a stop at the time budget means, and how to carry on (#145).</summary>
+        private static string StopMessage(BatchResult r)
+        {
+            BatchStop s = r.Stopped;
+            string budget = (s.BudgetMs / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) + " s";
+            string text = "Stopped at the batch's " + budget + " time budget after " + s.AtPoint + " of " + r.Ran.Points +
+                          (r.Ran.Points == 1 ? " point" : " points") + ", so the call returns before the client gives up on it";
+            text += s.Waiting != null
+                ? ", while waiting for '" + s.Waiting + "', which is probably still running: the instrument may not answer " +
+                  "other commands until it finishes (an 8563E queues them behind its sweep). An operation that takes " +
+                  "longer than the budget can't be waited for inside one batch."
+                : ".";
+            if (s.AtValue.HasValue)
+                text += " Run the rest with the sweep starting at " + BatchRunner.FormatNumber(s.AtValue.Value) +
+                        " (point " + (s.AtPoint + 1) + ").";
+            return text;
         }
 
         private static JToken Cell(object v)
@@ -317,6 +373,10 @@ namespace GpibMcp.Tools
             string summary = pts + ", " + r.Ran.GpibOps + " ops, " + secs + ", " + errs;
             if (r.Truncated != null)
                 summary += " (table truncated to " + r.Truncated.Returned + " of " + r.Truncated.Total + " rows)";
+            if (r.Stopped != null)
+                summary += "; stopped at the " + (r.Stopped.BudgetMs / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) +
+                           " s time budget after " + r.Stopped.AtPoint + " of " + r.Ran.Points + " points" +
+                           (r.Stopped.AtValue.HasValue ? ", continue from " + BatchRunner.FormatNumber(r.Stopped.AtValue.Value) : "");
             return summary;
         }
 
