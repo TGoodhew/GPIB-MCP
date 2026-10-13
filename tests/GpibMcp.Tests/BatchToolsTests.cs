@@ -65,6 +65,49 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Batch_StoppedAtItsTimeBudget_ReportsWhereToContinue()
+        {
+            // #145, end to end on a real clock: a 1 s budget, three points, a 0.6 s settle at each.
+            var (db, store, visa) = Fixture();
+            visa.QueryResponses["MKA?"] = "-12.3";
+            var args = SweepArgs();
+            args["time_budget_s"] = 1;
+            ((JObject)args["steps"][1])["settle_ms"] = 600;
+
+            var json = JObject.Parse(Tool(db, store, visa).InvokeText(args));
+
+            Assert.False((bool)json["ok"]);
+            var stopped = (JObject)json["stopped"];
+            Assert.Equal("time budget", (string)stopped["reason"]);
+            Assert.Equal(1.0, (double)stopped["budget_s"]);
+            int done = (int)stopped["completed_points"];
+            Assert.Equal(done, ((JArray)json["rows"]).Count);
+            Assert.InRange(done, 1, 2);
+            Assert.Equal(500000 + done * 500000, (double)stopped["continue_from"]);
+            var rest = (JObject)stopped["continue_sweep"];   // the same steps with this sweep run the remaining points
+            Assert.Equal("f_hz", (string)rest["var"]);
+            Assert.Equal(500000 + done * 500000, (double)rest["from"]);
+            Assert.Equal(1500000, (double)rest["to"]);
+            Assert.Equal(500000, (double)rest["step"]);
+            Assert.Contains("continue_sweep", (string)stopped["message"]);
+            Assert.Contains("stopped at the 1 s time budget", (string)json["summary"]);
+        }
+
+        [Fact]
+        public void Batch_TimeBudgetOverTheMaximum_IsRejected()
+        {
+            var (db, store, visa) = Fixture();
+            var args = SweepArgs();
+            args["time_budget_s"] = 70;
+
+            var json = JObject.Parse(Tool(db, store, visa).InvokeText(args));
+
+            Assert.False((bool)json["ok"]);
+            Assert.Contains("time budget", (string)json["error"]);
+            Assert.Empty(visa.Writes);
+        }
+
+        [Fact]
         public void Batch_Preview_ReportsPlanSize_WithoutTouchingTheBus()
         {
             var (db, store, visa) = Fixture();

@@ -32,6 +32,206 @@ namespace GpibMcp.Tests
         private static BatchResult Run(BatchPlan plan, FakeExec fake, BatchCaps caps = null) =>
             BatchRunner.Run(plan, fake, caps ?? new BatchCaps(), () => 0);
 
+        // ---- time budget (#145) ----------------------------------------------------
+
+        /// <summary>An executor on a virtual clock: each I/O op takes OpMs, an operation OperationMs to complete.</summary>
+        private sealed class ClockedExec : IBatchExecutor
+        {
+            public long Now;
+            public int OpMs = 1000;
+            public int OperationMs = 2000;
+            public readonly List<string> Log = new List<string>();
+            public int LastCompleteTimeoutMs;
+
+            public int LastIoTimeoutMs;
+
+            /// <summary>An I/O op takes OpMs, or times out at its timeout if that is shorter.</summary>
+            private void Io(int t)
+            {
+                LastIoTimeoutMs = t;
+                if (OpMs <= t) { Now += OpMs; return; }
+                Now += t;
+                throw new Exception("VI_ERROR_TMO after " + t + " ms");
+            }
+
+            public void Write(string r, string c, int t) { Log.Add("W " + c); Io(t); }
+            public string Query(string r, string c, int t) { Log.Add("Q " + c); Io(t); return "-42.5"; }
+            public void Set(string r, string c, double v, string u, int t) { Log.Add("S " + v); Io(t); }
+            public void Sleep(int ms) { Now += ms; Log.Add("Z " + ms); }
+            public void Complete(string r, string op, int t)
+            {
+                LastCompleteTimeoutMs = t;
+                Log.Add("C " + op + " " + t);
+                if (OperationMs <= t) { Now += OperationMs; return; }
+                Now += t;
+                throw new Exception("Timed out after " + t + " ms waiting for '" + op + "'.");
+            }
+        }
+
+        private static BatchResult Run(BatchPlan plan, ClockedExec exec) =>
+            BatchRunner.Run(plan, exec, new BatchCaps(), () => exec.Now);
+
+        [Fact]
+        public void ASweepThatWouldOutlastTheBudget_StopsWithTheRowsItHas_AndSaysWhereToContinue()
+        {
+            // #145: a batch that ran past the client's tool-call limit lost its whole result. Now it stops in time.
+            var plan = new BatchPlan
+            {
+                Sweep = new BatchSweep { Var = "f", From = 1, To = 10, Step = 1 },
+                Steps = new List<BatchStep> { new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp" } }
+            };
+            var exec = new ClockedExec { OpMs = 4000, };   // 10 points x 4 s = 40 s, against the default 25 s
+
+            var result = Run(plan, exec);
+
+            Assert.False(result.Ok);
+            Assert.Equal(6, result.Rows.Count);            // points 0..5 finished by 24 s
+            Assert.Equal(6, result.Stopped.AtPoint);
+            Assert.Equal(7d, result.Stopped.AtValue);
+            Assert.Equal(7d, result.Stopped.ContinueSweep.From);
+            Assert.Equal(10d, result.Stopped.ContinueSweep.To);
+            Assert.Equal(1d, result.Stopped.ContinueSweep.Step);
+            Assert.True(exec.Now <= 25000, "returned at " + exec.Now + " ms");
+        }
+
+        [Fact]
+        public void AnIoStepStartedJustBeforeTheBudget_IsCappedToIt_AndStopsThere()
+        {
+            // Copilot on #152: write/query/set kept their full timeout, so one started at 24 s could hold the
+            // call to 29 s - past the client's limit. Point 6's query starts at 24 s with 1 s left.
+            var plan = new BatchPlan
+            {
+                Sweep = new BatchSweep { Var = "f", From = 1, To = 10, Step = 1 },
+                Steps = new List<BatchStep> { new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp", TimeoutMs = 10000 } }
+            };
+            var exec = new ClockedExec { OpMs = 4000 };
+
+            var result = Run(plan, exec);
+
+            Assert.Equal(1000, exec.LastIoTimeoutMs);      // capped from 10 s to what was left
+            Assert.Equal(25000, exec.Now);
+            Assert.Equal("query MKA?", result.Stopped.Waiting);
+            Assert.Contains("time budget ran out while waiting for 'query MKA?'", Assert.Single(result.Errors).Error);
+        }
+
+        [Theory]
+        [InlineData(1, 10, 10, 7)]       // a count sweep stopped at point 7: the remaining 3 points, not 10 re-spaced
+        [InlineData(0, 1, 7, 2)]         // spacing 1/6, which a fresh 'count' over the rest must reproduce
+        [InlineData(500000, 1500000, 3, 2)]
+        public void TheContinuationOfACountSweep_RunsExactlyTheRemainingPoints(double from, double to, int count, int stoppedAt)
+        {
+            // Copilot on #152: reusing the original count with a new 'from' re-spaces the grid.
+            var sweep = new BatchSweep { Var = "f", From = from, To = to, Count = count };
+            var points = BatchRunner.ExpandSweep(sweep, out _);
+
+            var rest = BatchRunner.ExpandSweep(BatchRunner.RemainingSweep(sweep, points, stoppedAt), out string error);
+
+            Assert.Null(error);
+            Assert.Equal(points.Skip(stoppedAt).ToArray(), rest.ToArray(), new ToleranceComparer());
+        }
+
+        [Fact]
+        public void TheContinuationOfAStepSweep_KeepsTheStep()
+        {
+            var sweep = new BatchSweep { Var = "f", From = 0.5e6, To = 20e6, Step = 0.5e6 };
+            var points = BatchRunner.ExpandSweep(sweep, out _);
+
+            var rest = BatchRunner.ExpandSweep(BatchRunner.RemainingSweep(sweep, points, 12), out _);
+
+            Assert.Equal(points.Skip(12).ToArray(), rest.ToArray(), new ToleranceComparer());
+        }
+
+        private sealed class ToleranceComparer : IEqualityComparer<double>
+        {
+            public bool Equals(double a, double b) => Math.Abs(a - b) <= 1e-9 * Math.Max(1, Math.Abs(a));
+            public int GetHashCode(double d) => 0;
+        }
+
+        [Fact]
+        public void ACompleteWait_IsCutShortAtTheBudget_AndTheResultSaysTheOperationMayStillBeRunning()
+        {
+            var plan = new BatchPlan
+            {
+                Steps = new List<BatchStep>
+                {
+                    new BatchStep { Op = "write", Resource = "A", Command = "ST 60S;" },
+                    new BatchStep { Op = "complete", Resource = "A", Operation = "sweepComplete", TimeoutMs = 90000 },
+                    new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp" }
+                }
+            };
+            var exec = new ClockedExec { OperationMs = 60000 };
+
+            var result = Run(plan, exec);
+
+            Assert.Equal(24000, exec.LastCompleteTimeoutMs);       // the 25 s budget less the 1 s write
+            Assert.False(result.Ok);
+            Assert.Equal("sweepComplete", result.Stopped.Waiting);
+            Assert.Contains("time budget ran out while waiting for 'sweepComplete'", Assert.Single(result.Errors).Error);
+            Assert.Empty(result.Rows);                             // the point never finished
+            Assert.DoesNotContain("Q MKA?", exec.Log);
+            Assert.True(exec.Now <= 25000);                        // returned inside the budget
+        }
+
+        [Fact]
+        public void ACompleteThatFinishesInsideTheBudget_IsUnaffected()
+        {
+            var plan = new BatchPlan
+            {
+                Steps = new List<BatchStep>
+                {
+                    new BatchStep { Op = "complete", Resource = "A", Operation = "sweepComplete" },
+                    new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp" }
+                }
+            };
+            var result = Run(plan, new ClockedExec { OperationMs = 2000 });
+
+            Assert.True(result.Ok);
+            Assert.Null(result.Stopped);
+            Assert.Equal(-42.5, Assert.Single(result.Rows)[0]);
+        }
+
+        [Fact]
+        public void AWaitLongerThanTheBudget_IsCutShort_AndStops()
+        {
+            var plan = new BatchPlan
+            {
+                TimeBudgetMs = 10000,
+                Steps = new List<BatchStep> { new BatchStep { Op = "wait", SettleMs = 40000 } }
+            };
+            var exec = new ClockedExec();
+
+            var result = Run(plan, exec);
+
+            Assert.Equal(new[] { "Z 10000" }, exec.Log);
+            Assert.False(result.Ok);
+            Assert.NotNull(result.Stopped);
+            Assert.Empty(result.Errors);
+        }
+
+        [Fact]
+        public void ALargerBudget_LetsALongerBatchRun()
+        {
+            var plan = new BatchPlan
+            {
+                TimeBudgetMs = 55000,
+                Sweep = new BatchSweep { Var = "f", From = 1, To = 10, Step = 1 },
+                Steps = new List<BatchStep> { new BatchStep { Op = "query", Resource = "A", Command = "MKA?", As = "amp" } }
+            };
+            var result = Run(plan, new ClockedExec { OpMs = 4000 });
+
+            Assert.True(result.Ok);
+            Assert.Equal(10, result.Rows.Count);
+        }
+
+        [Theory]
+        [InlineData(500)]
+        [InlineData(60000)]
+        public void ABudgetOutsideOneTo55Seconds_IsRejected(int budgetMs)
+        {
+            var plan = new BatchPlan { TimeBudgetMs = budgetMs, Steps = new List<BatchStep> { new BatchStep { Op = "wait", SettleMs = 1 } } };
+            Assert.Contains("time budget", BatchRunner.Validate(plan, new BatchCaps()));
+        }
+
         // ---- reply cells (#141) ---------------------------------------------------
 
         [Theory]

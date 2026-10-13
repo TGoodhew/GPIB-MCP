@@ -39,6 +39,9 @@ namespace GpibMcp.Instruments
         public BatchSweep Sweep;
         public List<BatchStep> Steps = new List<BatchStep>();
         public string OnError = "stop";   // "stop" | "continue"
+
+        /// <summary>How long the batch may run before it stops and returns what it has; null = the default (#145).</summary>
+        public int? TimeBudgetMs;
     }
 
     /// <summary>Hard ceilings (a runaway plan can't drown the bus or the token budget).</summary>
@@ -54,6 +57,16 @@ namespace GpibMcp.Instruments
         /// bus: the tool returns a preview and runs only when re-called with confirm:true (#59 Phase 2).
         /// A small plan stays frictionless. Not a hard ceiling - confirm:true overrides it.</summary>
         public int ConfirmAboveOps = 50;
+
+        /// <summary>
+        /// How long a batch runs before it stops and returns the rows it has (#145). A client gives up on a tool
+        /// call after a fixed time and the whole result is lost: a batch that returned at 34 s failed in Claude
+        /// Desktop, and the link to a computer cuts off at 60 s. 25 s keeps under both.
+        /// </summary>
+        public int DefaultTimeBudgetMs = 25000;
+
+        /// <summary>The most a plan may ask for: under the 60 s at which the link to a computer cuts off.</summary>
+        public int MaxTimeBudgetMs = 55000;
     }
 
     // ---- execution boundary (real impl wraps the bus; a fake drives tests) ------
@@ -99,6 +112,22 @@ namespace GpibMcp.Instruments
         public string Reason;
     }
 
+    /// <summary>Why and where a batch stopped before running every point (#145).</summary>
+    public sealed class BatchStop
+    {
+        public string Reason;     // "time budget"
+        public long BudgetMs;
+        public int AtPoint;       // 0-based: the first point not completed - run again from here
+        public double? AtValue;   // that point's sweep value, when there is a sweep
+        public string Waiting;    // the operation still running when the budget ran out, if it stopped mid-wait
+
+        /// <summary>
+        /// The sweep that runs exactly the points not yet completed, when there is a sweep. Not just a new
+        /// 'from': a count-based sweep with its original count would re-space the grid (#145).
+        /// </summary>
+        public BatchSweep ContinueSweep;
+    }
+
     public sealed class BatchRanInfo
     {
         public string Sweep;
@@ -127,6 +156,7 @@ namespace GpibMcp.Instruments
         public List<List<object>> Rows = new List<List<object>>();
         public List<BatchError> Errors = new List<BatchError>();
         public BatchTruncation Truncated;   // null unless rows were capped
+        public BatchStop Stopped;           // null unless the run stopped before its last point (#145)
         public List<BatchOpTiming> Timing = new List<BatchOpTiming>();   // per-op-type wall-clock (#58)
     }
 
@@ -153,6 +183,8 @@ namespace GpibMcp.Instruments
                 return plan.Steps.Count + " steps per point; the cap is " + caps.MaxOpsPerPoint + ".";
             long total = (long)points * plan.Steps.Count;
             if (total > caps.MaxTotalOps) return total + " total operations; the cap is " + caps.MaxTotalOps + ".";
+            if (plan.TimeBudgetMs.HasValue && (plan.TimeBudgetMs.Value < 1000 || plan.TimeBudgetMs.Value > caps.MaxTimeBudgetMs))
+                return "the time budget must be 1 to " + caps.MaxTimeBudgetMs / 1000 + " s.";
             return null;
         }
 
@@ -204,9 +236,17 @@ namespace GpibMcp.Instruments
             int gpibOps = 0;
             bool aborted = false;
 
+            // Stop with the rows so far rather than run past the time a client waits for a tool call, which
+            // would lose the whole result (#145). Waits are cut short at the budget; a point stopped part-way
+            // isn't a row, and the result says which point to run again from.
+            long budget = plan.TimeBudgetMs ?? caps.DefaultTimeBudgetMs;
+            Func<long> left = () => budget - (nowMs() - start);
+
             for (int pi = 0; pi < points.Count && !aborted; pi++)
             {
+                if (left() <= 0) { result.Stopped = StopAt(budget, pi, points, plan, null); break; }
                 if (onPoint != null) onPoint(pi, points.Count);
+                bool pointDone = true;
 
                 var bindings = new Dictionary<string, string>(StringComparer.Ordinal);
                 var numeric = new Dictionary<string, object>(StringComparer.Ordinal);
@@ -222,20 +262,34 @@ namespace GpibMcp.Instruments
                 for (int si = 0; si < plan.Steps.Count; si++)
                 {
                     var step = plan.Steps[si];
-                    int timeout = step.TimeoutMs ?? caps.DefaultStepTimeoutMs;
+                    if (left() <= 0)
+                    {
+                        result.Stopped = StopAt(budget, pi, points, plan, null);
+                        pointDone = false; aborted = true; break;
+                    }
+                    // An I/O step's timeout is capped to the budget too, or one started just before it ran out
+                    // could hold the call past the client's limit for its whole timeout.
+                    int wantedIo = step.TimeoutMs ?? caps.DefaultStepTimeoutMs;
+                    int timeout = (int)Math.Max(1, Math.Min(wantedIo, left()));
                     gpibOps++;
                     long opStart = nowMs();
+                    string cutShort = null;   // what was cut short at the budget, while it lasts
                     try
                     {
                         string cmd = Interpolate(step.Command, bindings);
+                        string ioCut = timeout < wantedIo ? step.Op + (string.IsNullOrEmpty(cmd) ? "" : " " + cmd) : null;
                         switch ((step.Op ?? "").ToLowerInvariant())
                         {
                             case "write":
+                                cutShort = ioCut;
                                 exec.Write(step.Resource, cmd, timeout);
+                                cutShort = null;
                                 break;
                             case "query":
                             case "read":
+                                cutShort = ioCut;
                                 string resp = exec.Query(step.Resource, cmd, timeout);
+                                cutShort = null;
                                 if (!string.IsNullOrEmpty(step.As))
                                 {
                                     object cell = ParseCell(resp);
@@ -246,34 +300,57 @@ namespace GpibMcp.Instruments
                                 break;
                             case "set":
                                 double val = ParseRequired(Interpolate(step.Value, bindings), step);
+                                cutShort = timeout < wantedIo ? "set " + step.Command : null;
                                 exec.Set(step.Resource, step.Command, val, step.Unit, timeout);
+                                cutShort = null;
                                 break;
                             case "complete":
-                                exec.Complete(step.Resource, step.Operation, step.TimeoutMs ?? 30000);
+                                int wanted = step.TimeoutMs ?? 30000;
+                                int allowed = (int)Math.Max(0, Math.Min(wanted, left()));
+                                if (allowed < wanted) cutShort = step.Operation;
+                                exec.Complete(step.Resource, step.Operation, allowed);
+                                cutShort = null;   // it finished inside the budget
                                 break;
                             case "wait":
-                                exec.Sleep(step.SettleMs);
+                                if (!SleepWithin(exec, step.SettleMs, left)) cutShort = "wait";
                                 break;
                             default:
                                 throw new InvalidOperationException("unknown op '" + step.Op + "'");
                         }
-                        if (step.SettleMs > 0 && !string.Equals(step.Op, "wait", StringComparison.OrdinalIgnoreCase))
-                            exec.Sleep(step.SettleMs);
+                        if (cutShort == null && step.SettleMs > 0 && !string.Equals(step.Op, "wait", StringComparison.OrdinalIgnoreCase)
+                            && !SleepWithin(exec, step.SettleMs, left))
+                            cutShort = "settle";
                         AddTiming(result.Timing, step.Op, nowMs() - opStart);   // attribute this step's wall-clock (#58)
+                        if (cutShort != null)
+                        {
+                            result.Stopped = StopAt(budget, pi, points, plan, null);
+                            pointDone = false; aborted = true; break;
+                        }
                     }
                     catch (Exception ex)
                     {
+                        string error = ex.Message;
+                        if (cutShort != null && left() <= 0)
+                        {
+                            // A step cut short at the budget ran out: what it started may well still be running.
+                            error = "The batch's " + budget / 1000 + " s time budget ran out while waiting for '" + cutShort +
+                                    "', which may still be running. " + ex.Message;
+                            result.Stopped = StopAt(budget, pi, points, plan, cutShort);
+                            pointDone = false;
+                        }
                         result.Errors.Add(new BatchError
                         {
                             Point = pi, Step = si, Op = step.Op, Resource = step.Resource,
                             Command = step.Op == "set" ? step.Command : Interpolate(step.Command, bindings),
-                            Error = ex.Message
+                            Error = error
                         });
                         result.Ok = false;
-                        if (stopOnError) { aborted = true; break; }
+                        if (stopOnError || result.Stopped != null) { aborted = true; break; }
                         break;   // skip the rest of THIS point (later steps likely depend on the failed one)
                     }
                 }
+
+                if (!pointDone) break;   // stopped part-way: not a row; Stopped.AtPoint says to run it again
 
                 if (result.Rows.Count >= caps.MaxRows)
                 {
@@ -287,10 +364,42 @@ namespace GpibMcp.Instruments
 
             result.Ran.GpibOps = gpibOps;
             result.Ran.ElapsedMs = nowMs() - start;
+            if (result.Stopped != null) result.Ok = false;
             return result;
         }
 
         // ---- helpers ------------------------------------------------------------
+
+        private static BatchStop StopAt(long budget, int point, List<double> points, BatchPlan plan, string waiting) =>
+            new BatchStop
+            {
+                Reason = "time budget", BudgetMs = budget, AtPoint = point,
+                AtValue = plan.Sweep != null ? points[point] : (double?)null, Waiting = waiting,
+                ContinueSweep = RemainingSweep(plan.Sweep, points, point)
+            };
+
+        /// <summary>
+        /// A sweep over exactly points[from..]: the same step from there, or - for a count-based sweep - the
+        /// remaining count over the remaining range, which keeps the original spacing.
+        /// </summary>
+        public static BatchSweep RemainingSweep(BatchSweep sweep, List<double> points, int from)
+        {
+            if (sweep == null || from >= points.Count) return null;
+            var rest = new BatchSweep { Var = sweep.Var, From = points[from], To = sweep.To, Unit = sweep.Unit };
+            if (sweep.Count.HasValue) rest.Count = points.Count - from;
+            else rest.Step = sweep.Step;
+            return rest;
+        }
+
+        /// <summary>Sleeps <paramref name="ms"/>, or only what is left of the budget; false when cut short.</summary>
+        private static bool SleepWithin(IBatchExecutor exec, int ms, Func<long> left)
+        {
+            if (ms <= 0) return true;
+            long remaining = left();
+            if (ms <= remaining) { exec.Sleep(ms); return true; }
+            if (remaining > 0) exec.Sleep((int)remaining);
+            return false;
+        }
 
         /// <summary>Expands the sweep into its point values (inclusive of TO within rounding). Empty sweep -&gt; one null point.</summary>
         public static List<double> ExpandSweep(BatchSweep s, out string error)
