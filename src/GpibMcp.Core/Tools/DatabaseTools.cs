@@ -709,10 +709,12 @@ namespace GpibMcp.Tools
                        "reading its error queue with " + def.Identity.ErrorQuery + " failed: " + ex.Message;
             }
 
+            // Every read returned an error, and each read removes one - so the queue may be empty now, or not.
             if (!result.Emptied)
-                return "The " + def.Model + " doesn't support " + tried + ", tried first, and logged errors: its error " +
-                       "queue still wasn't empty after " + ErrorQueue.MaxReads + " reads with " + def.Identity.ErrorQuery +
-                       " (" + string.Join(", ", result.Errors) + "), so it may need clearing by hand.";
+                return "The " + def.Model + " doesn't support " + tried + ", tried first, and logged errors: " +
+                       ErrorQueue.MaxReads + " reads with " + def.Identity.ErrorQuery + " each returned one (" +
+                       string.Join(", ", result.Errors) + "), so its error queue couldn't be confirmed empty - read it " +
+                       "again with " + def.Identity.ErrorQuery + " to check.";
             if (result.Errors.Count == 0) return null;
             return "The " + def.Model + " doesn't support " + tried + ", tried first: it logged error " +
                    string.Join(", ", result.Errors) + ", now cleared with " + result.Sent + ".";

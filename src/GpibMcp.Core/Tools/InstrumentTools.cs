@@ -700,8 +700,8 @@ namespace GpibMcp.Tools
                     throw new NotSupportedException("the model defines no identity.errorQuery to read its error queue with");
                 ErrorQueue.Result result = ErrorQueue.Clear(_visa, _resource, _io, _identity);
                 if (!result.Emptied)
-                    throw new InvalidOperationException("its error queue still wasn't empty after " + ErrorQueue.MaxReads +
-                                                        " reads (" + string.Join(", ", result.Errors) + ")");
+                    throw new InvalidOperationException("its error queue couldn't be confirmed empty: " + ErrorQueue.MaxReads +
+                                                        " reads each returned an error (" + string.Join(", ", result.Errors) + ")");
                 return result.Errors;
             }
         }

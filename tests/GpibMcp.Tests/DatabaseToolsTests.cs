@@ -511,7 +511,7 @@ namespace GpibMcp.Tests
             var text = Tool("instrument_identify", db, AssignmentStore.InMemory(), visa)
                 .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
 
-            Assert.Contains("still wasn't empty after " + ErrorQueue.MaxReads + " reads", text);
+            Assert.Contains("couldn't be confirmed empty", text);   // not "still wasn't": the last read removed one too
             Assert.DoesNotContain("now cleared", text);
             Assert.DoesNotContain("STB?", visa.Queries);
         }

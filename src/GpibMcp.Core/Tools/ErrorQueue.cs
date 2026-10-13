@@ -21,8 +21,9 @@ namespace GpibMcp.Tools
             public readonly List<string> Errors = new List<string>();
 
             /// <summary>
-            /// Whether a no-error reply was read - the queue is empty. False when it still held errors after
-            /// <see cref="MaxReads"/> reads: then nothing is claimed cleared and the status byte is left alone.
+            /// Whether a no-error reply was read - the queue is empty. False when all <see cref="MaxReads"/> reads
+            /// returned an error: the queue may or may not be empty now (each read removes one), so nothing is
+            /// claimed cleared and the status byte is left alone.
             /// </summary>
             public bool Emptied;
 
