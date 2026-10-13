@@ -215,6 +215,30 @@ namespace GpibMcp.Tests
             return BlockResponse;
         }
 
+        /// <summary>Commands passed to <see cref="QueryBinary"/> (resource|command|format).</summary>
+        public readonly List<string> BinaryQueries = new List<string>();
+
+        /// <summary>The bytes <see cref="QueryBinary"/> reads, framed as the instrument sends them; defaults to <see cref="BlockResponse"/>.</summary>
+        public byte[] BinaryResponse;
+
+        /// <summary>Reads <see cref="BinaryResponse"/> through the real block reader, 100 bytes a read.</summary>
+        public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format)
+        {
+            BinaryQueries.Add(resource + "|" + command + "|" + format);
+            BlockQueries.Add(resource + "|" + command);
+            byte[] source = BinaryResponse ?? BlockResponse;
+            int at = 0;
+            return BinaryBlock.Read((int count, out bool more) =>
+            {
+                int n = System.Math.Min(System.Math.Min(count, 100), source.Length - at);
+                var chunk = new byte[n];
+                System.Array.Copy(source, at, chunk, 0, n);
+                at += n;
+                more = at < source.Length;
+                return chunk;
+            }, format);
+        }
+
         /// <summary>Commands passed to <see cref="CaptureRecordStream"/> (resource|preRoll|command).</summary>
         public readonly List<string> RecordCaptures = new List<string>();
 

@@ -43,6 +43,22 @@ namespace GpibMcp.Instruments
         [JsonProperty("commands")] public List<InstrumentCommand> Commands { get; set; }
     }
 
+    /// <summary>The commands that invert a screen dump's background, and read whether it is inverted.</summary>
+    public sealed class CaptureInvertSpec
+    {
+        /// <summary>Reads the current setting, e.g. ":HCOP:SDUM:IMAG?".</summary>
+        [JsonProperty("query")] public string Query { get; set; }
+
+        /// <summary>Turns inversion on, e.g. ":HCOP:SDUM:IMAG INV".</summary>
+        [JsonProperty("on")] public string On { get; set; }
+
+        /// <summary>Turns it off, e.g. ":HCOP:SDUM:IMAG NORM".</summary>
+        [JsonProperty("off")] public string Off { get; set; }
+
+        /// <summary>How the query's reply starts when inversion is on, e.g. "INV" (case-insensitive).</summary>
+        [JsonProperty("onReply")] public string OnReply { get; set; }
+    }
+
     /// <summary>How to capture this instrument's screen (e.g. HP-GL plotter emulation).</summary>
     public sealed class CaptureProfile
     {
@@ -89,6 +105,16 @@ namespace GpibMcp.Instruments
 
         /// <summary>Smallest byte count that counts as a real hardcopy rather than a false start. See <see cref="PerReadTimeoutMs"/>.</summary>
         [JsonProperty("minPlotBytes")] public int? MinPlotBytes { get; set; }
+
+        /// <summary>scpi_block: the per-read timeout for the screen dump (ms); null means 30 s. A GIF over GPIB is slow.</summary>
+        [JsonProperty("timeoutMs")] public int? TimeoutMs { get; set; }
+
+        /// <summary>
+        /// scpi_block, optional: how to invert the dump's background (e.g. the E4406A's ":HCOPy:SDUMp:IMAGe
+        /// NORMal|INVert"). With it, the capture tool's invert option sets it for the capture and puts the
+        /// instrument's previous setting back afterwards (#139). Data, so another instrument needs no code.
+        /// </summary>
+        [JsonProperty("invert")] public CaptureInvertSpec Invert { get; set; }
 
         /// <summary>Applies whichever timings this profile overrides, leaving the rest at their defaults.</summary>
         public void ApplyTimingTo(CaptureOptions options)

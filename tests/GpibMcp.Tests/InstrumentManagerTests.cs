@@ -1,3 +1,4 @@
+using System.Linq;
 using GpibMcp.Instruments;
 using Xunit;
 
@@ -65,6 +66,73 @@ namespace GpibMcp.Tests
             Assert.Null(req.TermChar);                                       // no termination char (binary)
             Assert.Equal(InstrumentManager.MaxImageBlockBytes, req.MaxBytes); // bounded raw read
             Assert.Equal(new byte[] { 0x89, 0x50, 0x0A, 0xFF, 0x42, 0x4D }, data);
+        }
+
+        /// <summary>A transport whose instrument has <c>Output</c> queued, read up to N bytes at a time, END at the last byte.</summary>
+        private sealed class BlockTransport : FakeTransportBase
+        {
+            public byte[] Output = new byte[0];
+            public int At;
+            public int MaxPerRead = 50;
+            /// <summary>Never asserts END: once the output runs out, reads time out.</summary>
+            public bool FallsSilent;
+            public readonly System.Collections.Generic.List<TransportReadRequest> Requests = new System.Collections.Generic.List<TransportReadRequest>();
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request)
+            {
+                Requests.Add(request);
+                int n = (int)System.Math.Min(System.Math.Min(request.MaxBytes, MaxPerRead), Output.Length - At);
+                var chunk = new byte[n];
+                System.Array.Copy(Output, At, chunk, 0, n);
+                At += n;
+                if (FallsSilent) return new TransportReadResult(chunk, n == 0, false);
+                return new TransportReadResult(chunk, false, At >= Output.Length);
+            }
+        }
+
+        [Fact]
+        public void QueryBinary_RawReplyCutOffByATimeout_FailsRatherThanReturningAShortFile()
+        {
+            var t = new BlockTransport { Output = new byte[300], FallsSilent = true };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() =>
+                mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 30000, BlockFormat.Raw));
+
+            Assert.Contains("timed out", ex.Message);
+        }
+
+        [Fact]
+        public void QueryBinary_ReadsTheWholeBlock_AsBytes_WithNoTerminationCharacter()
+        {
+            // #139: 0x0A in the payload must not end the read, and the block arrives over many reads.
+            byte[] image = System.Linq.Enumerable.Range(0, 1000).Select(i => (byte)(i % 13 == 0 ? 0x0A : i)).ToArray();
+            var t = new BlockTransport
+            {
+                Output = System.Text.Encoding.ASCII.GetBytes("#41000").Concat(image).Concat(new[] { (byte)'\n' }).ToArray()
+            };
+            var mgr = new InstrumentManager(t);
+
+            BinaryBlockResult block = mgr.QueryBinary("GPIB0::17::INSTR", ":HCOP:SDUM:DATA? GIF", 30000, BlockFormat.Ieee4882);
+
+            Assert.Equal(image, block.Payload);
+            Assert.Equal("#41000", block.Header);
+            Assert.Equal(t.Output.Length, t.At);                                  // nothing left on the instrument
+            Assert.All(t.Requests, r => Assert.Null(r.TermChar));                 // never stopped on 0x0A
+            Assert.Contains(mgr.RecentCommands("GPIB0::17::INSTR", 5), e => e.Text == "<1000-byte binary block #41000>");
+        }
+
+        [Fact]
+        public void QueryBinary_OnAReplyThatIsNotABlock_DrainsTheRest_AndSaysWhatArrived()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes(new string('x', 400) + "\n") };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() =>
+                mgr.QueryBinary("GPIB0::17::INSTR", ":HCOP:SDUM:DATA? GIF", 30000, BlockFormat.Ieee4882));
+
+            Assert.Contains("doesn't start with an IEEE 488.2 block header", ex.Message);
+            Assert.Equal(t.Output.Length, t.At);   // drained: the next command doesn't meet these bytes
         }
 
         [Fact]

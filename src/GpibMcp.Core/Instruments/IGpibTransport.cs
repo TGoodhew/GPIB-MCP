@@ -72,7 +72,22 @@ namespace GpibMcp.Instruments
     {
         public byte[] Data { get; }
         public bool TimedOut { get; }
-        public TransportReadResult(byte[] data, bool timedOut) { Data = data ?? Array.Empty<byte>(); TimedOut = timedOut; }
+
+        /// <summary>
+        /// True when the read stopped because the instrument ended its message (END/EOI or the termination
+        /// character), not because it filled. A binary block reader uses it to know there is nothing more to
+        /// read without waiting out a timeout (#139). False when unknown.
+        /// </summary>
+        public bool EndOfMessage { get; }
+
+        public TransportReadResult(byte[] data, bool timedOut) : this(data, timedOut, false) { }
+
+        public TransportReadResult(byte[] data, bool timedOut, bool endOfMessage)
+        {
+            Data = data ?? Array.Empty<byte>();
+            TimedOut = timedOut;
+            EndOfMessage = endOfMessage;
+        }
     }
 
     /// <summary>

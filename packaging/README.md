@@ -58,7 +58,7 @@ package differs only in how the client reaches the server:
   The manifest declares one **`user_config`** setting — *Instrument manual folder* (`directory`, optional) —
   substituted into `GPIB_MCP_MANUALS` for the server process, so the [manual library](../README.md#your-own-manual-library)
   is configured in the Extensions UI rather than via a machine-wide environment variable. Left empty, the
-  server logs one warning and doesn't register `manual_search`; the other 30 tools are unaffected.
+  server logs one warning and doesn't register `manual_search`; the other 31 tools are unaffected.
 
   Why an installer rather than a copy-paste config: VS Code and Cursor do **not** expand `${env:…}` in an
   MCP `command`, so a portable hand-written path isn't possible across clients — having the installer write
