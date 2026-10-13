@@ -33,9 +33,14 @@
       "requestService": 64
     },
     "operations": {
-      "sweepComplete": { "arm": "SNGLS;TS;", "expectBit": "commandComplete", "restore": "CONTS;" },
-      "sweepAndPeak": { "arm": "SNGLS;TS;MKPK HI;DONE;", "expectBit": "commandComplete", "restore": "CONTS;" }
+      "sweepComplete": { "prepare": "SNGLS;", "arm": "TS;", "expectBit": "commandComplete", "restore": "CONTS;" },
+      "sweepAndPeak": { "prepare": "SNGLS;", "arm": "TS;MKPK HI;", "expectBit": "commandComplete", "restore": "CONTS;" }
     }
+  },
+  "supersedes": {
+    "statusModel": [
+      {"srqSupported":true,"serialPoll":{"clearsRqs":true},"enableMask":{"setCommand":"RQS {mask}","clearCommand":"RQS 0","maskFormat":"decimal"},"doneSupport":{"supported":true,"mnemonic":"DONE"},"errorBit":"error","requestServiceBit":"requestService","bits":{"message":2,"endOfSweep":4,"commandComplete":16,"error":32,"requestService":64},"operations":{"sweepComplete":{"arm":"SNGLS;TS;","expectBit":"commandComplete","restore":"CONTS;"},"sweepAndPeak":{"arm":"SNGLS;TS;MKPK HI;DONE;","expectBit":"commandComplete","restore":"CONTS;"}}}
+    ]
   },
   "commands": [
     {

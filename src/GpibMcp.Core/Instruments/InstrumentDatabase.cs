@@ -20,6 +20,12 @@ namespace GpibMcp.Instruments
     /// default, while the user's own blocks continue to win. This is how bundled fixes reach an
     /// already-seeded user database without clobbering user edits (issue #25). Whole-block value
     /// changes the user already overrides are not auto-merged - use <c>instrument_db_refresh</c>.
+    ///
+    /// Except where the bundled file says a block's earlier values are superseded: its top-level
+    /// <c>supersedes</c> object lists, per block name, values it has shipped before. A user copy whose
+    /// block is still exactly one of those - seeded from an older build, never edited - takes the bundled
+    /// block instead, so a fix to that block reaches it (e.g. the 8560-family <c>statusModel</c>, #142).
+    /// A block the user has changed matches none of them and keeps winning.
     /// </summary>
     public sealed class InstrumentDatabase
     {
@@ -78,12 +84,35 @@ namespace GpibMcp.Instruments
         /// Overlays <paramref name="overlay"/>'s top-level properties onto <paramref name="baseObj"/>
         /// (each replaces or adds), leaving base-only blocks intact. Coarse by design: a block the
         /// overlay defines wins wholesale (no field-level merge of changed values, which would produce
-        /// an inconsistent mix); a block it omits falls through from the base.
+        /// an inconsistent mix); a block it omits falls through from the base. A block that is still one
+        /// of the base's superseded values (its <c>supersedes</c> list) does not replace the base's, and
+        /// the base's <c>supersedes</c> list itself is kept.
         /// </summary>
         internal static void MergeTopLevel(JObject baseObj, JObject overlay)
         {
+            var superseded = baseObj.GetValue(SupersedesKey, StringComparison.OrdinalIgnoreCase) as JObject;
             foreach (var prop in overlay.Properties())
+            {
+                if (string.Equals(prop.Name, SupersedesKey, StringComparison.OrdinalIgnoreCase) && superseded != null)
+                    continue;
+                if (IsSuperseded(superseded, prop))
+                {
+                    Log.Info("Instrument database: " + (string)baseObj.GetValue("model", StringComparison.OrdinalIgnoreCase) +
+                             " - the user copy's '" + prop.Name + "' is an earlier bundled version, never edited; " +
+                             "using the current bundled one.");
+                    continue;
+                }
                 baseObj[prop.Name] = prop.Value.DeepClone();
+            }
+        }
+
+        /// <summary>Top-level key listing, per block name, the block values a bundled definition has superseded.</summary>
+        internal const string SupersedesKey = "supersedes";
+
+        private static bool IsSuperseded(JObject superseded, JProperty block)
+        {
+            var earlier = superseded?.GetValue(block.Name, StringComparison.OrdinalIgnoreCase) as JArray;
+            return earlier != null && earlier.Any(value => JToken.DeepEquals(value, block.Value));
         }
 
         public IReadOnlyList<InstrumentDefinition> All => _all;

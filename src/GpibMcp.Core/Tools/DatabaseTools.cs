@@ -766,7 +766,9 @@ namespace GpibMcp.Tools
                 foreach (var kv in sm.Operations)
                 {
                     var op = kv.Value;
-                    var o = new JObject
+                    var o = new JObject();
+                    if (!string.IsNullOrEmpty(op.Prepare)) o["prepare"] = op.Prepare;
+                    o.Merge(new JObject
                     {
                         ["arm"] = op.Arm,
                         ["wait"] = "instrument_wait_complete(resource=<your resource>, operation='" + kv.Key +
@@ -774,7 +776,7 @@ namespace GpibMcp.Tools
                             "' status bit. Do not read or poll before it returns.",
                         ["thenRead"] = "After it returns, send the value query (instrument_reference " +
                             "command=<name> -> read.send) and read the response."
-                    };
+                    });
                     if (!string.IsNullOrEmpty(op.Restore)) o["restore"] = op.Restore;
                     ops[kv.Key] = o;
                 }

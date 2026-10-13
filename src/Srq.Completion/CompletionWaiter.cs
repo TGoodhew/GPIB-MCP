@@ -46,8 +46,9 @@ namespace Srq.Completion
     /// The data-driven, hardware-agnostic completion state machine. Decoupled from VISA and the MCP
     /// layer via <see cref="IStatusChannel"/> and injected clock/sleep so it can be unit- and harness-
     /// tested headlessly. 3-state dispatch (refuse / needs-definition / run); the run flow pre-clears
-    /// stale status, arms the SRQ mask, starts the operation, and confirms completion by polling the
-    /// LATCHED status byte (reliable - bits stay set until read), then clears the mask and restores.
+    /// stale status, sends any prepare commands, arms the SRQ mask, starts the operation, and confirms
+    /// completion by polling the LATCHED status byte (bits stay set until read), then clears the mask
+    /// and restores.
     /// </summary>
     public static class CompletionWaiter
     {
@@ -55,11 +56,20 @@ namespace Srq.Completion
         public const int DefaultTimeoutMs = 30000;
 
         /// <summary>
-        /// Upper bound (ms) on the SRQ-edge "busy" phase: how long to wait for the operation to start
-        /// (the expect bit to clear) before proceeding anyway. Capped at the overall timeout. Generous,
-        /// since starting a sweep clears the bit within a poll or two on real hardware.
+        /// SRQ-edge: pause (ms) after arming the mask before draining, so the instrument has executed the
+        /// prepare and arm commands - and raised any service request they cause - before it is polled.
         /// </summary>
-        public const int BusyConfirmMs = 5000;
+        public const int ArmSettleMs = 20;
+
+        /// <summary>
+        /// SRQ-edge: most polls the drain after arming may spend consuming service requests. One is normal
+        /// (the poll that reports a request clears it); the bound stops a condition that keeps requesting
+        /// from holding up the wait.
+        /// </summary>
+        public const int MaxArmDrainPolls = 5;
+
+        /// <summary>How many of the last polls a timed-out result lists, to show what the wait saw.</summary>
+        public const int RecentPollsShown = 6;
 
         /// <param name="trace">Optional sink that receives a line per phase/poll, for live tracing.</param>
         public static CompletionResult Wait(StatusModel model, string modelName, string operationName,
@@ -104,13 +114,16 @@ namespace Srq.Completion
         }
 
         /// <summary>
-        /// Robust SRQ flow, hardware-confirmed on the 8563E. The RQS mask and the read-back status byte
-        /// share one layout (e.g. 8560 Table 7-266): request-service is bit 0x40 - set on EVERY service
-        /// request, NOT an error - so completion is detected by that bit, and the error bit is a separate
-        /// condition. Because a condition bit (e.g. command-complete) can be CURRENTLY TRUE the moment we
-        /// arm - which would assert SRQ instantly and look like a finished operation - we first disarm and
-        /// drain, then wait for the operation to go BUSY (the expect bit clears) before accepting the next
-        /// request-service as the real completion.
+        /// SRQ flow, hardware-confirmed on the 8563E. The RQS mask and the read-back status byte share
+        /// one layout (e.g. 8560 Table 7-266): request-service is bit 0x40 - set on EVERY service request,
+        /// NOT an error - so completion is detected by that bit, and the error bit is a separate condition.
+        ///
+        /// On the 8563E the status bits latch as events (every command that completes sets
+        /// command-complete), arming a mask whose condition is already set requests service at once, and
+        /// the poll that reports a request clears the whole byte (#142). So: disarm and drain; send the
+        /// operation's prepare commands (e.g. SNGLS;) while nothing is armed; arm the mask and drain the
+        /// request that arming raises; then start the operation (e.g. TS;). The first request after that
+        /// is the operation's, however soon it comes - a 50 ms sweep can finish before the first poll.
         /// </summary>
         private static CompletionResult RunSrqEdge(StatusModel model, string modelName, string operationName,
             StatusOperation op, int expect, int? errorBit, int rqsBit, int timeoutMs, IStatusChannel channel,
@@ -119,41 +132,48 @@ namespace Srq.Completion
             // The arm mask deliberately EXCLUDES the request-service bit (arming it self-fires).
             int mask = expect | (errorBit ?? 0);
             long start = nowMs();
+            var polls = new RecentPolls();
             log("run '" + operationName + "' on " + modelName + " [SRQ-edge]: expect '" + op.ExpectBit + "'=0x" +
                 expect.ToString("X2") + ", errorBit '" + (model.ErrorBit ?? "-") + "'=0x" + (errorBit ?? 0).ToString("X2") +
                 ", requestService '" + model.RequestServiceBit + "'=0x" + rqsBit.ToString("X2") +
                 ", mask=" + mask + " (0x" + mask.ToString("X2") + "), timeout=" + timeoutMs + "ms");
 
-            // Disarm + drain so an already-true armed condition cannot pre-fire the next arm.
+            // Disarm + drain, so nothing left from earlier can request service once armed. An error bit
+            // seen before the operation starts was not caused by it (e.g. a query the instrument rejected).
             SafeSend(channel, model.EnableMask.ClearCommand, "disarm", log);
             int drained = channel.SerialPoll();
             log("drain serial poll -> 0x" + drained.ToString("X2"));
+            bool errorBefore = HasBit(drained, errorBit);
+
+            // Mode commands go before arming: they complete at once, and a command-complete they raise
+            // with the mask armed would be indistinguishable from the operation's own.
+            if (!string.IsNullOrEmpty(op.Prepare)) { channel.Send(op.Prepare); log("send (prepare): " + op.Prepare); }
 
             string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
             channel.Send(setCmd); log("send (arm mask): " + setCmd);
+
+            // Arming a condition that is already set requests service at once; drain that request so the
+            // next one belongs to the operation.
+            sleep(ArmSettleMs);
+            for (int i = 0; i < MaxArmDrainPolls; i++)
+            {
+                int pre = channel.SerialPoll();
+                log("drain after arming -> 0x" + pre.ToString("X2"));
+                if (HasBit(pre, errorBit)) errorBefore = true;
+                if ((pre & rqsBit) == 0) break;
+            }
+
             if (!string.IsNullOrEmpty(op.Arm)) { channel.Send(op.Arm); log("send (start op): " + op.Arm); }
 
-            int busyConfirm = (model.BusyConfirmMs.HasValue && model.BusyConfirmMs.Value > 0)
-                ? model.BusyConfirmMs.Value : BusyConfirmMs;
-            long busyDeadline = start + Math.Min(timeoutMs, busyConfirm);
-            bool busy = false;
             int stb = 0;
             long elapsed = 0;
             while (true)
             {
                 stb = channel.SerialPoll();
                 elapsed = nowMs() - start;
-                if (!busy)
-                {
-                    log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2") + " (awaiting busy)");
-                    if ((stb & expect) == 0) { busy = true; log("busy confirmed (expect bit cleared - operation running)"); }
-                    else if (nowMs() >= busyDeadline) { busy = true; log("busy not confirmed within " + BusyConfirmMs + " ms; proceeding"); }
-                }
-                else
-                {
-                    log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2"));
-                    if ((stb & rqsBit) != 0) break;    // service requested = operation done (or errored)
-                }
+                polls.Add(stb, elapsed);
+                log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2"));
+                if ((stb & rqsBit) != 0) break;        // the first request after the start: done (or errored)
                 if (elapsed >= timeoutMs) break;       // backstop
                 sleep(pollIntervalMs);
             }
@@ -162,8 +182,16 @@ namespace Srq.Completion
             SafeSend(channel, op.Restore, "restore", log);
 
             bool serviced = (stb & rqsBit) != 0;
-            bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
-            return Finish(model, operationName, op, stb, elapsed, timeoutMs, serviced, err, log);
+            bool err = HasBit(stb, errorBit);
+            string note = null;
+            if (err && errorBefore && (stb & expect) == expect)
+            {
+                // The operation completed; the error was there before it began.
+                err = false;
+                note = "An instrument error was already present before '" + operationName + "' started, so it is " +
+                       "not attributed to this operation - read and clear the instrument's error queue (e.g. ERR?).";
+            }
+            return Finish(model, operationName, op, stb, elapsed, timeoutMs, serviced, err, log, note, polls);
         }
 
         /// <summary>
@@ -185,16 +213,20 @@ namespace Srq.Completion
             int stale = channel.SerialPoll();
             log("pre-clear serial poll -> 0x" + stale.ToString("X2"));
 
+            if (!string.IsNullOrEmpty(op.Prepare)) { channel.Send(op.Prepare); log("send (prepare): " + op.Prepare); }
+
             string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
             channel.Send(setCmd); log("send (arm mask): " + setCmd);
             if (!string.IsNullOrEmpty(op.Arm)) { channel.Send(op.Arm); log("send (start op): " + op.Arm); }
 
             int stb = 0;
             long elapsed = 0;
+            var polls = new RecentPolls();
             while (true)
             {
                 stb = channel.SerialPoll();
                 elapsed = nowMs() - start;
+                polls.Add(stb, elapsed);
                 log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2"));
                 if ((stb & mask) != 0) break;          // completion or error bit appeared
                 if (elapsed >= timeoutMs) break;       // backstop
@@ -205,13 +237,13 @@ namespace Srq.Completion
             SafeSend(channel, op.Restore, "restore", log);
 
             bool done = (stb & expect) == expect;
-            bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
-            return Finish(model, operationName, op, stb, elapsed, timeoutMs, done, err, log);
+            bool err = HasBit(stb, errorBit);
+            return Finish(model, operationName, op, stb, elapsed, timeoutMs, done, err, log, null, polls);
         }
 
         /// <summary>Builds the final result + message from the terminal status byte (shared by both flows).</summary>
         private static CompletionResult Finish(StatusModel model, string operationName, StatusOperation op,
-            int stb, long elapsed, int timeoutMs, bool done, bool err, Action<string> log)
+            int stb, long elapsed, int timeoutMs, bool done, bool err, Action<string> log, string note, RecentPolls polls)
         {
             IReadOnlyList<string> bits = model.SetBitNames(stb);
             string detail = "status byte " + stb + " (0x" + stb.ToString("X2") + ") [" + Describe(bits) + "]";
@@ -223,14 +255,32 @@ namespace Srq.Completion
                     (done ? " (the expected completion bit is also set)" : "") + ".", stb, elapsed, bits);
             else if (done)
                 result = new CompletionResult(CompletionOutcome.Completed,
-                    "Completed '" + operationName + "' after " + elapsed + " ms - " + detail + ".", stb, elapsed, bits);
+                    "Completed '" + operationName + "' after " + elapsed + " ms - " + detail + "." +
+                    (note != null ? " " + note : ""), stb, elapsed, bits);
             else
                 result = new CompletionResult(CompletionOutcome.TimedOut,
                     "Timed out after " + timeoutMs + " ms waiting for '" + operationName + "' (expected bit '" +
-                    op.ExpectBit + "' not set) - " + detail + ". Mask cleared; bus left usable.", stb, elapsed, bits);
+                    op.ExpectBit + "' not set) - " + detail + ". Last polls: " + polls + ". Mask cleared; bus left usable.",
+                    stb, elapsed, bits);
 
             log("=> " + result.Outcome + ": " + result.Message);
             return result;
+        }
+
+        private static bool HasBit(int stb, int? bit) => bit.HasValue && bit.Value != 0 && (stb & bit.Value) == bit.Value;
+
+        /// <summary>The last few serial polls of a wait, as "0x54@212ms", for a timed-out result.</summary>
+        private sealed class RecentPolls
+        {
+            private readonly Queue<string> _last = new Queue<string>();
+
+            public void Add(int stb, long elapsedMs)
+            {
+                _last.Enqueue("0x" + stb.ToString("X2") + "@" + elapsedMs + "ms");
+                if (_last.Count > RecentPollsShown) _last.Dequeue();
+            }
+
+            public override string ToString() => _last.Count == 0 ? "none" : string.Join(", ", _last);
         }
 
         private static void SafeSend(IStatusChannel channel, string command, string what, Action<string> log)

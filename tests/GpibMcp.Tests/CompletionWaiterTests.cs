@@ -8,15 +8,14 @@ namespace GpibMcp.Tests
     /// <summary>
     /// Headless end-to-end tests for the completion state machine, driving the real
     /// <see cref="CompletionWaiter"/> against <see cref="SimulatedInstrument"/> with a virtual clock.
-    /// The simulator and model mirror the behaviour confirmed on a real 8563E (see
-    /// srq-8560-dual-bit-layout): the RQS mask and the read-back status byte share one layout, in which
-    /// request-service is bit 0x40 (set on every SRQ, not an error), and command-complete is a condition
-    /// that is true while idle - so the waiter must wait for the operation to go BUSY before accepting
-    /// the next service request as the real completion. No hardware.
+    /// The simulator behaves as a real 8563E was measured to (#142): the RQS mask and the read-back status
+    /// byte share one layout, in which request-service is bit 0x40 (set on every SRQ, not an error); bits
+    /// latch as events, so every command that completes sets command-complete; arming over a bit already
+    /// set requests service at once; and the poll that reports a request clears the whole byte. No hardware.
     /// </summary>
     public class CompletionWaiterTests
     {
-        // The 8563E status model in the hardware-confirmed read-back layout (Table 7-266).
+        // The 8563E status model as shipped (data/instruments/8563E.json), in the Table 7-266 layout.
         private static StatusModel Model8563() => new StatusModel
         {
             SrqSupported = true,
@@ -32,8 +31,8 @@ namespace GpibMcp.Tests
             },
             Operations = new Dictionary<string, StatusOperation>
             {
-                ["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "commandComplete", Restore = "CONTS;" },
-                ["sweepAndPeak"] = new StatusOperation { Arm = "SNGLS;TS;MKPK HI;DONE;", ExpectBit = "commandComplete" }
+                ["sweepComplete"] = new StatusOperation { Prepare = "SNGLS;", Arm = "TS;", ExpectBit = "commandComplete", Restore = "CONTS;" },
+                ["sweepAndPeak"] = new StatusOperation { Prepare = "SNGLS;", Arm = "TS;MKPK HI;", ExpectBit = "commandComplete", Restore = "CONTS;" }
             }
         };
 
@@ -41,22 +40,43 @@ namespace GpibMcp.Tests
             CompletionWaiter.Wait(model, "8563E", op, timeoutMs, sim, () => sim.Now, ms => sim.Advance(ms), poll);
 
         [Fact]
-        public void SweepComplete_WaitsForRealCompletion_ViaRequestService()
+        public void SweepComplete_WaitsForTheSweep_NotTheRequestThatArmingRaises()
         {
-            // Idle at arm time (command-complete already true) - the stale case. The busy handshake must
-            // wait for the FRESH sweep, not read the just-armed condition as a finished operation.
+            // Idle at arm time: command-complete is already set, so arming the mask requests service at once.
+            // That request must be drained, and the wait must last the whole sweep.
             var sim = new SimulatedInstrument { SweepDurationMs = 3000 };
             var result = Run(Model8563(), "sweepComplete", 30000, sim);
 
             Assert.Equal(CompletionOutcome.Completed, result.Outcome);
             Assert.Equal(SimulatedInstrument.RequestService, result.StatusByte & SimulatedInstrument.RequestService);
+            Assert.Equal(SimulatedInstrument.EndOfSweep, result.StatusByte & SimulatedInstrument.EndOfSweep);
             Assert.InRange(result.ElapsedMs, 3000, 3150);    // the full sweep, not ~0 (stale) or the backstop
             Assert.Equal(0, result.StatusByte & SimulatedInstrument.Error);
 
-            Assert.Contains("RQS 0", sim.Sent);    // disarmed before arming
-            Assert.Contains("RQS 48", sim.Sent);   // mask = commandComplete|error = 16|32 (NOT request-service)
-            Assert.Contains("SNGLS;TS;", sim.Sent);
-            Assert.Contains("CONTS;", sim.Sent);   // restored
+            // Disarm, then the mode command BEFORE arming (its command-complete must not count), then the sweep.
+            Assert.Equal(new[] { "RQS 0", "SNGLS;", "RQS 48", "TS;", "RQS 0", "CONTS;" }, sim.Sent);
+        }
+
+        [Fact]
+        public void FastSweep_FinishesBeforeTheFirstPollAfterIt_Completes()
+        {
+            // #142: the 8563E's default auto-coupled sweep is 50 ms - shorter than the poll interval, so the
+            // sweep is over before the instrument is ever seen busy. It used to wait out the backstop.
+            var sim = new SimulatedInstrument { SweepDurationMs = 50 };
+            var result = Run(Model8563(), "sweepComplete", 5000, sim, poll: 100);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.True(result.ElapsedMs < 300, "completed after " + result.ElapsedMs + " ms");
+        }
+
+        [Fact]
+        public void ZeroDurationOperation_Completes()
+        {
+            var sim = new SimulatedInstrument { SweepDurationMs = 0 };
+            var result = Run(Model8563(), "sweepComplete", 5000, sim, poll: 100);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.True(result.ElapsedMs < 300, "completed after " + result.ElapsedMs + " ms");
         }
 
         [Fact]
@@ -73,14 +93,28 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
-        public void NeverCompletes_TimesOutAtBackstop()
+        public void ErrorAlreadyQueuedBeforeTheOperation_IsNotReportedAsItsError()
+        {
+            // #142 run 2: *IDN?, which the 8563E rejects, left an error queued; the error bit then read set at
+            // the end of a sweep that had worked, and was reported as the sweep's error.
+            var sim = new SimulatedInstrument { SweepDurationMs = 50, ErrorQueued = true };
+            var result = Run(Model8563(), "sweepComplete", 5000, sim, poll: 100);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.Equal(SimulatedInstrument.Error, result.StatusByte & SimulatedInstrument.Error);
+            Assert.Contains("already present before", result.Message);
+        }
+
+        [Fact]
+        public void NeverCompletes_TimesOutAtBackstop_AndSaysWhatItSaw()
         {
             var sim = new SimulatedInstrument { SweepDurationMs = 100000 }; // longer than the timeout
             var result = Run(Model8563(), "sweepComplete", 3000, sim);
 
             Assert.Equal(CompletionOutcome.TimedOut, result.Outcome);
             Assert.InRange(result.ElapsedMs, 3000, 3150);
-            Assert.Contains("RQS 0", sim.Sent);              // mask cleared, bus usable
+            Assert.Contains("Last polls: 0x00@", result.Message);   // the polls that led to the timeout
+            Assert.Equal("RQS 0", sim.Sent[sim.Sent.Count - 2]);    // mask cleared, bus usable
         }
 
         [Fact]
@@ -90,8 +124,24 @@ namespace GpibMcp.Tests
             var result = Run(Model8563(), "sweepAndPeak", 30000, sim);
 
             Assert.Equal(CompletionOutcome.Completed, result.Outcome);
-            Assert.Equal(SimulatedInstrument.RequestService, result.StatusByte & SimulatedInstrument.RequestService);
-            Assert.Contains("SNGLS;TS;MKPK HI;DONE;", sim.Sent);
+            Assert.InRange(result.ElapsedMs, 1500, 1650);
+            Assert.Contains("TS;MKPK HI;", sim.Sent);
+        }
+
+        [Fact]
+        public void ModeCommandInTheArm_CompletesAtOnce_WhichIsWhyItBelongsInPrepare()
+        {
+            // The shape every 8560-family statusModel had before #142. On the real instrument SNGLS completes
+            // at once and requests service, so with it in the arm the "completion" is SNGLS's, not the sweep's.
+            // InstrumentDatabase replaces such unedited user copies with the bundled block (see supersedes).
+            var model = Model8563();
+            model.Operations["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "commandComplete", Restore = "CONTS;" };
+            var sim = new SimulatedInstrument { SweepDurationMs = 3000 };
+            var result = Run(model, "sweepComplete", 30000, sim);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.True(result.ElapsedMs < 3000, "the sweep had not finished: " + result.ElapsedMs + " ms");
+            Assert.Equal(0, result.StatusByte & SimulatedInstrument.EndOfSweep);
         }
 
         // ---- legacy direct-bit flow (models without a requestServiceBit, e.g. the 3325) ----------
@@ -101,7 +151,8 @@ namespace GpibMcp.Tests
         {
             var model = Model8563();
             model.RequestServiceBit = null;   // no request-service bit -> legacy direct-bit flow
-            var sim = new SimulatedInstrument { SweepDurationMs = 2000 };
+            model.Operations["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "commandComplete", Restore = "CONTS;" };
+            var sim = new SimulatedInstrument(behaviour: StatusBehaviour.LevelConditions) { SweepDurationMs = 2000 };
             var result = Run(model, "sweepComplete", 30000, sim);
 
             Assert.Equal(CompletionOutcome.Completed, result.Outcome);
