@@ -111,27 +111,71 @@ You need the following installed on a **Windows** machine:
 
 ## Install
 
-### Quick install (prebuilt release) — recommended
+### Install with Setup — recommended
 
-If you just want to *run* the server (not develop it), install a built release instead of building from
-source. **Prerequisite:** NI-VISA / NI-488.2 (the GPIB driver) must be installed first — it can't be bundled.
+If you just want to *run* the server (not develop it), download **`GpibMcp-Setup-<version>.exe`** from the
+[latest release](https://github.com/TGoodhew/GPIB-MCP/releases/latest) and run it. It installs for you alone,
+into `%LOCALAPPDATA%\Programs\GpibMcp`, so Windows doesn't ask for administrator rights.
 
-One PowerShell command downloads the latest release, unzips it to `%LOCALAPPDATA%\Programs\GpibMcp`, and
-optionally wires it into your AI client:
+**First, install NI's drivers:** [NI-VISA](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html)
+and [NI-488.2](https://www.ni.com/en/support/downloads/drivers/download.ni-488-2.html), each **with .NET
+support**. Setup doesn't install them. They need administrator rights and usually a restart, they come under
+NI's licence, and the right NI-488.2 depends on your GPIB interface. Setup checks for them before it installs
+anything. If one is missing, or **older than the version this release was built against**, it stops, names what
+to install, and offers to open NI's download pages. Having NI installed isn't always enough: the server binds
+to the NI version it was built with, or a newer one.
+
+The installer is not signed yet, so Windows may say "Windows protected your PC". Choose **More info**, then
+**Run anyway**.
+
+Setup asks:
+
+1. **Connect GPIB MCP to the AI apps on this PC.** On by default. It registers the server, as `gpib`, with each
+   app it finds: Claude Desktop (including the Microsoft Store build), Claude Code, VS Code, VS Code Insiders,
+   Visual Studio, Cursor, Windsurf, Gemini CLI, OpenAI Codex CLI, LM Studio and Continue. It changes only that one
+   entry in each app's settings, and copies a settings file aside (`*.before-gpib-mcp.bak`) before it first changes
+   it. If Claude Desktop already runs GPIB MCP as an extension (`.mcpb`), it's left alone, because two servers
+   would contend for the GPIB bus. Restart each app afterwards to pick it up.
+2. **Let it search a folder of instrument manuals.** Optional; see
+   [Your own manual library](#your-own-manual-library). If you use ManualForge, the folder it indexes is
+   suggested.
+
+A silent install takes the same answers on the command line:
 
 ```powershell
-# Install only (prints next steps):
-irm https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 | iex
+GpibMcp-Setup-<version>.exe /VERYSILENT /TASKS="mcp,manuals" /MANUALS="D:\Manuals"
+```
 
-# Install AND register with a client — download first so you can pass options:
-iwr https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 -OutFile Install-GpibMcp.ps1
-./Install-GpibMcp.ps1 -Client all        # vscode | cursor | windsurf | all
+**Upgrading** is running a newer Setup. It stops any running server first, names the app that started each
+one, and the apps start the new one when they next need it.
+
+**Uninstalling** (Settings → Apps → GPIB MCP) undoes what Setup did. It takes out the registrations it made, and
+puts back any `gpib` entry it replaced. It removes the `GPIB_MCP_MANUALS` variable if it set it. It asks before
+deleting `%LOCALAPPDATA%\GpibMcp`, which holds your instrument database edits, which instrument is at which
+address, logs and past captures. Saved capture images in `Pictures\GpibMcp Captures` are never touched.
+
+The installed program does both jobs itself, so you can run them from a terminal:
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\GpibMcp\GpibMcp.exe" check                  # are NI's drivers here, and new enough?
+& "$env:LOCALAPPDATA\Programs\GpibMcp\GpibMcp.exe" setup mcp --list       # where is it registered?
+& "$env:LOCALAPPDATA\Programs\GpibMcp\GpibMcp.exe" setup mcp              # register again (e.g. after installing an app)
+& "$env:LOCALAPPDATA\Programs\GpibMcp\GpibMcp.exe" setup mcp --remove     # undo it
+```
+
+#### Other ways to install
+
+A PowerShell script downloads the latest release zip and unzips it to the same folder. It can register with
+VS Code, Cursor and Windsurf. It doesn't check for NI and it doesn't uninstall.
+
+```powershell
+irm https://raw.githubusercontent.com/TGoodhew/GPIB-MCP/main/packaging/Install-GpibMcp.ps1 | iex
 ```
 
 Or download `GpibMcp-<version>-win-x86.zip` from the
 [Releases](https://github.com/TGoodhew/GPIB-MCP/releases) page, unzip it yourself, and configure your client
-(see [Configure an MCP client](#configure-an-mcp-client)). The installer backs up any existing client config
-before editing it.
+(see [Configure an MCP client](#configure-an-mcp-client)). Claude Desktop users can instead open
+`GpibMcp-<version>.mcpb` from the same page.
 
 To **build from source** instead, follow the steps below.
 
@@ -1201,6 +1245,11 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
     ManualForgeIndex.cs            ManualForge's full-text index, when installed (#134)
     ManualText.cs                  text extraction (sidecar / pdftotext) + on-disk cache
     ManualSearch.cs                passage search with page-numbered citations
+  Setup/                           what the installer drives: GpibMcp.exe check / setup mcp
+    NiCheck.cs                     are the NI drivers this build needs here, and new enough?
+    McpClients.cs                  each AI app's MCP settings, and how to add/remove one entry
+    McpRegistrations.cs            the record that lets uninstalling undo exactly what was added
+    SetupCommands.cs               the command line those run behind
   Instruments/
     IInstrumentManager.cs          tool-facing instrument abstraction (enables testing)
     InstrumentManager.cs           backend-neutral manager (history, errors, capture, the bus lock)
@@ -1236,6 +1285,7 @@ src/Srq.Completion/                headless SRQ completion state machine (no VIS
   StatusModel.cs / IStatusChannel.cs  data model + transport abstraction
 data/instruments/*.json            bundled instrument command database (188 models)
   README.md                        auto-generated catalog (tools/gen_instrument_catalog.py)
+packaging/GpibMcp.iss              the installer (Inno Setup), built by packaging/Build-Installer.ps1
 tools/HpglViewer/                  WinForms HP-GL viewer (side-by-side vs hp2xx reference)
 tools/SrqHarness/                  console SRQ scenarios against a simulated 8560
 tools/SrqHwHarness/                run the real waiter against live hardware over NI-VISA
@@ -1253,6 +1303,7 @@ tests/Hpgl.Rendering.Tests/        xUnit tests (renderer geometry, fonts, golden
 | `visa_list_resources` lists *every* GPIB address | An HPIB bus extender (e.g. HP 37204A) is ACKing all addresses; the server flags this. See [Discovery and bus extenders](#discovery-and-bus-extenders-hp-37204a). |
 | `BadImageFormatException` at runtime | A bitness mismatch — ensure the build is `x86` and matches your installed NI runtime (see [Why x86?](#why-x86)). |
 | A query times out | Instrument needs a different terminator or longer timeout; raise `timeout_ms`, and check the instrument's programming manual for the expected line ending. |
+| The server exits as soon as a client starts it, with *Could not start the GPIB backend* in the client's MCP log | NI-VISA or NI-488.2 is missing, or older than the version this build was compiled against. Run `GpibMcp.exe check`, which names what to install or update. |
 | Tools never appear in Claude Desktop | Check the `command` path in `claude_desktop_config.json` is absolute and backslash-escaped, then fully restart Claude Desktop. |
 
 ## Extending

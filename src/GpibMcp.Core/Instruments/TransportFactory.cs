@@ -59,10 +59,14 @@ namespace GpibMcp.Instruments
             }
             catch (Exception ex)
             {
+                // Said for the person reading a client's server log, who installed GPIB MCP rather than
+                // built it: the usual cause is NI-VISA or NI-488.2 missing or older than this build needs,
+                // and `check` names which.
                 throw new InvalidOperationException(
-                    "Could not load the GPIB backend '" + assemblyName + "'. Build the full solution " +
-                    "(GPIB-MCP.sln) so the backend assembly is deployed next to the server, and ensure its " +
-                    "driver (e.g. NI-VISA for the nivisa backend) is installed. Detail: " + ex.Message, ex);
+                    "Could not start the GPIB backend '" + assemblyName + "'. GPIB MCP needs NI-VISA and NI-488.2, " +
+                    "each with .NET support, at least as new as the versions it was built with. Run " +
+                    "\"GpibMcp.exe check\" to see what is missing. (Building from source: build the whole " +
+                    "solution, GPIB-MCP.sln, so the backend is deployed next to the server.) Detail: " + ex.Message, ex);
             }
         }
     }

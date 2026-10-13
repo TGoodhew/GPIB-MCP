@@ -1,6 +1,7 @@
 name: Release
 
 # Build the COMPLETE set of release artifacts and publish them to a GitHub Release:
+#   - GpibMcp-Setup-<version>.exe     the installer (Inno Setup; per user, checks for NI first)
 #   - GpibMcp-<version>-win-x86.zip   portable binary distribution (the server + data)
 #   - GpibMcp-<version>.mcpb          Claude Desktop one-click extension bundle (#67)
 #   - Install-GpibMcp.ps1             end-user installer (stdio clients)
@@ -10,7 +11,9 @@ name: Release
 # Runs on a SELF-HOSTED Windows runner: the build links the NI-VISA / NI-488.2 assemblies,
 # which only exist on a machine with the NI drivers installed, so a GitHub-hosted runner
 # cannot compile the GpibMcp.NiVisa backend. Register a self-hosted runner (Settings ->
-# Actions -> Runners) on the bench PC that has NI-VISA, the .NET SDK, and the gh CLI.
+# Actions -> Runners) on the bench PC that has NI-VISA, the .NET SDK, the gh CLI, and Inno Setup 6
+# installed for all users (winget install JRSoftware.InnoSetup --scope machine): the runner service runs
+# as NETWORK SERVICE, which cannot see a per-user install.
 
 on:
   push:
@@ -57,7 +60,8 @@ jobs:
 
       - name: Build (Release x86)
         shell: pwsh
-        run: dotnet build GPIB-MCP.sln -c Release -p:Platform=x86 --no-restore -clp:ErrorsOnly
+        # Stamped with the release version, which `GpibMcp.exe --version` reports and the installer checks.
+        run: dotnet build GPIB-MCP.sln -c Release -p:Platform=x86 "-p:Version=${{ steps.ver.outputs.version }}" --no-restore -clp:ErrorsOnly
 
       - name: Test (hardware-free suite)
         shell: pwsh

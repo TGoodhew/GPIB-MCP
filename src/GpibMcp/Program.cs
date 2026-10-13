@@ -20,6 +20,11 @@ namespace GpibMcp
     {
         private static int Main(string[] args)
         {
+            // A command (check, setup mcp, --version) rather than an MCP client starting the server.
+            int? command = Setup.SetupCommands.Run(args, Console.Out, Console.Error,
+                                                   Path.GetDirectoryName(typeof(Program).Assembly.Location));
+            if (command.HasValue) return command.Value;
+
             Log.Info("starting " + McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion +
                      " (MCP " + string.Join(", ", McpDispatcher.SupportedProtocolVersions) +
                      ", log level " + Log.MinimumLevel + ")");
