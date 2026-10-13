@@ -109,9 +109,16 @@ namespace GpibMcp.Instruments
                 }
             }
 
-            // Unbounded text read: to termination/EOI as a string. (Binary block reads use the bounded
-            // raw path above with a large MaxBytes - ReadString text-decodes and throws on image bytes.)
-            return new TransportReadResult(Latin1.GetBytes(session.RawIO.ReadString()), false);
+            // Unbounded text read: to END/EOI or the termination character, however many reads that takes.
+            // One ReadString() stopped after a buffer (~1 KB) and left the rest on the instrument (#141); it
+            // also decoded the text itself and threw on bytes >= 0x80. Raw bytes here; Core decodes Latin-1.
+            // (Binary block reads use the bounded raw path above with a large MaxBytes.)
+            return new TransportReadResult(ReplyReader.ReadToEnd((int count, out bool more) =>
+            {
+                byte[] data = session.RawIO.Read(count, out ReadStatus status);
+                more = status == ReadStatus.MaximumCountReached;
+                return data;
+            }), false);
         }
 
         public int SerialPoll(string resource)

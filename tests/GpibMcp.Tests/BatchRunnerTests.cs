@@ -32,6 +32,60 @@ namespace GpibMcp.Tests
         private static BatchResult Run(BatchPlan plan, FakeExec fake, BatchCaps caps = null) =>
             BatchRunner.Run(plan, fake, caps ?? new BatchCaps(), () => 0);
 
+        // ---- reply cells (#141) ---------------------------------------------------
+
+        [Theory]
+        [InlineData("005,403,409,420,421,422,503,602,UNJ")]   // *OPT?: was captured as 5
+        [InlineData("+16,\"Input Overload\"")]                // :SYST:ERR?: was 16, the message lost
+        [InlineData("+0,\"No error\"")]
+        [InlineData("-7.42E+001,-7.59E+001,-7.61E+001")]      // a trace: was its first point
+        [InlineData("HP8563E,006")]                           // an identity: was 8563
+        [InlineData("HP3325B")]
+        [InlineData("OVERLOAD")]
+        public void AReplyThatIsNotASingleNumber_IsKeptWhole(string reply)
+        {
+            Assert.Equal(reply, BatchRunner.ParseCell(reply + "\n"));
+        }
+
+        [Theory]
+        [InlineData("+5.00000000E+008", 500000000d)]
+        [InlineData(" -42.33\r\n", -42.33)]
+        [InlineData("1000000", 1000000d)]
+        [InlineData("FA 1.5E6 HZ", 1500000d)]                 // an older HP instrument's header-and-unit reply
+        [InlineData("-12.5DBM", -12.5)]
+        public void AReplyThatIsASingleNumber_IsANumericCell(string reply, double value)
+        {
+            Assert.Equal(value, BatchRunner.ParseCell(reply));
+        }
+
+        [Fact]
+        public void QueryCells_KeepWholeReplies_AndNumbersStillFeedLaterSteps()
+        {
+            var plan = new BatchPlan
+            {
+                Steps = new List<BatchStep>
+                {
+                    new BatchStep { Op = "query", Resource = "E4438C", Command = "*OPT?", As = "opt" },
+                    new BatchStep { Op = "query", Resource = "E4438C", Command = ":FREQ?", As = "freq" },
+                    new BatchStep { Op = "write", Resource = "E4406A", Command = ":FREQ:CENT {{freq}}" },
+                    new BatchStep { Op = "query", Resource = "E4406A", Command = ":SYST:ERR?", As = "err" }
+                }
+            };
+            var fake = new FakeExec
+            {
+                OnQuery = (r, c) => c == "*OPT?" ? "005,403,409,UNJ\n" : c == ":FREQ?" ? "+5.00000000E+008\n" : "+16,\"Input Overload\"\n"
+            };
+
+            var result = Run(plan, fake);
+
+            var row = Assert.Single(result.Rows);
+            var columns = result.Columns.Select(c => c.Name).ToList();
+            Assert.Equal("005,403,409,UNJ", row[columns.IndexOf("opt")]);
+            Assert.Equal(500000000d, row[columns.IndexOf("freq")]);
+            Assert.Equal("+16,\"Input Overload\"", row[columns.IndexOf("err")]);
+            Assert.Contains("W E4406A :FREQ:CENT 500000000", fake.Log);   // the numeric capture interpolates
+        }
+
         // ---- sweep expansion ----------------------------------------------------
 
         [Fact]

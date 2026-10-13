@@ -140,7 +140,6 @@ namespace GpibMcp.Instruments
     public static class BatchRunner
     {
         private static readonly Regex Placeholder = new Regex(@"\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}", RegexOptions.Compiled);
-        private static readonly Regex Number = new Regex(@"[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?", RegexOptions.Compiled);
 
         /// <summary>Validates the plan against the caps; returns a human reason, or null if it is runnable.</summary>
         public static string Validate(BatchPlan plan, BatchCaps caps)
@@ -348,16 +347,27 @@ namespace GpibMcp.Instruments
             });
         }
 
-        /// <summary>Parses an instrument response into a numeric cell when possible, else the trimmed raw string.</summary>
-        private static object ParseCell(string response)
+        /// <summary>
+        /// A reply that is one number becomes a numeric cell: a bare number ("+5.00000000E+008"), or one in an
+        /// older HP instrument's header-and-unit form ("FA 1.5E6 HZ"). Anything else - a list ("005,403,UNJ"),
+        /// an error with its message ("+16,\"Input Overload\""), an identity ("HP3325B") - is kept whole. It
+        /// used to take the first number found anywhere in the reply, which turned "*OPT?" into 5 and dropped
+        /// every error message (#141).
+        /// </summary>
+        internal static object ParseCell(string response)
         {
             if (response == null) return null;
             string trimmed = response.Trim();
-            var m = Number.Match(trimmed);
-            if (m.Success && double.TryParse(m.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
+            if (Tools.MeasurementValue.TryParseNumber(trimmed, out double d)) return d;
+            var m = HeaderedNumber.Match(trimmed);
+            if (m.Success && double.TryParse(m.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out d))
                 return d;
             return trimmed;
         }
+
+        /// <summary>One number, optionally after a word header and a space, optionally followed by a unit: "FA 1.5E6 HZ".</summary>
+        private static readonly Regex HeaderedNumber = new Regex(
+            @"^(?:[A-Za-z]+\s+)?([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*[A-Za-z]*$", RegexOptions.Compiled);
 
         private static double ParseRequired(string text, BatchStep step)
         {
