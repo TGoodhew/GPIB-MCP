@@ -678,9 +678,6 @@ namespace GpibMcp.Tools
         // Helpers
         // ------------------------------------------------------------------------
 
-        /// <summary>Most reads of an error queue to clear it, for instruments that report one error per read.</summary>
-        internal const int MaxErrorQueueReads = 5;
-
         /// <summary>
         /// #144: an instrument without IEEE 488.2 common commands (e.g. an 8563E) logs an error for the *IDN?
         /// tried before its own ID command answered, and the error stays queued - on its display, and as its
@@ -689,44 +686,37 @@ namespace GpibMcp.Tools
         /// when there was nothing to clear.
         /// </summary>
         internal static string ClearErrorsFromUnansweredQueries(IInstrumentManager visa, string resource, IoSpec io,
-            IEnumerable<InstrumentDefinition> matched, IList<string> unanswered)
+            IList<InstrumentDefinition> matched, IList<string> unanswered)
         {
             if (unanswered.Count == 0) return null;
             var def = matched.FirstOrDefault(d => d.Identity != null && !string.IsNullOrEmpty(d.Identity.ErrorQuery));
             if (def == null) return null;
 
-            string query = def.Identity.ErrorQuery;
             string tried = string.Join(", ", unanswered);
-            var errors = new List<string>();
-            try
-            {
-                for (int i = 0; i < MaxErrorQueueReads; i++)
-                {
-                    string reply = (visa.Query(resource, query, io) ?? "").Trim();
-                    if (IsNoError(reply)) break;
-                    errors.Add(reply);
-                }
-                // The queue is empty, but the status byte's error bit can stay latched until it is read.
-                string statusQuery = def.Identity.ClearStatusQuery;
-                if (errors.Count > 0 && !string.IsNullOrEmpty(statusQuery))
-                {
-                    visa.Query(resource, statusQuery, io);
-                    query += " and " + statusQuery;
-                }
-            }
+
+            // The reply can match several models (e.g. the 8757C/D/E all match "8757"). Only send an error query
+            // they all agree on - otherwise it could be another model's command, picked by file order.
+            if (matched.Select(d => (d.Identity?.ErrorQuery ?? "") + "\n" + (d.Identity?.ClearStatusQuery ?? "")).Distinct().Count() > 1)
+                return "It didn't answer " + tried + ", tried first, and may have logged an error; it wasn't cleared, " +
+                       "because the matched models (" + string.Join(", ", matched.Select(d => d.Model)) + ") read their " +
+                       "error queues differently. Assign the right model, then read its error queue.";
+
+            ErrorQueue.Result result;
+            try { result = ErrorQueue.Clear(visa, resource, io, def.Identity); }
             catch (Exception ex)
             {
                 return "The " + def.Model + " didn't answer " + tried + ", tried first, and may have logged an error; " +
-                       "clearing it with " + query + " failed: " + ex.Message;
+                       "reading its error queue with " + def.Identity.ErrorQuery + " failed: " + ex.Message;
             }
-            if (errors.Count == 0) return null;
-            return "The " + def.Model + " doesn't support " + tried + ", tried first: it logged error " +
-                   string.Join(", ", errors) + ", now cleared with " + query + ".";
-        }
 
-        /// <summary>An error-queue reply that means "no error": empty, or 0 / +0 (alone or before a message).</summary>
-        internal static bool IsNoError(string reply) =>
-            reply.Length == 0 || Regex.IsMatch(reply, @"^\+?0+(\s*,|\s*$)");
+            if (!result.Emptied)
+                return "The " + def.Model + " doesn't support " + tried + ", tried first, and logged errors: its error " +
+                       "queue still wasn't empty after " + ErrorQueue.MaxReads + " reads with " + def.Identity.ErrorQuery +
+                       " (" + string.Join(", ", result.Errors) + "), so it may need clearing by hand.";
+            if (result.Errors.Count == 0) return null;
+            return "The " + def.Model + " doesn't support " + tried + ", tried first: it logged error " +
+                   string.Join(", ", result.Errors) + ", now cleared with " + result.Sent + ".";
+        }
 
         private static string VerifyIdentity(IInstrumentManager visa, InstrumentDefinition def, bool verify,
                                              string resource, out bool ok)

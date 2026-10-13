@@ -174,6 +174,20 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Local_OnAnInterfaceWithoutIt_StillClosesTheSession_WhenAsked()
+        {
+            // Copilot on #148: the failure returned before closing, leaving the session ReturnToLocal had opened.
+            var fake = new FakeInstrumentManager { LocalUnsupported = true };
+            fake.OpenSessions.Add("ASRL3::INSTR");
+
+            var output = Get(fake, "visa_local").Invoke(new JObject { ["resource"] = "ASRL3::INSTR", ["close_session"] = true });
+
+            Assert.True(output.IsError);
+            Assert.Equal("ASRL3::INSTR", Assert.Single(fake.Closes));
+            Assert.Contains("Session closed", output.AsText());
+        }
+
+        [Fact]
         public void Local_OnAnInterfaceWithoutIt_IsAnError_NotASilentSuccess()
         {
             var fake = new FakeInstrumentManager { LocalUnsupported = true };

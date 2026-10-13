@@ -13,4 +13,17 @@ namespace Srq.Completion
         /// <summary>Serial-polls and returns the status byte (0-255). On most instruments this clears the latched bits.</summary>
         int SerialPoll();
     }
+
+    /// <summary>
+    /// Optional, for a channel to an instrument whose error queue can be read: lets the waiter clear an
+    /// error that was already queued before the operation, so an error at completion is the operation's.
+    /// </summary>
+    public interface IErrorQueueChannel
+    {
+        /// <summary>
+        /// Reads the error queue until it is empty (and clears any status the errors latched), returning the
+        /// errors read - none if it was already empty. Throws if the queue could not be emptied.
+        /// </summary>
+        System.Collections.Generic.IReadOnlyList<string> ClearErrors();
+    }
 }
