@@ -18,11 +18,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'            # pushing tag v0.3.0 publishes GitHub Release "v0.3.0"
+      - 'v*'            # pushing tag v1.0.0 publishes GitHub Release "v1.0.0"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build and publish, e.g. 0.3.0 (no leading v). Creates/updates tag v<version>.'
+        description: 'Version to build and publish, e.g. 1.0.0 (no leading v). Creates/updates tag v<version>.'
         required: true
         type: string
 

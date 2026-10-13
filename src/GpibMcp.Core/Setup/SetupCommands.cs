@@ -36,7 +36,7 @@ namespace GpibMcp.Setup
             {
                 case "--version":
                 case "version":
-                    output.WriteLine(McpDispatcher.ServerName + " " + NiCheck.ProgramVersion());
+                    output.WriteLine(McpDispatcher.ServerName + " " + McpDispatcher.BuildVersion);
                     return ExitOk;
 
                 case "check":
@@ -81,7 +81,7 @@ namespace GpibMcp.Setup
             bool start = !args.Skip(1).Any(a => a.Equals("--no-start", StringComparison.OrdinalIgnoreCase));
             NiCheck.Result result = new NiCheck(exeDir).Run(start);
 
-            output.WriteLine(McpDispatcher.ServerName + " " + NiCheck.ProgramVersion() + ": NI drivers");
+            output.WriteLine(McpDispatcher.ServerName + " " + McpDispatcher.BuildVersion + ": NI drivers");
             output.WriteLine();
             output.Write(result.Report());
             return result.Ok ? ExitOk : ExitNiMissing;

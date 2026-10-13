@@ -1,0 +1,13 @@
+<Project>
+
+  <!--
+    GPIB MCP's version, in one place for every project under src/: the server exe and GpibMcp.Core, which
+    reports it to MCP clients (McpDispatcher.ServerVersion), must agree (#137). A release build overrides it
+    with the tag's version (-p:Version=..., .github/workflows/release.yml); this is what every other build
+    says. Hpgl.Rendering and Srq.Completion keep versions of their own.
+  -->
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+</Project>

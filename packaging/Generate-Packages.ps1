@@ -33,12 +33,14 @@
         Reuse the existing Release build output (fast re-emit of the packages).
 
 .EXAMPLE
-    ./packaging/Generate-Packages.ps1 -Version 0.2.0 -PublishRelease
-        Build, emit, and publish a GitHub Release (tag v0.2.0) with the zip attached.
+    ./packaging/Generate-Packages.ps1 -Version 1.0.0 -PublishRelease
+        Build, emit, and publish a GitHub Release (tag v1.0.0) with the zip attached.
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.2.0",
+    # Defaults to the version in src\Directory.Build.props, which every non-release build is stamped with.
+    [string]$Version = (([xml](Get-Content (Join-Path (Split-Path -Parent $PSScriptRoot) 'src\Directory.Build.props'))).Project.PropertyGroup.Version |
+                        Where-Object { $_ } | Select-Object -First 1),
     # Canonical install location the generated configs/deeplinks reference (where the release is unzipped).
     [string]$InstallDir = "$env:LOCALAPPDATA\Programs\GpibMcp",
     [string]$Configuration = "Release",

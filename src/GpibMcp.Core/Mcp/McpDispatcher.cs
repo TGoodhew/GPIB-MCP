@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using GpibMcp.Diagnostics;
 using GpibMcp.Mcp.Tasks;
 using GpibMcp.Tools;
@@ -67,8 +68,31 @@ namespace GpibMcp.Mcp
         /// <summary>Server name reported to clients during initialize.</summary>
         public const string ServerName = "gpib-mcp";
 
-        /// <summary>Server version reported to clients during initialize.</summary>
-        public const string ServerVersion = "0.2.0";
+        /// <summary>
+        /// The build, as stamped at compile time (src\Directory.Build.props, or a release's tag): e.g.
+        /// "1.0.0+&lt;commit&gt;". What <c>GpibMcp.exe --version</c> and the startup log say.
+        /// </summary>
+        public static readonly string BuildVersion = ReadBuildVersion();
+
+        /// <summary>
+        /// Server version reported to clients during initialize: the release number, without the commit the
+        /// build came from (#137).
+        /// </summary>
+        public static readonly string ServerVersion = ReleaseOf(BuildVersion);
+
+        private static string ReadBuildVersion()
+        {
+            Assembly assembly = typeof(McpDispatcher).Assembly;
+            var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return informational?.InformationalVersion ?? assembly.GetName().Version.ToString(3);
+        }
+
+        /// <summary>A version without its build metadata: "1.0.0+abc123" is release "1.0.0".</summary>
+        internal static string ReleaseOf(string version)
+        {
+            int plus = version.IndexOf('+');
+            return plus < 0 ? version : version.Substring(0, plus);
+        }
 
         /// <summary>
         /// Identifier of the tasks extension (SEP-2663). A client declares support for it in its capabilities

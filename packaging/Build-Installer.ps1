@@ -38,7 +38,7 @@ $stage = Join-Path $OutputDir 'installer-stage'
 function Write-Step([string] $text) { Write-Host "==> $text" -ForegroundColor Cyan }
 
 if (-not $Version) {
-    $Version = ([xml](Get-Content (Join-Path $repo 'src\GpibMcp\GpibMcp.csproj'))).Project.PropertyGroup.Version |
+    $Version = ([xml](Get-Content (Join-Path $repo 'src\Directory.Build.props'))).Project.PropertyGroup.Version |
         Where-Object { $_ } | Select-Object -First 1
 }
 if ($Version -notmatch '^\d+\.\d+\.\d+([-.].+)?$') { throw "Version '$Version' is not an X.Y.Z version." }
