@@ -35,7 +35,8 @@ namespace GpibMcp.Tests
         }
 
         private static string Trace(int points) =>
-            string.Join(",", Enumerable.Range(0, points).Select(i => (-74.2 - i * 0.01).ToString("0.00E+000"))) + "\n";
+            string.Join(",", Enumerable.Range(0, points).Select(i =>
+                (-74.2 - i * 0.01).ToString("0.00E+000", System.Globalization.CultureInfo.InvariantCulture))) + "\n";
 
         [Fact]
         public void AShortReply_IsOneRead()
@@ -83,6 +84,27 @@ namespace GpibMcp.Tests
             Assert.Equal(7000 - 4096, ex.Discarded);
             Assert.Equal(0, buffer.Left);
             Assert.Contains("nothing is left waiting", ex.Message);
+        }
+
+        [Fact]
+        public void AReplyWhoseLastChunkCrossesTheLimit_IsStillTooLong()
+        {
+            // Copilot on #150: a 7,000-byte reply read in one 8 KB chunk ends there (no more to read), but it is
+            // still over a 4,096-byte limit and must not be returned whole.
+            var buffer = new OutputBuffer(new string('x', 7000));
+
+            var ex = Assert.Throws<ReplyTooLongException>(() => ReplyReader.ReadToEnd(buffer.Read, maxBytes: 4096, chunkBytes: 8192));
+
+            Assert.Equal(4096, ex.Kept);
+            Assert.Equal(7000 - 4096, ex.Discarded);
+            Assert.Equal(0, buffer.Left);
+        }
+
+        [Fact]
+        public void AReplyExactlyAtTheLimit_IsKept()
+        {
+            var buffer = new OutputBuffer(new string('x', 4096));
+            Assert.Equal(4096, ReplyReader.ReadToEnd(buffer.Read, maxBytes: 4096, chunkBytes: 1024).Length);
         }
 
         [Fact]

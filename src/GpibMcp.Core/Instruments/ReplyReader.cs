@@ -40,16 +40,18 @@ namespace GpibMcp.Instruments
                     reply.Write(chunk, 0, chunk.Length);
                     if (chunk.Length == 0) break;   // nothing arrived: never spin
 
-                    if (more && reply.Length >= maxBytes)
+                    // Over the limit - including when the last chunk crosses it and the reply then ends: keep
+                    // only up to the limit, count the overflow as discarded, and drain anything still to come.
+                    if (reply.Length > maxBytes || (more && reply.Length == maxBytes))
                     {
-                        long discarded = 0;
+                        long discarded = reply.Length - maxBytes;
                         while (more && discarded < maxBytes)
                         {
                             int n = (read(chunkBytes, out more) ?? Array.Empty<byte>()).Length;
                             if (n == 0) break;
                             discarded += n;
                         }
-                        throw new ReplyTooLongException(reply.Length, discarded, more);
+                        throw new ReplyTooLongException(maxBytes, discarded, more);
                     }
                 } while (more);
                 return reply.ToArray();
