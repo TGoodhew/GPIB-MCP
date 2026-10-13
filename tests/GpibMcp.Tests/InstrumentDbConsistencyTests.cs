@@ -49,6 +49,57 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void Supersedes_ListsEarlierValuesOfBlocksTheFileHas_NeverTheCurrentOne()
+        {
+            // A "supersedes" entry that named a missing block, or equalled the current one, would be a typo
+            // or a no-op that hides one (#142).
+            foreach (var (file, json) in AllDefinitions())
+            {
+                var supersedes = json["supersedes"] as JObject;
+                if (supersedes == null) continue;
+                foreach (var block in supersedes.Properties())
+                {
+                    Assert.True(json[block.Name] != null, file + ": supersedes '" + block.Name + "', which it does not define");
+                    var earlier = Assert.IsType<JArray>(block.Value);
+                    Assert.NotEmpty(earlier);
+                    Assert.DoesNotContain(earlier, value => JToken.DeepEquals(value, json[block.Name]));
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("8563E.json")]
+        [InlineData("8560E.json")]
+        public void UnchangedUserCopyFromAnyEarlierBuild_GetsTheFixedStatusModel(string file)
+        {
+            // #142: every statusModel this model has shipped is in its supersedes list, so a user copy seeded
+            // from any earlier build loads the fixed one - SNGLS in prepare, not in the arm.
+            JObject bundled = JObject.Parse(File.ReadAllText(Path.Combine(DataDir(), file)));
+            foreach (JToken earlier in (JArray)bundled["supersedes"]["statusModel"])
+            {
+                string user = Path.Combine(Path.GetTempPath(), "gpibmcp-supersedes-" + Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(user);
+                try
+                {
+                    var copy = (JObject)bundled.DeepClone();
+                    copy.Remove("supersedes");
+                    copy["statusModel"] = earlier.DeepClone();
+                    File.WriteAllText(Path.Combine(user, file), copy.ToString());
+
+                    var db = InstrumentDatabase.Load(new[] { DataDir(), user });
+
+                    Assert.True(db.TryGet((string)bundled["model"], out var def));
+                    foreach (var op in def.StatusModel.Operations)
+                    {
+                        Assert.Equal("SNGLS;", op.Value.Prepare);
+                        Assert.StartsWith("TS;", op.Value.Arm);
+                    }
+                }
+                finally { Directory.Delete(user, true); }
+            }
+        }
+
+        [Fact]
         public void AuditedUnitTokens_UseTheCanonicalUnitVocabulary()
         {
             // A token's `unit` (once audited) must be one canonical spelling everywhere, so the resolver can

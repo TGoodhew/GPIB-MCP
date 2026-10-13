@@ -508,7 +508,8 @@ namespace GpibMcp.Tools
             try
             {
                 result = CompletionWaiter.Wait(def.StatusModel, model, operation, timeoutMs, channel,
-                                               () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep);
+                                               () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep,
+                                               trace: TraceCompletion(resource));
             }
             catch (GpibOperationException gex) { return Err(gex.Detail); }
             catch (Exception ex) { return Err("Wait failed for " + resource + ": " + ex.Message); }
@@ -545,8 +546,16 @@ namespace GpibMcp.Tools
             var channel = new VisaStatusChannel(visa, resource);
             var watch = System.Diagnostics.Stopwatch.StartNew();
             return CompletionWaiter.Wait(sm, model ?? resource, operation, timeoutMs, channel,
-                                         () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep);
+                                         () => watch.ElapsedMilliseconds, System.Threading.Thread.Sleep,
+                                         trace: TraceCompletion(resource));
         }
+
+        /// <summary>
+        /// The waiter's per-phase/per-poll trace, to the debug log (GPIB_MCP_LOG_LEVEL=debug): the sequence
+        /// that shows why a wait completed, errored or timed out (#142).
+        /// </summary>
+        private static Action<string> TraceCompletion(string resource) =>
+            line => Log.Debug("SRQ " + resource + ": " + line);
 
         /// <summary>Tool affordance appended to a NeedsDefinition prompt: the one-step define-and-persist path.</summary>
         private static string DefineHint(string operation) =>

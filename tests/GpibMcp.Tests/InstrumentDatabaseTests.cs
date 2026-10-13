@@ -129,6 +129,61 @@ namespace GpibMcp.Tests
             finally { Directory.Delete(bundled, true); Directory.Delete(user, true); }
         }
 
+        // A bundled definition whose statusModel replaced an earlier one, which it lists in "supersedes".
+        private const string BundledWithSupersedes =
+            "{\"model\":\"X\",\"category\":\"bundled\"," +
+            "\"statusModel\":{\"srqSupported\":true,\"bits\":{\"done\":16}," +
+            "\"operations\":{\"sweep\":{\"prepare\":\"SNGLS;\",\"arm\":\"TS;\",\"expectBit\":\"done\"}}}," +
+            "\"supersedes\":{\"statusModel\":[" +
+            "{\"srqSupported\":true,\"bits\":{\"done\":16},\"operations\":{\"sweep\":{\"arm\":\"SNGLS;TS;\",\"expectBit\":\"done\"}}}" +
+            "]}}";
+
+        [Fact]
+        public void Load_UserBlockThatIsAnEarlierBundledVersion_TakesTheCurrentBundledBlock()
+        {
+            // #142: a user copy seeded from an older build, never edited, holds the superseded statusModel
+            // (here laid out differently - it is compared as JSON, not text). The bundled fix must reach it,
+            // while the user's other blocks still win.
+            string bundled = NewTempDir();
+            string user = NewTempDir();
+            try
+            {
+                File.WriteAllText(Path.Combine(bundled, "x.json"), BundledWithSupersedes);
+                File.WriteAllText(Path.Combine(user, "x.json"),
+                    "{ \"model\": \"X\", \"category\": \"user\",\n  \"statusModel\": { \"srqSupported\": true, \"bits\": { \"done\": 16 },\n" +
+                    "    \"operations\": { \"sweep\": { \"arm\": \"SNGLS;TS;\", \"expectBit\": \"done\" } } } }");
+
+                var db = InstrumentDatabase.Load(new[] { bundled, user });
+
+                Assert.True(db.TryGet("X", out var x));
+                Assert.Equal("user", x.Category);
+                Assert.Equal("SNGLS;", x.StatusModel.Operations["sweep"].Prepare);
+                Assert.Equal("TS;", x.StatusModel.Operations["sweep"].Arm);
+            }
+            finally { Directory.Delete(bundled, true); Directory.Delete(user, true); }
+        }
+
+        [Fact]
+        public void Load_UserBlockTheUserChanged_StillWins_OverABundledBlockThatSupersedesOthers()
+        {
+            string bundled = NewTempDir();
+            string user = NewTempDir();
+            try
+            {
+                File.WriteAllText(Path.Combine(bundled, "x.json"), BundledWithSupersedes);
+                File.WriteAllText(Path.Combine(user, "x.json"),
+                    "{\"model\":\"X\",\"statusModel\":{\"srqSupported\":true,\"bits\":{\"done\":16}," +
+                    "\"operations\":{\"sweep\":{\"arm\":\"SNGLS;TS;MKPK HI;\",\"expectBit\":\"done\"}}}}");
+
+                var db = InstrumentDatabase.Load(new[] { bundled, user });
+
+                Assert.True(db.TryGet("X", out var x));
+                Assert.Equal("SNGLS;TS;MKPK HI;", x.StatusModel.Operations["sweep"].Arm);   // the user's own edit
+                Assert.Null(x.StatusModel.Operations["sweep"].Prepare);
+            }
+            finally { Directory.Delete(bundled, true); Directory.Delete(user, true); }
+        }
+
         [Fact]
         public void Load_AcceptsScalarOrArrayForStringListFields()
         {

@@ -88,8 +88,8 @@ namespace SrqHarness
             },
             Operations = new Dictionary<string, StatusOperation>
             {
-                ["sweepComplete"] = new StatusOperation { Arm = "SNGLS;TS;", ExpectBit = "commandComplete", Restore = "CONTS;" },
-                ["sweepAndPeak"] = new StatusOperation { Arm = "SNGLS;TS;MKPK HI;DONE;", ExpectBit = "commandComplete", Restore = "CONTS;" }
+                ["sweepComplete"] = new StatusOperation { Prepare = "SNGLS;", Arm = "TS;", ExpectBit = "commandComplete", Restore = "CONTS;" },
+                ["sweepAndPeak"] = new StatusOperation { Prepare = "SNGLS;", Arm = "TS;MKPK HI;", ExpectBit = "commandComplete", Restore = "CONTS;" }
             }
         };
     }

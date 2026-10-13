@@ -14,8 +14,9 @@ namespace Srq.Completion
     /// no per-device logic. Two completion strategies, chosen by whether <see cref="RequestServiceBit"/>
     /// is set:
     ///   * <b>SRQ-edge</b> (RequestServiceBit set): poll the GPIB request-service bit (0x40) as the
-    ///     completion signal, after first waiting for the operation to go busy. Most robust; use when
-    ///     the instrument reliably asserts SRQ on the armed condition (e.g. the 8563E).
+    ///     completion signal - the first request after the operation starts, once any request raised by
+    ///     arming has been drained. Most robust; use when the instrument reliably asserts SRQ on the
+    ///     armed condition (e.g. the 8563E).
     ///   * <b>direct-bit</b> (RequestServiceBit absent): poll the operation's <c>expectBit</c> (or the
     ///     error bit) directly. Use when request-service is unavailable or unreliable - e.g. the 3325,
     ///     whose require-service bit only asserts in the unit's physical "Enhancements" mode.
@@ -39,20 +40,19 @@ namespace Srq.Completion
 
         /// <summary>
         /// Name (in <see cref="Bits"/>) of the serial-poll REQUEST-SERVICE bit (the GPIB RQS bit,
-        /// 0x40). When set, the waiter uses the robust "SRQ-edge" completion flow: it does NOT arm
-        /// this bit, but treats its assertion as the completion signal, and first waits for the
-        /// operation to go BUSY (the expect bit clears) so a condition that is already true at
-        /// arm-time cannot be mistaken for completion. Hardware-confirmed on the 8563E, where the
-        /// RQS-mask and the read-back status byte share the Table 7-266 layout (request-service=0x40
-        /// is set on every SRQ, NOT an error). Absent =&gt; legacy direct-bit flow (poll the expect bit).
+        /// 0x40). When set, the waiter uses the "SRQ-edge" completion flow: it does NOT arm this bit, but
+        /// treats its assertion as the completion signal. A condition already true when the mask is armed
+        /// requests service at once, so the waiter drains that request before starting the operation, and
+        /// the first request after the start is the completion (#142). Hardware-confirmed on the 8563E,
+        /// where the RQS-mask and the read-back status byte share the Table 7-266 layout (request-service
+        /// =0x40 is set on every SRQ, NOT an error). Absent =&gt; legacy direct-bit flow (poll the expect bit).
         /// </summary>
         public string RequestServiceBit { get; set; }
 
         /// <summary>
-        /// SRQ-edge only: how long (ms) to wait for the operation to go BUSY (the expect bit to clear)
-        /// before proceeding to wait for completion. Override per model when an instrument is slow to
-        /// start an operation; null uses <see cref="CompletionWaiter.BusyConfirmMs"/>. Always capped at
-        /// the overall timeout.
+        /// No longer used. The SRQ-edge flow once waited up to this long for the operation to go busy
+        /// before accepting a service request, and so missed operations that finished within a poll
+        /// (#142). Kept so existing definitions that set it still load.
         /// </summary>
         public int? BusyConfirmMs { get; set; }
 
@@ -112,7 +112,20 @@ namespace Srq.Completion
     /// <summary>A named completion operation: how to arm it, which status bit confirms it, optional restore.</summary>
     public sealed class StatusOperation
     {
-        /// <summary>Commands that start the operation (the waiter sends the enable mask first), e.g. "SNGLS;TS;".</summary>
+        /// <summary>
+        /// Optional commands sent BEFORE the enable mask is armed, to put the instrument in the mode the
+        /// operation needs - e.g. "SNGLS;" (single sweep) on the 8560. A command completing sets
+        /// command-complete and so requests service the moment it is armed; sent here, its request is
+        /// drained before the operation starts, rather than being taken for the operation's completion
+        /// (#142). Leave the command that actually runs the operation (e.g. "TS;") in <see cref="Arm"/>.
+        /// </summary>
+        public string Prepare { get; set; }
+
+        /// <summary>
+        /// Commands that start the operation, sent after the enable mask is armed, e.g. "TS;". In the
+        /// SRQ-edge flow the first service request after these is taken as completion, so put mode-setting
+        /// commands that complete at once in <see cref="Prepare"/>, not here.
+        /// </summary>
         public string Arm { get; set; }
 
         /// <summary>Name (in <see cref="StatusModel.Bits"/>) of the bit that signals completion.</summary>

@@ -759,14 +759,24 @@ contains no per-device logic, so adding a new SRQ instrument is pure data (see b
 The waiter picks a strategy from the model, never from the device identity:
 
 - **SRQ-edge** — used when the model names a `requestServiceBit` (the GPIB request-service bit, `0x40`).
-  The waiter disarms and drains stale status, arms `expectBit|errorBit` (**never** the request-service
-  bit — arming that self-fires), **waits for the operation to go busy** (the expect bit clears) so a
-  condition that is already true at arm-time can't be read as "done", then treats the next
-  request-service assertion as completion and classifies by the error bit. Most robust; the 8563E uses
-  it. Found the hard way on a real 8563E: the 8560 RQS mask and the read-back status byte share one
-  layout (Programming Guide Table 7-266) where `0x40` is request-service — *not* an error — so a naïve
-  "poll the expect bit" model misread every successful sweep as an error and could pre-fire on a
-  standing end-of-sweep.
+  The waiter takes these steps in order:
+  1. Disarm and drain stale status.
+  2. Send the operation's `prepare` commands (e.g. `SNGLS;`).
+  3. Arm `expectBit|errorBit`. **Never** the request-service bit: arming that self-fires.
+  4. Drain the request that arming raises, then start the operation (`arm`, e.g. `TS;`).
+  5. Treat the **first** request-service after that as completion, and classify it by the error bit.
+
+  Most robust; the 8563E uses it. What was found on a real 8563E:
+  - **Read-back layout:** the 8560 RQS mask and the read-back status byte share one layout (Programming
+    Guide Table 7-266), where `0x40` is request-service, *not* an error. A naïve "poll the expect bit"
+    model misread every successful sweep as an error.
+  - **Status bits latch as events:** every command that completes sets command-complete, so arming over
+    one already set requests service at once. The poll that reports a request clears the whole byte.
+    That is why mode commands go in `prepare`, not `arm`.
+  - **Fast operations:** a 50 ms sweep can finish before the first poll, so the waiter can't wait to see
+    the instrument busy first (#142).
+  - **Pre-existing errors:** an error already queued before the operation started (e.g. from an `*IDN?`
+    the instrument rejected) is reported as such, not as the operation's.
 - **direct-bit** — used when there is no `requestServiceBit`. The waiter arms the mask and polls the
   `expectBit` (or error bit) directly. Use this when request-service is unavailable or unreliable — the
   3325 uses it, because its require-service bit only asserts in the unit's physical *Enhancements* mode
@@ -786,9 +796,13 @@ Add a `statusModel` block to the instrument's `data/instruments/<model>.json`:
 | `serialPoll.clearsRqs` | whether a serial poll clears RQS. |
 | `errorBit` | name (in `bits`) of the failure bit (e.g. `error`, `fail`). |
 | `requestServiceBit` | name of the GPIB request-service bit (usually `64`/`0x40`) → enables the robust **SRQ-edge** flow. Omit to use **direct-bit**. |
-| `busyConfirmMs` | *(SRQ-edge, optional)* override the busy-confirm timeout for slow-to-start operations. |
 | `bits` | named status-byte bits → decimal weights, **as read back by a serial poll** (this is what the waiter decodes). |
-| `operations.<name>` | `{ arm, expectBit[, restore] }` — the commands that start the operation, the bit that signals it, and an optional restore. |
+| `operations.<name>` | `{ [prepare,] arm, expectBit[, restore] }`:<br>• `prepare`: mode commands sent before the mask is armed (e.g. `SNGLS;`).<br>• `arm`: the commands that start the operation (e.g. `TS;`).<br>• `expectBit`: the bit that signals completion.<br>• `restore`: optional commands to restore the instrument afterwards. |
+
+When a bundled `statusModel` changes, list the values it replaces under a top-level
+`"supersedes": { "statusModel": [ … ] }`. User copies seeded from an older build hold an old value until
+someone refreshes them; a copy that still exactly matches a listed value takes the new bundled block on
+load. A user's own edits match none of them, so they keep winning.
 
 Then verify on real hardware with [`SrqHwHarness`](tools/SrqHwHarness/) (and its `raw`/`probe` mode to
 characterise the status byte first) — the same code path the server uses. The 8563E (SRQ-edge) and the
