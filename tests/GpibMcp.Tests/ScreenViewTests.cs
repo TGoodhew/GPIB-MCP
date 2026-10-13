@@ -81,6 +81,45 @@ namespace GpibMcp.Tests
             Assert.Throws<InvalidOperationException>(() => McpAppViews.InlineSdk("var a=1;export{a as NotApp};"));
         }
 
+        [Theory]
+        [InlineData("{\"mimeTypes\":[\"text/html;profile=mcp-app\"]}", true)]
+        [InlineData("{\"mimeTypes\":[\"text/plain\",\"TEXT/HTML;PROFILE=MCP-APP\"]}", true)]
+        [InlineData("{}", false)]                                        // no mimeTypes
+        [InlineData("{\"mimeTypes\":[\"application/x-other-ui\"]}", false)]  // a UI this view isn't
+        [InlineData("{\"mimeTypes\":\"text/html;profile=mcp-app\"}", false)] // not an array
+        public void ViewSupport_NeedsTheViewsMimeType(string extension, bool expected)
+        {
+            var caps = new JObject { ["extensions"] = new JObject { [McpAppViews.Extension] = JObject.Parse(extension) } };
+            Assert.Equal(expected, McpAppViews.Declared(caps));
+            Assert.False(McpAppViews.Declared(new JObject()));
+            Assert.False(McpAppViews.Declared(null));
+        }
+
+        [Fact]
+        public void AClientOfferingAnotherUiType_KeepsTheSvgFallback_AndDoesntSeeTheViewOnlyTool()
+        {
+            using (var d = Dispatcher())
+            {
+                Send(d, 1, "initialize", new JObject
+                {
+                    ["protocolVersion"] = "2025-06-18",
+                    ["capabilities"] = new JObject { ["extensions"] = new JObject { [McpAppViews.Extension] = new JObject { ["mimeTypes"] = new JArray("application/x-other-ui") } } },
+                    ["clientInfo"] = new JObject { ["name"] = "test", ["version"] = "1" }
+                });
+                var names = ((JArray)Send(d, 2, "tools/list")["result"]["tools"]).Select(t => (string)t["name"]);
+                Assert.DoesNotContain(McpAppViews.ScreenImageTool, names);
+            }
+        }
+
+        [Fact]
+        public void TheSaveButton_DependsOnTheHostsDownloadCapability()
+        {
+            string html = (string)McpAppViews.Read(McpAppViews.ScreenViewUri)["contents"][0]["text"];
+            Assert.Contains("getHostCapabilities()", html);
+            Assert.Contains(".downloadFile;", html);
+            Assert.Contains("role=\"status\"", html);   // loading -> shown / failed is announced to screen readers
+        }
+
         // ---- the dispatcher --------------------------------------------------------------------------
 
         private static JObject Send(McpDispatcher dispatcher, int id, string method, JObject prms = null) =>

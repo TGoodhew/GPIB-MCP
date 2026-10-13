@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
@@ -30,11 +31,16 @@ namespace GpibMcp.Mcp
 
         private static readonly Lazy<string> ScreenViewHtml = new Lazy<string>(BuildScreenView);
 
-        /// <summary>True when the client's capabilities say it can draw views.</summary>
+        /// <summary>
+        /// True when the client's capabilities say it can draw these views: the extension, with
+        /// <see cref="MimeType"/> among its <c>mimeTypes</c>. A client offering only other UI types can't.
+        /// </summary>
         public static bool Declared(JObject capabilities)
         {
             var extensions = capabilities?["extensions"] as JObject;
-            return extensions?[Extension] != null;
+            var mimeTypes = (extensions?[Extension] as JObject)?["mimeTypes"] as JArray;
+            return mimeTypes != null &&
+                   mimeTypes.Any(m => m.Type == JTokenType.String && string.Equals((string)m, MimeType, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>The extension's entry in this server's capabilities.</summary>

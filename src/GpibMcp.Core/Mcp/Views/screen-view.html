@@ -19,7 +19,7 @@
   button { margin-top: 6px; }
 </style></head>
 <body>
-<div id="status">Waiting for the screen image...</div>
+<div id="status" role="status" aria-live="polite">Waiting for the screen image...</div>
 <img id="screen" alt="Instrument screen" hidden>
 <div id="path"></div>
 <button id="save" hidden>Save PNG...</button>
@@ -38,7 +38,8 @@
     $("screen").hidden = false;
     $("status").textContent = "";
     $("path").textContent = savedPath;
-    $("save").hidden = typeof app.downloadFile !== "function";
+    // Only where the host said at the handshake that it saves files (ui/download-file).
+    $("save").hidden = !(app.getHostCapabilities() || {}).downloadFile;
   };
 
   // The saved PNG at full size, through the view-only tool; null if it can't be had.

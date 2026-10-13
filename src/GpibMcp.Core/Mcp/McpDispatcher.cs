@@ -617,7 +617,7 @@ namespace GpibMcp.Mcp
         /// </summary>
         private bool ClientShowsViews(RequestContext context)
         {
-            return _clientDeclaredViews || context.DeclaresExtension(McpAppViews.Extension);
+            return _clientDeclaredViews || McpAppViews.Declared(context.ClientCapabilities);
         }
 
         /// <summary>
