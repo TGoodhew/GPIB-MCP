@@ -280,12 +280,5 @@ namespace GpibMcp.Setup
             }
         }
 
-        /// <summary>For messages: the version of this program.</summary>
-        public static string ProgramVersion()
-        {
-            Assembly entry = Assembly.GetEntryAssembly() ?? typeof(NiCheck).Assembly;
-            var informational = entry.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            return informational?.InformationalVersion ?? entry.GetName().Version.ToString(3);
-        }
     }
 }

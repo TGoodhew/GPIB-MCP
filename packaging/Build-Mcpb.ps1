@@ -14,7 +14,7 @@
     NI-VISA / NI-488.2 must still be installed on the machine - the driver can't be bundled.
 
 .EXAMPLE
-    ./Build-Mcpb.ps1 -SourceDir .\dist\GpibMcp-0.2.0-win-x86 -Version 0.2.0 -OutFile .\dist\GpibMcp-0.2.0.mcpb
+    ./Build-Mcpb.ps1 -SourceDir .\dist\GpibMcp-1.0.0-win-x86 -Version 1.0.0 -OutFile .\dist\GpibMcp-1.0.0.mcpb
 #>
 [CmdletBinding()]
 param(

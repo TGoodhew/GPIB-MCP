@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using GpibMcp.Instruments;
 using GpibMcp.Mcp;
 using GpibMcp.Stdio;
@@ -49,6 +50,29 @@ namespace GpibMcp.Tests
             Assert.Equal(McpDispatcher.ServerName, (string)result["serverInfo"]["name"]);
             Assert.Equal(McpDispatcher.ServerVersion, (string)result["serverInfo"]["version"]);
             Assert.NotNull(result["capabilities"]["tools"]);
+        }
+
+        [Fact]
+        public void ServerVersion_IsTheVersionTheBuildWasStampedWith()
+        {
+            // #137: it was a hard-coded "0.2.0" whatever the release. It is the assembly's own version - the
+            // one src\Directory.Build.props sets, or a release's tag - without the commit it was built from.
+            Assembly core = typeof(McpDispatcher).Assembly;
+            string stamped = core.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+            Assert.Equal(stamped, McpDispatcher.BuildVersion);
+            Assert.StartsWith(core.GetName().Version.ToString(3), McpDispatcher.ServerVersion);
+            Assert.DoesNotContain("+", McpDispatcher.ServerVersion);
+            Assert.StartsWith(McpDispatcher.ServerVersion, McpDispatcher.BuildVersion);
+        }
+
+        [Theory]
+        [InlineData("1.0.0+94bf4c73ed5aaae8191cea8cbed5bf368a5a7941", "1.0.0")]
+        [InlineData("1.0.0", "1.0.0")]
+        [InlineData("1.1.0-beta.2+94bf4c7", "1.1.0-beta.2")]
+        public void ReleaseOf_DropsTheBuildMetadata(string version, string release)
+        {
+            Assert.Equal(release, McpDispatcher.ReleaseOf(version));
         }
 
         [Fact]

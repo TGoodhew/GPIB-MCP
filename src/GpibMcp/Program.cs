@@ -25,7 +25,7 @@ namespace GpibMcp
                                                    Path.GetDirectoryName(typeof(Program).Assembly.Location));
             if (command.HasValue) return command.Value;
 
-            Log.Info("starting " + McpDispatcher.ServerName + " " + McpDispatcher.ServerVersion +
+            Log.Info("starting " + McpDispatcher.ServerName + " " + McpDispatcher.BuildVersion +
                      " (MCP " + string.Join(", ", McpDispatcher.SupportedProtocolVersions) +
                      ", log level " + Log.MinimumLevel + ")");
 

@@ -70,7 +70,7 @@ package differs only in how the client reaches the server:
 ```powershell
 ./packaging/Generate-Packages.ps1            # build + stage + emit (no publish)
 ./packaging/Generate-Packages.ps1 -SkipBuild # reuse the current build, just re-emit
-./packaging/Generate-Packages.ps1 -Version 0.2.0 -PublishRelease   # also publish the GitHub Release
+./packaging/Generate-Packages.ps1 -Version 1.0.0 -PublishRelease   # also publish the GitHub Release
 ```
 
 Output (git-ignored):
