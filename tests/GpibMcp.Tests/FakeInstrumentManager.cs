@@ -46,6 +46,16 @@ namespace GpibMcp.Tests
         public string Query(string resource, string command, int timeoutMs) =>
             Query(resource, command, new IoSpec(timeoutMs));
 
+        /// <summary>Every query sent, in order (trimmed).</summary>
+        public readonly List<string> Queries = new List<string>();
+
+        /// <summary>Queries that fail as an instrument that doesn't answer them would (e.g. *IDN? on an 8563E).</summary>
+        public readonly HashSet<string> UnansweredQueries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Successive replies for a query (e.g. an error queue: "112", then "0"); falls back to <see cref="QueryResponses"/> when used up.</summary>
+        public readonly Dictionary<string, Queue<string>> QueryReplySequences =
+            new Dictionary<string, Queue<string>>(StringComparer.OrdinalIgnoreCase);
+
         public string Query(string resource, string command, IoSpec io)
         {
             LastIo = io;
@@ -55,8 +65,11 @@ namespace GpibMcp.Tests
                 throw QueryError;
             }
             string key = (command ?? string.Empty).Trim();
+            Queries.Add(key);
             _history.Record(resource, CommandDirection.Sent, command ?? string.Empty);
-            string response = QueryResponses.TryGetValue(key, out var canned) ? canned : "RESPONSE:" + key;
+            if (UnansweredQueries.Contains(key)) throw new TimeoutException("VI_ERROR_TMO: no response to " + key);
+            string response = QueryReplySequences.TryGetValue(key, out var sequence) && sequence.Count > 0 ? sequence.Dequeue()
+                : QueryResponses.TryGetValue(key, out var canned) ? canned : "RESPONSE:" + key;
             _history.Record(resource, CommandDirection.Received, response);
             return response;
         }

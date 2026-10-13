@@ -9,7 +9,9 @@
   "identity": {
     "command": "ID?",
     "matchRegex": "8560E",
-    "description": "Returns the model number (e.g. HP8560E/EC) and installed options."
+    "description": "Returns the model number (e.g. HP8560E/EC) and installed options.",
+    "errorQuery": "ERR?",
+    "clearStatusQuery": "STB?"
   },
   "capture": {
     "method": "hpgl",
@@ -38,6 +40,9 @@
     }
   },
   "supersedes": {
+    "identity": [
+      {"command":"ID?","matchRegex":"8560E","description":"Returns the model number (e.g. HP8560E/EC) and installed options."}
+    ],
     "statusModel": [
       {"srqSupported":true,"serialPoll":{"clearsRqs":true},"enableMask":{"setCommand":"RQS {mask}","clearCommand":"RQS 0","maskFormat":"decimal"},"doneSupport":{"supported":true,"mnemonic":"DONE"},"errorBit":"error","requestServiceBit":"requestService","bits":{"message":2,"endOfSweep":4,"commandComplete":16,"error":32,"requestService":64},"operations":{"sweepComplete":{"arm":"SNGLS;TS;","expectBit":"commandComplete","restore":"CONTS;"},"sweepAndPeak":{"arm":"SNGLS;TS;MKPK HI;DONE;","expectBit":"commandComplete","restore":"CONTS;"}}}
     ]

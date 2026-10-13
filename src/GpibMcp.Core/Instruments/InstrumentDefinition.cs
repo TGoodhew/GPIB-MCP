@@ -139,6 +139,21 @@ namespace GpibMcp.Instruments
         [JsonProperty("description")] public string Description { get; set; }
 
         /// <summary>
+        /// Optional query that reads - and so clears - the instrument's error queue, e.g. "ERR?" on the
+        /// 8560 family. An instrument without IEEE 488.2 common commands logs an error when it is sent
+        /// *IDN?, which <c>instrument_identify</c> tries first on an unassigned resource; once its own
+        /// <see cref="Command"/> has identified it, this clears that error rather than leaving it queued (#144).
+        /// </summary>
+        [JsonProperty("errorQuery")] public string ErrorQuery { get; set; }
+
+        /// <summary>
+        /// Optional query that reads - and so clears - the status byte, sent once <see cref="ErrorQuery"/> has
+        /// emptied the error queue. On the 8563E the status byte's error bit can stay latched after the queue
+        /// is empty, until "STB?" reads it (#144).
+        /// </summary>
+        [JsonProperty("clearStatusQuery")] public string ClearStatusQuery { get; set; }
+
+        /// <summary>
         /// True when this model can be identified over the bus: not explicitly marked unsupported and
         /// carrying an identification command. False means "do not attempt identity verification".
         /// </summary>

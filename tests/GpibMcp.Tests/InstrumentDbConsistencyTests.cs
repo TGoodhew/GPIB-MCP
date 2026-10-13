@@ -18,7 +18,7 @@ namespace GpibMcp.Tests
         // Recognised IdentitySpec keys; anything else means a non-conforming block (e.g. the old
         // 5350A query/response/example shape, which the loader silently ignored).
         private static readonly HashSet<string> IdentityKeys =
-            new HashSet<string>(StringComparer.Ordinal) { "command", "matchRegex", "supported", "description" };
+            new HashSet<string>(StringComparer.Ordinal) { "command", "matchRegex", "supported", "description", "errorQuery", "clearStatusQuery" };
 
         private static string DataDir()
         {
@@ -65,6 +65,47 @@ namespace GpibMcp.Tests
                     Assert.DoesNotContain(earlier, value => JToken.DeepEquals(value, json[block.Name]));
                 }
             }
+        }
+
+        [Fact]
+        public void UnchangedUserCopyFromAnyEarlierBuild_LoadsAsTheBundledDefinition()
+        {
+            // For every block a bundled file supersedes, a user copy holding any earlier value of it - seeded
+            // from an older build, never edited - must load exactly as the bundled definition does.
+            foreach (var (file, bundled) in AllDefinitions())
+            {
+                var supersedes = bundled["supersedes"] as JObject;
+                if (supersedes == null) continue;
+
+                InstrumentDefinition expected = LoadWithUserCopy(file, null);
+                foreach (var block in supersedes.Properties())
+                    foreach (JToken earlier in (JArray)block.Value)
+                    {
+                        var copy = (JObject)bundled.DeepClone();
+                        copy.Remove("supersedes");
+                        copy[block.Name] = earlier.DeepClone();
+                        InstrumentDefinition actual = LoadWithUserCopy(file, copy);
+
+                        Assert.True(JToken.DeepEquals(JObject.FromObject(expected), JObject.FromObject(actual)),
+                            file + ": a user copy with an earlier '" + block.Name + "' did not load as the bundled one");
+                    }
+            }
+        }
+
+        /// <summary>Loads one bundled definition, layered under a user copy when one is given.</summary>
+        private static InstrumentDefinition LoadWithUserCopy(string file, JObject userCopy)
+        {
+            string user = Path.Combine(Path.GetTempPath(), "gpibmcp-supersedes-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(user);
+            try
+            {
+                if (userCopy != null) File.WriteAllText(Path.Combine(user, file), userCopy.ToString());
+                var db = InstrumentDatabase.Load(new[] { DataDir(), user });
+                string model = (string)JObject.Parse(File.ReadAllText(Path.Combine(DataDir(), file)))["model"];
+                Assert.True(db.TryGet(model, out var def));
+                return def;
+            }
+            finally { Directory.Delete(user, true); }
         }
 
         [Theory]

@@ -373,6 +373,96 @@ namespace GpibMcp.Tests
             Assert.Empty(visa.Reads);  // did not attempt any read/query
         }
 
+        // An 8563E: identifies with ID?, doesn't support *IDN?, its error queue reads with ERR?, and STB? clears its status byte.
+        private static InstrumentDefinition Analyzer8563E() => new InstrumentDefinition
+        {
+            Model = "8563E",
+            Category = "Spectrum Analyzer",
+            Identity = new IdentitySpec { Command = "ID?", MatchRegex = "8563", ErrorQuery = "ERR?", ClearStatusQuery = "STB?" }
+        };
+
+        private static FakeInstrumentManager Bench8563E(params string[] errorQueue)
+        {
+            var visa = new FakeInstrumentManager();
+            visa.UnansweredQueries.Add("*IDN?");
+            visa.QueryResponses["ID?"] = "HP8563E,006";
+            visa.QueryReplySequences["ERR?"] = new Queue<string>(errorQueue);
+            visa.QueryResponses["ERR?"] = "0";   // once the queue is read, it is empty
+            return visa;
+        }
+
+        [Fact]
+        public void Identify_Unassigned_ClearsTheErrorThatTheRejectedIdnQueryLeft()
+        {
+            // #144: unassigned, so *IDN? goes first; the 8563E doesn't support it and logs error 112, which
+            // stayed queued after ID? identified it - on its display, and as its status byte's error bit.
+            var db = InstrumentDatabase.FromDefinitions(new[] { Analyzer8563E() });
+            var visa = Bench8563E("112");
+
+            var text = Tool("instrument_identify", db, AssignmentStore.InMemory(), visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+
+            Assert.Contains("Matched model(s): 8563E", text);
+            Assert.Contains("doesn't support *IDN?", text);
+            Assert.Contains("logged error 112, now cleared with ERR? and STB?", text);
+            // Read until the queue is empty, then read the status byte, whose error bit can stay latched.
+            Assert.Equal(new[] { "*IDN?", "ID?", "ERR?", "ERR?", "STB?" }, visa.Queries);
+        }
+
+        [Fact]
+        public void Identify_Assigned_AsksTheModelsOwnIdCommandFirst_SoThereIsNothingToClear()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { Analyzer8563E() });
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::18::INSTR", "8563E");
+            var visa = Bench8563E("112");
+
+            var text = Tool("instrument_identify", db, store, visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+
+            Assert.Equal(new[] { "ID?" }, visa.Queries);
+            Assert.DoesNotContain("cleared", text);
+        }
+
+        [Fact]
+        public void Identify_WhenTheRejectedQueryLeftNoError_SaysNothingAboutIt()
+        {
+            var db = InstrumentDatabase.FromDefinitions(new[] { Analyzer8563E() });
+            var visa = Bench8563E();   // the queue reads 0 straight away
+
+            var text = Tool("instrument_identify", db, AssignmentStore.InMemory(), visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+
+            Assert.Equal(new[] { "*IDN?", "ID?", "ERR?" }, visa.Queries);   // nothing cleared, so no STB?
+            Assert.DoesNotContain("doesn't support", text);
+        }
+
+        [Fact]
+        public void Identify_ModelWithoutAnErrorQuery_DoesNotGuessOne()
+        {
+            var model = Analyzer8563E();
+            model.Identity.ErrorQuery = null;
+            var db = InstrumentDatabase.FromDefinitions(new[] { model });
+            var visa = Bench8563E("112");
+
+            Tool("instrument_identify", db, AssignmentStore.InMemory(), visa)
+                .InvokeText(new JObject { ["resource"] = "GPIB0::18::INSTR" });
+
+            Assert.Equal(new[] { "*IDN?", "ID?" }, visa.Queries);
+        }
+
+        [Theory]
+        [InlineData("0", true)]
+        [InlineData("+0,\"No error\"", true)]
+        [InlineData("", true)]
+        [InlineData("112", false)]
+        [InlineData("111,112", false)]
+        [InlineData("-113,\"Undefined header\"", false)]
+        public void ErrorQueueReply_ZeroMeansNoError(string reply, bool noError)
+        {
+            Assert.Equal(noError, DatabaseTools.IsNoError(reply));
+        }
+
         [Fact]
         public void Assign_NonIdentifiableModel_VerifyNoteSaysCannotVerify_AndDoesNotFail()
         {
