@@ -123,8 +123,13 @@ namespace GpibMcp.Instruments
         /// <summary>Sends the IEEE 488.2 device clear.</summary>
         void Clear(string resource, int timeoutMs);
 
-        /// <summary>Returns the instrument to local control (no-op if unsupported).</summary>
-        void ReturnToLocal(string resource);
+        /// <summary>
+        /// Returns the instrument to local control, so its front panel works again: opens the connection
+        /// if it isn't open, sends the interface's go-to-local, and says what it sent (e.g. "GPIB Go To
+        /// Local (GTL)"). Throws <see cref="NotSupportedException"/> when the resource's interface has no
+        /// remote/local control (e.g. serial) - never a silent no-op (#140).
+        /// </summary>
+        string ReturnToLocal(string resource, int timeoutMs);
 
         /// <summary>Decodes a backend exception to a <see cref="GpibStatus"/> (Empty if it cannot).</summary>
         GpibStatus DescribeError(Exception ex);

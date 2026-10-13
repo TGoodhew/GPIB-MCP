@@ -66,6 +66,13 @@ namespace GpibMcp.Instruments
         /// <summary>Sends an IEEE 488.2 device clear.</summary>
         void Clear(string resource, int timeoutMs);
 
+        /// <summary>
+        /// Returns the instrument to local control (its front panel works again), opening the session if
+        /// needed. Returns what was sent; throws <see cref="System.NotSupportedException"/> when the
+        /// resource's interface or the backend has no remote/local control (#140).
+        /// </summary>
+        string ReturnToLocal(string resource, int timeoutMs);
+
         /// <summary>Returns the resource strings of all sessions currently held open.</summary>
         IList<string> ListOpen();
 

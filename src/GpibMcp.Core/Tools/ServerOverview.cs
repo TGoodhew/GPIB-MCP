@@ -109,9 +109,11 @@ namespace GpibMcp.Tools
             Section(sb, "I/O (query / write / read / clear)",
                 "Send a query and read the reply, write a command with no reply, read a pending response, or send a " +
                 "device clear. Read/write terminators come from the assigned model automatically; a bounded read " +
-                "(read_bytes) stops a free-running instrument from timing out. Sessions are cached and can be listed/closed.",
+                "(read_bytes) stops a free-running instrument from timing out. Sessions are cached and can be listed/closed. " +
+                "Any command puts an instrument in remote, locking its front panel; visa_local hands it back (GPIB Go To " +
+                "Local or the LAN/USB equivalent, settings untouched), and visa_close does the same before closing.",
                 new[] { "\"Ask GPIB0::18 for its center frequency.\"", "\"Send *RST to the DMM.\"",
-                        "\"Read whatever the counter is sending.\"" });
+                        "\"Read whatever the counter is sending.\"", "\"Give me the analyzer's front panel back.\"" });
 
             Section(sb, "Identity & assignment",
                 "Query *IDN? (or a model's identity command), match the answer against the database, and assign a model " +

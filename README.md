@@ -406,7 +406,8 @@ tool blurbs.
 | `visa_identify` | `resource` | `read_bytes` | Convenience `*IDN?` query |
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
 | `visa_list_open` | — | — | List sessions this server holds open |
-| `visa_close` | `resource` | — | Close a held-open session |
+| `visa_close` | `resource` | `return_to_local` | Close a held-open session. By default it first returns the instrument to local, so its front panel works again (`return_to_local:false` leaves it in remote) |
+| `visa_local` | `resource` | `close_session` | Return an instrument to **local** control so its front panel works again: GPIB Go To Local, or the LAN (VXI-11/HiSLIP) or USB-TMC equivalent. Not a device clear, so its settings are untouched. Says so plainly if the interface has no remote/local control (e.g. serial) |
 | `visa_command_history` | `resource` | `max` | Show the recent command chain sent to / received from an instrument |
 | `visa_last_error` | — | `resource` | Return the exact, verbatim details (codes + text) of the most recent GPIB/VISA failure |
 | `visa_serial_poll` | `resource` | — | Serial-poll the instrument; return the status byte (decimal + hex) and the named bits set |
@@ -464,7 +465,7 @@ called again with `confirm=true`, like the other database writers.
 1. `visa_list_resources` → see what is connected.
 2. `visa_identify` (or `visa_query` with `*IDN?`) → confirm which instrument is which.
 3. `visa_write` / `visa_query` → configure and measure.
-4. `visa_close` → release the instrument when finished.
+4. `visa_close` → release the instrument when finished, and give its front panel back (or `visa_local` to unlock the front panel and keep the session).
 
 Sessions are cached, so steps 2–3 reuse the same open connection automatically.
 

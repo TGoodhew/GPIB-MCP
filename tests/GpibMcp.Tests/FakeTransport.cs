@@ -47,7 +47,13 @@ namespace GpibMcp.Tests
         public int SerialPoll(string resource) => 0x40;
         public bool WaitForSrq(string resource, int timeoutMs, out long elapsedMs) { elapsedMs = 3; return true; }
         public void Clear(string resource, int timeoutMs) { }
-        public void ReturnToLocal(string resource) { }
+        public readonly List<string> Locals = new List<string>();
+        public string ReturnToLocal(string resource, int timeoutMs)
+        {
+            Open(resource, timeoutMs);   // as the real transport does: a session is opened if there isn't one
+            Locals.Add(resource);
+            return "GPIB Go To Local (GTL)";
+        }
         public GpibStatus DescribeError(Exception ex) => GpibStatus.Empty;
         public string NativeQuery(int board, byte pad, byte sad, string command) => "NATIVE:" + command;
         public void Dispose() => Disposed = true;

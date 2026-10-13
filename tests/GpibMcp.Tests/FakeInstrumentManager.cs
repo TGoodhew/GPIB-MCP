@@ -131,6 +131,19 @@ namespace GpibMcp.Tests
 
         public void Clear(string resource, int timeoutMs) => Clears.Add(resource);
 
+        /// <summary>Resources returned to local, in order (#140).</summary>
+        public readonly List<string> Locals = new List<string>();
+
+        /// <summary>When set, <see cref="ReturnToLocal"/> reports the interface as having no remote/local control.</summary>
+        public bool LocalUnsupported;
+
+        public string ReturnToLocal(string resource, int timeoutMs)
+        {
+            if (LocalUnsupported) throw new NotSupportedException(resource + " has no remote/local control.");
+            Locals.Add(resource);
+            return "GPIB Go To Local (GTL)";
+        }
+
         public IList<string> ListOpen() => new List<string>(OpenSessions);
 
         public bool Close(string resource)

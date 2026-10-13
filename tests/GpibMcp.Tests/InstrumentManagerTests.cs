@@ -100,6 +100,47 @@ namespace GpibMcp.Tests
 
             Assert.Contains("SP0;", result.Hpgl);
             Assert.Equal(CaptureCompletion.PenUp, result.Completion);
+            Assert.Equal(1, t.LocalCount);   // the front panel is handed back afterwards...
+            Assert.Equal(0, t.ClearCount);   // ...never by a device clear, which presets an 8560 (#140)
+        }
+
+        [Fact]
+        public void Capture_StillReturnsItsResult_WhenReturningToLocalFails()
+        {
+            var t = new PlotTransport { LocalThrows = true };
+            var mgr = new InstrumentManager(t);
+
+            var result = mgr.CaptureScreen("GPIB0::18::INSTR", "SNGLS;TS;", "PLOT;",
+                new CaptureOptions { MinPlotBytes = 8, PerReadTimeoutMs = 5, InactivityTimeoutMs = 5, OverallTimeoutMs = 5000 });
+
+            Assert.Contains("SP0;", result.Hpgl);
+            Assert.Equal(1, t.LocalCount);
+        }
+
+        [Fact]
+        public void ReturnToLocal_OpensTheSessionIfNeeded_AndRecordsIt()
+        {
+            // #140: it used to do nothing when no session was cached - e.g. right after visa_close.
+            var t = new FakeTransport();
+            var mgr = new InstrumentManager(t);
+
+            string sent = mgr.ReturnToLocal("GPIB0::17::INSTR", InstrumentManager.DefaultTimeoutMs);
+
+            Assert.Equal("GPIB Go To Local (GTL)", sent);
+            Assert.Equal("GPIB0::17::INSTR", Assert.Single(t.Locals));
+            Assert.Contains("GPIB0::17::INSTR", t.Opened);
+            Assert.Contains(mgr.RecentCommands("GPIB0::17::INSTR", 5), e => e.Text == "<go to local>");
+        }
+
+        [Fact]
+        public void ReturnToLocal_OnABackendWithoutIt_SaysSo()
+        {
+            var t = new FakeTransport { Capabilities = new TransportCapabilities("Bare", true, true, true, true, false, false) };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<System.NotSupportedException>(() => mgr.ReturnToLocal("GPIB0::17::INSTR", 1000));
+            Assert.Contains("Bare", ex.Message);
+            Assert.Empty(t.Locals);
         }
 
         [Fact]
@@ -162,8 +203,15 @@ namespace GpibMcp.Tests
                 new TransportReadResult(System.Array.Empty<byte>(), true);
             public int SerialPoll(string resource) => 0;
             public bool WaitForSrq(string resource, int timeoutMs, out long elapsedMs) { elapsedMs = 0; return false; }
-            public void Clear(string resource, int timeoutMs) { }
-            public void ReturnToLocal(string resource) { }
+            public int ClearCount, LocalCount;
+            public bool LocalThrows;
+            public void Clear(string resource, int timeoutMs) => ClearCount++;
+            public string ReturnToLocal(string resource, int timeoutMs)
+            {
+                LocalCount++;
+                if (LocalThrows) throw new System.InvalidOperationException("bus error");
+                return "GPIB Go To Local (GTL)";
+            }
             public GpibStatus DescribeError(System.Exception ex) => GpibStatus.Empty;
             public void Dispose() { }
         }
