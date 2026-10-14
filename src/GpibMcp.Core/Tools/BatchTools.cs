@@ -50,10 +50,16 @@ namespace GpibMcp.Tools
             registry.Add(new McpTool(
                 "gpib_batch", Description,
                 Schema(
-                    Required("steps", "array", "Ordered steps run at each sweep point. Each: {op:'set'|'write'|" +
-                        "'query'|'read'|'complete'|'wait', resource, command?, value?, unit?, as?, operation?, settle_ms?, timeout_ms?}."),
-                    Prop("sweep", "object", "Optional swept dimension: {var, from, to, step} or {var, from, to, count} (+ optional unit). " +
-                        "Omit to run the steps once."),
+                    Required("steps", ArrayOf(StepSchema, "Ordered steps run at each sweep point. Each: {op:'set'|'write'|" +
+                        "'query'|'read'|'complete'|'wait', resource, command?, value?, unit?, as?, operation?, settle_ms?, timeout_ms?}.")),
+                    Prop("sweep", ObjectOf("Optional swept dimension: {var, from, to, step} or {var, from, to, count} (+ optional unit). " +
+                        "Omit to run the steps once.",
+                        Prop("var", "string", "Its name, for {{var}} in the steps (default 'x')."),
+                        Prop("from", "number", "First value."),
+                        Prop("to", "number", "Last value."),
+                        Prop("step", "number", "Increment between points; give this or count."),
+                        Prop("count", "integer", "Number of points, evenly spaced; give this or step."),
+                        Prop("unit", "string", "The swept value's unit, e.g. 'MHz'."))),
                     Prop("on_error", "string", "'stop' (default) or 'continue' (record the error, keep going)."),
                     Prop("time_budget_s", "number", "Seconds the batch may run before it stops and returns the rows it " +
                         "has (default 25, max 55). Clients give up on a tool call after a fixed time - about 30 s on " +
@@ -115,6 +121,30 @@ namespace GpibMcp.Tools
         /// <summary>A refusal that still conforms to the output schema, so `ok` is always the thing to check.</summary>
         private static ToolOutput Rejected(string message) =>
             Deliver(new JObject { ["ok"] = false, ["error"] = message }).AsError();
+
+        /// <summary>
+        /// One step, as <see cref="ParsePlan"/> reads it. Open (<c>additionalProperties</c>): a key it doesn't
+        /// know is ignored, as it always has been. The ops are matched without regard to case.
+        /// </summary>
+        private static JObject StepSchema
+        {
+            get
+            {
+                var schema = ObjectOf("One step.",
+                    Required("op", "string", "What the step does."),
+                    Prop("resource", "string", "VISA resource string or an assigned model name. Not needed for 'wait'."),
+                    Prop("command", "string", "'set': the command's name, as resolve_setting takes it. 'write'/'query'/'read': the literal command."),
+                    Prop("value", new JObject { ["type"] = new JArray("number", "string"), ["description"] = "'set': the value to set, or a {{name}}." }),
+                    Prop("unit", "string", "'set': the value's unit, e.g. 'MHz'."),
+                    Prop("as", "string", "'query'/'read': the result column to capture the reply into, reusable as {{name}}."),
+                    Prop("operation", "string", "'complete': the statusModel operation to wait for, e.g. sweepComplete."),
+                    Prop("settle_ms", "integer", "'wait': how long to wait. Any other op: a pause after it."),
+                    Prop("timeout_ms", "integer", "The step's I/O timeout; for 'complete', how long to wait for it (default 30000)."));
+                schema["properties"]["op"]["enum"] = new JArray("set", "write", "query", "read", "complete", "wait");
+                schema["additionalProperties"] = true;
+                return schema;
+            }
+        }
 
         /// <summary>
         /// The result schema. Deliberately open (<c>additionalProperties</c>) - a run carries optional blocks

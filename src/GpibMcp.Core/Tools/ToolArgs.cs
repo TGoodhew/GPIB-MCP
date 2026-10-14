@@ -31,15 +31,46 @@ namespace GpibMcp.Tools
         }
 
         public static JProperty Prop(string name, string type, string description) =>
-            new JProperty(name, new JObject { ["type"] = type, ["description"] = description });
+            new JProperty(name, new JObject { ["type"] = NotArray(name, type), ["description"] = description });
 
         public static JProperty Required(string name, string type, string description) =>
             new JProperty(name, new JObject
             {
-                ["type"] = type,
+                ["type"] = NotArray(name, type),
                 ["description"] = description,
                 ["__required"] = true
             });
+
+        /// <summary>A property with a schema of its own - an <see cref="ArrayOf"/> or an <see cref="ObjectOf"/>.</summary>
+        public static JProperty Prop(string name, JObject schema) => new JProperty(name, schema);
+
+        public static JProperty Required(string name, JObject schema)
+        {
+            schema["__required"] = true;
+            return new JProperty(name, schema);
+        }
+
+        /// <summary>
+        /// An array and what each item is. Clients such as VS Code's Copilot refuse a whole tool whose schema
+        /// has an array without <c>items</c> (#164), so an array can only be declared this way.
+        /// </summary>
+        public static JObject ArrayOf(JObject items, string description) =>
+            new JObject { ["type"] = "array", ["description"] = description, ["items"] = items };
+
+        /// <summary>An object and its properties, marked with <see cref="Prop"/> and <see cref="Required"/> as at the top level.</summary>
+        public static JObject ObjectOf(string description, params JProperty[] properties)
+        {
+            var schema = Schema(properties);
+            schema.AddFirst(new JProperty("description", description));
+            return schema;
+        }
+
+        private static string NotArray(string name, string type)
+        {
+            if (type == "array")
+                throw new ArgumentException("'" + name + "' is an array: declare it with ArrayOf, which says what its items are.");
+            return type;
+        }
 
         // ---- Argument readers -----------------------------------------------
 
