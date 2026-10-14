@@ -137,14 +137,17 @@ Setup asks:
    entry in each app's settings, and copies a settings file aside (`*.before-gpib-mcp.bak`) before it first changes
    it. If Claude Desktop already runs GPIB MCP as an extension (`.mcpb`), it's left alone, because two servers
    would contend for the GPIB bus. Restart each app afterwards to pick it up.
-2. **Let it search a folder of instrument manuals.** Optional; see
-   [Your own manual library](#your-own-manual-library). If you use ManualForge, the folder it indexes is
-   suggested.
+2. **Your manuals: which folder holds your instrument manuals.** See
+   [Your own manual library](#your-own-manual-library). If ManualForge is installed, its library is filled in,
+   so the two search the same manuals and GPIB MCP can use ManualForge's index. Otherwise the box starts empty.
+   **Leave it blank if you don't keep a folder of manuals:** GPIB MCP works without one, it just can't look up
+   a command its database doesn't have.
 
-A silent install takes the same answers on the command line:
+A silent install takes the same answers on the command line. Leave out `/MANUALS` to use ManualForge's
+library if it's installed, or no folder if it isn't:
 
 ```powershell
-GpibMcp-Setup-<version>.exe /VERYSILENT /TASKS="mcp,manuals" /MANUALS="D:\Manuals"
+GpibMcp-Setup-<version>.exe /VERYSILENT /TASKS="mcp" /MANUALS="D:\Manuals"
 ```
 
 **Upgrading** is running a newer Setup. It stops any running server first, names the app that started each
