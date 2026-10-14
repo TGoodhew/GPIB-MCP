@@ -15,6 +15,7 @@ namespace GpibMcp.Tests
     /// on purpose: the search, the ranking and the citations are what these tests are about, and a test that
     /// needed Poppler installed would be testing the machine instead of the code.
     /// </summary>
+    [Collection("ManualLibraryEnvironment")]
     public class ManualSearchTests : IDisposable
     {
         private readonly string _root;

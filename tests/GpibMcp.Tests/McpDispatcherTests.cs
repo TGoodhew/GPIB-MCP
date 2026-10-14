@@ -13,6 +13,8 @@ using Xunit;
 
 namespace GpibMcp.Tests
 {
+    // GPIB_MCP_MANUALS decides whether manual_search is listed, and ManualSearchTests sets it.
+    [Collection("ManualLibraryEnvironment")]
     public class McpDispatcherTests
     {
         static McpDispatcherTests()
@@ -149,7 +151,12 @@ namespace GpibMcp.Tests
         [Fact]
         public void ToolsList_ReturnsAllToolsWithSchemas()
         {
-            var responses = Run(null, "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}");
+            // Without a manual library, as in CI: a PC with one set lists manual_search as well.
+            string manuals = Environment.GetEnvironmentVariable("GPIB_MCP_MANUALS");
+            Environment.SetEnvironmentVariable("GPIB_MCP_MANUALS", null);
+            List<JObject> responses;
+            try { responses = Run(null, "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}"); }
+            finally { Environment.SetEnvironmentVariable("GPIB_MCP_MANUALS", manuals); }
             var tools = (JArray)responses.Single()["result"]["tools"];
 
             var names = tools.Select(t => (string)t["name"]).ToList();
