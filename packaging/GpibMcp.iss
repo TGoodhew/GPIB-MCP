@@ -50,7 +50,6 @@ ChangesEnvironment=yes
 
 [Tasks]
 Name: mcp; Description: "Connect GPIB MCP to the AI apps on this PC (Claude, VS Code and others)"
-Name: manuals; Description: "Let it search a folder of instrument manuals"; Flags: unchecked
 
 [InstallDelete]
 ; An upgrade replaces the program whole, so nothing from an older build lingers beside the new one. The
@@ -76,13 +75,15 @@ const
   EnvironmentKey = 'Environment';
   StateKey = 'Software\GpibMcp';
   ManualsVariable = 'GPIB_MCP_MANUALS';
+  ManualForgeKey = 'Software\ManualForge';
   NiVisaUrl = 'https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html';
   Ni4882Url = 'https://www.ni.com/en/support/downloads/drivers/download.ni-488-2.html';
   { GpibMcp.exe check: 0 all present, 3 something missing. Anything else is the check itself failing. }
   CheckNiMissing = 3;
 
 var
-  ManualsPage: TInputDirWizardPage;
+  ManualsPage: TInputQueryWizardPage;
+  ManualsBrowse: TNewButton;
   Stopped, Registered, InstalledSummary: String;
   CheckFailed: Boolean;
 
@@ -184,42 +185,89 @@ end;
 
 { ---------------------------------------------------------------- the manual folder }
 
+{ A DWORD this installer set to 1 in its state key, to remember something it did. }
+function Flag(const Name: String): Boolean;
+var
+  Value: Cardinal;
+begin
+  Result := RegQueryDWordValue(HKCU, StateKey, Name, Value) and (Value = 1);
+end;
+
+{ The folder, or '' for none: a blank box means no manuals (#159). }
 function Manuals(Param: String): String;
 begin
-  if WizardIsTaskSelected('manuals') then
-    Result := ManualsPage.Values[0]
-  else
+  Result := Trim(ManualsPage.Values[0]);
+end;
+
+{ ManualForge's library, or '' when ManualForge isn't installed. Its installer writes this value and removes
+  the whole key on uninstall, so the value being there means ManualForge is installed. }
+function ManualForgeLibrary: String;
+begin
+  if not RegQueryStringValue(HKCU, ManualForgeKey, 'Library', Result) then
     Result := '';
+  Result := Trim(Result);
+end;
+
+procedure BrowseManuals(Sender: TObject);
+var
+  Folder: String;
+begin
+  Folder := Manuals('');
+  if BrowseForFolder('Choose the folder that holds your instrument manuals.', Folder, False) then
+    ManualsPage.Values[0] := Folder;
 end;
 
 procedure InitializeWizard;
 var
-  Existing: String;
+  ForgeLibrary, Initial, Description: String;
+  Edit: TPasswordEdit;
 begin
-  ManualsPage := CreateInputDirPage(wpSelectTasks, 'Your manuals',
-    'Which folder holds your instrument manuals?',
-    '{#AppName} searches this folder for a command its database does not have, and quotes the page it found. ' +
-    'It only reads the folder.' + #13#10#13#10 +
-    'If ManualForge has indexed the same folder, {#AppName} uses its index to find the right manuals.',
-    False, '');
-  ManualsPage.Add('Manual folder:');
+  { One library for GPIB MCP and ManualForge (#159): ManualForge's when it is installed, else the user's
+    choice - which may be none. /MANUALS="D:\Manuals" answers the page on the command line. }
+  ForgeLibrary := ManualForgeLibrary;
+  Initial := Trim(ExpandConstant('{param:MANUALS|}'));
+  if Initial = '' then
+    Initial := ForgeLibrary;
 
-  { /MANUALS="D:\Manuals" answers this page on the command line, for a silent install. Otherwise the
-    folder chosen last time, then one already configured for this server or for ManualForge. }
-  Existing := ExpandConstant('{param:MANUALS|}');
-  if Existing = '' then
-    if not RegQueryStringValue(HKCU, StateKey, 'Manuals', Existing) then
-      if not RegQueryStringValue(HKCU, EnvironmentKey, ManualsVariable, Existing) then
-        RegQueryStringValue(HKCU, EnvironmentKey, 'MANUALFORGE_LIBRARY', Existing);
-  ManualsPage.Values[0] := Existing;
+  Description := '{#AppName} searches this folder for a command its database does not have, and quotes the ' +
+    'page it found. It only reads the folder.' + #13#10#13#10;
+  { Only when the box starts with ManualForge's folder: a /MANUALS= naming another isn't ManualForge's library. }
+  if (ForgeLibrary <> '') and
+     (CompareText(RemoveBackslashUnlessRoot(Initial), RemoveBackslashUnlessRoot(ForgeLibrary)) = 0) then
+    Description := Description + 'This is ManualForge''s library, so both search the same manuals and ' +
+      '{#AppName} can use ManualForge''s index to find the right one.' + #13#10#13#10;
+  Description := Description + 'No folder of manuals? Leave this blank. {#AppName} works without one; it just ' +
+    'can''t look up a command its database doesn''t have.';
 
-  if Existing <> '' then
-    WizardSelectTasks('manuals');
+  ManualsPage := CreateInputQueryPage(wpSelectTasks, 'Your manuals',
+    'Which folder holds your instrument manuals?', Description);
+  ManualsPage.Add('Manual folder (or blank for none):', False);
+
+  { A text box rather than Inno's folder page, which refuses an empty box. Browse sits beside it. }
+  Edit := ManualsPage.Edits[0];
+  ManualsBrowse := TNewButton.Create(ManualsPage);
+  ManualsBrowse.Parent := ManualsPage.Surface;
+  ManualsBrowse.Caption := SetupMessage(msgButtonWizardBrowse);
+  ManualsBrowse.Width := WizardForm.NextButton.Width;
+  ManualsBrowse.Height := WizardForm.NextButton.Height;
+  ManualsBrowse.Left := ManualsPage.SurfaceWidth - ManualsBrowse.Width;
+  ManualsBrowse.Top := Edit.Top + (Edit.Height - ManualsBrowse.Height) div 2;
+  ManualsBrowse.OnClick := @BrowseManuals;
+  Edit.Width := ManualsBrowse.Left - ScaleX(8) - Edit.Left;
+
+  ManualsPage.Values[0] := Initial;
 end;
 
-function ShouldSkipPage(PageID: Integer): Boolean;
+{ A folder that isn't there is refused; blank is fine. Not in a silent install, which has no one to ask. }
+function NextButtonClick(CurPageID: Integer): Boolean;
 begin
-  Result := (PageID = ManualsPage.ID) and not WizardIsTaskSelected('manuals');
+  Result := True;
+  if (CurPageID = ManualsPage.ID) and not WizardSilent and (Manuals('') <> '') and not DirExists(Manuals('')) then
+  begin
+    MsgBox('There is no folder at:' + #13#10 + Manuals('') + #13#10#13#10 +
+      'Choose the folder that holds your manuals, or leave the box blank for none.', mbError, MB_OK);
+    Result := False;
+  end;
 end;
 
 { ---------------------------------------------------------------- an upgrade: what is running, and whose }
@@ -432,8 +480,19 @@ begin
   if CurStep = ssPostInstall then
   begin
     { The manual folder, for anything that starts the server without a client's env block - the HTTP
-      launcher, a terminal. Set only if not already set; uninstalling takes away only what this put there. }
-    if (Manuals('') <> '') and not RegQueryStringValue(HKCU, EnvironmentKey, ManualsVariable, Existing) then
+      launcher, a terminal. Someone else's variable is left alone; ours follows this answer (#159), so a new
+      folder replaces the old one and a blank box removes it. Uninstalling takes away only what this put there. }
+    if Flag('SetManualsVariable') then
+    begin
+      if Manuals('') <> '' then
+        RegWriteStringValue(HKCU, EnvironmentKey, ManualsVariable, Manuals(''))
+      else
+      begin
+        RegDeleteValue(HKCU, EnvironmentKey, ManualsVariable);
+        RegDeleteValue(HKCU, StateKey, 'SetManualsVariable');
+      end;
+    end
+    else if (Manuals('') <> '') and not RegQueryStringValue(HKCU, EnvironmentKey, ManualsVariable, Existing) then
     begin
       RegWriteStringValue(HKCU, EnvironmentKey, ManualsVariable, Manuals(''));
       RegWriteDWordValue(HKCU, StateKey, 'SetManualsVariable', 1);
@@ -450,12 +509,6 @@ end;
 
 { ---------------------------------------------------------------- uninstalling }
 
-function Flag(const Name: String): Boolean;
-var
-  Value: Cardinal;
-begin
-  Result := RegQueryDWordValue(HKCU, StateKey, Name, Value) and (Value = 1);
-end;
 
 function InitializeUninstall: Boolean;
 begin

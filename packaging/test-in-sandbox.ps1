@@ -459,6 +459,226 @@ function Test-WithNi {
     Check 'NI is still installed (not GPIB MCP''s to remove)' (Test-NiPresent)
 }
 
+# ---- with NI, part 3: the manual library (#159) ------------------------------------------------------
+
+# One library for GPIB MCP and ManualForge: Setup fills the box with ManualForge's library when ManualForge
+# is installed, else leaves it empty, and a blank box means no manuals. ManualForge isn't installed here; its
+# installer's registry value, which is what Setup reads, stands in for it.
+$forgeKey = 'HKCU:\Software\ManualForge'
+
+function Get-ManualState {
+    $config = Get-Content $claudeConfig -Raw -ErrorAction SilentlyContinue | ConvertFrom-Json
+    [pscustomobject]@{
+        Setup    = (Get-ItemProperty 'HKCU:\Software\GpibMcp' -Name Manuals -ErrorAction SilentlyContinue).Manuals
+        Variable = (Get-ItemProperty 'HKCU:\Environment' -Name GPIB_MCP_MANUALS -ErrorAction SilentlyContinue).GPIB_MCP_MANUALS
+        Claude   = $config.mcpServers.gpib.env.GPIB_MCP_MANUALS
+    }
+}
+
+function Install-Quietly([string] $label, [string[]] $more) {
+    $install = Start-Process (Get-Setup).FullName -Wait -PassThru -ArgumentList (@(
+        '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/LOG=`"$results\install-$label.log`"") + $more)
+    Check "$label - installs (exit 0)" ($install.ExitCode -eq 0) "code $($install.ExitCode)"
+    $state = Get-ManualState
+    Write-Host "  setup '$($state.Setup)', variable '$($state.Variable)', Claude Desktop '$($state.Claude)'"
+    return $state
+}
+
+function Uninstall-Quietly([string] $label) {
+    $uninstaller = Get-ChildItem $app -Filter 'unins*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $uninstaller) { Check "$label - uninstaller present" $false; return }
+    $run = Start-Process $uninstaller.FullName -Wait -PassThru -ArgumentList @(
+        '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/LOG=`"$results\uninstall-$label.log`"")
+    for ($i = 0; $i -lt 60 -and (Test-Path $app); $i++) { Start-Sleep -Seconds 1 }
+    Check "$label - uninstalls (exit 0)" ($run.ExitCode -eq 0) "code $($run.ExitCode)"
+}
+
+# ---- the wizard's manual page, driven by window messages
+
+# Inno Setup's controls are its own classes (TNewButton, TNewRadioButton, TPasswordEdit), which UI Automation
+# reports as plain panes with no patterns: it can find them by class and caption, but not press or fill them.
+# So they are found through UI Automation and worked with the window messages a click or a typed value sends.
+function Initialize-WizardDriver {
+    Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+    if (-not ('WizardWindow' -as [type])) {
+        Add-Type @'
+using System; using System.Runtime.InteropServices; using System.Text;
+public static class WizardWindow {
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, string l);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, StringBuilder l);
+    [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr h, int m, IntPtr w, IntPtr l);
+}
+'@
+    }
+}
+
+$BM_CLICK = 0xF5; $WM_SETTEXT = 0x0C; $WM_GETTEXT = 0x0D
+
+function Get-WizardProcess {
+    for ($i = 0; $i -lt 60; $i++) {
+        $p = Get-Process | Where-Object { $_.ProcessName -like 'GpibMcp-Setup-*' -and $_.Path -like '*.tmp' -and $_.MainWindowHandle -ne 0 } |
+            Select-Object -First 1
+        if ($p) { return $p }
+        Start-Sleep -Seconds 1
+    }
+    return $null
+}
+
+# What is showing under $root: the current page (other pages are off screen) and any message box it opened.
+function Get-Shown($root) {
+    @($root.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition) |
+        Where-Object { -not $_.Current.IsOffscreen })
+}
+
+function Get-Texts($root) { (Get-Shown $root | ForEach-Object { $_.Current.Name } | Where-Object { $_ }) -join "`r`n" }
+
+# A control by caption, e.g. 'Next', 'I accept*', 'OK': Inno's own or a message box's.
+function Find-Control($root, [string] $caption) {
+    Get-Shown $root | Where-Object { ($_.Current.Name -replace '&', '') -like $caption -and $_.Current.IsEnabled } | Select-Object -First 1
+}
+
+# Posted, not sent: a click that opens a message box would otherwise wait until someone closed it.
+function Invoke-Button($root, [string] $caption) {
+    $control = Find-Control $root $caption
+    if (-not $control) { return $false }
+    [void][WizardWindow]::PostMessage([IntPtr]$control.Current.NativeWindowHandle, $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
+    Start-Sleep -Milliseconds 1500
+    return $true
+}
+
+# Starts the wizard and clicks Next until the manual page shows. Returns the process and its window, or $null.
+function Open-ManualPage([string] $label) {
+    Initialize-WizardDriver
+    Start-Process (Get-Setup).FullName -ArgumentList "/LOG=`"$results\install-$label.log`"" | Out-Null
+    $process = Get-WizardProcess
+    if (-not $process) { Check "$label - the wizard opens" $false; return $null }
+    $window = [System.Windows.Automation.AutomationElement]::FromHandle($process.MainWindowHandle)
+    for ($i = 0; $i -lt 8; $i++) {
+        if ((Get-Texts $window) -match 'Which folder holds your instrument manuals') { break }
+        # The licence page holds Next back until the agreement is accepted.
+        Invoke-Button $window 'I accept*' | Out-Null
+        if (-not (Invoke-Button $window 'Next')) { Start-Sleep -Seconds 1 }
+    }
+    $onPage = (Get-Texts $window) -match 'Which folder holds your instrument manuals'
+    Check "$label - the wizard reaches the manual page" $onPage
+    if (-not $onPage) { Save-Screen "$results\$label-lost.jpg"; Stop-Setup; return $null }
+    return [pscustomobject]@{ Process = $process; Window = $window }
+}
+
+function Get-ManualBox($wizard) {
+    $box = Get-Shown $wizard.Window | Where-Object { $_.Current.ClassName -eq 'TPasswordEdit' } | Select-Object -First 1
+    [IntPtr]$box.Current.NativeWindowHandle
+}
+
+function Set-ManualBox($wizard, [string] $value) {
+    [void][WizardWindow]::SendMessage((Get-ManualBox $wizard), $WM_SETTEXT, [IntPtr]::Zero, $value)
+}
+
+function Get-ManualBoxValue($wizard) {
+    $text = New-Object System.Text.StringBuilder 1024
+    [void][WizardWindow]::SendMessage((Get-ManualBox $wizard), $WM_GETTEXT, [IntPtr]1024, $text)
+    $text.ToString()
+}
+
+# Ends any Setup still running - the .tmp that shows the wizard and the .exe that started it - so nothing
+# holds the sandbox open or leaves its temporary folder behind.
+function Stop-Setup {
+    Get-Process | Where-Object { $_.ProcessName -like 'GpibMcp-Setup-*' } | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 2
+}
+
+function Close-Wizard($wizard) {
+    # Cancel, then "Exit Setup?" - Yes.
+    if (Invoke-Button $wizard.Window 'Cancel') { Invoke-Button $wizard.Window 'Yes' | Out-Null }
+    if (-not $wizard.Process.WaitForExit(20000)) { Stop-Setup }
+}
+
+function Test-ManualLibrary {
+    $forge = 'C:\Manuals-Forge'; $mine = 'C:\Manuals-Mine'; $theirs = 'C:\Manuals-Theirs'
+    New-Item -ItemType Directory -Force $forge, $mine, $theirs | Out-Null
+
+    Write-Step 'Manual library: ManualForge installed'
+    New-Item -Path $forgeKey -Force | Out-Null
+    Set-ItemProperty $forgeKey -Name Library -Value $forge
+    $s = Install-Quietly 'forge' @('/TASKS=mcp')
+    Check 'ManualForge installed - its library is used' ($s.Setup -eq $forge -and $s.Variable -eq $forge -and $s.Claude -eq $forge) "setup '$($s.Setup)', variable '$($s.Variable)', Claude '$($s.Claude)'"
+
+    Write-Step 'Manual library: /MANUALS= on a reinstall'
+    $s = Install-Quietly 'manuals-switch' @('/TASKS=mcp', "/MANUALS=`"$mine`"")
+    Check '/MANUALS wins, and the variable Setup set follows it' ($s.Setup -eq $mine -and $s.Variable -eq $mine -and $s.Claude -eq $mine) "setup '$($s.Setup)', variable '$($s.Variable)', Claude '$($s.Claude)'"
+
+    Write-Step 'Manual library: ManualForge not installed'
+    Remove-Item $forgeKey -Recurse -Force
+    $s = Install-Quietly 'no-forge' @('/TASKS=mcp')
+    Check 'no ManualForge - no manuals, and the variable Setup set is removed' (-not $s.Setup -and -not $s.Variable -and -not $s.Claude) "setup '$($s.Setup)', variable '$($s.Variable)', Claude '$($s.Claude)'"
+    Uninstall-Quietly 'no-forge'
+
+    Write-Step 'Manual library: an old command line naming the manuals task'
+    $s = Install-Quietly 'old-tasks' @('/TASKS="mcp,manuals"', "/MANUALS=`"$mine`"")
+    Check 'the old /TASKS still installs, with the folder given' ($s.Setup -eq $mine -and $s.Claude -eq $mine) "setup '$($s.Setup)', Claude '$($s.Claude)'"
+    Uninstall-Quietly 'old-tasks'
+    Check 'uninstalling removes the variable Setup set' (-not (Get-ManualState).Variable)
+
+    Write-Step 'Manual library: someone else''s GPIB_MCP_MANUALS'
+    Set-ItemProperty 'HKCU:\Environment' -Name GPIB_MCP_MANUALS -Value $theirs
+    $s = Install-Quietly 'theirs' @('/TASKS=mcp', "/MANUALS=`"$mine`"")
+    Check 'a variable Setup didn''t set is left alone' ($s.Variable -eq $theirs -and $s.Claude -eq $mine) "variable '$($s.Variable)', Claude '$($s.Claude)'"
+    Uninstall-Quietly 'theirs'
+    Check '... and kept on uninstall' ((Get-ManualState).Variable -eq $theirs)
+    Remove-ItemProperty 'HKCU:\Environment' -Name GPIB_MCP_MANUALS
+
+    Write-Step 'Manual page in the wizard: ManualForge installed'
+    New-Item -Path $forgeKey -Force | Out-Null
+    Set-ItemProperty $forgeKey -Name Library -Value $forge
+    $wizard = Open-ManualPage 'wizard-forge'
+    if ($wizard) {
+        Save-Screen "$results\manual-page-forge.jpg"
+        $text = Get-Texts $wizard.Window
+        Set-Content "$results\manual-page-forge.txt" $text -Encoding UTF8
+        Check 'the box holds ManualForge''s library' ((Get-ManualBoxValue $wizard) -eq $forge) "'$(Get-ManualBoxValue $wizard)'"
+        Check 'the page says it is ManualForge''s library' ($text -match 'This is ManualForge''s library')
+        Check 'the page says blank is fine' ($text -match 'Leave this blank')
+        Check 'there is a Browse button' ([bool] (Find-Control $wizard.Window 'Browse*'))
+
+        Set-ManualBox $wizard 'C:\No-Such-Folder'
+        Invoke-Button $wizard.Window 'Next' | Out-Null
+        # The message box shows under the wizard's window.
+        $refused = (Get-Texts $wizard.Window) -match 'There is no folder at'
+        Check 'a folder that isn''t there is refused' $refused
+        if ($refused) { Save-Screen "$results\manual-page-missing-folder.jpg"; Invoke-Button $wizard.Window 'OK' | Out-Null }
+        Check '... and the page stays' ((Get-Texts $wizard.Window) -match 'Which folder holds your instrument manuals')
+
+        Set-ManualBox $wizard ''
+        Invoke-Button $wizard.Window 'Next' | Out-Null
+        Check 'a blank box is accepted' ((Get-Texts $wizard.Window) -notmatch 'Which folder holds your instrument manuals')
+        Save-Screen "$results\manual-page-blank-next.jpg"
+        Invoke-Button $wizard.Window 'Install' | Out-Null
+        for ($i = 0; $i -lt 120 -and -not (Find-Control $wizard.Window 'Finish'); $i++) { Start-Sleep -Seconds 1 }
+        Invoke-Button $wizard.Window 'Finish' | Out-Null
+        if (-not $wizard.Process.WaitForExit(30000)) { Stop-Setup }
+        $s = Get-ManualState
+        Check 'installed from the wizard with no manuals' (-not $s.Setup -and -not $s.Claude) "setup '$($s.Setup)', Claude '$($s.Claude)'"
+        Uninstall-Quietly 'wizard-forge'
+    }
+
+    Write-Step 'Manual page in the wizard: ManualForge not installed'
+    Remove-Item $forgeKey -Recurse -Force
+    $wizard = Open-ManualPage 'wizard-no-forge'
+    if ($wizard) {
+        Save-Screen "$results\manual-page-no-forge.jpg"
+        $text = Get-Texts $wizard.Window
+        Set-Content "$results\manual-page-no-forge.txt" $text -Encoding UTF8
+        Check 'the box is empty' (-not (Get-ManualBoxValue $wizard)) "'$(Get-ManualBoxValue $wizard)'"
+        Check 'the page says blank is fine' ($text -match 'Leave this blank')
+        Check 'the page doesn''t mention ManualForge''s library' ($text -notmatch 'This is ManualForge''s library')
+        Close-Wizard $wizard
+    }
+
+    Stop-Setup
+    $left = Get-Leftovers ([datetime]::MinValue)
+    Check 'nothing left after the manual library tests' (-not $left) ($left -join '; ')
+}
+
 # ---- run ---------------------------------------------------------------------------------------------
 
 $finished = $true
@@ -487,6 +707,7 @@ try {
         # Before anything that could restart it again: a second logon in this phase must not loop.
         'testing' | Set-Content $phaseFile
         Test-WithNi
+        Test-ManualLibrary
     }
     else {
         Check 'the sandbox restarted only when asked' $false "it restarted during phase '$phase'"
@@ -506,4 +727,7 @@ finally {
             Set-Content -Path (Join-Path $results 'summary.txt') -Encoding UTF8
     }
 }
-exit $exitCode
+# Said before going, so a sandbox that doesn't close shows whether this got here. Environment.Exit, not exit:
+# UI Automation leaves threads behind that can hold PowerShell open after the script ends.
+Set-Content -Path (Join-Path $results 'exited.txt') -Value "exit $exitCode at $(Get-Date -Format 'HH:mm:ss')" -Encoding UTF8
+[Environment]::Exit($exitCode)

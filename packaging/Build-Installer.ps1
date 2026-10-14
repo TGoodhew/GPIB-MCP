@@ -110,6 +110,8 @@ Write-Host ("    {0}: {1:N1} MB, SHA-256 {2}" -f (Split-Path $package -Leaf), ((
 # passed, failed or fell over - or restarts when the script exits 194, for NI's restart.
 # Only kit\ and the results folders are mapped, never the output folder: once a sandbox has mapped a
 # folder, Windows keeps it shared after the sandbox closes, and Inno Setup can no longer write into it.
+# The sandbox doesn't share the host's graphics card (vGPU): twice on 2026-10-13 the host hard-reset while
+# a test sandbox was running or had just been closed, and vGPU is the usual cause. The tests need no GPU.
 $sandboxDir = Join-Path $OutputDir 'sandbox'
 $kit = Join-Path $sandboxDir 'kit'
 New-Item -ItemType Directory -Force $kit, (Join-Path $kit 'ni') | Out-Null
@@ -139,6 +141,7 @@ function Write-Sandbox([string] $name, [string] $results, [string] $command) {
     </MappedFolder>$resultsFolder
   </MappedFolders>
   <Networking>Enable</Networking>
+  <VGpu>Disable</VGpu>
   <LogonCommand>
     <Command>$([System.Security.SecurityElement]::Escape($command))</Command>
   </LogonCommand>
@@ -146,7 +149,7 @@ function Write-Sandbox([string] $name, [string] $results, [string] $command) {
 "@ | Set-Content -Path (Join-Path $sandboxDir $name) -Encoding UTF8
 }
 $test = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Installer\test-in-sandbox.ps1'
-$then = '& if errorlevel 194 (shutdown.exe /r /t 0) else (shutdown.exe /s /t 0)'
+$then = '& if errorlevel 194 (shutdown.exe /r /f /t 0) else (shutdown.exe /s /f /t 0 > C:\Results\shutdown.txt 2>&1)'
 Write-Sandbox 'test-in-sandbox.wsb' 'results' "cmd.exe /c $test $then"
 Write-Sandbox 'test-full-in-sandbox.wsb' 'results-full' "cmd.exe /c $test -WithNi $then"
 Write-Sandbox 'try-in-sandbox.wsb' '' 'explorer.exe C:\Installer'
