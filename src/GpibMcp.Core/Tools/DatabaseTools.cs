@@ -170,8 +170,30 @@ namespace GpibMcp.Tools
                             ["description"] = "The arm -> wait -> read contract, when the model has a completion model.",
                             ["additionalProperties"] = true
                         },
-                        ["commandIndex"] = new JObject { ["type"] = "array", ["description"] = "Compact name/mnemonic/category index." },
-                        ["commands"] = new JObject { ["type"] = "array", ["description"] = "Full command detail, when a filter narrowed it enough." }
+                        ["commandIndex"] = new JObject
+                        {
+                            ["type"] = "array",
+                            ["description"] = "Compact name/mnemonic/category index.",
+                            ["items"] = new JObject
+                            {
+                                ["type"] = "object",
+                                ["properties"] = new JObject
+                                {
+                                    ["name"] = new JObject { ["type"] = "string" },
+                                    ["mnemonic"] = new JObject { ["type"] = new JArray("string", "null") },
+                                    ["category"] = new JObject { ["type"] = new JArray("string", "null") },
+                                    ["description"] = new JObject { ["type"] = new JArray("string", "null") }
+                                },
+                                ["additionalProperties"] = true
+                            }
+                        },
+                        ["commands"] = new JObject
+                        {
+                            ["type"] = "array",
+                            ["description"] = "Full command detail, when a filter narrowed it enough.",
+                            // A command as the database documents it; its fields vary by model.
+                            ["items"] = new JObject { ["type"] = "object", ["additionalProperties"] = true }
+                        }
                     },
                     ["required"] = new JArray("ok"),
                     // Two shapes behind one tool (reference and recipe), and the recipe carries the model's own
