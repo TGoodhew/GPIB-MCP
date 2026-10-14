@@ -7,7 +7,8 @@
     Starts dist\sandbox\test-in-sandbox.wsb (without NI) or, with -Full, test-full-in-sandbox.wsb (installs
     NI, restarts, then installs GPIB MCP), both written by packaging\Build-Installer.ps1. The sandbox shuts
     itself down when its test ends; if it is still open after that - or the test has not finished within
-    -TimeoutMinutes - this closes it, so no sandbox is left behind either way.
+    -TimeoutMinutes - this closes it, so no sandbox is left behind either way. Either way it closes the
+    sandbox's window, which outlives the sandbox it showed.
 
     Exits 0 when every check passed, 1 when one failed or the test never finished.
 
@@ -68,14 +69,16 @@ while ((Get-Date) -lt $deadline) {
 }
 $finished = (Test-Path $summary) -and (Get-Item $summary).LastWriteTime -gt $started
 
-# The sandbox shuts itself down after writing the summary; give it a minute, then close what is left.
-for ($i = 0; $i -lt 60 -and $finished -and ((Get-Sandboxes) -or (Get-Process WindowsSandboxRemoteSession -ErrorAction SilentlyContinue)); $i++) {
+# The sandbox shuts itself down after writing the summary; give it a minute, then close it if it hasn't.
+for ($i = 0; $i -lt 60 -and $finished -and (Get-Sandboxes); $i++) {
     Start-Sleep -Seconds 1
 }
-if ((Get-Sandboxes) -or (Get-Process WindowsSandboxRemoteSession -ErrorAction SilentlyContinue)) {
+if (Get-Sandboxes) {
     Write-Host $(if ($finished) { 'The sandbox did not close itself; closing it.' } else { "No summary after $TimeoutMinutes min; closing the sandbox." })
-    Close-Sandbox
 }
+# Even when it has, its window stays open on "The remote environment is shutting down", for someone to click
+# Close (#163). It shows nothing, so it is closed as soon as the sandbox has gone.
+Close-Sandbox
 
 if (-not $finished) {
     Write-Host "The test did not finish. What it got to is in $transcript." -ForegroundColor Red

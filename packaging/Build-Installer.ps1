@@ -107,7 +107,8 @@ Write-Host ("    {0}: {1:N1} MB, SHA-256 {2}" -f (Split-Path $package -Leaf), ((
 #   kit\ni\                   NI's installers for the full test - ni-visa_*_online.exe and
 #                             ni-488.2_*_online.exe from ni.com. Put there once; kept across builds.
 # Both tests run packaging\test-in-sandbox.ps1 at logon, and the sandbox shuts itself down when it ends -
-# passed, failed or fell over - or restarts when the script exits 194, for NI's restart.
+# passed, failed or fell over - or restarts when the script exits 194, for NI's restart. The script does
+# that itself; the logon command does it too, should the script end before it can.
 # Only kit\ and the results folders are mapped, never the output folder: once a sandbox has mapped a
 # folder, Windows keeps it shared after the sandbox closes, and Inno Setup can no longer write into it.
 # The sandbox doesn't share the host's graphics card (vGPU): twice on 2026-10-13 the host hard-reset while
@@ -149,7 +150,10 @@ function Write-Sandbox([string] $name, [string] $results, [string] $command) {
 "@ | Set-Content -Path (Join-Path $sandboxDir $name) -Encoding UTF8
 }
 $test = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Installer\test-in-sandbox.ps1'
-$then = '& if errorlevel 194 (shutdown.exe /r /f /t 0) else (shutdown.exe /s /f /t 0 > C:\Results\shutdown.txt 2>&1)'
+# The script shuts down or restarts the sandbox itself (#163); this is for when it ends before it gets that far.
+# Its log says whether cmd got here at all: after a run that went to the end, it is shutdown.exe refusing,
+# as the script's shutdown is already scheduled.
+$then = '& if errorlevel 194 (shutdown.exe /r /f /t 0 > C:\Results\shutdown-cmd.txt 2>&1) else (shutdown.exe /s /f /t 0 > C:\Results\shutdown-cmd.txt 2>&1)'
 Write-Sandbox 'test-in-sandbox.wsb' 'results' "cmd.exe /c $test $then"
 Write-Sandbox 'test-full-in-sandbox.wsb' 'results-full' "cmd.exe /c $test -WithNi $then"
 Write-Sandbox 'try-in-sandbox.wsb' '' 'explorer.exe C:\Installer'

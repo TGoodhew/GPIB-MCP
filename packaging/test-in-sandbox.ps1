@@ -4,8 +4,9 @@
     must install, connect Claude Desktop, serve MCP, and uninstall cleanly.
 
 .DESCRIPTION
-    Run at logon by the .wsb files packaging\Build-Installer.ps1 writes, which shut the sandbox down when
-    this ends, however it ends. packaging\Invoke-SandboxTest.ps1 starts one and waits for it.
+    Run at logon by the .wsb files packaging\Build-Installer.ps1 writes. It shuts the sandbox down (or
+    restarts it) itself as it ends; the .wsb does too, should this end before it gets that far.
+    packaging\Invoke-SandboxTest.ps1 starts one and waits for it.
 
     Without -WithNi (test-in-sandbox.wsb): the sandbox is a clean Windows with no NI-VISA and no NI-488.2,
     the one place to see what someone without them sees. Setup must stop before installing anything, say
@@ -727,7 +728,13 @@ finally {
             Set-Content -Path (Join-Path $results 'summary.txt') -Encoding UTF8
     }
 }
-# Said before going, so a sandbox that doesn't close shows whether this got here. Environment.Exit, not exit:
-# UI Automation leaves threads behind that can hold PowerShell open after the script ends.
+# Said before going, so a sandbox that doesn't close shows whether this got here.
 Set-Content -Path (Join-Path $results 'exited.txt') -Value "exit $exitCode at $(Get-Date -Format 'HH:mm:ss')" -Encoding UTF8
+# Shut down or restart from here, not only from the .wsb's cmd after this exits: once UI Automation has been
+# loaded, PowerShell can hang on its way out (exit and Environment.Exit alike), and cmd then never gets to its
+# shutdown (#163). The restarts, whose phases don't load it, always worked. A few seconds' grace lets this
+# exit; cmd's own shutdown then finds this one already scheduled and does nothing.
+$shutdown = if ($exitCode -eq $RestartCode) { '/r' } else { '/s' }
+& shutdown.exe $shutdown /f /t 5 2>&1 | Out-File (Join-Path $results 'shutdown.txt') -Encoding UTF8
+"shutdown.exe $shutdown exit $LASTEXITCODE at $(Get-Date -Format 'HH:mm:ss')" | Out-File (Join-Path $results 'shutdown.txt') -Append -Encoding UTF8
 [Environment]::Exit($exitCode)
