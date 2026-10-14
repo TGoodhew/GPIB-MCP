@@ -219,16 +219,21 @@ end;
 
 procedure InitializeWizard;
 var
-  ForgeLibrary, Description: String;
+  ForgeLibrary, Initial, Description: String;
   Edit: TPasswordEdit;
 begin
   { One library for GPIB MCP and ManualForge (#159): ManualForge's when it is installed, else the user's
     choice - which may be none. /MANUALS="D:\Manuals" answers the page on the command line. }
   ForgeLibrary := ManualForgeLibrary;
+  Initial := Trim(ExpandConstant('{param:MANUALS|}'));
+  if Initial = '' then
+    Initial := ForgeLibrary;
 
   Description := '{#AppName} searches this folder for a command its database does not have, and quotes the ' +
     'page it found. It only reads the folder.' + #13#10#13#10;
-  if ForgeLibrary <> '' then
+  { Only when the box starts with ManualForge's folder: a /MANUALS= naming another isn't ManualForge's library. }
+  if (ForgeLibrary <> '') and
+     (CompareText(RemoveBackslashUnlessRoot(Initial), RemoveBackslashUnlessRoot(ForgeLibrary)) = 0) then
     Description := Description + 'This is ManualForge''s library, so both search the same manuals and ' +
       '{#AppName} can use ManualForge''s index to find the right one.' + #13#10#13#10;
   Description := Description + 'No folder of manuals? Leave this blank. {#AppName} works without one; it just ' +
@@ -250,9 +255,7 @@ begin
   ManualsBrowse.OnClick := @BrowseManuals;
   Edit.Width := ManualsBrowse.Left - ScaleX(8) - Edit.Left;
 
-  ManualsPage.Values[0] := ExpandConstant('{param:MANUALS|}');
-  if ManualsPage.Values[0] = '' then
-    ManualsPage.Values[0] := ForgeLibrary;
+  ManualsPage.Values[0] := Initial;
 end;
 
 { A folder that isn't there is refused; blank is fine. Not in a silent install, which has no one to ask. }
