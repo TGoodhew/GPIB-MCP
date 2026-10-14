@@ -13,8 +13,9 @@ namespace GpibMcp.Tests
     /// </summary>
     public class ToolSchemaTests
     {
+        /// <summary>Every tool, the view-only ones too: a client that shows views lists them, and checks them alike.</summary>
         private static Dictionary<string, JObject> ToolsList() =>
-            InstrumentTools.BuildRegistry(new FakeInstrumentManager()).ToListJson().OfType<JObject>()
+            InstrumentTools.BuildRegistry(new FakeInstrumentManager()).ToListJson(includeViewOnly: true).OfType<JObject>()
                 .ToDictionary(t => (string)t["name"]);
 
         /// <summary>Every schema node, however deep, as (path, node).</summary>
