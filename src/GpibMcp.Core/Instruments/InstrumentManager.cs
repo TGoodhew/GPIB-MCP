@@ -116,11 +116,10 @@ namespace GpibMcp.Instruments
                 {
                     // One read, however long the wait: re-addressing the instrument while it builds the reply is
                     // what splitting it would do, and on the 54845A that failed every capture and left the scope
-                    // not answering even a serial poll until it was power-cycled. So the wait is limited instead.
-                    // A driver rounds a timeout up to a step, about double over a GPIB-ENET/1000 (20 s waits about
-                    // 42 s), so half of the time for reading keeps that read inside the call's limit.
+                    // not answering even a serial poll until it was power-cycled. So the wait is limited instead,
+                    // to one whose driver step fits in half of the time for reading.
                     int readMs = Math.Max(options.TotalMs - BinaryRecoveryMs, MinBinaryReadMs);
-                    int firstReplyMs = Math.Min(Timeout(options.FirstReplyMs), Math.Max(readMs / 2, MinBinaryReadMs));
+                    int firstReplyMs = FirstReadMs(Timeout(options.FirstReplyMs), readMs / 2);
                     var clock = Stopwatch.StartNew();
                     _transport.Open(resource, firstReplyMs);
                     _history.Record(resource, CommandDirection.Sent, payload);
@@ -132,7 +131,7 @@ namespace GpibMcp.Instruments
                     // is slow - and a timeout's worth of it is what the block reader reports as incomplete.
                     // Nothing reads past the time left, so recovery still fits inside the limit.
                     int silentSlices = Math.Max(1, Timeout(timeoutMs) / BinaryReadSliceMs);
-                    bool timedOut = false, overBudget = false, firstRead = true, anyReply = false;
+                    bool timedOut = false, overBudget = false, firstRead = true, anyReply = false, ended = false;
                     ReplyReader.ReadChunk read = (int count, out bool more) =>
                     {
                         for (int silent = 1; ; silent++)
@@ -152,6 +151,7 @@ namespace GpibMcp.Instruments
                             if (nothing && !first && silent < silentSlices) continue;
                             timedOut = nothing;
                             anyReply |= r.Data.Length > 0;
+                            ended = r.EndOfMessage;
                             more = !r.EndOfMessage && !nothing;
                             return r.Data;
                         }
@@ -168,7 +168,7 @@ namespace GpibMcp.Instruments
                                 ? " The instrument sent nothing within " + firstReplyMs + " ms, which usually means it rejected the command."
                                 : "";
                         long left = readMs - clock.ElapsedMilliseconds;
-                        throw new IOException(ex.Message + why + RecoverNoLock(resource, options, timedOut, !anyReply, left,
+                        throw new IOException(ex.Message + why + RecoverNoLock(resource, options, timedOut, !anyReply, anyReply && !ended, left,
                                                                                () => clock.ElapsedMilliseconds >= options.TotalMs), ex);
                     }
 
@@ -187,8 +187,10 @@ namespace GpibMcp.Instruments
         /// Leaves the instrument ready for its next command after a failed binary read, and says what it made of
         /// this one: discards the rest of the reply, device-clears a model that allows it, and reads its error
         /// queue, stopping when <paramref name="outOfTime"/> says the call's limit has run out. Returns text for the error.
+        /// <paramref name="midReply"/> says a reply started and hasn't been seen to end, so silence doesn't finish it.
         /// </summary>
-        private string RecoverNoLock(string resource, BinaryReadOptions options, bool timedOut, bool noReply, long msLeft, Func<bool> outOfTime)
+        private string RecoverNoLock(string resource, BinaryReadOptions options, bool timedOut, bool noReply, bool midReply,
+                                     long msLeft, Func<bool> outOfTime)
         {
             var notes = new StringBuilder();
             bool clearable = options.DeviceClearSafe && _transport.Capabilities.DeviceClear;
@@ -200,7 +202,7 @@ namespace GpibMcp.Instruments
             {
                 long discarded;
                 byte[] preview;
-                finished = DrainNoLock(resource, clearable ? DrainMs : Math.Max(DrainMs, msLeft), out discarded, out preview);
+                finished = DrainNoLock(resource, clearable ? DrainMs : Math.Max(DrainMs, msLeft), midReply, out discarded, out preview);
                 if (discarded > 0)
                     notes.Append(" It went on to send " + discarded + " more bytes, starting '" + BinaryBlock.Printable(preview) + "'.");
             }
@@ -213,12 +215,21 @@ namespace GpibMcp.Instruments
                     _history.Record(resource, CommandDirection.Sent, "<device clear>");
                     _transport.Clear(resource, DrainMs);
                     notes.Append(" A device clear was sent, so it is ready for its next command.");
+                    finished = true;
                 }
                 catch (Exception ex)
                 {
                     Log.Warn("device clear after a failed binary read on " + resource + " failed: " + ex.Message);
                     notes.Append(" The device clear sent to recover it failed.");
                 }
+            }
+
+            // A query sent while it's still sending would only interrupt that reply, and its answer would be lost in it.
+            if (!finished)
+            {
+                notes.Append(" It may still be sending, so its error queue wasn't read: a device clear, or " +
+                             "visa_clear, readies it for the next command.");
+                return notes.ToString();
             }
 
             string errorQuery = options.Identity?.ErrorQuery;
@@ -252,9 +263,9 @@ namespace GpibMcp.Instruments
         /// to corrupt the next command, keeping only the first bytes for the error. Best effort, for at most
         /// <paramref name="limitMs"/>. Returns false if a reply may be left: still sending at the end of that, or
         /// it stopped part way without ending its message. A read that times out with data is a slow transfer,
-        /// not the end of one.
+        /// not the end of one, and silence doesn't end a reply that had started (<paramref name="midReply"/>).
         /// </summary>
-        private bool DrainNoLock(string resource, long limitMs, out long discarded, out byte[] preview)
+        private bool DrainNoLock(string resource, long limitMs, bool midReply, out long discarded, out byte[] preview)
         {
             discarded = 0;
             var kept = new MemoryStream();
@@ -268,7 +279,7 @@ namespace GpibMcp.Instruments
                         kept.Write(r.Data, 0, Math.Min(r.Data.Length, DrainPreviewBytes - (int)kept.Length));
                     discarded += r.Data.Length;
                     if (r.EndOfMessage) return true;
-                    if (r.Data.Length == 0) return discarded == 0;
+                    if (r.Data.Length == 0) return discarded == 0 && !midReply;
                 }
                 return false;
             }
@@ -675,6 +686,28 @@ namespace GpibMcp.Instruments
         }
 
         private static int Timeout(int timeoutMs) => timeoutMs <= 0 ? DefaultTimeoutMs : timeoutMs;
+
+        /// <summary>
+        /// NI-488 timeout steps, and the longest each was measured to wait over a GPIB-ENET/1000: a timeout is
+        /// rounded up to a step, then overruns it (3000 waits about 4.2 s, 5000 or 10000 about 16.8 s).
+        /// </summary>
+        private static readonly int[][] TimeoutSteps =
+        {
+            new[] { 300, 400 }, new[] { 1000, 1100 }, new[] { 3000, 4300 }, new[] { 10000, 17000 },
+            new[] { 30000, 43000 }, new[] { 100000, 135000 }, new[] { 300000, 400000 }
+        };
+
+        /// <summary>
+        /// <paramref name="requestedMs"/>, or the longest step below it whose real wait fits in
+        /// <paramref name="limitMs"/>, for a single read that can't be interrupted. Never under the first step.
+        /// </summary>
+        internal static int FirstReadMs(int requestedMs, int limitMs)
+        {
+            int[] rounded = TimeoutSteps.FirstOrDefault(s => s[0] >= requestedMs) ?? TimeoutSteps[TimeoutSteps.Length - 1];
+            if (rounded[1] <= limitMs) return requestedMs;
+            int[] fits = TimeoutSteps.LastOrDefault(s => s[1] <= limitMs && s[0] < requestedMs) ?? TimeoutSteps[0];
+            return Math.Min(requestedMs, fits[0]);
+        }
 
         /// <summary>Builds the enriched failure (decoding via the transport), records it, and returns it to throw.</summary>
         private GpibOperationException Fail(GpibOperation op, string resource, string command, Exception inner)

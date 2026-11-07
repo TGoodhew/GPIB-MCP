@@ -45,7 +45,7 @@ namespace GpibMcp.Tools
                     Prop("first_reply_timeout_ms", "integer", "How long the instrument may take to start replying, in ms " +
                         "(default: the assigned model's figure, otherwise " + BinaryReadOptions.DefaultFirstReplyMs + "). " +
                         "Raise it for an instrument that is slow to build the image, along with time_budget_s: it's limited " +
-                        "to about half of that. The driver rounds it up to a step: over a GPIB-ENET/1000, 3000 waits about 4 s " +
+                        "to a wait that fits in about half of that. The driver rounds it up to a step: over a GPIB-ENET/1000, 3000 waits about 4 s " +
                         "and 5000 to 10000 about 17 s."),
                     Prop("time_budget_s", "number", "Seconds the whole call may take (default " + BinaryReadOptions.DefaultTotalMs / 1000 +
                         ", max " + BinaryReadOptions.MaxTotalMs / 1000 + "). Claude Desktop gives up on a call at about 30 s, or " +
