@@ -40,7 +40,8 @@ namespace GpibMcp.Instruments
         /// consumed - or raw bytes to END. A malformed or short block is a <see cref="GpibOperationException"/>
         /// saying what arrived, after whatever was left has been read off the instrument.
         /// </summary>
-        BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format);
+        BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format,
+                                      BinaryReadOptions options = null);
 
         /// <summary>
         /// Writes a command and reads the response using the given per-instrument I/O behaviour

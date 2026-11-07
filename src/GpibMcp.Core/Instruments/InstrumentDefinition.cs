@@ -31,6 +31,13 @@ namespace GpibMcp.Instruments
         /// </summary>
         [JsonProperty("maxReadBytes")] public int? MaxReadBytes { get; set; }
 
+        /// <summary>
+        /// True when a device clear only resets this model's I/O and leaves its settings alone, so a binary read
+        /// that fails can be recovered with one. Off unless a model says so: on HP 8560-series analyzers a device
+        /// clear also presets the instrument, wiping the user's setup.
+        /// </summary>
+        [JsonProperty("deviceClearSafe")] public bool DeviceClearSafe { get; set; }
+
         [JsonProperty("identity")] public IdentitySpec Identity { get; set; }
         [JsonProperty("capture")] public CaptureProfile Capture { get; set; }
 
@@ -106,8 +113,18 @@ namespace GpibMcp.Instruments
         /// <summary>Smallest byte count that counts as a real hardcopy rather than a false start. See <see cref="PerReadTimeoutMs"/>.</summary>
         [JsonProperty("minPlotBytes")] public int? MinPlotBytes { get; set; }
 
-        /// <summary>scpi_block: the per-read timeout for the screen dump (ms); null means 30 s. A GIF over GPIB is slow.</summary>
+        /// <summary>
+        /// scpi_block: the limit on the screen dump (ms), per read and in all; null means
+        /// <see cref="BinaryReadOptions.DefaultTotalMs"/>. A GIF over GPIB is slow.
+        /// </summary>
         [JsonProperty("timeoutMs")] public int? TimeoutMs { get; set; }
+
+        /// <summary>
+        /// scpi_block: how long this model may take to start sending the dump (ms); null means
+        /// <see cref="BinaryReadOptions.DefaultFirstReplyMs"/>. A measured figure makes a rejected command fail
+        /// sooner. See <see cref="BinaryReadOptions.FirstReplyMs"/> for how a driver rounds it.
+        /// </summary>
+        [JsonProperty("firstReplyTimeoutMs")] public int? FirstReplyTimeoutMs { get; set; }
 
         /// <summary>
         /// scpi_block, optional: how to invert the dump's background (e.g. the E4406A's ":HCOPy:SDUMp:IMAGe

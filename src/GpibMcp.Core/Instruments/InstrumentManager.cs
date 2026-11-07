@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using GpibMcp.Diagnostics;
 
@@ -22,6 +23,24 @@ namespace GpibMcp.Instruments
 
         /// <summary>Upper bound for a single binary image-block read (#10) - generous for any instrument screenshot.</summary>
         public const long MaxImageBlockBytes = 16L * 1024 * 1024;
+
+        /// <summary>Set aside from a binary read's limit, for recovering from a failure.</summary>
+        private const int BinaryRecoveryMs = 3000;
+
+        /// <summary>Shortest a binary read is given, however small the limit.</summary>
+        private const int MinBinaryReadMs = 1000;
+
+        /// <summary>Longest single read of a reply that has started: the longest wait drivers honour exactly.</summary>
+        private const int BinaryReadSliceMs = 1000;
+
+        /// <summary>Time for discarding a reply before device-clearing instead, and for the clear itself.</summary>
+        private const int DrainMs = 1000;
+
+        /// <summary>Timeout on each read of the error queue after a failure.</summary>
+        internal const int ErrorQueryMs = 1000;
+
+        /// <summary>How much of a discarded reply the error quotes.</summary>
+        private const int DrainPreviewBytes = 64;
 
         /// <summary>VISA resource filter matching any INSTR resource on any bus.</summary>
         public const string DefaultResourceFilter = "?*INSTR";
@@ -85,32 +104,68 @@ namespace GpibMcp.Instruments
             lock (_gate) return QueryBlockNoLock(resource, command, timeoutMs);
         }
 
-        public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format)
+        public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format,
+                                             BinaryReadOptions options = null)
         {
+            options = options ?? new BinaryReadOptions();
             lock (_gate)
             {
                 var io = new IoSpec(timeoutMs);
                 string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
                 try
                 {
-                    _transport.Open(resource, Timeout(timeoutMs));
+                    int firstReplyMs = Math.Min(options.FirstReplyMs, Timeout(timeoutMs));
+                    var clock = Stopwatch.StartNew();
+                    _transport.Open(resource, firstReplyMs);
                     _history.Record(resource, CommandDirection.Sent, payload);
-                    _transport.Write(resource, Latin1.GetBytes(payload), Timeout(timeoutMs));
+                    _transport.Write(resource, Latin1.GetBytes(payload), firstReplyMs);
 
-                    // Raw bounded reads, no termination character: binary data can contain 0x0A. A read that
-                    // timed out means the instrument fell silent, which the block reader reports as incomplete.
-                    bool timedOut = false;
+                    // Raw bounded reads, no termination character: binary data can contain 0x0A. The first read
+                    // waits for a reply to start. After that, reads are short slices: a driver only honours
+                    // timeouts in steps, and over a GPIB-ENET/1000 asking for 20 s waits about 42 s, so one long
+                    // read would blow any limit. Only silence counts as a stall - a slice that brought data just
+                    // means the transfer is slow - and a timeout's worth of it is what the block reader reports
+                    // as incomplete. Nothing reads past the time left, so recovery still fits inside the limit.
+                    int readMs = Math.Max(options.TotalMs - BinaryRecoveryMs, MinBinaryReadMs);
+                    int silentSlices = Math.Max(1, Timeout(timeoutMs) / BinaryReadSliceMs);
+                    bool timedOut = false, overBudget = false, firstRead = true, anyReply = false;
                     ReplyReader.ReadChunk read = (int count, out bool more) =>
                     {
-                        var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = Timeout(timeoutMs), TermChar = null, MaxBytes = count });
-                        timedOut = r.TimedOut;
-                        more = !r.EndOfMessage && !r.TimedOut;
-                        return r.Data;
+                        for (int silent = 1; ; silent++)
+                        {
+                            long left = readMs - clock.ElapsedMilliseconds;
+                            if (left <= 0)
+                            {
+                                timedOut = overBudget = true;
+                                more = false;
+                                return Array.Empty<byte>();
+                            }
+                            bool first = firstRead;
+                            firstRead = false;
+                            int wait = (int)Math.Min(first ? firstReplyMs : BinaryReadSliceMs, left);
+                            var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = wait, TermChar = null, MaxBytes = count });
+                            bool nothing = r.TimedOut && r.Data.Length == 0;
+                            if (nothing && !first && silent < silentSlices) continue;
+                            timedOut = nothing;
+                            anyReply |= r.Data.Length > 0;
+                            more = !r.EndOfMessage && !nothing;
+                            return r.Data;
+                        }
                     };
 
                     BinaryBlockResult result;
                     try { result = BinaryBlock.Read(read, format, BinaryBlock.MaxBytes, () => timedOut); }
-                    catch (IOException) { DrainNoLock(resource); throw; }
+                    catch (IOException ex)
+                    {
+                        string why = overBudget
+                            ? " The " + options.TotalMs / 1000 + " s limit on the call ran out; time_budget_s can raise it to " +
+                              BinaryReadOptions.MaxTotalMs / 1000 + "."
+                            : timedOut && !anyReply
+                                ? " The instrument sent nothing within " + firstReplyMs + " ms, which usually means it rejected the command."
+                                : "";
+                        long left = readMs - clock.ElapsedMilliseconds;
+                        throw new IOException(ex.Message + why + RecoverNoLock(resource, options, timedOut, !anyReply, left), ex);
+                    }
 
                     _history.Record(resource, CommandDirection.Received,
                         "<" + result.Payload.Length + "-byte binary " + (result.Header != null ? "block " + result.Header : "reply") + ">");
@@ -124,21 +179,90 @@ namespace GpibMcp.Instruments
         }
 
         /// <summary>
-        /// Reads and discards whatever the instrument still has to send, so a failed binary read leaves nothing
-        /// to corrupt the next command. Not a device clear: on HP 8560-series analyzers that presets the
-        /// instrument. Short timeouts; best effort.
+        /// Leaves the instrument ready for its next command after a failed binary read, and says what it made of
+        /// this one: discards the rest of the reply, device-clears a model that allows it, and reads its error
+        /// queue. Everything here is short, inside <see cref="BinaryRecoveryMs"/> at worst. Returns text for the error.
         /// </summary>
-        private void DrainNoLock(string resource)
+        private string RecoverNoLock(string resource, BinaryReadOptions options, bool timedOut, bool noReply, long msLeft)
+        {
+            var notes = new StringBuilder();
+            bool clearable = options.DeviceClearSafe && _transport.Capabilities.DeviceClear;
+
+            // Timed out with a clear available: there is nothing to wait for. Otherwise read what's left - all of
+            // it if there is no clear to fall back on, because a remainder would meet the next command.
+            bool finished = false;
+            if (!timedOut || !clearable)
+            {
+                var rest = new MemoryStream();
+                finished = DrainNoLock(resource, rest, clearable ? DrainMs : Math.Max(DrainMs, msLeft));
+                if (rest.Length > 0)
+                    notes.Append(" It went on to send " + rest.Length + " more bytes, starting '" +
+                                 BinaryBlock.Printable(rest.ToArray().Take(DrainPreviewBytes).ToArray()) + "'.");
+            }
+
+            if (!finished && clearable)
+            {
+                try
+                {
+                    Log.Debug("VISA " + resource + " device clear after a failed binary read");
+                    _history.Record(resource, CommandDirection.Sent, "<device clear>");
+                    _transport.Clear(resource, DrainMs);
+                    notes.Append(" A device clear was sent, so it is ready for its next command.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("device clear after a failed binary read on " + resource + " failed: " + ex.Message);
+                    notes.Append(" The device clear sent to recover it failed.");
+                }
+            }
+
+            string errorQuery = options.Identity?.ErrorQuery;
+            if (string.IsNullOrEmpty(errorQuery))
+            {
+                if (noReply) notes.Append(" No model with an error query is assigned, so its error queue wasn't read.");
+                return notes.ToString();
+            }
+            try
+            {
+                ErrorQueue.Result queue = ErrorQueue.Clear(this, resource, options.ErrorIo ?? new IoSpec(ErrorQueryMs), options.Identity);
+                if (queue.Errors.Count > 0)
+                    notes.Append(" Its error queue (" + errorQuery + "): " + string.Join("; ", queue.Errors) +
+                                 (queue.Emptied ? "." : ", and there may be more."));
+                else if (noReply)
+                    notes.Append(" Its error queue is empty, so it may only have been slow to start: " +
+                                 "first_reply_timeout_ms can give it longer.");
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("error query after a failed binary read on " + resource + ": " + ex.Message);
+                notes.Append(" It didn't answer " + errorQuery + " either.");
+            }
+            return notes.ToString();
+        }
+
+        /// <summary>
+        /// Reads and discards whatever the instrument still has to send, so a failed binary read leaves nothing
+        /// to corrupt the next command, keeping the first bytes for the error. Best effort, for at most
+        /// <paramref name="limitMs"/>. Returns false if the instrument was still sending at the end of that.
+        /// </summary>
+        private bool DrainNoLock(string resource, Stream preview, long limitMs)
         {
             try
             {
-                for (int i = 0; i < 1024; i++)
+                var clock = Stopwatch.StartNew();
+                while (clock.ElapsedMilliseconds < limitMs)
                 {
                     var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = 500, TermChar = null, MaxBytes = BinaryBlock.ChunkBytes });
-                    if (r.EndOfMessage || r.TimedOut || r.Data.Length == 0) break;
+                    preview.Write(r.Data, 0, r.Data.Length);
+                    if (r.EndOfMessage || r.TimedOut || r.Data.Length == 0) return true;
                 }
+                return false;
             }
-            catch (Exception ex) { Log.Debug("drain after a failed binary read on " + resource + ": " + ex.Message); }
+            catch (Exception ex)
+            {
+                Log.Debug("drain after a failed binary read on " + resource + ": " + ex.Message);
+                return false;
+            }
         }
 
         /// <summary>QueryBlock body without taking the gate, for callers (e.g. the record loop) already holding it.</summary>

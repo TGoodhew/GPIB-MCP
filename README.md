@@ -406,7 +406,7 @@ tool blurbs.
 | `visa_query` | `resource`, `command` | `timeout_ms`, `read_bytes` | Write a command and read the response (e.g. `*IDN?`) |
 | `visa_write` | `resource`, `command` | `timeout_ms` | Write a command with no response (e.g. `*RST`, `OUTP ON`) |
 | `visa_write_raw` | `resource`, `data` | `chunk_bytes`, `settle_ms`, `timeout_ms`, `debug` | Write **raw bytes verbatim** (no terminator, no encoding) — `data` is base64. For control-byte-bearing payloads a text boundary would strip (HP-GL with ETX `0x03` label terminators, binary PCL). Pair with `instrument_capture_screen`'s `return_hpgl_base64` to forward a captured plot/print to a plotter/printer byte-for-byte. The send is **paced in bounded chunks** server-side (default 256 B; `timeout_ms` is **per-chunk**) so a large plot doesn't overrun/time out a slow plotter/printer |
-| `visa_query_binary` | `resource`, `command` | `timeout_ms`, `block_format` (`ieee488.2`\|`raw`), `save_path`, `save_dir` | Query whose reply is **binary** (e.g. `:HCOP:SDUM:DATA? GIF`): read as bytes, never text. The header is parsed and exactly the declared length is read over as many reads as it takes, with nothing left on the instrument. The bytes are saved to a file, and the result gives the path, byte count, type from the first bytes (GIF/PNG/BMP/JPEG/WMF/EMF), SHA-256 and first bytes. An image also comes back as PNG content, saved beside the original, and Claude Desktop shows it in the screen view. `visa_query` points here when a reply is binary |
+| `visa_query_binary` | `resource`, `command` | `timeout_ms`, `first_reply_timeout_ms`, `time_budget_s`, `block_format` (`ieee488.2`\|`raw`), `save_path`, `save_dir` | Query whose reply is **binary** (e.g. `:HCOP:SDUM:DATA? GIF`): read as bytes, never text. The header is parsed and exactly the declared length is read over as many reads as it takes, with nothing left on the instrument. An instrument that rejects the query never answers, so a read that doesn't start in time fails quickly with the instrument's own error if its model is assigned, and the whole call stops at `time_budget_s` (25 s by default, 55 at most). The bytes are saved to a file, and the result gives the path, byte count, type from the first bytes (GIF/PNG/BMP/JPEG/WMF/EMF), SHA-256 and first bytes. An image also comes back as PNG content, saved beside the original, and Claude Desktop shows it in the screen view. `visa_query` points here when a reply is binary |
 | `visa_read` | `resource` | `timeout_ms`, `read_bytes` | Read a pending response |
 | `visa_identify` | `resource` | `read_bytes` | Convenience `*IDN?` query |
 | `visa_clear` | `resource` | — | IEEE 488.2 device clear (clears I/O buffers). **Caution:** on HP 8560-series analyzers a device clear also **presets** the instrument |
@@ -659,7 +659,13 @@ Pass `format="plot"`/`"print"` to be explicit. SCPI-image boxes have one path (n
   8563E (against the KE5FX reference), which suit HP-GL boxes generally. A model that streams its hardcopy
   more slowly, pauses longer mid-plot, or produces a legitimately tiny one can override them in its own
   profile — `perReadTimeoutMs`, `inactivityTimeoutMs`, `minPlotBytes` — instead of the server being retuned
-  around whichever instrument happens to be on the bench. Omit them to keep the defaults.
+  around whichever instrument happens to be on the bench. Omit them to keep the defaults. A SCPI image dump
+  takes `timeoutMs` (the limit on the dump) and `firstReplyTimeoutMs` (how long the model may take to start
+  sending it, after which the command counts as rejected). Drivers round that up to a step: over a
+  GPIB-ENET/1000, 3000 waits about 4 s and 5000 about 17 s, so time the dump before choosing one.
+- **A failed binary read recovers the instrument.** The rest of the reply is discarded and the model's
+  `identity.errorQuery`, if it has one, is read into the error. A model marked `"deviceClearSafe": true` is
+  device-cleared as well. That is off by default, because of the preset described next.
 - **Your settings are preserved.** The capture does *not* device-clear the instrument afterward — on
   HP 8560-series analyzers a device clear also presets the box, which would wipe your setup on every
   capture. The 8563E profile's `preRoll` takes a single sweep for a clean plot and its `postRoll`

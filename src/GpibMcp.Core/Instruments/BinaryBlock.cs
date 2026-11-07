@@ -15,6 +15,43 @@ namespace GpibMcp.Instruments
         Raw
     }
 
+    /// <summary>
+    /// How long a binary read may take, and what the model allows when it fails. One stuck read holds the bus,
+    /// and every call behind it, for as long as it waits - and a client that gives up on the call doesn't stop it.
+    /// </summary>
+    public sealed class BinaryReadOptions
+    {
+        /// <summary>Default wait for the first byte. Long enough for a model that hasn't been timed.</summary>
+        public const int DefaultFirstReplyMs = 10000;
+
+        /// <summary>Default limit on the whole call: Claude Desktop's direct route cuts a call off at about 30 s.</summary>
+        public const int DefaultTotalMs = 25000;
+
+        /// <summary>Longest limit allowed: its link to a remote PC cuts a call off at 60 s.</summary>
+        public const int MaxTotalMs = 55000;
+
+        /// <summary>
+        /// How long to wait for the first byte; the caller's longer timeout applies once it has arrived. An
+        /// instrument that rejected the command never sends one. This is the check that a reply is coming:
+        /// asking anything else first would interrupt the query (-410), and MAV doesn't mean the same on every
+        /// instrument. A driver rounds this up to its next step: over a GPIB-ENET/1000, 3000 waits about 4 s
+        /// and 5000 to 10000 about 17 s.
+        /// </summary>
+        public int FirstReplyMs { get; set; } = DefaultFirstReplyMs;
+
+        /// <summary>Limit on the whole call, reading and recovering from a failure.</summary>
+        public int TotalMs { get; set; } = DefaultTotalMs;
+
+        /// <summary>The model's error-queue commands, read after a failure when it has them.</summary>
+        public IdentitySpec Identity { get; set; }
+
+        /// <summary>The model's terminators, for reading its error queue.</summary>
+        public IoSpec ErrorIo { get; set; }
+
+        /// <summary>See <see cref="InstrumentDefinition.DeviceClearSafe"/>.</summary>
+        public bool DeviceClearSafe { get; set; }
+    }
+
     /// <summary>A binary reply: the payload, and the header that framed it.</summary>
     public sealed class BinaryBlockResult
     {
@@ -68,7 +105,12 @@ namespace GpibMcp.Instruments
 
             if (format == BlockFormat.Raw)
             {
-                byte[] raw = ReplyReader.ReadToEnd(read, maxBytes, ChunkBytes);
+                // One byte first, as for a block: the caller's first read is its short wait for a reply, and a
+                // larger one would fail a slow transfer that hadn't filled the buffer in that time.
+                bool rest;
+                byte[] first = read(1, out rest) ?? Array.Empty<byte>();
+                byte[] others = rest && first.Length > 0 ? ReplyReader.ReadToEnd(read, maxBytes - 1, ChunkBytes) : Array.Empty<byte>();
+                byte[] raw = first.Concat(others).ToArray();
                 if (silent()) throw Malformed(TimedOutWhy, new MemoryStream(), raw.Length, null, raw);
                 return new BinaryBlockResult(raw, null, null);
             }
@@ -166,7 +208,8 @@ namespace GpibMcp.Instruments
         /// <summary>Bytes as hex, "47 49 46 38".</summary>
         public static string Hex(byte[] bytes) => string.Join(" ", (bytes ?? new byte[0]).Select(x => x.ToString("X2")));
 
-        private static string Printable(byte[] bytes) =>
+        /// <summary>Bytes as text, with anything unprintable as '.'.</summary>
+        public static string Printable(byte[] bytes) =>
             new string(bytes.Select(x => x >= 0x20 && x < 0x7F ? (char)x : '.').ToArray());
     }
 

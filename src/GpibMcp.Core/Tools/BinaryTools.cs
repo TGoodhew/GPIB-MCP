@@ -25,7 +25,7 @@ namespace GpibMcp.Tools
 
         public const int DefaultTimeoutMs = 30000;
 
-        public static void Register(ToolRegistry registry, IInstrumentManager visa)
+        public static void Register(ToolRegistry registry, InstrumentDatabase db, AssignmentStore assignments, IInstrumentManager visa)
         {
             registry.Add(new McpTool(
                 "visa_query_binary",
@@ -35,20 +35,39 @@ namespace GpibMcp.Tools
                 "otherwise); the result gives the path, byte count, type (from the first bytes: GIF, PNG, BMP, " +
                 "JPEG, WMF, EMF or unknown), SHA-256 and first bytes. An image is also returned as a PNG you can " +
                 "see, saved next to the original, and in Claude Desktop it is shown to the user inline. Use this when " +
-                "visa_query says a reply is binary.",
+                "visa_query says a reply is binary. An instrument that rejects the query never answers, so a read " +
+                "that doesn't start within first_reply_timeout_ms fails, with the instrument's own error if its " +
+                "model is assigned, and the whole call stops at time_budget_s.",
                 Schema(
                     Required("resource", "string", "VISA resource string, e.g. 'GPIB0::17::INSTR'."),
                     Required("command", "string", "The query, e.g. ':HCOP:SDUM:DATA? GIF'."),
-                    Prop("timeout_ms", "integer", "I/O timeout per read in ms (default 30000 - slow GPIB transfers)."),
+                    Prop("timeout_ms", "integer", "How long the reply may go silent once it has started, in ms (default 30000 - slow GPIB transfers)."),
+                    Prop("first_reply_timeout_ms", "integer", "How long the instrument may take to start replying, in ms " +
+                        "(default: the assigned model's figure, otherwise " + BinaryReadOptions.DefaultFirstReplyMs + "). " +
+                        "Raise it for an instrument that is slow to build the image. The driver rounds it up to a step: " +
+                        "over a GPIB-ENET/1000, 3000 waits about 4 s and 5000 to 10000 about 17 s."),
+                    Prop("time_budget_s", "number", "Seconds the whole call may take (default " + BinaryReadOptions.DefaultTotalMs / 1000 +
+                        ", max " + BinaryReadOptions.MaxTotalMs / 1000 + "). Claude Desktop gives up on a call at about 30 s, or " +
+                        "60 s over its link to a remote PC, and every call behind this one waits for it."),
                     Prop("block_format", "string", "'ieee488.2' (default): a #<n><length> block. 'raw': unframed bytes " +
                         "read until the instrument ends its message."),
                     Prop("save_path", "string", "Full path (with filename) to save the bytes to."),
                     Prop("save_dir", "string", "Folder to save into; a timestamped name with the resource is used.")),
-                (args, ctx) => Run(args, ctx, visa))     // long-running: a slow GPIB transfer can take 30 s
+                (args, ctx) => Run(args, ctx, db, assignments, visa))     // long-running: a slow GPIB transfer can take 30 s
                 .WithView(McpAppViews.ScreenViewUri));   // an image is shown to the user in the screen view (#157)
         }
 
-        private static ToolOutput Run(JObject args, ToolCallContext ctx, IInstrumentManager visa)
+        /// <summary>The limits on a binary read of <paramref name="def"/> (null if the model isn't known), and what its model allows on failure.</summary>
+        internal static BinaryReadOptions OptionsFor(InstrumentDefinition def, int totalMs, int? firstReplyMs = null) => new BinaryReadOptions
+        {
+            FirstReplyMs = firstReplyMs ?? def?.Capture?.FirstReplyTimeoutMs ?? BinaryReadOptions.DefaultFirstReplyMs,
+            TotalMs = Math.Min(totalMs, BinaryReadOptions.MaxTotalMs),
+            Identity = def?.Identity,
+            ErrorIo = InstrumentIo.FromDefinition(def, InstrumentManager.ErrorQueryMs),
+            DeviceClearSafe = def?.DeviceClearSafe == true
+        };
+
+        private static ToolOutput Run(JObject args, ToolCallContext ctx, InstrumentDatabase db, AssignmentStore assignments, IInstrumentManager visa)
         {
             string resource = ReqStr(args, "resource");
             string command = ReqStr(args, "command");
@@ -59,8 +78,15 @@ namespace GpibMcp.Tools
             else if (Regex.IsMatch(formatArg ?? "", @"^ieee[\s-]?488(\.2)?$", RegexOptions.IgnoreCase)) format = BlockFormat.Ieee4882;
             else return ToolOutput.Text("Unknown block_format '" + formatArg + "': use 'ieee488.2' or 'raw'.").AsError();
 
+            InstrumentDefinition def = null;
+            string model = assignments.Get(resource);
+            if (!string.IsNullOrEmpty(model)) db.TryGet(model, out def);
+            int totalMs = args["time_budget_s"] != null ? (int)Math.Round(args.Value<double>("time_budget_s") * 1000) : BinaryReadOptions.DefaultTotalMs;
+            int firstReplyMs = Int(args, "first_reply_timeout_ms", 0);
+            BinaryReadOptions options = OptionsFor(def, totalMs, firstReplyMs > 0 ? firstReplyMs : (int?)null);
+
             ctx.Progress(5, 100, "Reading the binary reply to " + command + ".");
-            BinaryBlockResult block = visa.QueryBinary(resource, command, timeout, format);
+            BinaryBlockResult block = visa.QueryBinary(resource, command, timeout, format, options);
             byte[] bytes = block.Payload;
             string kind = Kind(bytes);
             ctx.Progress(80, 100, "Read " + bytes.Length + " bytes (" + kind + "); saving.");

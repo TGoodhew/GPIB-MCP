@@ -215,6 +215,9 @@ namespace GpibMcp.Tests
             return BlockResponse;
         }
 
+        /// <summary>The options passed to the most recent <see cref="QueryBinary"/>.</summary>
+        public BinaryReadOptions LastBinaryOptions;
+
         /// <summary>Commands passed to <see cref="QueryBinary"/> (resource|command|format).</summary>
         public readonly List<string> BinaryQueries = new List<string>();
 
@@ -222,8 +225,10 @@ namespace GpibMcp.Tests
         public byte[] BinaryResponse;
 
         /// <summary>Reads <see cref="BinaryResponse"/> through the real block reader, 100 bytes a read.</summary>
-        public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format)
+        public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format,
+                                             BinaryReadOptions options = null)
         {
+            LastBinaryOptions = options;
             BinaryQueries.Add(resource + "|" + command + "|" + format);
             BlockQueries.Add(resource + "|" + command);
             byte[] source = BinaryResponse ?? BlockResponse;

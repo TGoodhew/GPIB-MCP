@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using GpibMcp.Instruments;
 
-namespace GpibMcp.Tools
+namespace GpibMcp.Instruments
 {
     /// <summary>
     /// Reads an instrument's error queue until it is empty, using the model's own commands
     /// (<see cref="IdentitySpec.ErrorQuery"/>, then <see cref="IdentitySpec.ClearStatusQuery"/>). Shared by
     /// instrument_identify, which clears the error a rejected *IDN? leaves (#144), and the SRQ waiter, which
-    /// clears an error already queued before an operation so one at completion is the operation's own.
+    /// clears an error already queued before an operation so one at completion is the operation's own, and
+    /// a failed binary read, which reports what the instrument made of the command.
     /// </summary>
     internal static class ErrorQueue
     {
