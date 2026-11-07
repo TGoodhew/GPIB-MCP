@@ -356,6 +356,25 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void AFirstReplyWaitAskedForByName_IsntCutShortByTheTimeout_ButTheDefaultIs()
+        {
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(Gif) };
+
+            Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = "DUMP?", ["save_dir"] = _dir,
+                ["timeout_ms"] = 1000, ["first_reply_timeout_ms"] = 10000
+            });
+            Assert.Equal(10000, visa.LastBinaryOptions.FirstReplyMs);
+
+            Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = "DUMP?", ["save_dir"] = _dir, ["timeout_ms"] = 1000
+            });
+            Assert.Equal(1000, visa.LastBinaryOptions.FirstReplyMs);
+        }
+
+        [Fact]
         public void TheBundled54845A_DumpsItsScreenAsAGif_AndNotAsWaveformData()
         {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);

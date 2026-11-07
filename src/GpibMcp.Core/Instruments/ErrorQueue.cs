@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -22,8 +23,8 @@ namespace GpibMcp.Instruments
 
             /// <summary>
             /// Whether a no-error reply was read - the queue is empty. False when all <see cref="MaxReads"/> reads
-            /// returned an error: the queue may or may not be empty now (each read removes one), so nothing is
-            /// claimed cleared and the status byte is left alone.
+            /// returned an error, or time ran out: the queue may or may not be empty now (each read removes one),
+            /// so nothing is claimed cleared and the status byte is left alone.
             /// </summary>
             public bool Emptied;
 
@@ -34,13 +35,15 @@ namespace GpibMcp.Instruments
         /// <summary>
         /// Reads <paramref name="identity"/>'s error query until a no-error reply; then, if any errors were read
         /// and the model has one, its clear-status query - on the 8563E the status byte's error bit can stay
-        /// latched after the queue is empty, until STB? reads it.
+        /// latched after the queue is empty, until STB? reads it. Stops before any read once
+        /// <paramref name="outOfTime"/> says so, for a caller with a limit of its own.
         /// </summary>
-        public static Result Clear(IInstrumentManager visa, string resource, IoSpec io, IdentitySpec identity)
+        public static Result Clear(IInstrumentManager visa, string resource, IoSpec io, IdentitySpec identity, Func<bool> outOfTime = null)
         {
             var result = new Result { Sent = identity.ErrorQuery };
             for (int i = 0; i < MaxReads; i++)
             {
+                if (outOfTime != null && outOfTime()) break;
                 string reply = (visa.Query(resource, identity.ErrorQuery, io) ?? "").Trim();
                 if (IsNoError(reply)) { result.Emptied = true; break; }
                 result.Errors.Add(reply);

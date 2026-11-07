@@ -44,8 +44,9 @@ namespace GpibMcp.Tools
                     Prop("timeout_ms", "integer", "How long the reply may go silent once it has started, in ms (default 30000 - slow GPIB transfers)."),
                     Prop("first_reply_timeout_ms", "integer", "How long the instrument may take to start replying, in ms " +
                         "(default: the assigned model's figure, otherwise " + BinaryReadOptions.DefaultFirstReplyMs + "). " +
-                        "Raise it for an instrument that is slow to build the image. The driver rounds it up to a step: " +
-                        "over a GPIB-ENET/1000, 3000 waits about 4 s and 5000 to 10000 about 17 s."),
+                        "Raise it for an instrument that is slow to build the image, along with time_budget_s: it's limited " +
+                        "to about half of that. The driver rounds it up to a step: over a GPIB-ENET/1000, 3000 waits about 4 s " +
+                        "and 5000 to 10000 about 17 s."),
                     Prop("time_budget_s", "number", "Seconds the whole call may take (default " + BinaryReadOptions.DefaultTotalMs / 1000 +
                         ", max " + BinaryReadOptions.MaxTotalMs / 1000 + "). Claude Desktop gives up on a call at about 30 s, or " +
                         "60 s over its link to a remote PC, and every call behind this one waits for it."),
@@ -58,9 +59,10 @@ namespace GpibMcp.Tools
         }
 
         /// <summary>The limits on a binary read of <paramref name="def"/> (null if the model isn't known), and what its model allows on failure.</summary>
-        internal static BinaryReadOptions OptionsFor(InstrumentDefinition def, int totalMs, int? firstReplyMs = null) => new BinaryReadOptions
+        internal static BinaryReadOptions OptionsFor(InstrumentDefinition def, int timeoutMs, int totalMs, int? firstReplyMs = null) => new BinaryReadOptions
         {
-            FirstReplyMs = firstReplyMs ?? def?.Capture?.FirstReplyTimeoutMs ?? BinaryReadOptions.DefaultFirstReplyMs,
+            // Asked for by name, it stands alone; otherwise it's no longer than the wait the caller set.
+            FirstReplyMs = firstReplyMs ?? Math.Min(def?.Capture?.FirstReplyTimeoutMs ?? BinaryReadOptions.DefaultFirstReplyMs, timeoutMs),
             TotalMs = Math.Min(totalMs, BinaryReadOptions.MaxTotalMs),
             Identity = def?.Identity,
             ErrorIo = InstrumentIo.FromDefinition(def, InstrumentManager.ErrorQueryMs),
@@ -83,7 +85,7 @@ namespace GpibMcp.Tools
             if (!string.IsNullOrEmpty(model)) db.TryGet(model, out def);
             int totalMs = args["time_budget_s"] != null ? (int)Math.Round(args.Value<double>("time_budget_s") * 1000) : BinaryReadOptions.DefaultTotalMs;
             int firstReplyMs = Int(args, "first_reply_timeout_ms", 0);
-            BinaryReadOptions options = OptionsFor(def, totalMs, firstReplyMs > 0 ? firstReplyMs : (int?)null);
+            BinaryReadOptions options = OptionsFor(def, timeout, totalMs, firstReplyMs > 0 ? firstReplyMs : (int?)null);
 
             ctx.Progress(5, 100, "Reading the binary reply to " + command + ".");
             BinaryBlockResult block = visa.QueryBinary(resource, command, timeout, format, options);

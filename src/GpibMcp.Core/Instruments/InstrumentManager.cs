@@ -107,26 +107,30 @@ namespace GpibMcp.Instruments
         public BinaryBlockResult QueryBinary(string resource, string command, int timeoutMs, BlockFormat format,
                                              BinaryReadOptions options = null)
         {
-            options = options ?? new BinaryReadOptions();
+            options = options ?? new BinaryReadOptions { FirstReplyMs = Math.Min(BinaryReadOptions.DefaultFirstReplyMs, Timeout(timeoutMs)) };
             lock (_gate)
             {
                 var io = new IoSpec(timeoutMs);
                 string payload = CommandText.EnsureTerminated(command, io.WriteTerminator);
                 try
                 {
-                    int firstReplyMs = Math.Min(options.FirstReplyMs, Timeout(timeoutMs));
+                    // One read, however long the wait: re-addressing the instrument while it builds the reply is
+                    // what splitting it would do, and on the 54845A that failed every capture and left the scope
+                    // not answering even a serial poll until it was power-cycled. So the wait is limited instead.
+                    // A driver rounds a timeout up to a step, about double over a GPIB-ENET/1000 (20 s waits about
+                    // 42 s), so half of the time for reading keeps that read inside the call's limit.
+                    int readMs = Math.Max(options.TotalMs - BinaryRecoveryMs, MinBinaryReadMs);
+                    int firstReplyMs = Math.Min(Timeout(options.FirstReplyMs), Math.Max(readMs / 2, MinBinaryReadMs));
                     var clock = Stopwatch.StartNew();
                     _transport.Open(resource, firstReplyMs);
                     _history.Record(resource, CommandDirection.Sent, payload);
                     _transport.Write(resource, Latin1.GetBytes(payload), firstReplyMs);
 
                     // Raw bounded reads, no termination character: binary data can contain 0x0A. The first read
-                    // waits for a reply to start. After that, reads are short slices: a driver only honours
-                    // timeouts in steps, and over a GPIB-ENET/1000 asking for 20 s waits about 42 s, so one long
-                    // read would blow any limit. Only silence counts as a stall - a slice that brought data just
-                    // means the transfer is slow - and a timeout's worth of it is what the block reader reports
-                    // as incomplete. Nothing reads past the time left, so recovery still fits inside the limit.
-                    int readMs = Math.Max(options.TotalMs - BinaryRecoveryMs, MinBinaryReadMs);
+                    // waits for a reply to start. After that, reads are short slices, because of those timeout
+                    // steps. Only silence counts as a stall - a slice that brought data just means the transfer
+                    // is slow - and a timeout's worth of it is what the block reader reports as incomplete.
+                    // Nothing reads past the time left, so recovery still fits inside the limit.
                     int silentSlices = Math.Max(1, Timeout(timeoutMs) / BinaryReadSliceMs);
                     bool timedOut = false, overBudget = false, firstRead = true, anyReply = false;
                     ReplyReader.ReadChunk read = (int count, out bool more) =>
@@ -164,7 +168,8 @@ namespace GpibMcp.Instruments
                                 ? " The instrument sent nothing within " + firstReplyMs + " ms, which usually means it rejected the command."
                                 : "";
                         long left = readMs - clock.ElapsedMilliseconds;
-                        throw new IOException(ex.Message + why + RecoverNoLock(resource, options, timedOut, !anyReply, left), ex);
+                        throw new IOException(ex.Message + why + RecoverNoLock(resource, options, timedOut, !anyReply, left,
+                                                                               () => clock.ElapsedMilliseconds >= options.TotalMs), ex);
                     }
 
                     _history.Record(resource, CommandDirection.Received,
@@ -181,9 +186,9 @@ namespace GpibMcp.Instruments
         /// <summary>
         /// Leaves the instrument ready for its next command after a failed binary read, and says what it made of
         /// this one: discards the rest of the reply, device-clears a model that allows it, and reads its error
-        /// queue. Everything here is short, inside <see cref="BinaryRecoveryMs"/> at worst. Returns text for the error.
+        /// queue, stopping when <paramref name="outOfTime"/> says the call's limit has run out. Returns text for the error.
         /// </summary>
-        private string RecoverNoLock(string resource, BinaryReadOptions options, bool timedOut, bool noReply, long msLeft)
+        private string RecoverNoLock(string resource, BinaryReadOptions options, bool timedOut, bool noReply, long msLeft, Func<bool> outOfTime)
         {
             var notes = new StringBuilder();
             bool clearable = options.DeviceClearSafe && _transport.Capabilities.DeviceClear;
@@ -193,11 +198,11 @@ namespace GpibMcp.Instruments
             bool finished = false;
             if (!timedOut || !clearable)
             {
-                var rest = new MemoryStream();
-                finished = DrainNoLock(resource, rest, clearable ? DrainMs : Math.Max(DrainMs, msLeft));
-                if (rest.Length > 0)
-                    notes.Append(" It went on to send " + rest.Length + " more bytes, starting '" +
-                                 BinaryBlock.Printable(rest.ToArray().Take(DrainPreviewBytes).ToArray()) + "'.");
+                long discarded;
+                byte[] preview;
+                finished = DrainNoLock(resource, clearable ? DrainMs : Math.Max(DrainMs, msLeft), out discarded, out preview);
+                if (discarded > 0)
+                    notes.Append(" It went on to send " + discarded + " more bytes, starting '" + BinaryBlock.Printable(preview) + "'.");
             }
 
             if (!finished && clearable)
@@ -224,10 +229,12 @@ namespace GpibMcp.Instruments
             }
             try
             {
-                ErrorQueue.Result queue = ErrorQueue.Clear(this, resource, options.ErrorIo ?? new IoSpec(ErrorQueryMs), options.Identity);
+                ErrorQueue.Result queue = ErrorQueue.Clear(this, resource, options.ErrorIo ?? new IoSpec(ErrorQueryMs), options.Identity, outOfTime);
                 if (queue.Errors.Count > 0)
                     notes.Append(" Its error queue (" + errorQuery + "): " + string.Join("; ", queue.Errors) +
                                  (queue.Emptied ? "." : ", and there may be more."));
+                else if (!queue.Emptied)
+                    notes.Append(" The call's time ran out before its error queue could be read.");
                 else if (noReply)
                     notes.Append(" Its error queue is empty, so it may only have been slow to start: " +
                                  "first_reply_timeout_ms can give it longer.");
@@ -242,19 +249,26 @@ namespace GpibMcp.Instruments
 
         /// <summary>
         /// Reads and discards whatever the instrument still has to send, so a failed binary read leaves nothing
-        /// to corrupt the next command, keeping the first bytes for the error. Best effort, for at most
-        /// <paramref name="limitMs"/>. Returns false if the instrument was still sending at the end of that.
+        /// to corrupt the next command, keeping only the first bytes for the error. Best effort, for at most
+        /// <paramref name="limitMs"/>. Returns false if a reply may be left: still sending at the end of that, or
+        /// it stopped part way without ending its message. A read that times out with data is a slow transfer,
+        /// not the end of one.
         /// </summary>
-        private bool DrainNoLock(string resource, Stream preview, long limitMs)
+        private bool DrainNoLock(string resource, long limitMs, out long discarded, out byte[] preview)
         {
+            discarded = 0;
+            var kept = new MemoryStream();
             try
             {
                 var clock = Stopwatch.StartNew();
                 while (clock.ElapsedMilliseconds < limitMs)
                 {
                     var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = 500, TermChar = null, MaxBytes = BinaryBlock.ChunkBytes });
-                    preview.Write(r.Data, 0, r.Data.Length);
-                    if (r.EndOfMessage || r.TimedOut || r.Data.Length == 0) return true;
+                    if (kept.Length < DrainPreviewBytes)
+                        kept.Write(r.Data, 0, Math.Min(r.Data.Length, DrainPreviewBytes - (int)kept.Length));
+                    discarded += r.Data.Length;
+                    if (r.EndOfMessage) return true;
+                    if (r.Data.Length == 0) return discarded == 0;
                 }
                 return false;
             }
@@ -263,6 +277,7 @@ namespace GpibMcp.Instruments
                 Log.Debug("drain after a failed binary read on " + resource + ": " + ex.Message);
                 return false;
             }
+            finally { preview = kept.ToArray(); }
         }
 
         /// <summary>QueryBlock body without taking the gate, for callers (e.g. the record loop) already holding it.</summary>

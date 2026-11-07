@@ -429,7 +429,7 @@ namespace GpibMcp.Tools
             }
 
             BinaryBlockResult block;
-            try { block = visa.QueryBinary(resource, profile.DumpCommand, timeout, BlockFormat.Ieee4882, BinaryTools.OptionsFor(def, timeout, firstReplyMs > 0 ? firstReplyMs : (int?)null)); }
+            try { block = visa.QueryBinary(resource, profile.DumpCommand, timeout, BlockFormat.Ieee4882, BinaryTools.OptionsFor(def, timeout, timeout, firstReplyMs > 0 ? firstReplyMs : (int?)null)); }
             catch (Exception ex) { return Error("Screen dump failed for " + resource + ": " + ex.Message); }
             finally
             {

@@ -144,6 +144,7 @@ namespace GpibMcp.Tests
                 new System.Collections.Generic.Queue<string>(new[] { "-224,\"Illegal parameter value\"", "-420,\"Query UNTERMINATED\"" });
             public readonly System.Collections.Generic.List<int> ReadTimeouts = new System.Collections.Generic.List<int>();
             public readonly System.Collections.Generic.List<string> Written = new System.Collections.Generic.List<string>();
+            public int ErrorReadMs;
 
             public override void Write(string resource, byte[] payload, int timeoutMs) =>
                 Written.Add(System.Text.Encoding.ASCII.GetString(payload));
@@ -152,7 +153,10 @@ namespace GpibMcp.Tests
             {
                 ReadTimeouts.Add(request.TimeoutMs);
                 if (Written[Written.Count - 1].StartsWith(":SYST:ERR?"))
+                {
+                    System.Threading.Thread.Sleep(ErrorReadMs);
                     return new TransportReadResult(System.Text.Encoding.ASCII.GetBytes((Errors.Count > 0 ? Errors.Dequeue() : "0,\"No error\"") + "\n"), false, true);
+                }
                 return new TransportReadResult(System.Array.Empty<byte>(), true);
             }
         }
@@ -208,20 +212,6 @@ namespace GpibMcp.Tests
             var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 30000, BlockFormat.Ieee4882));
 
             Assert.Contains("error queue wasn't read", ex.Message);
-        }
-
-        [Fact]
-        public void QueryBinary_WaitsOnceForTheFirstByte_ThenReadsInShortSlices()
-        {
-            // A driver rounds a timeout up to its next step (20 s waits about 42 s over a GPIB-ENET/1000), so a
-            // long read can't be stopped at the limit.
-            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#3100").Concat(new byte[100]).Concat(new[] { (byte)'\n' }).ToArray() };
-            var mgr = new InstrumentManager(t);
-
-            mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 20000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 3000 });
-
-            Assert.Equal(3000, t.Requests[0].TimeoutMs);
-            Assert.All(t.Requests.Skip(1), r => Assert.InRange(r.TimeoutMs, 1, 1000));
         }
 
         /// <summary>Sends a block in pieces with pauses, each a read that times out: a slow instrument, not a dead one.</summary>
@@ -282,6 +272,120 @@ namespace GpibMcp.Tests
             Assert.Equal(1, t.Requests[0].MaxBytes);
             Assert.Equal(3000, t.Requests[0].TimeoutMs);
             Assert.InRange(t.Requests[1].TimeoutMs, 1, 1000);
+        }
+
+        [Fact]
+        public void QueryBinary_WaitsOnceForTheFirstByte_ThenReadsInShortSlices()
+        {
+            // Never split that first wait: re-addressing the 54845A while it built the image failed every capture,
+            // and left the scope answering nothing, not even a serial poll, until it was power-cycled.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#3100").Concat(new byte[100]).Concat(new[] { (byte)'\n' }).ToArray() };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 20000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 3000 });
+
+            Assert.Equal(3000, t.Requests[0].TimeoutMs);
+            Assert.All(t.Requests.Skip(1), r => Assert.InRange(r.TimeoutMs, 1, 1000));
+        }
+
+        [Fact]
+        public void QueryBinary_ALongFirstWait_IsLimited_SoADriversStepsCantCarryItPastTheCallsLimit()
+        {
+            // 20 s waits about 42 s over a GPIB-ENET/1000, far past the default 25 s.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#14DATA\n") };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 30000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 20000 });
+
+            Assert.Equal(11000, t.Requests[0].TimeoutMs);
+        }
+
+        [Fact]
+        public void QueryBinary_TheFirstReplyWait_IsNotCappedByTheTimeoutForASilentReply()
+        {
+            // timeout_ms is about a reply going silent; how long one may take to start is a separate figure.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#14DATA\n") };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 10000 });
+
+            Assert.Equal(10000, t.Requests[0].TimeoutMs);
+        }
+
+        [Fact]
+        public void QueryBinary_WithNoOptions_ANarrowTimeoutStillLimitsTheFirstWait()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#14DATA\n") };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882);
+
+            Assert.Equal(1000, t.Requests[0].TimeoutMs);
+        }
+
+        [Fact]
+        public void QueryBinary_ThatLeavesARecoveryShortOfTime_StopsReadingTheErrorQueue()
+        {
+            var t = new RejectingTransport { ErrorReadMs = 400 };
+            t.Errors.Enqueue("-1,\"One\"");
+            t.Errors.Enqueue("-2,\"Two\"");
+            t.Errors.Enqueue("-3,\"Three\"");
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { FirstReplyMs = 100, TotalMs = 1000, Identity = ScpiErrors }));
+
+            Assert.Contains("there may be more", ex.Message);
+            Assert.True(t.Errors.Count > 0, "read every error");
+        }
+
+        /// <summary>Text arriving in slow reads that time out with data, then stopping without END.</summary>
+        private sealed class StalledTextTransport : FakeTransportBase
+        {
+            public int Chunks = 3;
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request) =>
+                Chunks-- > 0 ? new TransportReadResult(new[] { (byte)'1', (byte)'2' }, true, false)
+                             : new TransportReadResult(System.Array.Empty<byte>(), true, false);
+        }
+
+        [Fact]
+        public void QueryBinary_AReplyThatStopsPartWayThrough_StillGetsTheDeviceClear()
+        {
+            // A timeout with data is a slow transfer, not the end of one, and more may be coming.
+            var t = new StalledTextTransport();
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { DeviceClearSafe = true }));
+
+            Assert.Equal(1, t.ClearCount);
+            Assert.Contains("device clear was sent", ex.Message);
+        }
+
+        [Fact]
+        public void QueryBinary_AReplyThatEndedProperly_NeedsNoDeviceClear()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("12\n"), MaxPerRead = 1 };
+            var mgr = new InstrumentManager(t);
+
+            Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { DeviceClearSafe = true }));
+
+            Assert.Equal(0, t.ClearCount);
+        }
+
+        [Fact]
+        public void QueryBinary_KeepsOnlyTheStartOfADiscardedReply()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("1" + new string('y', 5000) + "\n") };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882));
+
+            Assert.Contains("5001 more bytes", ex.Message);
+            Assert.Contains(new string('y', 64), ex.Message);
+            Assert.DoesNotContain(new string('y', 65), ex.Message);
         }
 
         [Fact]
