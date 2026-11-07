@@ -86,6 +86,47 @@ namespace GpibMcp.Tests
             Assert.Equal(Gif, BinaryBlock.Read(instrument.Read, BlockFormat.Ieee4882).Payload);
         }
 
+        [Theory]
+        [InlineData(":DISP:DATA ")]         // the 54845A with :SYSTem:HEADer ON
+        [InlineData(":DISPLAY:DATA ")]      // and with :SYSTem:LONGform ON as well
+        [InlineData(":DISP:DATA\t ")]
+        [InlineData(":DISP:DATA")]
+        [InlineData("CURVE ")]
+        public void TheNameBeforeAReply_IsSkipped_WhenTheInstrumentsHeadersAreOn(string name)
+        {
+            var instrument = new Instrument(Concat(Bytes(name + Header(3, Gif.Length)), Gif, Bytes("\n")));
+
+            BinaryBlockResult block = BinaryBlock.Read(instrument.Read, BlockFormat.Ieee4882);
+
+            Assert.Equal(Gif, block.Payload);
+            Assert.Equal(Gif.Length, block.DeclaredLength);
+            Assert.Equal(0, instrument.Left);
+        }
+
+        [Theory]
+        [InlineData(":DISP:DATA 1.5,2.5\n")]       // ASCII data
+        [InlineData("NOT A BLOCK\n")]              // words, one of them skipped at most
+        [InlineData(":SYST:ERR -224,\"Illegal\"\n")]
+        public void TextThatStartsLikeAName_IsStillNotABlock(string reply)
+        {
+            var instrument = new Instrument(Bytes(reply));
+
+            var ex = Assert.Throws<BinaryBlockException>(() => BinaryBlock.Read(instrument.Read, BlockFormat.Ieee4882));
+
+            Assert.Contains("doesn't start with an IEEE 488.2 block header", ex.Message);
+        }
+
+        [Fact]
+        public void ANameThatNeverEnds_IsNotReadForever()
+        {
+            var instrument = new Instrument(Bytes(new string('A', 5000)));
+
+            var ex = Assert.Throws<BinaryBlockException>(() => BinaryBlock.Read(instrument.Read, BlockFormat.Ieee4882));
+
+            Assert.Contains("doesn't start with an IEEE 488.2 block header", ex.Message);
+            Assert.True(instrument.Left > 4000);
+        }
+
         [Fact]
         public void AnIndefiniteBlock_RunsToTheEnd_LessItsNewline()
         {

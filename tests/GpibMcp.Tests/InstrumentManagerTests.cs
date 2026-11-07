@@ -135,6 +135,373 @@ namespace GpibMcp.Tests
             Assert.Equal(t.Output.Length, t.At);   // drained: the next command doesn't meet these bytes
         }
 
+        private static readonly IdentitySpec ScpiErrors = new IdentitySpec { ErrorQuery = ":SYST:ERR? STR" };
+
+        /// <summary>The 54845A's reaction to a query it rejects: it sends nothing, and logs why.</summary>
+        private sealed class RejectingTransport : FakeTransportBase
+        {
+            public readonly System.Collections.Generic.Queue<string> Errors =
+                new System.Collections.Generic.Queue<string>(new[] { "-224,\"Illegal parameter value\"", "-420,\"Query UNTERMINATED\"" });
+            public readonly System.Collections.Generic.List<int> ReadTimeouts = new System.Collections.Generic.List<int>();
+            public readonly System.Collections.Generic.List<string> Written = new System.Collections.Generic.List<string>();
+            public int ErrorReadMs;
+
+            public override void Write(string resource, byte[] payload, int timeoutMs) =>
+                Written.Add(System.Text.Encoding.ASCII.GetString(payload));
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request)
+            {
+                ReadTimeouts.Add(request.TimeoutMs);
+                if (Written[Written.Count - 1].StartsWith(":SYST:ERR?"))
+                {
+                    System.Threading.Thread.Sleep(ErrorReadMs);
+                    return new TransportReadResult(System.Text.Encoding.ASCII.GetBytes((Errors.Count > 0 ? Errors.Dequeue() : "0,\"No error\"") + "\n"), false, true);
+                }
+                return new TransportReadResult(System.Array.Empty<byte>(), true);
+            }
+        }
+
+        [Fact]
+        public void QueryBinary_ARejectedCommand_FailsAtTheShortFirstWait_AndReportsTheInstrumentsError()
+        {
+            // The hang that blocked the server: a 60 s read, with every later call queued behind it.
+            var t = new RejectingTransport();
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", ":DISP:DATA? GIF,SCR,COL", 60000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { FirstReplyMs = 3000, Identity = ScpiErrors, DeviceClearSafe = true }));
+
+            Assert.Equal(3000, t.ReadTimeouts[0]);
+            Assert.Equal(1, t.ClearCount);
+            Assert.Contains("sent nothing within 3000 ms", ex.Message);
+            Assert.Contains("-224,\"Illegal parameter value\"; -420,\"Query UNTERMINATED\"", ex.Message);
+            Assert.Contains("device clear was sent", ex.Message);
+        }
+
+        [Fact]
+        public void QueryBinary_NeverDeviceClears_AModelThatDoesntSaySoItsSafe()
+        {
+            // On the 8560 series a device clear presets the instrument, wiping the user's setup.
+            var t = new RejectingTransport();
+            var mgr = new InstrumentManager(t);
+
+            Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::18::INSTR", "DUMP?", 30000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { Identity = ScpiErrors }));
+
+            Assert.Equal(0, t.ClearCount);
+        }
+
+        [Fact]
+        public void QueryBinary_NoReply_WithAnEmptyErrorQueue_SaysItMayJustBeSlow()
+        {
+            var t = new RejectingTransport();
+            t.Errors.Clear();
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 30000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { Identity = ScpiErrors }));
+
+            Assert.Contains("first_reply_timeout_ms", ex.Message);
+        }
+
+        [Fact]
+        public void QueryBinary_NoReply_WithNoModel_SaysTheErrorQueueWasntRead()
+        {
+            var mgr = new InstrumentManager(new RejectingTransport());
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 30000, BlockFormat.Ieee4882));
+
+            Assert.Contains("error queue wasn't read", ex.Message);
+        }
+
+        /// <summary>Sends a block in pieces with pauses, each a read that times out: a slow instrument, not a dead one.</summary>
+        private sealed class PausingTransport : FakeTransportBase
+        {
+            public byte[] Output;
+            public int At, Pauses;
+            public int SilentReadsPerPause = 3;
+            public int PiecesSent;
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request)
+            {
+                if (At > 0 && At < Output.Length && Pauses++ % (SilentReadsPerPause + 1) != SilentReadsPerPause)
+                    return new TransportReadResult(System.Array.Empty<byte>(), true);
+                int n = (int)System.Math.Min(request.MaxBytes, System.Math.Min(40, Output.Length - At));
+                var chunk = new byte[n];
+                System.Array.Copy(Output, At, chunk, 0, n);
+                At += n;
+                PiecesSent++;
+                return new TransportReadResult(chunk, At < Output.Length, At >= Output.Length);   // "timed out", with data
+            }
+        }
+
+        [Fact]
+        public void QueryBinary_AReadThatTimesOutWithData_IsASlowTransfer_NotAFailure()
+        {
+            var t = new PausingTransport { Output = System.Text.Encoding.ASCII.GetBytes("#3300").Concat(new byte[300]).ToArray() };
+            var mgr = new InstrumentManager(t);
+
+            BinaryBlockResult block = mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 20000, BlockFormat.Ieee4882);
+
+            Assert.Equal(300, block.Payload.Length);
+        }
+
+        [Fact]
+        public void QueryBinary_ThatGoesSilentPartWay_GivesUpAfterTheTimeout()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#41000").Concat(new byte[100]).ToArray(), FallsSilent = true };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 4000, BlockFormat.Ieee4882));
+
+            Assert.Contains("timed out", ex.Message);
+            // 6 for the header, 2 for the data, 4 silent 1 s slices making the 4 s timeout, 1 to drain.
+            Assert.Equal(6 + 2 + 4 + 1, t.Requests.Count);
+        }
+
+        [Fact]
+        public void QueryBinary_RawReply_WaitsShortlyForOneByte_ThenLongForTheRest()
+        {
+            // A first read of a whole buffer would time out on a slow transfer that hadn't filled it yet.
+            var t = new BlockTransport { Output = new byte[300] };
+            var mgr = new InstrumentManager(t);
+
+            BinaryBlockResult block = mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 20000, BlockFormat.Raw, new BinaryReadOptions { FirstReplyMs = 3000 });
+
+            Assert.Equal(300, block.Payload.Length);
+            Assert.Equal(1, t.Requests[0].MaxBytes);
+            Assert.Equal(3000, t.Requests[0].TimeoutMs);
+            Assert.InRange(t.Requests[1].TimeoutMs, 1, 1000);
+        }
+
+        [Fact]
+        public void QueryBinary_WaitsOnceForTheFirstByte_ThenReadsInShortSlices()
+        {
+            // Never split that first wait: re-addressing the 54845A while it built the image failed every capture,
+            // and left the scope answering nothing, not even a serial poll, until it was power-cycled.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#3100").Concat(new byte[100]).Concat(new[] { (byte)'\n' }).ToArray() };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", 20000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 3000 });
+
+            Assert.Equal(3000, t.Requests[0].TimeoutMs);
+            Assert.All(t.Requests.Skip(1), r => Assert.InRange(r.TimeoutMs, 1, 1000));
+        }
+
+        [Fact]
+        public void QueryBinary_ALongFirstWait_IsLimited_SoADriversStepsCantCarryItPastTheCallsLimit()
+        {
+            // 20 s waits about 42 s over a GPIB-ENET/1000, far past the default 25 s.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#14DATA\n") };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 30000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 20000 });
+
+            Assert.Equal(3000, t.Requests[0].TimeoutMs);    // the next step down, about 4.2 s, fits in 11 s
+        }
+
+        [Theory]
+        [InlineData(3000, 11000, 3000)]     // the 54845A's default: about 4.2 s, well inside
+        [InlineData(5000, 6000, 3000)]      // 5000 waits about 17 s, so it drops to 3000
+        [InlineData(5000, 26000, 5000)]
+        [InlineData(20000, 11000, 3000)]    // 20000 waits about 42 s
+        [InlineData(2000, 500, 300)]
+        public void TheFirstRead_IsLimitedToAStepWhoseRealWaitFits(int requested, int limit, int expected)
+        {
+            Assert.Equal(expected, InstrumentManager.FirstReadMs(requested, limit));
+        }
+
+        [Fact]
+        public void QueryBinary_TheFirstReplyWait_IsNotCappedByTheTimeoutForASilentReply()
+        {
+            // timeout_ms is about a reply going silent; how long one may take to start is a separate figure.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#14DATA\n") };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882, new BinaryReadOptions { FirstReplyMs = 10000, TotalMs = 55000 });
+
+            Assert.Equal(10000, t.Requests[0].TimeoutMs);
+        }
+
+        [Fact]
+        public void QueryBinary_WithNoOptions_ANarrowTimeoutStillLimitsTheFirstWait()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#14DATA\n") };
+            var mgr = new InstrumentManager(t);
+
+            mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882);
+
+            Assert.Equal(1000, t.Requests[0].TimeoutMs);
+        }
+
+        [Fact]
+        public void QueryBinary_ThatLeavesARecoveryShortOfTime_StopsReadingTheErrorQueue()
+        {
+            var t = new RejectingTransport { ErrorReadMs = 400 };
+            t.Errors.Enqueue("-1,\"One\"");
+            t.Errors.Enqueue("-2,\"Two\"");
+            t.Errors.Enqueue("-3,\"Three\"");
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { FirstReplyMs = 100, TotalMs = 1000, Identity = ScpiErrors }));
+
+            Assert.Contains("there may be more", ex.Message);
+            Assert.True(t.Errors.Count > 0, "read every error");
+        }
+
+        /// <summary>Text arriving in slow reads that time out with data, then stopping without END.</summary>
+        private sealed class StalledTextTransport : FakeTransportBase
+        {
+            public int Chunks = 3;
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request) =>
+                Chunks-- > 0 ? new TransportReadResult(new[] { (byte)'1', (byte)'2' }, true, false)
+                             : new TransportReadResult(System.Array.Empty<byte>(), true, false);
+        }
+
+        [Fact]
+        public void QueryBinary_AReplyThatStopsPartWayThrough_StillGetsTheDeviceClear()
+        {
+            // A timeout with data is a slow transfer, not the end of one, and more may be coming.
+            var t = new StalledTextTransport();
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { DeviceClearSafe = true }));
+
+            Assert.Equal(1, t.ClearCount);
+            Assert.Contains("device clear was sent", ex.Message);
+        }
+
+        /// <summary>Sends <see cref="First"/> without END, then silence, or a stream that never ends.</summary>
+        private sealed class UnendedTransport : FakeTransportBase
+        {
+            public byte[] First = { (byte)'-' };
+            public bool Streams;
+            public readonly System.Collections.Generic.List<string> Written = new System.Collections.Generic.List<string>();
+            private bool _sent;
+
+            public override void Write(string resource, byte[] payload, int timeoutMs) =>
+                Written.Add(System.Text.Encoding.ASCII.GetString(payload));
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request)
+            {
+                if (!_sent) { _sent = true; return new TransportReadResult(First, false, false); }
+                if (!Streams) return new TransportReadResult(System.Array.Empty<byte>(), true, false);
+                System.Threading.Thread.Sleep(20);
+                return new TransportReadResult(new[] { (byte)'x' }, true, false);
+            }
+        }
+
+        [Fact]
+        public void QueryBinary_AReplyThatStartedAndWentSilentWithoutEnd_StillGetsTheDeviceClear()
+        {
+            var t = new UnendedTransport();
+            var mgr = new InstrumentManager(t);
+
+            Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { DeviceClearSafe = true }));
+
+            Assert.Equal(1, t.ClearCount);
+        }
+
+        [Fact]
+        public void QueryBinary_AnInstrumentStillSending_IsntAskedForItsErrors()
+        {
+            // No clear allowed, and it never stops: a query now would only interrupt the reply.
+            var t = new UnendedTransport { Streams = true };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { TotalMs = 1000, Identity = ScpiErrors }));
+
+            Assert.Equal(0, t.ClearCount);
+            Assert.DoesNotContain(t.Written, w => w.StartsWith(":SYST:ERR?"));
+            Assert.Contains("may still be sending", ex.Message);
+        }
+
+        [Fact]
+        public void QueryBinary_AReplyThatEndedProperly_NeedsNoDeviceClear()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("12\n"), MaxPerRead = 1 };
+            var mgr = new InstrumentManager(t);
+
+            Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { DeviceClearSafe = true }));
+
+            Assert.Equal(0, t.ClearCount);
+        }
+
+        [Fact]
+        public void QueryBinary_KeepsOnlyTheStartOfADiscardedReply()
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("1" + new string('y', 5000) + "\n") };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 1000, BlockFormat.Ieee4882));
+
+            Assert.Contains("5001 more bytes", ex.Message);
+            Assert.Contains(new string('y', 64), ex.Message);
+            Assert.DoesNotContain(new string('y', 65), ex.Message);
+        }
+
+        [Fact]
+        public void QueryBinary_ThatRunsOutOfTime_StopsAtTheLimit_WhateverTheReadTimeout()
+        {
+            var t = new TricklingTransport();
+            var mgr = new InstrumentManager(t);
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 60000, BlockFormat.Ieee4882,
+                new BinaryReadOptions { TotalMs = 1000 }));
+
+            Assert.InRange(clock.ElapsedMilliseconds, 900, 2900);
+            Assert.All(t.ReadTimeouts, ms => Assert.True(ms <= 1000, ms + " ms"));
+            Assert.Contains("limit on the call ran out", ex.Message);
+        }
+
+        /// <summary>Declares a large block, then sends it a little at a time, for ever.</summary>
+        private sealed class TricklingTransport : FakeTransportBase
+        {
+            private readonly System.IO.MemoryStream _header = new System.IO.MemoryStream(System.Text.Encoding.ASCII.GetBytes("#71000000"));
+            public readonly System.Collections.Generic.List<int> ReadTimeouts = new System.Collections.Generic.List<int>();
+
+            public override TransportReadResult Read(string resource, TransportReadRequest request)
+            {
+                ReadTimeouts.Add(request.TimeoutMs);
+                if (_header.Position < _header.Length) return new TransportReadResult(new[] { (byte)_header.ReadByte() }, false, false);
+                System.Threading.Thread.Sleep(50);
+                return new TransportReadResult(new byte[10], false, false);
+            }
+        }
+
+        [Fact]
+        public void QueryBinary_ATextReply_QuotesWhatItSent_ForTheCaller()
+        {
+            // The 54845A's old "screen dump": ASCII waveform values, which said nothing with only the '-' reported.
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("-1.23E-01,4.56E-01\n") };
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", ":WAVeform:DATA?", 30000, BlockFormat.Ieee4882));
+
+            Assert.Contains("1.23E-01,4.56E-01", ex.Message);
+            Assert.Equal(t.Output.Length, t.At);
+        }
+
+        [Fact]
+        public void QueryBinary_AModelThatCanBeCleared_IsClearedIfItWontStopSending()
+        {
+            var t = new TricklingTransport();
+            var mgr = new InstrumentManager(t);
+
+            var ex = Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::7::INSTR", "DUMP?", 30000, BlockFormat.Raw,
+                new BinaryReadOptions { TotalMs = 1000, DeviceClearSafe = true }));
+
+            Assert.Equal(1, t.ClearCount);
+            Assert.Contains("device clear was sent", ex.Message);
+        }
+
         [Fact]
         public void Capabilities_ComeFromTheTransport()
         {

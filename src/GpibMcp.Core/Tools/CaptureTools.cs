@@ -61,7 +61,10 @@ namespace GpibMcp.Tools
                     Prop("save_path", "string", "Full path (including filename) to save the PNG to. Overrides save_dir."),
                     Prop("debug", "boolean", "If true, ALSO save the verbatim captured HP-GL/PCL bytes to a debug file (for " +
                         "troubleshooting plot/render glitches). Set this when the user asks to capture or send 'with debug'."),
-                    Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000).")),
+                    Prop("timeout_ms", "integer", "Overall capture backstop in ms (default 30000; " + BinaryReadOptions.DefaultTotalMs + ", or the " +
+                        "model's own figure, for a SCPI screen dump, which stops at " + BinaryReadOptions.MaxTotalMs + " however large this is)."),
+                    Prop("first_reply_timeout_ms", "integer", "SCPI screen dumps: how long the instrument may take to start " +
+                        "sending the image, in ms. Leave unset unless a capture fails saying it was slow to start.")),
                 (Func<JObject, ToolCallContext, ToolOutput>)((args, ctx) => Capture(args, ctx, db, assignments, visa)))
                 .WithView(McpAppViews.ScreenViewUri));   // the screen, in full colour, in clients that draw views (#157)
         }
@@ -391,7 +394,8 @@ namespace GpibMcp.Tools
                 return Error("Model '" + def.Model + "' has a scpi_block profile but no dumpCommand.");
 
             string resource = ReqStr(args, "resource");
-            int timeout = Int(args, "timeout_ms", profile.TimeoutMs ?? 30000);
+            int timeout = Int(args, "timeout_ms", profile.TimeoutMs ?? BinaryReadOptions.DefaultTotalMs);
+            int firstReplyMs = Int(args, "first_reply_timeout_ms", 0);
             string format = (Str(args, "format", null) ?? "").ToLowerInvariant();
             ctx.Progress(5, 100, "Asking " + def.Model + " for its screen image.");
 
@@ -425,7 +429,7 @@ namespace GpibMcp.Tools
             }
 
             BinaryBlockResult block;
-            try { block = visa.QueryBinary(resource, profile.DumpCommand, timeout, BlockFormat.Ieee4882); }
+            try { block = visa.QueryBinary(resource, profile.DumpCommand, timeout, BlockFormat.Ieee4882, BinaryTools.OptionsFor(def, timeout, timeout, firstReplyMs > 0 ? firstReplyMs : (int?)null)); }
             catch (Exception ex) { return Error("Screen dump failed for " + resource + ": " + ex.Message); }
             finally
             {

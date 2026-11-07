@@ -13,15 +13,35 @@
     "write": "\n",
     "read": "\n"
   },
+  "deviceClearSafe": true,
   "identity": {
     "command": "*IDN?",
     "matchRegex": "54845A",
     "supported": true,
-    "description": "Standard IEEE 488.2 identification query; returns manufacturer, model (54845A), serial number and firmware revision."
+    "description": "Standard IEEE 488.2 identification query; returns manufacturer, model (54845A), serial number and firmware revision.",
+    "errorQuery": ":SYSTem:ERRor? STRing"
   },
   "capture": {
     "method": "scpi_block",
-    "dumpCommand": ":WAVeform:DATA?"
+    "dumpCommand": ":DISPlay:DATA? GIF,SCReen",
+    "firstReplyTimeoutMs": 3000,
+    "description": "Screen dump as a GIF in an IEEE 488.2 block (Programmer's Quick Reference Guide 54810-97065, p. 2-20: :DISPlay:DATA? [{BMP|PCX|EPS|PS|GIF|TIF}[,{SCReen|GRATicule}[,{ON|OFF}[,{NORMal|INVert}]]]]). There is no palette argument: given anything else there, the scope logs -224 and sends nothing. The dump takes about 2.2 s over a GPIB-ENET/1000, which turns a 3000 ms timeout into about 4.2 s; the next step up is about 17 s, so a rejected command would fail far later."
+  },
+  "supersedes": {
+    "identity": [
+      {
+        "command": "*IDN?",
+        "matchRegex": "54845A",
+        "supported": true,
+        "description": "Standard IEEE 488.2 identification query; returns manufacturer, model (54845A), serial number and firmware revision."
+      }
+    ],
+    "capture": [
+      {
+        "method": "scpi_block",
+        "dumpCommand": ":WAVeform:DATA?"
+      }
+    ]
   },
   "commands": [
     {
@@ -255,10 +275,11 @@
       "name": "system_error",
       "mnemonic": ":SYSTem:ERRor?",
       "category": "SYSTem",
-      "description": "Query the next entry in the error queue (error number and message).",
-      "query": ":SYSTem:ERRor?",
+      "description": "Query the next entry in the error queue (error number and message). The optional NUMBer or STRing argument selects the reply: STRing returns the number and the message.",
+      "query": ":SYSTem:ERRor? [{NUMBer|STRing}]",
       "examples": [
-        ":SYSTem:ERRor?"
+        ":SYSTem:ERRor?",
+        ":SYSTem:ERRor? STRing"
       ]
     },
     {
@@ -1171,6 +1192,34 @@
       "query": ":WAVeform:YORigin?",
       "examples": [
         ":WAVeform:YORigin?"
+      ]
+    },
+    {
+      "name": "display_data",
+      "mnemonic": ":DISPlay:DATA?",
+      "category": "DISPlay",
+      "description": "Query the screen as an image, returned as an IEEE 488.2 definite-length block. Read it with visa_query_binary, or use instrument_capture_screen. The arguments are positional and each is optional only if those after it are left out. There is no palette argument: anything else in these positions is rejected with -224 and no reply is sent.",
+      "query": ":DISPlay:DATA? [<type>[,<area>[,<compress>[,<invert>]]]]",
+      "parameters": [
+        {
+          "name": "<type>",
+          "range": "{BMP|PCX|EPS|PS|GIF|TIF}"
+        },
+        {
+          "name": "<area>",
+          "range": "{SCReen|GRATicule}"
+        },
+        {
+          "name": "<compress>",
+          "range": "{{ON|1}|{OFF|0}}"
+        },
+        {
+          "name": "<invert>",
+          "range": "{NORMal|INVert}"
+        }
+      ],
+      "examples": [
+        ":DISPlay:DATA? GIF,SCReen"
       ]
     },
     {

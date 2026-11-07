@@ -22,7 +22,7 @@ query (typically listen-only legacy HP-IB gear).
 | 54641D | Agilent | Oscilloscope | 233 | `*IDN?` |
 | 54642A | Agilent | Oscilloscope | 233 | `*IDN?` |
 | 54642D | Agilent | Oscilloscope | 233 | `*IDN?` |
-| 54845A | Agilent | Oscilloscope | 74 | `*IDN?` |
+| 54845A | Agilent | Oscilloscope | 75 | `*IDN?` |
 | 8711C | Agilent | Network Analyzer | 145 | `*IDN?` |
 | 8712C | Agilent | Network Analyzer | 145 | `*IDN?` |
 | 8712ES | Agilent | Network Analyzer | 145 | `*IDN?` |

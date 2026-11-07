@@ -315,6 +315,143 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void QueryBinary_AnAssignedModel_SetsTheLimits_AndWhatToDoOnFailure()
+        {
+            var def = new InstrumentDefinition
+            {
+                Model = "54845A",
+                DeviceClearSafe = true,
+                Identity = new IdentitySpec { ErrorQuery = ":SYST:ERR? STR" },
+                Capture = new CaptureProfile { FirstReplyTimeoutMs = 5000 }
+            };
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::7::INSTR", "54845A");
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(Gif) };
+
+            Tool("visa_query_binary", visa, InstrumentDatabase.FromDefinitions(new[] { def }), store).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::7::INSTR", ["command"] = ":DISP:DATA? GIF", ["save_dir"] = _dir
+            });
+
+            Assert.Equal(5000, visa.LastBinaryOptions.FirstReplyMs);
+            Assert.Equal(BinaryReadOptions.DefaultTotalMs, visa.LastBinaryOptions.TotalMs);
+            Assert.Equal(":SYST:ERR? STR", visa.LastBinaryOptions.Identity.ErrorQuery);
+            Assert.True(visa.LastBinaryOptions.DeviceClearSafe);
+        }
+
+        [Fact]
+        public void QueryBinary_TheCallersLimitsWin_ButNotPastWhatAClientWillWaitFor()
+        {
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(Gif) };
+
+            Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = "DUMP?", ["save_dir"] = _dir,
+                ["first_reply_timeout_ms"] = 20000, ["time_budget_s"] = 90
+            });
+
+            Assert.Equal(20000, visa.LastBinaryOptions.FirstReplyMs);
+            Assert.Equal(BinaryReadOptions.MaxTotalMs, visa.LastBinaryOptions.TotalMs);
+            Assert.False(visa.LastBinaryOptions.DeviceClearSafe);     // no model, so no device clear
+        }
+
+        [Fact]
+        public void AFirstReplyWaitAskedForByName_IsntCutShortByTheTimeout_ButTheDefaultIs()
+        {
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(Gif) };
+
+            Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = "DUMP?", ["save_dir"] = _dir,
+                ["timeout_ms"] = 1000, ["first_reply_timeout_ms"] = 10000
+            });
+            Assert.Equal(10000, visa.LastBinaryOptions.FirstReplyMs);
+
+            Tool("visa_query_binary", visa).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::17::INSTR", ["command"] = "DUMP?", ["save_dir"] = _dir, ["timeout_ms"] = 1000
+            });
+            Assert.Equal(1000, visa.LastBinaryOptions.FirstReplyMs);
+        }
+
+        [Fact]
+        public void TheBundled54845A_DumpsItsScreenAsAGif_AndNotAsWaveformData()
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "data", "instruments"))) dir = dir.Parent;
+            Assert.NotNull(dir);
+            var db = InstrumentDatabase.Load(new[] { Path.Combine(dir.FullName, "data", "instruments") });
+
+            Assert.True(db.TryGet("54845A", out var scope));
+            Assert.Equal("scpi_block", scope.Capture.Method);
+            Assert.Equal(":DISPlay:DATA? GIF,SCReen", scope.Capture.DumpCommand);
+            Assert.Equal(":SYSTem:ERRor? STRing", scope.Identity.ErrorQuery);
+            Assert.True(scope.DeviceClearSafe);
+        }
+
+        [Fact]
+        public void TheBundled54845A_ReachesAUserCopySeededBeforeTheFix()
+        {
+            // The server seeds a user copy of every model on first run, and a user's block normally wins - so a
+            // fix to the bundled file alone would never reach an existing install.
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "data", "instruments"))) dir = dir.Parent;
+            Assert.NotNull(dir);
+            string bundled = Path.Combine(dir.FullName, "data", "instruments");
+            string user = Path.Combine(_dir, "seeded");
+            Directory.CreateDirectory(user);
+            File.WriteAllText(Path.Combine(user, "54845A.json"), @"{
+                ""model"": ""54845A"",
+                ""identity"": { ""command"": ""*IDN?"", ""matchRegex"": ""54845A"", ""supported"": true,
+                    ""description"": ""Standard IEEE 488.2 identification query; returns manufacturer, model (54845A), serial number and firmware revision."" },
+                ""capture"": { ""method"": ""scpi_block"", ""dumpCommand"": "":WAVeform:DATA?"" } }");
+
+            var db = InstrumentDatabase.Load(new[] { bundled, user });
+
+            Assert.True(db.TryGet("54845A", out var scope));
+            Assert.Equal(":DISPlay:DATA? GIF,SCReen", scope.Capture.DumpCommand);
+            Assert.Equal(":SYSTem:ERRor? STRing", scope.Identity.ErrorQuery);
+            Assert.True(scope.DeviceClearSafe);
+        }
+
+        [Fact]
+        public void Capture_PassesTheModelsLimits_AndLetsTheCallerRaiseTheWaitForAReply()
+        {
+            var def = new InstrumentDefinition
+            {
+                Model = "54845A",
+                Capture = new CaptureProfile { Method = "scpi_block", DumpCommand = ":DISPlay:DATA? GIF,SCReen", FirstReplyTimeoutMs = 3000 }
+            };
+            var store = AssignmentStore.InMemory();
+            store.Set("GPIB0::7::INSTR", "54845A");
+            var db = InstrumentDatabase.FromDefinitions(new[] { def });
+            var visa = new FakeInstrumentManager { BinaryResponse = Block(Gif) };
+
+            Tool("instrument_capture_screen", visa, db, store).Invoke(new JObject { ["resource"] = "GPIB0::7::INSTR", ["format"] = "file", ["save_dir"] = _dir });
+            Assert.Equal(3000, visa.LastBinaryOptions.FirstReplyMs);
+            Assert.Equal(BinaryReadOptions.DefaultTotalMs, visa.LastBinaryOptions.TotalMs);
+
+            Tool("instrument_capture_screen", visa, db, store).Invoke(new JObject
+            {
+                ["resource"] = "GPIB0::7::INSTR", ["format"] = "file", ["save_dir"] = _dir, ["first_reply_timeout_ms"] = 10000, ["timeout_ms"] = 90000
+            });
+            Assert.Equal(10000, visa.LastBinaryOptions.FirstReplyMs);
+            Assert.Equal(BinaryReadOptions.MaxTotalMs, visa.LastBinaryOptions.TotalMs);
+        }
+
+        [Fact]
+        public void TheBundled8560Family_IsNeverDeviceClearedByABinaryRead()
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "data", "instruments"))) dir = dir.Parent;
+            Assert.NotNull(dir);
+            var db = InstrumentDatabase.Load(new[] { Path.Combine(dir.FullName, "data", "instruments") });
+
+            Assert.True(db.TryGet("8563E", out var analyzer));
+            Assert.False(analyzer.DeviceClearSafe);
+        }
+
+        [Fact]
         public void TheBundledE4406A_HasAGifScreenDumpProfile_WithInvert()
         {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);

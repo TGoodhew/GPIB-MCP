@@ -1,14 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using GpibMcp.Instruments;
 
-namespace GpibMcp.Tools
+namespace GpibMcp.Instruments
 {
     /// <summary>
     /// Reads an instrument's error queue until it is empty, using the model's own commands
     /// (<see cref="IdentitySpec.ErrorQuery"/>, then <see cref="IdentitySpec.ClearStatusQuery"/>). Shared by
     /// instrument_identify, which clears the error a rejected *IDN? leaves (#144), and the SRQ waiter, which
-    /// clears an error already queued before an operation so one at completion is the operation's own.
+    /// clears an error already queued before an operation so one at completion is the operation's own, and
+    /// a failed binary read, which reports what the instrument made of the command.
     /// </summary>
     internal static class ErrorQueue
     {
@@ -22,8 +23,8 @@ namespace GpibMcp.Tools
 
             /// <summary>
             /// Whether a no-error reply was read - the queue is empty. False when all <see cref="MaxReads"/> reads
-            /// returned an error: the queue may or may not be empty now (each read removes one), so nothing is
-            /// claimed cleared and the status byte is left alone.
+            /// returned an error, or time ran out: the queue may or may not be empty now (each read removes one),
+            /// so nothing is claimed cleared and the status byte is left alone.
             /// </summary>
             public bool Emptied;
 
@@ -34,13 +35,15 @@ namespace GpibMcp.Tools
         /// <summary>
         /// Reads <paramref name="identity"/>'s error query until a no-error reply; then, if any errors were read
         /// and the model has one, its clear-status query - on the 8563E the status byte's error bit can stay
-        /// latched after the queue is empty, until STB? reads it.
+        /// latched after the queue is empty, until STB? reads it. Stops before any read once
+        /// <paramref name="outOfTime"/> says so, for a caller with a limit of its own.
         /// </summary>
-        public static Result Clear(IInstrumentManager visa, string resource, IoSpec io, IdentitySpec identity)
+        public static Result Clear(IInstrumentManager visa, string resource, IoSpec io, IdentitySpec identity, Func<bool> outOfTime = null)
         {
             var result = new Result { Sent = identity.ErrorQuery };
             for (int i = 0; i < MaxReads; i++)
             {
+                if (outOfTime != null && outOfTime()) break;
                 string reply = (visa.Query(resource, identity.ErrorQuery, io) ?? "").Trim();
                 if (IsNoError(reply)) { result.Emptied = true; break; }
                 result.Errors.Add(reply);
@@ -54,8 +57,11 @@ namespace GpibMcp.Tools
             return result;
         }
 
-        /// <summary>An error-queue reply that means "no error": empty, or 0 / +0 (alone or before a message).</summary>
+        /// <summary>
+        /// An error-queue reply that means "no error": empty, or 0 / +0 (alone or before a message), after the
+        /// reply's name if the instrument's headers are on (:SYST:ERR 0,"No error").
+        /// </summary>
         public static bool IsNoError(string reply) =>
-            reply.Length == 0 || Regex.IsMatch(reply, @"^\+?0+(\s*,|\s*$)");
+            reply.Length == 0 || Regex.IsMatch(reply, @"^(:?[A-Za-z][\w:]*\s+)?\+?0+(\s*,|\s*$)");
     }
 }
