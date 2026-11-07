@@ -157,13 +157,15 @@ namespace GpibMcp.Manuals
             if (!ManualForgeIndex.IsAvailable(_root)) return hits;
 
             bool haveModel = !string.IsNullOrWhiteSpace(model);
+            // One file: every copy listed apart, since the index otherwise folds a copy into another's hit, and
+            // no model filter, since the caller chose the file.
             int ask = only != null ? PagesForOneFile : Math.Max(1, limit) * 4;
-            foreach (ManualForgeIndex.PageHit page in ManualForgeIndex.SearchPages(_root, query, model, ask, timeoutMs).Pages)
+            foreach (ManualForgeIndex.PageHit page in ManualForgeIndex.SearchPages(_root, query, model, ask, timeoutMs, only != null).Pages)
             {
                 ManualFile file = Resolve(page.Path);    // as in Choose: nothing outside this root
                 if (file == null) continue;
                 if (only != null && !string.Equals(file.FullPath, only.FullPath, StringComparison.OrdinalIgnoreCase)) continue;
-                if (haveModel && ModelScore(file, model) == 0) continue;
+                if (only == null && haveModel && ModelScore(file, model) == 0) continue;
                 hits.Add(new ManualSearch.Hit
                 {
                     File = file.RelativePath,

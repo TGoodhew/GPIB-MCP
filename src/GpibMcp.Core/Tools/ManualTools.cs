@@ -34,7 +34,11 @@ namespace GpibMcp.Tools
         /// <summary>Kept back from reading for the index's page lookup, which takes about 150 ms warm.</summary>
         private const int PagesReserveMs = 3000;
 
-        private const int MinReadMs = 3000, MinPagesMs = 2000;
+        /// <summary>
+        /// Reading gets at least this when time allows, so a slow choice of manuals still reads something. Below
+        /// <see cref="MinPagesMs"/> left, the index isn't asked for pages.
+        /// </summary>
+        private const int MinReadMs = 3000, MinPagesMs = 1000;
 
         public static void Register(ToolRegistry registry, ManualLibrary library)
         {
@@ -96,16 +100,17 @@ namespace GpibMcp.Tools
                 return NothingMatched(library, query, model, selection != null && selection.IndexFoundNothing);
 
             ctx.Progress(1, candidates.Count + 1, "Searching " + candidates.Count + " manual(s).");
-            int readMs = (int)Math.Max(MinReadMs, Math.Min(ManualSearch.DefaultTimeBudgetMs,
-                                                           CallBudgetMs - PagesReserveMs - clock.ElapsedMilliseconds));
+            long left = CallBudgetMs - clock.ElapsedMilliseconds;
+            int readMs = (int)Math.Max(0, Math.Min(ManualSearch.DefaultTimeBudgetMs,
+                                                   Math.Max(left - PagesReserveMs, Math.Min(MinReadMs, left))));
             ManualSearch.Results results = ManualSearch.Run(candidates, query, maxResults, contextChars,
                 (index, total, name) => ctx.Progress(index + 1, total + 1, "Reading " + name + "."), readMs);
 
             // A search the manuals answered in full starts no process. One they didn't - too few passages, or
             // some with only part of the query - may have its answer on a page only ManualForge can read.
-            if (results.Hits.Count(h => h.HasEveryWord) < maxResults)
-                ManualSearch.Fill(results, library.IndexedPages(query, model, one, maxResults,
-                    (int)Math.Max(MinPagesMs, CallBudgetMs - clock.ElapsedMilliseconds)), maxResults);
+            left = CallBudgetMs - clock.ElapsedMilliseconds;
+            if (results.Hits.Count(h => h.HasEveryWord) < maxResults && left >= MinPagesMs)
+                ManualSearch.Fill(results, library.IndexedPages(query, model, one, maxResults, (int)left), maxResults);
             ctx.Progress(candidates.Count + 1, candidates.Count + 1, "Search complete.");
 
             // Nothing named for the instrument itself was read, only its series - a substitution, and one

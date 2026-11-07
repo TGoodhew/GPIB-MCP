@@ -205,6 +205,21 @@ namespace GpibMcp.Tests
             Search(new JObject { ["query"] = "CF", ["model"] = "8563E", ["file"] = "8563E Guide.txt" });
 
             Assert.Contains("--limit " + ManualLibrary.PagesForOneFile, File.ReadAllText(Path.Combine(_tools, "pages-args.txt")));
+            Assert.Contains("--show-duplicates", File.ReadAllText(Path.Combine(_tools, "pages-args.txt")));
+        }
+
+        [Fact]
+        public void ANamedFile_KeepsItsIndexPages_EvenWhenItsNameDoesntMentionTheModel()
+        {
+            // The caller chose the file, so the model's filter on filenames has nothing to add.
+            Write("Operating Manual.txt", "Nothing relevant.\n");
+            CreateIndex();
+            PagesReply = Pages(new object[] { "Operating Manual.txt", 12, "[CF] only OCR has", true });
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "CF", ["model"] = "8563E", ["file"] = "Operating Manual.txt" });
+
+            Assert.Equal(12, (int)Assert.Single((JArray)output.Structured["hits"])["page"]);
         }
 
         [Fact]

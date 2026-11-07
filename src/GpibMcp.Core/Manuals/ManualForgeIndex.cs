@@ -140,8 +140,10 @@ namespace GpibMcp.Manuals
         /// Asks the index which pages in <paramref name="root"/> match <paramref name="query"/>. Never throws, as
         /// <see cref="Search"/> doesn't: anything that goes wrong just means no pages from here.
         /// </summary>
-        public static Result SearchPages(string root, string query, string model, int limit, int timeoutMs = SearchTimeoutMs) =>
-            Ask(root, query, model, limit, "--json", ParsePages, timeoutMs);
+        /// <param name="everyCopy">List identical copies of a manual apart, rather than folding them into one hit.</param>
+        public static Result SearchPages(string root, string query, string model, int limit, int timeoutMs = SearchTimeoutMs,
+                                         bool everyCopy = false) =>
+            Ask(root, query, model, limit, everyCopy ? "--json --show-duplicates" : "--json", ParsePages, timeoutMs);
 
         private static Result Ask(string root, string query, string model, int limit, string format, Func<byte[], Result> parse,
                                   int timeoutMs)
