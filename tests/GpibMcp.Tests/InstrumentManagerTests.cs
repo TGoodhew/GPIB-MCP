@@ -259,6 +259,22 @@ namespace GpibMcp.Tests
             Assert.Equal(6 + 2 + 4 + 1, t.Requests.Count);
         }
 
+        [Theory]
+        [InlineData(1500, new[] { 1000, 500 })]   // was one 1 s slice: rounded down to whole seconds
+        [InlineData(500, new[] { 500 })]          // was a full second
+        [InlineData(3000, new[] { 1000, 1000, 1000 })]
+        public void QueryBinary_ThatGoesSilentPartWay_WaitsTheTimeoutAskedFor_NotWholeSeconds(int timeoutMs, int[] silentWaits)
+        {
+            var t = new BlockTransport { Output = System.Text.Encoding.ASCII.GetBytes("#41000").Concat(new byte[100]).ToArray(), FallsSilent = true };
+            var mgr = new InstrumentManager(t);
+
+            Assert.Throws<GpibOperationException>(() => mgr.QueryBinary("GPIB0::17::INSTR", "DUMP?", timeoutMs, BlockFormat.Ieee4882));
+
+            // 6 for the header, 2 for the data, then the silence, then 1 to drain.
+            Assert.Equal(silentWaits, t.Requests.Skip(8).Take(silentWaits.Length).Select(r => r.TimeoutMs).ToArray());
+            Assert.Equal(8 + silentWaits.Length + 1, t.Requests.Count);
+        }
+
         [Fact]
         public void QueryBinary_RawReply_WaitsShortlyForOneByte_ThenLongForTheRest()
         {

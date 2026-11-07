@@ -128,13 +128,15 @@ namespace GpibMcp.Instruments
                     // Raw bounded reads, no termination character: binary data can contain 0x0A. The first read
                     // waits for a reply to start. After that, reads are short slices, because of those timeout
                     // steps. Only silence counts as a stall - a slice that brought data just means the transfer
-                    // is slow - and a timeout's worth of it is what the block reader reports as incomplete.
-                    // Nothing reads past the time left, so recovery still fits inside the limit.
-                    int silentSlices = Math.Max(1, Timeout(timeoutMs) / BinaryReadSliceMs);
+                    // is slow - and a timeout's worth of it is what the block reader reports as incomplete. That's
+                    // counted in milliseconds asked for, so the last slice is only what's left of the timeout. A
+                    // driver may wait longer than asked, never less. Nothing reads past the time left, so recovery
+                    // still fits inside the limit.
+                    int stallMs = Timeout(timeoutMs);
                     bool timedOut = false, overBudget = false, firstRead = true, anyReply = false, ended = false;
                     ReplyReader.ReadChunk read = (int count, out bool more) =>
                     {
-                        for (int silent = 1; ; silent++)
+                        for (int silentMs = 0; ; )
                         {
                             long left = readMs - clock.ElapsedMilliseconds;
                             if (left <= 0)
@@ -145,10 +147,10 @@ namespace GpibMcp.Instruments
                             }
                             bool first = firstRead;
                             firstRead = false;
-                            int wait = (int)Math.Min(first ? firstReplyMs : BinaryReadSliceMs, left);
+                            int wait = (int)Math.Min(first ? firstReplyMs : Math.Min(BinaryReadSliceMs, stallMs - silentMs), left);
                             var r = _transport.Read(resource, new TransportReadRequest { TimeoutMs = wait, TermChar = null, MaxBytes = count });
                             bool nothing = r.TimedOut && r.Data.Length == 0;
-                            if (nothing && !first && silent < silentSlices) continue;
+                            if (nothing && !first && (silentMs += wait) < stallMs) continue;
                             timedOut = nothing;
                             anyReply |= r.Data.Length > 0;
                             ended = r.EndOfMessage;
