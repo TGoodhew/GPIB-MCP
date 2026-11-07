@@ -78,7 +78,7 @@ tools the model can call to discover instruments and exchange SCPI / IEEE-488.2 
   a fixed timeout.
 - **Reads your own manuals** — point `GPIB_MCP_MANUALS` at a folder of instrument manuals and the server
   can search them when the command database falls short, returning the passage with the file and page to
-  cite (PDFs via `pdftotext` or a text sidecar).
+  cite. PDFs work with nothing else installed, and [ManualForge](#working-alongside-manualforge) adds its OCR text when it's there.
 - **Measurements come back as data, not prose** — the query, sweep and setting tools declare an
   `outputSchema` and return `structuredContent`, so a reading arrives as a number and a unit (the unit
   taken from the database's audited tokens, never guessed off the wire).
@@ -1037,15 +1037,17 @@ empty and the server logs one warning and doesn't register the tool — the othe
 | Variable | Purpose |
 |---|---|
 | `GPIB_MCP_MANUALS` | folder of manuals (searched recursively). Unset = the tool isn't registered at all |
-| `GPIB_MCP_PDFTOTEXT` | full path to `pdftotext`, if it isn't on `PATH` |
+| `GPIB_MCP_PDFTOTEXT` | full path to `pdftotext`, if it isn't on `PATH`. Optional: PDFs are read without it |
 | `GPIB_MCP_MANUAL_CACHE` | where extracted text is cached (default `%LOCALAPPDATA%\GpibMcp\manual-text`) |
 
 **Reading PDFs.** .NET Framework can't, and bundling a PDF engine into a server whose whole shape is "no
 external dependencies" is a poor trade for a feature that's off by default. So there are three routes, tried
-in order: the file is already `.txt`/`.md`; a sidecar `<name>.txt` sits beside the PDF; or **`pdftotext`**
-(Poppler/xpdf) is on `PATH`, run with `-layout` so command tables keep their columns. If none applies, the
-result says *which* file couldn't be read and how to fix it — a manual that can't be extracted must never
-look like a manual with no match. Extracted text is cached, keyed by path, size and modification time.
+in order: the file is already `.txt`/`.md`; a sidecar `<name>.txt` sits beside the PDF; **`pdftotext`** (Poppler/xpdf)
+if it's on `PATH`; otherwise the **built-in reader** ([PdfPig](https://github.com/UglyToad/PdfPig)), which installs with
+the server. Both keep a command table's columns. A scan with no text layer has nothing to read: the result says
+*which* file it was and how to fix it, because a manual that can't be extracted must never look like a manual with
+no match. Extracted text is cached, keyed by path, size and modification time. A search spends at most 15 s opening
+manuals, because a dozen read for the first time can take a minute, and any it didn't reach are listed the same way.
 
 **How it finds the right manual.** By filename first — a library is hundreds of large PDFs and extracting
 them all would take minutes and return noise. Pass `model=` and it reads only that instrument's manuals.
@@ -1074,14 +1076,18 @@ server detects that and asks the index which manuals to open (issue #134):
 | Candidate files chosen by | filename and model | content across every page, then filename |
 | Finds a topic no filename mentions | no | yes |
 | Files opened per search | up to 12 | up to 12 |
-| Passages returned | unchanged | unchanged |
+| Pages only OCR could read | not found | found, and marked as OCR |
+| Scanned manuals | unreadable | readable once it has OCRed them |
 
-It is consulted only where filenames can't do the job alone: when **no model** is given, or when a model's
-own manuals number **more than the 12** a search opens. The usual query, *the center frequency command
-for an 8563E*, never starts the process. When the index does pick a model's manuals, it chooses among
-**that model's** manuals only. A content hit in another instrument's manual doesn't displace them.
+It is consulted only where reading the manuals can't do the job alone. It helps choose them when **no model** is
+given, or when a model's own manuals number **more than the 12** a search opens. And when the manuals that were read
+leave a search short of `max_results`, its pages fill the rest: some hold text only ManualForge's OCR recovered, which
+no PDF reader can see, such as the syntax diagrams in the 54845A's programmer's guide. Those are short snippets, marked
+`source: "manualforge"` (and `ocr: true` when they came from OCR), and its `read_manual_page` tool gives the whole page.
+A search the manuals answer in full never starts the process. Either way it keeps to **that model's** manuals: a
+content hit in another instrument's manual doesn't displace them.
 
-The index is asked through ManualForge's command line (`manualforge search … --files-only`), the same way
+The index is asked through ManualForge's command line (`manualforge search … --files-only` or `--json`), the same way
 `pdftotext` is used, so no SQLite driver or other new dependency comes with it. A warm query costs ~150 ms.
 If anything fails (the tool exits with an error, takes longer than 20 s, or names files that are no longer in
 the library), the search falls back to filenames silently and logs a warning. When the index was used, the
@@ -1288,7 +1294,8 @@ src/GpibMcp.Core/                  backend-neutral core (no driver dependency; b
   Manuals/                         the user's own manual folder (#120)
     ManualLibrary.cs               which files in it match a question (filename-first)
     ManualForgeIndex.cs            ManualForge's full-text index, when installed (#134)
-    ManualText.cs                  text extraction (sidecar / pdftotext) + on-disk cache
+    ManualText.cs                  text extraction (sidecar / pdftotext / built-in) + on-disk cache
+    BuiltInPdfText.cs              the built-in PDF reader, which keeps a table's columns
     ManualSearch.cs                passage search with page-numbered citations
   Setup/                           what the installer drives: GpibMcp.exe check / setup mcp
     NiCheck.cs                     are the NI drivers this build needs here, and new enough?

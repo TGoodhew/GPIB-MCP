@@ -52,8 +52,8 @@ $manifest = [ordered]@{
             type        = "directory"
             title       = "Instrument manual folder"
             description = "Optional. A folder of instrument manuals (PDF, or text) to search when the " +
-                          "built-in command database does not cover a command. PDFs need 'pdftotext' " +
-                          "(Poppler/xpdf) on PATH, or an extracted .txt beside each file. Leave empty to " +
+                          "built-in command database does not cover a command. Scanned PDFs need " +
+                          "ManualForge to add their text, or an extracted .txt beside each file. Leave empty to " +
                           "disable manual lookup."
             required    = $false
             multiple    = $false

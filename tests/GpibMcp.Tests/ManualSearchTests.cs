@@ -6,6 +6,10 @@ using GpibMcp.Manuals;
 using GpibMcp.Mcp;
 using GpibMcp.Tools;
 using Newtonsoft.Json.Linq;
+using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.Core;
+using UglyToad.PdfPig.Fonts.Standard14Fonts;
+using UglyToad.PdfPig.Writer;
 using Xunit;
 
 namespace GpibMcp.Tests
@@ -236,10 +240,190 @@ namespace GpibMcp.Tests
                 var unreadable = (JArray)output.Structured["unreadable"];
                 Assert.Single(unreadable);
                 Assert.Equal("8563E scan.pdf", (string)unreadable[0]["file"]);
-                Assert.Contains("pdftotext", (string)unreadable[0]["problem"]);
+                Assert.Contains("extraction failed", (string)unreadable[0]["problem"]);
                 Assert.Contains("Could not read", output.AsText());
             }
             finally { Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", null); }
+        }
+
+        /// <summary>A real PDF, in a fixed-pitch font so a column's position in the text can be tested.</summary>
+        private void WritePdf(string name, params string[][] pages)
+        {
+            var builder = new PdfDocumentBuilder();
+            PdfDocumentBuilder.AddedFont font = builder.AddStandard14Font(Standard14Font.Courier);
+            foreach (string[] lines in pages)
+            {
+                PdfPageBuilder page = builder.AddPage(PageSize.A4);
+                for (int i = 0; i < lines.Length; i++)
+                    foreach (var column in lines[i].Split('|').Select((text, n) => new { text, n }))
+                        if (column.text.Length > 0)
+                            page.AddText(column.text, 10, new PdfPoint(50 + column.n * 200, 750 - i * 14), font);
+            }
+            File.WriteAllBytes(Path.Combine(_root, name), builder.Build());
+        }
+
+        [Fact]
+        public void APdfIsReadWithNothingElseInstalled_AndCitesTheRightPage()
+        {
+            WritePdf("8563E guide.pdf", new[] { "Introduction" }, new[] { "CF sets the center frequency" });
+            Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", Path.Combine(_root, "no-such-tool.exe"));
+            try
+            {
+                ToolOutput output = Tool(ManualLibrary.At(_root)).Invoke(new JObject { ["query"] = "center frequency", ["model"] = "8563E" });
+
+                var hit = (JObject)Assert.Single((JArray)output.Structured["hits"]);
+                Assert.Equal(2, (int)hit["page"]);
+                Assert.Contains("center frequency", (string)hit["text"]);
+                Assert.Empty((JArray)output.Structured["unreadable"]);
+            }
+            finally { Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", null); }
+        }
+
+        [Fact]
+        public void AQueryWordTheManualDoesntHave_DoesntLoseTheWordsItDoes()
+        {
+            // The real query: "palette" appears nowhere in the 54845A's guide, and that hid everything else.
+            Write("8563E guide.txt", AnalyzerManual);
+
+            ToolOutput output = Tool(ManualLibrary.At(_root)).Invoke(new JObject { ["query"] = "center frequency palette", ["model"] = "8563E" });
+
+            Assert.Equal(2, (int)Assert.Single((JArray)output.Structured["hits"])["page"]);
+        }
+
+        [Fact]
+        public void TheBuiltInReaderKeepsATablesColumns()
+        {
+            WritePdf("table.pdf", new[] { "CF|center frequency|Hz", "SP|span|Hz" });
+
+            string text = BuiltInPdfText.Read(Path.Combine(_root, "table.pdf"), 60000);
+
+            string[] lines = text.Split('\n');
+            Assert.Equal(lines[0].IndexOf("center"), lines[1].IndexOf("span"));
+            Assert.Equal(lines[0].LastIndexOf("Hz"), lines[1].LastIndexOf("Hz"));
+            Assert.True(lines[0].IndexOf("center") > "CF ".Length, lines[0]);
+        }
+
+        [Fact]
+        public void TheBuiltInReaderSeparatesPagesLikePdftotext_AndStopsAtItsLimit()
+        {
+            WritePdf("two pages.pdf", new[] { "one" }, new string[0], new[] { "three" });
+            string path = Path.Combine(_root, "two pages.pdf");
+
+            string text = BuiltInPdfText.Read(path, 60000);
+            Assert.Equal(3, ManualText.PageAt(text, text.IndexOf("three")));
+
+            var ex = Assert.Throws<TimeoutException>(() => BuiltInPdfText.Read(path, -1));
+            Assert.Contains("did not finish", ex.Message);
+        }
+
+        [Fact]
+        public void PdftotextStillWins_WhenItIsThere()
+        {
+            WritePdf("8563E guide.pdf", new[] { "What the built-in reader would see" });
+            string tool = Path.Combine(_root, "pdftotext.cmd");
+            File.WriteAllText(tool, "@echo off\r\necho The extractor's CF text> %4\r\n");
+            Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", tool);
+            try
+            {
+                ToolOutput output = Tool(ManualLibrary.At(_root)).Invoke(new JObject { ["query"] = "CF", ["model"] = "8563E" });
+
+                Assert.Contains("extractor's", (string)Assert.Single((JArray)output.Structured["hits"])["text"]);
+            }
+            finally { Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", null); }
+        }
+
+        [Fact]
+        public void APdfWithNoTextLayer_SaysItNeedsOcr_RatherThanLookingLikeNoMatch()
+        {
+            WritePdf("8563E scan.pdf", new string[0]);
+            Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", Path.Combine(_root, "no-such-tool.exe"));
+            try
+            {
+                ToolOutput output = Tool(ManualLibrary.At(_root)).Invoke(new JObject { ["query"] = "CF", ["model"] = "8563E" });
+
+                string problem = (string)Assert.Single((JArray)output.Structured["unreadable"])["problem"];
+                Assert.Contains("OCR", problem);
+                Assert.Contains("ManualForge", problem);
+            }
+            finally { Environment.SetEnvironmentVariable("GPIB_MCP_PDFTOTEXT", null); }
+        }
+
+        [Fact]
+        public void ASearchOutOfTime_ListsTheManualsItDidntReach_RatherThanSayingTheyDontMatch()
+        {
+            Write("8563E one.txt", AnalyzerManual);
+            Write("8563E two.txt", AnalyzerManual);
+            var files = ManualLibrary.At(_root).Candidates("8563E", "CF");
+
+            ManualSearch.Results results = ManualSearch.Run(files, "CF", timeBudgetMs: 0);
+
+            Assert.Empty(results.Searched);
+            Assert.Equal(2, results.Unreadable.Count);
+            Assert.All(results.Unreadable, note => Assert.Contains("time ran out", note.Problem));
+        }
+
+        [Fact]
+        public void AManualStillBeingRead_IsSaidToBe_AndTheNextSearchJoinsTheSameRead()
+        {
+            Write("8563E big.txt", AnalyzerManual);
+            var files = ManualLibrary.At(_root).Candidates("8563E", "CF");
+            var release = new System.Threading.ManualResetEventSlim();
+            int reads = 0;
+            Func<ManualFile, ManualText.Result> original = ManualSearch.ReadText;
+            ManualSearch.ReadText = f =>
+            {
+                System.Threading.Interlocked.Increment(ref reads);
+                release.Wait(10000);
+                return new ManualText.Result(ManualText.Outcome.Extracted, AnalyzerManual, null);
+            };
+            try
+            {
+                var clock = System.Diagnostics.Stopwatch.StartNew();
+                ManualSearch.Results first = ManualSearch.Run(files, "CF", timeBudgetMs: 300);
+                Assert.True(clock.ElapsedMilliseconds < 3000, clock.ElapsedMilliseconds + " ms");
+                Assert.Contains("still being read", Assert.Single(first.Unreadable).Problem);
+                Assert.Empty(first.Searched);
+
+                ManualSearch.Results second = ManualSearch.Run(files, "CF", timeBudgetMs: 300);
+                Assert.Contains("still being read", Assert.Single(second.Unreadable).Problem);
+                Assert.Equal(1, reads);
+
+                release.Set();
+                ManualSearch.Results third = ManualSearch.Run(files, "CF", timeBudgetMs: 5000);
+                Assert.Empty(third.Unreadable);
+                Assert.Equal(2, third.Hits.Single().Page);
+            }
+            finally
+            {
+                release.Set();
+                ManualSearch.ReadText = original;
+            }
+        }
+
+        [Fact]
+        public void PagesThatCouldntBeRead_AreNamed_AndTheRestIsStillSearched()
+        {
+            Write("8563E guide.txt", AnalyzerManual);
+            var files = ManualLibrary.At(_root).Candidates("8563E", "CF");
+            Func<ManualFile, ManualText.Result> original = ManualSearch.ReadText;
+            string damaged = "Intro\f" + ManualText.UnreadablePage + "\fCF Center Frequency\f" + ManualText.UnreadablePage;
+            ManualSearch.ReadText = f => new ManualText.Result(ManualText.Outcome.Extracted, damaged, null);
+            try
+            {
+                ManualSearch.Results results = ManualSearch.Run(files, "CF");
+
+                Assert.Equal(3, results.Hits.Single().Page);
+                Assert.Single(results.Searched);
+                Assert.Equal("pages 2 and 4 could not be read, so they weren't searched. The rest of the manual was.",
+                             Assert.Single(results.Unreadable).Problem);
+
+                ManualSearch.ReadText = f => new ManualText.Result(ManualText.Outcome.Extracted,
+                    ManualText.UnreadablePage + "\f" + ManualText.UnreadablePage, null);
+                results = ManualSearch.Run(files, "CF");
+                Assert.Empty(results.Searched);
+                Assert.Contains("none of its 2 page(s)", Assert.Single(results.Unreadable).Problem);
+            }
+            finally { ManualSearch.ReadText = original; }
         }
 
         [Fact]

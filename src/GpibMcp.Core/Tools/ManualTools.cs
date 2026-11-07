@@ -22,6 +22,24 @@ namespace GpibMcp.Tools
     /// </summary>
     public static class ManualTools
     {
+        /// <summary>
+        /// What one search may take in all. Claude Desktop gives up on a call at about 30 s, so choosing manuals,
+        /// reading them and asking the index share this, and none waits past what the others left.
+        /// </summary>
+        private const int CallBudgetMs = 25000;
+
+        /// <summary>For choosing manuals by the index: a cold first query has been measured at 9 s.</summary>
+        private const int ChooseIndexMs = 12000;
+
+        /// <summary>Kept back from reading for the index's page lookup, which takes about 150 ms warm.</summary>
+        private const int PagesReserveMs = 3000;
+
+        /// <summary>
+        /// Reading gets at least this when time allows, so a slow choice of manuals still reads something. Below
+        /// <see cref="MinPagesMs"/> left, the index isn't asked for pages.
+        /// </summary>
+        private const int MinReadMs = 3000, MinPagesMs = 1000;
+
         public static void Register(ToolRegistry registry, ManualLibrary library)
         {
             if (registry == null || library == null) return;
@@ -38,7 +56,8 @@ namespace GpibMcp.Tools
                 "This returns SOURCE TEXT, not an answer: read the passage, tell the user what it says, and " +
                 "CITE the file and page. If it gives you a command the database lacks, offer to add it with " +
                 "instrument_db_save so the next lookup is instant. Do NOT send a command to an instrument " +
-                "purely on your own reading of a passage without telling the user where it came from.",
+                "purely on your own reading of a passage without telling the user where it came from. " +
+                "If ManualForge has indexed the library, its pages fill in what reading the manuals didn't find.",
                 Schema(
                     Required("query", "string", "What to look for, e.g. 'center frequency command' or " +
                         "'status byte bit 4' or 'OUTPPLOT'. Include the mnemonic if you know it."),
@@ -60,18 +79,20 @@ namespace GpibMcp.Tools
             int maxResults = Math.Min(Math.Max(Int(args, "max_results", 5), 1), 20);
             int contextChars = Math.Min(Math.Max(Int(args, "context_chars", ManualSearch.DefaultContextChars), 100), 4000);
 
+            var clock = System.Diagnostics.Stopwatch.StartNew();
             IReadOnlyList<ManualFile> candidates;
             CandidateSelection selection = null;
+            ManualFile one = null;
             if (!string.IsNullOrWhiteSpace(file))
             {
-                ManualFile one = library.Resolve(file);
+                one = library.Resolve(file);
                 if (one == null)
                     return Failed("No manual at '" + file + "' inside the library (" + library.Root + ").");
                 candidates = new[] { one };
             }
             else
             {
-                selection = library.Choose(model, query);
+                selection = library.Choose(model, query, ManualLibrary.MaxFilesPerSearch, ChooseIndexMs);
                 candidates = selection.Files;
             }
 
@@ -79,8 +100,17 @@ namespace GpibMcp.Tools
                 return NothingMatched(library, query, model, selection != null && selection.IndexFoundNothing);
 
             ctx.Progress(1, candidates.Count + 1, "Searching " + candidates.Count + " manual(s).");
+            long left = CallBudgetMs - clock.ElapsedMilliseconds;
+            int readMs = (int)Math.Max(0, Math.Min(ManualSearch.DefaultTimeBudgetMs,
+                                                   Math.Max(left - PagesReserveMs, Math.Min(MinReadMs, left))));
             ManualSearch.Results results = ManualSearch.Run(candidates, query, maxResults, contextChars,
-                (index, total, name) => ctx.Progress(index + 1, total + 1, "Reading " + name + "."));
+                (index, total, name) => ctx.Progress(index + 1, total + 1, "Reading " + name + "."), readMs);
+
+            // A search the manuals answered in full starts no process. One they didn't - too few passages, or
+            // some with only part of the query - may have its answer on a page only ManualForge can read.
+            left = CallBudgetMs - clock.ElapsedMilliseconds;
+            if (results.Hits.Count(h => h.HasEveryWord) < maxResults && left >= MinPagesMs)
+                ManualSearch.Fill(results, library.IndexedPages(query, model, one, maxResults, (int)left), maxResults);
             ctx.Progress(candidates.Count + 1, candidates.Count + 1, "Search complete.");
 
             // Nothing named for the instrument itself was read, only its series - a substitution, and one
@@ -146,12 +176,7 @@ namespace GpibMcp.Tools
                 ["query"] = query,
                 ["library"] = library.Root,
                 ["searched"] = new JArray(results.Searched.Cast<object>().ToArray()),
-                ["hits"] = new JArray(results.Hits.Select(h => (JToken)new JObject
-                {
-                    ["file"] = h.File,
-                    ["page"] = h.Page,
-                    ["text"] = h.Text
-                })),
+                ["hits"] = new JArray(results.Hits.Select(Structured)),
                 ["unreadable"] = new JArray(results.Unreadable.Select(u => (JToken)new JObject
                 {
                     ["file"] = u.File,
@@ -191,19 +216,28 @@ namespace GpibMcp.Tools
                 foreach (ManualSearch.Hit hit in results.Hits)
                 {
                     text.AppendLine();
-                    text.AppendLine("--- " + hit.File + ", page " + hit.Page + " ---");
+                    text.AppendLine("--- " + hit.File + ", page " + hit.Page +
+                                    (hit.FromIndex ? " (ManualForge" + (hit.RecoveredByOcr ? ", recovered by OCR" : "") + ")" : "") + " ---");
                     text.AppendLine(hit.Text);
                 }
                 text.AppendLine();
                 text.AppendLine("CITE the file and page when you tell the user what this says. If it gives a " +
                                 "command the database lacks, offer to add it with instrument_db_save.");
+                if (results.Hits.Any(h => h.FromIndex))
+                {
+                    text.AppendLine();
+                    text.AppendLine("Passages marked ManualForge are short snippets from its index, with [brackets] " +
+                                    "round the matched words: those are its marks, not the manual's. Its read_manual_page " +
+                                    "tool gives the whole page. Text recovered by OCR can carry recognition errors, in " +
+                                    "command names too, so quote it as what the page appears to say.");
+                }
             }
 
             // Never let an unreadable manual look like a manual with no match.
             if (results.Unreadable.Count > 0)
             {
                 text.AppendLine();
-                text.AppendLine("Could not read " + results.Unreadable.Count + " file(s):");
+                text.AppendLine("Could not read " + results.Unreadable.Count + " file(s), or not all of them:");
                 foreach (ManualSearch.FileNote note in results.Unreadable.Take(5))
                     text.AppendLine("  " + note.File + " - " + note.Problem);
                 text.AppendLine("Tell the user this: the answer may be in a manual that could not be searched.");
@@ -219,6 +253,14 @@ namespace GpibMcp.Tools
             }
 
             return ToolOutput.Text(text.ToString().TrimEnd()).WithStructured(structured);
+        }
+
+        private static JToken Structured(ManualSearch.Hit hit)
+        {
+            var json = new JObject { ["file"] = hit.File, ["page"] = hit.Page, ["text"] = hit.Text };
+            if (hit.FromIndex) json["source"] = "manualforge";
+            if (hit.RecoveredByOcr) json["ocr"] = true;
+            return json;
         }
 
         private static ToolOutput Failed(string message) =>
@@ -247,7 +289,9 @@ namespace GpibMcp.Tools
                         {
                             ["file"] = new JObject { ["type"] = "string", ["description"] = "Path within the library." },
                             ["page"] = new JObject { ["type"] = "integer", ["description"] = "1-based page, for the citation." },
-                            ["text"] = new JObject { ["type"] = "string" }
+                            ["text"] = new JObject { ["type"] = "string" },
+                            ["source"] = new JObject { ["type"] = "string", ["description"] = "'manualforge' for a short snippet from its index, with [brackets] round the matched words. Absent for a passage read from the file." },
+                            ["ocr"] = new JObject { ["type"] = "boolean", ["description"] = "True when the text was recovered by OCR, so it may carry recognition errors." }
                         },
                         ["required"] = new JArray("file", "page", "text")
                     }
