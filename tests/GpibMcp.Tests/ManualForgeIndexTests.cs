@@ -60,6 +60,15 @@ namespace GpibMcp.Tests
         private void FakeManualForge(int exitCode, params string[] paths)
         {
             var script = new StringBuilder("@echo off\r\n");
+
+            // A page search, answered from PagesReply if a test set one. Logged apart from the file search, so
+            // what the tests below say about choosing manuals still means that.
+            string json = Path.Combine(_tools, "pages.json");
+            string pagesLog = Path.Combine(_tools, "pages-args.txt");
+            script.Append("echo %* | findstr /c:\"--json\" >nul && (echo %* > \"").Append(pagesLog).Append("\"")
+                  .Append(" & if exist \"").Append(json).Append("\" (type \"").Append(json).Append("\" & exit /b 0) else exit /b 2)\r\n");
+            if (PagesReply != null) File.WriteAllText(json, PagesReply);
+
             script.Append("echo %* > \"").Append(_argsLog).Append("\"\r\n");
             foreach (string path in paths)
                 script.Append("echo ").Append(Path.IsPathRooted(path) ? path : Path.Combine(_root, path)).Append("\r\n");
@@ -72,6 +81,147 @@ namespace GpibMcp.Tests
         }
 
         private bool ToolWasRun => File.Exists(_argsLog);
+
+        private bool PagesWereAskedFor => File.Exists(Path.Combine(_tools, "pages-args.txt"));
+
+        /// <summary>What <c>search --json</c> prints, or null to have it match nothing.</summary>
+        private string PagesReply;
+
+        /// <summary>A real reply's shape, as <c>manualforge search --json</c> printed it for this library.</summary>
+        private string Pages(params object[][] hits) => new JObject
+        {
+            ["schemaVersion"] = 1,
+            ["results"] = new JArray(hits.Select(h => (object)new JObject
+            {
+                ["path"] = Path.Combine(_root, (string)h[0]),
+                ["title"] = Path.GetFileNameWithoutExtension((string)h[0]),
+                ["page"] = (int)h[1],
+                ["snippet"] = (string)h[2],
+                ["recoveredByOcr"] = (bool)h[3]
+            }).ToArray())
+        }.ToString();
+
+        // ---- pages from the index ----------------------------------------------------------------------
+
+        [Fact]
+        public void TheCopiesManualForgeSetAside_AreNotSearchedAgain()
+        {
+            Write(Path.Combine("_Originals", "8563E Guide.txt"), "The CF command.\n");
+            Write("8563E Guide.txt", "The CF command.\n");
+            CreateIndex();
+            FakeManualForge(2);
+
+            Assert.Equal(new[] { "8563E Guide.txt" }, Searched(Search(new JObject { ["query"] = "CF", ["model"] = "8563E" })));
+        }
+
+        [Fact]
+        public void AFolderOfThatNameIsAnOrdinaryFolder_WithoutManualForgesIndex()
+        {
+            Write(Path.Combine("_Originals", "8563E Guide.txt"), "The CF command.\n");
+
+            Assert.Single(Searched(Search(new JObject { ["query"] = "CF", ["model"] = "8563E" })));
+        }
+
+        [Fact]
+        public void APageOnlyTheIndexCanRead_IsReturned_AndSaysWhereItCameFrom()
+        {
+            // The real case: the 54845A's syntax diagrams are pictures, so the PDF holds no words for them.
+            Write("54845A Programmer.txt", "SYSTem commands, and nothing else.\n");
+            CreateIndex();
+            PagesReply = Pages(new object[] { "54845A Programmer.txt", 46, ":DISPlay [DATA]? BMP PCX GIF", true });
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "DATA?", ["model"] = "54845A" });
+
+            var hit = (JObject)Assert.Single((JArray)output.Structured["hits"]);
+            Assert.Equal("54845A Programmer.txt", (string)hit["file"]);
+            Assert.Equal(46, (int)hit["page"]);
+            Assert.Equal("manualforge", (string)hit["source"]);
+            Assert.True((bool)hit["ocr"]);
+            Assert.Contains("page 46 (ManualForge, recovered by OCR)", output.AsText());
+            Assert.Contains("read_manual_page", output.AsText());
+        }
+
+        [Fact]
+        public void IndexPagesFillWhatReadingLeft_WithoutRepeatingAPageItFound()
+        {
+            Write("8563E Guide.txt", "Page one.\n\fThe CF command sets centre frequency.\n");
+            CreateIndex();
+            PagesReply = Pages(new object[] { "8563E Guide.txt", 2, "The [CF] command", false },
+                               new object[] { "8563E Guide.txt", 9, "[CF] in a table", false });
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "CF", ["model"] = "8563E" });
+
+            var hits = (JArray)output.Structured["hits"];
+            Assert.Equal(new[] { 2, 9 }, hits.Select(h => (int)h["page"]).ToArray());
+            Assert.Null(hits[0]["source"]);                        // the passage read from the file wins
+            Assert.Equal("manualforge", (string)hits[1]["source"]);
+            Assert.Null(hits[1]["ocr"]);
+        }
+
+        [Fact]
+        public void APageWithEveryWord_BeatsPassagesWithOnlySomeOfThem()
+        {
+            // The real case: the file names GIF on page after page, while the one page giving the syntax is a
+            // picture only the index can read. Passages that merely fill the slots mustn't crowd it out.
+            Write("54845A Guide.txt", "GIF one.\n\fGIF two.\n\fGIF three.\n");
+            CreateIndex();
+            PagesReply = Pages(new object[] { "54845A Guide.txt", 46, "[GIF] [TIF] [GRATicule]", true });
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "GIF TIF GRATicule", ["model"] = "54845A", ["max_results"] = 2 });
+
+            var pages = ((JArray)output.Structured["hits"]).Select(h => (int)h["page"]).ToArray();
+            Assert.Equal(46, pages[0]);
+            Assert.Equal(2, pages.Length);
+        }
+
+        [Fact]
+        public void ASearchTheManualsAnswerInFull_NeverStartsTheProcess()
+        {
+            Write("8563E Guide.txt", "CF one.\n\fCF two.\n");
+            CreateIndex();
+            FakeManualForge(0);
+
+            Search(new JObject { ["query"] = "CF", ["model"] = "8563E", ["max_results"] = 2 });
+
+            Assert.False(PagesWereAskedFor);
+        }
+
+        [Fact]
+        public void IndexPagesKeepToTheCallersModelAndFile_AndStayInsideTheLibrary()
+        {
+            Write("8563E Guide.txt", "Nothing relevant.\n");
+            Write("8563E Extra.txt", "Nothing relevant.\n");
+            Write("3458A Manual.txt", "Nothing relevant.\n");
+            CreateIndex();
+            PagesReply = Pages(new object[] { "3458A Manual.txt", 4, "another instrument", false },
+                               new object[] { "8563E Extra.txt", 5, "another file", false },
+                               new object[] { "8563E Guide.txt", 6, "the right one", false },
+                               new object[] { Path.Combine("..", "outside.txt"), 7, "outside the library", false });
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "relevant?", ["model"] = "8563E", ["file"] = "8563E Guide.txt" });
+
+            Assert.Equal(6, (int)Assert.Single((JArray)output.Structured["hits"])["page"]);
+        }
+
+        [Theory]
+        [InlineData("not json at all")]
+        [InlineData("{\"schemaVersion\": 2, \"results\": [{\"path\": \"x\", \"page\": 1, \"snippet\": \"y\"}]}")]
+        public void AnIndexReplyThisBuildCantRead_ChangesNothing(string reply)
+        {
+            Write("8563E Guide.txt", "The CF command.\n");
+            CreateIndex();
+            PagesReply = reply;
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "CF", ["model"] = "8563E" });
+
+            Assert.True(PagesWereAskedFor);
+            AssertSameResult(SearchWithoutManualForge(new JObject { ["query"] = "CF", ["model"] = "8563E" }), output);
+        }
 
         private ToolOutput Search(JObject args)
         {

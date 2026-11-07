@@ -38,7 +38,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- PdfPig's licence goes wherever PdfPig does. -->
+    <None Include="..\..\packaging\THIRD-PARTY-NOTICES.txt" Link="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Reads manuals with nothing else installed: managed, so it adds nothing native to an x86 server. -->
+    <PackageReference Include="PdfPig" Version="0.1.16" />
     <!-- Lets `dotnet build` compile net472 without a full VS install. -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>

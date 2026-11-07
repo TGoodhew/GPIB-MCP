@@ -11,21 +11,23 @@ namespace GpibMcp.Manuals
     /// <summary>
     /// Turns a manual into searchable text (#120) - the part that decides what this feature can do at all.
     ///
-    /// .NET Framework cannot read a PDF on its own, and bundling a PDF engine into a server whose whole shape
-    /// is "no external dependencies" would be a poor trade for a feature that is off by default. So there are
-    /// three routes, in order:
+    /// There are four routes, in order, and the last needs nothing else installed:
     ///
     /// <list type="number">
     /// <item>the file is already text (.txt/.md) - read it;</item>
     /// <item>a sidecar <c>&lt;name&gt;.txt</c> sits beside the PDF - read that (how a user without the tool
     ///       below can still use this feature: extract once, however they like, and leave the text there);</item>
     /// <item><c>pdftotext</c> is on PATH (Poppler, xpdf) - run it with <c>-layout</c>, which keeps the column
-    ///       alignment that command tables in instrument manuals depend on.</item>
+    ///       alignment that command tables in instrument manuals depend on;</item>
+    /// <item><see cref="BuiltInPdfText"/>, which ships with the server.</item>
     /// </list>
     ///
-    /// If none applies the answer is an explicit "this file could not be read, here is how to fix it", never
-    /// silence - a manual that cannot be extracted looking identical to a manual with no match would make the
-    /// whole tool untrustworthy.
+    /// ManualForge isn't a route here: its command line can't give a document's text, only pages and snippets,
+    /// so what it adds comes through <see cref="ManualLibrary.IndexedPages"/> instead.
+    ///
+    /// If a file still gives no text the answer is an explicit "this file could not be read", never silence -
+    /// a manual that cannot be extracted looking identical to a manual with no match would make the whole tool
+    /// untrustworthy.
     ///
     /// Extraction is cached under <c>%LOCALAPPDATA%\GpibMcp\manual-text</c>, keyed by path, size and
     /// modification time, because it is slow and the same manual is read over and over.
@@ -42,7 +44,6 @@ namespace GpibMcp.Manuals
         public enum Outcome
         {
             Extracted,
-            NoExtractorAvailable,
             ExtractionFailed
         }
 
@@ -97,19 +98,15 @@ namespace GpibMcp.Manuals
                 }
             }
 
-            string converter = FindPdfToText();
-            if (converter == null)
-                return new Result(Outcome.NoExtractorAvailable, null,
-                    "this is a PDF and no text extractor is available. Install Poppler or xpdf so that " +
-                    "'pdftotext' is on PATH (or set GPIB_MCP_PDFTOTEXT to its full path), or place an " +
-                    "extracted '" + Path.GetFileNameWithoutExtension(file.FullPath) + ".txt' next to it.");
-
             try
             {
-                string text = RunPdfToText(converter, file.FullPath);
+                string converter = FindPdfToText();
+                string text = converter != null ? RunPdfToText(converter, file.FullPath)
+                                                : BuiltInPdfText.Read(file.FullPath, ExtractTimeoutMs);
                 if (string.IsNullOrWhiteSpace(text))
                     return new Result(Outcome.ExtractionFailed, null,
-                        "the extractor produced no text - the manual is most likely a scan, which would need OCR.");
+                        "it has no text to read - it is most likely a scan, which needs OCR. ManualForge adds the " +
+                        "text, or an extracted '" + Path.GetFileNameWithoutExtension(file.FullPath) + ".txt' beside it will do.");
 
                 WriteCache(file, text);
                 return new Result(Outcome.Extracted, text, null);

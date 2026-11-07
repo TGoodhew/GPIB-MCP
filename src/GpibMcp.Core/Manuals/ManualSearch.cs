@@ -24,6 +24,15 @@ namespace GpibMcp.Manuals
             public int Page { get; set; }
             public int Score { get; set; }
             public string Text { get; set; }
+
+            /// <summary>True when every word of the query is in the passage, not only some of them.</summary>
+            public bool HasEveryWord { get; set; }
+
+            /// <summary>True for a snippet from ManualForge's index rather than a passage read from the file.</summary>
+            public bool FromIndex { get; set; }
+
+            /// <summary>True when the index holds this page's text only because OCR recovered it.</summary>
+            public bool RecoveredByOcr { get; set; }
         }
 
         public sealed class FileNote
@@ -46,11 +55,20 @@ namespace GpibMcp.Manuals
         }
 
         /// <summary>
-        /// Searches <paramref name="files"/> for <paramref name="query"/>, best passages first.
+        /// How long a search may spend opening manuals. A manual is read once and kept, but a dozen read for the
+        /// first time can take a minute, and Claude Desktop gives up on a call at about 30 s.
+        /// </summary>
+        public const int DefaultTimeBudgetMs = 15000;
+
+        /// <summary>
+        /// Searches <paramref name="files"/> for <paramref name="query"/>, best passages first. Files not reached
+        /// inside <paramref name="timeBudgetMs"/> are listed as unreadable: a search that stopped must never read
+        /// as one that looked.
         /// </summary>
         /// <param name="onFile">Progress callback: (index, total, file being read).</param>
         public static Results Run(IReadOnlyList<ManualFile> files, string query, int maxHits = 5,
-                                  int contextChars = DefaultContextChars, Action<int, int, string> onFile = null)
+                                  int contextChars = DefaultContextChars, Action<int, int, string> onFile = null,
+                                  int timeBudgetMs = DefaultTimeBudgetMs)
         {
             var results = new Results();
             if (files == null || files.Count == 0) return results;
@@ -59,9 +77,20 @@ namespace GpibMcp.Manuals
             if (words.Length == 0) return results;
 
             var all = new List<Hit>();
+            var clock = System.Diagnostics.Stopwatch.StartNew();
             for (int i = 0; i < files.Count; i++)
             {
                 ManualFile file = files[i];
+                if (clock.ElapsedMilliseconds >= timeBudgetMs)
+                {
+                    results.Unreadable.Add(new FileNote
+                    {
+                        File = file.RelativePath,
+                        Problem = "not reached before this search's time ran out. Search again: the manuals already " +
+                                  "read are kept, so the next one gets further."
+                    });
+                    continue;
+                }
                 if (onFile != null) onFile(i, files.Count, file.RelativePath);
 
                 ManualText.Result text = ManualText.Read(file);
@@ -82,6 +111,23 @@ namespace GpibMcp.Manuals
         }
 
         /// <summary>
+        /// Adds <paramref name="pages"/> from the index, which match every word of the query, ahead of passages
+        /// that match only some, skipping any page already found: a passage read from the file says more than a
+        /// snippet of the same page.
+        /// </summary>
+        public static void Fill(Results results, IEnumerable<Hit> pages, int maxHits)
+        {
+            var have = new HashSet<string>(results.Hits.Select(h => h.File + "|" + h.Page), StringComparer.OrdinalIgnoreCase);
+            List<Hit> merged = results.Hits.Where(h => h.HasEveryWord)
+                                      .Concat(pages.Where(p => have.Add(p.File + "|" + p.Page)))
+                                      .Concat(results.Hits.Where(h => !h.HasEveryWord))
+                                      .Take(Math.Max(1, maxHits))
+                                      .ToList();
+            results.Hits.Clear();
+            results.Hits.AddRange(merged);
+        }
+
+        /// <summary>
         /// Scores each occurrence of the rarest query word by how many of the other words appear nearby.
         /// Anchoring on the rarest word is what makes a search for "center frequency CF" land on the page
         /// defining CF rather than the hundreds of pages that merely say "frequency".
@@ -90,9 +136,12 @@ namespace GpibMcp.Manuals
         {
             string lower = text.ToLowerInvariant();
 
-            string anchor = words.OrderBy(w => CountOccurrences(lower, w)).First();
+            // The rarest word this manual has: one it doesn't, like a guess at an option's name, says nothing
+            // about the words it does have.
+            string anchor = words.Where(w => CountOccurrences(lower, w) > 0)
+                                 .OrderBy(w => CountOccurrences(lower, w)).FirstOrDefault();
+            if (anchor == null) yield break;
             int anchorCount = CountOccurrences(lower, anchor);
-            if (anchorCount == 0) yield break;
 
             // A word that appears everywhere is not evidence of anything; stop rather than return noise.
             const int TooCommon = 400;
@@ -113,9 +162,9 @@ namespace GpibMcp.Manuals
                 string snippet = text.Substring(start, length);
                 string snippetLower = snippet.ToLowerInvariant();
 
-                int score = 10;
+                int score = 10, found = 1;
                 foreach (string word in words)
-                    if (word != anchor && snippetLower.Contains(word)) score += 20;
+                    if (word != anchor && snippetLower.Contains(word)) { score += 20; found++; }
 
                 // One hit per page: consecutive matches on a page are the same passage to a reader.
                 int page = ManualText.PageAt(text, at);
@@ -126,7 +175,8 @@ namespace GpibMcp.Manuals
                     File = file.RelativePath,
                     Page = page,
                     Score = score,
-                    Text = Tidy(snippet)
+                    Text = Tidy(snippet),
+                    HasEveryWord = found == words.Length
                 };
             }
         }

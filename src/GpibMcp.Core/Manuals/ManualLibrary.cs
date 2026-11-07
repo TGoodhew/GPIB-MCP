@@ -136,6 +136,36 @@ namespace GpibMcp.Manuals
             return CandidateSelection.ByContent(merged, merged.Count(f => byContent.Contains(f)));
         }
 
+        /// <summary>
+        /// The pages ManualForge's index matched, when this library has one: how a search reaches pages that
+        /// reading the manuals can't, because their text was recovered by OCR and isn't in the PDF. The same limits
+        /// apply as to choosing manuals - the caller's model still wins, and <paramref name="only"/> keeps it to
+        /// one file - and without an index this starts no process and returns nothing.
+        /// </summary>
+        public IReadOnlyList<ManualSearch.Hit> IndexedPages(string query, string model, ManualFile only, int limit)
+        {
+            var hits = new List<ManualSearch.Hit>();
+            if (!ManualForgeIndex.IsAvailable(_root)) return hits;
+
+            bool haveModel = !string.IsNullOrWhiteSpace(model);
+            foreach (ManualForgeIndex.PageHit page in ManualForgeIndex.SearchPages(_root, query, model, Math.Max(1, limit) * 4).Pages)
+            {
+                ManualFile file = Resolve(page.Path);    // as in Choose: nothing outside this root
+                if (file == null) continue;
+                if (only != null && !string.Equals(file.FullPath, only.FullPath, StringComparison.OrdinalIgnoreCase)) continue;
+                if (haveModel && ModelScore(file, model) == 0) continue;
+                hits.Add(new ManualSearch.Hit
+                {
+                    File = file.RelativePath,
+                    Page = page.Page,
+                    Text = page.Snippet,
+                    FromIndex = true,
+                    RecoveredByOcr = page.RecoveredByOcr
+                });
+            }
+            return hits;
+        }
+
         /// <summary>A sample of what the library holds, so a caller told "nothing matched" can retry usefully.</summary>
         public IReadOnlyList<string> SampleNames(string model, int limit = 20)
         {
@@ -168,8 +198,15 @@ namespace GpibMcp.Manuals
                 yield break;
             }
 
+            // Where ManualForge has been, this folder holds the copies it set aside before OCR: the same manuals
+            // again, the scans among them unreadable, which would only report a false "could not be searched".
+            string index = ManualForgeIndex.IndexPath(_root);
+            string setAside = File.Exists(index) ? Path.GetDirectoryName(index) + Path.DirectorySeparatorChar : null;
+
             foreach (string path in paths)
             {
+                if (setAside != null && path.StartsWith(setAside, StringComparison.OrdinalIgnoreCase)) continue;
+
                 string ext = Path.GetExtension(path);
                 if (Array.IndexOf(ReadableExtensions, ext.ToLowerInvariant()) < 0) continue;
 
