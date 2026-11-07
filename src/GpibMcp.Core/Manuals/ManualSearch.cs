@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GpibMcp.Manuals
 {
@@ -45,7 +46,10 @@ namespace GpibMcp.Manuals
         {
             public List<Hit> Hits { get; } = new List<Hit>();
 
-            /// <summary>Files that could not be read, and why - never silently dropped.</summary>
+            /// <summary>
+            /// Files that could not be read, or only in part, and why - never silently dropped. A file read in
+            /// part is in <see cref="Searched"/> too.
+            /// </summary>
             public List<FileNote> Unreadable { get; } = new List<FileNote>();
 
             public List<string> Searched { get; } = new List<string>();
@@ -60,10 +64,46 @@ namespace GpibMcp.Manuals
         /// </summary>
         public const int DefaultTimeBudgetMs = 15000;
 
+        /// <summary>How a manual's text is read: <see cref="ManualText.Read"/>, or a stand-in for a test.</summary>
+        internal static Func<ManualFile, ManualText.Result> ReadText = ManualText.Read;
+
+        /// <summary>Manuals being read now, by path and state, so a search that comes back finds the same read.</summary>
+        private static readonly Dictionary<string, Task<ManualText.Result>> Reading =
+            new Dictionary<string, Task<ManualText.Result>>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Reads <paramref name="file"/> on a thread of its own, or joins the read already under way. A search
+        /// waits only for the time it has left, and a read it gave up on carries on and fills the cache, so a
+        /// large manual is ready for the next search instead of being started again and abandoned each time.
+        /// </summary>
+        private static Task<ManualText.Result> StartReading(ManualFile file)
+        {
+            string key = file.FullPath + "|" + file.SizeBytes + "|" + file.ModifiedUtc.Ticks;
+            lock (Reading)
+            {
+                Task<ManualText.Result> task;
+                if (Reading.TryGetValue(key, out task)) return task;
+
+                Func<ManualFile, ManualText.Result> read = ReadText;
+                task = Task.Run(() =>
+                {
+                    try { return read(file); }
+                    catch (Exception ex)
+                    {
+                        return new ManualText.Result(ManualText.Outcome.ExtractionFailed, null, "extraction failed: " + ex.Message);
+                    }
+                });
+                Reading[key] = task;
+                // Runs inline if the read has already finished; the lock is this thread's, so the entry goes at once.
+                task.ContinueWith(_ => { lock (Reading) Reading.Remove(key); }, TaskContinuationOptions.ExecuteSynchronously);
+                return task;
+            }
+        }
+
         /// <summary>
         /// Searches <paramref name="files"/> for <paramref name="query"/>, best passages first. Files not reached
-        /// inside <paramref name="timeBudgetMs"/> are listed as unreadable: a search that stopped must never read
-        /// as one that looked.
+        /// or not finished inside <paramref name="timeBudgetMs"/>, and pages that couldn't be read, are listed as
+        /// unreadable: a search that stopped must never read as one that looked.
         /// </summary>
         /// <param name="onFile">Progress callback: (index, total, file being read).</param>
         public static Results Run(IReadOnlyList<ManualFile> files, string query, int maxHits = 5,
@@ -93,12 +133,44 @@ namespace GpibMcp.Manuals
                 }
                 if (onFile != null) onFile(i, files.Count, file.RelativePath);
 
-                ManualText.Result text = ManualText.Read(file);
+                Task<ManualText.Result> reading = StartReading(file);
+                long left = timeBudgetMs - clock.ElapsedMilliseconds;
+                if (!reading.Wait((int)Math.Max(0, Math.Min(left, int.MaxValue))))
+                {
+                    results.Unreadable.Add(new FileNote
+                    {
+                        File = file.RelativePath,
+                        Problem = "still being read when this search's time ran out: a long manual takes a while the " +
+                                  "first time. Reading carries on, so search again in a minute and it will be ready."
+                    });
+                    continue;
+                }
+
+                ManualText.Result text = reading.Result;
                 if (!text.Ok)
                 {
                     results.Unreadable.Add(new FileNote { File = file.RelativePath, Problem = text.Detail });
                     continue;
                 }
+
+                int pageCount;
+                List<int> damaged = ManualText.UnreadablePages(text.Text, out pageCount);
+                if (damaged.Count > 0 && damaged.Count == pageCount)
+                {
+                    results.Unreadable.Add(new FileNote
+                    {
+                        File = file.RelativePath,
+                        Problem = "none of its " + pageCount + " page(s) could be read: the PDF looks damaged."
+                    });
+                    continue;
+                }
+                if (damaged.Count > 0)
+                    results.Unreadable.Add(new FileNote
+                    {
+                        File = file.RelativePath,
+                        Problem = PageList(damaged) + " could not be read, so " +
+                                  (damaged.Count == 1 ? "it wasn't" : "they weren't") + " searched. The rest of the manual was."
+                    });
 
                 results.Searched.Add(file.RelativePath);
                 all.AddRange(FindIn(file, text.Text, words, contextChars));
@@ -110,22 +182,37 @@ namespace GpibMcp.Manuals
             return results;
         }
 
+        /// <summary>"page 4", "pages 4, 9 and 12", or the first ten and how many more.</summary>
+        private static string PageList(List<int> pages)
+        {
+            if (pages.Count == 1) return "page " + pages[0];
+            const int Shown = 10;
+            List<string> shown = pages.Take(Shown).Select(p => p.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToList();
+            string last = pages.Count > Shown ? (pages.Count - Shown) + " more" : shown[shown.Count - 1];
+            if (pages.Count <= Shown) shown.RemoveAt(shown.Count - 1);
+            return "pages " + string.Join(", ", shown) + " and " + last;
+        }
+
         /// <summary>
         /// Adds <paramref name="pages"/> from the index, which match every word of the query, ahead of passages
-        /// that match only some, skipping any page already found: a passage read from the file says more than a
-        /// snippet of the same page.
+        /// that match only some. A page a passage from the file already answered in full is skipped, since the
+        /// passage says more than a snippet. One the file matched only in part gives way to the snippet: what it
+        /// lacked is likely text only the index holds, recovered by OCR.
         /// </summary>
         public static void Fill(Results results, IEnumerable<Hit> pages, int maxHits)
         {
-            var have = new HashSet<string>(results.Hits.Select(h => h.File + "|" + h.Page), StringComparer.OrdinalIgnoreCase);
+            var have = new HashSet<string>(results.Hits.Where(h => h.HasEveryWord).Select(Key), StringComparer.OrdinalIgnoreCase);
+            List<Hit> indexed = pages.Where(p => have.Add(Key(p))).ToList();
             List<Hit> merged = results.Hits.Where(h => h.HasEveryWord)
-                                      .Concat(pages.Where(p => have.Add(p.File + "|" + p.Page)))
-                                      .Concat(results.Hits.Where(h => !h.HasEveryWord))
+                                      .Concat(indexed)
+                                      .Concat(results.Hits.Where(h => !h.HasEveryWord && !have.Contains(Key(h))))
                                       .Take(Math.Max(1, maxHits))
                                       .ToList();
             results.Hits.Clear();
             results.Hits.AddRange(merged);
         }
+
+        private static string Key(Hit hit) => hit.File + "|" + hit.Page;
 
         /// <summary>
         /// Scores each occurrence of the rarest query word by how many of the other words appear nearby.

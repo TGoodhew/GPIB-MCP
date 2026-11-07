@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -36,6 +37,12 @@ namespace GpibMcp.Manuals
     {
         /// <summary>Page separator emitted by pdftotext; how a citation gets a page number.</summary>
         public const char PageBreak = '\f';
+
+        /// <summary>
+        /// The whole text of a page the reader couldn't parse. It's kept in the cached text so a later search
+        /// still says which pages it never saw, and it holds no letters, so no query matches it.
+        /// </summary>
+        public const string UnreadablePage = "";
 
         /// <summary>Extraction is bounded: a runaway converter must not hang a tool call.</summary>
         private const int ExtractTimeoutMs = 60000;
@@ -128,6 +135,17 @@ namespace GpibMcp.Manuals
             return page;
         }
 
+        /// <summary>The 1-based pages of <paramref name="text"/> marked <see cref="UnreadablePage"/>.</summary>
+        public static List<int> UnreadablePages(string text, out int pageCount)
+        {
+            var pages = new List<int>();
+            string[] split = (text ?? string.Empty).Split(PageBreak);
+            pageCount = split.Length;
+            for (int i = 0; i < split.Length; i++)
+                if (split[i] == UnreadablePage) pages.Add(i + 1);
+            return pages;
+        }
+
         /// <summary>The extractor to use, or null when there is none.</summary>
         public static string FindPdfToText()
         {
@@ -196,9 +214,10 @@ namespace GpibMcp.Manuals
 
         private static string CachePath(ManualFile file)
         {
-            // Keyed by identity AND state: a re-scanned or replaced manual must not serve stale text.
+            // Keyed by identity AND state: a re-scanned or replaced manual must not serve stale text. The "|2"
+            // retires text cached before unreadable pages were marked, which dropped them without a word.
             string key = file.FullPath.ToLowerInvariant() + "|" + file.SizeBytes + "|" +
-                         file.ModifiedUtc.Ticks.ToString(CultureInfo.InvariantCulture);
+                         file.ModifiedUtc.Ticks.ToString(CultureInfo.InvariantCulture) + "|2";
 
             using (var sha = SHA256.Create())
             {

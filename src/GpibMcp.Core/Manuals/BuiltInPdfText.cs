@@ -28,11 +28,18 @@ namespace GpibMcp.Manuals
                         throw new TimeoutException("the PDF reader did not finish within " + limitMs / 1000 + "s");
 
                     if (number > 1) text.Append(ManualText.PageBreak);
-                    try { AppendPage(text, document.GetPage(number)); }
+                    var page = new StringBuilder();
+                    try
+                    {
+                        AppendPage(page, document.GetPage(number));
+                        text.Append(page);
+                    }
                     catch (Exception ex) when (!(ex is OutOfMemoryException))
                     {
-                        // One damaged page shouldn't lose a manual, and leaving it empty keeps the numbering.
+                        // One damaged page shouldn't lose a manual. Marking it keeps the numbering, and lets the
+                        // search say it wasn't read rather than that it didn't match.
                         Diagnostics.Log.Debug("Page " + number + " of '" + path + "' unreadable: " + ex.Message);
+                        text.Append(ManualText.UnreadablePage);
                     }
                 }
             }

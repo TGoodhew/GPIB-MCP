@@ -34,9 +34,9 @@ namespace GpibMcp.Manuals
         /// <summary>
         /// The search is bounded like extraction is. A warm query takes ~150 ms; the first against an index on
         /// a synced or sleeping drive has been measured at 9 s, and that is still worth waiting for when the
-        /// alternative is opening twelve manuals chosen by name.
+        /// alternative is opening twelve manuals chosen by name. A caller with less time left passes less.
         /// </summary>
-        private const int SearchTimeoutMs = 20000;
+        public const int SearchTimeoutMs = 20000;
 
         /// <summary>The <c>search --json</c> reply this reads, from its <c>schemaVersion</c>.</summary>
         private const int SearchSchemaVersion = 1;
@@ -133,18 +133,20 @@ namespace GpibMcp.Manuals
         /// Asks the index which files in <paramref name="root"/> best answer <paramref name="query"/>. Never
         /// throws: anything that goes wrong is an outcome, because every one of them means "use filenames".
         /// </summary>
-        public static Result Search(string root, string query, string model, int limit) =>
-            Ask(root, query, model, limit, "--files-only", ParsePaths);
+        public static Result Search(string root, string query, string model, int limit, int timeoutMs = SearchTimeoutMs) =>
+            Ask(root, query, model, limit, "--files-only", ParsePaths, timeoutMs);
 
         /// <summary>
         /// Asks the index which pages in <paramref name="root"/> match <paramref name="query"/>. Never throws, as
         /// <see cref="Search"/> doesn't: anything that goes wrong just means no pages from here.
         /// </summary>
-        public static Result SearchPages(string root, string query, string model, int limit) =>
-            Ask(root, query, model, limit, "--json", ParsePages);
+        public static Result SearchPages(string root, string query, string model, int limit, int timeoutMs = SearchTimeoutMs) =>
+            Ask(root, query, model, limit, "--json", ParsePages, timeoutMs);
 
-        private static Result Ask(string root, string query, string model, int limit, string format, Func<byte[], Result> parse)
+        private static Result Ask(string root, string query, string model, int limit, string format, Func<byte[], Result> parse,
+                                  int timeoutMs)
         {
+            timeoutMs = Math.Max(1, timeoutMs);
             if (string.IsNullOrWhiteSpace(root) || string.IsNullOrWhiteSpace(query) || !File.Exists(IndexPath(root)))
                 return new Result(Outcome.NotAvailable, null, "this library has no ManualForge index");
 
@@ -180,12 +182,12 @@ namespace GpibMcp.Manuals
                     Task copyOut = process.StandardOutput.BaseStream.CopyToAsync(stdout);
                     Task<string> readErr = process.StandardError.ReadToEndAsync();
 
-                    if (!process.WaitForExit(SearchTimeoutMs))
+                    if (!process.WaitForExit(timeoutMs))
                     {
                         try { process.Kill(); } catch { /* already gone */ }
-                        return Failed("no answer within " + (SearchTimeoutMs / 1000) + "s");
+                        return Failed("no answer within " + (timeoutMs / 1000.0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + " s");
                     }
-                    Task.WaitAll(new Task[] { copyOut, readErr }, SearchTimeoutMs);
+                    Task.WaitAll(new Task[] { copyOut, readErr }, timeoutMs);
 
                     if (process.ExitCode == ExitNothingMatched)
                         return new Result(Outcome.NothingMatched, null, "no page in the index matched");

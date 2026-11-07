@@ -22,6 +22,20 @@ namespace GpibMcp.Tools
     /// </summary>
     public static class ManualTools
     {
+        /// <summary>
+        /// What one search may take in all. Claude Desktop gives up on a call at about 30 s, so choosing manuals,
+        /// reading them and asking the index share this, and none waits past what the others left.
+        /// </summary>
+        private const int CallBudgetMs = 25000;
+
+        /// <summary>For choosing manuals by the index: a cold first query has been measured at 9 s.</summary>
+        private const int ChooseIndexMs = 12000;
+
+        /// <summary>Kept back from reading for the index's page lookup, which takes about 150 ms warm.</summary>
+        private const int PagesReserveMs = 3000;
+
+        private const int MinReadMs = 3000, MinPagesMs = 2000;
+
         public static void Register(ToolRegistry registry, ManualLibrary library)
         {
             if (registry == null || library == null) return;
@@ -61,6 +75,7 @@ namespace GpibMcp.Tools
             int maxResults = Math.Min(Math.Max(Int(args, "max_results", 5), 1), 20);
             int contextChars = Math.Min(Math.Max(Int(args, "context_chars", ManualSearch.DefaultContextChars), 100), 4000);
 
+            var clock = System.Diagnostics.Stopwatch.StartNew();
             IReadOnlyList<ManualFile> candidates;
             CandidateSelection selection = null;
             ManualFile one = null;
@@ -73,7 +88,7 @@ namespace GpibMcp.Tools
             }
             else
             {
-                selection = library.Choose(model, query);
+                selection = library.Choose(model, query, ManualLibrary.MaxFilesPerSearch, ChooseIndexMs);
                 candidates = selection.Files;
             }
 
@@ -81,13 +96,16 @@ namespace GpibMcp.Tools
                 return NothingMatched(library, query, model, selection != null && selection.IndexFoundNothing);
 
             ctx.Progress(1, candidates.Count + 1, "Searching " + candidates.Count + " manual(s).");
+            int readMs = (int)Math.Max(MinReadMs, Math.Min(ManualSearch.DefaultTimeBudgetMs,
+                                                           CallBudgetMs - PagesReserveMs - clock.ElapsedMilliseconds));
             ManualSearch.Results results = ManualSearch.Run(candidates, query, maxResults, contextChars,
-                (index, total, name) => ctx.Progress(index + 1, total + 1, "Reading " + name + "."));
+                (index, total, name) => ctx.Progress(index + 1, total + 1, "Reading " + name + "."), readMs);
 
             // A search the manuals answered in full starts no process. One they didn't - too few passages, or
             // some with only part of the query - may have its answer on a page only ManualForge can read.
             if (results.Hits.Count(h => h.HasEveryWord) < maxResults)
-                ManualSearch.Fill(results, library.IndexedPages(query, model, one, maxResults), maxResults);
+                ManualSearch.Fill(results, library.IndexedPages(query, model, one, maxResults,
+                    (int)Math.Max(MinPagesMs, CallBudgetMs - clock.ElapsedMilliseconds)), maxResults);
             ctx.Progress(candidates.Count + 1, candidates.Count + 1, "Search complete.");
 
             // Nothing named for the instrument itself was read, only its series - a substitution, and one
@@ -214,7 +232,7 @@ namespace GpibMcp.Tools
             if (results.Unreadable.Count > 0)
             {
                 text.AppendLine();
-                text.AppendLine("Could not read " + results.Unreadable.Count + " file(s):");
+                text.AppendLine("Could not read " + results.Unreadable.Count + " file(s), or not all of them:");
                 foreach (ManualSearch.FileNote note in results.Unreadable.Take(5))
                     text.AppendLine("  " + note.File + " - " + note.Problem);
                 text.AppendLine("Tell the user this: the answer may be in a manual that could not be searched.");

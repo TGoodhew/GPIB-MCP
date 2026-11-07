@@ -363,6 +363,70 @@ namespace GpibMcp.Tests
         }
 
         [Fact]
+        public void AManualStillBeingRead_IsSaidToBe_AndTheNextSearchJoinsTheSameRead()
+        {
+            Write("8563E big.txt", AnalyzerManual);
+            var files = ManualLibrary.At(_root).Candidates("8563E", "CF");
+            var release = new System.Threading.ManualResetEventSlim();
+            int reads = 0;
+            Func<ManualFile, ManualText.Result> original = ManualSearch.ReadText;
+            ManualSearch.ReadText = f =>
+            {
+                System.Threading.Interlocked.Increment(ref reads);
+                release.Wait(10000);
+                return new ManualText.Result(ManualText.Outcome.Extracted, AnalyzerManual, null);
+            };
+            try
+            {
+                var clock = System.Diagnostics.Stopwatch.StartNew();
+                ManualSearch.Results first = ManualSearch.Run(files, "CF", timeBudgetMs: 300);
+                Assert.True(clock.ElapsedMilliseconds < 3000, clock.ElapsedMilliseconds + " ms");
+                Assert.Contains("still being read", Assert.Single(first.Unreadable).Problem);
+                Assert.Empty(first.Searched);
+
+                ManualSearch.Results second = ManualSearch.Run(files, "CF", timeBudgetMs: 300);
+                Assert.Contains("still being read", Assert.Single(second.Unreadable).Problem);
+                Assert.Equal(1, reads);
+
+                release.Set();
+                ManualSearch.Results third = ManualSearch.Run(files, "CF", timeBudgetMs: 5000);
+                Assert.Empty(third.Unreadable);
+                Assert.Equal(2, third.Hits.Single().Page);
+            }
+            finally
+            {
+                release.Set();
+                ManualSearch.ReadText = original;
+            }
+        }
+
+        [Fact]
+        public void PagesThatCouldntBeRead_AreNamed_AndTheRestIsStillSearched()
+        {
+            Write("8563E guide.txt", AnalyzerManual);
+            var files = ManualLibrary.At(_root).Candidates("8563E", "CF");
+            Func<ManualFile, ManualText.Result> original = ManualSearch.ReadText;
+            string damaged = "Intro\f" + ManualText.UnreadablePage + "\fCF Center Frequency\f" + ManualText.UnreadablePage;
+            ManualSearch.ReadText = f => new ManualText.Result(ManualText.Outcome.Extracted, damaged, null);
+            try
+            {
+                ManualSearch.Results results = ManualSearch.Run(files, "CF");
+
+                Assert.Equal(3, results.Hits.Single().Page);
+                Assert.Single(results.Searched);
+                Assert.Equal("pages 2 and 4 could not be read, so they weren't searched. The rest of the manual was.",
+                             Assert.Single(results.Unreadable).Problem);
+
+                ManualSearch.ReadText = f => new ManualText.Result(ManualText.Outcome.Extracted,
+                    ManualText.UnreadablePage + "\f" + ManualText.UnreadablePage, null);
+                results = ManualSearch.Run(files, "CF");
+                Assert.Empty(results.Searched);
+                Assert.Contains("none of its 2 page(s)", Assert.Single(results.Unreadable).Problem);
+            }
+            finally { ManualSearch.ReadText = original; }
+        }
+
+        [Fact]
         public void ASidecarTextFileIsUsedWhenThereIsNoExtractor()
         {
             // The route for a user with no Poppler: extract once, however they like, leave the .txt beside it.

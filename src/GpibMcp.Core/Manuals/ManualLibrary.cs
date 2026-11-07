@@ -29,6 +29,13 @@ namespace GpibMcp.Manuals
         /// </summary>
         public const int MaxFilesPerSearch = 12;
 
+        /// <summary>
+        /// Pages to ask the index for when the search is of one file. Its search can't be narrowed to a file, so
+        /// the library's best pages would otherwise fill the reply before any of that file's. 500 took 1.5 s on a
+        /// real library.
+        /// </summary>
+        public const int PagesForOneFile = 500;
+
         private readonly string _root;
 
         private ManualLibrary(string root) { _root = root; }
@@ -81,7 +88,8 @@ namespace GpibMcp.Manuals
         /// Everywhere else - which is the common "what is the command for X on a model Y" query - nothing
         /// changes and no process is started. Without an index, nothing changes anywhere.
         /// </summary>
-        public CandidateSelection Choose(string model, string query, int limit = MaxFilesPerSearch)
+        public CandidateSelection Choose(string model, string query, int limit = MaxFilesPerSearch,
+                                         int indexTimeoutMs = ManualForgeIndex.SearchTimeoutMs)
         {
             bool haveModel = !string.IsNullOrWhiteSpace(model);
             limit = Math.Max(1, limit);
@@ -109,7 +117,7 @@ namespace GpibMcp.Manuals
 
             // Ask for more than the cap: the model filter below can discard some, and the extra paths cost
             // nothing measurable (limit 5 and limit 30 differ by ~7 ms).
-            ManualForgeIndex.Result answer = ManualForgeIndex.Search(_root, query, model, limit * 4);
+            ManualForgeIndex.Result answer = ManualForgeIndex.Search(_root, query, model, limit * 4, indexTimeoutMs);
 
             var byContent = new List<ManualFile>();
             foreach (string path in answer.Paths)
@@ -142,13 +150,15 @@ namespace GpibMcp.Manuals
         /// apply as to choosing manuals - the caller's model still wins, and <paramref name="only"/> keeps it to
         /// one file - and without an index this starts no process and returns nothing.
         /// </summary>
-        public IReadOnlyList<ManualSearch.Hit> IndexedPages(string query, string model, ManualFile only, int limit)
+        public IReadOnlyList<ManualSearch.Hit> IndexedPages(string query, string model, ManualFile only, int limit,
+                                                            int timeoutMs = ManualForgeIndex.SearchTimeoutMs)
         {
             var hits = new List<ManualSearch.Hit>();
             if (!ManualForgeIndex.IsAvailable(_root)) return hits;
 
             bool haveModel = !string.IsNullOrWhiteSpace(model);
-            foreach (ManualForgeIndex.PageHit page in ManualForgeIndex.SearchPages(_root, query, model, Math.Max(1, limit) * 4).Pages)
+            int ask = only != null ? PagesForOneFile : Math.Max(1, limit) * 4;
+            foreach (ManualForgeIndex.PageHit page in ManualForgeIndex.SearchPages(_root, query, model, ask, timeoutMs).Pages)
             {
                 ManualFile file = Resolve(page.Path);    // as in Choose: nothing outside this root
                 if (file == null) continue;

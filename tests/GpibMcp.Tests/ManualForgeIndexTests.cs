@@ -19,6 +19,7 @@ namespace GpibMcp.Tests
     /// The "absent" and "failing" cases compare against the same search with the feature switched off, so
     /// "behaves exactly as it does today" is asserted rather than approximated.
     /// </summary>
+    [Collection("ManualLibraryEnvironment")]   // it sets the same process-wide variables as ManualSearchTests
     public class ManualForgeIndexTests : IDisposable
     {
         private readonly string _root;
@@ -175,6 +176,50 @@ namespace GpibMcp.Tests
             var pages = ((JArray)output.Structured["hits"]).Select(h => (int)h["page"]).ToArray();
             Assert.Equal(46, pages[0]);
             Assert.Equal(2, pages.Length);
+        }
+
+        [Fact]
+        public void AnIndexSnippetReplacesAPassageThatMatchedOnlyPartOfTheQuery_OnTheSamePage()
+        {
+            // The file's text for page 2 has GIF but not the rest, which only OCR recovered.
+            Write("54845A Guide.txt", "Intro.\n\fGIF only.\n");
+            CreateIndex();
+            PagesReply = Pages(new object[] { "54845A Guide.txt", 2, "[GIF] [TIF] [GRATicule]", true });
+            FakeManualForge(2);
+
+            ToolOutput output = Search(new JObject { ["query"] = "GIF TIF GRATicule", ["model"] = "54845A" });
+
+            var hit = (JObject)Assert.Single((JArray)output.Structured["hits"]);
+            Assert.Equal(2, (int)hit["page"]);
+            Assert.Equal("manualforge", (string)hit["source"]);
+        }
+
+        [Fact]
+        public void ASearchOfOneFile_AsksTheIndexForEnoughPagesToReachThatFile()
+        {
+            // The index can't be narrowed to a file, so the library's best pages would fill a short reply.
+            Write("8563E Guide.txt", "Nothing relevant.\n");
+            CreateIndex();
+            FakeManualForge(2);
+
+            Search(new JObject { ["query"] = "CF", ["model"] = "8563E", ["file"] = "8563E Guide.txt" });
+
+            Assert.Contains("--limit " + ManualLibrary.PagesForOneFile, File.ReadAllText(Path.Combine(_tools, "pages-args.txt")));
+        }
+
+        [Fact]
+        public void AnIndexLookupGivesUpAtTheTimeItWasGiven()
+        {
+            CreateIndex();
+            string tool = Path.Combine(_tools, "manualforge.cmd");
+            File.WriteAllText(tool, "@echo off\r\nping -n 6 127.0.0.1 >nul\r\nexit /b 2\r\n");
+            Environment.SetEnvironmentVariable("GPIB_MCP_MANUALFORGE", tool);
+
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            ManualForgeIndex.Result result = ManualForgeIndex.SearchPages(_root, "CF", null, 5, timeoutMs: 500);
+
+            Assert.Equal(ManualForgeIndex.Outcome.Failed, result.Outcome);
+            Assert.True(clock.ElapsedMilliseconds < 3000, clock.ElapsedMilliseconds + " ms");
         }
 
         [Fact]
