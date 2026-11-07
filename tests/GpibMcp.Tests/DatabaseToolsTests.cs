@@ -519,6 +519,11 @@ namespace GpibMcp.Tests
         [Theory]
         [InlineData("0", true)]
         [InlineData("+0,\"No error\"", true)]
+        [InlineData(":SYST:ERR 0,\"No error\"", true)]     // the 54845A with :SYSTem:HEADer ON
+        [InlineData(":SYSTEM:ERROR 0,\"No error\"", true)]
+        [InlineData(":SYST:ERR +0", true)]
+        [InlineData(":SYST:ERR -224,\"Illegal\"", false)]
+        [InlineData(":SYST:ERR 112", false)]
         [InlineData("", true)]
         [InlineData("112", false)]
         [InlineData("111,112", false)]

@@ -54,8 +54,11 @@ namespace GpibMcp.Instruments
             return result;
         }
 
-        /// <summary>An error-queue reply that means "no error": empty, or 0 / +0 (alone or before a message).</summary>
+        /// <summary>
+        /// An error-queue reply that means "no error": empty, or 0 / +0 (alone or before a message), after the
+        /// reply's name if the instrument's headers are on (:SYST:ERR 0,"No error").
+        /// </summary>
         public static bool IsNoError(string reply) =>
-            reply.Length == 0 || Regex.IsMatch(reply, @"^\+?0+(\s*,|\s*$)");
+            reply.Length == 0 || Regex.IsMatch(reply, @"^(:?[A-Za-z][\w:]*\s+)?\+?0+(\s*,|\s*$)");
     }
 }

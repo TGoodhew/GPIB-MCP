@@ -76,8 +76,9 @@ namespace GpibMcp.Instruments
     /// Reads a binary reply - an instrument's screen image, a waveform record - as bytes, never as text
     /// (#139). The header is parsed as it arrives, exactly the declared length is read over as many reads as
     /// it takes (binary data can contain 0x0A, so the termination character plays no part), and the
-    /// trailing terminator is consumed. A malformed or short block throws <see cref="BinaryBlockException"/>
-    /// saying what did arrive.
+    /// trailing terminator is consumed. The name an instrument puts before its reply when its headers are on
+    /// (":DISP:DATA #515766...") is skipped, so a capture doesn't depend on that setting or have to change it. A
+    /// malformed or short block throws <see cref="BinaryBlockException"/> saying what did arrive.
     /// </summary>
     public static class BinaryBlock
     {
@@ -89,6 +90,9 @@ namespace GpibMcp.Instruments
 
         /// <summary>Most whitespace skipped before the '#'.</summary>
         private const int MaxLeadingWhitespace = 16;
+
+        /// <summary>Longest reply name skipped before the '#': well past ":DISPLAY:DATA" in long form.</summary>
+        private const int MaxReplyName = 64;
 
         /// <summary>Most bytes accepted after a definite-length block: its terminator, CR LF at most.</summary>
         private const int MaxTerminatorBytes = 2;
@@ -118,17 +122,21 @@ namespace GpibMcp.Instruments
             var seen = new MemoryStream();   // everything read, for the error report
             bool more = true;
 
-            // '#', after any leading whitespace.
-            byte b;
-            int skipped = 0;
-            do
+            // '#', after any leading whitespace and the reply's name, if the instrument sends one. Only a single
+            // word is skipped, so text that merely starts like one is still reported as not being a block.
+            byte b = FirstAfterWhitespace(read, seen, ref more, silent);
+            if (StartsReplyName(b))
             {
-                b = ReadByte(read, seen, ref more, "the block header", silent);
-                if (!IsWhitespace(b)) break;
-                if (++skipped > MaxLeadingWhitespace) throw Malformed("no '#' block header", seen, 0, null);
-            } while (true);
+                int name = 0;
+                while (IsInReplyName(b))
+                {
+                    if (++name > MaxReplyName) throw Malformed(NotABlock, seen, 0, null);
+                    b = ReadByte(read, seen, ref more, "the block header", silent);
+                }
+                if (IsWhitespace(b)) b = FirstAfterWhitespace(read, seen, ref more, silent);
+            }
             if (b != (byte)'#')
-                throw Malformed("the reply doesn't start with an IEEE 488.2 block header '#'", seen, 0, null);
+                throw Malformed(NotABlock, seen, 0, null);
 
             byte digit = ReadByte(read, seen, ref more, "the block header", silent);
             if (digit < (byte)'0' || digit > (byte)'9')
@@ -185,6 +193,8 @@ namespace GpibMcp.Instruments
             return new BinaryBlockResult(payload, header, length);
         }
 
+        private const string NotABlock = "the reply doesn't start with an IEEE 488.2 block header '#'";
+
         private const string TimedOutWhy = "the read timed out before the instrument ended its message, so the reply is incomplete";
 
         private static byte ReadByte(ReplyReader.ReadChunk read, MemoryStream seen, ref bool more, string what, Func<bool> silent)
@@ -196,7 +206,23 @@ namespace GpibMcp.Instruments
             return one[0];
         }
 
+        private static byte FirstAfterWhitespace(ReplyReader.ReadChunk read, MemoryStream seen, ref bool more, Func<bool> silent)
+        {
+            for (int skipped = 0; ; skipped++)
+            {
+                byte b = ReadByte(read, seen, ref more, "the block header", silent);
+                if (!IsWhitespace(b)) return b;
+                if (skipped >= MaxLeadingWhitespace) throw Malformed("no '#' block header", seen, 0, null);
+            }
+        }
+
         private static bool IsWhitespace(byte b) => b == (byte)' ' || b == (byte)'\t' || b == (byte)'\r' || b == (byte)'\n';
+
+        private static bool IsLetter(byte b) => (b >= (byte)'A' && b <= (byte)'Z') || (b >= (byte)'a' && b <= (byte)'z');
+
+        private static bool StartsReplyName(byte b) => b == (byte)':' || IsLetter(b);
+
+        private static bool IsInReplyName(byte b) => StartsReplyName(b) || (b >= (byte)'0' && b <= (byte)'9') || b == (byte)'_';
 
         private static BinaryBlockException Malformed(string why, MemoryStream seen, long got, long? expected, byte[] payload = null)
         {
