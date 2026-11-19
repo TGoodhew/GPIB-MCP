@@ -103,7 +103,8 @@ Compress-Archive -Path "$stageDir\*" -DestinationPath $zipPath
 
 # Claude Desktop Extension bundle (.mcpb) for one-click install (#67), built from the same staged server.
 $mcpbPath = Join-Path $OutputDir "GpibMcp-$Version.mcpb"
-& (Join-Path $PSScriptRoot "Build-Mcpb.ps1") -SourceDir $stageDir -Version $Version -OutFile $mcpbPath
+# Signed builds pack it without npx: nothing fetched from npm runs beside the signing session.
+& (Join-Path $PSScriptRoot "Build-Mcpb.ps1") -SourceDir $stageDir -Version $Version -OutFile $mcpbPath -NoMcpbCli:([bool]$SignScript)
 
 # The installer (GpibMcp-Setup-<version>.exe), from the same build. Needs Inno Setup: a release must carry
 # it, so publishing without it is an error; a local run without it just skips it.
