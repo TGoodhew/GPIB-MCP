@@ -126,8 +126,9 @@ anything. If one is missing, or **older than the version this release was built 
 to install, and offers to open NI's download pages. Having NI installed isn't always enough: the server binds
 to the NI version it was built with, or a newer one.
 
-The installer is not signed yet, so Windows may say "Windows protected your PC". Choose **More info**, then
-**Run anyway**.
+From 1.3.3 the installer, its uninstaller and GPIB MCP's own programs are signed by **The Schnauzer Group
+LLC**. Windows may still say "Windows protected your PC" while the certificate builds its reputation with
+SmartScreen. Check the publisher it shows, then choose **More info** and **Run anyway**.
 
 Setup asks:
 

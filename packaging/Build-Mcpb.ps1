@@ -20,7 +20,10 @@
 param(
     [Parameter(Mandatory)][string]$SourceDir,   # staged build dir (GpibMcp.exe + DLLs + data\)
     [Parameter(Mandatory)][string]$Version,
-    [Parameter(Mandatory)][string]$OutFile       # the .mcpb to produce
+    [Parameter(Mandatory)][string]$OutFile,      # the .mcpb to produce
+    # Pack it here, without `npx @anthropic-ai/mcpb`. Generate-Packages.ps1 passes this in a signed build:
+    # code npx fetches must not run where a signing session could be used to sign as the publisher.
+    [switch]$NoMcpbCli
 )
 
 $ErrorActionPreference = "Stop"
@@ -100,7 +103,7 @@ try {
     if (Test-Path $OutFile) { Remove-Item $OutFile -Force }
 
     $packed = $false
-    if (Get-Command npx -ErrorAction SilentlyContinue) {
+    if (-not $NoMcpbCli -and (Get-Command npx -ErrorAction SilentlyContinue)) {
         Step "Packing with @anthropic-ai/mcpb (validates the manifest)"
         & npx --yes @anthropic-ai/mcpb pack $packDir $OutFile 2>&1 | Write-Host
         if ($LASTEXITCODE -eq 0 -and (Test-Path $OutFile)) { $packed = $true }

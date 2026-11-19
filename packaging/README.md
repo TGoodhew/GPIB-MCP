@@ -95,6 +95,7 @@ dist/
 | `-SkipBuild` | off | reuse the existing build output (skip `dotnet build`) |
 | `-PublishRelease` | off | publish a GitHub Release (`v<Version>`) with the zip via `gh` |
 | `-OutputDir` | `dist` | output root |
+| `-SignScript` | `$env:GPIBMCP_SIGN_SCRIPT` | a maintainer's signing script, kept outside the repo (as ManualForge's is). It's given file paths, and must sign and timestamp them and fail if it can't. GPIB MCP's own exe and DLLs are signed before anything is packed, so the zip, `.mcpb` and installer carry signed programs; Setup and its uninstaller are signed too. Without it the build is unsigned and warns. `release.yml` passes `Sign-ArtifactSigning.ps1` (below); a maintainer building locally can pass their own. |
 
 ## Continuous integration (GitHub Actions)
 
@@ -105,7 +106,16 @@ which only exist on a machine with the NI drivers installed — a stock GitHub-h
 | Workflow | Trigger | What it does |
 |---|---|---|
 | **`ci.yml`** | push to `main`, PRs into `main` | `dotnet build` + `dotnet test` (the hardware-free suite) — catches regressions before a release. |
-| **`release.yml`** | push a `v*` tag (or manual **Run workflow** with a version) | builds + tests, then runs `Generate-Packages.ps1 -SkipBuild -PublishRelease` to build and **post the complete asset set** to the GitHub Release: the **zip**, the **`.mcpb`**, **`Install-GpibMcp.ps1`**, and **`Start-GpibMcpHttp.ps1`**. |
+| **`release.yml`** | push a `v*` tag (or manual **Run workflow** with a version) | builds + tests, signs in to Azure, then runs `Generate-Packages.ps1 -SkipBuild -SignScript ./packaging/Sign-ArtifactSigning.ps1 -PublishRelease` to build, **sign**, and **post the complete asset set** to the GitHub Release: the **installer**, the **zip**, the **`.mcpb`**, **`Install-GpibMcp.ps1`**, and **`Start-GpibMcpHttp.ps1`**. |
+
+**Signing** uses Azure Artifact Signing with no stored secret. `azure/login` exchanges the job's GitHub OIDC
+token for the Entra app named by the `release` environment's `AZURE_CLIENT_ID` variable. That app trusts only
+this repository's `release` environment (federated credential subject
+`repo:TGoodhew/GPIB-MCP:environment:release`), and its one role is *Artifact Signing Certificate Profile
+Signer* on the `SchnauzerPublic` profile. `Sign-ArtifactSigning.ps1` then signs with signtool and the
+`Microsoft.ArtifactSigning.Client` dlib from NuGet, which it pins and checks is signed by Microsoft. The
+endpoint, account and profile are the environment's `ARTIFACT_SIGNING_*` variables. An unsigned build never
+overwrites an existing release's assets.
 
 **Cut a release:** tag the commit and push — e.g. `git tag v0.3.0 && git push origin v0.3.0` — or use
 **Actions → Release → Run workflow** and enter the version. Publishing is **idempotent**: re-running an
@@ -113,8 +123,11 @@ existing tag refreshes that release's notes and re-uploads the assets (`gh relea
 failing. The release step authenticates `gh` with the workflow's `GITHUB_TOKEN` (`permissions: contents: write`).
 
 **One-time runner setup:** register a self-hosted runner (repo **Settings → Actions → Runners → New runner**)
-on the bench PC, with the default `self-hosted` + `Windows` labels, and ensure **NI-VISA/NI-488.2**, the
-**.NET SDK**, and the **`gh` CLI** are installed (they already are on the machine that builds locally today).
+on the bench PC as a service, with the default `self-hosted` + `Windows` labels. The service runs as NETWORK
+SERVICE, which sees only what is installed **for all users**: **NI-VISA/NI-488.2**, the **.NET SDK**, the
+**`gh` CLI**, the **Azure CLI**, the **Windows SDK** (signtool), **Inno Setup 6**
+(`winget install JRSoftware.InnoSetup --scope machine`) and **PowerShell 7** in `C:\Program Files\PowerShell\7`
+on the machine `PATH`. The Microsoft Store PowerShell is per user, so the service can't run it.
 
 ## Notes
 - **NI-VISA build dependency:** the server is built on a machine with the NI tooling (locally, or the
