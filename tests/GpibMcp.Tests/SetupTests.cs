@@ -36,10 +36,15 @@ namespace GpibMcp.Tests
             try { Directory.Delete(_home, recursive: true); } catch { /* best effort */ }
         }
 
+        private readonly Dictionary<string, string> _variables = new Dictionary<string, string>();
+        private readonly List<RunningProcess> _running = new List<RunningProcess>();
+
         private McpEnvironment Environment() => new McpEnvironment(
             _home, _appData, _localAppData, Path.Combine(_home, "ProgramFiles"),
             command => command == "claude" && _claudeOnPath,
-            (command, arguments) => { _claudeCalls.Add(arguments.ToArray()); return new ProcessResult(0, ""); });
+            (command, arguments) => { _claudeCalls.Add(arguments.ToArray()); return new ProcessResult(0, ""); },
+            name => _variables.TryGetValue(name, out string value) ? value : null,
+            () => _running);
 
         private McpClient Client(string id) => McpClients.All(Environment()).Single(c => c.Id == id);
 
@@ -151,6 +156,148 @@ namespace GpibMcp.Tests
             Assert.True(client.IsInstalled);
             client.Register(Entry);
             Assert.True(File.Exists(Path.Combine(store, "claude_desktop_config.json")));
+        }
+
+        [Fact]
+        public void ANewerStoreBuildIsFoundInItsClaudeDataFolder()
+        {
+            // Newer Store builds run with --user-data-dir=%LOCALAPPDATA%\Claude-Data\claude_<id> and no longer
+            // read the package's virtualised AppData, though the old folder (and its config) is still there.
+            string old = Path.Combine(_localAppData, "Packages", "Claude_abc123", "LocalCache", "Roaming", "Claude");
+            string moved = Path.Combine(_localAppData, "Claude-Data", "claude_abc123");
+            Directory.CreateDirectory(old);
+            Directory.CreateDirectory(moved);
+            McpClient client = Client("claude-desktop-store");
+
+            Assert.True(client.IsInstalled);
+            client.Register(Entry);
+            Assert.True(File.Exists(Path.Combine(moved, "claude_desktop_config.json")));
+            Assert.False(File.Exists(Path.Combine(old, "claude_desktop_config.json")));
+        }
+
+        private string OldStoreDir(string family = "Claude_abc123") =>
+            Path.Combine(_localAppData, "Packages", family, "LocalCache", "Roaming", "Claude");
+
+        private string MovedStoreDir(string family = "Claude_abc123") =>
+            Path.Combine(_localAppData, "Claude-Data", family.ToLowerInvariant());
+
+        private static string StoreExe(string folder) =>
+            @"C:\Program Files\WindowsApps\" + folder + @"\app\Claude.exe";
+
+        [Fact]
+        public void TheMarkerLeftInTheOldFolderMeansTheDataHasMoved()
+        {
+            // The move can leave the marker before Claude-Data has anything this would recognise.
+            Directory.CreateDirectory(OldStoreDir());
+            File.WriteAllText(Path.Combine(OldStoreDir(), ".user-data-left.claude_abc123"), "{\"v\":1}");
+
+            Assert.Equal(Path.Combine(MovedStoreDir(), "claude_desktop_config.json"), Client("claude-desktop-store").Location);
+        }
+
+        [Fact]
+        public void ARunningClaudeDesktopsOwnDataFolderWins()
+        {
+            Directory.CreateDirectory(OldStoreDir());
+            Directory.CreateDirectory(MovedStoreDir());
+            string actual = Path.Combine(_home, "Somewhere Else", "claude");
+            // Claude Code is claude.exe too, and isn't Claude Desktop: its command line is ignored.
+            _running.Add(new RunningProcess(@"C:\Users\x\.vscode\extensions\claude-code\claude.exe", "claude.exe --user-data-dir=C:\\wrong"));
+            _running.Add(new RunningProcess(StoreExe("Claude_6.6395.0.0_x64__abc123"),
+                "\"Claude.exe\" --type=renderer --user-data-dir=\"" + actual + "\" --lang=en-US"));
+
+            McpClient client = Client("claude-desktop-store");
+            Assert.True(client.IsInstalled);
+            Assert.Equal(Path.Combine(actual, "claude_desktop_config.json"), client.Location);
+        }
+
+        [Fact]
+        public void ClaudesOwnOverrideVariableIsFollowed()
+        {
+            Directory.CreateDirectory(OldStoreDir());
+            Directory.CreateDirectory(MovedStoreDir());
+            string overridden = Path.Combine(_home, "ClaudeData");
+            _variables[ClaudeDesktopStore.UserDataVariable] = overridden;
+
+            Assert.Equal(Path.Combine(overridden, "claude_desktop_config.json"), Client("claude-desktop-store").Location);
+        }
+
+        [Fact]
+        public void TheOtherStoreIdentityIsFoundToo()
+        {
+            Directory.CreateDirectory(OldStoreDir("AnthropicPBC.Claude_fnn82j28hfe8t"));
+            Directory.CreateDirectory(MovedStoreDir("AnthropicPBC.Claude_fnn82j28hfe8t"));
+
+            McpClient client = Client("claude-desktop-store");
+            Assert.True(client.IsInstalled);
+            Assert.Equal(Path.Combine(MovedStoreDir("AnthropicPBC.Claude_fnn82j28hfe8t"), "claude_desktop_config.json"), client.Location);
+        }
+
+        [Fact]
+        public void AnotherPackageWhoseNameStartsWithClaudeIsNotClaudeDesktop()
+        {
+            Directory.CreateDirectory(Path.Combine(_localAppData, "Packages", "Claude_Something_Else"));
+            Assert.False(Client("claude-desktop-store").IsInstalled);
+        }
+
+        [Theory]
+        [InlineData(@"C:\Program Files\WindowsApps\Claude_6.6395.0.0_x64__pzs8sxrjxfjjc\app\Claude.exe", "Claude_pzs8sxrjxfjjc")]
+        [InlineData(@"C:\Program Files\WindowsApps\AnthropicPBC.Claude_1.2.3.0_x64__fnn82j28hfe8t\app\Claude.exe", "AnthropicPBC.Claude_fnn82j28hfe8t")]
+        [InlineData(@"C:\Users\x\AppData\Local\AnthropicClaude\app-1.0\claude.exe", null)]
+        [InlineData(@"C:\Program Files\WindowsApps\Other_1.0.0.0_x64__abc\app\Claude.exe", null)]
+        public void TheStorePackageIsReadFromTheProgramsPath(string path, string family)
+        {
+            Assert.Equal(family, ClaudeDesktopStore.FamilyOf(path));
+        }
+
+        private void RecordRegistration(string client, string location, string previous = null)
+        {
+            string record = McpRegistrations.PathFor(Environment());
+            Directory.CreateDirectory(Path.GetDirectoryName(record));
+            File.WriteAllText(record, Newtonsoft.Json.JsonConvert.SerializeObject(new[]
+            {
+                new McpRegistration { Client = client, Location = location, Previous = previous }
+            }));
+        }
+
+        [Fact]
+        public void RegisteringAgainMovesAnEntryAnEarlierInstallLeftInTheOldFile()
+        {
+            // 1.3.x registered in the old file; Claude Desktop has since moved to Claude-Data and stopped reading it.
+            Directory.CreateDirectory(OldStoreDir());
+            string oldConfig = Path.Combine(OldStoreDir(), "claude_desktop_config.json");
+            File.WriteAllText(oldConfig, "{ \"mcpServers\": { \"manualforge\": { \"command\": \"mf.exe\" }, " +
+                                         "\"gpib\": { \"command\": \"old.exe\" } } }");
+            RecordRegistration("claude-desktop-store", oldConfig);
+            Directory.CreateDirectory(MovedStoreDir());
+            McpClient client = Client("claude-desktop-store");
+
+            McpRegistrations record = McpRegistrations.Load(Environment());
+            Assert.True(record.Register(client, Entry).Changed);
+
+            JObject oldServers = (JObject)JObject.Parse(File.ReadAllText(oldConfig))["mcpServers"];
+            Assert.Null(oldServers["gpib"]);                                    // taken out where it was
+            Assert.NotNull(oldServers["manualforge"]);                          // and nothing else
+            Assert.Equal(client.Location, McpRegistrations.Load(Environment()).Entries.Single().Location);
+            Assert.Equal(McpClientState.Registered, client.State(Entry));
+
+            McpRegistrations.Load(Environment()).Remove(new[] { client });     // uninstalling undoes the new one
+            Assert.False(File.Exists(client.Location));                         // a file it created goes with it
+        }
+
+        [Fact]
+        public void UninstallingRemovesTheEntryFromTheFileItWasPutIn()
+        {
+            Directory.CreateDirectory(OldStoreDir());
+            string oldConfig = Path.Combine(OldStoreDir(), "claude_desktop_config.json");
+            File.WriteAllText(oldConfig, "{ \"mcpServers\": { \"gpib\": { \"command\": \"old.exe\" } } }");
+            RecordRegistration("claude-desktop-store", oldConfig);
+            Directory.CreateDirectory(MovedStoreDir());
+
+            IReadOnlyList<McpRemoval> removals = McpRegistrations.Load(Environment()).Remove(new[] { Client("claude-desktop-store") });
+
+            Assert.True(removals.Single().Change.Changed);
+            Assert.False(File.Exists(oldConfig) && JObject.Parse(File.ReadAllText(oldConfig))["mcpServers"]?["gpib"] != null);
+            Assert.Empty(McpRegistrations.Load(Environment()).Entries);
         }
 
         // ---------------------------------------------------------------- Claude Code

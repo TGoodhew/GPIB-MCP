@@ -15,7 +15,9 @@ namespace GpibMcp.Setup
     public sealed class McpEnvironment
     {
         public McpEnvironment(string userProfile, string appData, string localAppData, string programFiles,
-                              Func<string, bool> onPath, Func<string, IReadOnlyList<string>, ProcessResult> run)
+                              Func<string, bool> onPath, Func<string, IReadOnlyList<string>, ProcessResult> run,
+                              Func<string, string> variable = null,
+                              Func<IReadOnlyList<RunningProcess>> runningClaude = null)
         {
             UserProfile = userProfile;
             AppData = appData;
@@ -23,6 +25,8 @@ namespace GpibMcp.Setup
             ProgramFiles = programFiles;
             OnPath = onPath;
             Run = run;
+            Variable = variable ?? (_ => null);
+            RunningClaude = runningClaude ?? (() => new RunningProcess[0]);
         }
 
         public string UserProfile { get; }
@@ -36,18 +40,57 @@ namespace GpibMcp.Setup
         /// <summary>Runs a command with arguments and returns its exit code and output.</summary>
         public Func<string, IReadOnlyList<string>, ProcessResult> Run { get; }
 
-        public static McpEnvironment FromProcess() => new McpEnvironment(
-            Variable("USERPROFILE", Environment.SpecialFolder.UserProfile),
-            Variable("APPDATA", Environment.SpecialFolder.ApplicationData),
-            Variable("LOCALAPPDATA", Environment.SpecialFolder.LocalApplicationData),
-            Variable("ProgramFiles", Environment.SpecialFolder.ProgramFiles),
-            IsOnPath,
-            RunProcess);
+        /// <summary>An environment variable, or null when it isn't set.</summary>
+        public Func<string, string> Variable { get; }
 
-        private static string Variable(string name, Environment.SpecialFolder fallback)
+        /// <summary>
+        /// The claude.exe processes running now, with their command lines, so Claude Desktop's own
+        /// --user-data-dir can say where its settings are (#175). Empty when none, or when they can't be read.
+        /// </summary>
+        public Func<IReadOnlyList<RunningProcess>> RunningClaude { get; }
+
+        public static McpEnvironment FromProcess() => new McpEnvironment(
+            Folder("USERPROFILE", Environment.SpecialFolder.UserProfile),
+            Folder("APPDATA", Environment.SpecialFolder.ApplicationData),
+            Folder("LOCALAPPDATA", Environment.SpecialFolder.LocalApplicationData),
+            Folder("ProgramFiles", Environment.SpecialFolder.ProgramFiles),
+            IsOnPath,
+            RunProcess,
+            name => { string value = Environment.GetEnvironmentVariable(name); return string.IsNullOrEmpty(value) ? null : value; },
+            FindRunningClaude);
+
+        private static string Folder(string name, Environment.SpecialFolder fallback)
         {
             string value = Environment.GetEnvironmentVariable(name);
             return string.IsNullOrEmpty(value) ? Environment.GetFolderPath(fallback) : value;
+        }
+
+        private static IReadOnlyList<RunningProcess> FindRunningClaude()
+        {
+            var found = new List<RunningProcess>();
+            try
+            {
+                using (var searcher = new System.Management.ManagementObjectSearcher(
+                           "SELECT ExecutablePath, CommandLine FROM Win32_Process WHERE Name = 'claude.exe'"))
+                using (var results = searcher.Get())
+                {
+                    foreach (var process in results)
+                    {
+                        using (process)
+                        {
+                            var path = process["ExecutablePath"] as string;
+                            var commandLine = process["CommandLine"] as string;
+                            if (path != null && commandLine != null) found.Add(new RunningProcess(path, commandLine));
+                        }
+                    }
+                }
+            }
+            catch (Exception e) when (e is System.Management.ManagementException || e is System.Runtime.InteropServices.COMException ||
+                                      e is UnauthorizedAccessException)
+            {
+                // No WMI, or not allowed to ask: fall back to what's on disk.
+            }
+            return found;
         }
 
         private static bool IsOnPath(string command) => FindOnPath(command) != null;
@@ -95,6 +138,19 @@ namespace GpibMcp.Setup
                 return new ProcessResult(process.ExitCode, output + stderr.Result);
             }
         }
+    }
+
+    /// <summary>A process that is running: its program and its whole command line.</summary>
+    public sealed class RunningProcess
+    {
+        public RunningProcess(string executablePath, string commandLine)
+        {
+            ExecutablePath = executablePath ?? "";
+            CommandLine = commandLine ?? "";
+        }
+
+        public string ExecutablePath { get; }
+        public string CommandLine { get; }
     }
 
     public sealed class ProcessResult

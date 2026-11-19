@@ -107,6 +107,12 @@ namespace GpibMcp.Setup
         public virtual string RestartNote => null;
 
         /// <summary>
+        /// This client's settings at another location: where an earlier install registered it, when the client
+        /// has since moved them (Claude Desktop, #175). Null for a client whose settings don't move.
+        /// </summary>
+        public virtual McpClient At(string location) => null;
+
+        /// <summary>
         /// Copies a settings file aside the first time it is changed: beside it, named for this server, so the
         /// user can see whose it is and put it back. Never overwritten, so it stays the file as it was before.
         /// </summary>
@@ -399,6 +405,9 @@ namespace GpibMcp.Setup
         {
             _settingsDir = settingsDir;
         }
+
+        public override McpClient At(string location) =>
+            new ClaudeDesktopClient(Id, DisplayName, Path.GetDirectoryName(location), () => File.Exists(location));
 
         public override McpClientState State(McpServerEntry entry)
         {
@@ -733,15 +742,16 @@ namespace GpibMcp.Setup
             if (environment == null) throw new ArgumentNullException(nameof(environment));
             string home = environment.UserProfile;
 
-            // The Microsoft Store build keeps its settings in its package's virtualised AppData, not %APPDATA%.
+            // The Microsoft Store build doesn't use %APPDATA%: see ClaudeDesktopStore.
             string packages = Path.Combine(environment.LocalAppData, "Packages");
-            string store = Directory.Exists(packages) ? Directory.GetDirectories(packages, "Claude_*").FirstOrDefault() : null;
+            string storeSettings;
+            bool store = ClaudeDesktopStore.TryFind(environment, out storeSettings);
 
             return new McpClient[]
             {
                 new ClaudeDesktopClient("claude-desktop-store", "Claude Desktop (Microsoft Store)",
-                    Path.Combine(store ?? Path.Combine(packages, "Claude_"), "LocalCache", "Roaming", "Claude"),
-                    () => store != null),
+                    storeSettings ?? Path.Combine(packages, "Claude_", "LocalCache", "Roaming", "Claude"),
+                    () => store),
                 new ClaudeDesktopClient("claude-desktop", "Claude Desktop",
                     Path.Combine(environment.AppData, "Claude"),
                     () => Directory.Exists(Path.Combine(environment.AppData, "Claude"))),

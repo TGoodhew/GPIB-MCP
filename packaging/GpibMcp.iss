@@ -285,7 +285,9 @@ begin
   Result := '';
   if Name = 'claude.exe' then
   begin
-    if (Pos('\windowsapps\claude_', Path) > 0) or (Pos('\anthropicclaude\', Path) > 0) then
+    { The Store build is published as Claude_ and as AnthropicPBC.Claude_ (#175). }
+    if (Pos('\windowsapps\claude_', Path) > 0) or (Pos('\windowsapps\anthropicpbc.claude_', Path) > 0) or
+       (Pos('\anthropicclaude\', Path) > 0) then
       Result := 'Claude Desktop'
     else
       Result := 'Claude Code';
