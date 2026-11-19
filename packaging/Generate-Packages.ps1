@@ -24,6 +24,10 @@
 
     Nothing is published unless you pass -PublishRelease (which calls `gh release create`).
 
+    With -SignScript (or GPIBMCP_SIGN_SCRIPT), GPIB MCP's own programs are signed in the stage before anything
+    is packed, so the zip, the .mcpb and the installer all carry signed programs, and Setup and its
+    uninstaller are signed too (Build-Installer.ps1). The .mcpb file itself is not Authenticode-signed.
+
 .EXAMPLE
     ./packaging/Generate-Packages.ps1
         Build + stage + emit all client packages under dist/ (no publish).
@@ -35,6 +39,10 @@
 .EXAMPLE
     ./packaging/Generate-Packages.ps1 -Version 1.0.0 -PublishRelease
         Build, emit, and publish a GitHub Release (tag v1.0.0) with the zip attached.
+
+.EXAMPLE
+    ./packaging/Generate-Packages.ps1 -Version 1.0.0 -SignScript C:\signing\Sign-Files.ps1 -PublishRelease
+        The same, with every program signed.
 #>
 [CmdletBinding()]
 param(
@@ -46,7 +54,9 @@ param(
     [string]$Configuration = "Release",
     [switch]$SkipBuild,
     [switch]$PublishRelease,
-    [string]$OutputDir
+    [string]$OutputDir,
+    # A maintainer's signing script (see Sign-OwnFiles.ps1); kept outside the repository.
+    [string]$SignScript = $env:GPIBMCP_SIGN_SCRIPT
 )
 
 $ErrorActionPreference = "Stop"
@@ -78,6 +88,15 @@ if (Test-Path $stageDir) { Remove-Item $stageDir -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stageDir | Out-Null
 Copy-Item "$buildOut\*" $stageDir -Recurse -Force
 
+# Signed once here, so the zip, the .mcpb and the installer below all carry the same signed programs.
+if ($SignScript) {
+    Write-Step "Signing GPIB MCP's own programs"
+    & (Join-Path $PSScriptRoot "Sign-OwnFiles.ps1") -Directory $stageDir -SignScript $SignScript
+}
+else {
+    Write-Warning "Not signed: no -SignScript and no GPIBMCP_SIGN_SCRIPT."
+}
+
 Write-Step "Zipping -> $zipPath"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 Compress-Archive -Path "$stageDir\*" -DestinationPath $zipPath
@@ -90,7 +109,9 @@ $mcpbPath = Join-Path $OutputDir "GpibMcp-$Version.mcpb"
 # it, so publishing without it is an error; a local run without it just skips it.
 $setupPath = Join-Path $OutputDir "GpibMcp-Setup-$Version.exe"
 try {
-    $null = & (Join-Path $PSScriptRoot "Build-Installer.ps1") -Version $Version -SkipBuild -Configuration $Configuration -OutputDir $OutputDir
+    $installerArgs = @{ Version = $Version; SkipBuild = $true; Configuration = $Configuration; OutputDir = $OutputDir; SourceDir = $stageDir }
+    if ($SignScript) { $installerArgs.SignScript = $SignScript }
+    $null = & (Join-Path $PSScriptRoot "Build-Installer.ps1") @installerArgs
 }
 catch {
     if ($PublishRelease) { throw }
@@ -195,6 +216,10 @@ See ``packaging/copilot`` and ``packaging/chatgpt`` for the connector docs.
 
 Or download ``$stageName.zip`` below and unzip to ``%LOCALAPPDATA%\Programs\GpibMcp``.
 "@
+    if ($SignScript) {
+        $signer = (Get-AuthenticodeSignature (Join-Path $stageDir "GpibMcp.exe")).SignerCertificate.GetNameInfo('SimpleName', $false)
+        $notes += "`n`nSetup, its uninstaller and GPIB MCP's own programs are signed by **$signer**."
+    }
     $assets = @($zipPath)
     if (Test-Path $setupPath) { $assets += $setupPath }
     if (Test-Path $mcpbPath)  { $assets += $mcpbPath }
@@ -206,6 +231,10 @@ Or download ``$stageName.zip`` below and unzip to ``%LOCALAPPDATA%\Programs\Gpib
     # instead of failing with "release already exists".
     & gh release view "v$Version" *> $null
     if ($LASTEXITCODE -eq 0) {
+        # Releases are signed: a run that couldn't sign (no -SignScript) must not replace signed assets.
+        if (-not $SignScript) {
+            throw "Release v$Version already exists, and this build is unsigned: not replacing its assets. Re-run with -SignScript to refresh it."
+        }
         Write-Step "Release v$Version already exists - updating notes and re-uploading assets"
         & gh release edit "v$Version" --title "GPIB MCP $Version" --notes $notes
         if ($LASTEXITCODE -ne 0) { throw "gh release edit failed (exit $LASTEXITCODE)" }

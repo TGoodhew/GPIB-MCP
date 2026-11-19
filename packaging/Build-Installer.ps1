@@ -14,10 +14,18 @@
     anything, and stops with links to NI's downloads when NI-VISA or NI-488.2 is missing or older than this
     build needs (see GpibMcp.iss).
 
+    With -SignScript, GPIB MCP's own programs are signed in the stage (step 2, Sign-OwnFiles.ps1), and Inno
+    Setup signs the Setup program and the uninstaller it builds (step 3), all with that script. It is given
+    the files to sign, and must sign and timestamp them and fail if it cannot. The signing account and its
+    tools live outside this repository, so the script's path is given here, or in GPIBMCP_SIGN_SCRIPT, never
+    written into it. Without one the build is unsigned, and says so.
+
 .EXAMPLE
     ./packaging/Build-Installer.ps1 -Version 0.4.0
 .EXAMPLE
     ./packaging/Build-Installer.ps1 -Version 0.4.0 -SkipBuild     # after `dotnet build ... -p:Version=0.4.0`
+.EXAMPLE
+    ./packaging/Build-Installer.ps1 -Version 0.4.0 -SignScript C:\signing\Sign-Files.ps1
 #>
 [CmdletBinding()]
 param(
@@ -25,6 +33,10 @@ param(
     [switch] $SkipBuild,
     [string] $Configuration = 'Release',
     [string] $OutputDir,
+    # The build to package; defaults to the Release x86 build output. Generate-Packages.ps1 passes its own
+    # stage, which it has already signed.
+    [string] $SourceDir,
+    [string] $SignScript = $env:GPIBMCP_SIGN_SCRIPT,
     [string] $Iscc = (@("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
                         "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1)
 )
@@ -32,7 +44,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 if (-not $OutputDir) { $OutputDir = Join-Path $repo 'dist' }
-$buildOut = Join-Path $repo "src\GpibMcp\bin\x86\$Configuration\net472"
+$buildOut = if ($SourceDir) { $SourceDir } else { Join-Path $repo "src\GpibMcp\bin\x86\$Configuration\net472" }
 $stage = Join-Path $OutputDir 'installer-stage'
 
 function Write-Step([string] $text) { Write-Host "==> $text" -ForegroundColor Cyan }
@@ -74,6 +86,15 @@ if ($reported -notlike "$Version*") {
 $files = Get-ChildItem $stage -Recurse -File
 Write-Host ("    {0}: {1} files, {2:N1} MB" -f $reported, $files.Count, (($files | Measure-Object Length -Sum).Sum / 1MB))
 
+# GPIB MCP's own programs only: everyone else's DLLs are theirs to sign.
+if ($SignScript) {
+    Write-Step 'Signing GPIB MCP''s own programs'
+    & (Join-Path $PSScriptRoot 'Sign-OwnFiles.ps1') -Directory $stage -SignScript $SignScript
+}
+else {
+    Write-Warning 'Not signed: no -SignScript and no GPIBMCP_SIGN_SCRIPT.'
+}
+
 # ---- 3. compile -----------------------------------------------------------------------------------
 Write-Step 'Compiling the installer'
 $defines = [ordered]@{
@@ -84,12 +105,19 @@ $defines = [ordered]@{
     OutputDir   = $OutputDir
     RepoDir     = $repo
 }
-$arguments = @($defines.GetEnumerator() | ForEach-Object { "/D$($_.Key)=$($_.Value)" }) + (Join-Path $PSScriptRoot 'GpibMcp.iss')
+$arguments = @($defines.GetEnumerator() | ForEach-Object { "/D$($_.Key)=$($_.Value)" })
+if ($SignScript) {
+    # Inno Setup runs this for Setup and for the uninstaller it builds into it; $f is the file, $q a quote.
+    $shell = (Get-Process -Id $PID).Path
+    $arguments += '/DSign', "/Sgpibmcp=`$q$shell`$q -NoProfile -ExecutionPolicy Bypass -File `$q$((Resolve-Path $SignScript).Path)`$q `$f"
+}
+$arguments += Join-Path $PSScriptRoot 'GpibMcp.iss'
 & $Iscc /Q @arguments
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed (exit $LASTEXITCODE)." }
 
 $package = Join-Path $OutputDir "GpibMcp-Setup-$Version.exe"
 if (-not (Test-Path $package)) { throw "Inno Setup reported success but $package is not there." }
+if ($SignScript -and (Get-AuthenticodeSignature $package).Status -ne 'Valid') { throw "$package is not validly signed." }
 $hash = (Get-FileHash $package -Algorithm SHA256).Hash.ToLowerInvariant()
 Write-Host ("    {0}: {1:N1} MB, SHA-256 {2}" -f (Split-Path $package -Leaf), ((Get-Item $package).Length / 1MB), $hash)
 

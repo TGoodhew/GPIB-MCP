@@ -28,6 +28,7 @@ on:
 
 permissions:
   contents: write       # gh release create/edit/upload authenticates with the workflow GITHUB_TOKEN
+  id-token: write       # azure/login exchanges GitHub's OIDC token for the signing identity; no secret is stored
 
 concurrency:
   group: release        # never run two publishes at once
@@ -67,10 +68,28 @@ jobs:
         shell: pwsh
         run: dotnet test GPIB-MCP.sln -c Release -p:Platform=x86 --no-build --logger "console;verbosity=minimal"
 
-      - name: Build + publish all release assets
+      # Signing (Azure Artifact Signing). The Entra app named by AZURE_CLIENT_ID trusts only this repository's
+      # 'release' environment (a federated credential, subject repo:TGoodhew/GPIB-MCP:environment:release), and
+      # may only sign with the one certificate profile. The IDs are the environment's variables, not secrets.
+      - name: Sign in to Azure for signing (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Build, sign + publish all release assets
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # -SkipBuild reuses the Release x86 build above; -PublishRelease stages every artifact and
-        # creates/updates the GitHub Release with the full asset set.
-        run: ./packaging/Generate-Packages.ps1 -Version '${{ steps.ver.outputs.version }}' -SkipBuild -PublishRelease
+          ARTIFACT_SIGNING_ENDPOINT: ${{ vars.ARTIFACT_SIGNING_ENDPOINT }}
+          ARTIFACT_SIGNING_ACCOUNT: ${{ vars.ARTIFACT_SIGNING_ACCOUNT }}
+          ARTIFACT_SIGNING_PROFILE: ${{ vars.ARTIFACT_SIGNING_PROFILE }}
+        # -SkipBuild reuses the Release x86 build above; -SignScript signs GPIB MCP's own programs, Setup and
+        # its uninstaller; -PublishRelease stages every artifact and creates/updates the GitHub Release.
+        run: ./packaging/Generate-Packages.ps1 -Version '${{ steps.ver.outputs.version }}' -SkipBuild -SignScript ./packaging/Sign-ArtifactSigning.ps1 -PublishRelease
+
+      - name: Sign out of Azure
+        if: always()
+        shell: pwsh
+        run: az logout; az account clear

@@ -45,6 +45,12 @@ WizardStyle=modern
 ; An upgrade first stops the running servers, naming the app that started each (PrepareToInstall, below).
 ; This catches anything else holding the program's files. Clients start the new server when next needed.
 CloseApplications=yes
+#ifdef Sign
+; Build-Installer.ps1 -SignScript defines Sign and the gpibmcp sign tool; the uninstaller Setup writes on the
+; user's PC is signed here too, when it is built.
+SignTool=gpibmcp
+SignedUninstaller=yes
+#endif
 RestartApplications=no
 ChangesEnvironment=yes
 
