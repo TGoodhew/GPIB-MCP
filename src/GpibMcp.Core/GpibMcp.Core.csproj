@@ -29,6 +29,8 @@
   <ItemGroup>
     <!-- Windows raw printing (#83): PrinterSettings enumeration (the winspool RAW spool is P/Invoke). -->
     <Reference Include="System.Drawing" />
+    <!-- setup mcp reads a running Claude Desktop's user-data-dir switch (#175). Part of .NET Framework. -->
+    <Reference Include="System.Management" />
   </ItemGroup>
 
   <ItemGroup>

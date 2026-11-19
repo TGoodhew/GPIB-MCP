@@ -76,6 +76,8 @@ namespace GpibMcp.Setup
                 string.Equals(client.CommandOf(previous), entry.Command, StringComparison.OrdinalIgnoreCase))
                 previous = null;
 
+            MoveFromOldLocation(client);
+
             McpChange change = client.Register(entry);
             if (change.Changed && _entries.All(e => e.Client != client.Id))
             {
@@ -94,13 +96,55 @@ namespace GpibMcp.Setup
                 McpRegistration recorded = _entries.FirstOrDefault(e => e.Client == client.Id);
                 if (recorded == null) continue;
 
-                McpChange change = recorded.Previous == null ? client.Unregister() : client.Restore(recorded.Previous);
+                // Registered where the client's settings were then. If the client has since moved them, the
+                // entry went with them unless it is still in the old file.
+                McpClient old = Moved(client, recorded);
+                McpClient target = old != null && old.Snapshot() != null ? old : client;
+
+                McpChange change = recorded.Previous == null ? target.Unregister() : target.Restore(recorded.Previous);
                 removals.Add(new McpRemoval(client, change, recorded.Previous != null));
                 if (change.Changed || change.Note == null) _entries.Remove(recorded);
             }
 
             Save();
             return removals;
+        }
+
+        /// <summary>
+        /// The client at the location an earlier install recorded, when that is no longer where the client keeps
+        /// its settings; otherwise null.
+        /// </summary>
+        private static McpClient Moved(McpClient client, McpRegistration recorded) =>
+            string.IsNullOrEmpty(recorded.Location) ||
+            string.Equals(Normalise(recorded.Location), Normalise(client.Location), StringComparison.OrdinalIgnoreCase)
+                ? null
+                : client.At(recorded.Location);
+
+        private static string Normalise(string location)
+        {
+            try { return Path.GetFullPath(location).TrimEnd('\\'); }
+            catch (ArgumentException) { return location; }   // not a path: "claude mcp (user scope)"
+            catch (NotSupportedException) { return location; }
+        }
+
+        /// <summary>
+        /// An earlier install registered this client in a file it no longer reads (#175): undo that there, as
+        /// uninstalling would have, and forget it, so the registration about to be made is recorded where it
+        /// is. Left as it was when that can't be done, so nothing is lost.
+        /// </summary>
+        private void MoveFromOldLocation(McpClient client)
+        {
+            McpRegistration recorded = _entries.FirstOrDefault(e => e.Client == client.Id);
+            McpClient old = recorded == null ? null : Moved(client, recorded);
+            if (old == null) return;
+
+            if (old.Snapshot() != null)
+            {
+                McpChange undone = recorded.Previous == null ? old.Unregister() : old.Restore(recorded.Previous);
+                if (!undone.Changed && undone.Note != null) return;
+            }
+            _entries.Remove(recorded);
+            Save();
         }
 
         private void Save()

@@ -334,23 +334,37 @@ The location depends on **how Claude Desktop was installed** — this matters on
 | Install type | Config path |
 |--------------|-------------|
 | **Standard installer** (downloaded `.exe`) | `%APPDATA%\Claude\claude_desktop_config.json` |
-| **Microsoft Store / MSIX package** | `%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude\claude_desktop_config.json` |
+| **Microsoft Store / MSIX package** (current builds) | `%LOCALAPPDATA%\Claude-Data\<package>\claude_desktop_config.json` |
+| **Microsoft Store / MSIX package** (older builds) | `%LOCALAPPDATA%\Packages\<package>\LocalCache\Roaming\Claude\claude_desktop_config.json` |
 
-The Store/MSIX build runs with a **virtualized AppData**, so it does *not* read the
-standard `%APPDATA%\Claude` path — editing that file has no effect. Find the real path
-for the packaged build with:
+`<package>` is the Store package's family name: `Claude_pzs8sxrjxfjjc` (lower case under `Claude-Data`) or
+`AnthropicPBC.Claude_fnn82j28hfe8t`. Setting `CLAUDE_USER_DATA_DIR` overrides the folder.
+
+The Store/MSIX build does *not* read the standard `%APPDATA%\Claude` path, so editing
+that file has no effect. When a current Store build updates, it moves its data to
+`%LOCALAPPDATA%\Claude-Data\<package>` and leaves a `.user-data-left.<package>` marker in the old
+`LocalCache\Roaming\Claude` folder. From then on it no longer reads the config left there. Anthropic
+doesn't document any of this ([anthropics/claude-code#26073](https://github.com/anthropics/claude-code/issues/26073),
+[#175](https://github.com/TGoodhew/GPIB-MCP/issues/175)).
+
+The installer and `GpibMcp.exe setup mcp` find the right file themselves. They use the running Claude
+Desktop's `--user-data-dir`, then `CLAUDE_USER_DATA_DIR`, then `Claude-Data` (if it exists or the marker
+says the data moved), then the old folder. If an earlier version registered GPIB MCP in the old file,
+installing again moves it. Find the real path for the packaged build by hand with:
 
 ```powershell
-# Lists the package roots; the folder name contains the <id>, e.g. Claude_pzs8sxrjxfjjc
-Get-ChildItem "$env:LOCALAPPDATA\Packages" -Filter "Claude_*"
+# The folder Claude Desktop is actually using is its --user-data-dir:
+(Get-CimInstance Win32_Process -Filter "Name='claude.exe'").CommandLine |
+    Select-String -Pattern '--user-data-dir=(?:"([^"]+)"|(\S+))' | Select-Object -First 1 |
+    ForEach-Object { $g = $_.Matches[0].Groups; if ($g[1].Success) { $g[1].Value } else { $g[2].Value } }
 
-# Open (or create) the active config for the packaged app:
-$cfg = Get-ChildItem "$env:LOCALAPPDATA\Packages\Claude_*\LocalCache\Roaming\Claude\claude_desktop_config.json"
-$cfg.FullName
+# Otherwise: Claude-Data if it exists, else the package's LocalCache
+Get-ChildItem "$env:LOCALAPPDATA\Claude-Data\*claude_*\claude_desktop_config.json",
+    "$env:LOCALAPPDATA\Packages\*Claude_*\LocalCache\Roaming\Claude\claude_desktop_config.json" -ErrorAction SilentlyContinue
 ```
 
 If you are unsure which build you have, check for a running process: a packaged install
-runs from `C:\Program Files\WindowsApps\Claude_...`.
+runs from `C:\Program Files\WindowsApps\Claude_...` (or `AnthropicPBC.Claude_...`).
 
 #### Apply the change
 
