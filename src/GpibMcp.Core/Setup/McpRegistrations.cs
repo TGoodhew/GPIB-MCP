@@ -71,12 +71,15 @@ namespace GpibMcp.Setup
         {
             if (client == null) throw new ArgumentNullException(nameof(client));
 
+            // Before taking what is there now: a move that carried this server's entry across is followed,
+            // not mistaken for an entry to put back (#178).
+            McpRegistration recorded = _entries.FirstOrDefault(e => e.Client == client.Id);
+            if (recorded != null) FollowMove(client, recorded, out _);
+
             string previous = client.Snapshot();
             if (previous != null &&
                 string.Equals(client.CommandOf(previous), entry.Command, StringComparison.OrdinalIgnoreCase))
                 previous = null;
-
-            MoveFromOldLocation(client);
 
             McpChange change = client.Register(entry);
             if (change.Changed && _entries.All(e => e.Client != client.Id))
@@ -96,14 +99,20 @@ namespace GpibMcp.Setup
                 McpRegistration recorded = _entries.FirstOrDefault(e => e.Client == client.Id);
                 if (recorded == null) continue;
 
-                // Registered where the client's settings were then. If the client has since moved them, the
-                // entry went with them unless it is still in the old file.
-                McpClient old = Moved(client, recorded);
-                McpClient target = old != null && old.Snapshot() != null ? old : client;
+                McpChange undone;
+                McpRegistration now = FollowMove(client, recorded, out undone);
+                if (now == null || (undone != null && !undone.Changed && undone.Note != null))
+                {
+                    // The entry was only in the file the client no longer reads, and is out of it now; or it
+                    // couldn't be taken out of there, and the record stays as it was.
+                    removals.Add(new McpRemoval(client, undone ?? new McpChange(false, null), recorded.Previous != null));
+                    continue;
+                }
 
-                McpChange change = recorded.Previous == null ? target.Unregister() : target.Restore(recorded.Previous);
-                removals.Add(new McpRemoval(client, change, recorded.Previous != null));
-                if (change.Changed || change.Note == null) _entries.Remove(recorded);
+                McpChange change = now.Previous == null ? client.Unregister() : client.Restore(now.Previous);
+                if (undone != null && undone.Changed && !change.Changed && change.Note == null) change = undone;
+                removals.Add(new McpRemoval(client, change, now.Previous != null));
+                if (change.Changed || change.Note == null) _entries.Remove(now);
             }
 
             Save();
@@ -128,23 +137,37 @@ namespace GpibMcp.Setup
         }
 
         /// <summary>
-        /// An earlier install registered this client in a file it no longer reads (#175): undo that there, as
-        /// uninstalling would have, and forget it, so the registration about to be made is recorded where it
-        /// is. Left as it was when that can't be done, so nothing is lost.
+        /// An earlier install registered with a client whose settings have since moved (#175: current Store
+        /// builds of Claude Desktop keep them in <c>Claude-Data</c> and no longer read the old file). The entry
+        /// is taken out of the old file, as uninstalling would have done. When the client took its settings
+        /// with it (#178), this server's entry is in the new file too, so the record follows it there, still
+        /// holding the entry from before this server; otherwise the record is forgotten and the next
+        /// registration starts afresh. Returns the record as it now stands, or null when forgotten, with what
+        /// was done to the old file in <paramref name="undone"/>. When the old file can't be changed,
+        /// everything is left as it was, so nothing is lost.
         /// </summary>
-        private void MoveFromOldLocation(McpClient client)
+        private McpRegistration FollowMove(McpClient client, McpRegistration recorded, out McpChange undone)
         {
-            McpRegistration recorded = _entries.FirstOrDefault(e => e.Client == client.Id);
-            McpClient old = recorded == null ? null : Moved(client, recorded);
-            if (old == null) return;
+            undone = null;
+            McpClient old = Moved(client, recorded);
+            if (old == null) return recorded;
 
-            if (old.Snapshot() != null)
+            string there = old.Snapshot();
+            bool carried = there != null && string.Equals(there, client.Snapshot(), StringComparison.Ordinal);
+
+            if (there != null)
             {
-                McpChange undone = recorded.Previous == null ? old.Unregister() : old.Restore(recorded.Previous);
-                if (!undone.Changed && undone.Note != null) return;
+                undone = recorded.Previous == null ? old.Unregister() : old.Restore(recorded.Previous);
+                if (!undone.Changed && undone.Note != null) return recorded;
             }
+
             _entries.Remove(recorded);
+            McpRegistration now = carried
+                ? new McpRegistration { Client = recorded.Client, Location = client.Location, Previous = recorded.Previous }
+                : null;
+            if (now != null) _entries.Add(now);
             Save();
+            return now;
         }
 
         private void Save()

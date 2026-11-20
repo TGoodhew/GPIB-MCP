@@ -300,6 +300,87 @@ namespace GpibMcp.Tests
             Assert.Empty(McpRegistrations.Load(Environment()).Entries);
         }
 
+        /// <summary>
+        /// Registers in the old Store folder, then moves Claude Desktop's data the way #175 describes: the
+        /// config is copied into Claude-Data and the old folder is left with the marker. Returns both files.
+        /// </summary>
+        private (string Old, string Moved) RegisterThenCarryAcross(string config)
+        {
+            Directory.CreateDirectory(OldStoreDir());
+            string oldConfig = Path.Combine(OldStoreDir(), "claude_desktop_config.json");
+            File.WriteAllText(oldConfig, config);
+            Assert.True(McpRegistrations.Load(Environment()).Register(Client("claude-desktop-store"), Entry).Changed);
+            Assert.Equal(oldConfig, McpRegistrations.Load(Environment()).Entries.Single().Location);
+
+            Directory.CreateDirectory(MovedStoreDir());
+            string movedConfig = Path.Combine(MovedStoreDir(), "claude_desktop_config.json");
+            File.Copy(oldConfig, movedConfig);
+            File.WriteAllText(Path.Combine(OldStoreDir(), ".user-data-left.claude_abc123"), "{\"v\":1}");
+            Assert.Equal(movedConfig, Client("claude-desktop-store").Location);
+            return (oldConfig, movedConfig);
+        }
+
+        private const string ConfigWithOthers =
+            "{ \"mcpServers\": { \"manualforge\": { \"command\": \"mf.exe\" } }, \"preferences\": { \"x\": 1 } }";
+
+        private static JToken GpibIn(string config) =>
+            File.Exists(config) ? JObject.Parse(File.ReadAllText(config))["mcpServers"]?["gpib"] : null;
+
+        [Fact]
+        public void RegisteringAgainAfterAMoveThatCarriedTheConfigFollowsItThere()
+        {
+            var (oldConfig, movedConfig) = RegisterThenCarryAcross(ConfigWithOthers);
+            McpClient client = Client("claude-desktop-store");
+
+            Assert.False(McpRegistrations.Load(Environment()).Register(client, Entry).Changed);
+            McpRegistration recorded = McpRegistrations.Load(Environment()).Entries.Single();
+            Assert.Equal(movedConfig, recorded.Location);
+            Assert.Null(recorded.Previous);
+            Assert.Null(GpibIn(oldConfig));
+            Assert.Equal(McpClientState.Registered, client.State(Entry));
+
+            McpRegistrations.Load(Environment()).Remove(new[] { client });
+
+            JObject root = JObject.Parse(File.ReadAllText(movedConfig));
+            Assert.Null(root["mcpServers"]["gpib"]);
+            Assert.NotNull(root["mcpServers"]["manualforge"]);
+            Assert.Equal(1, (int)root["preferences"]["x"]);
+            Assert.Empty(McpRegistrations.Load(Environment()).Entries);
+        }
+
+        [Fact]
+        public void UninstallingAfterAMoveThatCarriedTheConfigTakesTheEntryOutOfBothFiles()
+        {
+            var (oldConfig, movedConfig) = RegisterThenCarryAcross(ConfigWithOthers);
+
+            IReadOnlyList<McpRemoval> removals = McpRegistrations.Load(Environment()).Remove(new[] { Client("claude-desktop-store") });
+
+            Assert.True(removals.Single().Change.Changed);
+            Assert.Null(GpibIn(oldConfig));
+            Assert.Null(GpibIn(movedConfig));
+            Assert.NotNull(JObject.Parse(File.ReadAllText(movedConfig))["mcpServers"]["manualforge"]);
+            Assert.Empty(McpRegistrations.Load(Environment()).Entries);
+        }
+
+        [Fact]
+        public void AnEntryThisReplacedThatWasCarriedAcrossIsPutBackInTheNewFile()
+        {
+            const string theirs = "{\"command\":\"C:\\\\Other\\\\gpib.exe\",\"args\":[\"--fast\"]}";
+            var (oldConfig, movedConfig) = RegisterThenCarryAcross("{ \"mcpServers\": { \"gpib\": " + theirs + " } }");
+            McpClient client = Client("claude-desktop-store");
+            Assert.Equal(theirs, McpRegistrations.Load(Environment()).Entries.Single().Previous);
+
+            Assert.False(McpRegistrations.Load(Environment()).Register(client, Entry).Changed);
+            Assert.Equal(theirs, McpRegistrations.Load(Environment()).Entries.Single().Previous);
+
+            IReadOnlyList<McpRemoval> removals = McpRegistrations.Load(Environment()).Remove(new[] { client });
+
+            Assert.True(removals.Single().Restored);
+            Assert.Equal(theirs, GpibIn(movedConfig).ToString(Newtonsoft.Json.Formatting.None));
+            Assert.Equal(theirs, GpibIn(oldConfig).ToString(Newtonsoft.Json.Formatting.None));
+            Assert.Empty(McpRegistrations.Load(Environment()).Entries);
+        }
+
         // ---------------------------------------------------------------- Claude Code
 
         [Fact]
